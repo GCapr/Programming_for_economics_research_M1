@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 2: Data Harnessing | Data Science Foundations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">Data Science Foundations</a>
+      <span class="sidebar-subtitle">Python, Stata & R for Causal Inference</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html">Welcome</a></li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li><a href="02-data-harnessing.html" class="active"><span class="module-number">2</span> Data Harnessing</a></li>
+          <li><a href="03-data-cleaning.html"><span class="module-number">3</span> Data Cleaning</a></li>
+          <li><a href="04-data-analysis.html"><span class="module-number">4</span> Data Analysis & Visualization</a></li>
+          <li><a href="05-causal-inference.html"><span class="module-number">5</span> Causal Inference</a></li>
+          <li><a href="06-estimation.html"><span class="module-number">6</span> Estimation Methods</a></li>
+          <li><a href="../resources.html">Resources & References</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>2 &nbsp;Data Harnessing</h1>
+          <div class="module-meta">
+            <span>⏱️ ~6 hours</span>
+            <span>📊 Loading, Merging, Reshaping</span>
+            <span>🎯 Beginner-Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>🎯 Learning Objectives</h3>
+          <ul>
+            <li>Load data from CSV, Excel, Stata, and other formats</li>
+            <li>Access data from APIs and online sources</li>
+            <li>Merge and append multiple datasets</li>
+            <li>Reshape data between wide and long formats</li>
+            <li>Create new variables and subset data</li>
+          </ul>
+        </div>
+
+        <h2>2.1 Loading Data from Files</h2>
+        <p>Real-world data comes in many formats. The most common are CSV, Excel spreadsheets, and Stata's .dta files.</p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Loading data with pandas</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># CSV</span>
+df = pd.read_csv(<span class="code-string">"data.csv"</span>)
+
+<span class="code-comment"># Excel</span>
+df = pd.read_excel(<span class="code-string">"data.xlsx"</span>, sheet_name=<span class="code-string">"Sheet1"</span>)
+
+<span class="code-comment"># Stata</span>
+df = pd.read_stata(<span class="code-string">"data.dta"</span>)
+
+<span class="code-comment"># From URL</span>
+url = <span class="code-string">"https://example.com/data.csv"</span>
+df = pd.read_csv(url)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Loading data</span>
+
+<span class="code-comment">* CSV</span>
+<span class="code-keyword">import</span> delimited <span class="code-string">"data.csv"</span>, clear
+
+<span class="code-comment">* Excel</span>
+<span class="code-keyword">import</span> excel <span class="code-string">"data.xlsx"</span>, firstrow clear
+
+<span class="code-comment">* Stata</span>
+<span class="code-keyword">use</span> <span class="code-string">"data.dta"</span>, clear
+
+<span class="code-comment">* From URL</span>
+<span class="code-keyword">use</span> <span class="code-string">"https://example.com/data.dta"</span>, clear</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Loading data</span>
+<span class="code-function">library</span>(tidyverse)
+<span class="code-function">library</span>(haven)
+<span class="code-function">library</span>(readxl)
+
+<span class="code-comment"># CSV</span>
+df <- <span class="code-function">read_csv</span>(<span class="code-string">"data.csv"</span>)
+
+<span class="code-comment"># Excel</span>
+df <- <span class="code-function">read_excel</span>(<span class="code-string">"data.xlsx"</span>)
+
+<span class="code-comment"># Stata</span>
+df <- <span class="code-function">read_dta</span>(<span class="code-string">"data.dta"</span>)</code></pre>
+          </div>
+        </div>
+
+        <h2>2.2 Merging Datasets</h2>
+        <p>Merging combines two datasets based on common key variables. There are four main types: inner, left, right, and outer joins.</p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Merging with pandas</span>
+merged = pd.merge(df1, df2, on=<span class="code-string">"id"</span>)                   <span class="code-comment"># Inner join</span>
+merged = pd.merge(df1, df2, on=<span class="code-string">"id"</span>, how=<span class="code-string">"left"</span>)       <span class="code-comment"># Left join</span>
+merged = pd.merge(df1, df2, on=[<span class="code-string">"id"</span>, <span class="code-string">"year"</span>])         <span class="code-comment"># Multiple keys</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Merging datasets</span>
+<span class="code-keyword">merge</span> 1:1 id <span class="code-keyword">using</span> <span class="code-string">"other_data.dta"</span>
+<span class="code-keyword">tab</span> _merge</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Merging with dplyr</span>
+merged <- <span class="code-function">inner_join</span>(df1, df2, by = <span class="code-string">"id"</span>)
+merged <- <span class="code-function">left_join</span>(df1, df2, by = <span class="code-function">c</span>(<span class="code-string">"id"</span>, <span class="code-string">"year"</span>))</code></pre>
+          </div>
+        </div>
+
+        <h2>2.3 Reshaping Data</h2>
+        <p>Data comes in wide format (one row per unit) or long format (multiple rows per unit). Most analysis requires long format.</p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Reshape wide to long</span>
+long = pd.melt(wide, id_vars=[<span class="code-string">"country"</span>], var_name=<span class="code-string">"year"</span>, value_name=<span class="code-string">"gdp"</span>)
+
+<span class="code-comment"># Long to wide</span>
+wide = long.pivot(index=<span class="code-string">"country"</span>, columns=<span class="code-string">"year"</span>, values=<span class="code-string">"gdp"</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Reshape</span>
+<span class="code-keyword">reshape</span> long gdp, i(country) j(year)
+<span class="code-keyword">reshape</span> wide gdp, i(country) j(year)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Reshape with tidyr</span>
+long <- wide %>% <span class="code-function">pivot_longer</span>(cols = <span class="code-function">starts_with</span>(<span class="code-string">"gdp"</span>), names_to = <span class="code-string">"year"</span>)
+wide <- long %>% <span class="code-function">pivot_wider</span>(names_from = year, values_from = gdp)</code></pre>
+          </div>
+        </div>
+
+        <div class="nav-footer">
+          <a href="01-getting-started.html" class="nav-link prev">Module 1: Getting Started</a>
+          <a href="03-data-cleaning.html" class="nav-link next">Module 3: Data Cleaning</a>
+        </div>
+      </div>
+    </main>
+  </div>
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">☰</button>
+  <script src="../js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 6: Estimation Methods | Data Science Foundations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">Data Science Foundations</a>
+      <span class="sidebar-subtitle">Python, Stata & R for Causal Inference</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html">Welcome</a></li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li><a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a></li>
+          <li><a href="03-data-cleaning.html"><span class="module-number">3</span> Data Cleaning</a></li>
+          <li><a href="04-data-analysis.html"><span class="module-number">4</span> Data Analysis & Visualization</a></li>
+          <li><a href="05-causal-inference.html"><span class="module-number">5</span> Causal Inference</a></li>
+          <li><a href="06-estimation.html" class="active"><span class="module-number">6</span> Estimation Methods</a></li>
+          <li><a href="../resources.html">Resources & References</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>6 &nbsp;Estimation Methods</h1>
+          <div class="module-meta">
+            <span>⏱️ ~10 hours</span>
+            <span>📊 OLS, Matching, DiD, RDD, IV</span>
+            <span>🎯 Advanced</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>🎯 Learning Objectives</h3>
+          <ul>
+            <li>Implement OLS regression with proper standard errors</li>
+            <li>Apply matching methods (PSM, exact matching, CEM)</li>
+            <li>Estimate difference-in-differences models</li>
+            <li>Implement regression discontinuity designs</li>
+            <li>Understand and apply instrumental variables</li>
+          </ul>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#ols">6.1 Ordinary Least Squares (OLS)</a></li>
+            <li><a href="#matching">6.2 Matching Methods</a></li>
+            <li><a href="#did">6.3 Difference-in-Differences</a></li>
+            <li><a href="#rdd">6.4 Regression Discontinuity</a></li>
+            <li><a href="#iv">6.5 Instrumental Variables</a></li>
+            <li><a href="#case-study">6.6 Case Study: Minimum Wage</a></li>
+          </ul>
+        </div>
+
+        <h2 id="ols">6.1 Ordinary Least Squares (OLS)</h2>
+
+        <p>
+          OLS regression is the workhorse of empirical research. While OLS alone doesn't identify causal effects, it's the foundation for most estimation methods.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: OLS regression with statsmodels</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span>
+<span class="code-keyword">import</span> <span class="code-package">statsmodels.formula.api</span> <span class="code-keyword">as</span> <span class="code-variable">smf</span>
+
+<span class="code-comment"># Load data (using wage data from Wooldridge)</span>
+<span class="code-variable">url</span> = <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/wage2.dta"</span>
+<span class="code-variable">df</span> = pd.read_stata(url)
+
+<span class="code-comment"># Basic OLS</span>
+<span class="code-variable">model</span> = smf.ols(<span class="code-string">'lwage ~ educ + exper + tenure'</span>, data=df).fit()
+<span class="code-function">print</span>(model.summary())
+
+<span class="code-comment"># Robust standard errors (HC1)</span>
+<span class="code-variable">model_robust</span> = smf.ols(<span class="code-string">'lwage ~ educ + exper + tenure'</span>, data=df).fit(
+    cov_type=<span class="code-string">'HC1'</span>
+)
+<span class="code-function">print</span>(model_robust.summary())
+
+<span class="code-comment"># Clustered standard errors</span>
+<span class="code-variable">model_cluster</span> = smf.ols(<span class="code-string">'lwage ~ educ + exper + tenure'</span>, data=df).fit(
+    cov_type=<span class="code-string">'cluster'</span>,
+    cov_kwds={<span class="code-string">'groups'</span>: df[<span class="code-string">'industry'</span>]}
+)
+
+<span class="code-comment"># Multiple specifications</span>
+<span class="code-variable">models</span> = []
+<span class="code-variable">specs</span> = [
+    <span class="code-string">'lwage ~ educ'</span>,
+    <span class="code-string">'lwage ~ educ + exper'</span>,
+    <span class="code-string">'lwage ~ educ + exper + tenure'</span>,
+    <span class="code-string">'lwage ~ educ + exper + tenure + married + black'</span>
+]
+<span class="code-keyword">for</span> spec <span class="code-keyword">in</span> specs:
+    models.append(smf.ols(spec, data=df).fit())</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: OLS regression</span>
+
+<span class="code-comment">* Load data</span>
+<span class="code-keyword">use</span> <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/wage2.dta"</span>, clear
+
+<span class="code-comment">* Basic OLS</span>
+<span class="code-keyword">reg</span> lwage educ exper tenure
+
+<span class="code-comment">* Robust standard errors</span>
+<span class="code-keyword">reg</span> lwage educ exper tenure, robust
+
+<span class="code-comment">* Clustered standard errors</span>
+<span class="code-keyword">reg</span> lwage educ exper tenure, cluster(industry)
+
+<span class="code-comment">* Multiple specifications with eststo</span>
+<span class="code-keyword">eststo clear</span>
+<span class="code-keyword">eststo</span>: reg lwage educ
+<span class="code-keyword">eststo</span>: reg lwage educ exper
+<span class="code-keyword">eststo</span>: reg lwage educ exper tenure
+<span class="code-keyword">eststo</span>: reg lwage educ exper tenure married black
+
+<span class="code-comment">* Display all results</span>
+<span class="code-keyword">esttab</span>, se star(* <span class="code-number">0.10</span> ** <span class="code-number">0.05</span> *** <span class="code-number">0.01</span>) ///
+    title(<span class="code-string">"Returns to Education"</span>)
+
+<span class="code-comment">* Export to LaTeX</span>
+<span class="code-keyword">esttab</span> using <span class="code-string">"wage_results.tex"</span>, replace ///
+    se star(* <span class="code-number">0.10</span> ** <span class="code-number">0.05</span> *** <span class="code-number">0.01</span>)</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: OLS regression with fixest</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
+<span class="code-function">library</span>(<span class="code-package">fixest</span>)        <span class="code-comment"># Fast estimation</span>
+<span class="code-function">library</span>(<span class="code-package">modelsummary</span>)  <span class="code-comment"># Beautiful tables</span>
+<span class="code-function">library</span>(<span class="code-package">haven</span>)
+
+<span class="code-comment"># Load data</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> <span class="code-function">read_dta</span>(<span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/wage2.dta"</span>)
+
+<span class="code-comment"># Basic OLS with fixest</span>
+<span class="code-variable">model</span> <span class="code-operator"><-</span> <span class="code-function">feols</span>(lwage ~ educ + exper + tenure, data = df)
+<span class="code-function">summary</span>(model)
+
+<span class="code-comment"># Robust standard errors (default in fixest)</span>
+<span class="code-variable">model_robust</span> <span class="code-operator"><-</span> <span class="code-function">feols</span>(lwage ~ educ + exper + tenure, data = df, vcov = <span class="code-string">"hetero"</span>)
+
+<span class="code-comment"># Clustered standard errors</span>
+<span class="code-variable">model_cluster</span> <span class="code-operator"><-</span> <span class="code-function">feols</span>(lwage ~ educ + exper + tenure, 
+                       data = df, cluster = ~industry)
+
+<span class="code-comment"># Multiple specifications</span>
+<span class="code-variable">models</span> <span class="code-operator"><-</span> <span class="code-function">list</span>(
+  <span class="code-string">"(1)"</span> = <span class="code-function">feols</span>(lwage ~ educ, data = df),
+  <span class="code-string">"(2)"</span> = <span class="code-function">feols</span>(lwage ~ educ + exper, data = df),
+  <span class="code-string">"(3)"</span> = <span class="code-function">feols</span>(lwage ~ educ + exper + tenure, data = df),
+  <span class="code-string">"(4)"</span> = <span class="code-function">feols</span>(lwage ~ educ + exper + tenure + married + black, data = df)
+)
+
+<span class="code-comment"># Beautiful regression table</span>
+<span class="code-function">modelsummary</span>(
+  models,
+  stars = <span class="code-keyword">TRUE</span>,
+  title = <span class="code-string">"Returns to Education"</span>,
+  gof_omit = <span class="code-string">"IC|Log|RMSE"</span>
+)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="matching">6.2 Matching Methods</h2>
+
+        <p>
+          Matching methods attempt to create comparable treatment and control groups by matching on observed characteristics. The key assumption is <strong>selection on observables</strong>: conditional on covariates X, treatment is independent of potential outcomes.
+        </p>
+
+        <div class="equation">
+          (Y(1), Y(0)) ⊥ D | X &nbsp;&nbsp; (Conditional Independence)
+        </div>
+
+        <h3>Propensity Score Matching</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Propensity Score Matching</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span>
+<span class="code-keyword">from</span> <span class="code-package">sklearn.linear_model</span> <span class="code-keyword">import</span> LogisticRegression
+<span class="code-keyword">from</span> <span class="code-package">sklearn.neighbors</span> <span class="code-keyword">import</span> NearestNeighbors
+
+<span class="code-comment"># Load NSW job training data (LaLonde 1986)</span>
+<span class="code-variable">url</span> = <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/nsw_mixtape.dta"</span>
+<span class="code-variable">df</span> = pd.read_stata(url)
+
+<span class="code-comment"># Step 1: Estimate propensity scores</span>
+<span class="code-variable">X</span> = df[[<span class="code-string">'age'</span>, <span class="code-string">'educ'</span>, <span class="code-string">'black'</span>, <span class="code-string">'hisp'</span>, <span class="code-string">'married'</span>, <span class="code-string">'nodegree'</span>, <span class="code-string">'re74'</span>, <span class="code-string">'re75'</span>]]
+<span class="code-variable">y</span> = df[<span class="code-string">'treat'</span>]
+
+<span class="code-variable">logit</span> = LogisticRegression(max_iter=<span class="code-number">1000</span>)
+logit.fit(X, y)
+<span class="code-variable">df</span>[<span class="code-string">'pscore'</span>] = logit.predict_proba(X)[:, <span class="code-number">1</span>]
+
+<span class="code-comment"># Step 2: Match treated to control using nearest neighbor</span>
+<span class="code-variable">treated</span> = df[df[<span class="code-string">'treat'</span>] == <span class="code-number">1</span>]
+<span class="code-variable">control</span> = df[df[<span class="code-string">'treat'</span>] == <span class="code-number">0</span>]
+
+<span class="code-variable">nn</span> = NearestNeighbors(n_neighbors=<span class="code-number">1</span>)
+nn.fit(control[[<span class="code-string">'pscore'</span>]])
+<span class="code-variable">distances</span>, <span class="code-variable">indices</span> = nn.kneighbors(treated[[<span class="code-string">'pscore'</span>]])
+
+<span class="code-comment"># Step 3: Calculate ATT</span>
+<span class="code-variable">matched_control</span> = control.iloc[indices.flatten()]
+<span class="code-variable">ATT</span> = treated[<span class="code-string">'re78'</span>].mean() - matched_control[<span class="code-string">'re78'</span>].mean()
+<span class="code-function">print</span>(f<span class="code-string">"ATT (Propensity Score Matching): ${ATT:,.0f}"</span>)
+
+<span class="code-comment"># Using causalinference package (recommended)</span>
+<span class="code-comment"># pip install causalinference</span>
+<span class="code-keyword">from</span> <span class="code-package">causalinference</span> <span class="code-keyword">import</span> CausalModel
+
+<span class="code-variable">Y</span> = df[<span class="code-string">'re78'</span>].values
+<span class="code-variable">D</span> = df[<span class="code-string">'treat'</span>].values
+<span class="code-variable">X</span> = df[[<span class="code-string">'age'</span>, <span class="code-string">'educ'</span>, <span class="code-string">'black'</span>, <span class="code-string">'hisp'</span>, <span class="code-string">'married'</span>, <span class="code-string">'nodegree'</span>, <span class="code-string">'re74'</span>, <span class="code-string">'re75'</span>]].values
+
+<span class="code-variable">causal</span> = CausalModel(Y, D, X)
+causal.est_via_matching(matches=<span class="code-number">1</span>, bias_adj=<span class="code-keyword">True</span>)
+<span class="code-function">print</span>(causal.estimates)</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Propensity Score Matching</span>
+<span class="code-comment">* ssc install psmatch2</span>
+<span class="code-comment">* ssc install teffects (built into Stata 13+)</span>
+
+<span class="code-comment">* Load NSW data</span>
+<span class="code-keyword">use</span> <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/nsw_mixtape.dta"</span>, clear
+
+<span class="code-comment">* Method 1: psmatch2 (classic)</span>
+<span class="code-keyword">psmatch2</span> treat age educ black hisp married nodegree re74 re75, ///
+    outcome(re78) neighbor(<span class="code-number">1</span>) caliper(<span class="code-number">0.05</span>)
+
+<span class="code-comment">* Check balance</span>
+<span class="code-keyword">pstest</span> age educ black hisp married nodegree re74 re75, treated(treat)
+
+<span class="code-comment">* Method 2: teffects (modern, built-in)</span>
+<span class="code-keyword">teffects</span> psmatch (re78) (treat age educ black hisp married nodegree re74 re75), ///
+    atet nn(<span class="code-number">1</span>)
+
+<span class="code-comment">* Inverse probability weighting</span>
+<span class="code-keyword">teffects</span> ipw (re78) (treat age educ black hisp married nodegree re74 re75), ///
+    atet
+
+<span class="code-comment">* Doubly robust (AIPW)</span>
+<span class="code-keyword">teffects</span> aipw (re78 age educ black hisp married nodegree re74 re75) ///
+    (treat age educ black hisp married nodegree re74 re75), atet</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Propensity Score Matching with MatchIt</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
+<span class="code-function">library</span>(<span class="code-package">MatchIt</span>)
+<span class="code-function">library</span>(<span class="code-package">cobalt</span>)    <span class="code-comment"># Balance diagnostics</span>
+<span class="code-function">library</span>(<span class="code-package">haven</span>)
+
+<span class="code-comment"># Load NSW data</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> <span class="code-function">read_dta</span>(<span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/nsw_mixtape.dta"</span>)
+
+<span class="code-comment"># Propensity score matching</span>
+<span class="code-variable">m.out</span> <span class="code-operator"><-</span> <span class="code-function">matchit</span>(
+  treat ~ age + educ + black + hisp + married + nodegree + re74 + re75,
+  data = df,
+  method = <span class="code-string">"nearest"</span>,
+  distance = <span class="code-string">"glm"</span>,     <span class="code-comment"># logistic regression</span>
+  caliper = <span class="code-number">0.05</span>
+)
+
+<span class="code-comment"># Check balance</span>
+<span class="code-function">summary</span>(m.out)
+<span class="code-function">love.plot</span>(m.out, thresholds = <span class="code-function">c</span>(m = <span class="code-number">0.1</span>))
+
+<span class="code-comment"># Extract matched data</span>
+<span class="code-variable">m.data</span> <span class="code-operator"><-</span> <span class="code-function">match.data</span>(m.out)
+
+<span class="code-comment"># Estimate ATT</span>
+<span class="code-variable">att</span> <span class="code-operator"><-</span> <span class="code-function">lm</span>(re78 ~ treat, data = m.data, weights = weights)
+<span class="code-function">summary</span>(att)
+
+<span class="code-comment"># With regression adjustment</span>
+<span class="code-variable">att_adj</span> <span class="code-operator"><-</span> <span class="code-function">lm</span>(re78 ~ treat + age + educ + black + hisp + married + nodegree + re74 + re75,
+              data = m.data, weights = weights)
+<span class="code-function">summary</span>(att_adj)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="did">6.3 Difference-in-Differences</h2>
+
+        <p>
+          Difference-in-differences (DiD) compares changes over time between a treatment and control group. The key assumption is <strong>parallel trends</strong>: absent treatment, the groups would have followed similar trajectories.
+        </p>
+
+        <div class="equation">
+          DiD = (Y<sub>treat,post</sub> - Y<sub>treat,pre</sub>) - (Y<sub>control,post</sub> - Y<sub>control,pre</sub>)
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Difference-in-Differences</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+<span class="code-keyword">import</span> <span class="code-package">statsmodels.formula.api</span> <span class="code-keyword">as</span> <span class="code-variable">smf</span>
+
+<span class="code-comment"># Classic Card & Krueger (1994) minimum wage data</span>
+<span class="code-comment"># Simulated version for demonstration</span>
+<span class="code-variable">url</span> = <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/card_krueger.dta"</span>
+<span class="code-variable">df</span> = pd.read_stata(url)
+
+<span class="code-comment"># Manual 2x2 DiD</span>
+<span class="code-variable">means</span> = df.groupby([<span class="code-string">'state'</span>, <span class="code-string">'after'</span>])[<span class="code-string">'fte'</span>].mean().unstack()
+<span class="code-variable">did_manual</span> = (means.loc[<span class="code-string">'nj'</span>, <span class="code-number">1</span>] - means.loc[<span class="code-string">'nj'</span>, <span class="code-number">0</span>]) - \
+              (means.loc[<span class="code-string">'pa'</span>, <span class="code-number">1</span>] - means.loc[<span class="code-string">'pa'</span>, <span class="code-number">0</span>])
+<span class="code-function">print</span>(f<span class="code-string">"Manual DiD estimate: {did_manual:.3f}"</span>)
+
+<span class="code-comment"># Regression DiD</span>
+<span class="code-variable">df</span>[<span class="code-string">'treat'</span>] = (df[<span class="code-string">'state'</span>] == <span class="code-string">'nj'</span>).astype(int)
+<span class="code-variable">df</span>[<span class="code-string">'post'</span>] = df[<span class="code-string">'after'</span>]
+<span class="code-variable">df</span>[<span class="code-string">'treat_post'</span>] = df[<span class="code-string">'treat'</span>] * df[<span class="code-string">'post'</span>]
+
+<span class="code-variable">did_model</span> = smf.ols(<span class="code-string">'fte ~ treat + post + treat_post'</span>, data=df).fit()
+<span class="code-function">print</span>(did_model.summary())
+
+<span class="code-comment"># With fixed effects (for panel data)</span>
+<span class="code-comment"># pip install linearmodels</span>
+<span class="code-keyword">from</span> <span class="code-package">linearmodels.panel</span> <span class="code-keyword">import</span> PanelOLS
+
+<span class="code-comment"># If panel data with entity and time fixed effects:</span>
+<span class="code-comment"># df = df.set_index(['store_id', 'time'])</span>
+<span class="code-comment"># model = PanelOLS(df['fte'], df[['treat_post']], entity_effects=True, time_effects=True)</span></code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Difference-in-Differences</span>
+
+<span class="code-comment">* Load data</span>
+<span class="code-keyword">use</span> <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/card_krueger.dta"</span>, clear
+
+<span class="code-comment">* Create treatment variables</span>
+<span class="code-keyword">gen</span> treat = (state == <span class="code-string">"nj"</span>)
+<span class="code-keyword">gen</span> post = after
+<span class="code-keyword">gen</span> treat_post = treat * post
+
+<span class="code-comment">* Basic DiD regression</span>
+<span class="code-keyword">reg</span> fte treat post treat_post, robust
+
+<span class="code-comment">* With entity and time fixed effects (panel data)</span>
+<span class="code-keyword">xtset</span> store_id time
+<span class="code-keyword">xtreg</span> fte treat_post i.time, fe robust
+
+<span class="code-comment">* Modern DiD with staggered treatment (Callaway & Sant'Anna)</span>
+<span class="code-comment">* ssc install csdid</span>
+<span class="code-comment">* ssc install drdid</span>
+<span class="code-keyword">csdid</span> fte, ivar(store_id) time(time) gvar(first_treat) method(dripw)
+
+<span class="code-comment">* Event study plot</span>
+<span class="code-keyword">csdid_plot</span></code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Difference-in-Differences</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
+<span class="code-function">library</span>(<span class="code-package">fixest</span>)
+<span class="code-function">library</span>(<span class="code-package">did</span>)        <span class="code-comment"># Callaway & Sant'Anna</span>
+<span class="code-function">library</span>(<span class="code-package">haven</span>)
+
+<span class="code-comment"># Load data</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> <span class="code-function">read_dta</span>(<span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/card_krueger.dta"</span>)
+
+<span class="code-comment"># Create treatment variables</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    treat = <span class="code-function">as.integer</span>(state == <span class="code-string">"nj"</span>),
+    post = after,
+    treat_post = treat * post
+  )
+
+<span class="code-comment"># Basic DiD regression</span>
+<span class="code-variable">did_model</span> <span class="code-operator"><-</span> <span class="code-function">feols</span>(fte ~ treat + post + treat_post, data = df, vcov = <span class="code-string">"hetero"</span>)
+<span class="code-function">summary</span>(did_model)
+
+<span class="code-comment"># With two-way fixed effects</span>
+<span class="code-variable">twfe</span> <span class="code-operator"><-</span> <span class="code-function">feols</span>(fte ~ treat_post | store_id + time, data = df)
+<span class="code-function">summary</span>(twfe)
+
+<span class="code-comment"># Modern DiD for staggered treatment (Callaway & Sant'Anna)</span>
+<span class="code-comment"># Requires: first_treat variable (0 for never-treated)</span>
+<span class="code-comment"># cs_model <- att_gt(</span>
+<span class="code-comment">#   yname = "fte",</span>
+<span class="code-comment">#   tname = "time",</span>
+<span class="code-comment">#   idname = "store_id",</span>
+<span class="code-comment">#   gname = "first_treat",</span>
+<span class="code-comment">#   data = df</span>
+<span class="code-comment"># )</span>
+<span class="code-comment"># summary(cs_model)</span>
+<span class="code-comment"># ggdid(cs_model)  # Event study plot</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="rdd">6.4 Regression Discontinuity</h2>
+
+        <p>
+          Regression Discontinuity (RDD) exploits situations where treatment is assigned based on whether a running variable crosses a cutoff. The key assumption is <strong>continuity</strong>: potential outcomes are continuous at the cutoff.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">📖 RDD Design</div>
+          <p>
+            For an excellent treatment of RDD, see <a href="https://mixtape.scunning.com/06-regression_discontinuity" target="_blank">Chapter 6 of Causal Inference: The Mixtape</a> by Scott Cunningham, which inspired this course's format.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Regression Discontinuity</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span>
+<span class="code-keyword">import</span> <span class="code-package">matplotlib.pyplot</span> <span class="code-keyword">as</span> <span class="code-variable">plt</span>
+<span class="code-keyword">from</span> <span class="code-package">rdrobust</span> <span class="code-keyword">import</span> rdrobust, rdplot
+
+<span class="code-comment"># Load close elections data (Lee 2008)</span>
+<span class="code-variable">url</span> = <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/lmb-data.dta"</span>
+<span class="code-variable">df</span> = pd.read_stata(url)
+
+<span class="code-comment"># Running variable: vote margin (centered at 0)</span>
+<span class="code-variable">df</span>[<span class="code-string">'margin'</span>] = df[<span class="code-string">'demvoteshare'</span>] - <span class="code-number">0.5</span>  <span class="code-comment"># Center at 50%</span>
+
+<span class="code-comment"># RD Plot</span>
+<span class="code-variable">rdplot_out</span> = rdplot(
+    y=df[<span class="code-string">'score'</span>], 
+    x=df[<span class="code-string">'margin'</span>],
+    title=<span class="code-string">"RD Plot: ADA Score vs. Vote Margin"</span>,
+    x_label=<span class="code-string">"Democratic Vote Margin"</span>,
+    y_label=<span class="code-string">"ADA Score (Voting Liberalism)"</span>
+)
+
+<span class="code-comment"># Main RD estimation with optimal bandwidth</span>
+<span class="code-variable">rd_out</span> = rdrobust(
+    y=df[<span class="code-string">'score'</span>], 
+    x=df[<span class="code-string">'margin'</span>],
+    c=<span class="code-number">0</span>
+)
+<span class="code-function">print</span>(rd_out)
+
+<span class="code-comment"># The coefficient on "Conventional" is the treatment effect</span>
+<span class="code-comment"># Democrats who barely win have ~20 points higher ADA scores</span></code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Regression Discontinuity</span>
+<span class="code-comment">* ssc install rdrobust</span>
+<span class="code-comment">* ssc install rddensity</span>
+
+<span class="code-comment">* Load close elections data</span>
+<span class="code-keyword">use</span> <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/lmb-data.dta"</span>, clear
+
+<span class="code-comment">* Create running variable centered at 50%</span>
+<span class="code-keyword">gen</span> margin = demvoteshare - <span class="code-number">0.5</span>
+
+<span class="code-comment">* RD Plot</span>
+<span class="code-keyword">rdplot</span> score margin, c(<span class="code-number">0</span>) ///
+    title(<span class="code-string">"RD Plot: ADA Score vs. Vote Margin"</span>) ///
+    x(<span class="code-string">"Democratic Vote Margin"</span>) y(<span class="code-string">"ADA Score"</span>)
+
+<span class="code-comment">* Main RD estimation</span>
+<span class="code-keyword">rdrobust</span> score margin, c(<span class="code-number">0</span>)
+
+<span class="code-comment">* With different bandwidth selectors</span>
+<span class="code-keyword">rdrobust</span> score margin, c(<span class="code-number">0</span>) bwselect(mserd)
+<span class="code-keyword">rdrobust</span> score margin, c(<span class="code-number">0</span>) bwselect(cerrd)
+
+<span class="code-comment">* McCrary density test (manipulation check)</span>
+<span class="code-keyword">rddensity</span> margin, c(<span class="code-number">0</span>)
+
+<span class="code-comment">* Covariate balance</span>
+<span class="code-keyword">rdrobust</span> pcthighscl margin, c(<span class="code-number">0</span>)
+<span class="code-keyword">rdrobust</span> pctblack margin, c(<span class="code-number">0</span>)</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Regression Discontinuity</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
+<span class="code-function">library</span>(<span class="code-package">rdrobust</span>)
+<span class="code-function">library</span>(<span class="code-package">rddensity</span>)
+<span class="code-function">library</span>(<span class="code-package">haven</span>)
+
+<span class="code-comment"># Load close elections data</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> <span class="code-function">read_dta</span>(<span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/lmb-data.dta"</span>)
+
+<span class="code-comment"># Create running variable centered at 50%</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">mutate</span>(margin = demvoteshare - <span class="code-number">0.5</span>)
+
+<span class="code-comment"># RD Plot</span>
+<span class="code-function">rdplot</span>(
+  y = df$score, 
+  x = df$margin,
+  title = <span class="code-string">"RD Plot: ADA Score vs. Vote Margin"</span>,
+  x.label = <span class="code-string">"Democratic Vote Margin"</span>,
+  y.label = <span class="code-string">"ADA Score (Voting Liberalism)"</span>
+)
+
+<span class="code-comment"># Main RD estimation</span>
+<span class="code-variable">rd_out</span> <span class="code-operator"><-</span> <span class="code-function">rdrobust</span>(y = df$score, x = df$margin, c = <span class="code-number">0</span>)
+<span class="code-function">summary</span>(rd_out)
+
+<span class="code-comment"># McCrary density test</span>
+<span class="code-variable">density_test</span> <span class="code-operator"><-</span> <span class="code-function">rddensity</span>(X = df$margin, c = <span class="code-number">0</span>)
+<span class="code-function">summary</span>(density_test)
+
+<span class="code-comment"># Plot density</span>
+<span class="code-function">rdplotdensity</span>(density_test, df$margin)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="iv">6.5 Instrumental Variables</h2>
+
+        <p>
+          Instrumental Variables (IV) uses an external source of variation (the instrument Z) to identify causal effects when the treatment is endogenous. The instrument must be: (1) relevant (correlated with treatment), and (2) exogenous (affects outcome only through treatment).
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Instrumental Variables (2SLS)</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+<span class="code-keyword">from</span> <span class="code-package">linearmodels.iv</span> <span class="code-keyword">import</span> IV2SLS
+
+<span class="code-comment"># Classic example: Angrist & Krueger (1991) quarter of birth</span>
+<span class="code-comment"># Using Card (1995) college proximity data instead</span>
+<span class="code-variable">url</span> = <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/card.dta"</span>
+<span class="code-variable">df</span> = pd.read_stata(url)
+
+<span class="code-comment"># OLS (biased)</span>
+<span class="code-keyword">import</span> <span class="code-package">statsmodels.formula.api</span> <span class="code-keyword">as</span> <span class="code-variable">smf</span>
+<span class="code-variable">ols</span> = smf.ols(<span class="code-string">'lwage ~ educ + exper + black + south + married'</span>, data=df).fit()
+<span class="code-function">print</span>(<span class="code-string">"OLS coefficient on education:"</span>, ols.params[<span class="code-string">'educ'</span>])
+
+<span class="code-comment"># 2SLS using linearmodels</span>
+<span class="code-comment"># Instrument: nearc4 (grew up near 4-year college)</span>
+<span class="code-variable">iv_model</span> = IV2SLS.from_formula(
+    <span class="code-string">'lwage ~ 1 + exper + black + south + married + [educ ~ nearc4]'</span>,
+    data=df
+).fit()
+<span class="code-function">print</span>(iv_model.summary)
+
+<span class="code-comment"># Check first stage</span>
+<span class="code-variable">first_stage</span> = smf.ols(<span class="code-string">'educ ~ nearc4 + exper + black + south + married'</span>, data=df).fit()
+<span class="code-function">print</span>(<span class="code-string">"First stage F-statistic:"</span>, first_stage.fvalue)</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Instrumental Variables (2SLS)</span>
+
+<span class="code-comment">* Load Card (1995) data</span>
+<span class="code-keyword">use</span> <span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/card.dta"</span>, clear
+
+<span class="code-comment">* OLS (biased)</span>
+<span class="code-keyword">reg</span> lwage educ exper black south married
+
+<span class="code-comment">* 2SLS: ivregress</span>
+<span class="code-keyword">ivregress</span> 2sls lwage exper black south married (educ = nearc4), first
+
+<span class="code-comment">* Check first stage F-statistic (should be > 10)</span>
+<span class="code-keyword">estat</span> firststage
+
+<span class="code-comment">* With robust standard errors</span>
+<span class="code-keyword">ivregress</span> 2sls lwage exper black south married (educ = nearc4), robust first
+
+<span class="code-comment">* Weak instrument test</span>
+<span class="code-keyword">estat</span> firststage, all
+
+<span class="code-comment">* Overidentification test (if multiple instruments)</span>
+<span class="code-keyword">ivregress</span> 2sls lwage exper black south married (educ = nearc4 nearc2)
+<span class="code-keyword">estat</span> overid</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Instrumental Variables (2SLS)</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
+<span class="code-function">library</span>(<span class="code-package">fixest</span>)    <span class="code-comment"># Also does IV</span>
+<span class="code-function">library</span>(<span class="code-package">ivreg</span>)     <span class="code-comment"># Dedicated IV package</span>
+<span class="code-function">library</span>(<span class="code-package">haven</span>)
+
+<span class="code-comment"># Load Card (1995) data</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> <span class="code-function">read_dta</span>(<span class="code-string">"https://github.com/scunning1975/mixtape/raw/master/card.dta"</span>)
+
+<span class="code-comment"># OLS (biased)</span>
+<span class="code-variable">ols</span> <span class="code-operator"><-</span> <span class="code-function">feols</span>(lwage ~ educ + exper + black + south + married, data = df)
+
+<span class="code-comment"># 2SLS with fixest</span>
+<span class="code-variable">iv</span> <span class="code-operator"><-</span> <span class="code-function">feols</span>(lwage ~ exper + black + south + married | educ ~ nearc4, data = df)
+<span class="code-function">summary</span>(iv)
+
+<span class="code-comment"># First stage diagnostics</span>
+<span class="code-function">fitstat</span>(iv, <span class="code-string">"ivf"</span>)  <span class="code-comment"># First stage F</span>
+
+<span class="code-comment"># With ivreg (more diagnostics)</span>
+<span class="code-variable">iv2</span> <span class="code-operator"><-</span> <span class="code-function">ivreg</span>(
+  lwage ~ educ + exper + black + south + married | nearc4 + exper + black + south + married,
+  data = df
+)
+<span class="code-function">summary</span>(iv2, diagnostics = <span class="code-keyword">TRUE</span>)
+
+<span class="code-comment"># Compare OLS and IV</span>
+<span class="code-function">modelsummary</span>(<span class="code-function">list</span>(<span class="code-string">"OLS"</span> = ols, <span class="code-string">"IV"</span> = iv), stars = <span class="code-keyword">TRUE</span>)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="case-study">6.6 Case Study: Minimum Wage and Employment</h2>
+
+        <p>
+          The effect of minimum wage on employment is one of the most studied questions in labor economics. Card and Krueger (1994) used a difference-in-differences design comparing New Jersey (which raised its minimum wage) to neighboring Pennsylvania.
+        </p>
+
+        <div class="citation">
+          <div class="citation-title">Original Paper</div>
+          <p>
+            Card, D., & Krueger, A. B. (1994). Minimum Wages and Employment: A Case Study of the Fast-Food Industry in New Jersey and Pennsylvania. <em>American Economic Review</em>, 84(4), 772-793.
+          </p>
+          <p>Data available from the <a href="https://davidcard.berkeley.edu/data_sets.html" target="_blank">David Card's website</a>.</p>
+        </div>
+
+        <p>
+          See the downloadable course materials for the complete replication exercise, which includes: testing parallel trends assumptions, estimating the DiD model with various specifications, and conducting robustness checks.
+        </p>
+
+        <div class="nav-footer">
+          <a href="05-causal-inference.html" class="nav-link prev">Module 5: Causal Inference</a>
+          <a href="../resources.html" class="nav-link next">Resources & References</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">☰</button>
+  <script src="../js/main.js"></script>
+</body>
+</html>

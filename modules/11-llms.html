@@ -3,17 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Module 11: Large Language Models | Data Science Foundations</title>
+  <title>Module 11: Large Language Models | ProTools ER1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="page-wrapper">
+  <!-- Password Protection Overlay -->
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Please enter the course password to access the materials.</p>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+      <button id="password-submit">Access Course</button>
+      <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
     <aside class="sidebar">
-      <a href="../index.html" class="sidebar-logo">Data Science Foundations</a>
-      <span class="sidebar-subtitle">Python, Stata & R for Causal Inference</span>
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
       <nav>
         <ul>
           <li><a href="../index.html">Welcome</a></li>
@@ -39,14 +59,14 @@
         <div class="module-header">
           <h1>11 &nbsp;Large Language Models</h1>
           <div class="module-meta">
-            <span>⏱️ ~8 hours</span>
-            <span>📊 How LLMs Work</span>
-            <span>🎯 Conceptual + Practical</span>
+            <span>~8 hours</span>
+            <span>How LLMs Work</span>
+            <span>Conceptual + Practical</span>
           </div>
         </div>
 
         <div class="learning-objectives">
-          <h3>🎯 Learning Objectives</h3>
+          <h3>Learning Objectives</h3>
           <ul>
             <li>Understand how LLMs are trained and how they generate text</li>
             <li>Grasp the Transformer architecture conceptually</li>
@@ -77,9 +97,9 @@
         </p>
 
         <div class="info-box note">
-          <div class="info-box-title">🤖 The Key Insight</div>
+          <div class="info-box-title">The Key Insight</div>
           <p>
-            LLMs are "just" predicting the next word. But to predict well, they must learn grammar, facts, reasoning patterns, and even social conventions—all compressed into billions of parameters.
+            LLMs are "just" predicting the next word. But to predict well, they must learn grammar, facts, reasoning patterns, and even social conventions--all compressed into billions of parameters.
           </p>
         </div>
 
@@ -126,7 +146,7 @@
 
         <h3>Tokenization</h3>
         <p>
-          Text is split into <strong>tokens</strong>—subword units. "Tokenization" might become ["Token", "ization"]. This handles rare words by breaking them into common pieces.
+          Text is split into <strong>tokens</strong>--subword units. "Tokenization" might become ["Token", "ization"]. This handles rare words by breaking them into common pieces.
         </p>
 
         <div class="code-tabs">
@@ -144,7 +164,7 @@ tokens = [<span class="code-string">"Hello"</span>, <span class="code-string">",
 token_ids = [<span class="code-number">15496</span>, <span class="code-number">11</span>, <span class="code-number">703</span>, <span class="code-number">527</span>, <span class="code-number">499</span>, <span class="code-number">3815</span>, <span class="code-number">3432</span>, <span class="code-number">30</span>]
 
 <span class="code-comment"># Models work with token IDs, not text</span>
-<span class="code-comment"># Typical: 1 token ≈ 0.75 words</span></code></pre>
+<span class="code-comment"># Typical: 1 token is approximately 0.75 words</span></code></pre>
           </div>
         </div>
 
@@ -154,7 +174,7 @@ token_ids = [<span class="code-number">15496</span>, <span class="code-number">1
         </p>
 
         <div class="info-box note">
-          <div class="info-box-title">👁️ Self-Attention Intuition</div>
+          <div class="info-box-title">Self-Attention Intuition</div>
           <p>
             Consider: "The cat sat on the mat because <strong>it</strong> was tired."
           </p>
@@ -165,7 +185,7 @@ token_ids = [<span class="code-number">15496</span>, <span class="code-number">1
 
         <h3>Next-Token Prediction</h3>
         <p>
-          Given tokens [t₁, t₂, ..., tₙ], the model outputs a probability distribution over the vocabulary for tₙ₊₁. During generation, it samples from this distribution and repeats.
+          Given tokens [t1, t2, ..., tn], the model outputs a probability distribution over the vocabulary for t(n+1). During generation, it samples from this distribution and repeats.
         </p>
 
         <div class="code-tabs">
@@ -180,13 +200,13 @@ tokens = tokenize(prompt)  <span class="code-comment"># [464, 3361, 315, 9822, 3
 <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(max_tokens):
     <span class="code-comment"># Model outputs probability for each vocabulary word</span>
     probs = model(tokens)  <span class="code-comment"># Shape: [vocab_size]</span>
-    
+
     <span class="code-comment"># Sample next token (or take argmax for greedy)</span>
     next_token = sample(probs, temperature=<span class="code-number">0.7</span>)
-    
+
     <span class="code-comment"># Append and continue</span>
     tokens.append(next_token)
-    
+
     <span class="code-keyword">if</span> next_token == END_TOKEN:
         <span class="code-keyword">break</span>
 
@@ -208,7 +228,7 @@ output = detokenize(tokens)
 
         <h3>Pre-training</h3>
         <p>
-          LLMs are trained on massive text corpora—often trillions of tokens from the web, books, code, and more. The objective is simple: predict the next token. This is called <strong>self-supervised learning</strong> because no human labels are needed.
+          LLMs are trained on massive text corpora--often trillions of tokens from the web, books, code, and more. The objective is simple: predict the next token. This is called <strong>self-supervised learning</strong> because no human labels are needed.
         </p>
 
         <table>
@@ -245,7 +265,7 @@ output = detokenize(tokens)
 
         <h3>Scaling Laws</h3>
         <p>
-          Kaplan et al. (2020) and Hoffmann et al. (2022) showed that performance scales predictably with compute, data, and parameters. More of each → better models. This motivated the race to train ever-larger models.
+          Kaplan et al. (2020) and Hoffmann et al. (2022) showed that performance scales predictably with compute, data, and parameters. More of each leads to better models. This motivated the race to train ever-larger models.
         </p>
 
         <h2 id="rlhf">11.4 RLHF and Alignment</h2>
@@ -262,7 +282,7 @@ output = detokenize(tokens)
         </ol>
 
         <div class="info-box note">
-          <div class="info-box-title">🎯 Why RLHF Matters</div>
+          <div class="info-box-title">Why RLHF Matters</div>
           <p>
             Without RLHF, models might:
           </p>
@@ -272,7 +292,7 @@ output = detokenize(tokens)
             <li>Hallucinate confidently</li>
             <li>Be inconsistent in style</li>
           </ul>
-          <p>RLHF teaches models to be helpful, harmless, and honest—the "HHH" criteria.</p>
+          <p>RLHF teaches models to be helpful, harmless, and honest--the "HHH" criteria.</p>
         </div>
 
         <h3>Constitutional AI</h3>
@@ -336,13 +356,13 @@ French:"""</span>
 
 <span class="code-comment"># Chain-of-thought</span>
 prompt = <span class="code-string">"""Solve step by step:
-If a train travels 120 miles in 2 hours, then continues 
+If a train travels 120 miles in 2 hours, then continues
 for 3 more hours at the same speed, what is the total distance?
 
 Let's think step by step:"""</span>
 
 <span class="code-comment"># Role + structured output</span>
-prompt = <span class="code-string">"""You are a data analyst. Given this data, 
+prompt = <span class="code-string">"""You are a data analyst. Given this data,
 identify the top 3 trends. Format as JSON:
 {"trends": ["trend1", "trend2", "trend3"]}"""</span></code></pre>
           </div>
@@ -401,7 +421,7 @@ message = client.messages.create(
         </ul>
 
         <div class="info-box warning">
-          <div class="info-box-title">⚠️ Critical for Research</div>
+          <div class="info-box-title">Critical for Research</div>
           <p>
             <strong>Never trust LLM outputs without verification.</strong> They can generate plausible-sounding but false citations, statistics, and claims. Always verify facts from primary sources.
           </p>
@@ -418,7 +438,7 @@ message = client.messages.create(
         <h2 id="research">11.8 LLMs in Research</h2>
 
         <p>
-          LLMs are increasingly used as research tools—for coding, literature review, data analysis, and writing. Use them wisely.
+          LLMs are increasingly used as research tools--for coding, literature review, data analysis, and writing. Use them wisely.
         </p>
 
         <h3>Appropriate Uses</h3>
@@ -454,7 +474,34 @@ message = client.messages.create(
       </div>
     </main>
   </div>
-  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">☰</button>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I'm the ProTools ER1 course assistant. I can help you with questions about Python, Stata, R, causal inference methods, or any of the course material. How can I assist you today?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question about the course..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
 </body>
 </html>

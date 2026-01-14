@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 10: Machine Learning | Data Science Foundations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">Data Science Foundations</a>
+      <span class="sidebar-subtitle">Python, Stata & R for Causal Inference</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html">Welcome</a></li>
+          <li><a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a></li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li><a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a></li>
+          <li><a href="03-data-cleaning.html"><span class="module-number">3</span> Data Cleaning</a></li>
+          <li><a href="04-data-analysis.html"><span class="module-number">4</span> Data Analysis</a></li>
+          <li><a href="05-causal-inference.html"><span class="module-number">5</span> Causal Inference</a></li>
+          <li><a href="06-estimation.html"><span class="module-number">6</span> Estimation Methods</a></li>
+          <li><a href="07-replicability.html"><span class="module-number">7</span> Replicability</a></li>
+          <li><a href="08-github.html"><span class="module-number">8</span> Git & GitHub</a></li>
+          <li><a href="09-nlp-history.html"><span class="module-number">9</span> History of NLP</a></li>
+          <li><a href="10-machine-learning.html" class="active"><span class="module-number">10</span> Machine Learning</a></li>
+          <li><a href="11-llms.html"><span class="module-number">11</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>10 &nbsp;Machine Learning</h1>
+          <div class="module-meta">
+            <span>⏱️ ~10 hours</span>
+            <span>📊 Prediction & Classification</span>
+            <span>🎯 Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>🎯 Learning Objectives</h3>
+          <ul>
+            <li>Distinguish prediction from causal inference</li>
+            <li>Understand the bias-variance tradeoff</li>
+            <li>Implement supervised learning algorithms</li>
+            <li>Evaluate models properly with cross-validation</li>
+            <li>Apply ML to economics and social science problems</li>
+          </ul>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#prediction-vs-causation">10.1 Prediction vs. Causation</a></li>
+            <li><a href="#bias-variance">10.2 The Bias-Variance Tradeoff</a></li>
+            <li><a href="#supervised">10.3 Supervised Learning</a></li>
+            <li><a href="#evaluation">10.4 Model Evaluation</a></li>
+            <li><a href="#regularization">10.5 Regularization</a></li>
+            <li><a href="#trees">10.6 Tree-Based Methods</a></li>
+            <li><a href="#neural-networks">10.7 Neural Networks</a></li>
+            <li><a href="#causal-ml">10.8 ML for Causal Inference</a></li>
+          </ul>
+        </div>
+
+        <h2 id="prediction-vs-causation">10.1 Prediction vs. Causation</h2>
+
+        <p>
+          Machine learning optimizes for <strong>prediction</strong>: given inputs X, predict output Y as accurately as possible. This is fundamentally different from causal inference, which asks: what happens to Y if we <em>change</em> X?
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Aspect</th>
+              <th>Prediction (ML)</th>
+              <th>Causal Inference</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Goal</strong></td>
+              <td>Minimize prediction error</td>
+              <td>Estimate treatment effect</td>
+            </tr>
+            <tr>
+              <td><strong>Question</strong></td>
+              <td>"What Y given X?"</td>
+              <td>"What if we changed X?"</td>
+            </tr>
+            <tr>
+              <td><strong>Coefficients</strong></td>
+              <td>Unimportant if prediction works</td>
+              <td>The whole point</td>
+            </tr>
+            <tr>
+              <td><strong>Confounders</strong></td>
+              <td>Include if predictive</td>
+              <td>Must address carefully</td>
+            </tr>
+            <tr>
+              <td><strong>Overfitting</strong></td>
+              <td>Primary concern</td>
+              <td>Less central</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box warning">
+          <div class="info-box-title">⚠️ The Prediction-Causation Gap</div>
+          <p>
+            A model that perfectly predicts hospital deaths might find "being on a ventilator" is associated with dying. Should we remove ventilators? Of course not—the relationship isn't causal. ML finds correlations; interpreting them causally requires additional assumptions.
+          </p>
+        </div>
+
+        <h2 id="bias-variance">10.2 The Bias-Variance Tradeoff</h2>
+
+        <p>
+          Prediction error can be decomposed into three components:
+        </p>
+
+        <div class="equation">
+          Error = Bias² + Variance + Irreducible Noise
+        </div>
+
+        <ul>
+          <li><strong>Bias:</strong> Error from wrong assumptions (underfitting)</li>
+          <li><strong>Variance:</strong> Error from sensitivity to training data (overfitting)</li>
+          <li><strong>Irreducible:</strong> Noise inherent in the data</li>
+        </ul>
+
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Simple Model</th>
+              <th>Complex Model</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bias</strong></td>
+              <td>High (misses patterns)</td>
+              <td>Low (captures patterns)</td>
+            </tr>
+            <tr>
+              <td><strong>Variance</strong></td>
+              <td>Low (stable)</td>
+              <td>High (sensitive to data)</td>
+            </tr>
+            <tr>
+              <td><strong>Risk</strong></td>
+              <td>Underfitting</td>
+              <td>Overfitting</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="supervised">10.3 Supervised Learning</h2>
+
+        <p>
+          <strong>Supervised learning</strong> learns from labeled examples: given (X, Y) pairs, learn f such that f(X) ≈ Y.
+        </p>
+
+        <h3>Linear and Logistic Regression</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python (sklearn)</button>
+            <button class="tab-button" data-lang="r">R (tidymodels)</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Supervised learning with scikit-learn</span>
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LinearRegression, LogisticRegression
+<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error, accuracy_score
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Load and prepare data</span>
+df = pd.read_csv(<span class="code-string">"data.csv"</span>)
+X = df[[<span class="code-string">'age'</span>, <span class="code-string">'education'</span>, <span class="code-string">'experience'</span>]]
+y = df[<span class="code-string">'income'</span>]
+
+<span class="code-comment"># Split into train and test sets</span>
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=<span class="code-number">0.2</span>, random_state=<span class="code-number">42</span>
+)
+
+<span class="code-comment"># Fit linear regression</span>
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+<span class="code-comment"># Predict and evaluate</span>
+y_pred = model.predict(X_test)
+rmse = mean_squared_error(y_test, y_pred, squared=<span class="code-keyword">False</span>)
+<span class="code-function">print</span>(f<span class="code-string">"RMSE: {rmse:.2f}"</span>)
+
+<span class="code-comment"># For classification, use LogisticRegression</span>
+clf = LogisticRegression()
+clf.fit(X_train, y_train_binary)
+accuracy = accuracy_score(y_test_binary, clf.predict(X_test))</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Supervised learning with tidymodels</span>
+<span class="code-function">library</span>(tidymodels)
+
+<span class="code-comment"># Load data</span>
+df <- <span class="code-function">read_csv</span>(<span class="code-string">"data.csv"</span>)
+
+<span class="code-comment"># Split data</span>
+set.seed(<span class="code-number">42</span>)
+split <- <span class="code-function">initial_split</span>(df, prop = <span class="code-number">0.8</span>)
+train <- <span class="code-function">training</span>(split)
+test <- <span class="code-function">testing</span>(split)
+
+<span class="code-comment"># Define model</span>
+lm_spec <- <span class="code-function">linear_reg</span>() %>%
+  <span class="code-function">set_engine</span>(<span class="code-string">"lm"</span>)
+
+<span class="code-comment"># Fit model</span>
+lm_fit <- lm_spec %>%
+  <span class="code-function">fit</span>(income ~ age + education + experience, data = train)
+
+<span class="code-comment"># Predict and evaluate</span>
+predictions <- <span class="code-function">predict</span>(lm_fit, test)
+results <- test %>% <span class="code-function">bind_cols</span>(predictions)
+
+rmse <- results %>%
+  <span class="code-function">rmse</span>(truth = income, estimate = .pred)
+<span class="code-function">print</span>(rmse)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="evaluation">10.4 Model Evaluation</h2>
+
+        <h3>Train-Test Split</h3>
+        <p>
+          Never evaluate on training data! The model memorizes training examples, so training accuracy is misleading. Always hold out a <strong>test set</strong> that the model never sees during training.
+        </p>
+
+        <h3>Cross-Validation</h3>
+        <p>
+          <strong>K-fold cross-validation</strong> provides more robust estimates by training K models, each holding out a different fold.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Cross-Validation</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: K-fold cross-validation</span>
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> cross_val_score, KFold
+
+<span class="code-comment"># 5-fold cross-validation</span>
+cv = KFold(n_splits=<span class="code-number">5</span>, shuffle=<span class="code-keyword">True</span>, random_state=<span class="code-number">42</span>)
+scores = cross_val_score(model, X, y, cv=cv, scoring=<span class="code-string">'neg_mean_squared_error'</span>)
+
+<span class="code-function">print</span>(f<span class="code-string">"CV RMSE: {(-scores.mean())**0.5:.2f} (+/- {scores.std()**0.5:.2f})"</span>)</code></pre>
+          </div>
+        </div>
+
+        <h3>Metrics</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Metric</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="3">Regression</td>
+              <td>RMSE</td>
+              <td>Root Mean Squared Error</td>
+            </tr>
+            <tr>
+              <td>MAE</td>
+              <td>Mean Absolute Error</td>
+            </tr>
+            <tr>
+              <td>R²</td>
+              <td>Variance explained</td>
+            </tr>
+            <tr>
+              <td rowspan="4">Classification</td>
+              <td>Accuracy</td>
+              <td>Percent correct</td>
+            </tr>
+            <tr>
+              <td>Precision</td>
+              <td>TP / (TP + FP)</td>
+            </tr>
+            <tr>
+              <td>Recall</td>
+              <td>TP / (TP + FN)</td>
+            </tr>
+            <tr>
+              <td>AUC-ROC</td>
+              <td>Area under ROC curve</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="regularization">10.5 Regularization</h2>
+
+        <p>
+          <strong>Regularization</strong> prevents overfitting by penalizing model complexity.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Penalty</th>
+              <th>Effect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ridge (L2)</strong></td>
+              <td>λ Σ β²</td>
+              <td>Shrinks coefficients toward zero</td>
+            </tr>
+            <tr>
+              <td><strong>LASSO (L1)</strong></td>
+              <td>λ Σ |β|</td>
+              <td>Sets some coefficients exactly to zero (variable selection)</td>
+            </tr>
+            <tr>
+              <td><strong>Elastic Net</strong></td>
+              <td>α(L1) + (1-α)(L2)</td>
+              <td>Combines both</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Regularization</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: LASSO with cross-validated lambda</span>
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LassoCV
+
+<span class="code-comment"># LASSO with automatic lambda selection</span>
+lasso = LassoCV(cv=<span class="code-number">5</span>, random_state=<span class="code-number">42</span>)
+lasso.fit(X_train, y_train)
+
+<span class="code-function">print</span>(f<span class="code-string">"Best lambda: {lasso.alpha_:.4f}"</span>)
+<span class="code-function">print</span>(f<span class="code-string">"Non-zero coefficients: {(lasso.coef_ != 0).sum()}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="trees">10.6 Tree-Based Methods</h2>
+
+        <p>
+          Decision trees partition the feature space into regions, predicting the mean (regression) or mode (classification) in each region.
+        </p>
+
+        <h3>Random Forests</h3>
+        <p>
+          <strong>Random forests</strong> average many trees, each trained on a bootstrap sample with random feature subsets. This reduces variance dramatically.
+        </p>
+
+        <h3>Gradient Boosting</h3>
+        <p>
+          <strong>Gradient boosting</strong> builds trees sequentially, with each tree correcting the errors of previous trees. XGBoost and LightGBM are popular implementations.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Tree Methods</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Random Forest and XGBoost</span>
+<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestRegressor
+<span class="code-keyword">import</span> xgboost <span class="code-keyword">as</span> xgb
+
+<span class="code-comment"># Random Forest</span>
+rf = RandomForestRegressor(n_estimators=<span class="code-number">100</span>, max_depth=<span class="code-number">10</span>, random_state=<span class="code-number">42</span>)
+rf.fit(X_train, y_train)
+
+<span class="code-comment"># Feature importance</span>
+importance = pd.DataFrame({
+    <span class="code-string">'feature'</span>: X.columns,
+    <span class="code-string">'importance'</span>: rf.feature_importances_
+}).sort_values(<span class="code-string">'importance'</span>, ascending=<span class="code-keyword">False</span>)
+
+<span class="code-comment"># XGBoost</span>
+xgb_model = xgb.XGBRegressor(n_estimators=<span class="code-number">100</span>, learning_rate=<span class="code-number">0.1</span>, max_depth=<span class="code-number">5</span>)
+xgb_model.fit(X_train, y_train)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="neural-networks">10.7 Neural Networks</h2>
+
+        <p>
+          Neural networks learn hierarchical representations through layers of nonlinear transformations. Deep learning refers to networks with many layers.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Simple Neural Network</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Neural network with PyTorch</span>
+<span class="code-keyword">import</span> torch
+<span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
+
+<span class="code-keyword">class</span> <span class="code-function">SimpleNN</span>(nn.Module):
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, input_size, hidden_size, output_size):
+        <span class="code-function">super</span>().__init__()
+        self.layer1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.layer2 = nn.Linear(hidden_size, output_size)
+    
+    <span class="code-keyword">def</span> <span class="code-function">forward</span>(self, x):
+        x = self.layer1(x)
+        x = self.relu(x)
+        x = self.layer2(x)
+        <span class="code-keyword">return</span> x
+
+<span class="code-comment"># Create model</span>
+model = SimpleNN(input_size=<span class="code-number">10</span>, hidden_size=<span class="code-number">64</span>, output_size=<span class="code-number">1</span>)
+
+<span class="code-comment"># Loss and optimizer</span>
+criterion = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=<span class="code-number">0.001</span>)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="causal-ml">10.8 ML for Causal Inference</h2>
+
+        <p>
+          A growing field combines ML's predictive power with causal inference frameworks. Key approaches:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Double ML (DML)</strong></td>
+              <td>Use ML to partial out confounders, then estimate treatment effect</td>
+            </tr>
+            <tr>
+              <td><strong>Causal Forests</strong></td>
+              <td>Estimate heterogeneous treatment effects</td>
+            </tr>
+            <tr>
+              <td><strong>LASSO for Controls</strong></td>
+              <td>Variable selection for control variables</td>
+            </tr>
+            <tr>
+              <td><strong>Synthetic Control</strong></td>
+              <td>ML-weighted comparison units</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="citation">
+          <div class="citation-title">Key References</div>
+          <ul>
+            <li>Athey, S. & Imbens, G. (2019). Machine Learning Methods That Economists Should Know About. <em>Annual Review of Economics</em>.</li>
+            <li>Chernozhukov, V., et al. (2018). Double/Debiased Machine Learning for Treatment and Structural Parameters. <em>Econometrics Journal</em>.</li>
+            <li>Wager, S. & Athey, S. (2018). Estimation and Inference of Heterogeneous Treatment Effects using Random Forests. <em>JASA</em>.</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="09-nlp-history.html" class="nav-link prev">Module 9: History of NLP</a>
+          <a href="11-llms.html" class="nav-link next">Module 11: Large Language Models</a>
+        </div>
+      </div>
+    </main>
+  </div>
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">☰</button>
+  <script src="../js/main.js"></script>
+</body>
+</html>

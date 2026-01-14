@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 3: Data Cleaning | Data Science Foundations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">Data Science Foundations</a>
+      <span class="sidebar-subtitle">Python, Stata & R for Causal Inference</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html">Welcome</a></li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li><a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a></li>
+          <li><a href="03-data-cleaning.html" class="active"><span class="module-number">3</span> Data Cleaning</a></li>
+          <li><a href="04-data-analysis.html"><span class="module-number">4</span> Data Analysis & Visualization</a></li>
+          <li><a href="05-causal-inference.html"><span class="module-number">5</span> Causal Inference</a></li>
+          <li><a href="06-estimation.html"><span class="module-number">6</span> Estimation Methods</a></li>
+          <li><a href="../resources.html">Resources & References</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>3 &nbsp;Data Cleaning</h1>
+          <div class="module-meta">
+            <span>⏱️ ~6 hours</span>
+            <span>📊 Missing Data, Outliers, Validation</span>
+            <span>🎯 Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>🎯 Learning Objectives</h3>
+          <ul>
+            <li>Identify and handle missing values appropriately</li>
+            <li>Detect and treat outliers</li>
+            <li>Clean and manipulate string variables</li>
+            <li>Work with dates and time series data</li>
+            <li>Validate data quality and consistency</li>
+          </ul>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#missing-data">3.1 Handling Missing Data</a></li>
+            <li><a href="#outliers">3.2 Detecting and Treating Outliers</a></li>
+            <li><a href="#strings">3.3 String Manipulation</a></li>
+            <li><a href="#dates">3.4 Working with Dates</a></li>
+            <li><a href="#validation">3.5 Data Validation</a></li>
+            <li><a href="#case-study">3.6 Case Study: CPS Data Cleaning</a></li>
+          </ul>
+        </div>
+
+        <h2 id="missing-data">3.1 Handling Missing Data</h2>
+
+        <p>
+          Missing data is ubiquitous in real-world datasets. Understanding why data is missing is crucial for choosing the appropriate handling strategy. There are three main types of missingness:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>MCAR</strong></td>
+              <td>Missing Completely At Random</td>
+              <td>Survey responses lost due to computer glitch</td>
+            </tr>
+            <tr>
+              <td><strong>MAR</strong></td>
+              <td>Missing At Random (conditional on observed)</td>
+              <td>Income missing more often for older respondents</td>
+            </tr>
+            <tr>
+              <td><strong>MNAR</strong></td>
+              <td>Missing Not At Random</td>
+              <td>High earners refuse to report income</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Handling missing data</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span>
+
+<span class="code-comment"># Check for missing values</span>
+<span class="code-function">print</span>(df.isnull().sum())           <span class="code-comment"># Count by column</span>
+<span class="code-function">print</span>(df.isnull().mean() * <span class="code-number">100</span>)   <span class="code-comment"># Percentage missing</span>
+
+<span class="code-comment"># Visualize missing patterns</span>
+<span class="code-keyword">import</span> <span class="code-package">missingno</span> <span class="code-keyword">as</span> <span class="code-variable">msno</span>
+msno.matrix(df)
+msno.heatmap(df)  <span class="code-comment"># Correlation of missingness</span>
+
+<span class="code-comment"># Drop missing values</span>
+<span class="code-variable">df_complete</span> = df.dropna()                    <span class="code-comment"># Drop any row with NA</span>
+<span class="code-variable">df_subset</span> = df.dropna(subset=[<span class="code-string">'income'</span>])    <span class="code-comment"># Drop if income is missing</span>
+
+<span class="code-comment"># Fill missing values</span>
+<span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].mean(), inplace=<span class="code-keyword">True</span>)  <span class="code-comment"># Mean imputation</span>
+<span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].median(), inplace=<span class="code-keyword">True</span>) <span class="code-comment"># Median imputation</span>
+<span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(method=<span class="code-string">'ffill'</span>, inplace=<span class="code-keyword">True</span>)      <span class="code-comment"># Forward fill</span>
+
+<span class="code-comment"># Group-wise imputation</span>
+<span class="code-variable">df</span>[<span class="code-string">'income'</span>] = df.groupby(<span class="code-string">'education'</span>)[<span class="code-string">'income'</span>].transform(
+    <span class="code-keyword">lambda</span> x: x.fillna(x.median())
+)
+
+<span class="code-comment"># Create missing indicator</span>
+<span class="code-variable">df</span>[<span class="code-string">'income_missing'</span>] = df[<span class="code-string">'income'</span>].isnull().astype(int)</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Handling missing data</span>
+
+<span class="code-comment">* Check for missing values</span>
+<span class="code-keyword">misstable</span> summarize          <span class="code-comment">// Summary of missing patterns</span>
+<span class="code-keyword">misstable</span> patterns           <span class="code-comment">// Missing patterns</span>
+<span class="code-keyword">mdesc</span>                        <span class="code-comment">// Requires: ssc install mdesc</span>
+
+<span class="code-comment">* Count missing by variable</span>
+<span class="code-keyword">foreach</span> var <span class="code-keyword">of</span> varlist * {
+    <span class="code-keyword">count</span> if missing(`var')
+    <span class="code-keyword">display</span> <span class="code-string">"`var': "</span> r(N) <span class="code-string">" missing"</span>
+}
+
+<span class="code-comment">* Drop observations with missing values</span>
+<span class="code-keyword">drop</span> if missing(income)      <span class="code-comment">// Drop if income missing</span>
+<span class="code-keyword">keep</span> if !missing(income)     <span class="code-comment">// Alternative</span>
+
+<span class="code-comment">* Replace missing with mean</span>
+<span class="code-keyword">summarize</span> income
+<span class="code-keyword">replace</span> income = r(mean) if missing(income)
+
+<span class="code-comment">* Group-wise imputation</span>
+<span class="code-keyword">bysort</span> education: egen income_med = median(income)
+<span class="code-keyword">replace</span> income = income_med if missing(income)
+
+<span class="code-comment">* Create missing indicator</span>
+<span class="code-keyword">gen</span> income_missing = missing(income)
+
+<span class="code-comment">* Multiple imputation (advanced)</span>
+<span class="code-keyword">mi set</span> mlong
+<span class="code-keyword">mi register</span> imputed income
+<span class="code-keyword">mi impute</span> regress income age education, add(<span class="code-number">20</span>)</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Handling missing data</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
+<span class="code-function">library</span>(<span class="code-package">naniar</span>)    <span class="code-comment"># For missing data visualization</span>
+
+<span class="code-comment"># Check for missing values</span>
+<span class="code-function">sum</span>(<span class="code-function">is.na</span>(df))                    <span class="code-comment"># Total missing</span>
+<span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df))                <span class="code-comment"># By column</span>
+<span class="code-function">colMeans</span>(<span class="code-function">is.na</span>(df)) * <span class="code-number">100</span>        <span class="code-comment"># Percentage</span>
+
+<span class="code-comment"># Visualize missing patterns (naniar)</span>
+<span class="code-function">vis_miss</span>(df)
+<span class="code-function">gg_miss_var</span>(df)
+<span class="code-function">gg_miss_upset</span>(df)
+
+<span class="code-comment"># Drop missing values</span>
+<span class="code-variable">df_complete</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">drop_na</span>()              <span class="code-comment"># All complete cases</span>
+<span class="code-variable">df_subset</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">drop_na</span>(income)        <span class="code-comment"># Drop if income missing</span>
+
+<span class="code-comment"># Replace missing values</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    income = <span class="code-function">replace_na</span>(income, <span class="code-function">mean</span>(income, na.rm = <span class="code-keyword">TRUE</span>))
+  )
+
+<span class="code-comment"># Group-wise imputation</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">group_by</span>(education) <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    income = <span class="code-function">ifelse</span>(<span class="code-function">is.na</span>(income), <span class="code-function">median</span>(income, na.rm = <span class="code-keyword">TRUE</span>), income)
+  ) <span class="code-operator">%>%</span>
+  <span class="code-function">ungroup</span>()
+
+<span class="code-comment"># Create missing indicator</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(income_missing = <span class="code-function">as.integer</span>(<span class="code-function">is.na</span>(income)))</code></pre>
+          </div>
+        </div>
+
+        <h2 id="outliers">3.2 Detecting and Treating Outliers</h2>
+
+        <p>
+          Outliers can significantly affect your analysis. Before removing them, always investigate why they exist—they might be data errors, or they might be genuine extreme values that contain important information.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Detecting and treating outliers</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span>
+<span class="code-keyword">from</span> <span class="code-package">scipy</span> <span class="code-keyword">import</span> stats
+
+<span class="code-comment"># Method 1: IQR method</span>
+<span class="code-variable">Q1</span> = df[<span class="code-string">'income'</span>].quantile(<span class="code-number">0.25</span>)
+<span class="code-variable">Q3</span> = df[<span class="code-string">'income'</span>].quantile(<span class="code-number">0.75</span>)
+<span class="code-variable">IQR</span> = Q3 - Q1
+<span class="code-variable">lower</span> = Q1 - <span class="code-number">1.5</span> * IQR
+<span class="code-variable">upper</span> = Q3 + <span class="code-number">1.5</span> * IQR
+
+<span class="code-variable">outliers</span> = df[(df[<span class="code-string">'income'</span>] < lower) | (df[<span class="code-string">'income'</span>] > upper)]
+<span class="code-function">print</span>(f<span class="code-string">"Outliers: {len(outliers)}"</span>)
+
+<span class="code-comment"># Method 2: Z-score</span>
+<span class="code-variable">df</span>[<span class="code-string">'z_score'</span>] = np.abs(stats.zscore(df[<span class="code-string">'income'</span>]))
+<span class="code-variable">outliers_z</span> = df[df[<span class="code-string">'z_score'</span>] > <span class="code-number">3</span>]
+
+<span class="code-comment"># Treatment: Winsorize (cap at percentiles)</span>
+<span class="code-variable">p01</span> = df[<span class="code-string">'income'</span>].quantile(<span class="code-number">0.01</span>)
+<span class="code-variable">p99</span> = df[<span class="code-string">'income'</span>].quantile(<span class="code-number">0.99</span>)
+<span class="code-variable">df</span>[<span class="code-string">'income_win'</span>] = df[<span class="code-string">'income'</span>].clip(p01, p99)
+
+<span class="code-comment"># Using scipy</span>
+<span class="code-keyword">from</span> <span class="code-package">scipy.stats.mstats</span> <span class="code-keyword">import</span> winsorize
+<span class="code-variable">df</span>[<span class="code-string">'income_win'</span>] = winsorize(df[<span class="code-string">'income'</span>], limits=[<span class="code-number">0.01</span>, <span class="code-number">0.01</span>])</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Detecting and treating outliers</span>
+
+<span class="code-comment">* Visual inspection</span>
+<span class="code-keyword">histogram</span> income
+<span class="code-keyword">graph box</span> income
+
+<span class="code-comment">* Identify using percentiles</span>
+<span class="code-keyword">summarize</span> income, detail
+<span class="code-keyword">local</span> p1 = r(p1)
+<span class="code-keyword">local</span> p99 = r(p99)
+<span class="code-keyword">list</span> if income < `p1' | income > `p99'
+
+<span class="code-comment">* Winsorize at 1st and 99th percentiles</span>
+<span class="code-keyword">winsor2</span> income, cuts(<span class="code-number">1</span> <span class="code-number">99</span>) suffix(_win)  <span class="code-comment">// ssc install winsor2</span>
+
+<span class="code-comment">* Manual winsorizing</span>
+<span class="code-keyword">egen</span> p1 = pctile(income), p(<span class="code-number">1</span>)
+<span class="code-keyword">egen</span> p99 = pctile(income), p(<span class="code-number">99</span>)
+<span class="code-keyword">gen</span> income_win = income
+<span class="code-keyword">replace</span> income_win = p1 if income < p1
+<span class="code-keyword">replace</span> income_win = p99 if income > p99
+
+<span class="code-comment">* Flag outliers</span>
+<span class="code-keyword">gen</span> outlier = (income < p1 | income > p99)</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Detecting and treating outliers</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
+
+<span class="code-comment"># Method 1: IQR method</span>
+<span class="code-variable">Q1</span> <span class="code-operator"><-</span> <span class="code-function">quantile</span>(df$income, <span class="code-number">0.25</span>, na.rm = <span class="code-keyword">TRUE</span>)
+<span class="code-variable">Q3</span> <span class="code-operator"><-</span> <span class="code-function">quantile</span>(df$income, <span class="code-number">0.75</span>, na.rm = <span class="code-keyword">TRUE</span>)
+<span class="code-variable">IQR_val</span> <span class="code-operator"><-</span> Q3 - Q1
+<span class="code-variable">lower</span> <span class="code-operator"><-</span> Q1 - <span class="code-number">1.5</span> * IQR_val
+<span class="code-variable">upper</span> <span class="code-operator"><-</span> Q3 + <span class="code-number">1.5</span> * IQR_val
+
+<span class="code-variable">outliers</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">filter</span>(income < lower | income > upper)
+
+<span class="code-comment"># Winsorize function</span>
+<span class="code-variable">winsorize</span> <span class="code-operator"><-</span> <span class="code-keyword">function</span>(x, probs = <span class="code-function">c</span>(<span class="code-number">0.01</span>, <span class="code-number">0.99</span>)) {
+  <span class="code-variable">limits</span> <span class="code-operator"><-</span> <span class="code-function">quantile</span>(x, probs, na.rm = <span class="code-keyword">TRUE</span>)
+  x[x < limits[<span class="code-number">1</span>]] <span class="code-operator"><-</span> limits[<span class="code-number">1</span>]
+  x[x > limits[<span class="code-number">2</span>]] <span class="code-operator"><-</span> limits[<span class="code-number">2</span>]
+  <span class="code-keyword">return</span>(x)
+}
+
+<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    income_win = <span class="code-function">winsorize</span>(income),
+    outlier = income < lower | income > upper
+  )</code></pre>
+          </div>
+        </div>
+
+        <h2 id="strings">3.3 String Manipulation</h2>
+
+        <p>
+          Text data often requires cleaning—standardizing case, removing whitespace, extracting patterns, and more.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: String manipulation</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+
+<span class="code-comment"># Case conversion</span>
+<span class="code-variable">df</span>[<span class="code-string">'name_lower'</span>] = df[<span class="code-string">'name'</span>].str.lower()
+<span class="code-variable">df</span>[<span class="code-string">'name_upper'</span>] = df[<span class="code-string">'name'</span>].str.upper()
+<span class="code-variable">df</span>[<span class="code-string">'name_title'</span>] = df[<span class="code-string">'name'</span>].str.title()
+
+<span class="code-comment"># Whitespace</span>
+<span class="code-variable">df</span>[<span class="code-string">'name'</span>] = df[<span class="code-string">'name'</span>].str.strip()          <span class="code-comment"># Remove leading/trailing</span>
+<span class="code-variable">df</span>[<span class="code-string">'name'</span>] = df[<span class="code-string">'name'</span>].str.replace(<span class="code-string">r'\s+'</span>, <span class="code-string">' '</span>, regex=<span class="code-keyword">True</span>)  <span class="code-comment"># Collapse spaces</span>
+
+<span class="code-comment"># Extract patterns with regex</span>
+<span class="code-variable">df</span>[<span class="code-string">'zip'</span>] = df[<span class="code-string">'address'</span>].str.extract(<span class="code-string">r'(\d{5})'</span>)
+<span class="code-variable">df</span>[<span class="code-string">'state'</span>] = df[<span class="code-string">'address'</span>].str.extract(<span class="code-string">r', ([A-Z]{2}) \d'</span>)
+
+<span class="code-comment"># Replace values</span>
+<span class="code-variable">df</span>[<span class="code-string">'status'</span>] = df[<span class="code-string">'status'</span>].replace({<span class="code-string">'M'</span>: <span class="code-string">'Married'</span>, <span class="code-string">'S'</span>: <span class="code-string">'Single'</span>})
+
+<span class="code-comment"># Split strings</span>
+<span class="code-variable">df</span>[[<span class="code-string">'first'</span>, <span class="code-string">'last'</span>]] = df[<span class="code-string">'full_name'</span>].str.split(<span class="code-string">' '</span>, n=<span class="code-number">1</span>, expand=<span class="code-keyword">True</span>)
+
+<span class="code-comment"># Contains / startswith / endswith</span>
+<span class="code-variable">df</span>[<span class="code-string">'is_dr'</span>] = df[<span class="code-string">'name'</span>].str.startswith(<span class="code-string">'Dr.'</span>)</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: String manipulation</span>
+
+<span class="code-comment">* Case conversion</span>
+<span class="code-keyword">gen</span> name_lower = lower(name)
+<span class="code-keyword">gen</span> name_upper = upper(name)
+<span class="code-keyword">gen</span> name_proper = proper(name)
+
+<span class="code-comment">* Whitespace</span>
+<span class="code-keyword">replace</span> name = strtrim(name)         <span class="code-comment">// Remove leading/trailing</span>
+<span class="code-keyword">replace</span> name = stritrim(name)        <span class="code-comment">// Collapse internal spaces</span>
+
+<span class="code-comment">* Extract substrings</span>
+<span class="code-keyword">gen</span> first3 = substr(name, <span class="code-number">1</span>, <span class="code-number">3</span>)      <span class="code-comment">// First 3 characters</span>
+<span class="code-keyword">gen</span> last3 = substr(name, -<span class="code-number">3</span>, <span class="code-number">3</span>)      <span class="code-comment">// Last 3 characters</span>
+
+<span class="code-comment">* Regular expressions</span>
+<span class="code-keyword">gen</span> has_number = regexm(name, <span class="code-string">"[0-9]"</span>)
+<span class="code-keyword">gen</span> zip = regexs(<span class="code-number">1</span>) if regexm(address, <span class="code-string">"([0-9]{5})"</span>)
+
+<span class="code-comment">* Replace</span>
+<span class="code-keyword">replace</span> status = <span class="code-string">"Married"</span> if status == <span class="code-string">"M"</span>
+<span class="code-keyword">replace</span> status = <span class="code-string">"Single"</span> if status == <span class="code-string">"S"</span>
+
+<span class="code-comment">* Split strings</span>
+<span class="code-keyword">split</span> full_name, parse(<span class="code-string">" "</span>) gen(name_part)
+
+<span class="code-comment">* String length</span>
+<span class="code-keyword">gen</span> name_len = strlen(name)</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: String manipulation with stringr</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)  <span class="code-comment"># includes stringr</span>
+
+<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    <span class="code-comment"># Case conversion</span>
+    name_lower = <span class="code-function">str_to_lower</span>(name),
+    name_upper = <span class="code-function">str_to_upper</span>(name),
+    name_title = <span class="code-function">str_to_title</span>(name),
+    
+    <span class="code-comment"># Whitespace</span>
+    name = <span class="code-function">str_trim</span>(name),                   <span class="code-comment"># Remove leading/trailing</span>
+    name = <span class="code-function">str_squish</span>(name),                 <span class="code-comment"># Collapse all whitespace</span>
+    
+    <span class="code-comment"># Extract with regex</span>
+    zip = <span class="code-function">str_extract</span>(address, <span class="code-string">"\\d{5}"</span>),
+    state = <span class="code-function">str_extract</span>(address, <span class="code-string">"(?<=, )[A-Z]{2}(?= \\d)"</span>),
+    
+    <span class="code-comment"># Replace</span>
+    status = <span class="code-function">recode</span>(status, <span class="code-string">"M"</span> = <span class="code-string">"Married"</span>, <span class="code-string">"S"</span> = <span class="code-string">"Single"</span>),
+    
+    <span class="code-comment"># Detect patterns</span>
+    is_dr = <span class="code-function">str_starts</span>(name, <span class="code-string">"Dr\\."</span>)
+  )
+
+<span class="code-comment"># Split strings</span>
+<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">separate</span>(full_name, into = <span class="code-function">c</span>(<span class="code-string">"first"</span>, <span class="code-string">"last"</span>), sep = <span class="code-string">" "</span>, extra = <span class="code-string">"merge"</span>)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="dates">3.4 Working with Dates</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Working with dates</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+
+<span class="code-comment"># Parse dates</span>
+<span class="code-variable">df</span>[<span class="code-string">'date'</span>] = pd.to_datetime(df[<span class="code-string">'date_string'</span>])
+<span class="code-variable">df</span>[<span class="code-string">'date'</span>] = pd.to_datetime(df[<span class="code-string">'date_string'</span>], format=<span class="code-string">'%Y-%m-%d'</span>)
+<span class="code-variable">df</span>[<span class="code-string">'date'</span>] = pd.to_datetime(df[<span class="code-string">'date_string'</span>], format=<span class="code-string">'%m/%d/%Y'</span>)
+
+<span class="code-comment"># Extract components</span>
+<span class="code-variable">df</span>[<span class="code-string">'year'</span>] = df[<span class="code-string">'date'</span>].dt.year
+<span class="code-variable">df</span>[<span class="code-string">'month'</span>] = df[<span class="code-string">'date'</span>].dt.month
+<span class="code-variable">df</span>[<span class="code-string">'day'</span>] = df[<span class="code-string">'date'</span>].dt.day
+<span class="code-variable">df</span>[<span class="code-string">'weekday'</span>] = df[<span class="code-string">'date'</span>].dt.day_name()
+<span class="code-variable">df</span>[<span class="code-string">'quarter'</span>] = df[<span class="code-string">'date'</span>].dt.quarter
+
+<span class="code-comment"># Date arithmetic</span>
+<span class="code-variable">df</span>[<span class="code-string">'days_since'</span>] = (pd.Timestamp.today() - df[<span class="code-string">'date'</span>]).dt.days
+<span class="code-variable">df</span>[<span class="code-string">'next_month'</span>] = df[<span class="code-string">'date'</span>] + pd.DateOffset(months=<span class="code-number">1</span>)
+
+<span class="code-comment"># Filter by date</span>
+<span class="code-variable">df_2020</span> = df[df[<span class="code-string">'date'</span>].dt.year == <span class="code-number">2020</span>]
+<span class="code-variable">df_recent</span> = df[df[<span class="code-string">'date'</span>] >= <span class="code-string">'2020-01-01'</span>]</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Working with dates</span>
+
+<span class="code-comment">* Parse string to date</span>
+<span class="code-keyword">gen</span> date = date(date_string, <span class="code-string">"YMD"</span>)
+<span class="code-keyword">format</span> date %td
+
+<span class="code-comment">* Different formats</span>
+<span class="code-keyword">gen</span> date = date(date_string, <span class="code-string">"MDY"</span>)    <span class="code-comment">// 01/15/2020</span>
+<span class="code-keyword">gen</span> date = date(date_string, <span class="code-string">"DMY"</span>)    <span class="code-comment">// 15/01/2020</span>
+
+<span class="code-comment">* Extract components</span>
+<span class="code-keyword">gen</span> year = year(date)
+<span class="code-keyword">gen</span> month = month(date)
+<span class="code-keyword">gen</span> day = day(date)
+<span class="code-keyword">gen</span> dow = dow(date)              <span class="code-comment">// Day of week (0=Sunday)</span>
+<span class="code-keyword">gen</span> quarter = quarter(date)
+
+<span class="code-comment">* Date arithmetic</span>
+<span class="code-keyword">gen</span> days_since = td($S_DATE) - date
+<span class="code-keyword">gen</span> next_month = date + <span class="code-number">30</span>
+
+<span class="code-comment">* Monthly/quarterly dates</span>
+<span class="code-keyword">gen</span> mdate = mofd(date)           <span class="code-comment">// Month of date</span>
+<span class="code-keyword">format</span> mdate %tm
+<span class="code-keyword">gen</span> qdate = qofd(date)           <span class="code-comment">// Quarter of date</span>
+<span class="code-keyword">format</span> qdate %tq</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Working with dates (lubridate)</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
+<span class="code-function">library</span>(<span class="code-package">lubridate</span>)
+
+<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    <span class="code-comment"># Parse dates (lubridate auto-detects many formats)</span>
+    date = <span class="code-function">ymd</span>(date_string),           <span class="code-comment"># 2020-01-15</span>
+    date = <span class="code-function">mdy</span>(date_string),           <span class="code-comment"># 01/15/2020</span>
+    date = <span class="code-function">dmy</span>(date_string),           <span class="code-comment"># 15/01/2020</span>
+    
+    <span class="code-comment"># Extract components</span>
+    year = <span class="code-function">year</span>(date),
+    month = <span class="code-function">month</span>(date),
+    day = <span class="code-function">day</span>(date),
+    weekday = <span class="code-function">wday</span>(date, label = <span class="code-keyword">TRUE</span>),
+    quarter = <span class="code-function">quarter</span>(date),
+    
+    <span class="code-comment"># Date arithmetic</span>
+    days_since = <span class="code-function">as.integer</span>(<span class="code-function">today</span>() - date),
+    next_month = date <span class="code-function">%m+%</span> <span class="code-function">months</span>(<span class="code-number">1</span>)
+  )
+
+<span class="code-comment"># Filter by date</span>
+<span class="code-variable">df_2020</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">filter</span>(<span class="code-function">year</span>(date) == <span class="code-number">2020</span>)
+<span class="code-variable">df_recent</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">filter</span>(date >= <span class="code-function">ymd</span>(<span class="code-string">"2020-01-01"</span>))</code></pre>
+          </div>
+        </div>
+
+        <h2 id="validation">3.5 Data Validation</h2>
+
+        <p>
+          Before analysis, always validate your data for consistency and logical errors.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Data validation</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+
+<span class="code-comment"># Check for duplicates</span>
+<span class="code-function">print</span>(f<span class="code-string">"Duplicates: {df.duplicated().sum()}"</span>)
+<span class="code-variable">duplicates</span> = df[df.duplicated(subset=[<span class="code-string">'id'</span>], keep=<span class="code-keyword">False</span>)]
+
+<span class="code-comment"># Check value ranges</span>
+<span class="code-keyword">assert</span> df[<span class="code-string">'age'</span>].between(<span class="code-number">0</span>, <span class="code-number">120</span>).all(), <span class="code-string">"Invalid ages found"</span>
+<span class="code-keyword">assert</span> df[<span class="code-string">'income'</span>].min() >= <span class="code-number">0</span>, <span class="code-string">"Negative income found"</span>
+
+<span class="code-comment"># Check categorical values</span>
+<span class="code-variable">valid_genders</span> = [<span class="code-string">'M'</span>, <span class="code-string">'F'</span>, <span class="code-string">'Other'</span>]
+<span class="code-variable">invalid</span> = df[~df[<span class="code-string">'gender'</span>].isin(valid_genders)]
+
+<span class="code-comment"># Check logical consistency</span>
+<span class="code-variable">errors</span> = df[df[<span class="code-string">'birth_year'</span>] > df[<span class="code-string">'hire_year'</span>]]
+
+<span class="code-comment"># Summary report</span>
+<span class="code-keyword">def</span> <span class="code-function">validate_data</span>(df):
+    <span class="code-variable">report</span> = {
+        <span class="code-string">'total_rows'</span>: len(df),
+        <span class="code-string">'duplicates'</span>: df.duplicated().sum(),
+        <span class="code-string">'missing_pct'</span>: df.isnull().mean().to_dict()
+    }
+    <span class="code-keyword">return</span> report</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Data validation</span>
+
+<span class="code-comment">* Check for duplicates</span>
+<span class="code-keyword">duplicates</span> report
+<span class="code-keyword">duplicates</span> report id
+<span class="code-keyword">duplicates</span> list id
+<span class="code-keyword">duplicates</span> drop id, force    <span class="code-comment">// Remove duplicates</span>
+
+<span class="code-comment">* Check value ranges</span>
+<span class="code-keyword">assert</span> age >= <span class="code-number">0</span> & age <= <span class="code-number">120</span>
+<span class="code-keyword">assert</span> income >= <span class="code-number">0</span> if !missing(income)
+
+<span class="code-comment">* List violations</span>
+<span class="code-keyword">list</span> if age < <span class="code-number">0</span> | age > <span class="code-number">120</span>
+
+<span class="code-comment">* Check categorical values</span>
+<span class="code-keyword">tab</span> gender
+<span class="code-keyword">assert</span> inlist(gender, <span class="code-string">"M"</span>, <span class="code-string">"F"</span>, <span class="code-string">"Other"</span>)
+
+<span class="code-comment">* Logical consistency</span>
+<span class="code-keyword">list</span> if birth_year > hire_year
+
+<span class="code-comment">* codebook provides comprehensive summary</span>
+<span class="code-keyword">codebook</span> age income gender</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Data validation</span>
+<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
+
+<span class="code-comment"># Check for duplicates</span>
+<span class="code-function">sum</span>(<span class="code-function">duplicated</span>(df))
+df <span class="code-operator">%>%</span> <span class="code-function">filter</span>(<span class="code-function">duplicated</span>(id) | <span class="code-function">duplicated</span>(id, fromLast = <span class="code-keyword">TRUE</span>))
+
+<span class="code-comment"># Check value ranges with assertions</span>
+<span class="code-function">stopifnot</span>(<span class="code-function">all</span>(df$age >= <span class="code-number">0</span> & df$age <= <span class="code-number">120</span>, na.rm = <span class="code-keyword">TRUE</span>))
+<span class="code-function">stopifnot</span>(<span class="code-function">all</span>(df$income >= <span class="code-number">0</span>, na.rm = <span class="code-keyword">TRUE</span>))
+
+<span class="code-comment"># Check categorical values</span>
+<span class="code-variable">valid_genders</span> <span class="code-operator"><-</span> <span class="code-function">c</span>(<span class="code-string">"M"</span>, <span class="code-string">"F"</span>, <span class="code-string">"Other"</span>)
+df <span class="code-operator">%>%</span> <span class="code-function">filter</span>(!gender <span class="code-operator">%in%</span> valid_genders)
+
+<span class="code-comment"># Logical consistency</span>
+df <span class="code-operator">%>%</span> <span class="code-function">filter</span>(birth_year > hire_year)
+
+<span class="code-comment"># Summary function</span>
+<span class="code-variable">validate_data</span> <span class="code-operator"><-</span> <span class="code-keyword">function</span>(df) {
+  <span class="code-function">list</span>(
+    total_rows = <span class="code-function">nrow</span>(df),
+    duplicates = <span class="code-function">sum</span>(<span class="code-function">duplicated</span>(df)),
+    missing = <span class="code-function">colMeans</span>(<span class="code-function">is.na</span>(df))
+  )
+}</code></pre>
+          </div>
+        </div>
+
+        <h2 id="case-study">3.6 Case Study: CPS Data Cleaning</h2>
+
+        <p>
+          The Current Population Survey (CPS) is a key data source for labor economics research. Let's walk through cleaning a typical CPS extract.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">📊 About the CPS</div>
+          <p>
+            The CPS is a monthly survey of about 60,000 households conducted by the Bureau of Labor Statistics. It provides employment, earnings, and demographic data. Access cleaned extracts from <a href="https://cps.ipums.org/" target="_blank">IPUMS CPS</a>.
+          </p>
+          <p class="credit">Data source: Sarah Flood et al. IPUMS CPS: Version 11.0 [dataset]. Minneapolis, MN: IPUMS, 2023.</p>
+        </div>
+
+        <p>
+          See the complete case study code in the downloadable course materials. The cleaning process covers: handling CPS missing value codes, creating consistent variable labels, constructing hourly wages from earnings and hours, and creating demographic indicators.
+        </p>
+
+        <div class="nav-footer">
+          <a href="02-data-harnessing.html" class="nav-link prev">Module 2: Data Harnessing</a>
+          <a href="04-data-analysis.html" class="nav-link next">Module 4: Data Analysis</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">☰</button>
+  <script src="../js/main.js"></script>
+</body>
+</html>

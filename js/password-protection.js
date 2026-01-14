@@ -31,7 +31,7 @@
     // Simple hash function (for basic protection)
     // The password is: firsT_coursE2026
     // This is NOT cryptographically secure - for real monetization, use server-side auth
-    const HASHED_PASSWORD = 'ZmlyczhfY291cnNFMjAyNg=='; // base64 of the password
+    const HASHED_PASSWORD = 'Zmlyc1RfY291cnNFMjAyNg=='; // base64 of the password: firsT_coursE2026
 
     const STORAGE_KEY = 'protools_er1_access';
     const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds

@@ -1,23 +1,26 @@
 /**
- * Data Science Foundations Course
+ * ProTools ER1 Course
  * Interactive JavaScript functionality
  */
 
 document.addEventListener('DOMContentLoaded', function() {
   // Code tab switching
   initCodeTabs();
-  
+
   // Mobile menu toggle
   initMobileMenu();
-  
+
   // Smooth scroll for anchor links
   initSmoothScroll();
-  
+
   // Active navigation highlighting
   initActiveNav();
-  
+
   // Copy code functionality
   initCopyCode();
+
+  // Hotspot tooltip positioning
+  initHotspotTooltips();
 });
 
 /**
@@ -251,4 +254,122 @@ function trackProgress() {
     }
   `;
   document.head.appendChild(style);
+}
+
+/**
+ * Initialize hotspot tooltip positioning
+ * Moves tooltips to body and positions them with fixed positioning
+ * to ensure they're always visible regardless of parent overflow settings
+ */
+function initHotspotTooltips() {
+  const hotspots = document.querySelectorAll('.hotspot');
+
+  hotspots.forEach(hotspot => {
+    const tooltip = hotspot.querySelector('.hotspot-tooltip');
+    if (!tooltip) return;
+
+    // Move tooltip to body to escape any overflow:hidden containers
+    document.body.appendChild(tooltip);
+
+    // Store reference to hotspot on tooltip for cleanup
+    tooltip._hotspot = hotspot;
+
+    // Position and show tooltip on mouse enter
+    hotspot.addEventListener('mouseenter', () => {
+      positionTooltip(hotspot, tooltip);
+      tooltip.style.opacity = '1';
+      tooltip.style.visibility = 'visible';
+    });
+
+    // Hide tooltip on mouse leave
+    hotspot.addEventListener('mouseleave', () => {
+      tooltip.style.opacity = '0';
+      tooltip.style.visibility = 'hidden';
+    });
+
+    // Also handle touch devices
+    hotspot.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      positionTooltip(hotspot, tooltip);
+      tooltip.style.opacity = '1';
+      tooltip.style.visibility = 'visible';
+
+      // Hide on touch elsewhere
+      const hideTooltip = () => {
+        tooltip.style.opacity = '0';
+        tooltip.style.visibility = 'hidden';
+        document.removeEventListener('touchstart', hideTooltip);
+      };
+      setTimeout(() => {
+        document.addEventListener('touchstart', hideTooltip);
+      }, 100);
+    });
+  });
+}
+
+/**
+ * Position a tooltip relative to its hotspot
+ */
+function positionTooltip(hotspot, tooltip) {
+  const hotspotRect = hotspot.getBoundingClientRect();
+  const tooltipWidth = 280;
+  const tooltipHeight = tooltip.offsetHeight || 150;
+  const padding = 15;
+  const arrowSize = 10;
+
+  // Get viewport dimensions
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+
+  // Determine best position based on available space
+  const spaceRight = viewportWidth - hotspotRect.right;
+  const spaceLeft = hotspotRect.left;
+  const spaceTop = hotspotRect.top;
+  const spaceBottom = viewportHeight - hotspotRect.bottom;
+
+  let top, left;
+  let position = 'right'; // default
+
+  // Determine best position
+  if (spaceRight >= tooltipWidth + padding) {
+    // Position to the right
+    position = 'right';
+    left = hotspotRect.right + arrowSize;
+    top = hotspotRect.top + (hotspotRect.height / 2) - (tooltipHeight / 2);
+  } else if (spaceLeft >= tooltipWidth + padding) {
+    // Position to the left
+    position = 'left';
+    left = hotspotRect.left - tooltipWidth - arrowSize;
+    top = hotspotRect.top + (hotspotRect.height / 2) - (tooltipHeight / 2);
+  } else if (spaceTop >= tooltipHeight + padding) {
+    // Position above
+    position = 'top';
+    left = hotspotRect.left + (hotspotRect.width / 2) - (tooltipWidth / 2);
+    top = hotspotRect.top - tooltipHeight - arrowSize;
+  } else {
+    // Position below
+    position = 'bottom';
+    left = hotspotRect.left + (hotspotRect.width / 2) - (tooltipWidth / 2);
+    top = hotspotRect.bottom + arrowSize;
+  }
+
+  // Keep tooltip within viewport bounds
+  if (left < padding) left = padding;
+  if (left + tooltipWidth > viewportWidth - padding) {
+    left = viewportWidth - tooltipWidth - padding;
+  }
+  if (top < padding) top = padding;
+  if (top + tooltipHeight > viewportHeight - padding) {
+    top = viewportHeight - tooltipHeight - padding;
+  }
+
+  // Apply position
+  tooltip.style.position = 'fixed';
+  tooltip.style.top = top + 'px';
+  tooltip.style.left = left + 'px';
+  tooltip.style.transform = 'none';
+
+  // Update arrow position class
+  tooltip.classList.remove('top', 'bottom', 'left', 'right');
+  tooltip.classList.add(position);
 }

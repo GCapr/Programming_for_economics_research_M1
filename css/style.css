@@ -467,19 +467,26 @@ tr:hover {
    INTERACTIVE SCREENSHOT SYSTEM
    Hotspots with hover tooltips
    =========================================== */
+
+/* Screenshot container - clean layout */
 .screenshot-container {
   position: relative;
   margin: var(--space-2xl) 0;
   border-radius: 8px;
-  overflow: visible; /* Allow tooltips to overflow outside */
+  overflow: visible;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   background: #1e1e1e;
 }
 
-/* Clip only the visual content, not the tooltips */
+/* The IDE mockup visual styling */
 .screenshot-container .ide-mockup {
+  position: relative;
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
+}
+
+.screenshot-container .ide-mockup .ide-titlebar {
+  border-radius: 8px 8px 0 0;
 }
 
 .screenshot-container img {
@@ -505,12 +512,13 @@ tr:hover {
   font-size: 0.85rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
-  z-index: 10;
+  z-index: 100;
 }
 
 .hotspot:hover {
   transform: scale(1.2);
   background: #dd6b20;
+  z-index: 1000;
 }
 
 .hotspot::before {
@@ -539,87 +547,69 @@ tr:hover {
   }
 }
 
-/* Tooltip that appears on hover */
+/* Tooltip - uses fixed positioning via JS for guaranteed visibility */
 .hotspot-tooltip {
-  position: absolute;
+  position: fixed;
   background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
   color: white;
   padding: var(--space-md) var(--space-lg);
   border-radius: 8px;
-  width: 260px;
-  max-width: 260px;
+  width: 280px;
+  max-width: 280px;
   font-size: 0.85rem;
   line-height: 1.5;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s ease;
-  z-index: 9999; /* High z-index to appear above everything */
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 99999;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   pointer-events: none;
 }
 
-.hotspot:hover .hotspot-tooltip {
-  opacity: 1;
-  visibility: visible;
-}
+/* Tooltip visibility controlled by JS since tooltips are moved to body */
+/* The .hotspot:hover selector no longer works after moving to body */
 
-/* Tooltip positioning classes */
-.hotspot-tooltip.top {
-  bottom: calc(100% + 12px);
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.hotspot-tooltip.bottom {
-  top: calc(100% + 12px);
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.hotspot-tooltip.left {
-  right: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%);
-}
-
+/* Position classes for arrow direction (JS handles actual positioning) */
+.hotspot-tooltip.top,
+.hotspot-tooltip.bottom,
+.hotspot-tooltip.left,
 .hotspot-tooltip.right {
-  left: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%);
+  /* These classes only control the arrow direction now */
+  /* The JS sets actual top/left with fixed positioning */
 }
 
-/* Arrow for tooltips */
+/* Arrow for tooltips - positioned based on direction class */
 .hotspot-tooltip::after {
   content: '';
   position: absolute;
   border: 8px solid transparent;
 }
 
+/* Arrow points DOWN (tooltip is above the hotspot) */
 .hotspot-tooltip.top::after {
   top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 20px;
   border-top-color: #2c5282;
 }
 
+/* Arrow points UP (tooltip is below the hotspot) */
 .hotspot-tooltip.bottom::after {
   bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 20px;
   border-bottom-color: #1a365d;
 }
 
+/* Arrow points RIGHT (tooltip is to the left of hotspot) */
 .hotspot-tooltip.left::after {
   left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 20px;
   border-left-color: #2c5282;
 }
 
+/* Arrow points LEFT (tooltip is to the right of hotspot) */
 .hotspot-tooltip.right::after {
   right: 100%;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 20px;
   border-right-color: #1a365d;
 }
 

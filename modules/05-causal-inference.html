@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 5: Causal Inference | Data Science Foundations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">Data Science Foundations</a>
+      <span class="sidebar-subtitle">Python, Stata & R for Causal Inference</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html">Welcome</a></li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li><a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a></li>
+          <li><a href="03-data-cleaning.html"><span class="module-number">3</span> Data Cleaning</a></li>
+          <li><a href="04-data-analysis.html"><span class="module-number">4</span> Data Analysis & Visualization</a></li>
+          <li><a href="05-causal-inference.html" class="active"><span class="module-number">5</span> Causal Inference</a></li>
+          <li><a href="06-estimation.html"><span class="module-number">6</span> Estimation Methods</a></li>
+          <li><a href="../resources.html">Resources & References</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>5 &nbsp;Causal Inference</h1>
+          <div class="module-meta">
+            <span>⏱️ ~8 hours</span>
+            <span>📊 Theory & Foundations</span>
+            <span>🎯 Intermediate-Advanced</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>🎯 Learning Objectives</h3>
+          <ul>
+            <li>Understand the fundamental problem of causal inference</li>
+            <li>Master the potential outcomes framework (Rubin Causal Model)</li>
+            <li>Learn to read and construct Directed Acyclic Graphs (DAGs)</li>
+            <li>Identify sources of selection bias and confounding</li>
+            <li>Understand when causal claims are justified</li>
+          </ul>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#why-causality">5.1 Why Causality Matters</a></li>
+            <li><a href="#potential-outcomes">5.2 The Potential Outcomes Framework</a></li>
+            <li><a href="#ate">5.3 Average Treatment Effects</a></li>
+            <li><a href="#selection-bias">5.4 Selection Bias</a></li>
+            <li><a href="#dags">5.5 Directed Acyclic Graphs (DAGs)</a></li>
+            <li><a href="#identification">5.6 Identification Strategies</a></li>
+          </ul>
+        </div>
+
+        <h2 id="why-causality">5.1 Why Causality Matters</h2>
+
+        <p>
+          Correlation is not causation—you've heard this countless times. But why does this distinction matter, and when can we move from correlation to causation?
+        </p>
+
+        <p>
+          Consider these questions that require causal answers:
+        </p>
+        <ul>
+          <li>Does education increase earnings?</li>
+          <li>Do minimum wage increases reduce employment?</li>
+          <li>Does health insurance improve health outcomes?</li>
+          <li>Does advertising increase sales?</li>
+        </ul>
+
+        <p>
+          To answer these, we need to know what <em>would have happened</em> had things been different. This counterfactual reasoning is the heart of causal inference.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">📖 The Credibility Revolution</div>
+          <p>
+            The 2021 Nobel Prize in Economics was awarded to David Card, Joshua Angrist, and Guido Imbens for their methodological contributions to causal inference. Their work established the "credibility revolution" in empirical economics—a shift toward research designs that can convincingly identify causal effects.
+          </p>
+          <p class="credit">See: Angrist & Pischke (2010), "The Credibility Revolution in Empirical Economics"</p>
+        </div>
+
+        <h2 id="potential-outcomes">5.2 The Potential Outcomes Framework</h2>
+
+        <p>
+          The <strong>potential outcomes framework</strong> (also called the Rubin Causal Model) provides a formal language for thinking about causality. For each unit <em>i</em>, we define:
+        </p>
+
+        <div class="equation">
+          Y<sub>i</sub>(1) = Potential outcome if treated<br>
+          Y<sub>i</sub>(0) = Potential outcome if not treated
+        </div>
+
+        <p>
+          The <strong>individual treatment effect</strong> for unit <em>i</em> is:
+        </p>
+
+        <div class="equation">
+          τ<sub>i</sub> = Y<sub>i</sub>(1) - Y<sub>i</sub>(0)
+        </div>
+
+        <h3>The Fundamental Problem of Causal Inference</h3>
+
+        <p>
+          The fundamental problem is that we can only observe <em>one</em> of the potential outcomes for each unit. If unit <em>i</em> is treated (D<sub>i</sub> = 1), we observe Y<sub>i</sub>(1) but not Y<sub>i</sub>(0). The unobserved outcome is the <strong>counterfactual</strong>.
+        </p>
+
+        <p>
+          This creates a missing data problem:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Unit</th>
+              <th>D (Treatment)</th>
+              <th>Y(1)</th>
+              <th>Y(0)</th>
+              <th>τ = Y(1) - Y(0)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>1</td>
+              <td>8</td>
+              <td style="color: #999;">?</td>
+              <td style="color: #999;">?</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>1</td>
+              <td>6</td>
+              <td style="color: #999;">?</td>
+              <td style="color: #999;">?</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>0</td>
+              <td style="color: #999;">?</td>
+              <td>4</td>
+              <td style="color: #999;">?</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>0</td>
+              <td style="color: #999;">?</td>
+              <td>2</td>
+              <td style="color: #999;">?</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="ate">5.3 Average Treatment Effects</h2>
+
+        <p>
+          Since individual effects are unobservable, we focus on <strong>average treatment effects</strong>:
+        </p>
+
+        <div class="equation">
+          <strong>ATE</strong> = E[Y(1) - Y(0)] = E[Y(1)] - E[Y(0)]
+        </div>
+
+        <p>
+          The ATE is the average effect across the entire population. Other quantities of interest include:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Definition</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>ATT</strong></td>
+              <td>E[Y(1) - Y(0) | D = 1]</td>
+              <td>Effect for the treated</td>
+            </tr>
+            <tr>
+              <td><strong>ATU</strong></td>
+              <td>E[Y(1) - Y(0) | D = 0]</td>
+              <td>Effect for the untreated</td>
+            </tr>
+            <tr>
+              <td><strong>LATE</strong></td>
+              <td>Effect for compliers</td>
+              <td>Used with instrumental variables</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="selection-bias">5.4 Selection Bias</h2>
+
+        <p>
+          The naive comparison of treated vs. untreated units is:
+        </p>
+
+        <div class="equation">
+          E[Y | D = 1] - E[Y | D = 0]
+        </div>
+
+        <p>
+          This can be decomposed as:
+        </p>
+
+        <div class="equation">
+          E[Y | D = 1] - E[Y | D = 0] = <span style="color: #38a169;">ATT</span> + <span style="color: #e53e3e;">Selection Bias</span>
+        </div>
+
+        <p>
+          Where selection bias = E[Y(0) | D = 1] - E[Y(0) | D = 0]. Selection bias arises when treated and untreated groups differ in their baseline potential outcomes.
+        </p>
+
+        <div class="info-box warning">
+          <div class="info-box-title">⚠️ When Selection Bias Arises</div>
+          <p>
+            Selection bias occurs whenever treatment assignment is correlated with potential outcomes. Common examples:
+          </p>
+          <ul>
+            <li><strong>Self-selection:</strong> People choose treatment based on expected benefits</li>
+            <li><strong>Administrative selection:</strong> Programs target those most in need</li>
+            <li><strong>Sorting:</strong> Better schools attract better students</li>
+          </ul>
+        </div>
+
+        <h3>Example: Returns to Education</h3>
+
+        <p>
+          Consider estimating the effect of college on earnings. If we simply compare college graduates to non-graduates:
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Demonstrating selection bias</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+np.random.seed(<span class="code-number">42</span>)
+
+<span class="code-variable">n</span> = <span class="code-number">10000</span>
+
+<span class="code-comment"># Unobserved ability affects both college attendance and earnings</span>
+<span class="code-variable">ability</span> = np.random.normal(<span class="code-number">0</span>, <span class="code-number">1</span>, n)
+
+<span class="code-comment"># College attendance depends on ability (selection!)</span>
+<span class="code-variable">p_college</span> = <span class="code-number">1</span> / (<span class="code-number">1</span> + np.exp(-(<span class="code-number">0.5</span> * ability)))
+<span class="code-variable">college</span> = np.random.binomial(<span class="code-number">1</span>, p_college)
+
+<span class="code-comment"># True causal effect of college is $10,000</span>
+<span class="code-variable">TRUE_EFFECT</span> = <span class="code-number">10000</span>
+
+<span class="code-comment"># Potential outcomes</span>
+<span class="code-variable">Y0</span> = <span class="code-number">30000</span> + <span class="code-number">5000</span> * ability + np.random.normal(<span class="code-number">0</span>, <span class="code-number">5000</span>, n)
+<span class="code-variable">Y1</span> = Y0 + TRUE_EFFECT
+
+<span class="code-comment"># Observed outcome (switching equation)</span>
+<span class="code-variable">earnings</span> = college * Y1 + (<span class="code-number">1</span> - college) * Y0
+
+<span class="code-comment"># Naive comparison</span>
+<span class="code-variable">naive_effect</span> = earnings[college == <span class="code-number">1</span>].mean() - earnings[college == <span class="code-number">0</span>].mean()
+<span class="code-function">print</span>(f<span class="code-string">"True effect: ${TRUE_EFFECT:,.0f}"</span>)
+<span class="code-function">print</span>(f<span class="code-string">"Naive estimate: ${naive_effect:,.0f}"</span>)
+<span class="code-function">print</span>(f<span class="code-string">"Bias: ${naive_effect - TRUE_EFFECT:,.0f}"</span>)
+
+<span class="code-comment"># The naive estimate is biased upward because high-ability</span>
+<span class="code-comment"># individuals are more likely to attend college</span></code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Demonstrating selection bias</span>
+<span class="code-keyword">clear</span>
+<span class="code-keyword">set</span> seed <span class="code-number">42</span>
+<span class="code-keyword">set</span> obs <span class="code-number">10000</span>
+
+<span class="code-comment">* Unobserved ability</span>
+<span class="code-keyword">gen</span> ability = rnormal(<span class="code-number">0</span>, <span class="code-number">1</span>)
+
+<span class="code-comment">* College attendance depends on ability (selection!)</span>
+<span class="code-keyword">gen</span> p_college = <span class="code-number">1</span> / (<span class="code-number">1</span> + exp(-(<span class="code-number">0.5</span> * ability)))
+<span class="code-keyword">gen</span> college = runiform() < p_college
+
+<span class="code-comment">* True causal effect of college is $10,000</span>
+<span class="code-keyword">local</span> TRUE_EFFECT = <span class="code-number">10000</span>
+
+<span class="code-comment">* Potential outcomes</span>
+<span class="code-keyword">gen</span> Y0 = <span class="code-number">30000</span> + <span class="code-number">5000</span> * ability + rnormal(<span class="code-number">0</span>, <span class="code-number">5000</span>)
+<span class="code-keyword">gen</span> Y1 = Y0 + `TRUE_EFFECT'
+
+<span class="code-comment">* Observed outcome</span>
+<span class="code-keyword">gen</span> earnings = college * Y1 + (<span class="code-number">1</span> - college) * Y0
+
+<span class="code-comment">* Naive comparison</span>
+<span class="code-keyword">reg</span> earnings college
+<span class="code-keyword">display</span> <span class="code-string">"True effect: "</span> `TRUE_EFFECT'
+<span class="code-keyword">display</span> <span class="code-string">"Naive estimate: "</span> _b[college]
+<span class="code-keyword">display</span> <span class="code-string">"Bias: "</span> _b[college] - `TRUE_EFFECT'</code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Demonstrating selection bias</span>
+<span class="code-function">set.seed</span>(<span class="code-number">42</span>)
+<span class="code-variable">n</span> <span class="code-operator"><-</span> <span class="code-number">10000</span>
+
+<span class="code-comment"># Unobserved ability affects both college attendance and earnings</span>
+<span class="code-variable">ability</span> <span class="code-operator"><-</span> <span class="code-function">rnorm</span>(n, <span class="code-number">0</span>, <span class="code-number">1</span>)
+
+<span class="code-comment"># College attendance depends on ability (selection!)</span>
+<span class="code-variable">p_college</span> <span class="code-operator"><-</span> <span class="code-function">plogis</span>(<span class="code-number">0.5</span> * ability)
+<span class="code-variable">college</span> <span class="code-operator"><-</span> <span class="code-function">rbinom</span>(n, <span class="code-number">1</span>, p_college)
+
+<span class="code-comment"># True causal effect of college is $10,000</span>
+<span class="code-variable">TRUE_EFFECT</span> <span class="code-operator"><-</span> <span class="code-number">10000</span>
+
+<span class="code-comment"># Potential outcomes</span>
+<span class="code-variable">Y0</span> <span class="code-operator"><-</span> <span class="code-number">30000</span> + <span class="code-number">5000</span> * ability + <span class="code-function">rnorm</span>(n, <span class="code-number">0</span>, <span class="code-number">5000</span>)
+<span class="code-variable">Y1</span> <span class="code-operator"><-</span> Y0 + TRUE_EFFECT
+
+<span class="code-comment"># Observed outcome (switching equation)</span>
+<span class="code-variable">earnings</span> <span class="code-operator"><-</span> college * Y1 + (<span class="code-number">1</span> - college) * Y0
+
+<span class="code-comment"># Naive comparison</span>
+<span class="code-variable">naive_effect</span> <span class="code-operator"><-</span> <span class="code-function">mean</span>(earnings[college == <span class="code-number">1</span>]) - <span class="code-function">mean</span>(earnings[college == <span class="code-number">0</span>])
+<span class="code-function">cat</span>(<span class="code-string">"True effect: $"</span>, <span class="code-function">format</span>(TRUE_EFFECT, big.mark = <span class="code-string">","</span>), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"Naive estimate: $"</span>, <span class="code-function">format</span>(<span class="code-function">round</span>(naive_effect), big.mark = <span class="code-string">","</span>), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"Bias: $"</span>, <span class="code-function">format</span>(<span class="code-function">round</span>(naive_effect - TRUE_EFFECT), big.mark = <span class="code-string">","</span>), <span class="code-string">"\n"</span>)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="dags">5.5 Directed Acyclic Graphs (DAGs)</h2>
+
+        <p>
+          <strong>Directed Acyclic Graphs</strong> (DAGs) are a visual tool for representing causal relationships. They help us identify confounders, mediators, and colliders.
+        </p>
+
+        <h3>Basic DAG Elements</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Structure</th>
+              <th>Diagram</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Confounder</strong></td>
+              <td>X ← C → Y</td>
+              <td>C causes both X and Y (must control)</td>
+            </tr>
+            <tr>
+              <td><strong>Mediator</strong></td>
+              <td>X → M → Y</td>
+              <td>M is on the causal path (don't control for total effect)</td>
+            </tr>
+            <tr>
+              <td><strong>Collider</strong></td>
+              <td>X → C ← Y</td>
+              <td>Both X and Y cause C (don't control!)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box warning">
+          <div class="info-box-title">⚠️ Collider Bias</div>
+          <p>
+            Controlling for a collider <em>opens</em> a backdoor path and creates bias where none existed. This is one of the most common mistakes in applied research.
+          </p>
+          <p>
+            Example: Conditioning on "hospital admission" when studying treatment effects—being hospitalized is caused by both treatment and illness severity.
+          </p>
+        </div>
+
+        <h3>Drawing DAGs in Code</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Drawing DAGs with graphviz</span>
+<span class="code-comment"># pip install graphviz</span>
+<span class="code-keyword">from</span> <span class="code-package">graphviz</span> <span class="code-keyword">import</span> Digraph
+
+<span class="code-comment"># Create DAG for education and earnings</span>
+<span class="code-variable">dag</span> = Digraph(<span class="code-string">'education_dag'</span>)
+dag.attr(rankdir=<span class="code-string">'LR'</span>)
+
+<span class="code-comment"># Add nodes</span>
+dag.node(<span class="code-string">'A'</span>, <span class="code-string">'Ability'</span>)
+dag.node(<span class="code-string">'E'</span>, <span class="code-string">'Education'</span>)
+dag.node(<span class="code-string">'Y'</span>, <span class="code-string">'Earnings'</span>)
+dag.node(<span class="code-string">'F'</span>, <span class="code-string">'Family\nBackground'</span>)
+
+<span class="code-comment"># Add edges</span>
+dag.edge(<span class="code-string">'A'</span>, <span class="code-string">'E'</span>)
+dag.edge(<span class="code-string">'A'</span>, <span class="code-string">'Y'</span>)
+dag.edge(<span class="code-string">'E'</span>, <span class="code-string">'Y'</span>)
+dag.edge(<span class="code-string">'F'</span>, <span class="code-string">'E'</span>)
+dag.edge(<span class="code-string">'F'</span>, <span class="code-string">'A'</span>)
+
+dag.render(<span class="code-string">'education_dag'</span>, format=<span class="code-string">'png'</span>, cleanup=<span class="code-keyword">True</span>)
+
+<span class="code-comment"># Using dagitty through causalinference</span>
+<span class="code-comment"># pip install causalinference</span></code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata doesn't have built-in DAG tools</span>
+<span class="code-comment">* Use external tools like DAGitty (dagitty.net)</span>
+<span class="code-comment">* or draw in LaTeX with tikz</span>
+
+<span class="code-comment">* However, you can use the -dag- command</span>
+<span class="code-comment">* ssc install dag</span>
+
+<span class="code-comment">* Example workflow:</span>
+<span class="code-comment">* 1. Go to dagitty.net</span>
+<span class="code-comment">* 2. Draw your DAG</span>
+<span class="code-comment">* 3. Export the adjustment sets</span>
+<span class="code-comment">* 4. Implement in Stata</span></code></pre>
+          </div>
+          
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Drawing DAGs with ggdag</span>
+<span class="code-comment"># install.packages(c("ggdag", "dagitty"))</span>
+<span class="code-function">library</span>(<span class="code-package">ggdag</span>)
+<span class="code-function">library</span>(<span class="code-package">dagitty</span>)
+
+<span class="code-comment"># Define DAG</span>
+<span class="code-variable">dag</span> <span class="code-operator"><-</span> <span class="code-function">dagitty</span>(<span class="code-string">'dag {
+  Ability [unobserved]
+  Family [unobserved]
+  
+  Family -> Ability
+  Family -> Education
+  Ability -> Education
+  Ability -> Earnings
+  Education -> Earnings
+}'</span>)
+
+<span class="code-comment"># Plot</span>
+<span class="code-function">ggdag</span>(dag, text = <span class="code-keyword">TRUE</span>, use_labels = <span class="code-string">"name"</span>) +
+  <span class="code-function">theme_dag</span>()
+
+<span class="code-comment"># Find adjustment sets</span>
+<span class="code-function">adjustmentSets</span>(dag, exposure = <span class="code-string">"Education"</span>, outcome = <span class="code-string">"Earnings"</span>)
+
+<span class="code-comment"># Check if path is blocked</span>
+<span class="code-function">ggdag_adjustment_set</span>(dag, exposure = <span class="code-string">"Education"</span>, outcome = <span class="code-string">"Earnings"</span>) +
+  <span class="code-function">theme_dag</span>()</code></pre>
+          </div>
+        </div>
+
+        <h2 id="identification">5.6 Identification Strategies</h2>
+
+        <p>
+          <strong>Identification</strong> refers to the conditions under which we can recover a causal effect from data. The key question: what assumptions are needed to interpret our estimate causally?
+        </p>
+
+        <h3>The Gold Standard: Randomized Experiments</h3>
+
+        <p>
+          Random assignment solves the selection problem by making treatment independent of potential outcomes:
+        </p>
+
+        <div class="equation">
+          (Y(1), Y(0)) ⊥ D &nbsp;&nbsp; (Independence)
+        </div>
+
+        <p>
+          With random assignment, the naive comparison is unbiased:
+        </p>
+
+        <div class="equation">
+          E[Y | D = 1] - E[Y | D = 0] = E[Y(1)] - E[Y(0)] = ATE
+        </div>
+
+        <h3>Observational Strategies</h3>
+
+        <p>
+          When experiments aren't possible, we use quasi-experimental methods that rely on different identifying assumptions:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Key Assumption</th>
+              <th>Best Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Matching</strong></td>
+              <td>Selection on observables (CIA)</td>
+              <td>Rich covariate data</td>
+            </tr>
+            <tr>
+              <td><strong>Difference-in-Differences</strong></td>
+              <td>Parallel trends</td>
+              <td>Policy changes with comparison groups</td>
+            </tr>
+            <tr>
+              <td><strong>Regression Discontinuity</strong></td>
+              <td>Continuity at cutoff</td>
+              <td>Threshold-based treatments</td>
+            </tr>
+            <tr>
+              <td><strong>Instrumental Variables</strong></td>
+              <td>Exclusion restriction, relevance</td>
+              <td>Exogenous variation in treatment</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="citation">
+          <div class="citation-title">Essential Reading</div>
+          <ul>
+            <li><strong>Cunningham, S.</strong> (2021). <em>Causal Inference: The Mixtape</em>. Yale University Press. <a href="https://mixtape.scunning.com" target="_blank">Free online</a></li>
+            <li><strong>Huntington-Klein, N.</strong> (2022). <em>The Effect</em>. Chapman & Hall. <a href="https://theeffectbook.net" target="_blank">Free online</a></li>
+            <li><strong>Angrist, J. & Pischke, J.</strong> (2009). <em>Mostly Harmless Econometrics</em>. Princeton.</li>
+            <li><strong>Angrist, J. & Pischke, J.</strong> (2015). <em>Mastering 'Metrics</em>. Princeton.</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="04-data-analysis.html" class="nav-link prev">Module 4: Data Analysis</a>
+          <a href="06-estimation.html" class="nav-link next">Module 6: Estimation Methods</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">☰</button>
+  <script src="../js/main.js"></script>
+</body>
+</html>

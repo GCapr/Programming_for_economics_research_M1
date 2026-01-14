@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 4: Data Analysis & Visualization | Data Science Foundations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">Data Science Foundations</a>
+      <span class="sidebar-subtitle">Python, Stata & R for Causal Inference</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html">Welcome</a></li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li><a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a></li>
+          <li><a href="03-data-cleaning.html"><span class="module-number">3</span> Data Cleaning</a></li>
+          <li><a href="04-data-analysis.html" class="active"><span class="module-number">4</span> Data Analysis & Visualization</a></li>
+          <li><a href="05-causal-inference.html"><span class="module-number">5</span> Causal Inference</a></li>
+          <li><a href="06-estimation.html"><span class="module-number">6</span> Estimation Methods</a></li>
+          <li><a href="../resources.html">Resources & References</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>4 &nbsp;Data Analysis & Visualization</h1>
+          <div class="module-meta">
+            <span>⏱️ ~8 hours</span>
+            <span>📊 EDA, Statistics, Plots</span>
+            <span>🎯 Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>🎯 Learning Objectives</h3>
+          <ul>
+            <li>Compute and interpret descriptive statistics</li>
+            <li>Create publication-quality visualizations</li>
+            <li>Perform exploratory data analysis (EDA)</li>
+            <li>Conduct hypothesis tests</li>
+            <li>Generate summary tables for papers</li>
+          </ul>
+        </div>
+
+        <h2>4.1 Descriptive Statistics</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Descriptive statistics</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+df.describe()                          <span class="code-comment"># Summary stats</span>
+df[<span class="code-string">'income'</span>].mean()                   <span class="code-comment"># Mean</span>
+df[<span class="code-string">'income'</span>].median()                 <span class="code-comment"># Median</span>
+df[<span class="code-string">'income'</span>].std()                    <span class="code-comment"># Standard deviation</span>
+df[<span class="code-string">'income'</span>].quantile([<span class="code-number">0.25</span>, <span class="code-number">0.75</span>])  <span class="code-comment"># Percentiles</span>
+
+<span class="code-comment"># By group</span>
+df.groupby(<span class="code-string">'education'</span>)[<span class="code-string">'income'</span>].mean()</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Descriptive statistics</span>
+<span class="code-keyword">summarize</span> income
+<span class="code-keyword">summarize</span> income, detail
+<span class="code-keyword">tabstat</span> income, by(education) stat(mean sd n)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Descriptive statistics</span>
+<span class="code-function">summary</span>(df$income)
+<span class="code-function">mean</span>(df$income, na.rm = TRUE)
+<span class="code-function">sd</span>(df$income, na.rm = TRUE)
+
+<span class="code-comment"># By group with dplyr</span>
+df %>% <span class="code-function">group_by</span>(education) %>% <span class="code-function">summarize</span>(mean_inc = <span class="code-function">mean</span>(income))</code></pre>
+          </div>
+        </div>
+
+        <h2>4.2 Data Visualization</h2>
+
+        <h3>Histograms</h3>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Histogram</span>
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+
+plt.hist(df[<span class="code-string">'income'</span>], bins=<span class="code-number">30</span>, edgecolor=<span class="code-string">'white'</span>)
+plt.xlabel(<span class="code-string">'Income'</span>)
+plt.ylabel(<span class="code-string">'Frequency'</span>)
+plt.title(<span class="code-string">'Distribution of Income'</span>)
+plt.savefig(<span class="code-string">'histogram.png'</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Histogram</span>
+<span class="code-keyword">histogram</span> income, frequency ///
+    title(<span class="code-string">"Distribution of Income"</span>)
+<span class="code-keyword">graph export</span> <span class="code-string">"histogram.png"</span>, replace</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Histogram with ggplot2</span>
+<span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = income)) +
+  <span class="code-function">geom_histogram</span>(bins = <span class="code-number">30</span>, fill = <span class="code-string">"steelblue"</span>) +
+  <span class="code-function">labs</span>(title = <span class="code-string">"Distribution of Income"</span>)
+<span class="code-function">ggsave</span>(<span class="code-string">"histogram.png"</span>)</code></pre>
+          </div>
+        </div>
+
+        <h3>Scatter Plots</h3>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Scatter plot</span>
+<span class="code-keyword">import</span> seaborn <span class="code-keyword">as</span> sns
+
+sns.scatterplot(data=df, x=<span class="code-string">'gdpPercap'</span>, y=<span class="code-string">'lifeExp'</span>, hue=<span class="code-string">'continent'</span>)
+plt.xscale(<span class="code-string">'log'</span>)
+plt.savefig(<span class="code-string">'scatter.png'</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Scatter plot</span>
+<span class="code-keyword">twoway</span> (scatter lifeExp gdpPercap), xscale(log)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Scatter plot</span>
+<span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = gdpPercap, y = lifeExp, color = continent)) +
+  <span class="code-function">geom_point</span>() +
+  <span class="code-function">scale_x_log10</span>()</code></pre>
+          </div>
+        </div>
+
+        <h2>4.3 Correlation Analysis</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Correlation</span>
+df[[<span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'age'</span>]].corr()
+
+<span class="code-comment"># With p-values</span>
+<span class="code-keyword">from</span> scipy <span class="code-keyword">import</span> stats
+r, p = stats.pearsonr(df[<span class="code-string">'income'</span>], df[<span class="code-string">'education'</span>])</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Correlation</span>
+<span class="code-keyword">correlate</span> income education age
+<span class="code-keyword">pwcorr</span> income education age, sig star(<span class="code-number">.05</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Correlation</span>
+<span class="code-function">cor</span>(df[<span class="code-function">c</span>(<span class="code-string">"income"</span>, <span class="code-string">"education"</span>, <span class="code-string">"age"</span>)], use = <span class="code-string">"complete.obs"</span>)
+<span class="code-function">cor.test</span>(df$income, df$education)</code></pre>
+          </div>
+        </div>
+
+        <h2>4.4 Summary Tables for Papers</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Summary table with stargazer</span>
+<span class="code-comment"># pip install stargazer</span>
+<span class="code-keyword">from</span> stargazer.stargazer <span class="code-keyword">import</span> Stargazer
+
+<span class="code-comment"># For regression tables</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+model = smf.ols(<span class="code-string">'income ~ education + age'</span>, data=df).fit()
+stargazer = Stargazer([model])
+<span class="code-keyword">print</span>(stargazer.render_latex())</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Summary tables with estout</span>
+<span class="code-keyword">eststo clear</span>
+<span class="code-keyword">eststo</span>: reg income education
+<span class="code-keyword">eststo</span>: reg income education age
+<span class="code-keyword">esttab</span> using <span class="code-string">"table.tex"</span>, replace se star(* <span class="code-number">0.1</span> ** <span class="code-number">0.05</span> *** <span class="code-number">0.01</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Summary tables with modelsummary</span>
+<span class="code-function">library</span>(modelsummary)
+
+model1 <- <span class="code-function">lm</span>(income ~ education, data = df)
+model2 <- <span class="code-function">lm</span>(income ~ education + age, data = df)
+
+<span class="code-function">modelsummary</span>(<span class="code-function">list</span>(model1, model2), stars = TRUE, output = <span class="code-string">"table.tex"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="nav-footer">
+          <a href="03-data-cleaning.html" class="nav-link prev">Module 3: Data Cleaning</a>
+          <a href="05-causal-inference.html" class="nav-link next">Module 5: Causal Inference</a>
+        </div>
+      </div>
+    </main>
+  </div>
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">☰</button>
+  <script src="../js/main.js"></script>
+</body>
+</html>

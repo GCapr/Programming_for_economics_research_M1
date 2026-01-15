@@ -99,8 +99,16 @@
       <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
       <nav>
         <ul>
-          <li><a href="../index.html">Welcome</a></li>
-          <li><a href="00-languages-platforms.html" class="active"><span class="module-number">0</span> Languages & Platforms</a></li>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li>
+            <a href="00-languages-platforms.html" class="active"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html" class="active">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
           <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
           <li><a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a></li>
           <li><a href="03-data-cleaning.html"><span class="module-number">3</span> Data Cleaning</a></li>
@@ -492,6 +500,123 @@ log close</code></pre>
             <li><strong>Start a log file</strong> to save all your output</li>
             <li><strong>Comment liberally</strong> using <code>*</code> or <code>/* */</code></li>
             <li><strong>Use relative paths</strong> after setting your working directory</li>
+          </ul>
+        </div>
+
+        <h2>Understanding Log Files</h2>
+
+        <p>
+          A <strong>log file</strong> is a text record of everything that happens in your Stata session: every command you run and all the output it produces. Log files are essential for reproducibility—they let you (and others) see exactly what you did and what results you got.
+        </p>
+
+        <h3>Creating a Log File</h3>
+
+        <p>You start and stop logging with simple commands:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">stata</span>
+          </div>
+          <pre><code><span class="code-comment">* Start logging to a text file (overwrites if exists)</span>
+log using "my_analysis.log", text replace
+
+<span class="code-comment">* ... run your analysis here ...</span>
+
+<span class="code-comment">* Stop logging</span>
+log close</code></pre>
+        </div>
+
+        <p>
+          The <code>text</code> option creates a plain text file (readable anywhere). Without it, Stata creates a <code>.smcl</code> file (Stata Markup and Control Language), which preserves formatting but only opens in Stata.
+        </p>
+
+        <h3>Sample Log File</h3>
+
+        <p>Here's what a typical log file looks like after running some basic analysis:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">my_analysis.log</span>
+          </div>
+          <pre><code style="font-size: 0.8rem; line-height: 1.5;">-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/researcher/projects/wages/my_analysis.log
+  log type:  text
+ opened on:  15 Jan 2026, 10:32:15
+
+. * Load the dataset
+. use "wages.dta", clear
+
+. * Describe the data
+. describe
+
+Contains data from wages.dta
+ Observations:         1,000
+    Variables:             5                  15 Jan 2026 09:15
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+wage            float   %9.0g                 Hourly wage (dollars)
+education       byte    %9.0g                 Years of education
+experience      byte    %9.0g                 Years of experience
+female          byte    %9.0g      sex        1 = Female
+age             byte    %9.0g                 Age in years
+-------------------------------------------------------------------------------
+Sorted by:
+
+. * Summary statistics
+. summarize wage education experience
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        wage |      1,000       22.47       12.35       5.25      98.50
+   education |      1,000       13.24        2.68          8         20
+  experience |      1,000       17.82       11.45          0         45
+
+. * Run regression
+. regress wage education experience female
+
+      Source |       SS           df       MS      Number of obs   =     1,000
+-------------+----------------------------------   F(3, 996)       =    142.56
+       Model |   45892.123         3  15297.374   Prob > F        =    0.0000
+    Residual |  106834.877       996   107.263   R-squared       =    0.3005
+-------------+----------------------------------   Adj R-squared   =    0.2984
+       Total |  152727.000       999   152.880   Root MSE        =    10.357
+
+------------------------------------------------------------------------------
+        wage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   education |    2.4521     0.1423    17.23   0.000      2.1728      2.7314
+  experience |    0.3845     0.0412     9.33   0.000      0.3036      0.4654
+      female |   -3.2156     0.6534    -4.92   0.000     -4.4982     -1.9330
+       _cons |   -8.7234     2.0145    -4.33   0.000    -12.6781     -4.7687
+------------------------------------------------------------------------------
+
+. log close
+      name:  <unnamed>
+       log:  /Users/researcher/projects/wages/my_analysis.log
+  log type:  text
+ closed on:  15 Jan 2026, 10:32:18
+-------------------------------------------------------------------------------</code></pre>
+        </div>
+
+        <h3>Key Parts of a Log File</h3>
+
+        <ul>
+          <li><strong>Header</strong> — Shows when and where the log was created</li>
+          <li><strong>Commands</strong> — Each command you ran appears after a dot (<code>.</code>)</li>
+          <li><strong>Output</strong> — The results of each command appear directly below it</li>
+          <li><strong>Footer</strong> — Shows when the log was closed</li>
+        </ul>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Log File Tips</div>
+          <ul style="margin-bottom: 0;">
+            <li>Use <code>log using "filename", append</code> to add to an existing log instead of replacing it</li>
+            <li>Name your logs descriptively: <code>analysis_v2_2026-01-15.log</code></li>
+            <li>Store logs alongside your do-files for easy reference</li>
+            <li>If you forget to close a log, use <code>log close _all</code> to close any open logs</li>
           </ul>
         </div>
 

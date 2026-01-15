@@ -15,6 +15,68 @@
       -ms-user-select: none;
       user-select: none;
     }
+    /* Interactive IDE diagram styles */
+    .ide-diagram {
+      position: relative;
+      margin: 2rem 0;
+      border-radius: 8px;
+      overflow: visible;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    .ide-diagram-container {
+      position: relative;
+      background: #1e1e1e;
+      border-radius: 8px;
+    }
+    .ide-region {
+      position: absolute;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .ide-region:hover {
+      border-color: var(--color-accent);
+      background: rgba(237, 137, 54, 0.15);
+    }
+    .ide-region.active {
+      border-color: var(--color-accent);
+      background: rgba(237, 137, 54, 0.2);
+    }
+    .ide-region-label {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: var(--color-accent);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .ide-info-panel {
+      background: var(--color-bg-alt);
+      padding: 1rem 1.5rem;
+      border-radius: 0 0 8px 8px;
+      min-height: 100px;
+      transition: all 0.2s ease;
+    }
+    .ide-info-panel h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--color-primary);
+    }
+    .ide-info-panel p {
+      margin: 0;
+      color: var(--color-text);
+    }
+    .ide-info-default {
+      color: var(--color-text-light);
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -97,52 +159,140 @@
         <h2>The RStudio Interface</h2>
 
         <p>
-          When you first open RStudio, you'll see a window divided into four panels. Each panel has a specific purpose. Don't worry if it looks overwhelming at first—you'll get comfortable with it quickly.
+          When you first open RStudio, you'll see a window divided into four panels. <strong>Hover over each numbered region below</strong> to learn what it does:
         </p>
 
-        <!-- Real RStudio Screenshot -->
-        <div style="margin: 2rem 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);">
-          <img src="https://docs.posit.co/ide/user/ide/guide/ui/images/rstudio-panes-labeled.jpeg" alt="RStudio interface with labeled panes" style="width: 100%; display: block;">
-          <div style="background: var(--color-bg-alt); padding: 1rem; font-size: 0.9rem;">
-            <strong>The RStudio interface.</strong> Image credit: <a href="https://docs.posit.co/ide/user/ide/guide/ui/ui-panes.html" target="_blank">Posit Documentation</a>.
+        <!-- Interactive RStudio Diagram -->
+        <div class="ide-diagram" id="rstudio-diagram">
+          <div class="ide-diagram-container">
+            <!-- RStudio mockup with 4 quadrants -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; min-height: 380px;">
+              <!-- Source Editor (top-left) -->
+              <div style="background: #1e1e1e; border-right: 1px solid #3c3c3c; border-bottom: 1px solid #3c3c3c; padding: 12px; position: relative;">
+                <div style="color: #808080; font-size: 0.75rem; margin-bottom: 8px;">Source</div>
+                <div style="font-family: var(--font-code); font-size: 0.8rem; color: #d4d4d4; line-height: 1.6;">
+                  <span style="color: #6c7086;"># Load packages</span><br>
+                  <span style="color: #cba6f7;">library</span>(<span style="color: #a6e3a1;">tidyverse</span>)<br>
+                  <span style="color: #cba6f7;">library</span>(<span style="color: #a6e3a1;">fixest</span>)<br><br>
+                  <span style="color: #6c7086;"># Load data</span><br>
+                  df <- <span style="color: #89b4fa;">read_csv</span>(<span style="color: #a6e3a1;">"data.csv"</span>)
+                </div>
+                <div class="ide-region" data-region="1" style="top: 0; left: 0; right: 0; bottom: 0;">
+                  <span class="ide-region-label">1</span>
+                </div>
+              </div>
+
+              <!-- Environment (top-right) -->
+              <div style="background: #252526; border-bottom: 1px solid #3c3c3c; padding: 12px; position: relative;">
+                <div style="color: #808080; font-size: 0.75rem; margin-bottom: 8px;">Environment</div>
+                <div style="font-size: 0.8rem; color: #cccccc;">
+                  <div style="padding: 4px 0; border-bottom: 1px solid #3c3c3c;">
+                    <span style="color: #89b4fa;">df</span> &nbsp; <span style="color: #808080;">1000 obs. of 5 variables</span>
+                  </div>
+                  <div style="padding: 4px 0;">
+                    <span style="color: #89b4fa;">model1</span> &nbsp; <span style="color: #808080;">List of 12</span>
+                  </div>
+                </div>
+                <div class="ide-region" data-region="2" style="top: 0; left: 0; right: 0; bottom: 0;">
+                  <span class="ide-region-label">2</span>
+                </div>
+              </div>
+
+              <!-- Console (bottom-left) -->
+              <div style="background: #1e1e1e; border-right: 1px solid #3c3c3c; padding: 12px; position: relative;">
+                <div style="color: #808080; font-size: 0.75rem; margin-bottom: 8px;">Console</div>
+                <div style="font-family: var(--font-code); font-size: 0.8rem; color: #d4d4d4;">
+                  <span style="color: #4ec9b0;">&gt;</span> summary(df$income)<br>
+                  <span style="color: #808080;">Min. 1st Qu. Median Mean 3rd Qu. Max.</span><br>
+                  <span style="color: #808080;">15000 35000 52000 58400 75000 250000</span><br>
+                  <span style="color: #4ec9b0;">&gt;</span> <span style="color: #ffffff;">|</span>
+                </div>
+                <div class="ide-region" data-region="3" style="top: 0; left: 0; right: 0; bottom: 0;">
+                  <span class="ide-region-label">3</span>
+                </div>
+              </div>
+
+              <!-- Files/Plots (bottom-right) -->
+              <div style="background: #252526; padding: 12px; position: relative;">
+                <div style="display: flex; gap: 12px; margin-bottom: 8px;">
+                  <span style="color: #ffffff; font-size: 0.75rem; padding-bottom: 4px; border-bottom: 2px solid #ed8936;">Plots</span>
+                  <span style="color: #808080; font-size: 0.75rem;">Files</span>
+                  <span style="color: #808080; font-size: 0.75rem;">Packages</span>
+                  <span style="color: #808080; font-size: 0.75rem;">Help</span>
+                </div>
+                <div style="background: #1e1e1e; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                  <span style="color: #808080; font-size: 0.85rem;">[Plot appears here]</span>
+                </div>
+                <div class="ide-region" data-region="4" style="top: 0; left: 0; right: 0; bottom: 0;">
+                  <span class="ide-region-label">4</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Info panel that updates on hover -->
+          <div class="ide-info-panel" id="rstudio-info">
+            <p class="ide-info-default">Hover over a numbered region to learn about that part of RStudio.</p>
           </div>
         </div>
 
-        <h3>The Four Panels</h3>
+        <script>
+          (function() {
+            const infoPanel = document.getElementById('rstudio-info');
+            const regions = document.querySelectorAll('#rstudio-diagram .ide-region');
 
-        <div style="display: grid; gap: 1.5rem; margin: 2rem 0;">
-          <div style="background: var(--color-bg-alt); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--color-python);">
-            <h4 style="margin-top: 0; color: var(--color-python);">1. Source Editor (Top Left)</h4>
-            <p style="margin-bottom: 0;">
-              This is where you write your R scripts. Think of it as a text editor specifically designed for code. You can have multiple files open in tabs. <strong>Key shortcut:</strong> Press <code>Ctrl+Enter</code> (or <code>Cmd+Enter</code> on Mac) to run the current line of code.
-            </p>
-          </div>
+            const regionInfo = {
+              '1': {
+                title: 'Source Editor (Top Left)',
+                description: 'This is where you write your R scripts. Think of it as a text editor specifically designed for code. You can have multiple files open in tabs. <strong>Key shortcut:</strong> Press <code>Ctrl+Enter</code> (or <code>Cmd+Enter</code> on Mac) to run the current line of code.'
+              },
+              '2': {
+                title: 'Environment/History (Top Right)',
+                description: 'The <strong>Environment</strong> tab shows all the variables, data frames, and objects currently in memory. Click on a data frame to view it in a spreadsheet-like viewer. The <strong>History</strong> tab shows all commands you\'ve run in this session.'
+              },
+              '3': {
+                title: 'Console (Bottom Left)',
+                description: 'The Console is where R actually runs your code. When you run a line from the Source Editor, it appears here along with its output. You can also type commands directly into the Console for quick tests. The <code>&gt;</code> symbol is R waiting for your input.'
+              },
+              '4': {
+                title: 'Files/Plots/Packages/Help (Bottom Right)',
+                description: 'This multi-purpose panel has several tabs: <strong>Files</strong> — Browse your project files. <strong>Plots</strong> — Your visualizations appear here. <strong>Packages</strong> — Install and manage R packages. <strong>Help</strong> — Documentation for functions (type <code>?function_name</code> in Console).'
+              }
+            };
 
-          <div style="background: var(--color-bg-alt); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--color-accent);">
-            <h4 style="margin-top: 0; color: var(--color-accent);">2. Console (Bottom Left)</h4>
-            <p style="margin-bottom: 0;">
-              The Console is where R actually runs your code. When you run a line from the Source Editor, it appears here along with its output. You can also type commands directly into the Console for quick tests. The <code>&gt;</code> symbol is R waiting for your input.
-            </p>
-          </div>
+            const defaultContent = '<p class="ide-info-default">Hover over a numbered region to learn about that part of RStudio.</p>';
 
-          <div style="background: var(--color-bg-alt); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--color-success);">
-            <h4 style="margin-top: 0; color: var(--color-success);">3. Environment/History (Top Right)</h4>
-            <p style="margin-bottom: 0;">
-              The <strong>Environment</strong> tab shows all the variables, data frames, and objects currently in memory. Click on a data frame to view it in a spreadsheet-like viewer. The <strong>History</strong> tab shows all commands you've run in this session.
-            </p>
-          </div>
+            regions.forEach(region => {
+              region.addEventListener('mouseenter', function() {
+                const regionId = this.getAttribute('data-region');
+                const info = regionInfo[regionId];
+                if (info) {
+                  infoPanel.innerHTML = `<h4>${info.title}</h4><p>${info.description}</p>`;
+                  regions.forEach(r => r.classList.remove('active'));
+                  this.classList.add('active');
+                }
+              });
 
-          <div style="background: var(--color-bg-alt); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--color-r);">
-            <h4 style="margin-top: 0; color: var(--color-r);">4. Files/Plots/Packages/Help (Bottom Right)</h4>
-            <p style="margin-bottom: 0;">
-              This multi-purpose panel has several tabs:
-              <br><strong>Files:</strong> Browse your project files
-              <br><strong>Plots:</strong> Your visualizations appear here
-              <br><strong>Packages:</strong> Install and manage R packages
-              <br><strong>Help:</strong> Documentation for functions (type <code>?function_name</code> in Console)
-            </p>
-          </div>
-        </div>
+              region.addEventListener('mouseleave', function() {
+                // Keep the info visible but remove active state after a delay
+                setTimeout(() => {
+                  if (!document.querySelector('#rstudio-diagram .ide-region:hover')) {
+                    this.classList.remove('active');
+                  }
+                }, 100);
+              });
+            });
+
+            // Reset to default when leaving the entire diagram
+            document.getElementById('rstudio-diagram').addEventListener('mouseleave', function() {
+              setTimeout(() => {
+                if (!document.querySelector('#rstudio-diagram:hover')) {
+                  infoPanel.innerHTML = defaultContent;
+                  regions.forEach(r => r.classList.remove('active'));
+                }
+              }, 300);
+            });
+          })();
+        </script>
 
         <h2>Essential Keyboard Shortcuts</h2>
 
@@ -189,11 +339,6 @@
               <td><code>Cmd + S</code></td>
               <td>Save current file</td>
             </tr>
-            <tr>
-              <td><code>Ctrl + Shift + N</code></td>
-              <td><code>Cmd + Shift + N</code></td>
-              <td>New R script</td>
-            </tr>
           </tbody>
         </table>
 
@@ -236,30 +381,6 @@ y <- x * <span class="code-number">2</span>
           <li>Watch the output appear in the Console, and the plot appear in the Plots panel</li>
         </ol>
 
-        <div class="info-box tip">
-          <div class="info-box-title">Understanding the Assignment Operator</div>
-          <p>
-            In R, we use <code>&lt;-</code> to assign values to variables (like <code>x <- 5</code>). You can also use <code>=</code>, but <code>&lt;-</code> is the R convention. The keyboard shortcut <code>Alt + -</code> (or <code>Option + -</code> on Mac) inserts <code>&lt;-</code> automatically.
-          </p>
-        </div>
-
-        <h2>RStudio Projects</h2>
-
-        <p>
-          I strongly recommend using <strong>RStudio Projects</strong> for all your work. A Project is a folder that keeps all your files, data, and settings together. It also sets your "working directory" automatically, so you don't have to worry about file paths.
-        </p>
-
-        <p>
-          To create a new Project:
-        </p>
-
-        <ol>
-          <li>Go to <strong>File > New Project</strong></li>
-          <li>Choose "New Directory" > "New Project"</li>
-          <li>Give it a name and choose where to save it</li>
-          <li>Click "Create Project"</li>
-        </ol>
-
         <h2>Cloud Alternative: Posit Cloud</h2>
 
         <p>
@@ -267,7 +388,7 @@ y <- x * <span class="code-number">2</span>
         </p>
 
         <p>
-          <a href="https://posit.cloud/" target="_blank" class="button" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--color-r); color: white; border-radius: 6px; text-decoration: none; font-weight: 600;">Try Posit Cloud (Free)</a>
+          <a href="https://posit.cloud/" target="_blank" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--color-r); color: white; border-radius: 6px; text-decoration: none; font-weight: 600;">Try Posit Cloud (Free) &rarr;</a>
         </p>
 
         <h2>Video Tutorial</h2>

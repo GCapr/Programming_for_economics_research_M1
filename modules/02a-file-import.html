@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 2a: Importing Data from Files | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .output-simulation { background: #1e1e1e; border-radius: 8px; margin: 1rem 0; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.8rem; display: none; }
+    .output-simulation.visible { display: block; }
+    .output-header { background: #333; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 0.75rem; }
+    .output-body { padding: 1rem; color: #d4d4d4; white-space: pre-wrap; overflow-x: auto; max-height: 350px; overflow-y: auto; }
+    .output-body .out-green { color: #4ec9b0; }
+    .output-body .out-yellow { color: #dcdcaa; }
+    .output-body .out-blue { color: #569cd6; }
+    .output-body .out-num { color: #b5cea8; }
+    .output-body .out-str { color: #ce9178; }
+    .research-banner { background: #4a5568; color: white; padding: 1.5rem; border-radius: 12px; margin: 2rem 0; border-left: 5px solid #ed8936; }
+    .research-banner h3 { color: white; margin-top: 0; }
+    .concept-box { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+    .concept-box h4 { color: #1e40af; margin-top: 0; }
+    .run-btn { background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .run-btn:hover { background: #16a34a; }
+    .run-btn::before { content: '▶'; font-size: 0.7rem; }
+    .close-output { background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; }
+    .close-output:hover { color: white; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; max-width: 300px; white-space: normal; }
+    .code-tooltip:hover::after { opacity: 1; }
+    .format-comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .format-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+    .format-card h4 { margin-top: 0; color: #1e40af; font-size: 1rem; }
+    .format-card .ext { font-family: 'Fira Code', monospace; background: #e2e8f0; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.85rem; }
+    /* Interactive Exercise Styles */
+    .interactive-exercise { background: white; border: 2px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .exercise-editor { margin: 1rem 0; }
+    .editor-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .lang-btn { padding: 0.4rem 1rem; border: 1px solid var(--color-border); background: white; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .lang-btn:hover { border-color: var(--color-primary); }
+    .lang-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .code-editor { width: 100%; min-height: 200px; padding: 1rem; font-family: var(--font-code); font-size: 0.9rem; border: none; border-radius: 8px; background: #1a202c; color: #e2e8f0; resize: vertical; line-height: 1.5; }
+    .code-editor:focus { outline: 2px solid var(--color-accent); }
+    .exercise-actions { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+    .btn-check-score, .btn-show-solution { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-check-score { background: var(--color-primary); color: white; }
+    .btn-check-score:hover { background: var(--color-secondary); transform: translateY(-1px); }
+    .btn-show-solution { background: var(--color-accent); color: white; }
+    .btn-show-solution:hover { background: #c77a3a; }
+    .score-display { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-radius: 8px; }
+    .score-circle { display: flex; align-items: baseline; gap: 2px; }
+    .score-value { font-size: 2rem; font-weight: 700; color: var(--color-primary); }
+    .score-value.score-high { color: #38a169; }
+    .score-value.score-medium { color: #d69e2e; }
+    .score-value.score-low { color: #e53e3e; }
+    .score-label { font-size: 1rem; color: #666; }
+    .score-feedback { font-size: 0.9rem; color: #555; max-width: 300px; }
+    .solution-steps { margin-top: 1.5rem; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
+    .solution-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-bottom: 1px solid var(--color-border); }
+    .solution-header h5 { margin: 0; color: var(--color-primary); }
+    .step-counter { font-size: 0.85rem; color: #666; }
+    .solution-step { padding: 1rem; border-bottom: 1px solid var(--color-border); animation: fadeIn 0.3s ease; }
+    .solution-step:last-of-type { border-bottom: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .step-description { font-weight: 600; color: var(--color-secondary); margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 3px solid var(--color-accent); }
+    .step-code { margin: 0; background: #1e1e1e; border-radius: 6px; padding: 1rem; }
+    .step-code code { color: #d4d4d4; }
+    .solution-navigation { display: flex; justify-content: space-between; padding: 1rem; background: var(--color-bg-alt); }
+    .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Please enter the course password to access the materials.</p>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+      <button id="password-submit">Access Course</button>
+      <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li>
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages &amp; Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li>
+            <a href="02-data-harnessing.html" class="active"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html" class="active">Importing from Files</a></li>
+              <li><a href="02b-apis.html">Working with APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
+          <li><a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a></li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git &amp; GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact &amp; Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>2a &nbsp;Importing Data from Files</h1>
+          <div class="module-meta">
+            <span>~3 hours</span>
+            <span>CSV, Excel, Stata, Merging, Reshaping</span>
+            <span>Beginner</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Load data from CSV, Excel, Stata, and other common formats</li>
+            <li>Understand different file encodings and handle them correctly</li>
+            <li>Merge multiple datasets using key variables</li>
+            <li>Reshape data between wide and long formats</li>
+          </ul>
+        </div>
+
+        <div class="research-banner">
+          <h3>Course Research Project</h3>
+          <p style="margin-bottom: 0;">In this submodule, we'll load our first datasets for the "Climate Vulnerability and Economic Growth" project&mdash;World Bank GDP data and country indicators.</p>
+        </div>
+
+        <!-- Section 1: File Formats -->
+        <h2>Common Data Formats in Economics Research</h2>
+
+        <p>Before loading data, you need to understand what format it's in. Here are the most common formats you'll encounter:</p>
+
+        <div class="format-comparison">
+          <div class="format-card">
+            <h4>CSV <span class="ext">.csv</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Comma-Separated Values. Plain text, universal compatibility.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Sharing data, web downloads, exports</p>
+          </div>
+          <div class="format-card">
+            <h4>Excel <span class="ext">.xlsx</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Microsoft spreadsheet format. Can have multiple sheets.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Business data, government reports</p>
+          </div>
+          <div class="format-card">
+            <h4>Stata <span class="ext">.dta</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Stata's native format. Preserves labels and types.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Academic datasets, IPUMS, replication files</p>
+          </div>
+          <div class="format-card">
+            <h4>Parquet <span class="ext">.parquet</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Columnar storage. Fast, compressed, big data friendly.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Large datasets, data engineering</p>
+          </div>
+        </div>
+
+        <!-- Section 2: Loading Data -->
+        <h2>Loading Data from Files</h2>
+
+        <div class="concept-box">
+          <h4>What Happens When You "Load" Data?</h4>
+          <p style="margin-bottom: 0;">Loading data reads the file from disk into your program's memory as a structured object (DataFrame in Python/R, dataset in Stata). The original file remains unchanged&mdash;you're working with a copy. Any changes you make only exist in memory until you explicitly save them.</p>
+        </div>
+
+        <h3>Loading CSV Files</h3>
+        <p>CSV is the most common format. Here's how to load it in each language:</p>
+
+        <div class="code-tabs" data-runnable="load-csv">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Load CSV with pandas</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas is Python's main data manipulation library. Convention is to import as 'pd'.">pandas</span> <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Basic CSV load from URL</span>
+<span class="code-tooltip" data-tip="read_csv() automatically detects the delimiter, encoding, and column types.">df</span> = pd.read_csv(<span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>)
+
+<span class="code-comment"># Load from local file</span>
+df = pd.read_csv(<span class="code-string">"data/my_data.csv"</span>)
+
+<span class="code-comment"># Handle common issues:</span>
+df = pd.read_csv(<span class="code-string">"data.csv"</span>,
+    <span class="code-tooltip" data-tip="Specify encoding when you see garbled characters. 'latin-1' handles most European characters.">encoding</span>=<span class="code-string">"utf-8"</span>,           <span class="code-comment"># or "latin-1", "cp1252"</span>
+    <span class="code-tooltip" data-tip="Use sep for files with different delimiters (tabs, semicolons, etc.)">sep</span>=<span class="code-string">","</span>,                      <span class="code-comment"># delimiter (try ";" or "\t")</span>
+    <span class="code-tooltip" data-tip="na_values tells pandas what strings represent missing data">na_values</span>=[<span class="code-string">""</span>, <span class="code-string">"NA"</span>, <span class="code-string">"."</span>, <span class="code-string">"-999"</span>],  <span class="code-comment"># missing value codes</span>
+    <span class="code-tooltip" data-tip="dtype forces specific column types. Useful for IDs that look like numbers.">dtype</span>={<span class="code-string">"id"</span>: str}             <span class="code-comment"># force column types</span>
+)
+
+<span class="code-comment"># Verify the load</span>
+<span class="code-keyword">print</span>(<span class="code-string">f"Loaded {len(df):,} rows, {len(df.columns)} columns"</span>)
+<span class="code-keyword">print</span>(df.head())</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Load CSV files</span>
+
+<span class="code-comment">* Basic CSV load from URL</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="import delimited reads CSV and other delimited text files into Stata">import delimited</span></span> <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>, clear
+
+<span class="code-comment">* Load from local file</span>
+<span class="code-keyword">import delimited</span> <span class="code-string">"data/my_data.csv"</span>, clear
+
+<span class="code-comment">* Handle common issues:</span>
+<span class="code-keyword">import delimited</span> <span class="code-string">"data.csv"</span>, ///
+    <span class="code-tooltip" data-tip="encoding() specifies file encoding. Use 'latin1' for European characters.">encoding</span>(utf-8) ///           <span class="code-comment">// or latin1, windows-1252</span>
+    <span class="code-tooltip" data-tip="delimiter() specifies the column separator">delimiter</span>(<span class="code-string">","</span>) ///            <span class="code-comment">// try ";" or tab</span>
+    <span class="code-tooltip" data-tip="varnames(1) uses first row as variable names">varnames</span>(1) ///               <span class="code-comment">// first row = headers</span>
+    <span class="code-tooltip" data-tip="stringcols() forces columns to be read as strings, not numbers">stringcols</span>(1) ///              <span class="code-comment">// force col 1 as string</span>
+    clear
+
+<span class="code-comment">* Verify the load</span>
+<span class="code-keyword">describe</span>, short
+<span class="code-keyword">list</span> in 1/5</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Load CSV with tidyverse</span>
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="tidyverse includes readr for fast CSV reading, plus dplyr, ggplot2, etc.">tidyverse</span>)
+
+<span class="code-comment"># Basic CSV load from URL</span>
+<span class="code-tooltip" data-tip="read_csv() from readr package. Faster than base R's read.csv() and guesses column types.">df</span> <- <span class="code-function">read_csv</span>(<span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>)
+
+<span class="code-comment"># Load from local file</span>
+df <- <span class="code-function">read_csv</span>(<span class="code-string">"data/my_data.csv"</span>)
+
+<span class="code-comment"># Handle common issues:</span>
+df <- <span class="code-function">read_csv</span>(<span class="code-string">"data.csv"</span>,
+    <span class="code-tooltip" data-tip="locale() specifies encoding and date/number formats">locale</span> = <span class="code-function">locale</span>(encoding = <span class="code-string">"UTF-8"</span>),
+    <span class="code-tooltip" data-tip="na specifies strings to interpret as missing values">na</span> = <span class="code-function">c</span>(<span class="code-string">""</span>, <span class="code-string">"NA"</span>, <span class="code-string">"."</span>, <span class="code-string">"-999"</span>),
+    <span class="code-tooltip" data-tip="col_types forces specific column types using a compact specification">col_types</span> = <span class="code-function">cols</span>(id = <span class="code-function">col_character</span>())
+)
+
+<span class="code-comment"># Verify the load</span>
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"Loaded %s rows, %d columns\n"</span>,
+    <span class="code-function">format</span>(<span class="code-function">nrow</span>(df), big.mark=<span class="code-string">","</span>), <span class="code-function">ncol</span>(df)))
+<span class="code-function">head</span>(df)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="load-csv" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Loaded <span class="out-num">14,112</span> rows, <span class="out-num">4</span> columns
+
+   Country Name Country Code  Year         Value
+<span class="out-num">0</span>    Arab World          ARB  <span class="out-num">1968</span>  <span class="out-num">2.576068e+10</span>
+<span class="out-num">1</span>    Arab World          ARB  <span class="out-num">1969</span>  <span class="out-num">2.843420e+10</span>
+<span class="out-num">2</span>    Arab World          ARB  <span class="out-num">1970</span>  <span class="out-num">3.138565e+10</span>
+<span class="out-num">3</span>    Arab World          ARB  <span class="out-num">1971</span>  <span class="out-num">3.587548e+10</span>
+<span class="out-num">4</span>    Arab World          ARB  <span class="out-num">1972</span>  <span class="out-num">4.250944e+10</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="load-csv" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. import delimited "https://...gdp.csv", clear</span>
+(encoding automatically selected: UTF-8)
+(4 vars, 14,112 obs)
+
+<span class="out-str">. describe, short</span>
+
+Contains data
+ Observations:        <span class="out-num">14,112</span>
+    Variables:             <span class="out-num">4</span>
+
+<span class="out-str">. list in 1/5</span>
+
+     +--------------------------------------------------+
+     |    countryname   countrycode   year        value |
+     |--------------------------------------------------|
+  1. |     Arab World           ARB   1968   2.5761e+10 |
+  2. |     Arab World           ARB   1969   2.8434e+10 |
+  3. |     Arab World           ARB   1970   3.1386e+10 |
+  4. |     Arab World           ARB   1971   3.5875e+10 |
+  5. |     Arab World           ARB   1972   4.2509e+10 |
+     +--------------------------------------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="load-csv" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-blue">Rows: 14112 Columns: 4</span>
+<span class="out-str">── Column specification ────────────────────────────</span>
+Delimiter: ","
+<span class="out-green">chr</span> (2): Country Name, Country Code
+<span class="out-green">dbl</span> (2): Year, Value
+
+Loaded <span class="out-num">14,112</span> rows, <span class="out-num">4</span> columns
+
+<span class="out-green"># A tibble: 6 x 4</span>
+  `Country Name` `Country Code`  Year        Value
+  <span class="out-blue">&lt;chr&gt;</span>          <span class="out-blue">&lt;chr&gt;</span>          <span class="out-blue">&lt;dbl&gt;</span>        <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> Arab World     ARB             1968  25760680000
+<span class="out-num">2</span> Arab World     ARB             1969  28434200000
+<span class="out-num">3</span> Arab World     ARB             1970  31385650000</div>
+        </div>
+
+        <h3>Loading Excel and Stata Files</h3>
+
+        <div class="code-tabs" data-runnable="load-other">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Load Excel and Stata files</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Excel files</span>
+df = pd.read_excel(<span class="code-string">"data.xlsx"</span>)                      <span class="code-comment"># First sheet</span>
+df = pd.read_excel(<span class="code-string">"data.xlsx"</span>, sheet_name=<span class="code-string">"Sheet2"</span>) <span class="code-comment"># Specific sheet</span>
+df = pd.read_excel(<span class="code-string">"data.xlsx"</span>, sheet_name=<span class="code-number">0</span>)        <span class="code-comment"># By index</span>
+
+<span class="code-comment"># Load all sheets into a dictionary</span>
+<span class="code-tooltip" data-tip="sheet_name=None loads ALL sheets into a dict: {'Sheet1': df1, 'Sheet2': df2, ...}">all_sheets</span> = pd.read_excel(<span class="code-string">"data.xlsx"</span>, sheet_name=<span class="code-keyword">None</span>)
+
+<span class="code-comment"># Stata files (preserves labels!)</span>
+df = pd.read_stata(<span class="code-string">"data.dta"</span>)
+
+<span class="code-comment"># For large Stata files, use iterator</span>
+<span class="code-keyword">for</span> chunk <span class="code-keyword">in</span> pd.read_stata(<span class="code-string">"big_data.dta"</span>, chunksize=<span class="code-number">10000</span>):
+    <span class="code-comment"># Process each chunk</span>
+    <span class="code-keyword">pass</span>
+
+<span class="code-comment"># Parquet (fast, compressed)</span>
+df = pd.read_parquet(<span class="code-string">"data.parquet"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Load different file formats</span>
+
+<span class="code-comment">* Stata native format (.dta)</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="use loads Stata's native .dta format. Preserves all labels and metadata.">use</span></span> <span class="code-string">"data.dta"</span>, clear
+
+<span class="code-comment">* Load from URL</span>
+<span class="code-keyword">use</span> <span class="code-string">"https://example.com/data.dta"</span>, clear
+
+<span class="code-comment">* Load only specific variables</span>
+<span class="code-keyword">use</span> country year gdp <span class="code-keyword">using</span> <span class="code-string">"data.dta"</span>, clear
+
+<span class="code-comment">* Load with condition (faster than loading all then dropping)</span>
+<span class="code-keyword">use</span> <span class="code-string">"data.dta"</span> if year >= 2000, clear
+
+<span class="code-comment">* Excel files</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="import excel reads .xlsx and .xls files. firstrow treats row 1 as variable names.">import excel</span></span> <span class="code-string">"data.xlsx"</span>, firstrow clear
+<span class="code-keyword">import excel</span> <span class="code-string">"data.xlsx"</span>, sheet(<span class="code-string">"Sheet2"</span>) firstrow clear
+
+<span class="code-comment">* View available sheets</span>
+<span class="code-keyword">import excel</span> <span class="code-string">"data.xlsx"</span>, describe</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Load different file formats</span>
+<span class="code-function">library</span>(tidyverse)
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="readxl package reads Excel files (.xlsx, .xls) without requiring Excel">readxl</span>)      <span class="code-comment"># For Excel files</span>
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="haven package reads Stata, SPSS, and SAS files">haven</span>)       <span class="code-comment"># For Stata files</span>
+
+<span class="code-comment"># Excel files</span>
+df <- <span class="code-function">read_excel</span>(<span class="code-string">"data.xlsx"</span>)                       <span class="code-comment"># First sheet</span>
+df <- <span class="code-function">read_excel</span>(<span class="code-string">"data.xlsx"</span>, sheet = <span class="code-string">"Sheet2"</span>)     <span class="code-comment"># Specific sheet</span>
+
+<span class="code-comment"># List available sheets</span>
+<span class="code-function">excel_sheets</span>(<span class="code-string">"data.xlsx"</span>)
+
+<span class="code-comment"># Load all sheets into a list</span>
+sheets <- <span class="code-function">excel_sheets</span>(<span class="code-string">"data.xlsx"</span>)
+all_data <- <span class="code-function">map</span>(sheets, ~<span class="code-function">read_excel</span>(<span class="code-string">"data.xlsx"</span>, sheet = .x))
+<span class="code-function">names</span>(all_data) <- sheets
+
+<span class="code-comment"># Stata files (preserves labels!)</span>
+df <- <span class="code-function"><span class="code-tooltip" data-tip="read_dta() from haven reads Stata files and preserves variable/value labels">read_dta</span></span>(<span class="code-string">"data.dta"</span>)
+
+<span class="code-comment"># Parquet (fast, compressed)</span>
+<span class="code-function">library</span>(arrow)
+df <- <span class="code-function">read_parquet</span>(<span class="code-string">"data.parquet"</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="load-other" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">Excel file loaded successfully</span>
+Sheets found: [<span class="out-str">'Data'</span>, <span class="out-str">'Metadata'</span>, <span class="out-str">'Notes'</span>]
+
+<span class="out-green">Stata file loaded successfully</span>
+Loaded <span class="out-num">50,000</span> rows, <span class="out-num">25</span> columns
+<span class="out-blue">Note: Variable labels preserved</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="load-other" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. use "data.dta", clear</span>
+(World Development Indicators)
+
+<span class="out-str">. describe, short</span>
+
+Contains data from data.dta
+ Observations:        <span class="out-num">50,000</span>
+    Variables:            <span class="out-num">25</span>
+
+<span class="out-str">. import excel "data.xlsx", describe</span>
+
+  Sheet name: <span class="out-str">"Data"</span>         range: A1:Z1000
+  Sheet name: <span class="out-str">"Metadata"</span>     range: A1:D200
+  Sheet name: <span class="out-str">"Notes"</span>        range: A1:B50</div>
+        </div>
+
+        <div class="output-simulation" data-output="load-other" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">&gt; excel_sheets("data.xlsx")</span>
+[1] <span class="out-str">"Data"</span>     <span class="out-str">"Metadata"</span> <span class="out-str">"Notes"</span>
+
+<span class="out-str">&gt; df <- read_dta("data.dta")</span>
+<span class="out-green"># A tibble: 50,000 x 25</span>
+<span class="out-blue">Note: Variable labels accessible via attr(df$varname, "label")</span></div>
+        </div>
+
+        <!-- Section 3: Merging -->
+        <h2>Merging Datasets</h2>
+
+        <div class="concept-box">
+          <h4>What is Merging?</h4>
+          <p>Merging (or joining) combines two datasets based on common <strong>key variables</strong>. For example, you might merge GDP data with population data using country code and year as keys. The key variables must uniquely identify observations in at least one of the datasets.</p>
+        </div>
+
+        <h3>Types of Merges</h3>
+        <table style="width: 100%; margin: 1rem 0;">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Keeps</th>
+              <th>Use When</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Inner</strong></td>
+              <td>Only matching rows</td>
+              <td>You only want complete cases</td>
+            </tr>
+            <tr>
+              <td><strong>Left</strong></td>
+              <td>All from left + matches from right</td>
+              <td>Keep all your main data, add info where available</td>
+            </tr>
+            <tr>
+              <td><strong>Right</strong></td>
+              <td>All from right + matches from left</td>
+              <td>Opposite of left join</td>
+            </tr>
+            <tr>
+              <td><strong>Outer (Full)</strong></td>
+              <td>All rows from both</td>
+              <td>You want to preserve everything</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="code-tabs" data-runnable="merge-1">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Merging datasets with pandas</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Create example datasets</span>
+gdp = pd.DataFrame({
+    <span class="code-string">'country'</span>: [<span class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>, <span class="code-string">'DEU'</span>],
+    <span class="code-string">'year'</span>: [<span class="code-number">2020</span>, <span class="code-number">2020</span>, <span class="code-number">2020</span>],
+    <span class="code-string">'gdp'</span>: [<span class="code-number">21000</span>, <span class="code-number">14700</span>, <span class="code-number">3800</span>]
+})
+
+pop = pd.DataFrame({
+    <span class="code-string">'country'</span>: [<span class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>, <span class="code-string">'JPN'</span>],
+    <span class="code-string">'year'</span>: [<span class="code-number">2020</span>, <span class="code-number">2020</span>, <span class="code-number">2020</span>],
+    <span class="code-string">'population'</span>: [<span class="code-number">331</span>, <span class="code-number">1400</span>, <span class="code-number">126</span>]
+})
+
+<span class="code-comment"># Inner join (only matches)</span>
+<span class="code-tooltip" data-tip="pd.merge() combines datasets. 'on' specifies key columns. Default is inner join.">merged</span> = pd.merge(gdp, pop, on=[<span class="code-string">'country'</span>, <span class="code-string">'year'</span>])
+
+<span class="code-comment"># Left join (keep all from gdp)</span>
+merged_left = pd.merge(gdp, pop, on=[<span class="code-string">'country'</span>, <span class="code-string">'year'</span>], <span class="code-tooltip" data-tip="how='left' keeps all rows from the left DataFrame">how</span>=<span class="code-string">'left'</span>)
+
+<span class="code-comment"># Outer join (keep all)</span>
+merged_outer = pd.merge(gdp, pop, on=[<span class="code-string">'country'</span>, <span class="code-string">'year'</span>], how=<span class="code-string">'outer'</span>)
+
+<span class="code-comment"># When key columns have different names</span>
+merged = pd.merge(gdp, pop,
+    <span class="code-tooltip" data-tip="left_on and right_on specify key columns when they have different names">left_on</span>=[<span class="code-string">'country'</span>, <span class="code-string">'year'</span>],
+    right_on=[<span class="code-string">'iso3'</span>, <span class="code-string">'yr'</span>])
+
+<span class="code-comment"># Check merge quality</span>
+<span class="code-keyword">print</span>(<span class="code-string">f"GDP rows: {len(gdp)}, Pop rows: {len(pop)}, Merged: {len(merged)}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Merging datasets</span>
+
+<span class="code-comment">* Load master dataset first</span>
+<span class="code-keyword">use</span> <span class="code-string">"gdp.dta"</span>, clear
+
+<span class="code-comment">* Basic 1:1 merge (one observation per key in both)</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="merge combines two datasets. 1:1 means one-to-one match on key variables.">merge</span></span> 1:1 country year <span class="code-keyword">using</span> <span class="code-string">"population.dta"</span>
+
+<span class="code-comment">* Check merge results (ALWAYS DO THIS!)</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="_merge shows merge status: 1=master only, 2=using only, 3=matched">tab</span></span> _merge
+
+<span class="code-comment">* m:1 merge (many-to-one: many in master, one in using)</span>
+<span class="code-comment">* Example: household data merged with region characteristics</span>
+<span class="code-keyword">merge</span> m:1 region <span class="code-keyword">using</span> <span class="code-string">"region_data.dta"</span>
+
+<span class="code-comment">* 1:m merge (one-to-many)</span>
+<span class="code-keyword">merge</span> 1:m country <span class="code-keyword">using</span> <span class="code-string">"yearly_data.dta"</span>
+
+<span class="code-comment">* Keep only matched observations</span>
+<span class="code-keyword">keep</span> if _merge == 3
+<span class="code-keyword">drop</span> _merge
+
+<span class="code-comment">* Or assert all should match</span>
+<span class="code-keyword">assert</span> _merge == 3
+<span class="code-keyword">drop</span> _merge</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Merging datasets with dplyr</span>
+<span class="code-function">library</span>(tidyverse)
+
+<span class="code-comment"># Create example datasets</span>
+gdp <- <span class="code-function">tibble</span>(
+    country = <span class="code-function">c</span>(<span class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>, <span class="code-string">"DEU"</span>),
+    year = <span class="code-function">c</span>(<span class="code-number">2020</span>, <span class="code-number">2020</span>, <span class="code-number">2020</span>),
+    gdp = <span class="code-function">c</span>(<span class="code-number">21000</span>, <span class="code-number">14700</span>, <span class="code-number">3800</span>)
+)
+
+pop <- <span class="code-function">tibble</span>(
+    country = <span class="code-function">c</span>(<span class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>, <span class="code-string">"JPN"</span>),
+    year = <span class="code-function">c</span>(<span class="code-number">2020</span>, <span class="code-number">2020</span>, <span class="code-number">2020</span>),
+    population = <span class="code-function">c</span>(<span class="code-number">331</span>, <span class="code-number">1400</span>, <span class="code-number">126</span>)
+)
+
+<span class="code-comment"># Inner join (only matches)</span>
+<span class="code-tooltip" data-tip="inner_join() keeps only rows that match in both datasets">merged</span> <- <span class="code-function">inner_join</span>(gdp, pop, by = <span class="code-function">c</span>(<span class="code-string">"country"</span>, <span class="code-string">"year"</span>))
+
+<span class="code-comment"># Left join (keep all from gdp)</span>
+merged_left <- <span class="code-function"><span class="code-tooltip" data-tip="left_join() keeps all rows from the first (left) dataset">left_join</span></span>(gdp, pop, by = <span class="code-function">c</span>(<span class="code-string">"country"</span>, <span class="code-string">"year"</span>))
+
+<span class="code-comment"># Full/outer join (keep all)</span>
+merged_full <- <span class="code-function">full_join</span>(gdp, pop, by = <span class="code-function">c</span>(<span class="code-string">"country"</span>, <span class="code-string">"year"</span>))
+
+<span class="code-comment"># When key columns have different names</span>
+merged <- <span class="code-function">left_join</span>(gdp, pop, by = <span class="code-function">c</span>(<span class="code-string">"country"</span> = <span class="code-string">"iso3"</span>, <span class="code-string">"year"</span> = <span class="code-string">"yr"</span>))
+
+<span class="code-comment"># Check merge quality</span>
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"GDP: %d, Pop: %d, Merged: %d\n"</span>,
+    <span class="code-function">nrow</span>(gdp), <span class="code-function">nrow</span>(pop), <span class="code-function">nrow</span>(merged)))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="merge-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">Inner join result:</span>
+  country  year    gdp  population
+<span class="out-num">0</span>     USA  <span class="out-num">2020</span>  <span class="out-num">21000</span>         <span class="out-num">331</span>
+<span class="out-num">1</span>     CHN  <span class="out-num">2020</span>  <span class="out-num">14700</span>        <span class="out-num">1400</span>
+
+<span class="out-str">Left join result:</span>
+  country  year    gdp  population
+<span class="out-num">0</span>     USA  <span class="out-num">2020</span>  <span class="out-num">21000</span>       <span class="out-num">331.0</span>
+<span class="out-num">1</span>     CHN  <span class="out-num">2020</span>  <span class="out-num">14700</span>      <span class="out-num">1400.0</span>
+<span class="out-num">2</span>     DEU  <span class="out-num">2020</span>   <span class="out-num">3800</span>         <span class="out-yellow">NaN</span>  <span class="out-str">&lt;-- no match</span>
+
+GDP rows: <span class="out-num">3</span>, Pop rows: <span class="out-num">3</span>, Merged: <span class="out-num">2</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="merge-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. merge 1:1 country year using "population.dta"</span>
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             2
+        from master                         1  (_merge==1)  <span class="out-yellow">&lt;-- DEU</span>
+        from using                          1  (_merge==2)  <span class="out-yellow">&lt;-- JPN</span>
+    Matched                                 2  (_merge==3)
+    -----------------------------------------
+
+<span class="out-str">. tab _merge</span>
+
+     _merge |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1       25.00       25.00
+          2 |          1       25.00       50.00
+          3 |          2       50.00      100.00
+------------+-----------------------------------
+      Total |          4      100.00</div>
+        </div>
+
+        <div class="output-simulation" data-output="merge-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">&gt; merged  # Inner join</span>
+<span class="out-green"># A tibble: 2 x 4</span>
+  country  year   gdp population
+  <span class="out-blue">&lt;chr&gt;</span>   <span class="out-blue">&lt;dbl&gt;</span> <span class="out-blue">&lt;dbl&gt;</span>      <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> USA      2020 21000        331
+<span class="out-num">2</span> CHN      2020 14700       1400
+
+<span class="out-str">&gt; merged_left  # Left join</span>
+<span class="out-green"># A tibble: 3 x 4</span>
+  country  year   gdp population
+<span class="out-num">1</span> USA      2020 21000        331
+<span class="out-num">2</span> CHN      2020 14700       1400
+<span class="out-num">3</span> DEU      2020  3800         <span class="out-yellow">NA</span>
+
+GDP: <span class="out-num">3</span>, Pop: <span class="out-num">3</span>, Merged: <span class="out-num">2</span></div>
+        </div>
+
+        <!-- Section 4: Reshaping -->
+        <h2>Reshaping Data: Wide vs Long</h2>
+
+        <div class="concept-box">
+          <h4>Wide vs Long Format</h4>
+          <p><strong>Wide format:</strong> One row per unit, with separate columns for each time period (e.g., gdp_2018, gdp_2019, gdp_2020).</p>
+          <p style="margin-bottom: 0;"><strong>Long format:</strong> Multiple rows per unit, with a single column for the variable and another for time period. <em>Most statistical analyses require long format.</em></p>
+        </div>
+
+        <div class="code-tabs" data-runnable="reshape-1">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Reshaping with pandas</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Example wide data</span>
+wide = pd.DataFrame({
+    <span class="code-string">'country'</span>: [<span class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>],
+    <span class="code-string">'gdp_2018'</span>: [<span class="code-number">20500</span>, <span class="code-number">13900</span>],
+    <span class="code-string">'gdp_2019'</span>: [<span class="code-number">21400</span>, <span class="code-number">14300</span>],
+    <span class="code-string">'gdp_2020'</span>: [<span class="code-number">21000</span>, <span class="code-number">14700</span>]
+})
+
+<span class="code-comment"># Wide to Long using melt()</span>
+<span class="code-tooltip" data-tip="melt() converts wide to long format. id_vars stay as columns, others become rows.">long</span> = pd.melt(wide,
+    id_vars=[<span class="code-string">'country'</span>],           <span class="code-comment"># Columns to keep</span>
+    var_name=<span class="code-string">'year'</span>,               <span class="code-comment"># Name for the new 'variable' column</span>
+    value_name=<span class="code-string">'gdp'</span>               <span class="code-comment"># Name for the new 'value' column</span>
+)
+
+<span class="code-comment"># Clean up the year column (remove 'gdp_' prefix)</span>
+long[<span class="code-string">'year'</span>] = long[<span class="code-string">'year'</span>].str.replace(<span class="code-string">'gdp_'</span>, <span class="code-string">''</span>).astype(int)
+
+<span class="code-comment"># Long to Wide using pivot()</span>
+<span class="code-tooltip" data-tip="pivot() converts long to wide format. index=rows, columns=new columns, values=cell values">wide_again</span> = long.pivot(
+    index=<span class="code-string">'country'</span>,               <span class="code-comment"># Row identifier</span>
+    columns=<span class="code-string">'year'</span>,                <span class="code-comment"># Create columns from this</span>
+    values=<span class="code-string">'gdp'</span>                   <span class="code-comment"># Values to fill cells</span>
+).reset_index()
+
+<span class="code-keyword">print</span>(<span class="code-string">"Long format:"</span>)
+<span class="code-keyword">print</span>(long)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Reshaping data</span>
+
+<span class="code-comment">* Example: Start with wide data</span>
+<span class="code-comment">* Variables: country, gdp2018, gdp2019, gdp2020</span>
+
+<span class="code-comment">* Wide to Long</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="reshape long converts wide to long. Stub 'gdp' becomes variable, suffix becomes j variable.">reshape</span></span> long gdp, i(country) j(year)
+
+<span class="code-comment">* i() = identifier variables (rows)</span>
+<span class="code-comment">* j() = new variable to hold the suffix (2018, 2019, 2020)</span>
+<span class="code-comment">* 'gdp' = stub of the variables to reshape</span>
+
+<span class="code-comment">* Long to Wide</span>
+<span class="code-keyword">reshape</span> wide gdp, i(country) j(year)
+
+<span class="code-comment">* Verify the reshape</span>
+<span class="code-keyword">list</span> in 1/6
+
+<span class="code-comment">* Multiple variables at once</span>
+<span class="code-comment">* If you have gdp2018 gdp2019 pop2018 pop2019:</span>
+<span class="code-keyword">reshape</span> long gdp pop, i(country) j(year)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Reshaping with tidyr</span>
+<span class="code-function">library</span>(tidyverse)
+
+<span class="code-comment"># Example wide data</span>
+wide <- <span class="code-function">tibble</span>(
+    country = <span class="code-function">c</span>(<span class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>),
+    gdp_2018 = <span class="code-function">c</span>(<span class="code-number">20500</span>, <span class="code-number">13900</span>),
+    gdp_2019 = <span class="code-function">c</span>(<span class="code-number">21400</span>, <span class="code-number">14300</span>),
+    gdp_2020 = <span class="code-function">c</span>(<span class="code-number">21000</span>, <span class="code-number">14700</span>)
+)
+
+<span class="code-comment"># Wide to Long using pivot_longer()</span>
+<span class="code-tooltip" data-tip="pivot_longer() converts wide to long. cols specifies which columns to pivot.">long</span> <- wide %>%
+  <span class="code-function">pivot_longer</span>(
+    cols = <span class="code-function">starts_with</span>(<span class="code-string">"gdp_"</span>),   <span class="code-comment"># Columns to pivot</span>
+    names_to = <span class="code-string">"year"</span>,             <span class="code-comment"># New column for names</span>
+    values_to = <span class="code-string">"gdp"</span>,             <span class="code-comment"># New column for values</span>
+    names_prefix = <span class="code-string">"gdp_"</span>          <span class="code-comment"># Remove this prefix</span>
+  ) %>%
+  <span class="code-function">mutate</span>(year = <span class="code-function">as.integer</span>(year))
+
+<span class="code-comment"># Long to Wide using pivot_wider()</span>
+<span class="code-tooltip" data-tip="pivot_wider() converts long to wide. names_from becomes column names, values_from fills cells.">wide_again</span> <- long %>%
+  <span class="code-function">pivot_wider</span>(
+    names_from = year,             <span class="code-comment"># Column to spread</span>
+    values_from = gdp,             <span class="code-comment"># Values to fill</span>
+    names_prefix = <span class="code-string">"gdp_"</span>          <span class="code-comment"># Add prefix to column names</span>
+  )
+
+<span class="code-function">print</span>(long)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="reshape-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Long format:
+  country  year    gdp
+<span class="out-num">0</span>     USA  <span class="out-num">2018</span>  <span class="out-num">20500</span>
+<span class="out-num">1</span>     CHN  <span class="out-num">2018</span>  <span class="out-num">13900</span>
+<span class="out-num">2</span>     USA  <span class="out-num">2019</span>  <span class="out-num">21400</span>
+<span class="out-num">3</span>     CHN  <span class="out-num">2019</span>  <span class="out-num">14300</span>
+<span class="out-num">4</span>     USA  <span class="out-num">2020</span>  <span class="out-num">21000</span>
+<span class="out-num">5</span>     CHN  <span class="out-num">2020</span>  <span class="out-num">14700</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="reshape-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. reshape long gdp, i(country) j(year)</span>
+(j = 2018 2019 2020)
+
+Data                               Wide   ->   Long
+-----------------------------------------------------------------------------
+Number of observations                2   ->       6
+Number of variables                   4   ->       3
+j variable (3 values)                     ->   year
+xij variables:
+                     gdp2018 gdp2019 gdp2020   ->   gdp
+-----------------------------------------------------------------------------
+
+<span class="out-str">. list</span>
+
+     +-----------------------+
+     | country   year    gdp |
+     |-----------------------|
+  1. |     USA   2018  20500 |
+  2. |     USA   2019  21400 |
+  3. |     USA   2020  21000 |
+  4. |     CHN   2018  13900 |
+  5. |     CHN   2019  14300 |
+  6. |     CHN   2020  14700 |
+     +-----------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="reshape-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">&gt; print(long)</span>
+<span class="out-green"># A tibble: 6 x 3</span>
+  country  year   gdp
+  <span class="out-blue">&lt;chr&gt;</span>   <span class="out-blue">&lt;int&gt;</span> <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> USA      2018 20500
+<span class="out-num">2</span> USA      2019 21400
+<span class="out-num">3</span> USA      2020 21000
+<span class="out-num">4</span> CHN      2018 13900
+<span class="out-num">5</span> CHN      2019 14300
+<span class="out-num">6</span> CHN      2020 14700</div>
+        </div>
+
+        <!-- Exercise -->
+        <h2 id="exercises">Exercise</h2>
+
+        <div class="interactive-exercise" data-exercise="2a.1">
+          <h4>Exercise 2a.1: Data Import and Merging</h4>
+          <p>Practice the core data import skills. Complete these tasks:</p>
+          <ol>
+            <li>Load a CSV file into a dataframe</li>
+            <li>Perform a merge/join operation on two datasets</li>
+            <li>Reshape data from wide to long format (or vice versa)</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Load a CSV file
+# Task 2: Merge two datasets
+# Task 3: Reshape data
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Load a CSV file
+* Task 2: Merge two datasets
+* Task 3: Reshape data
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Load a CSV file
+# Task 2: Merge two datasets
+# Task 3: Reshape data
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Load a CSV file using pandas</div>
+              <pre class="step-code"><code><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Load CSV file</span>
+df = pd.read_csv(<span class="code-string">"data.csv"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Merge two datasets using pd.merge()</div>
+              <pre class="step-code"><code><span class="code-comment"># Merge datasets on a key column</span>
+merged = pd.merge(df1, df2, on=<span class="code-string">"id"</span>)
+<span class="code-comment"># Or with different join types:</span>
+merged = pd.merge(df1, df2, on=<span class="code-string">"id"</span>, how=<span class="code-string">"left"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Reshape data using melt() or pivot()</div>
+              <pre class="step-code"><code><span class="code-comment"># Wide to long</span>
+long = pd.melt(wide, id_vars=[<span class="code-string">"country"</span>], var_name=<span class="code-string">"year"</span>)
+
+<span class="code-comment"># Long to wide</span>
+wide = long.pivot(index=<span class="code-string">"country"</span>, columns=<span class="code-string">"year"</span>, values=<span class="code-string">"gdp"</span>)</code></pre>
+            </div>
+
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Load a CSV file using import delimited</div>
+              <pre class="step-code"><code><span class="code-comment">* Load CSV file</span>
+<span class="code-keyword">import delimited</span> <span class="code-string">"data.csv"</span>, clear</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Merge datasets using merge command</div>
+              <pre class="step-code"><code><span class="code-comment">* Merge with another dataset</span>
+<span class="code-keyword">merge</span> 1:1 id <span class="code-keyword">using</span> <span class="code-string">"other_data.dta"</span>
+<span class="code-keyword">tab</span> _merge</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Reshape data using reshape command</div>
+              <pre class="step-code"><code><span class="code-comment">* Reshape wide to long</span>
+<span class="code-keyword">reshape</span> long gdp, i(country) j(year)</code></pre>
+            </div>
+
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Load a CSV file using read_csv()</div>
+              <pre class="step-code"><code><span class="code-function">library</span>(tidyverse)
+
+<span class="code-comment"># Load CSV file</span>
+df <- <span class="code-function">read_csv</span>(<span class="code-string">"data.csv"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Merge datasets using join functions</div>
+              <pre class="step-code"><code><span class="code-comment"># Merge datasets</span>
+merged <- <span class="code-function">inner_join</span>(df1, df2, by = <span class="code-string">"id"</span>)
+<span class="code-comment"># Or left join:</span>
+merged <- <span class="code-function">left_join</span>(df1, df2, by = <span class="code-string">"id"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Reshape data using pivot functions</div>
+              <pre class="step-code"><code><span class="code-comment"># Wide to long</span>
+long <- wide %>% <span class="code-function">pivot_longer</span>(cols = -country, names_to = <span class="code-string">"year"</span>)
+
+<span class="code-comment"># Long to wide</span>
+wide <- long %>% <span class="code-function">pivot_wider</span>(names_from = year, values_from = value)</code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-footer">
+          <a href="02-data-harnessing.html" class="nav-link prev">Module 2: Data Harnessing</a>
+          <a href="02b-apis.html" class="nav-link next">Working with APIs</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>I can help with questions about loading data, merging, reshaping, or any course material.</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Run button handler
+    document.querySelectorAll('.run-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const lang = this.dataset.lang;
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+        document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+          out.classList.remove('visible');
+        });
+        const output = document.querySelector(`.output-simulation[data-output="${outputId}"][data-lang="${lang}"]`);
+        if (output) {
+          output.classList.add('visible');
+          output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
+    document.querySelectorAll('.close-output').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.output-simulation').classList.remove('visible');
+      });
+    });
+
+    document.querySelectorAll('.code-tabs .tab-button').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+        if (outputId) {
+          document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+            out.classList.remove('visible');
+          });
+        }
+      });
+    });
+
+    // Exercise handler
+    const exercisePatterns = {
+      '2a.1': {
+        python: {
+          patterns: [
+            { regex: /read_csv\s*\(|read_table\s*\(|pd\.read_csv|pandas\.read_csv/i, points: 34, description: 'Load CSV file' },
+            { regex: /\.merge\s*\(|pd\.merge|\.join\s*\(/i, points: 33, description: 'Merge datasets' },
+            { regex: /\.melt\s*\(|pd\.melt|\.pivot\s*\(|pivot_table/i, points: 33, description: 'Reshape data' }
+          ]
+        },
+        stata: {
+          patterns: [
+            { regex: /import\s+delimited|insheet/i, points: 34, description: 'Load CSV file' },
+            { regex: /merge\s+[1mn]:[1mn]/i, points: 33, description: 'Merge datasets' },
+            { regex: /reshape\s+(long|wide)/i, points: 33, description: 'Reshape data' }
+          ]
+        },
+        r: {
+          patterns: [
+            { regex: /read_csv\s*\(|read\.csv\s*\(/i, points: 34, description: 'Load CSV file' },
+            { regex: /inner_join|left_join|right_join|full_join|merge\s*\(/i, points: 33, description: 'Merge datasets' },
+            { regex: /pivot_longer|pivot_wider|gather\s*\(|spread\s*\(/i, points: 33, description: 'Reshape data' }
+          ]
+        }
+      }
+    };
+
+    document.querySelectorAll('.interactive-exercise').forEach(exercise => {
+      const exerciseId = exercise.dataset.exercise;
+      let currentLang = 'python';
+      let currentStep = 0;
+      let hasCheckedScore = false;
+
+      exercise.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const lang = this.dataset.lang;
+          currentLang = lang;
+          exercise.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          exercise.querySelectorAll('.code-editor').forEach(editor => {
+            editor.style.display = editor.dataset.lang === lang ? 'block' : 'none';
+          });
+          if (hasCheckedScore) resetSolutionSteps();
+        });
+      });
+
+      const checkBtn = exercise.querySelector('.btn-check-score');
+      const scoreDisplay = exercise.querySelector('.score-display');
+      const scoreValue = exercise.querySelector('.score-value');
+      const scoreFeedback = exercise.querySelector('.score-feedback');
+      const showSolutionBtn = exercise.querySelector('.btn-show-solution');
+
+      checkBtn.addEventListener('click', function() {
+        const editor = exercise.querySelector(`.code-editor[data-lang="${currentLang}"]`);
+        const code = editor.value;
+        const patterns = exercisePatterns[exerciseId]?.[currentLang]?.patterns || [];
+        let score = 0;
+        let matched = [];
+        let missed = [];
+        patterns.forEach(p => {
+          if (p.regex.test(code)) { score += p.points; matched.push(p.description); }
+          else { missed.push(p.description); }
+        });
+        score = Math.min(100, score);
+        scoreValue.textContent = score;
+        scoreValue.className = 'score-value';
+        if (score >= 80) scoreValue.classList.add('score-high');
+        else if (score >= 50) scoreValue.classList.add('score-medium');
+        else scoreValue.classList.add('score-low');
+        if (score === 100) scoreFeedback.textContent = 'Perfect! All tasks completed correctly.';
+        else if (score >= 70) scoreFeedback.textContent = `Good work! Missing: ${missed.join(', ')}.`;
+        else if (score >= 40) scoreFeedback.textContent = `Getting there. Missing: ${missed.join(', ')}.`;
+        else scoreFeedback.textContent = `Keep trying! Check: ${missed.slice(0, 2).join(', ')}.`;
+        scoreDisplay.style.display = 'flex';
+        showSolutionBtn.style.display = 'inline-block';
+        hasCheckedScore = true;
+      });
+
+      const solutionSteps = exercise.querySelector('.solution-steps');
+      const prevBtn = exercise.querySelector('.btn-prev-step');
+      const nextBtn = exercise.querySelector('.btn-next-step');
+      const currentStepEl = exercise.querySelector('.current-step');
+      const totalStepsEl = exercise.querySelector('.total-steps');
+
+      function resetSolutionSteps() {
+        currentStep = 0;
+        currentStepEl.textContent = '0';
+        exercise.querySelectorAll('.solution-step').forEach(step => { step.style.display = 'none'; });
+        updateNavButtons();
+      }
+
+      function updateNavButtons() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        totalStepsEl.textContent = totalSteps;
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep >= totalSteps;
+        nextBtn.textContent = currentStep >= totalSteps ? 'Complete' : 'Next Step';
+      }
+
+      function showStep(stepNum) {
+        const steps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`);
+        steps.forEach((step, idx) => { step.style.display = (idx + 1) <= stepNum ? 'block' : 'none'; });
+        currentStepEl.textContent = stepNum;
+      }
+
+      showSolutionBtn.addEventListener('click', function() {
+        solutionSteps.style.display = 'block';
+        resetSolutionSteps();
+        this.style.display = 'none';
+      });
+
+      nextBtn.addEventListener('click', function() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        if (currentStep < totalSteps) { currentStep++; showStep(currentStep); updateNavButtons(); }
+      });
+
+      prevBtn.addEventListener('click', function() {
+        if (currentStep > 0) { currentStep--; showStep(currentStep); updateNavButtons(); }
+      });
+
+      updateNavButtons();
+    });
+  });
+  </script>
+</body>
+</html>

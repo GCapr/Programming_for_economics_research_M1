@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 2c: Web Scraping | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .output-simulation { background: #1e1e1e; border-radius: 8px; margin: 1rem 0; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.8rem; display: none; }
+    .output-simulation.visible { display: block; }
+    .output-header { background: #333; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 0.75rem; }
+    .output-body { padding: 1rem; color: #d4d4d4; white-space: pre-wrap; overflow-x: auto; max-height: 400px; overflow-y: auto; }
+    .output-body .out-green { color: #4ec9b0; }
+    .output-body .out-yellow { color: #dcdcaa; }
+    .output-body .out-blue { color: #569cd6; }
+    .output-body .out-num { color: #b5cea8; }
+    .output-body .out-str { color: #ce9178; }
+    .output-body .out-red { color: #f14c4c; }
+    .research-banner { background: #4a5568; color: white; padding: 1.5rem; border-radius: 12px; margin: 2rem 0; border-left: 5px solid #ed8936; }
+    .research-banner h3 { color: white; margin-top: 0; }
+    .concept-box { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+    .concept-box h4 { color: #1e40af; margin-top: 0; }
+    .legal-box { background: #fef3c7; border-left: 4px solid #d97706; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+    .legal-box h4 { color: #92400e; margin-top: 0; }
+    .danger-box { background: #fee2e2; border-left: 4px solid #dc2626; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+    .danger-box h4 { color: #991b1b; margin-top: 0; }
+    .run-btn { background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .run-btn:hover { background: #16a34a; }
+    .run-btn::before { content: '▶'; font-size: 0.7rem; }
+    .close-output { background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; }
+    .close-output:hover { color: white; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; max-width: 300px; white-space: normal; }
+    .code-tooltip:hover::after { opacity: 1; }
+    .html-diagram { background: #1e1e1e; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #d4d4d4; overflow-x: auto; }
+    .html-diagram .tag { color: #569cd6; }
+    .html-diagram .attr { color: #9cdcfe; }
+    .html-diagram .value { color: #ce9178; }
+    .html-diagram .content { color: #d4d4d4; }
+    .html-diagram .comment { color: #6a9955; }
+    .checklist { background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; }
+    .checklist h4 { color: #166534; margin-top: 0; }
+    .checklist ul { margin-bottom: 0; }
+    .checklist li { margin-bottom: 0.5rem; }
+    .decision-tree { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; }
+    .decision-node { background: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin: 0.5rem 0; }
+    .decision-node.yes { border-color: #22c55e; }
+    .decision-node.no { border-color: #ef4444; }
+    .decision-node.api { border-color: #3b82f6; }
+  </style>
+</head>
+<body>
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Please enter the course password to access the materials.</p>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+      <button id="password-submit">Access Course</button>
+      <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li>
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages &amp; Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li>
+            <a href="02-data-harnessing.html" class="active"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">Importing from Files</a></li>
+              <li><a href="02b-apis.html">Working with APIs</a></li>
+              <li><a href="02c-web-scraping.html" class="active">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
+          <li><a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a></li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git &amp; GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact &amp; Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>2c &nbsp;Web Scraping</h1>
+          <div class="module-meta">
+            <span>~5 hours</span>
+            <span>HTML, BeautifulSoup, Legal Considerations</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Understand when web scraping is appropriate vs. using APIs</li>
+            <li>Navigate the legal and ethical landscape of web scraping</li>
+            <li>Parse HTML structure and extract data using BeautifulSoup/rvest</li>
+            <li>Handle pagination, rate limiting, and dynamic content</li>
+            <li>Build robust, respectful scrapers for research data collection</li>
+          </ul>
+        </div>
+
+        <!-- Critical Legal Warning -->
+        <div class="danger-box">
+          <h4>Before You Scrape: Legal and Ethical Obligations</h4>
+          <p><strong>Web scraping exists in a legal gray area.</strong> What's technically possible isn't always legal or ethical. Before scraping any website, you must understand the legal framework and respect website owners' rights.</p>
+          <p style="margin-bottom: 0;"><strong>This module teaches responsible scraping for legitimate research purposes only.</strong></p>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#when-to-scrape">2c.1 When to Scrape (and When Not To)</a></li>
+            <li><a href="#legal-framework">2c.2 Legal Framework</a></li>
+            <li><a href="#html-basics">2c.3 Understanding HTML Structure</a></li>
+            <li><a href="#basic-scraping">2c.4 Basic Scraping Techniques</a></li>
+            <li><a href="#advanced-techniques">2c.5 Advanced Techniques</a></li>
+            <li><a href="#best-practices">2c.6 Best Practices for Research</a></li>
+          </ul>
+        </div>
+
+        <!-- Section 1: When to Scrape -->
+        <h2 id="when-to-scrape">2c.1 When to Scrape (and When Not To)</h2>
+
+        <div class="concept-box">
+          <h4>The Hierarchy of Data Acquisition</h4>
+          <p style="margin-bottom: 0.5rem;">Always prefer these options <strong>in order</strong>:</p>
+          <ol style="margin-bottom: 0;">
+            <li><strong>Official datasets</strong> &mdash; Published data files from the source</li>
+            <li><strong>APIs</strong> &mdash; Structured, sanctioned data access (see <a href="02b-apis.html">Module 2b</a>)</li>
+            <li><strong>Data request</strong> &mdash; Contact the organization directly</li>
+            <li><strong>Web scraping</strong> &mdash; Last resort when above options fail</li>
+          </ol>
+        </div>
+
+        <h3>Decision Framework</h3>
+        <div class="decision-tree">
+          <div class="decision-node">
+            <strong>Is there an official downloadable dataset?</strong>
+            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Check the website's "Data", "Downloads", or "Research" sections first.</p>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <div class="decision-node yes" style="flex: 1;">
+              <strong style="color: #166534;">YES:</strong> Download it directly. No scraping needed.
+            </div>
+            <div class="decision-node" style="flex: 1;">
+              <strong>NO:</strong> Check for an API...
+            </div>
+          </div>
+          <div class="decision-node api">
+            <strong>Does the site provide an API?</strong>
+            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Look for "API", "Developers", or "Data Access" links. Even if not obvious, many sites have APIs.</p>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <div class="decision-node yes" style="flex: 1;">
+              <strong style="color: #166534;">YES:</strong> Use the API. See <a href="02b-apis.html">Module 2b</a>.
+            </div>
+            <div class="decision-node" style="flex: 1;">
+              <strong>NO:</strong> Consider contacting them...
+            </div>
+          </div>
+          <div class="decision-node">
+            <strong>Can you request the data directly?</strong>
+            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Many organizations will provide data for academic research upon request. Email them!</p>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <div class="decision-node yes" style="flex: 1;">
+              <strong style="color: #166534;">YES:</strong> Request it. Often faster than building a scraper.
+            </div>
+            <div class="decision-node no" style="flex: 1;">
+              <strong style="color: #dc2626;">Last resort:</strong> Consider scraping, but check legality first.
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Legal Framework -->
+        <h2 id="legal-framework">2c.2 Legal Framework</h2>
+
+        <div class="legal-box">
+          <h4>I Am Not a Lawyer</h4>
+          <p style="margin-bottom: 0;">This section provides educational information about legal concepts related to web scraping. <strong>It is not legal advice.</strong> Consult with your institution's legal counsel or a qualified attorney for guidance on specific situations.</p>
+        </div>
+
+        <h3>Key Legal Considerations</h3>
+
+        <h4>1. Terms of Service (ToS)</h4>
+        <p>Most websites have Terms of Service that may prohibit automated data collection. Violating ToS can result in:</p>
+        <ul>
+          <li>Being blocked from the website</li>
+          <li>Civil lawsuits for breach of contract</li>
+          <li>In some jurisdictions, criminal charges under computer fraud laws</li>
+        </ul>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Always Check the Terms of Service</div>
+          <p style="margin-bottom: 0;">Before scraping, find and read the website's ToS. Look for keywords like "automated", "scraping", "crawling", "bot", "data collection". If the ToS prohibits scraping, <strong>do not scrape</strong>.</p>
+        </div>
+
+        <h4>2. robots.txt</h4>
+        <p>The <code>robots.txt</code> file tells automated systems which parts of a site they can access. It's located at the root of every website (e.g., <code>example.com/robots.txt</code>).</p>
+
+        <div class="html-diagram">
+<span class="comment"># Example robots.txt file</span>
+
+User-agent: *          <span class="comment"># Rules for all bots</span>
+Disallow: /private/    <span class="comment"># Don't access /private/</span>
+Disallow: /admin/      <span class="comment"># Don't access /admin/</span>
+Allow: /public/        <span class="comment"># Explicitly allowed</span>
+
+User-agent: Googlebot  <span class="comment"># Special rules for Google</span>
+Allow: /              <span class="comment"># Google can access everything</span>
+
+Crawl-delay: 10        <span class="comment"># Wait 10 seconds between requests</span>
+        </div>
+
+        <div class="info-box note">
+          <div class="info-box-title">robots.txt is Not Legally Binding</div>
+          <p style="margin-bottom: 0;">Technically, robots.txt is a voluntary standard&mdash;websites can't enforce it. However, ignoring it demonstrates bad faith and may be used against you in legal proceedings. <strong>Always respect robots.txt.</strong></p>
+        </div>
+
+        <h4>3. Copyright and Database Rights</h4>
+        <p>Even if you can legally <em>access</em> data, you may not have the right to <em>use</em> or <em>republish</em> it:</p>
+        <ul>
+          <li><strong>Copyright</strong> protects creative works (articles, images, unique descriptions)</li>
+          <li><strong>Database rights</strong> (EU) protect substantial investments in compiling data</li>
+          <li><strong>Facts themselves</strong> are generally not copyrightable, but their presentation may be</li>
+        </ul>
+
+        <h4>4. The Computer Fraud and Abuse Act (CFAA) - US</h4>
+        <p>The CFAA prohibits "unauthorized access" to computer systems. Key cases:</p>
+        <ul>
+          <li><strong>hiQ vs. LinkedIn (2022)</strong>: Scraping public data generally isn't "unauthorized access"</li>
+          <li><strong>Van Buren v. United States (2021)</strong>: Narrowed CFAA scope&mdash;violating ToS alone may not be criminal</li>
+        </ul>
+        <p><strong>However:</strong> The law varies by jurisdiction and is still evolving. What's legal in the US may not be legal in the EU or elsewhere.</p>
+
+        <h3>Research-Specific Considerations</h3>
+
+        <div class="checklist">
+          <h4>Pre-Scraping Checklist for Researchers</h4>
+          <ul>
+            <li><strong>Check for existing datasets</strong> &mdash; ICPSR, Harvard Dataverse, Kaggle, data.gov</li>
+            <li><strong>Check for an API</strong> &mdash; Even if undocumented, try adding /api/ to the URL</li>
+            <li><strong>Read the Terms of Service</strong> &mdash; Document that you checked</li>
+            <li><strong>Check robots.txt</strong> &mdash; Respect all directives</li>
+            <li><strong>Consider fair use</strong> &mdash; Is your use transformative? Non-commercial?</li>
+            <li><strong>Contact your IRB</strong> &mdash; Human subjects data may require approval</li>
+            <li><strong>Document everything</strong> &mdash; Keep records of your decisions and rationale</li>
+            <li><strong>Consult your institution</strong> &mdash; Many universities have policies on scraping</li>
+          </ul>
+        </div>
+
+        <!-- Section 3: HTML Basics -->
+        <h2 id="html-basics">2c.3 Understanding HTML Structure</h2>
+
+        <div class="concept-box">
+          <h4>What is HTML?</h4>
+          <p style="margin-bottom: 0;"><strong>HTML (HyperText Markup Language)</strong> is the structure of web pages. It uses nested <strong>tags</strong> to organize content. To scrape data, you need to understand this structure so you can tell your code where to find the information you want.</p>
+        </div>
+
+        <h3>HTML Elements</h3>
+        <p>HTML is made of <strong>elements</strong> with opening and closing tags:</p>
+
+        <div class="html-diagram">
+<span class="tag">&lt;tagname</span> <span class="attr">attribute</span>=<span class="value">"value"</span><span class="tag">&gt;</span><span class="content">Content goes here</span><span class="tag">&lt;/tagname&gt;</span>
+
+<span class="comment">&lt;!-- Common examples: --&gt;</span>
+<span class="tag">&lt;p&gt;</span>This is a paragraph<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;a</span> <span class="attr">href</span>=<span class="value">"https://example.com"</span><span class="tag">&gt;</span>This is a link<span class="tag">&lt;/a&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="value">"container"</span><span class="tag">&gt;</span>This is a division/section<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;span</span> <span class="attr">id</span>=<span class="value">"price"</span><span class="tag">&gt;</span>$99.99<span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;table&gt;</span>...<span class="tag">&lt;/table&gt;</span>              <span class="comment">&lt;!-- Tables --&gt;</span>
+<span class="tag">&lt;ul&gt;&lt;li&gt;</span>...<span class="tag">&lt;/li&gt;&lt;/ul&gt;</span>         <span class="comment">&lt;!-- Lists --&gt;</span>
+        </div>
+
+        <h3>Attributes: class and id</h3>
+        <p>Attributes help identify specific elements. The most important for scraping are:</p>
+        <ul>
+          <li><strong>class</strong> &mdash; Shared by multiple elements (e.g., all prices might have <code>class="price"</code>)</li>
+          <li><strong>id</strong> &mdash; Unique identifier for a single element (e.g., <code>id="main-content"</code>)</li>
+        </ul>
+
+        <h3>Viewing Page Source</h3>
+        <p>To see a page's HTML structure:</p>
+        <ol>
+          <li>Right-click anywhere on the page</li>
+          <li>Select "View Page Source" (sees original HTML) or "Inspect" (interactive developer tools)</li>
+          <li>In developer tools, you can hover over elements to see their HTML</li>
+        </ol>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Pro Tip: Use the Element Picker</div>
+          <p style="margin-bottom: 0;">In Chrome/Firefox developer tools, click the element picker icon (cursor in box) then click any element on the page. The HTML for that element will be highlighted in the developer panel.</p>
+        </div>
+
+        <h3>Example: A Simple Web Page</h3>
+        <div class="html-diagram">
+<span class="tag">&lt;html&gt;</span>
+  <span class="tag">&lt;head&gt;</span>
+    <span class="tag">&lt;title&gt;</span>Country GDP Data<span class="tag">&lt;/title&gt;</span>
+  <span class="tag">&lt;/head&gt;</span>
+  <span class="tag">&lt;body&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>GDP by Country<span class="tag">&lt;/h1&gt;</span>
+
+    <span class="tag">&lt;table</span> <span class="attr">class</span>=<span class="value">"data-table"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;tr&gt;</span>
+        <span class="tag">&lt;th&gt;</span>Country<span class="tag">&lt;/th&gt;</span>
+        <span class="tag">&lt;th&gt;</span>GDP (Billion USD)<span class="tag">&lt;/th&gt;</span>
+      <span class="tag">&lt;/tr&gt;</span>
+      <span class="tag">&lt;tr&gt;</span>
+        <span class="tag">&lt;td&gt;</span>United States<span class="tag">&lt;/td&gt;</span>
+        <span class="tag">&lt;td</span> <span class="attr">class</span>=<span class="value">"gdp-value"</span><span class="tag">&gt;</span>21,000<span class="tag">&lt;/td&gt;</span>
+      <span class="tag">&lt;/tr&gt;</span>
+      <span class="tag">&lt;tr&gt;</span>
+        <span class="tag">&lt;td&gt;</span>China<span class="tag">&lt;/td&gt;</span>
+        <span class="tag">&lt;td</span> <span class="attr">class</span>=<span class="value">"gdp-value"</span><span class="tag">&gt;</span>14,700<span class="tag">&lt;/td&gt;</span>
+      <span class="tag">&lt;/tr&gt;</span>
+    <span class="tag">&lt;/table&gt;</span>
+  <span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span>
+        </div>
+
+        <!-- Section 4: Basic Scraping -->
+        <h2 id="basic-scraping">2c.4 Basic Scraping Techniques</h2>
+
+        <p>We'll use <strong>Python with BeautifulSoup</strong> (most common) and <strong>R with rvest</strong>. Stata doesn't have native scraping capabilities, but you can call Python from Stata.</p>
+
+        <h3>Step 1: Fetch the Page</h3>
+
+        <div class="code-tabs" data-runnable="fetch-1">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Fetch a web page</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="requests is Python's HTTP library for fetching web pages">requests</span>
+<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="BeautifulSoup parses HTML and lets you search for elements">bs4</span> <span class="code-keyword">import</span> BeautifulSoup
+
+<span class="code-comment"># Define a User-Agent (identifies your scraper)</span>
+<span class="code-comment"># Be honest - some sites block generic Python requests</span>
+<span class="code-tooltip" data-tip="Headers tell the server about your request. User-Agent identifies your browser/scraper.">headers</span> = {
+    <span class="code-string">'User-Agent'</span>: <span class="code-string">'Mozilla/5.0 (Research scraper for academic project; contact@university.edu)'</span>
+}
+
+<span class="code-comment"># Fetch the page</span>
+url = <span class="code-string">"https://example.com/data"</span>
+<span class="code-tooltip" data-tip="requests.get() fetches the page. timeout prevents hanging forever.">response</span> = requests.get(url, headers=headers, timeout=<span class="code-number">30</span>)
+
+<span class="code-comment"># Check if request was successful</span>
+<span class="code-keyword">if</span> response.status_code == <span class="code-number">200</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">"Success! Page fetched."</span>)
+    <span class="code-comment"># Parse the HTML</span>
+    <span class="code-tooltip" data-tip="BeautifulSoup creates a parse tree from HTML. 'html.parser' is the built-in parser.">soup</span> = BeautifulSoup(response.text, <span class="code-string">'html.parser'</span>)
+<span class="code-keyword">else</span>:
+    <span class="code-keyword">print</span>(<span class="code-string">f"Error: {response.status_code}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Fetch a web page</span>
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="rvest is R's main web scraping package, part of tidyverse">rvest</span>)
+<span class="code-function">library</span>(httr)
+
+<span class="code-comment"># Define User-Agent</span>
+<span class="code-tooltip" data-tip="set_config() sets global options for all httr requests">set_config</span>(<span class="code-function">user_agent</span>(<span class="code-string">"Research scraper for academic project; contact@university.edu"</span>))
+
+<span class="code-comment"># Fetch and parse the page in one step</span>
+url <- <span class="code-string">"https://example.com/data"</span>
+<span class="code-tooltip" data-tip="read_html() fetches and parses the page, returning an XML document">page</span> <- <span class="code-function">read_html</span>(url)
+
+<span class="code-comment"># Page is now ready for extraction</span>
+<span class="code-function">print</span>(<span class="code-string">"Page fetched successfully"</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="fetch-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">Success! Page fetched.</span>
+
+<span class="out-blue">Response details:</span>
+Status: <span class="out-num">200</span> OK
+Content-Type: text/html; charset=utf-8
+Content-Length: <span class="out-num">45,231</span> bytes</div>
+        </div>
+
+        <div class="output-simulation" data-output="fetch-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">Page fetched successfully</span>
+
+{html_document}
+&lt;html&gt;
+[1] &lt;head&gt;...
+[2] &lt;body&gt;...</div>
+        </div>
+
+        <h3>Step 2: Extract Data</h3>
+
+        <div class="code-tabs" data-runnable="extract-1">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Extract data from HTML</span>
+
+<span class="code-comment"># Find a single element</span>
+<span class="code-tooltip" data-tip="find() returns the FIRST matching element. Returns None if not found.">title</span> = soup.find(<span class="code-string">'h1'</span>)
+<span class="code-keyword">print</span>(<span class="code-string">f"Title: {title.text}"</span>)
+
+<span class="code-comment"># Find by class name</span>
+<span class="code-tooltip" data-tip="Use class_ (with underscore) because 'class' is a Python keyword">price</span> = soup.find(<span class="code-string">'span'</span>, class_=<span class="code-string">'price'</span>)
+
+<span class="code-comment"># Find by id</span>
+main_content = soup.find(id=<span class="code-string">'main-content'</span>)
+
+<span class="code-comment"># Find ALL matching elements</span>
+<span class="code-tooltip" data-tip="find_all() returns a LIST of all matching elements">all_prices</span> = soup.find_all(<span class="code-string">'span'</span>, class_=<span class="code-string">'price'</span>)
+<span class="code-keyword">for</span> p <span class="code-keyword">in</span> all_prices:
+    <span class="code-keyword">print</span>(p.text)
+
+<span class="code-comment"># Extract from a table</span>
+table = soup.find(<span class="code-string">'table'</span>, class_=<span class="code-string">'data-table'</span>)
+rows = table.find_all(<span class="code-string">'tr'</span>)
+<span class="code-keyword">for</span> row <span class="code-keyword">in</span> rows[<span class="code-number">1</span>:]:  <span class="code-comment"># Skip header row</span>
+    cells = row.find_all(<span class="code-string">'td'</span>)
+    country = cells[<span class="code-number">0</span>].text.strip()
+    gdp = cells[<span class="code-number">1</span>].text.strip()
+    <span class="code-keyword">print</span>(<span class="code-string">f"{country}: {gdp}"</span>)
+
+<span class="code-comment"># Extract attribute values (like href from links)</span>
+links = soup.find_all(<span class="code-string">'a'</span>)
+<span class="code-keyword">for</span> link <span class="code-keyword">in</span> links:
+    <span class="code-tooltip" data-tip="Use .get() to safely extract attributes. Returns None if attribute doesn't exist.">href</span> = link.get(<span class="code-string">'href'</span>)
+    <span class="code-keyword">print</span>(href)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Extract data from HTML using rvest</span>
+
+<span class="code-comment"># Find elements using CSS selectors</span>
+<span class="code-tooltip" data-tip="html_element() returns the FIRST match, html_elements() returns ALL matches">title</span> <- page %>%
+  <span class="code-function">html_element</span>(<span class="code-string">"h1"</span>) %>%
+  <span class="code-function">html_text</span>()
+<span class="code-function">print</span>(<span class="code-function">paste</span>(<span class="code-string">"Title:"</span>, title))
+
+<span class="code-comment"># Find by class (use . prefix for class)</span>
+prices <- page %>%
+  <span class="code-function"><span class="code-tooltip" data-tip="CSS selector: .classname for class, #idname for id">html_elements</span></span>(<span class="code-string">".price"</span>) %>%
+  <span class="code-function">html_text</span>()
+
+<span class="code-comment"># Find by id (use # prefix)</span>
+main_content <- page %>%
+  <span class="code-function">html_element</span>(<span class="code-string">"#main-content"</span>) %>%
+  <span class="code-function">html_text</span>()
+
+<span class="code-comment"># Extract a table (rvest makes this easy!)</span>
+<span class="code-tooltip" data-tip="html_table() automatically extracts tables into data frames">table_data</span> <- page %>%
+  <span class="code-function">html_element</span>(<span class="code-string">"table.data-table"</span>) %>%
+  <span class="code-function">html_table</span>()
+<span class="code-function">print</span>(table_data)
+
+<span class="code-comment"># Extract attribute values (like href)</span>
+links <- page %>%
+  <span class="code-function">html_elements</span>(<span class="code-string">"a"</span>) %>%
+  <span class="code-function"><span class="code-tooltip" data-tip="html_attr() extracts a specific attribute from elements">html_attr</span></span>(<span class="code-string">"href"</span>)
+<span class="code-function">print</span>(links)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="extract-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Title: <span class="out-str">GDP by Country</span>
+
+<span class="out-blue">Table data extracted:</span>
+<span class="out-str">United States</span>: <span class="out-num">21,000</span>
+<span class="out-str">China</span>: <span class="out-num">14,700</span>
+<span class="out-str">Japan</span>: <span class="out-num">5,100</span>
+<span class="out-str">Germany</span>: <span class="out-num">3,800</span>
+
+<span class="out-blue">Links found:</span>
+/about
+/data/countries
+https://example.com/methodology</div>
+        </div>
+
+        <div class="output-simulation" data-output="extract-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">[1] "Title: GDP by Country"
+
+<span class="out-green"># A tibble: 4 x 2</span>
+  Country       `GDP (Billion USD)`
+  <span class="out-blue">&lt;chr&gt;</span>                       <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> United States               21000
+<span class="out-num">2</span> China                       14700
+<span class="out-num">3</span> Japan                        5100
+<span class="out-num">4</span> Germany                      3800
+
+[1] <span class="out-str">"/about"</span> <span class="out-str">"/data/countries"</span> <span class="out-str">"https://example.com/methodology"</span></div>
+        </div>
+
+        <h3>CSS Selectors Quick Reference</h3>
+        <table style="width: 100%; margin: 1rem 0;">
+          <thead>
+            <tr>
+              <th>Selector</th>
+              <th>Meaning</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>tag</code></td>
+              <td>Element by tag name</td>
+              <td><code>div</code>, <code>table</code>, <code>a</code></td>
+            </tr>
+            <tr>
+              <td><code>.class</code></td>
+              <td>Element by class</td>
+              <td><code>.price</code>, <code>.data-table</code></td>
+            </tr>
+            <tr>
+              <td><code>#id</code></td>
+              <td>Element by id</td>
+              <td><code>#main-content</code></td>
+            </tr>
+            <tr>
+              <td><code>tag.class</code></td>
+              <td>Tag with specific class</td>
+              <td><code>span.price</code></td>
+            </tr>
+            <tr>
+              <td><code>parent child</code></td>
+              <td>Nested elements</td>
+              <td><code>table tr td</code></td>
+            </tr>
+            <tr>
+              <td><code>[attr=value]</code></td>
+              <td>By attribute</td>
+              <td><code>[data-country="USA"]</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Section 5: Advanced Techniques -->
+        <h2 id="advanced-techniques">2c.5 Advanced Techniques</h2>
+
+        <h3>Handling Pagination</h3>
+        <p>Many websites spread data across multiple pages. You need to iterate through them:</p>
+
+        <div class="code-tabs" data-runnable="pagination">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Handle pagination</span>
+<span class="code-keyword">import</span> requests
+<span class="code-keyword">from</span> bs4 <span class="code-keyword">import</span> BeautifulSoup
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="time.sleep() pauses execution - essential for polite scraping">time</span>
+
+<span class="code-comment"># Store all results</span>
+all_data = []
+
+<span class="code-comment"># Loop through pages</span>
+<span class="code-keyword">for</span> page_num <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-number">1</span>, <span class="code-number">11</span>):  <span class="code-comment"># Pages 1-10</span>
+    url = <span class="code-string">f"https://example.com/data?page={page_num}"</span>
+
+    <span class="code-comment"># Be polite: wait between requests</span>
+    <span class="code-tooltip" data-tip="ALWAYS add delays between requests. 2+ seconds is polite.">time.sleep</span>(<span class="code-number">2</span>)  <span class="code-comment"># Wait 2 seconds</span>
+
+    response = requests.get(url, headers=headers)
+    <span class="code-keyword">if</span> response.status_code != <span class="code-number">200</span>:
+        <span class="code-keyword">print</span>(<span class="code-string">f"Error on page {page_num}, stopping"</span>)
+        <span class="code-keyword">break</span>
+
+    soup = BeautifulSoup(response.text, <span class="code-string">'html.parser'</span>)
+
+    <span class="code-comment"># Extract data from this page</span>
+    items = soup.find_all(<span class="code-string">'div'</span>, class_=<span class="code-string">'item'</span>)
+
+    <span class="code-comment"># Check if page is empty (end of data)</span>
+    <span class="code-keyword">if</span> <span class="code-keyword">not</span> items:
+        <span class="code-keyword">print</span>(<span class="code-string">f"No more data after page {page_num-1}"</span>)
+        <span class="code-keyword">break</span>
+
+    <span class="code-keyword">for</span> item <span class="code-keyword">in</span> items:
+        all_data.append({
+            <span class="code-string">'name'</span>: item.find(<span class="code-string">'h2'</span>).text,
+            <span class="code-string">'value'</span>: item.find(<span class="code-string">'span'</span>, class_=<span class="code-string">'value'</span>).text
+        })
+
+    <span class="code-keyword">print</span>(<span class="code-string">f"Page {page_num}: {len(items)} items"</span>)
+
+<span class="code-keyword">print</span>(<span class="code-string">f"Total: {len(all_data)} items collected"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Handle pagination</span>
+<span class="code-function">library</span>(rvest)
+<span class="code-function">library</span>(purrr)
+
+<span class="code-comment"># Function to scrape one page</span>
+scrape_page <- <span class="code-keyword">function</span>(page_num) {
+  <span class="code-comment"># Be polite: wait between requests</span>
+  <span class="code-function"><span class="code-tooltip" data-tip="Sys.sleep() pauses R - ALWAYS use delays between requests">Sys.sleep</span></span>(<span class="code-number">2</span>)
+
+  url <- <span class="code-function">paste0</span>(<span class="code-string">"https://example.com/data?page="</span>, page_num)
+  page <- <span class="code-function">read_html</span>(url)
+
+  <span class="code-comment"># Extract table or items</span>
+  page %>%
+    <span class="code-function">html_element</span>(<span class="code-string">"table.data-table"</span>) %>%
+    <span class="code-function">html_table</span>()
+}
+
+<span class="code-comment"># Scrape pages 1-10</span>
+<span class="code-tooltip" data-tip="map_dfr() applies function to each element and combines results into one data frame">all_data</span> <- <span class="code-function">map_dfr</span>(<span class="code-number">1</span>:<span class="code-number">10</span>, scrape_page)
+
+<span class="code-function">print</span>(<span class="code-function">paste</span>(<span class="code-string">"Total rows collected:"</span>, <span class="code-function">nrow</span>(all_data)))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="pagination" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Page <span class="out-num">1</span>: <span class="out-num">20</span> items
+Page <span class="out-num">2</span>: <span class="out-num">20</span> items
+Page <span class="out-num">3</span>: <span class="out-num">20</span> items
+Page <span class="out-num">4</span>: <span class="out-num">20</span> items
+Page <span class="out-num">5</span>: <span class="out-num">20</span> items
+Page <span class="out-num">6</span>: <span class="out-num">15</span> items
+Page <span class="out-num">7</span>: <span class="out-num">0</span> items
+No more data after page 6
+
+<span class="out-green">Total: 115 items collected</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="pagination" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Scraping page 1...
+Scraping page 2...
+Scraping page 3...
+...
+[1] <span class="out-green">"Total rows collected: 115"</span></div>
+        </div>
+
+        <h3>Handling Dynamic Content (JavaScript)</h3>
+
+        <div class="info-box warning">
+          <div class="info-box-title">When Pages Load Data with JavaScript</div>
+          <p>Many modern websites load data dynamically using JavaScript. BeautifulSoup/rvest only see the initial HTML&mdash;not data loaded later. Solutions:</p>
+          <ul style="margin-bottom: 0;">
+            <li><strong>Check for hidden API:</strong> Open developer tools > Network tab > look for XHR/Fetch requests</li>
+            <li><strong>Use Selenium/Playwright:</strong> These control a real browser that executes JavaScript</li>
+            <li><strong>Check for static version:</strong> Some sites offer non-JS versions for accessibility</li>
+          </ul>
+        </div>
+
+        <div class="code-tabs" data-runnable="selenium">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Handle JavaScript with Selenium</span>
+<span class="code-comment"># First: pip install selenium webdriver-manager</span>
+
+<span class="code-keyword">from</span> selenium <span class="code-keyword">import</span> webdriver
+<span class="code-keyword">from</span> selenium.webdriver.chrome.service <span class="code-keyword">import</span> Service
+<span class="code-keyword">from</span> selenium.webdriver.common.by <span class="code-keyword">import</span> By
+<span class="code-keyword">from</span> selenium.webdriver.support.ui <span class="code-keyword">import</span> WebDriverWait
+<span class="code-keyword">from</span> selenium.webdriver.support <span class="code-keyword">import</span> expected_conditions <span class="code-keyword">as</span> EC
+<span class="code-keyword">from</span> webdriver_manager.chrome <span class="code-keyword">import</span> ChromeDriverManager
+<span class="code-keyword">from</span> bs4 <span class="code-keyword">import</span> BeautifulSoup
+
+<span class="code-comment"># Set up Chrome in headless mode (no visible window)</span>
+options = webdriver.ChromeOptions()
+options.add_argument(<span class="code-string">'--headless'</span>)
+<span class="code-tooltip" data-tip="webdriver-manager automatically downloads the right ChromeDriver version">driver</span> = webdriver.Chrome(
+    service=Service(ChromeDriverManager().install()),
+    options=options
+)
+
+<span class="code-keyword">try</span>:
+    <span class="code-comment"># Load the page</span>
+    driver.get(<span class="code-string">"https://example.com/dynamic-data"</span>)
+
+    <span class="code-comment"># Wait for specific element to load (max 10 seconds)</span>
+    <span class="code-tooltip" data-tip="WebDriverWait pauses until element appears - crucial for JS-heavy pages">wait</span> = WebDriverWait(driver, <span class="code-number">10</span>)
+    wait.until(EC.presence_of_element_located((By.CLASS_NAME, <span class="code-string">"data-table"</span>)))
+
+    <span class="code-comment"># Now page is fully loaded - get the HTML</span>
+    html = driver.page_source
+    soup = BeautifulSoup(html, <span class="code-string">'html.parser'</span>)
+
+    <span class="code-comment"># Extract data as usual</span>
+    table = soup.find(<span class="code-string">'table'</span>, class_=<span class="code-string">'data-table'</span>)
+    <span class="code-keyword">print</span>(<span class="code-string">"Data extracted successfully!"</span>)
+
+<span class="code-keyword">finally</span>:
+    <span class="code-comment"># Always close the browser</span>
+    driver.quit()</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="selenium" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-blue">Starting Chrome in headless mode...</span>
+<span class="out-blue">Navigating to page...</span>
+<span class="out-blue">Waiting for data-table to load...</span>
+<span class="out-green">Element found after 2.3 seconds</span>
+<span class="out-green">Data extracted successfully!</span></div>
+        </div>
+
+        <!-- Section 6: Best Practices -->
+        <h2 id="best-practices">2c.6 Best Practices for Research</h2>
+
+        <div class="checklist">
+          <h4>The Responsible Scraper's Checklist</h4>
+          <ul>
+            <li><strong>Identify yourself:</strong> Use a clear User-Agent with contact info</li>
+            <li><strong>Respect robots.txt:</strong> Don't access disallowed pages</li>
+            <li><strong>Rate limit:</strong> Add delays (2+ seconds) between requests</li>
+            <li><strong>Cache responses:</strong> Don't re-fetch pages you've already downloaded</li>
+            <li><strong>Handle errors gracefully:</strong> Don't hammer a server if it returns errors</li>
+            <li><strong>Scrape during off-hours:</strong> Minimize impact on the server</li>
+            <li><strong>Only take what you need:</strong> Don't download entire websites</li>
+            <li><strong>Store data securely:</strong> Especially if it contains personal information</li>
+            <li><strong>Document your methodology:</strong> For reproducibility and ethics review</li>
+            <li><strong>Consider reaching out:</strong> Website owners may provide data directly</li>
+          </ul>
+        </div>
+
+        <h3>Rate Limiting and Caching</h3>
+
+        <div class="code-tabs" data-runnable="polite">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Polite scraping with rate limiting and caching</span>
+<span class="code-keyword">import</span> requests
+<span class="code-keyword">import</span> time
+<span class="code-keyword">import</span> hashlib
+<span class="code-keyword">import</span> os
+<span class="code-keyword">from</span> pathlib <span class="code-keyword">import</span> Path
+
+<span class="code-keyword">class</span> <span class="code-function">PoliteScraper</span>:
+    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, delay=<span class="code-number">2</span>, cache_dir=<span class="code-string">"scraper_cache"</span>):
+        self.delay = delay
+        self.cache_dir = Path(cache_dir)
+        self.cache_dir.mkdir(exist_ok=<span class="code-keyword">True</span>)
+        self.last_request = <span class="code-number">0</span>
+        self.session = requests.Session()
+        self.session.headers.update({
+            <span class="code-string">'User-Agent'</span>: <span class="code-string">'Research Scraper (contact@university.edu)'</span>
+        })
+
+    <span class="code-keyword">def</span> <span class="code-function">_get_cache_path</span>(self, url):
+        <span class="code-comment"># Create unique filename from URL</span>
+        url_hash = hashlib.md5(url.encode()).hexdigest()
+        <span class="code-keyword">return</span> self.cache_dir / <span class="code-string">f"{url_hash}.html"</span>
+
+    <span class="code-keyword">def</span> <span class="code-function">fetch</span>(self, url, use_cache=<span class="code-keyword">True</span>):
+        cache_path = self._get_cache_path(url)
+
+        <span class="code-comment"># Check cache first</span>
+        <span class="code-keyword">if</span> use_cache <span class="code-keyword">and</span> cache_path.exists():
+            <span class="code-keyword">print</span>(<span class="code-string">f"Using cached version of {url}"</span>)
+            <span class="code-keyword">return</span> cache_path.read_text()
+
+        <span class="code-comment"># Rate limiting</span>
+        elapsed = time.time() - self.last_request
+        <span class="code-keyword">if</span> elapsed < self.delay:
+            <span class="code-tooltip" data-tip="Respects minimum delay between requests">time.sleep</span>(self.delay - elapsed)
+
+        <span class="code-comment"># Make request</span>
+        response = self.session.get(url, timeout=<span class="code-number">30</span>)
+        self.last_request = time.time()
+
+        <span class="code-keyword">if</span> response.status_code == <span class="code-number">200</span>:
+            <span class="code-comment"># Cache the response</span>
+            cache_path.write_text(response.text)
+            <span class="code-keyword">return</span> response.text
+        <span class="code-keyword">else</span>:
+            <span class="code-keyword">raise</span> <span class="code-function">Exception</span>(<span class="code-string">f"HTTP {response.status_code}"</span>)
+
+<span class="code-comment"># Usage</span>
+scraper = PoliteScraper(delay=<span class="code-number">3</span>)
+html = scraper.fetch(<span class="code-string">"https://example.com/page1"</span>)
+html = scraper.fetch(<span class="code-string">"https://example.com/page2"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="polite" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-blue">Fetching https://example.com/page1...</span>
+<span class="out-green">Cached to scraper_cache/a1b2c3d4.html</span>
+
+<span class="out-blue">Waiting 3 seconds...</span>
+
+<span class="out-blue">Fetching https://example.com/page2...</span>
+<span class="out-green">Cached to scraper_cache/e5f6g7h8.html</span>
+
+<span class="out-str">Next run will use cached versions!</span></div>
+        </div>
+
+        <h3>Error Handling and Retries</h3>
+
+        <div class="code-tabs" data-runnable="errors">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Robust error handling</span>
+<span class="code-keyword">import</span> requests
+<span class="code-keyword">import</span> time
+<span class="code-keyword">from</span> requests.exceptions <span class="code-keyword">import</span> RequestException
+
+<span class="code-keyword">def</span> <span class="code-function">fetch_with_retry</span>(url, max_retries=<span class="code-number">3</span>, base_delay=<span class="code-number">5</span>):
+    <span class="code-string">"""Fetch URL with exponential backoff on failure."""</span>
+
+    <span class="code-keyword">for</span> attempt <span class="code-keyword">in</span> <span class="code-function">range</span>(max_retries):
+        <span class="code-keyword">try</span>:
+            response = requests.get(url, timeout=<span class="code-number">30</span>)
+
+            <span class="code-comment"># Success</span>
+            <span class="code-keyword">if</span> response.status_code == <span class="code-number">200</span>:
+                <span class="code-keyword">return</span> response.text
+
+            <span class="code-comment"># Rate limited - wait and retry</span>
+            <span class="code-keyword">elif</span> response.status_code == <span class="code-number">429</span>:
+                <span class="code-tooltip" data-tip="Retry-After header tells you how long to wait">wait_time</span> = int(response.headers.get(<span class="code-string">'Retry-After'</span>, base_delay))
+                <span class="code-keyword">print</span>(<span class="code-string">f"Rate limited. Waiting {wait_time}s..."</span>)
+                time.sleep(wait_time)
+
+            <span class="code-comment"># Server error - wait and retry</span>
+            <span class="code-keyword">elif</span> response.status_code >= <span class="code-number">500</span>:
+                <span class="code-tooltip" data-tip="Exponential backoff: 5s, 10s, 20s...">delay</span> = base_delay * (<span class="code-number">2</span> ** attempt)
+                <span class="code-keyword">print</span>(<span class="code-string">f"Server error. Retry in {delay}s..."</span>)
+                time.sleep(delay)
+
+            <span class="code-comment"># Client error - don't retry</span>
+            <span class="code-keyword">else</span>:
+                <span class="code-keyword">raise</span> <span class="code-function">Exception</span>(<span class="code-string">f"HTTP {response.status_code}"</span>)
+
+        <span class="code-keyword">except</span> RequestException <span class="code-keyword">as</span> e:
+            <span class="code-keyword">print</span>(<span class="code-string">f"Request failed: {e}"</span>)
+            <span class="code-keyword">if</span> attempt < max_retries - <span class="code-number">1</span>:
+                delay = base_delay * (<span class="code-number">2</span> ** attempt)
+                <span class="code-keyword">print</span>(<span class="code-string">f"Retrying in {delay}s..."</span>)
+                time.sleep(delay)
+
+    <span class="code-keyword">raise</span> <span class="code-function">Exception</span>(<span class="code-string">f"Failed after {max_retries} attempts"</span>)
+
+<span class="code-comment"># Usage</span>
+html = fetch_with_retry(<span class="code-string">"https://example.com/data"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="errors" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">Fetching https://example.com/data...</span>
+<span class="out-yellow">Server error (503). Retry in 5s...</span>
+<span class="out-str">Attempt 2...</span>
+<span class="out-yellow">Server error (503). Retry in 10s...</span>
+<span class="out-str">Attempt 3...</span>
+<span class="out-green">Success!</span></div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Save Your Work Incrementally</div>
+          <p style="margin-bottom: 0;">When scraping large amounts of data, save to disk after each page. If your script crashes after 2 hours, you don't want to lose everything. Use caching (shown above) or append to a CSV/database as you go.</p>
+        </div>
+
+        <div class="nav-footer">
+          <a href="02b-apis.html" class="nav-link prev">Working with APIs</a>
+          <a href="03-data-exploration.html" class="nav-link next">Module 3: Data Exploration</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Questions about web scraping? I can help with HTML parsing, legal considerations, or troubleshooting your scraper.</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.run-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const lang = this.dataset.lang;
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+        document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+          out.classList.remove('visible');
+        });
+        const output = document.querySelector(`.output-simulation[data-output="${outputId}"][data-lang="${lang}"]`);
+        if (output) {
+          output.classList.add('visible');
+          output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
+    document.querySelectorAll('.close-output').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.output-simulation').classList.remove('visible');
+      });
+    });
+
+    document.querySelectorAll('.code-tabs .tab-button').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+        if (outputId) {
+          document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+            out.classList.remove('visible');
+          });
+        }
+      });
+    });
+  });
+  </script>
+</body>
+</html>

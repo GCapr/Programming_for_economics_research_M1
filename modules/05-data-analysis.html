@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 5: Data Analysis | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    /* Interactive Exercise Styles */
+    .interactive-exercise { background: white; border: 2px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .exercise-editor { margin: 1rem 0; }
+    .editor-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .lang-btn { padding: 0.4rem 1rem; border: 1px solid var(--color-border); background: white; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .lang-btn:hover { border-color: var(--color-primary); }
+    .lang-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .code-editor { width: 100%; min-height: 200px; padding: 1rem; font-family: var(--font-code); font-size: 0.9rem; border: none; border-radius: 8px; background: #1a202c; color: #e2e8f0; resize: vertical; line-height: 1.5; }
+    .code-editor:focus { outline: 2px solid var(--color-accent); }
+    .exercise-actions { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+    .btn-check-score, .btn-show-solution { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-check-score { background: var(--color-primary); color: white; }
+    .btn-check-score:hover { background: var(--color-secondary); transform: translateY(-1px); }
+    .btn-show-solution { background: var(--color-accent); color: white; }
+    .btn-show-solution:hover { background: #c77a3a; }
+    .score-display { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-radius: 8px; }
+    .score-circle { display: flex; align-items: baseline; gap: 2px; }
+    .score-value { font-size: 2rem; font-weight: 700; color: var(--color-primary); }
+    .score-value.score-high { color: #38a169; }
+    .score-value.score-medium { color: #d69e2e; }
+    .score-value.score-low { color: #e53e3e; }
+    .score-label { font-size: 1rem; color: #666; }
+    .score-feedback { font-size: 0.9rem; color: #555; max-width: 300px; }
+    .solution-steps { margin-top: 1.5rem; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
+    .solution-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-bottom: 1px solid var(--color-border); }
+    .solution-header h5 { margin: 0; color: var(--color-primary); }
+    .step-counter { font-size: 0.85rem; color: #666; }
+    .solution-step { padding: 1rem; border-bottom: 1px solid var(--color-border); animation: fadeIn 0.3s ease; }
+    .solution-step:last-of-type { border-bottom: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .step-description { font-weight: 600; color: var(--color-secondary); margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 3px solid var(--color-accent); }
+    .step-code { margin: 0; background: #1e1e1e; border-radius: 6px; padding: 1rem; }
+    .step-code code { color: #d4d4d4; }
+    .solution-navigation { display: flex; justify-content: space-between; padding: 1rem; background: var(--color-bg-alt); }
+    .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <!-- Password Protection Overlay -->
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Please enter the course password to access the materials.</p>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+      <button id="password-submit">Access Course</button>
+      <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li>
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages &amp; Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li>
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">Importing from Files</a></li>
+              <li><a href="02b-apis.html">Working with APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li><a href="05-data-analysis.html" class="active"><span class="module-number">5</span> Data Analysis</a></li>
+          <li><a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a></li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git &amp; GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact &amp; Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>5 &nbsp;Data Analysis & Visualization</h1>
+          <div class="module-meta">
+            <span>~8 hours</span>
+            <span>EDA, Statistics, Plots</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Compute and interpret descriptive statistics</li>
+            <li>Create publication-quality visualizations</li>
+            <li>Perform exploratory data analysis (EDA)</li>
+            <li>Conduct hypothesis tests</li>
+            <li>Generate summary tables for papers</li>
+          </ul>
+        </div>
+
+        <h2>4.1 Descriptive Statistics</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Descriptive statistics</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+df.describe()                          <span class="code-comment"># Summary stats</span>
+df[<span class="code-string">'income'</span>].mean()                   <span class="code-comment"># Mean</span>
+df[<span class="code-string">'income'</span>].median()                 <span class="code-comment"># Median</span>
+df[<span class="code-string">'income'</span>].std()                    <span class="code-comment"># Standard deviation</span>
+df[<span class="code-string">'income'</span>].quantile([<span class="code-number">0.25</span>, <span class="code-number">0.75</span>])  <span class="code-comment"># Percentiles</span>
+
+<span class="code-comment"># By group</span>
+df.groupby(<span class="code-string">'education'</span>)[<span class="code-string">'income'</span>].mean()</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Descriptive statistics</span>
+<span class="code-keyword">summarize</span> income
+<span class="code-keyword">summarize</span> income, detail
+<span class="code-keyword">tabstat</span> income, by(education) stat(mean sd n)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Descriptive statistics</span>
+<span class="code-function">summary</span>(df$income)
+<span class="code-function">mean</span>(df$income, na.rm = TRUE)
+<span class="code-function">sd</span>(df$income, na.rm = TRUE)
+
+<span class="code-comment"># By group with dplyr</span>
+df %>% <span class="code-function">group_by</span>(education) %>% <span class="code-function">summarize</span>(mean_inc = <span class="code-function">mean</span>(income))</code></pre>
+          </div>
+        </div>
+
+        <h2>4.2 Data Visualization</h2>
+
+        <h3>Histograms</h3>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Histogram</span>
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+
+plt.hist(df[<span class="code-string">'income'</span>], bins=<span class="code-number">30</span>, edgecolor=<span class="code-string">'white'</span>)
+plt.xlabel(<span class="code-string">'Income'</span>)
+plt.ylabel(<span class="code-string">'Frequency'</span>)
+plt.title(<span class="code-string">'Distribution of Income'</span>)
+plt.savefig(<span class="code-string">'histogram.png'</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Histogram</span>
+<span class="code-keyword">histogram</span> income, frequency ///
+    title(<span class="code-string">"Distribution of Income"</span>)
+<span class="code-keyword">graph export</span> <span class="code-string">"histogram.png"</span>, replace</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Histogram with ggplot2</span>
+<span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = income)) +
+  <span class="code-function">geom_histogram</span>(bins = <span class="code-number">30</span>, fill = <span class="code-string">"steelblue"</span>) +
+  <span class="code-function">labs</span>(title = <span class="code-string">"Distribution of Income"</span>)
+<span class="code-function">ggsave</span>(<span class="code-string">"histogram.png"</span>)</code></pre>
+          </div>
+        </div>
+
+        <h3>Scatter Plots</h3>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Scatter plot</span>
+<span class="code-keyword">import</span> seaborn <span class="code-keyword">as</span> sns
+
+sns.scatterplot(data=df, x=<span class="code-string">'gdpPercap'</span>, y=<span class="code-string">'lifeExp'</span>, hue=<span class="code-string">'continent'</span>)
+plt.xscale(<span class="code-string">'log'</span>)
+plt.savefig(<span class="code-string">'scatter.png'</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Scatter plot</span>
+<span class="code-keyword">twoway</span> (scatter lifeExp gdpPercap), xscale(log)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Scatter plot</span>
+<span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = gdpPercap, y = lifeExp, color = continent)) +
+  <span class="code-function">geom_point</span>() +
+  <span class="code-function">scale_x_log10</span>()</code></pre>
+          </div>
+        </div>
+
+        <h2>4.3 Correlation Analysis</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Correlation</span>
+df[[<span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'age'</span>]].corr()
+
+<span class="code-comment"># With p-values</span>
+<span class="code-keyword">from</span> scipy <span class="code-keyword">import</span> stats
+r, p = stats.pearsonr(df[<span class="code-string">'income'</span>], df[<span class="code-string">'education'</span>])</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Correlation</span>
+<span class="code-keyword">correlate</span> income education age
+<span class="code-keyword">pwcorr</span> income education age, sig star(<span class="code-number">.05</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Correlation</span>
+<span class="code-function">cor</span>(df[<span class="code-function">c</span>(<span class="code-string">"income"</span>, <span class="code-string">"education"</span>, <span class="code-string">"age"</span>)], use = <span class="code-string">"complete.obs"</span>)
+<span class="code-function">cor.test</span>(df$income, df$education)</code></pre>
+          </div>
+        </div>
+
+        <h2>4.4 Summary Tables for Papers</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Summary table with stargazer</span>
+<span class="code-comment"># pip install stargazer</span>
+<span class="code-keyword">from</span> stargazer.stargazer <span class="code-keyword">import</span> Stargazer
+
+<span class="code-comment"># For regression tables</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+model = smf.ols(<span class="code-string">'income ~ education + age'</span>, data=df).fit()
+stargazer = Stargazer([model])
+<span class="code-keyword">print</span>(stargazer.render_latex())</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Summary tables with estout</span>
+<span class="code-keyword">eststo clear</span>
+<span class="code-keyword">eststo</span>: reg income education
+<span class="code-keyword">eststo</span>: reg income education age
+<span class="code-keyword">esttab</span> using <span class="code-string">"table.tex"</span>, replace se star(* <span class="code-number">0.1</span> ** <span class="code-number">0.05</span> *** <span class="code-number">0.01</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Summary tables with modelsummary</span>
+<span class="code-function">library</span>(modelsummary)
+
+model1 <- <span class="code-function">lm</span>(income ~ education, data = df)
+model2 <- <span class="code-function">lm</span>(income ~ education + age, data = df)
+
+<span class="code-function">modelsummary</span>(<span class="code-function">list</span>(model1, model2), stars = TRUE, output = <span class="code-string">"table.tex"</span>)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="exercises">4.5 Exercises</h2>
+
+        <!-- Exercise 4.1: Interactive -->
+        <div class="interactive-exercise" data-exercise="4.1">
+          <h4>Exercise 4.1: Descriptive Statistics and Visualization</h4>
+          <p>Practice computing statistics and creating visualizations. Complete these tasks:</p>
+          <ol>
+            <li>Calculate descriptive statistics (mean, median, std)</li>
+            <li>Create a histogram</li>
+            <li>Create a scatter plot</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Calculate descriptive statistics
+# Task 2: Create a histogram
+# Task 3: Create a scatter plot
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Calculate descriptive statistics
+* Task 2: Create a histogram
+* Task 3: Create a scatter plot
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Calculate descriptive statistics
+# Task 2: Create a histogram
+# Task 3: Create a scatter plot
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <!-- Python Solutions -->
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Calculate descriptive statistics</div>
+              <pre class="step-code"><code><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Descriptive statistics</span>
+df.describe()
+df[<span class="code-string">'income'</span>].mean()
+df[<span class="code-string">'income'</span>].median()
+df[<span class="code-string">'income'</span>].std()</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Create a histogram</div>
+              <pre class="step-code"><code><span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+
+plt.hist(df[<span class="code-string">'income'</span>], bins=<span class="code-number">30</span>)
+plt.xlabel(<span class="code-string">'Income'</span>)
+plt.ylabel(<span class="code-string">'Frequency'</span>)
+plt.show()</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a scatter plot</div>
+              <pre class="step-code"><code>plt.scatter(df[<span class="code-string">'gdpPercap'</span>], df[<span class="code-string">'lifeExp'</span>])
+plt.xlabel(<span class="code-string">'GDP per Capita'</span>)
+plt.ylabel(<span class="code-string">'Life Expectancy'</span>)
+plt.show()</code></pre>
+            </div>
+
+            <!-- Stata Solutions -->
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Calculate descriptive statistics</div>
+              <pre class="step-code"><code><span class="code-comment">* Descriptive statistics</span>
+<span class="code-keyword">summarize</span> income
+<span class="code-keyword">summarize</span> income, detail</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Create a histogram</div>
+              <pre class="step-code"><code><span class="code-keyword">histogram</span> income, frequency
+<span class="code-keyword">graph export</span> <span class="code-string">"histogram.png"</span>, replace</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a scatter plot</div>
+              <pre class="step-code"><code><span class="code-keyword">twoway</span> (scatter lifeExp gdpPercap)
+<span class="code-keyword">graph export</span> <span class="code-string">"scatter.png"</span>, replace</code></pre>
+            </div>
+
+            <!-- R Solutions -->
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Calculate descriptive statistics</div>
+              <pre class="step-code"><code><span class="code-comment"># Descriptive statistics</span>
+<span class="code-function">summary</span>(df$income)
+<span class="code-function">mean</span>(df$income, na.rm = TRUE)
+<span class="code-function">sd</span>(df$income, na.rm = TRUE)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Create a histogram</div>
+              <pre class="step-code"><code><span class="code-function">library</span>(ggplot2)
+
+<span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = income)) +
+  <span class="code-function">geom_histogram</span>(bins = 30)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a scatter plot</div>
+              <pre class="step-code"><code><span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = gdpPercap, y = lifeExp)) +
+  <span class="code-function">geom_point</span>()</code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-footer">
+          <a href="04-data-cleaning.html" class="nav-link prev">Module 4: Data Cleaning</a>
+          <a href="06-causal-inference.html" class="nav-link next">Module 6: Causal Inference</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I'm the ProTools ER1 course assistant. I can help you with questions about Python, Stata, R, causal inference methods, or any of the course material. How can I assist you today?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question about the course..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Interactive Exercise Script -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const exercisePatterns = {
+      '4.1': {
+        python: {
+          patterns: [
+            // Descriptive stats - accepts: describe, mean, median, std, var, quantile, agg
+            { regex: /\.describe\s*\(|\.mean\s*\(|\.median\s*\(|\.std\s*\(|\.var\s*\(|\.quantile\s*\(|\.agg\s*\(|statistics\.|np\.mean|np\.std|np\.median/i, points: 34, description: 'Calculate descriptive statistics' },
+            // Histogram - accepts: plt.hist, hist(), sns.histplot, distplot, displot
+            { regex: /plt\.hist\s*\(|\.hist\s*\(|sns\.histplot|sns\.distplot|sns\.displot|histogram|geom_histogram/i, points: 33, description: 'Create histogram' },
+            // Scatter plot - accepts: plt.scatter, scatter(), sns.scatterplot, regplot
+            { regex: /plt\.scatter\s*\(|\.scatter\s*\(|sns\.scatterplot|sns\.regplot|sns\.lmplot|geom_point|scatterplot/i, points: 33, description: 'Create scatter plot' }
+          ]
+        },
+        stata: {
+          patterns: [
+            // Descriptive stats - accepts: summarize, su, sum, tabstat, tab, describe
+            { regex: /summarize|sum\s+|su\s+|tabstat|tabulate|tab\s+|describe/i, points: 34, description: 'Calculate descriptive statistics' },
+            // Histogram - accepts: histogram, hist, kdensity, graph bar
+            { regex: /histogram|hist\s+|kdensity|graph\s+bar/i, points: 33, description: 'Create histogram' },
+            // Scatter plot - accepts: scatter, twoway scatter, graph twoway
+            { regex: /scatter\s+|twoway\s+\(?\s*scatter|graph\s+twoway/i, points: 33, description: 'Create scatter plot' }
+          ]
+        },
+        r: {
+          patterns: [
+            // Descriptive stats - accepts: summary, mean, median, sd, var, describe, summarize/summarise
+            { regex: /summary\s*\(|mean\s*\(|median\s*\(|sd\s*\(|var\s*\(|describe\s*\(|summarize\s*\(|summarise\s*\(/i, points: 34, description: 'Calculate descriptive statistics' },
+            // Histogram - accepts: geom_histogram, hist(), geom_bar, geom_density
+            { regex: /geom_histogram|hist\s*\(|geom_bar|geom_density|histogram/i, points: 33, description: 'Create histogram' },
+            // Scatter plot - accepts: geom_point, plot(), geom_smooth, scatterplot
+            { regex: /geom_point|plot\s*\(.*,|geom_smooth|scatterplot|geom_jitter/i, points: 33, description: 'Create scatter plot' }
+          ]
+        }
+      }
+    };
+
+    // Initialize interactive exercises
+    document.querySelectorAll('.interactive-exercise').forEach(exercise => {
+      const exerciseId = exercise.dataset.exercise;
+      let currentLang = 'python';
+      let currentStep = 0;
+      let hasCheckedScore = false;
+
+      exercise.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const lang = this.dataset.lang;
+          currentLang = lang;
+          exercise.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          exercise.querySelectorAll('.code-editor').forEach(editor => {
+            editor.style.display = editor.dataset.lang === lang ? 'block' : 'none';
+          });
+          if (hasCheckedScore) resetSolutionSteps();
+        });
+      });
+
+      const checkBtn = exercise.querySelector('.btn-check-score');
+      const scoreDisplay = exercise.querySelector('.score-display');
+      const scoreValue = exercise.querySelector('.score-value');
+      const scoreFeedback = exercise.querySelector('.score-feedback');
+      const showSolutionBtn = exercise.querySelector('.btn-show-solution');
+
+      checkBtn.addEventListener('click', function() {
+        const editor = exercise.querySelector(`.code-editor[data-lang="${currentLang}"]`);
+        const code = editor.value;
+        const patterns = exercisePatterns[exerciseId]?.[currentLang]?.patterns || [];
+
+        let score = 0;
+        let matched = [];
+        let missed = [];
+
+        patterns.forEach(p => {
+          if (p.regex.test(code)) {
+            score += p.points;
+            matched.push(p.description);
+          } else {
+            missed.push(p.description);
+          }
+        });
+
+        score = Math.min(100, score);
+        scoreValue.textContent = score;
+        scoreValue.className = 'score-value';
+        if (score >= 80) scoreValue.classList.add('score-high');
+        else if (score >= 50) scoreValue.classList.add('score-medium');
+        else scoreValue.classList.add('score-low');
+
+        if (score === 100) {
+          scoreFeedback.textContent = 'Perfect! All tasks completed correctly.';
+        } else if (score >= 70) {
+          scoreFeedback.textContent = `Good work! Missing: ${missed.join(', ')}.`;
+        } else if (score >= 40) {
+          scoreFeedback.textContent = `Getting there. Missing: ${missed.join(', ')}.`;
+        } else {
+          scoreFeedback.textContent = `Keep trying! Check: ${missed.slice(0, 2).join(', ')}.`;
+        }
+
+        scoreDisplay.style.display = 'flex';
+        showSolutionBtn.style.display = 'inline-block';
+        hasCheckedScore = true;
+      });
+
+      const solutionSteps = exercise.querySelector('.solution-steps');
+      const prevBtn = exercise.querySelector('.btn-prev-step');
+      const nextBtn = exercise.querySelector('.btn-next-step');
+      const currentStepEl = exercise.querySelector('.current-step');
+      const totalStepsEl = exercise.querySelector('.total-steps');
+
+      function resetSolutionSteps() {
+        currentStep = 0;
+        currentStepEl.textContent = '0';
+        exercise.querySelectorAll('.solution-step').forEach(step => {
+          step.style.display = 'none';
+        });
+        updateNavButtons();
+      }
+
+      function updateNavButtons() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        totalStepsEl.textContent = totalSteps;
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep >= totalSteps;
+        nextBtn.textContent = currentStep >= totalSteps ? 'Complete' : 'Next Step';
+      }
+
+      function showStep(stepNum) {
+        const steps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`);
+        steps.forEach((step, idx) => {
+          step.style.display = (idx + 1) <= stepNum ? 'block' : 'none';
+        });
+        currentStepEl.textContent = stepNum;
+      }
+
+      showSolutionBtn.addEventListener('click', function() {
+        solutionSteps.style.display = 'block';
+        resetSolutionSteps();
+        this.style.display = 'none';
+      });
+
+      nextBtn.addEventListener('click', function() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        if (currentStep < totalSteps) {
+          currentStep++;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      prevBtn.addEventListener('click', function() {
+        if (currentStep > 0) {
+          currentStep--;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      updateNavButtons();
+    });
+  });
+  </script>
+</body>
+</html>

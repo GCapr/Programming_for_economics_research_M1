@@ -15,6 +15,69 @@
       -ms-user-select: none;
       user-select: none;
     }
+    /* Interactive IDE diagram styles */
+    .ide-diagram {
+      position: relative;
+      margin: 2rem 0;
+      border-radius: 8px;
+      overflow: visible;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    .ide-diagram-container {
+      position: relative;
+      background: #1e1e1e;
+      border-radius: 8px 8px 0 0;
+    }
+    .ide-region {
+      position: absolute;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .ide-region:hover {
+      border-color: var(--color-accent);
+      background: rgba(237, 137, 54, 0.15);
+    }
+    .ide-region.active {
+      border-color: var(--color-accent);
+      background: rgba(237, 137, 54, 0.2);
+    }
+    .ide-region-label {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: var(--color-accent);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      z-index: 10;
+    }
+    .ide-info-panel {
+      background: var(--color-bg-alt);
+      padding: 1rem 1.5rem;
+      border-radius: 0 0 8px 8px;
+      min-height: 100px;
+      transition: all 0.2s ease;
+    }
+    .ide-info-panel h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--color-primary);
+    }
+    .ide-info-panel p {
+      margin: 0;
+      color: var(--color-text);
+    }
+    .ide-info-default {
+      color: var(--color-text-light);
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -96,53 +159,164 @@
         <h2>The VS Code Interface</h2>
 
         <p>
-          VS Code has a clean, customizable interface. Here are the main components:
+          VS Code has a clean, customizable interface. <strong>Hover over each numbered region below</strong> to learn what it does:
         </p>
 
-        <!-- Real VS Code Screenshot -->
-        <div style="margin: 2rem 0; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);">
-          <img src="https://code.visualstudio.com/assets/docs/getstarted/userinterface/hero.png" alt="VS Code interface overview" style="width: 100%; display: block;">
-          <div style="background: var(--color-bg-alt); padding: 1rem; font-size: 0.9rem;">
-            <strong>The VS Code interface.</strong> Image credit: <a href="https://code.visualstudio.com/docs/getstarted/userinterface" target="_blank">Microsoft VS Code Documentation</a>.
+        <!-- Interactive VS Code Diagram -->
+        <div class="ide-diagram" id="vscode-diagram">
+          <div class="ide-diagram-container">
+            <!-- VS Code window mockup -->
+            <div style="background: #1e1e1e; border-radius: 8px 8px 0 0;">
+              <!-- Title bar -->
+              <div style="background: #323233; padding: 6px 12px; border-radius: 8px 8px 0 0; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; gap: 6px;">
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></span>
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></span>
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></span>
+                </div>
+                <span style="color: #ccc; font-size: 0.8rem;">analysis.py - my_project - Visual Studio Code</span>
+                <div style="width: 50px;"></div>
+              </div>
+              <!-- Main content area -->
+              <div style="display: grid; grid-template-columns: 48px 200px 1fr; min-height: 380px;">
+                <!-- Activity Bar (far left) -->
+                <div style="background: #333333; display: flex; flex-direction: column; align-items: center; padding: 8px 0; position: relative;">
+                  <div style="padding: 10px; color: #fff; background: rgba(255,255,255,0.1); border-left: 2px solid #007acc;">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M17.5 0h-9L7 1.5V6H2.5L1 7.5v15.07L2.5 24h12.07L16 22.57V18h4.7l1.3-1.43V4.5L17.5 0zm0 2.12l2.38 2.38H17.5V2.12zm-3 20.38H3v-15h4.5v10.07L9 19.07h5.5v3.43zm8-5H9v-15h6v4.5h4.5v10.5z"/></svg>
+                  </div>
+                  <div style="padding: 10px; color: #888;">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M15.25 0a8.25 8.25 0 0 0-6.18 13.72L1 22.88l1.12 1.12 9.16-8.07A8.25 8.25 0 1 0 15.25 0zm0 15a6.75 6.75 0 1 1 0-13.5 6.75 6.75 0 0 1 0 13.5z"/></svg>
+                  </div>
+                  <div style="padding: 10px; color: #888;">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M21.007 8.222A3.738 3.738 0 0 0 15.045 5.2a3.737 3.737 0 0 0 1.156 6.583 2.988 2.988 0 0 1-2.668 1.67h-2.99a4.456 4.456 0 0 0-2.989 1.165V7.476a3.737 3.737 0 1 0-1.494 0v9.048a3.737 3.737 0 1 0 1.607.109 2.988 2.988 0 0 1 2.876-2.188h2.99a4.482 4.482 0 0 0 4.028-2.557 3.738 3.738 0 0 0 3.446-3.666z"/></svg>
+                  </div>
+                  <div style="padding: 10px; color: #888;">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M13.5 3H12v10.02l5.25 3.07.53-.92-4.28-2.5V3zm-1.5 18a9 9 0 1 1 0-18 9 9 0 0 1 0 18zm0-20C5.37 1 0 6.37 0 13s5.37 12 12 12 12-5.37 12-12S18.63 1 12 1z"/></svg>
+                  </div>
+                  <div class="ide-region" data-region="1" style="top: 0; left: 0; right: 0; bottom: 0;">
+                    <span class="ide-region-label">1</span>
+                  </div>
+                </div>
+
+                <!-- Sidebar (Explorer) -->
+                <div style="background: #252526; border-right: 1px solid #1e1e1e; position: relative;">
+                  <div style="padding: 10px; color: #bbb; font-size: 0.7rem; text-transform: uppercase; font-weight: 600;">Explorer</div>
+                  <div style="padding: 0 10px; font-size: 0.8rem; color: #ccc;">
+                    <div style="padding: 4px 0;"><span style="color: #e8ab53;">▾</span> <strong>my_project</strong></div>
+                    <div style="padding: 2px 0 2px 16px; color: #ccc;">📄 analysis.py</div>
+                    <div style="padding: 2px 0 2px 16px; color: #888;">📄 data.csv</div>
+                    <div style="padding: 2px 0 2px 16px; color: #888;">📄 README.md</div>
+                    <div style="padding: 2px 0 2px 16px; color: #888;">📁 output</div>
+                  </div>
+                  <div class="ide-region" data-region="2" style="top: 0; left: 0; right: 0; bottom: 0;">
+                    <span class="ide-region-label">2</span>
+                  </div>
+                </div>
+
+                <!-- Main Editor + Terminal -->
+                <div style="display: flex; flex-direction: column;">
+                  <!-- Tab bar -->
+                  <div style="background: #252526; display: flex; border-bottom: 1px solid #1e1e1e;">
+                    <div style="padding: 8px 12px; background: #1e1e1e; color: #fff; font-size: 0.8rem; border-top: 1px solid #007acc;">
+                      analysis.py <span style="color: #666; margin-left: 8px;">×</span>
+                    </div>
+                  </div>
+                  <!-- Editor area -->
+                  <div style="flex: 1; background: #1e1e1e; padding: 12px; font-family: var(--font-code); font-size: 0.75rem; line-height: 1.6; position: relative; color: #d4d4d4;">
+                    <div><span style="color: #569cd6;">import</span> pandas <span style="color: #569cd6;">as</span> pd</div>
+                    <div><span style="color: #569cd6;">import</span> numpy <span style="color: #569cd6;">as</span> np</div>
+                    <div>&nbsp;</div>
+                    <div><span style="color: #6a9955;"># Load the data</span></div>
+                    <div>df = pd.<span style="color: #dcdcaa;">read_csv</span>(<span style="color: #ce9178;">"data.csv"</span>)</div>
+                    <div>&nbsp;</div>
+                    <div><span style="color: #6a9955;"># Calculate summary statistics</span></div>
+                    <div><span style="color: #dcdcaa;">print</span>(df.<span style="color: #dcdcaa;">describe</span>())</div>
+                    <div class="ide-region" data-region="3" style="top: 0; left: 0; right: 0; bottom: 0;">
+                      <span class="ide-region-label">3</span>
+                    </div>
+                  </div>
+                  <!-- Terminal -->
+                  <div style="height: 100px; background: #1e1e1e; border-top: 1px solid #454545; position: relative;">
+                    <div style="background: #252526; padding: 4px 12px; font-size: 0.7rem; color: #ccc; display: flex; gap: 16px;">
+                      <span style="border-bottom: 1px solid #007acc; padding-bottom: 2px;">TERMINAL</span>
+                      <span style="color: #888;">PROBLEMS</span>
+                      <span style="color: #888;">OUTPUT</span>
+                    </div>
+                    <div style="padding: 8px 12px; font-family: var(--font-code); font-size: 0.7rem; color: #ccc;">
+                      <div style="color: #888;">~/my_project $</div>
+                      <div>python analysis.py</div>
+                      <div style="color: #6a9955;">[Output appears here]</div>
+                    </div>
+                    <div class="ide-region" data-region="4" style="top: 0; left: 0; right: 0; bottom: 0;">
+                      <span class="ide-region-label">4</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Info panel that updates on hover -->
+          <div class="ide-info-panel" id="vscode-info">
+            <p class="ide-info-default">Hover over a numbered region to learn about that part of VS Code.</p>
           </div>
         </div>
 
-        <h3>Interface Components</h3>
+        <script>
+          (function() {
+            const infoPanel = document.getElementById('vscode-info');
+            const regions = document.querySelectorAll('#vscode-diagram .ide-region');
 
-        <div style="display: grid; gap: 1.5rem; margin: 2rem 0;">
-          <div style="background: var(--color-bg-alt); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--color-python);">
-            <h4 style="margin-top: 0; color: var(--color-python);">Activity Bar (Far Left)</h4>
-            <p style="margin-bottom: 0;">
-              The vertical bar with icons for:
-              <br><strong>Explorer</strong> — Browse files in your project
-              <br><strong>Search</strong> — Find text across all files
-              <br><strong>Source Control</strong> — Git integration
-              <br><strong>Run & Debug</strong> — Debugging tools
-              <br><strong>Extensions</strong> — Install new functionality
-            </p>
-          </div>
+            const regionInfo = {
+              '1': {
+                title: 'Activity Bar (Far Left)',
+                description: 'The vertical bar with icons for the main views: <strong>Explorer</strong> (file browser), <strong>Search</strong> (find in files), <strong>Source Control</strong> (Git integration), <strong>Run & Debug</strong>, and <strong>Extensions</strong>. Click an icon to open that view in the Side Bar.'
+              },
+              '2': {
+                title: 'Side Bar / Explorer',
+                description: 'Shows the content for whichever Activity Bar icon is selected. Usually you\'ll have the <strong>Explorer</strong> open, showing your project\'s file tree. Click on a file to open it in the editor. Right-click for options like New File, Rename, Delete.'
+              },
+              '3': {
+                title: 'Editor',
+                description: 'The main area where you write code. Features include syntax highlighting, autocomplete (IntelliSense), error detection, and multi-cursor editing. You can split the editor to view files side by side. Run code with <code>Ctrl+F5</code> or select code and press <code>Shift+Enter</code>.'
+              },
+              '4': {
+                title: 'Panel / Terminal',
+                description: 'Contains the integrated <strong>Terminal</strong>, <strong>Problems</strong> (errors and warnings), <strong>Output</strong> (logs from extensions), and <strong>Debug Console</strong>. Toggle it with <code>Ctrl+`</code> (backtick). The terminal lets you run commands without leaving VS Code.'
+              }
+            };
 
-          <div style="background: var(--color-bg-alt); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--color-accent);">
-            <h4 style="margin-top: 0; color: var(--color-accent);">Side Bar (Left)</h4>
-            <p style="margin-bottom: 0;">
-              Shows the content for whichever Activity Bar icon is selected. Usually you'll have the Explorer open, showing your project's file tree. Click on a file to open it in the editor.
-            </p>
-          </div>
+            const defaultContent = '<p class="ide-info-default">Hover over a numbered region to learn about that part of VS Code.</p>';
 
-          <div style="background: var(--color-bg-alt); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--color-success);">
-            <h4 style="margin-top: 0; color: var(--color-success);">Editor (Center)</h4>
-            <p style="margin-bottom: 0;">
-              The main area where you write code. You can open multiple files in tabs, split the editor to view files side by side, and even preview Markdown files. VS Code provides syntax highlighting, error detection, and autocomplete.
-            </p>
-          </div>
+            regions.forEach(region => {
+              region.addEventListener('mouseenter', function() {
+                const regionId = this.getAttribute('data-region');
+                const info = regionInfo[regionId];
+                if (info) {
+                  infoPanel.innerHTML = `<h4>${info.title}</h4><p>${info.description}</p>`;
+                  regions.forEach(r => r.classList.remove('active'));
+                  this.classList.add('active');
+                }
+              });
 
-          <div style="background: var(--color-bg-alt); padding: 1.5rem; border-radius: 8px; border-left: 4px solid var(--color-r);">
-            <h4 style="margin-top: 0; color: var(--color-r);">Panel (Bottom)</h4>
-            <p style="margin-bottom: 0;">
-              Contains the <strong>Terminal</strong> (run commands without leaving VS Code), <strong>Problems</strong> (see errors and warnings), <strong>Output</strong> (logs from extensions), and <strong>Debug Console</strong>. Toggle it with <code>Ctrl+`</code>.
-            </p>
-          </div>
-        </div>
+              region.addEventListener('mouseleave', function() {
+                setTimeout(() => {
+                  if (!document.querySelector('#vscode-diagram .ide-region:hover')) {
+                    this.classList.remove('active');
+                  }
+                }, 100);
+              });
+            });
+
+            document.getElementById('vscode-diagram').addEventListener('mouseleave', function() {
+              setTimeout(() => {
+                if (!document.querySelector('#vscode-diagram:hover')) {
+                  infoPanel.innerHTML = defaultContent;
+                  regions.forEach(r => r.classList.remove('active'));
+                }
+              }, 300);
+            });
+          })();
+        </script>
 
         <h2>Installing Extensions</h2>
 
@@ -187,16 +361,6 @@
               <td>Enhanced Git integration and history viewing</td>
               <td>Version control</td>
             </tr>
-            <tr>
-              <td><strong>R</strong> (by REditorSupport)</td>
-              <td>R language support</td>
-              <td>R development (optional)</td>
-            </tr>
-            <tr>
-              <td><strong>Stata Enhanced</strong></td>
-              <td>Stata syntax highlighting</td>
-              <td>Viewing Stata code (optional)</td>
-            </tr>
           </tbody>
         </table>
 
@@ -206,63 +370,6 @@
             At minimum, install the <strong>Python</strong> extension by Microsoft. It will automatically recommend Pylance as well. These two extensions transform VS Code into a powerful Python IDE.
           </p>
         </div>
-
-        <h2>Setting Up Python in VS Code</h2>
-
-        <p>
-          After installing the Python extension, you need to configure VS Code to use your Python installation:
-        </p>
-
-        <ol>
-          <li>Open VS Code</li>
-          <li>Press <code>Ctrl+Shift+P</code> (or <code>Cmd+Shift+P</code> on Mac) to open the Command Palette</li>
-          <li>Type "Python: Select Interpreter" and press Enter</li>
-          <li>Choose your Python installation from the list</li>
-        </ol>
-
-        <p>
-          If you don't have Python installed, download it from <a href="https://www.python.org/downloads/" target="_blank">python.org</a> or use Anaconda from <a href="https://www.anaconda.com/download" target="_blank">anaconda.com</a>.
-        </p>
-
-        <h2>Running Python Code</h2>
-
-        <p>
-          There are several ways to run Python in VS Code:
-        </p>
-
-        <h3>Method 1: Run Entire File</h3>
-        <ul>
-          <li>Open a <code>.py</code> file</li>
-          <li>Click the <strong>Play button</strong> (top right) or press <code>Ctrl+F5</code></li>
-          <li>Output appears in the Terminal panel</li>
-        </ul>
-
-        <h3>Method 2: Run Selection (Interactive)</h3>
-        <ul>
-          <li>Select some code</li>
-          <li>Press <code>Shift+Enter</code></li>
-          <li>VS Code runs the selection in an interactive Python window</li>
-        </ul>
-
-        <h3>Method 3: Jupyter Notebooks</h3>
-        <ul>
-          <li>Create a new file with <code>.ipynb</code> extension</li>
-          <li>Write code in cells and run them individually</li>
-          <li>Great for exploratory analysis (see the <a href="00d-notebooks-guide.html">Notebooks guide</a>)</li>
-        </ul>
-
-        <h2>The Integrated Terminal</h2>
-
-        <p>
-          One of VS Code's best features is the integrated terminal. Open it with <code>Ctrl+`</code> (backtick). You can:
-        </p>
-
-        <ul>
-          <li>Run Python scripts: <code>python my_script.py</code></li>
-          <li>Install packages: <code>pip install pandas</code></li>
-          <li>Use Git commands: <code>git status</code></li>
-          <li>Navigate directories without leaving VS Code</li>
-        </ul>
 
         <h2>Essential Keyboard Shortcuts</h2>
 
@@ -291,11 +398,6 @@
               <td>Quick Open (find files fast)</td>
             </tr>
             <tr>
-              <td><code>Ctrl + Shift + X</code></td>
-              <td><code>Cmd + Shift + X</code></td>
-              <td>Open Extensions view</td>
-            </tr>
-            <tr>
               <td><code>Ctrl + B</code></td>
               <td><code>Cmd + B</code></td>
               <td>Toggle sidebar</td>
@@ -306,21 +408,6 @@
               <td>Comment/uncomment line</td>
             </tr>
             <tr>
-              <td><code>Alt + Up/Down</code></td>
-              <td><code>Option + Up/Down</code></td>
-              <td>Move line up/down</td>
-            </tr>
-            <tr>
-              <td><code>Ctrl + D</code></td>
-              <td><code>Cmd + D</code></td>
-              <td>Select next occurrence of word</td>
-            </tr>
-            <tr>
-              <td><code>F5</code></td>
-              <td><code>F5</code></td>
-              <td>Start debugging</td>
-            </tr>
-            <tr>
               <td><code>Shift + Enter</code></td>
               <td><code>Shift + Enter</code></td>
               <td>Run selected Python code</td>
@@ -328,68 +415,13 @@
           </tbody>
         </table>
 
-        <h2>Using AI Coding Assistants</h2>
-
-        <p>
-          VS Code integrates well with AI coding tools, which can dramatically accelerate your learning and productivity.
-        </p>
-
-        <h3>GitHub Copilot</h3>
-        <p>
-          GitHub Copilot provides real-time code suggestions as you type. It's trained on billions of lines of code and can complete entire functions from comments.
-        </p>
-        <ul>
-          <li><strong>Cost:</strong> $10/month, but <strong>free for students</strong> (apply at <a href="https://education.github.com" target="_blank">education.github.com</a>)</li>
-          <li><strong>Install:</strong> Search "GitHub Copilot" in Extensions</li>
-        </ul>
-
-        <h3>Claude Code</h3>
-        <p>
-          Claude Code is Anthropic's AI coding assistant. There are two ways to use it:
-        </p>
-
-        <h4>Option 1: Claude Extension</h4>
-        <ol>
-          <li>Open Extensions (<code>Ctrl+Shift+X</code>)</li>
-          <li>Search for "Claude" or "Anthropic"</li>
-          <li>Install the official extension</li>
-          <li>Sign in with your Anthropic account</li>
-        </ol>
-
-        <h4>Option 2: Claude Code CLI in Terminal</h4>
-        <p>
-          You can use the Claude Code command-line tool directly in VS Code's integrated terminal:
-        </p>
-
-        <div class="code-tabs">
-          <div class="tab-buttons">
-            <button class="tab-button active" data-lang="python">Terminal Commands</button>
-          </div>
-          <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Install Claude Code globally</span>
-npm install -g @anthropic-ai/claude-code
-
-<span class="code-comment"># Navigate to your project</span>
-cd /path/to/your/project
-
-<span class="code-comment"># Start Claude Code</span>
-claude
-
-<span class="code-comment"># Now you can ask questions like:</span>
-<span class="code-string">&gt; "Explain what this file does"</span>
-<span class="code-string">&gt; "Fix the bug on line 42"</span>
-<span class="code-string">&gt; "Write tests for my function"</span>
-<span class="code-string">&gt; "Convert this R code to Python"</span></code></pre>
-          </div>
-        </div>
-
         <h2>Video Tutorials</h2>
 
         <div class="info-box note">
           <div class="info-box-title">Recommended Videos</div>
           <ul>
-            <li><a href="https://www.youtube.com/watch?v=B-s71n0dHUk" target="_blank">Visual Studio Code Tutorial for Beginners</a> (YouTube, ~30 min) — Comprehensive overview</li>
-            <li><a href="https://www.youtube.com/watch?v=KMxo3T_MTvY" target="_blank">Python in VS Code</a> (YouTube, ~10 min) — Setting up Python specifically</li>
+            <li><a href="https://www.youtube.com/watch?v=B-s71n0dHUk" target="_blank">Visual Studio Code Tutorial for Beginners</a> (YouTube, ~30 min)</li>
+            <li><a href="https://www.youtube.com/watch?v=KMxo3T_MTvY" target="_blank">Python in VS Code</a> (YouTube, ~10 min)</li>
             <li><a href="https://code.visualstudio.com/docs/getstarted/introvideos" target="_blank">VS Code Intro Videos</a> — Official video series from Microsoft</li>
           </ul>
         </div>

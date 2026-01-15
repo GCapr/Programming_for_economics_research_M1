@@ -1166,26 +1166,38 @@ numbers <- <span class="code-number">1</span>:<span class="code-number">5</span>
       '1.1': {
         python: {
           patterns: [
-            { regex: /print\s*\(\s*["'].*Hello.*ProTools.*["']\s*\)/i, points: 33, description: 'Print greeting' },
-            { regex: /\*\*\s*10|2\s*\*\*\s*10|pow\s*\(\s*2\s*,\s*10\s*\)/i, points: 33, description: 'Calculate 2^10' },
-            { regex: /sum\s*\(|\.sum\s*\(/i, points: 17, description: 'Use sum function' },
-            { regex: /\[\s*1\s*,\s*2\s*,\s*3\s*,\s*4\s*,\s*5\s*\]|range\s*\(\s*1\s*,\s*6\s*\)|list\s*\(\s*range/i, points: 17, description: 'Create list 1-5' }
+            // Print greeting - accepts: print("Hello..."), print('Hello...'), f-strings, variables
+            { regex: /print\s*\(.*["'].*[Hh]ello.*["'].*\)|print\s*\([^)]*[Hh]ello|print\s*\(.*[Pp]ro[Tt]ools|print\s*\(.*greeting|print\s*\(.*message/i, points: 33, description: 'Print greeting' },
+            // Calculate 2^10 - accepts: 2**10, pow(2,10), 2^10 in comments, storing result in variable
+            { regex: /2\s*\*\*\s*10|pow\s*\(\s*2\s*,\s*10\s*\)|math\.pow\s*\(\s*2\s*,\s*10|1024|2\^10/i, points: 33, description: 'Calculate 2^10' },
+            // Sum function - accepts: sum(), numpy sum, pandas sum, reduce with add
+            { regex: /sum\s*\(|\.sum\s*\(|np\.sum|numpy\.sum|reduce\s*\(.*add/i, points: 17, description: 'Use sum function' },
+            // Create list 1-5 - accepts: literal list, range(), list comprehension, numpy arange
+            { regex: /\[\s*1\s*,\s*2\s*,\s*3\s*,\s*4\s*,\s*5\s*\]|range\s*\(\s*1\s*,\s*6\s*\)|range\s*\(\s*5\s*\)|list\s*\(\s*range|\[\s*i\s+for\s+i\s+in|np\.arange\s*\(\s*1\s*,\s*6|numpy\.arange/i, points: 17, description: 'Create list 1-5' }
           ]
         },
         stata: {
           patterns: [
-            { regex: /display\s*["'].*Hello.*ProTools.*["']/i, points: 33, description: 'Display greeting' },
-            { regex: /display\s*2\s*\^?\s*10|di\s*2\s*\^?\s*10/i, points: 33, description: 'Calculate 2^10' },
-            { regex: /summarize|sum\s+|total/i, points: 17, description: 'Summarize/sum' },
-            { regex: /gen\s+|generate\s+|_n/i, points: 17, description: 'Generate numbers' }
+            // Display greeting - accepts: display, di, dis (Stata abbreviations), with various quotes
+            { regex: /di(splay)?\s*["'`].*[Hh]ello|di(splay)?\s*["'`].*[Pp]ro[Tt]ools|di\s+["'`]/i, points: 33, description: 'Display greeting' },
+            // Calculate 2^10 - accepts: display 2^10, di 2^10, scalar, local with result, 1024
+            { regex: /di(splay)?\s+2\s*\^\s*10|di\s+2\s*\*\*\s*10|scalar.*2\s*\^\s*10|local.*2\s*\^\s*10|1024|=\s*2\s*\^\s*10/i, points: 33, description: 'Calculate 2^10' },
+            // Summarize/sum - accepts: summarize, sum, tabstat, total, collapse (sum)
+            { regex: /summarize|sum\s|tabstat|total\s|collapse.*sum|su\s+|sum,|mean\s/i, points: 17, description: 'Summarize/sum' },
+            // Generate numbers - accepts: gen, generate, egen, forvalues, numlist, _n, seq()
+            { regex: /gen(erate)?\s+|egen\s+|_n|forval(ues)?|numlist|seq\s*\(|set\s+obs/i, points: 17, description: 'Generate numbers' }
           ]
         },
         r: {
           patterns: [
-            { regex: /print\s*\(\s*["'].*Hello.*ProTools.*["']\s*\)|cat\s*\(\s*["'].*Hello.*ProTools/i, points: 33, description: 'Print greeting' },
-            { regex: /2\s*\^\s*10|2\s*\*\*\s*10/i, points: 33, description: 'Calculate 2^10' },
-            { regex: /sum\s*\(/i, points: 17, description: 'Use sum function' },
-            { regex: /1\s*:\s*5|c\s*\(\s*1\s*,\s*2\s*,\s*3\s*,\s*4\s*,\s*5\s*\)|seq\s*\(\s*1\s*,\s*5\s*\)/i, points: 17, description: 'Create vector 1-5' }
+            // Print greeting - accepts: print(), cat(), paste(), message(), writeLines(), sprintf
+            { regex: /print\s*\(.*["'].*[Hh]ello|cat\s*\(.*["'].*[Hh]ello|message\s*\(.*[Hh]ello|writeLines\s*\(|paste.*[Hh]ello|sprintf.*[Hh]ello|print\s*\(.*[Pp]ro[Tt]ools|cat\s*\(.*[Pp]ro[Tt]ools/i, points: 33, description: 'Print greeting' },
+            // Calculate 2^10 - accepts: 2^10, 2**10, 1024, storing in variable
+            { regex: /2\s*\^\s*10|2\s*\*\*\s*10|1024|<-\s*2\s*\^|=\s*2\s*\^/i, points: 33, description: 'Calculate 2^10' },
+            // Sum function - accepts: sum(), Reduce("+"), colSums, rowSums, aggregate with sum
+            { regex: /sum\s*\(|Reduce\s*\(\s*["']\+["']|colSums|rowSums|aggregate.*sum|summarise.*sum|summarize.*sum/i, points: 17, description: 'Use sum function' },
+            // Create vector 1-5 - accepts: 1:5, c(1,2,3,4,5), seq(), sequence()
+            { regex: /1\s*:\s*5|c\s*\(\s*1\s*,\s*2\s*,\s*3\s*,\s*4\s*,\s*5\s*\)|seq\s*\(\s*1\s*,\s*5|seq\s*\(\s*5\s*\)|seq_len\s*\(\s*5|sequence\s*\(/i, points: 17, description: 'Create vector 1-5' }
           ]
         }
       }

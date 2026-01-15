@@ -10,15 +10,16 @@
   <link rel="stylesheet" href="../css/style.css">
   <style>
     .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-    .output-simulation { background: #1e1e1e; border-radius: 8px; margin: 1rem 0; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.8rem; }
-    .output-header { background: #333; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; color: #ccc; font-size: 0.75rem; }
+    .output-simulation { background: #1e1e1e; border-radius: 8px; margin: 1rem 0; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.8rem; display: none; }
+    .output-simulation.visible { display: block; }
+    .output-header { background: #333; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 0.75rem; }
     .output-body { padding: 1rem; color: #d4d4d4; white-space: pre-wrap; overflow-x: auto; max-height: 350px; overflow-y: auto; }
     .output-body .out-green { color: #4ec9b0; }
     .output-body .out-yellow { color: #dcdcaa; }
     .output-body .out-blue { color: #569cd6; }
     .output-body .out-num { color: #b5cea8; }
     .output-body .out-str { color: #ce9178; }
-    .research-banner { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 2rem; border-radius: 12px; margin: 2rem 0; }
+    .research-banner { background: #4a5568; color: white; padding: 2rem; border-radius: 12px; margin: 2rem 0; border-left: 5px solid #ed8936; }
     .research-banner h3 { color: white; margin-top: 0; }
     .concept-box { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
     .concept-box h4 { color: #1e40af; margin-top: 0; }
@@ -28,6 +29,16 @@
     .workflow-step-number { width: 28px; height: 28px; background: #2563eb; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: bold; font-size: 0.85rem; }
     .workflow-arrow { color: #2563eb; font-size: 1.25rem; flex-shrink: 0; }
     @media (max-width: 768px) { .workflow-steps { flex-direction: column; } .workflow-arrow { transform: rotate(90deg); } }
+    /* Run button */
+    .run-btn { background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .run-btn:hover { background: #16a34a; }
+    .run-btn::before { content: '▶'; font-size: 0.7rem; }
+    .close-output { background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; }
+    .close-output:hover { color: white; }
+    /* Code tooltips */
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; max-width: 300px; white-space: normal; }
+    .code-tooltip:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -141,9 +152,9 @@
           <p style="margin-bottom: 0;">Loading data means reading information from a file into your program's memory. The file stays unchanged&mdash;you create a working copy. Different formats (CSV, Excel, Stata) require different commands.</p>
         </div>
 
-        <p>For our research project, we'll use World Bank development indicators. Here's a complete, runnable example:</p>
+        <p>For our research project, we'll use World Bank development indicators. Click <strong>Run</strong> to see the output for each language:</p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="load-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -151,52 +162,128 @@
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># COMPLETE EXAMPLE: Load World Bank data directly from URL</span>
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-comment"># This demonstrates loading CSV data from the internet</span>
 
-<span class="code-comment"># World Bank provides CSV downloads - let's use GDP per capita data</span>
-url = <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>
-df = pd.read_csv(url)
+<span class="code-comment"># Import pandas - the main data manipulation library in Python</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas: Python's primary library for data manipulation. Provides DataFrame structures similar to Excel spreadsheets or SQL tables.">pandas</span> <span class="code-keyword">as</span> pd
 
-<span class="code-comment"># Verify the load worked</span>
-<span class="code-keyword">print</span>(<span class="code-string">f"Loaded {len(df):,} rows and {len(df.columns)} columns"</span>)
-<span class="code-keyword">print</span>(<span class="code-string">f"Columns: {list(df.columns)}"</span>)</code></pre>
+<span class="code-comment"># World Bank provides CSV downloads - we use GDP data</span>
+<span class="code-comment"># This URL points to a publicly available dataset on GitHub</span>
+<span class="code-tooltip" data-tip="URL pointing to a CSV file hosted on GitHub. This is a cleaned version of World Bank GDP data.">url</span> = <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>
+
+<span class="code-comment"># read_csv() loads CSV data into a DataFrame</span>
+<span class="code-comment"># It automatically detects column names and data types</span>
+<span class="code-tooltip" data-tip="pd.read_csv() reads a CSV file into a DataFrame. Can read from URLs, local files, or file-like objects.">df</span> = pd.read_csv(url)
+
+<span class="code-comment"># Verify the load worked by checking dimensions</span>
+<span class="code-comment"># len(df) returns number of rows, len(df.columns) returns number of columns</span>
+<span class="code-keyword">print</span>(<span class="code-string">f"Loaded {<span class="code-tooltip" data-tip="len(df) returns the number of rows in the DataFrame">len(df)</span>:,} rows and {<span class="code-tooltip" data-tip="len(df.columns) returns the number of columns">len(df.columns)</span>} columns"</span>)
+<span class="code-keyword">print</span>(<span class="code-string">f"Columns: {<span class="code-tooltip" data-tip="list(df.columns) converts column names to a Python list for display">list(df.columns)</span>}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* COMPLETE EXAMPLE: Load World Bank data</span>
-<span class="code-keyword">clear</span> all
+<span class="code-comment">* Stata can import CSV files directly from URLs</span>
 
-<span class="code-comment">* Import from URL (GDP data)</span>
-<span class="code-keyword">import</span> delimited <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>, clear
+<span class="code-comment">* Clear any existing data from memory</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="clear all: Removes all data, variables, and programs from memory. Use before loading new data.">clear</span></span> all
 
-<span class="code-comment">* Verify the load</span>
-<span class="code-keyword">describe</span>, short
-<span class="code-keyword">list</span> in 1/5</code></pre>
+<span class="code-comment">* Import CSV file from URL into Stata</span>
+<span class="code-comment">* 'delimited' means comma-separated values</span>
+<span class="code-comment">* 'clear' option replaces any data in memory</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="import delimited: Reads CSV (or other delimited) files. Can import from URLs or local paths.">import</span></span> delimited <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>, clear
+
+<span class="code-comment">* Verify the load - describe shows variable info</span>
+<span class="code-comment">* 'short' option gives a compact summary</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="describe: Shows dataset structure including number of observations, variables, and their types.">describe</span></span>, short
+
+<span class="code-comment">* List first 5 observations to preview the data</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="list in 1/5: Displays observations 1 through 5. Useful for quick data inspection.">list</span></span> in 1/5</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># COMPLETE EXAMPLE: Load World Bank data directly from URL</span>
-<span class="code-function">library</span>(tidyverse)
+<span class="code-comment"># R can read CSV files from URLs natively</span>
 
-<span class="code-comment"># World Bank GDP data</span>
-url <- <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>
-df <- <span class="code-function">read_csv</span>(url)
+<span class="code-comment"># Load tidyverse - a collection of R packages for data science</span>
+<span class="code-comment"># Includes readr (for reading data), dplyr (for manipulation), ggplot2 (for visualization)</span>
+<span class="code-function"><span class="code-tooltip" data-tip="library(): Loads an R package. tidyverse is a collection of packages for data science.">library</span></span>(tidyverse)
 
-<span class="code-comment"># Verify the load</span>
+<span class="code-comment"># Define the URL pointing to our CSV data</span>
+<span class="code-tooltip" data-tip="&lt;- is R's assignment operator (like = in Python). Assigns the URL string to the variable 'url'.">url</span> <- <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>
+
+<span class="code-comment"># read_csv() from readr package loads the data into a tibble</span>
+<span class="code-comment"># A tibble is a modern version of R's data.frame</span>
+<span class="code-tooltip" data-tip="read_csv(): tidyverse function that reads CSV files. Returns a 'tibble' (enhanced data frame). Faster than base R's read.csv().">df</span> <- <span class="code-function">read_csv</span>(url)
+
+<span class="code-comment"># Print dimensions and column names</span>
+<span class="code-comment"># nrow() = number of rows, ncol() = number of columns</span>
 <span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"Loaded %s rows and %d columns\n"</span>,
-    <span class="code-function">format</span>(<span class="code-function">nrow</span>(df), big.mark=<span class="code-string">","</span>), <span class="code-function">ncol</span>(df)))
-<span class="code-function">print</span>(<span class="code-function">names</span>(df))</code></pre>
+    <span class="code-function"><span class="code-tooltip" data-tip="format() with big.mark adds thousands separator (commas) for readability">format</span></span>(<span class="code-function">nrow</span>(df), big.mark=<span class="code-string">","</span>), <span class="code-function"><span class="code-tooltip" data-tip="ncol() returns the number of columns in a data frame">ncol</span></span>(df)))
+<span class="code-function">print</span>(<span class="code-function"><span class="code-tooltip" data-tip="names() returns the column names of a data frame as a character vector">names</span></span>(df))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
 
-        <div class="output-simulation">
-          <div class="output-header"><span>Python Output (VS Code)</span></div>
+        <!-- Output simulations for Step 1 -->
+        <div class="output-simulation" data-output="load-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output (VS Code)</span>
+            <button class="close-output">&times;</button>
+          </div>
           <div class="output-body">Loaded <span class="out-num">14,112</span> rows and <span class="out-num">4</span> columns
 Columns: [<span class="out-str">'Country Name'</span>, <span class="out-str">'Country Code'</span>, <span class="out-str">'Year'</span>, <span class="out-str">'Value'</span>]</div>
+        </div>
+
+        <div class="output-simulation" data-output="load-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. import delimited "https://...gdp.csv", clear</span>
+(encoding automatically selected: UTF-8)
+(4 vars, 14,112 obs)
+
+<span class="out-str">. describe, short</span>
+
+Contains data
+ Observations:        <span class="out-num">14,112</span>
+    Variables:             <span class="out-num">4</span>
+
+<span class="out-str">. list in 1/5</span>
+
+     +--------------------------------------------------+
+     |    countryname   countrycode   year        value |
+     |--------------------------------------------------|
+  1. |     Arab World           ARB   1968   2.5761e+10 |
+  2. |     Arab World           ARB   1969   2.8434e+10 |
+  3. |     Arab World           ARB   1970   3.1386e+10 |
+  4. |     Arab World           ARB   1971   3.5875e+10 |
+  5. |     Arab World           ARB   1972   4.2509e+10 |
+     +--------------------------------------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="load-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output (RStudio Console)</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-blue">Rows: 14112 Columns: 4</span>
+<span class="out-str">── Column specification ──────────────────────────────</span>
+Delimiter: ","
+<span class="out-green">chr</span> (2): Country Name, Country Code
+<span class="out-green">dbl</span> (2): Year, Value
+
+Loaded <span class="out-num">14,112</span> rows and <span class="out-num">4</span> columns
+[1] <span class="out-str">"Country Name"</span> <span class="out-str">"Country Code"</span> <span class="out-str">"Year"</span> <span class="out-str">"Value"</span></div>
         </div>
 
         <!-- STEP 2: Inspecting Structure -->
         <h2>Step 2: Inspecting Structure</h2>
 
-        <div class="code-tabs">
+        <p>Before analyzing data, we need to understand its structure: what variables exist, their types, and any missing values.</p>
+
+        <div class="code-tabs" data-runnable="inspect-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -204,37 +291,50 @@ Columns: [<span class="out-str">'Country Name'</span>, <span class="out-str">'Co
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Continuing from above - inspect the data structure</span>
+<span class="code-comment"># This is crucial before any analysis!</span>
 
-<span class="code-comment"># Basic info: types and missing values</span>
+<span class="code-comment"># info() shows data types and non-null counts for each column</span>
+<span class="code-comment"># This reveals missing values and helps identify type issues</span>
 <span class="code-keyword">print</span>(<span class="code-string">"=== DATA STRUCTURE ==="</span>)
-<span class="code-keyword">print</span>(df.info())
+<span class="code-keyword">print</span>(<span class="code-tooltip" data-tip="df.info() displays column names, data types, non-null counts, and memory usage. Essential for understanding your data.">df.info()</span>)
 
-<span class="code-comment"># First few rows</span>
+<span class="code-comment"># head() shows first rows - always visually inspect!</span>
+<span class="code-comment"># Default is 5 rows, but you can specify: head(10)</span>
 <span class="code-keyword">print</span>(<span class="code-string">"\n=== FIRST 5 ROWS ==="</span>)
-<span class="code-keyword">print</span>(df.head())</code></pre>
+<span class="code-keyword">print</span>(<span class="code-tooltip" data-tip="df.head() returns the first 5 rows. Use head(n) for different number of rows.">df.head()</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Continuing - inspect structure</span>
+<span class="code-comment">* Always check your data before analysis!</span>
 
-<span class="code-comment">* Full variable description</span>
-<span class="code-keyword">describe</span>
+<span class="code-comment">* Full variable description including type, format, labels</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="describe: Shows detailed info about all variables including storage type, display format, and variable labels.">describe</span></span>
 
-<span class="code-comment">* First observations</span>
-<span class="code-keyword">list</span> in 1/5</code></pre>
+<span class="code-comment">* First observations - visual inspection is crucial</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="list in 1/5: Displays rows 1-5. Combine with variable names to show specific columns: list countryname year in 1/5">list</span></span> in 1/5</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># Continuing - inspect structure</span>
+<span class="code-comment"># Understanding structure prevents analysis mistakes</span>
 
-<span class="code-comment"># Structure overview</span>
-<span class="code-function">str</span>(df)
+<span class="code-comment"># str() shows structure: variable types, sample values</span>
+<span class="code-comment"># This is R's equivalent of pandas info()</span>
+<span class="code-function"><span class="code-tooltip" data-tip="str() displays the internal structure of an R object. Shows types, dimensions, and sample values.">str</span></span>(df)
 
-<span class="code-comment"># First rows</span>
-<span class="code-function">head</span>(df)</code></pre>
+<span class="code-comment"># head() shows first 6 rows by default</span>
+<span class="code-function"><span class="code-tooltip" data-tip="head() returns the first n rows (default 6). Use head(df, 10) for more rows.">head</span></span>(df)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
 
-        <div class="output-simulation">
-          <div class="output-header"><span>Python Output</span></div>
+        <!-- Output simulations for Step 2 -->
+        <div class="output-simulation" data-output="inspect-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
           <div class="output-body">=== DATA STRUCTURE ===
 &lt;class 'pandas.core.frame.DataFrame'&gt;
 RangeIndex: <span class="out-num">14112</span> entries, 0 to 14111
@@ -247,50 +347,126 @@ Data columns (total 4 columns):
  3   Value         <span class="out-num">10585</span> non-null  <span class="out-blue">float64</span>
 
 === FIRST 5 ROWS ===
-       Country Name Country Code  Year         Value
-0     Arab World          ARB  1968  2.576068e+10
-1     Arab World          ARB  1969  2.843420e+10
-2     Arab World          ARB  1970  3.138565e+10</div>
+   Country Name Country Code  Year         Value
+0    Arab World          ARB  1968  2.576068e+10
+1    Arab World          ARB  1969  2.843420e+10
+2    Arab World          ARB  1970  3.138565e+10
+3    Arab World          ARB  1971  3.587548e+10
+4    Arab World          ARB  1972  4.250944e+10</div>
+        </div>
+
+        <div class="output-simulation" data-output="inspect-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. describe</span>
+
+Contains data
+ Observations:        <span class="out-num">14,112</span>
+    Variables:             <span class="out-num">4</span>
+
+Variable      Storage   Display    Value
+    name         type    format    label
+───────────────────────────────────────────
+countryname     <span class="out-blue">str52</span>   %52s
+countrycode     <span class="out-blue">str3</span>    %9s
+year            <span class="out-blue">int</span>     %10.0g
+value           <span class="out-blue">double</span>  %10.0g
+
+<span class="out-str">. list in 1/5</span>
+
+     +--------------------------------------------------+
+     |    countryname   countrycode   year        value |
+     |--------------------------------------------------|
+  1. |     Arab World           ARB   1968   2.5761e+10 |
+  2. |     Arab World           ARB   1969   2.8434e+10 |
+  3. |     Arab World           ARB   1970   3.1386e+10 |
+  4. |     Arab World           ARB   1971   3.5875e+10 |
+  5. |     Arab World           ARB   1972   4.2509e+10 |
+     +--------------------------------------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="inspect-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output (RStudio Console)</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">&gt; str(df)</span>
+tibble [14,112 x 4] (S3: tbl_df/tbl/data.frame)
+ $ Country Name: <span class="out-blue">chr</span>  "Arab World" "Arab World" "Arab World" ...
+ $ Country Code: <span class="out-blue">chr</span>  "ARB" "ARB" "ARB" "ARB" ...
+ $ Year        : <span class="out-blue">num</span>  1968 1969 1970 1971 1972 ...
+ $ Value       : <span class="out-blue">num</span>  2.58e+10 2.84e+10 3.14e+10 3.59e+10 4.25e+10 ...
+
+<span class="out-str">&gt; head(df)</span>
+<span class="out-green"># A tibble: 6 x 4</span>
+  `Country Name` `Country Code`  Year        Value
+  <span class="out-blue">&lt;chr&gt;</span>          <span class="out-blue">&lt;chr&gt;</span>          <span class="out-blue">&lt;dbl&gt;</span>        <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> Arab World     ARB             1968  25760680000
+<span class="out-num">2</span> Arab World     ARB             1969  28434200000
+<span class="out-num">3</span> Arab World     ARB             1970  31385650000
+<span class="out-num">4</span> Arab World     ARB             1971  35875480000
+<span class="out-num">5</span> Arab World     ARB             1972  42509440000
+<span class="out-num">6</span> Arab World     ARB             1973  54832410000</div>
         </div>
 
         <!-- STEP 3: Summary Statistics -->
         <h2>Step 3: Summary Statistics</h2>
 
-        <div class="code-tabs">
+        <p>Now we calculate key statistics to understand our data's distribution and identify potential issues.</p>
+
+        <div class="code-tabs" data-runnable="summary-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Summary statistics</span>
-<span class="code-keyword">print</span>(<span class="code-string">"=== SUMMARY STATISTICS ==="</span>)
-<span class="code-keyword">print</span>(df.describe())
+<pre><code><span class="code-comment"># Summary statistics - understand your distributions</span>
 
-<span class="code-comment"># Missing values</span>
+<span class="code-comment"># describe() gives count, mean, std, min, 25%, 50%, 75%, max</span>
+<span class="code-comment"># Only works on numeric columns by default</span>
+<span class="code-keyword">print</span>(<span class="code-string">"=== SUMMARY STATISTICS ==="</span>)
+<span class="code-keyword">print</span>(<span class="code-tooltip" data-tip="df.describe() computes summary statistics: count, mean, std deviation, min, quartiles (25%, 50%, 75%), and max for numeric columns.">df.describe()</span>)
+
+<span class="code-comment"># Missing values analysis - CRITICAL for research!</span>
+<span class="code-comment"># isnull() returns True/False, sum() counts True values</span>
 <span class="code-keyword">print</span>(<span class="code-string">"\n=== MISSING VALUES ==="</span>)
-missing = df.isnull().sum()
-missing_pct = (missing / len(df) * <span class="code-number">100</span>).round(<span class="code-number">1</span>)
+<span class="code-tooltip" data-tip="df.isnull().sum() counts missing (NaN) values per column">missing</span> = df.isnull().sum()
+<span class="code-tooltip" data-tip="Calculates missing values as percentage of total rows - helps assess data quality">missing_pct</span> = (missing / len(df) * <span class="code-number">100</span>).round(<span class="code-number">1</span>)
 <span class="code-keyword">print</span>(pd.DataFrame({<span class="code-string">'Missing'</span>: missing, <span class="code-string">'Percent'</span>: missing_pct}))</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Summary statistics</span>
-<span class="code-keyword">summarize</span>, detail
+<span class="code-comment">* 'detail' option gives more info: percentiles, skewness, kurtosis</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="summarize: Computes mean, std dev, min, max. Add 'detail' for percentiles, skewness, kurtosis.">summarize</span></span>, detail
 
-<span class="code-comment">* Missing values</span>
-<span class="code-keyword">misstable</span> summarize</code></pre>
+<span class="code-comment">* Missing values analysis</span>
+<span class="code-comment">* misstable shows patterns of missing data</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="misstable summarize: Shows count and percentage of missing values for each variable.">misstable</span></span> summarize</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># Summary statistics</span>
-<span class="code-function">summary</span>(df)
+<span class="code-comment"># summary() gives min, 1st quartile, median, mean, 3rd quartile, max</span>
+<span class="code-function"><span class="code-tooltip" data-tip="summary() provides a 5-number summary plus mean for numeric columns, and counts for categorical.">summary</span></span>(df)
 
-<span class="code-comment"># Missing values</span>
-<span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df))</code></pre>
+<span class="code-comment"># Missing values count per column</span>
+<span class="code-comment"># is.na() returns TRUE/FALSE, colSums() sums each column</span>
+<span class="code-function">cat</span>(<span class="code-string">"\nMissing values:\n"</span>)
+<span class="code-function"><span class="code-tooltip" data-tip="colSums(is.na(df)) counts missing values in each column">colSums</span></span>(<span class="code-function">is.na</span>(df))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
 
-        <div class="output-simulation">
-          <div class="output-header"><span>Python Output</span></div>
+        <!-- Output simulations for Step 3 -->
+        <div class="output-simulation" data-output="summary-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
           <div class="output-body">=== SUMMARY STATISTICS ===
                Year         Value
 count  <span class="out-num">14112.00</span>  <span class="out-num">10585.00</span>
@@ -310,6 +486,58 @@ Year                0      0.0
 Value            <span class="out-yellow">3527</span>     <span class="out-yellow">25.0</span></div>
         </div>
 
+        <div class="output-simulation" data-output="summary-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. summarize, detail</span>
+
+                            year
+─────────────────────────────────────────────────────
+      Percentiles      Smallest
+ 1%         1968           1960
+ 5%         1970           1960
+10%         1972           1960       Obs          <span class="out-num">14,112</span>
+25%         1977           1960       Sum of wgt.  <span class="out-num">14,112</span>
+
+50%         1994                      Mean         <span class="out-num">1993.5</span>
+                        Largest       Std. dev.    <span class="out-num">15.589</span>
+75%         2010           2027
+90%         2016           2027       Variance     <span class="out-num">243.02</span>
+95%         2019           2027       Skewness     <span class="out-num">0</span>
+99%         2024           2027       Kurtosis     <span class="out-num">1.8</span>
+
+<span class="out-str">. misstable summarize</span>
+
+                                               Obs<.
+                                             ─────────
+               Obs.   Variable        Unique
+             missing   name           values   Min   Max
+         ─────────────────────────────────────────────────
+           <span class="out-yellow">3,527</span>    value            10585    .      .</div>
+        </div>
+
+        <div class="output-simulation" data-output="summary-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output (RStudio Console)</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">&gt; summary(df)</span>
+ Country Name       Country Code            Year           Value
+ Length:14112       Length:14112       Min.   :1960   Min.   :2.69e+06
+ Class :character   Class :character   1st Qu.:1977   1st Qu.:2.23e+09
+ Mode  :character   Mode  :character   Median :1994   Median :1.45e+10
+                                       Mean   :1994   Mean   :3.21e+11
+                                       3rd Qu.:2010   3rd Qu.:9.89e+10
+                                       Max.   :2027   Max.   :2.55e+13
+                                                      <span class="out-yellow">NA's   :3527</span>
+
+Missing values:
+Country Name Country Code         Year        Value
+           0            0            0         <span class="out-yellow">3527</span></div>
+        </div>
+
         <div class="info-box note">
           <div class="info-box-title">Red Flag Detected!</div>
           <p style="margin-bottom: 0;">25% of GDP values are missing. Before any analysis, we need to understand <em>why</em>. Are they missing for small countries? Recent years? This is exactly what the "First Analysis" approach catches early.</p>
@@ -318,62 +546,130 @@ Value            <span class="out-yellow">3527</span>     <span class="out-yello
         <!-- STEP 4 & 5: Visualization and Correlation -->
         <h2>Step 4-5: Visualization & Correlations</h2>
 
-        <div class="code-tabs">
+        <p>Visual inspection often reveals patterns that statistics miss. Let's plot our GDP data.</p>
+
+        <div class="code-tabs" data-runnable="viz-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+<pre><code><span class="code-comment"># Import matplotlib for plotting</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="matplotlib.pyplot: Python's main plotting library. Imported as 'plt' by convention.">matplotlib.pyplot</span> <span class="code-keyword">as</span> plt
 
-<span class="code-comment"># Histogram of GDP values (log scale for readability)</span>
-plt.figure(figsize=(<span class="code-number">10</span>, <span class="code-number">5</span>))
-plt.hist(df[<span class="code-string">'Value'</span>].dropna().apply(<span class="code-keyword">lambda</span> x: x/<span class="code-number">1e9</span>), bins=<span class="code-number">50</span>, edgecolor=<span class="code-string">'black'</span>)
+<span class="code-comment"># Histogram of GDP values (scaled to billions for readability)</span>
+<span class="code-comment"># dropna() removes missing values before plotting</span>
+<span class="code-tooltip" data-tip="plt.figure() creates a new figure. figsize=(width, height) sets dimensions in inches.">plt.figure</span>(figsize=(<span class="code-number">10</span>, <span class="code-number">5</span>))
+<span class="code-tooltip" data-tip="plt.hist() creates a histogram. bins=50 sets number of bars. edgecolor adds borders.">plt.hist</span>(df[<span class="code-string">'Value'</span>].dropna().apply(<span class="code-keyword">lambda</span> x: x/<span class="code-number">1e9</span>), bins=<span class="code-number">50</span>, edgecolor=<span class="code-string">'black'</span>)
 plt.xlabel(<span class="code-string">'GDP (Billion USD)'</span>)
 plt.ylabel(<span class="code-string">'Frequency'</span>)
 plt.title(<span class="code-string">'Distribution of GDP Across Countries and Years'</span>)
 plt.show()
 
 <span class="code-comment"># GDP over time for selected countries</span>
+<span class="code-comment"># Filter to specific country codes using isin()</span>
 countries = [<span class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>, <span class="code-string">'DEU'</span>, <span class="code-string">'BRA'</span>]
-subset = df[df[<span class="code-string">'Country Code'</span>].isin(countries)]
+<span class="code-tooltip" data-tip="isin() filters rows where column value is in the given list">subset</span> = df[df[<span class="code-string">'Country Code'</span>].isin(countries)]
 
 plt.figure(figsize=(<span class="code-number">10</span>, <span class="code-number">5</span>))
 <span class="code-keyword">for</span> country <span class="code-keyword">in</span> countries:
     data = subset[subset[<span class="code-string">'Country Code'</span>] == country]
-    plt.plot(data[<span class="code-string">'Year'</span>], data[<span class="code-string">'Value'</span>]/<span class="code-number">1e12</span>, label=country)
+    <span class="code-tooltip" data-tip="plt.plot() draws a line chart. Dividing by 1e12 converts to trillions.">plt.plot</span>(data[<span class="code-string">'Year'</span>], data[<span class="code-string">'Value'</span>]/<span class="code-number">1e12</span>, label=country)
 plt.xlabel(<span class="code-string">'Year'</span>)
 plt.ylabel(<span class="code-string">'GDP (Trillion USD)'</span>)
 plt.legend()
 plt.title(<span class="code-string">'GDP Trends: Selected Countries'</span>)
 plt.show()</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
-<pre><code><span class="code-comment">* Histogram</span>
-<span class="code-keyword">gen</span> gdp_billions = value / 1e9
-<span class="code-keyword">histogram</span> gdp_billions, frequency title(<span class="code-string">"Distribution of GDP"</span>)
+<pre><code><span class="code-comment">* Create histogram of GDP in billions</span>
+<span class="code-comment">* First generate a scaled variable</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="gen: Creates a new variable. Here we scale GDP to billions for better visualization.">gen</span></span> gdp_billions = value / 1e9
+<span class="code-keyword"><span class="code-tooltip" data-tip="histogram: Creates a histogram. 'frequency' shows counts instead of density.">histogram</span></span> gdp_billions, frequency title(<span class="code-string">"Distribution of GDP"</span>)
 
 <span class="code-comment">* Time series for selected countries</span>
-<span class="code-keyword">twoway</span> (line value year if countrycode == <span class="code-string">"USA"</span>) ///
-       (line value year if countrycode == <span class="code-string">"CHN"</span>), ///
-       legend(label(1 <span class="code-string">"USA"</span>) label(2 <span class="code-string">"China"</span>))</code></pre>
+<span class="code-comment">* twoway combines multiple plots</span>
+<span class="code-keyword"><span class="code-tooltip" data-tip="twoway: Combines multiple graph types. 'line' draws connected points.">twoway</span></span> (line value year if countrycode == <span class="code-string">"USA"</span>) ///
+       (line value year if countrycode == <span class="code-string">"CHN"</span>) ///
+       (line value year if countrycode == <span class="code-string">"DEU"</span>) ///
+       (line value year if countrycode == <span class="code-string">"BRA"</span>), ///
+       legend(label(1 <span class="code-string">"USA"</span>) label(2 <span class="code-string">"China"</span>) label(3 <span class="code-string">"Germany"</span>) label(4 <span class="code-string">"Brazil"</span>)) ///
+       title(<span class="code-string">"GDP Trends"</span>) ytitle(<span class="code-string">"GDP (USD)"</span>)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-function">library</span>(ggplot2)
+<pre><code><span class="code-comment"># Load ggplot2 (part of tidyverse) for elegant visualizations</span>
+<span class="code-function">library</span>(ggplot2)
 
-<span class="code-comment"># Histogram</span>
-<span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = Value/<span class="code-number">1e9</span>)) +
-  <span class="code-function">geom_histogram</span>(bins = <span class="code-number">50</span>, fill = <span class="code-string">"steelblue"</span>) +
-  <span class="code-function">labs</span>(x = <span class="code-string">"GDP (Billion USD)"</span>, title = <span class="code-string">"Distribution of GDP"</span>)
+<span class="code-comment"># Histogram of GDP distribution</span>
+<span class="code-comment"># ggplot uses layered "grammar of graphics" approach</span>
+<span class="code-function"><span class="code-tooltip" data-tip="ggplot() initializes a plot. aes() defines aesthetic mappings (which variables map to x, y, color, etc.)">ggplot</span></span>(df, <span class="code-function">aes</span>(x = Value/<span class="code-number">1e9</span>)) +
+  <span class="code-function"><span class="code-tooltip" data-tip="geom_histogram() adds a histogram layer. bins= controls number of bars.">geom_histogram</span></span>(bins = <span class="code-number">50</span>, fill = <span class="code-string">"steelblue"</span>, color = <span class="code-string">"white"</span>) +
+  <span class="code-function">labs</span>(x = <span class="code-string">"GDP (Billion USD)"</span>, y = <span class="code-string">"Frequency"</span>,
+       title = <span class="code-string">"Distribution of GDP Across Countries"</span>)
 
-<span class="code-comment"># Time series</span>
+<span class="code-comment"># Time series for selected countries</span>
 countries <- <span class="code-function">c</span>(<span class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>, <span class="code-string">"DEU"</span>, <span class="code-string">"BRA"</span>)
 df %>%
-  <span class="code-function">filter</span>(`Country Code` %in% countries) %>%
+  <span class="code-function"><span class="code-tooltip" data-tip="filter() subsets rows. %in% checks if value is in a vector (like Python's 'in').">filter</span></span>(`Country Code` %in% countries) %>%
   <span class="code-function">ggplot</span>(<span class="code-function">aes</span>(x = Year, y = Value/<span class="code-number">1e12</span>, color = `Country Code`)) +
-  <span class="code-function">geom_line</span>() +
-  <span class="code-function">labs</span>(y = <span class="code-string">"GDP (Trillion USD)"</span>)</code></pre>
+  <span class="code-function"><span class="code-tooltip" data-tip="geom_line() draws connected lines. Color aesthetic creates separate lines per group.">geom_line</span></span>(linewidth = <span class="code-number">1</span>) +
+  <span class="code-function">labs</span>(y = <span class="code-string">"GDP (Trillion USD)"</span>, title = <span class="code-string">"GDP Trends: Selected Countries"</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulations for Step 4-5 -->
+        <div class="output-simulation" data-output="viz-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output (Plots)</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body" style="text-align: center; padding: 2rem;">
+            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 2rem; margin-bottom: 1rem;">
+              <p style="color: #6c757d; margin: 0;"><em>[Histogram showing right-skewed distribution of GDP]</em></p>
+              <p style="color: #6c757d; margin: 0.5rem 0 0; font-size: 0.85rem;">Most countries have GDP &lt; $500B, few have &gt; $5T</p>
+            </div>
+            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 2rem;">
+              <p style="color: #6c757d; margin: 0;"><em>[Line chart showing GDP trends 1960-2027]</em></p>
+              <p style="color: #6c757d; margin: 0.5rem 0 0; font-size: 0.85rem;">USA: steady growth, China: exponential growth post-2000</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="viz-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output (Graphics Window)</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body" style="text-align: center; padding: 2rem;">
+            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 2rem; margin-bottom: 1rem;">
+              <p style="color: #6c757d; margin: 0;"><em>[Histogram: Distribution of GDP (Billion USD)]</em></p>
+              <p style="color: #6c757d; margin: 0.5rem 0 0; font-size: 0.85rem;">Heavily right-skewed, most values clustered near 0</p>
+            </div>
+            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 2rem;">
+              <p style="color: #6c757d; margin: 0;"><em>[Line graph: GDP Trends by Country]</em></p>
+              <p style="color: #6c757d; margin: 0.5rem 0 0; font-size: 0.85rem;">Four country trends visible in Stata Graph window</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="viz-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output (RStudio Plots Panel)</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body" style="text-align: center; padding: 2rem;">
+            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 2rem; margin-bottom: 1rem;">
+              <p style="color: #6c757d; margin: 0;"><em>[ggplot2 histogram with steelblue bars]</em></p>
+              <p style="color: #6c757d; margin: 0.5rem 0 0; font-size: 0.85rem;">Clean ggplot2 styling, right-skewed distribution</p>
+            </div>
+            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 2rem;">
+              <p style="color: #6c757d; margin: 0;"><em>[ggplot2 line chart with color legend]</em></p>
+              <p style="color: #6c757d; margin: 0.5rem 0 0; font-size: 0.85rem;">Color-coded lines for USA, CHN, DEU, BRA</p>
+            </div>
           </div>
         </div>
 
@@ -391,7 +687,7 @@ df %>%
 <span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
 <span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
 
-<span class="code-comment"># 1. LOAD DATA</span>
+<span class="code-comment"># 1. LOAD DATA - Replace URL with your data source</span>
 url = <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>
 df = pd.read_csv(url)
 
@@ -399,20 +695,20 @@ df = pd.read_csv(url)
 <span class="code-keyword">print</span>(<span class="code-string">"FIRST ANALYSIS REPORT"</span>)
 <span class="code-keyword">print</span>(<span class="code-string">"="</span>*<span class="code-number">50</span>)
 
-<span class="code-comment"># 2. STRUCTURE</span>
+<span class="code-comment"># 2. STRUCTURE - Understand dimensions and types</span>
 <span class="code-keyword">print</span>(<span class="code-string">f"\nRows: {len(df):,} | Columns: {len(df.columns)}"</span>)
 <span class="code-keyword">print</span>(<span class="code-string">f"\nColumn types:\n{df.dtypes}"</span>)
 
-<span class="code-comment"># 3. MISSING VALUES</span>
+<span class="code-comment"># 3. MISSING VALUES - Critical for research quality</span>
 <span class="code-keyword">print</span>(<span class="code-string">"\n--- MISSING VALUES ---"</span>)
 missing_pct = (df.isnull().sum() / len(df) * <span class="code-number">100</span>).round(<span class="code-number">1</span>)
 <span class="code-keyword">print</span>(missing_pct[missing_pct > <span class="code-number">0</span>])
 
-<span class="code-comment"># 4. SUMMARY STATISTICS</span>
+<span class="code-comment"># 4. SUMMARY STATISTICS - Understand distributions</span>
 <span class="code-keyword">print</span>(<span class="code-string">"\n--- SUMMARY STATISTICS ---"</span>)
 <span class="code-keyword">print</span>(df.describe())
 
-<span class="code-comment"># 5. HISTOGRAMS</span>
+<span class="code-comment"># 5. HISTOGRAMS - Visual inspection of all numeric columns</span>
 df.select_dtypes(include=[<span class="code-string">'number'</span>]).hist(figsize=(<span class="code-number">12</span>, <span class="code-number">6</span>), bins=<span class="code-number">30</span>)
 plt.tight_layout()
 plt.savefig(<span class="code-string">'first_analysis_histograms.png'</span>)
@@ -426,7 +722,7 @@ plt.show()
         </details>
 
         <div class="nav-footer">
-          <a href="01-getting-started.html" class="nav-link prev">Module 1: Getting Started</a>
+          <a href="02-data-harnessing.html" class="nav-link prev">Module 2: Data Harnessing</a>
           <a href="02b-apis.html" class="nav-link next">Module 2b: Working with APIs</a>
         </div>
       </div>
@@ -460,5 +756,53 @@ plt.show()
   <script src="../js/main.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
+
+  <!-- Run button and output toggle script -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle Run button clicks
+    document.querySelectorAll('.run-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const lang = this.dataset.lang;
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+
+        // Hide all outputs for this code block
+        document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+          out.classList.remove('visible');
+        });
+
+        // Show the output for the selected language
+        const output = document.querySelector(`.output-simulation[data-output="${outputId}"][data-lang="${lang}"]`);
+        if (output) {
+          output.classList.add('visible');
+          // Scroll to output
+          output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
+    // Handle close output buttons
+    document.querySelectorAll('.close-output').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.output-simulation').classList.remove('visible');
+      });
+    });
+
+    // Update Run button when language tab changes
+    document.querySelectorAll('.code-tabs .tab-button').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+        if (outputId) {
+          // Hide all outputs when switching tabs
+          document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+            out.classList.remove('visible');
+          });
+        }
+      });
+    });
+  });
+  </script>
 </body>
 </html>

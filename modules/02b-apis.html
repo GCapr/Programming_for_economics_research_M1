@@ -10,25 +10,40 @@
   <link rel="stylesheet" href="../css/style.css">
   <style>
     .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-    .output-simulation { background: #1e1e1e; border-radius: 8px; margin: 1rem 0; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.8rem; }
-    .output-header { background: #333; padding: 0.5rem 1rem; color: #ccc; font-size: 0.75rem; }
+    .output-simulation { background: #1e1e1e; border-radius: 8px; margin: 1rem 0; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.8rem; display: none; }
+    .output-simulation.visible { display: block; }
+    .output-header { background: #333; padding: 0.5rem 1rem; color: #ccc; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
     .output-body { padding: 1rem; color: #d4d4d4; white-space: pre-wrap; overflow-x: auto; max-height: 300px; overflow-y: auto; }
     .out-green { color: #4ec9b0; }
     .out-yellow { color: #dcdcaa; }
     .out-blue { color: #569cd6; }
     .out-num { color: #b5cea8; }
     .out-str { color: #ce9178; }
-    .research-banner { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 1.5rem; border-radius: 12px; margin: 2rem 0; }
+    .research-banner { background: #4a5568; color: white; padding: 1.5rem; border-radius: 12px; margin: 2rem 0; border-left: 5px solid #ed8936; }
     .research-banner h3 { color: white; margin-top: 0; }
     .concept-box { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
     .concept-box h4 { color: #1e40af; margin-top: 0; }
-    .api-diagram { background: #f8f9fa; border-radius: 12px; padding: 2rem; margin: 2rem 0; text-align: center; }
+    /* API Diagram - darker colors */
+    .api-diagram { background: #e2e8f0; border-radius: 12px; padding: 2rem; margin: 2rem 0; text-align: center; }
     .api-flow { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; }
-    .api-box { background: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); min-width: 120px; }
-    .api-box.client { background: #dbeafe; border: 2px solid #3b82f6; }
-    .api-box.server { background: #dcfce7; border: 2px solid #22c55e; }
-    .api-arrow { font-size: 2rem; color: #6b7280; }
-    .api-label { font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; }
+    .api-box { background: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 120px; }
+    .api-box.client { background: #1e40af; border: 2px solid #1e3a8a; color: white; }
+    .api-box.client strong { color: white; }
+    .api-box.server { background: #166534; border: 2px solid #14532d; color: white; }
+    .api-box.server strong { color: white; }
+    .api-arrow { font-size: 2rem; color: #374151; font-weight: bold; }
+    .api-label { font-size: 0.8rem; color: #374151; margin-top: 0.25rem; font-weight: 500; }
+    .api-box .api-label { color: rgba(255,255,255,0.9); }
+    /* Run button */
+    .run-btn { background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .run-btn:hover { background: #16a34a; }
+    .run-btn::before { content: '▶'; font-size: 0.7rem; }
+    .close-output { background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; }
+    .close-output:hover { color: white; }
+    /* Code tooltips */
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; max-width: 300px; white-space: normal; }
+    .code-tooltip:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -117,9 +132,9 @@
           <p style="margin-bottom: 0;"><strong>Analogy:</strong> Think of a restaurant. You (the client) don't go into the kitchen. Instead, you tell the waiter (the API) what you want, and the waiter brings your food (the data) from the kitchen (the server).</p>
         </div>
 
-        <!-- API Diagram -->
+        <!-- API Diagram - DARKER COLORS -->
         <div class="api-diagram">
-          <h4 style="margin-top: 0;">How an API Request Works</h4>
+          <h4 style="margin-top: 0; color: #1f2937;">How an API Request Works</h4>
           <div class="api-flow">
             <div class="api-box client">
               <strong>Your Code</strong>
@@ -127,7 +142,7 @@
             </div>
             <div>
               <div class="api-arrow">&rarr;</div>
-              <div class="api-label">HTTP Request<br>"GET /countries/USA/gdp"</div>
+              <div class="api-label">HTTP Request<br><code style="background: #374151; color: #e5e7eb; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem;">GET /countries/USA/gdp</code></div>
             </div>
             <div class="api-box server">
               <strong>World Bank Server</strong>
@@ -135,7 +150,7 @@
             </div>
             <div>
               <div class="api-arrow">&rarr;</div>
-              <div class="api-label">JSON Response<br>{"gdp": 25000000000000}</div>
+              <div class="api-label">JSON Response<br><code style="background: #374151; color: #e5e7eb; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem;">{"gdp": 25e12}</code></div>
             </div>
             <div class="api-box client">
               <strong>Your Code</strong>
@@ -149,11 +164,11 @@
 
         <p>API requests use URLs with specific structures:</p>
 
-        <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; overflow-x: auto;">
+        <pre style="background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem;">
 https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD?format=json
-|_____||________________||_||___||_____________________________||___________|
-   |          |          |    |              |                        |
-Protocol    Host      Version  Country   Indicator Code          Parameters</pre>
+<span style="color: #fbbf24;">|_____|</span><span style="color: #60a5fa;">|________________|</span><span style="color: #34d399;">|__|</span><span style="color: #f472b6;">|___|</span><span style="color: #a78bfa;">|_____________________________|</span><span style="color: #fb923c;">|___________|</span>
+   <span style="color: #fbbf24;">|</span>          <span style="color: #60a5fa;">|</span>            <span style="color: #34d399;">|</span>    <span style="color: #f472b6;">|</span>              <span style="color: #a78bfa;">|</span>                        <span style="color: #fb923c;">|</span>
+<span style="color: #fbbf24;">Protocol</span>    <span style="color: #60a5fa;">Host</span>       <span style="color: #34d399;">Version</span>  <span style="color: #f472b6;">Country</span>   <span style="color: #a78bfa;">Indicator Code</span>          <span style="color: #fb923c;">Parameters</span></pre>
 
         <div class="concept-box">
           <h4>Key Components</h4>
@@ -167,98 +182,111 @@ Protocol    Host      Version  Country   Indicator Code          Parameters</pre
         <!-- Your First API Call -->
         <h2>Your First API Call</h2>
 
-        <p>Let's fetch GDP data from the World Bank API. This is a complete, runnable example:</p>
+        <p>Let's fetch GDP data from the World Bank API. Click <strong>Run</strong> below each code block to see the output:</p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="api-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># COMPLETE EXAMPLE: Fetch GDP data from World Bank API</span>
-<span class="code-keyword">import</span> requests
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<pre><code><span class="code-comment"># Import the requests library for making HTTP calls</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="requests: Library for making HTTP requests to web servers">requests</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas: Data manipulation library, aliased as 'pd' by convention">pandas</span> <span class="code-keyword">as</span> pd
 
-<span class="code-comment"># World Bank API endpoint for GDP (current US$)</span>
-<span class="code-comment"># Indicator: NY.GDP.MKTP.CD</span>
-url = <span class="code-string">"https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD"</span>
-params = {
-    <span class="code-string">"format"</span>: <span class="code-string">"json"</span>,
-    <span class="code-string">"date"</span>: <span class="code-string">"2015:2022"</span>,
-    <span class="code-string">"per_page"</span>: <span class="code-number">100</span>
+<span class="code-comment"># Define the API endpoint URL</span>
+<span class="code-comment"># NY.GDP.MKTP.CD is the World Bank code for GDP in current US dollars</span>
+<span class="code-tooltip" data-tip="The base URL pointing to the World Bank API endpoint for USA's GDP indicator">url</span> = <span class="code-string">"https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD"</span>
+
+<span class="code-comment"># Set query parameters to customize the request</span>
+<span class="code-tooltip" data-tip="Dictionary of parameters: format=json for JSON output, date for year range, per_page for max results">params</span> = {
+    <span class="code-string">"format"</span>: <span class="code-string">"json"</span>,      <span class="code-comment"># Return data as JSON (not XML)</span>
+    <span class="code-string">"date"</span>: <span class="code-string">"2015:2022"</span>,   <span class="code-comment"># Get data from 2015 to 2022</span>
+    <span class="code-string">"per_page"</span>: <span class="code-number">100</span>        <span class="code-comment"># Maximum records per page</span>
 }
 
-<span class="code-comment"># Make the request</span>
-response = requests.get(url, params=params)
+<span class="code-comment"># Send GET request to the API</span>
+<span class="code-tooltip" data-tip="requests.get() sends an HTTP GET request and returns a Response object">response</span> = requests.get(url, params=params)
 <span class="code-keyword">print</span>(<span class="code-string">f"Status Code: {response.status_code}"</span>)  <span class="code-comment"># 200 = success</span>
 
-<span class="code-comment"># Parse JSON response</span>
-data = response.json()
+<span class="code-comment"># Parse the JSON response into a Python object</span>
+<span class="code-tooltip" data-tip=".json() converts the response body from JSON text to Python dictionaries/lists">data</span> = response.json()
 
-<span class="code-comment"># The World Bank API returns [metadata, actual_data]</span>
+<span class="code-comment"># World Bank returns [metadata, records] - we want index 1</span>
 records = data[<span class="code-number">1</span>]
 
-<span class="code-comment"># Convert to DataFrame</span>
+<span class="code-comment"># Convert to DataFrame using list comprehension</span>
 df = pd.DataFrame([{
-    <span class="code-string">'country'</span>: r[<span class="code-string">'country'</span>][<span class="code-string">'value'</span>],
-    <span class="code-string">'year'</span>: <span class="code-keyword">int</span>(r[<span class="code-string">'date'</span>]),
-    <span class="code-string">'gdp'</span>: r[<span class="code-string">'value'</span>]
+    <span class="code-string">'country'</span>: r[<span class="code-string">'country'</span>][<span class="code-string">'value'</span>],  <span class="code-comment"># Extract country name</span>
+    <span class="code-string">'year'</span>: <span class="code-keyword">int</span>(r[<span class="code-string">'date'</span>]),           <span class="code-comment"># Convert year to integer</span>
+    <span class="code-string">'gdp'</span>: r[<span class="code-string">'value'</span>]                 <span class="code-comment"># GDP value</span>
 } <span class="code-keyword">for</span> r <span class="code-keyword">in</span> records <span class="code-keyword">if</span> r[<span class="code-string">'value'</span>] <span class="code-keyword">is not None</span>])
 
 <span class="code-keyword">print</span>(df)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
-<pre><code><span class="code-comment">* Stata: API calls require additional setup</span>
-<span class="code-comment">* Option 1: Use Python via Stata 17+ integration</span>
-<span class="code-comment">* Option 2: Download the data and import</span>
+<pre><code><span class="code-comment">* Stata requires additional packages for API calls</span>
+<span class="code-comment">* The wbopendata package makes World Bank data easy to access</span>
 
-<span class="code-comment">* For World Bank data, use the wbopendata package</span>
+<span class="code-comment">* Install the World Bank Open Data package (run once)</span>
 <span class="code-keyword">ssc</span> install wbopendata
 
-<span class="code-comment">* Fetch GDP data directly</span>
+<span class="code-comment">* Fetch GDP data for USA from 2015-2022</span>
+<span class="code-comment">* indicator(): World Bank indicator code for GDP</span>
+<span class="code-comment">* country(): ISO country code</span>
+<span class="code-comment">* year(): time range</span>
+<span class="code-comment">* clear: replace current data in memory</span>
 <span class="code-keyword">wbopendata</span>, indicator(NY.GDP.MKTP.CD) country(USA) year(2015:2022) clear
 
-<span class="code-comment">* View the data</span>
-<span class="code-keyword">list</span></code></pre>
+<span class="code-comment">* Display the data</span>
+<span class="code-keyword">list</span> countryname year ny_gdp_mktp_cd</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-comment"># COMPLETE EXAMPLE: Fetch GDP data from World Bank API</span>
-<span class="code-function">library</span>(httr)
-<span class="code-function">library</span>(jsonlite)
-<span class="code-function">library</span>(tidyverse)
+<pre><code><span class="code-comment"># Load required libraries</span>
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="httr: HTTP client library for making web requests">httr</span>)
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="jsonlite: Library for parsing JSON data">jsonlite</span>)
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="tidyverse: Collection of data science packages including dplyr and ggplot2">tidyverse</span>)
 
-<span class="code-comment"># World Bank API endpoint</span>
+<span class="code-comment"># Define the API endpoint URL</span>
 url <- <span class="code-string">"https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD"</span>
 
-<span class="code-comment"># Make request with parameters</span>
-response <- <span class="code-function">GET</span>(url, query = <span class="code-function">list</span>(
-  format = <span class="code-string">"json"</span>,
-  date = <span class="code-string">"2015:2022"</span>,
-  per_page = <span class="code-number">100</span>
+<span class="code-comment"># Make GET request with query parameters</span>
+<span class="code-tooltip" data-tip="GET() from httr sends an HTTP GET request; query= adds URL parameters">response</span> <- <span class="code-function">GET</span>(url, query = <span class="code-function">list</span>(
+  format = <span class="code-string">"json"</span>,      <span class="code-comment"># Request JSON format</span>
+  date = <span class="code-string">"2015:2022"</span>,   <span class="code-comment"># Year range</span>
+  per_page = <span class="code-number">100</span>        <span class="code-comment"># Max results</span>
 ))
 
+<span class="code-comment"># Check response status</span>
 <span class="code-function">cat</span>(<span class="code-string">"Status:"</span>, <span class="code-function">status_code</span>(response), <span class="code-string">"\n"</span>)
 
-<span class="code-comment"># Parse JSON</span>
-data <- <span class="code-function">content</span>(response, <span class="code-string">"text"</span>) %>% <span class="code-function">fromJSON</span>()
+<span class="code-comment"># Parse JSON response</span>
+<span class="code-tooltip" data-tip="content() extracts response body; fromJSON() parses JSON to R objects">data</span> <- <span class="code-function">content</span>(response, <span class="code-string">"text"</span>) %>% <span class="code-function">fromJSON</span>()
 
-<span class="code-comment"># Extract records (second element)</span>
+<span class="code-comment"># Extract records (second element of response list)</span>
 records <- data[[2]]
 
-<span class="code-comment"># Create tibble</span>
+<span class="code-comment"># Create tibble (tidyverse data frame)</span>
 df <- <span class="code-function">tibble</span>(
-  country = records$country$value,
-  year = <span class="code-function">as.integer</span>(records$date),
-  gdp = records$value
-) %>% <span class="code-function">filter</span>(!<span class="code-function">is.na</span>(gdp))
+  country = records$country$value,      <span class="code-comment"># Country name</span>
+  year = <span class="code-function">as.integer</span>(records$date),      <span class="code-comment"># Year as integer</span>
+  gdp = records$value                    <span class="code-comment"># GDP value</span>
+) %>% <span class="code-function">filter</span>(!<span class="code-function">is.na</span>(gdp))              <span class="code-comment"># Remove NAs</span>
 
 <span class="code-function">print</span>(df)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
 
-        <div class="output-simulation">
-          <div class="output-header"><span>Python Output</span></div>
+        <!-- Output simulations (hidden by default, shown on click) -->
+        <div class="output-simulation" data-output="api-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
           <div class="output-body">Status Code: <span class="out-num">200</span>
         country  year           gdp
 <span class="out-num">0</span>  United States  <span class="out-num">2022</span>  <span class="out-num">2.546206e+13</span>
@@ -271,127 +299,47 @@ df <- <span class="code-function">tibble</span>(
 <span class="out-num">7</span>  United States  <span class="out-num">2015</span>  <span class="out-num">1.823893e+13</span></div>
         </div>
 
-        <!-- Fetching Multiple Countries -->
-        <h2>Fetching Data for Multiple Countries</h2>
-
-        <p>For our research project, we need data for many countries. Here's how:</p>
-
-        <div class="code-tabs">
-          <div class="tab-buttons">
-            <button class="tab-button active" data-lang="python">Python</button>
-            <button class="tab-button" data-lang="r">R</button>
+        <div class="output-simulation" data-output="api-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
           </div>
-          <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Fetch GDP and CO2 emissions for multiple countries</span>
-<span class="code-keyword">import</span> requests
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+          <div class="output-body"><span class="out-str">. wbopendata, indicator(NY.GDP.MKTP.CD) country(USA) year(2015:2022) clear</span>
+(8 vars, 8 obs)
 
-<span class="code-keyword">def</span> <span class="code-function">fetch_wb_indicator</span>(indicator, countries, start_year, end_year):
-    <span class="code-string">"""Fetch World Bank indicator for multiple countries."""</span>
-    all_data = []
+<span class="out-str">. list countryname year ny_gdp_mktp_cd</span>
 
-    <span class="code-comment"># Join country codes with semicolon</span>
-    country_str = <span class="code-string">";"</span>.join(countries)
-
-    url = <span class="code-string">f"https://api.worldbank.org/v2/country/{country_str}/indicator/{indicator}"</span>
-    params = {
-        <span class="code-string">"format"</span>: <span class="code-string">"json"</span>,
-        <span class="code-string">"date"</span>: <span class="code-string">f"{start_year}:{end_year}"</span>,
-        <span class="code-string">"per_page"</span>: <span class="code-number">1000</span>
-    }
-
-    response = requests.get(url, params=params)
-    <span class="code-keyword">if</span> response.status_code == <span class="code-number">200</span>:
-        data = response.json()
-        <span class="code-keyword">if</span> len(data) > <span class="code-number">1</span> <span class="code-keyword">and</span> data[<span class="code-number">1</span>]:
-            <span class="code-keyword">for</span> r <span class="code-keyword">in</span> data[<span class="code-number">1</span>]:
-                <span class="code-keyword">if</span> r[<span class="code-string">'value'</span>] <span class="code-keyword">is not None</span>:
-                    all_data.append({
-                        <span class="code-string">'country_code'</span>: r[<span class="code-string">'countryiso3code'</span>],
-                        <span class="code-string">'country'</span>: r[<span class="code-string">'country'</span>][<span class="code-string">'value'</span>],
-                        <span class="code-string">'year'</span>: <span class="code-keyword">int</span>(r[<span class="code-string">'date'</span>]),
-                        <span class="code-string">'value'</span>: r[<span class="code-string">'value'</span>]
-                    })
-
-    <span class="code-keyword">return</span> pd.DataFrame(all_data)
-
-<span class="code-comment"># Countries for our climate research</span>
-countries = [<span class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>, <span class="code-string">'DEU'</span>, <span class="code-string">'IND'</span>, <span class="code-string">'BRA'</span>, <span class="code-string">'GBR'</span>, <span class="code-string">'FRA'</span>, <span class="code-string">'JPN'</span>]
-
-<span class="code-comment"># Fetch GDP (NY.GDP.MKTP.CD) and CO2 emissions (EN.ATM.CO2E.KT)</span>
-gdp_df = fetch_wb_indicator(<span class="code-string">'NY.GDP.MKTP.CD'</span>, countries, <span class="code-number">2010</span>, <span class="code-number">2022</span>)
-gdp_df = gdp_df.rename(columns={<span class="code-string">'value'</span>: <span class="code-string">'gdp'</span>})
-
-co2_df = fetch_wb_indicator(<span class="code-string">'EN.ATM.CO2E.KT'</span>, countries, <span class="code-number">2010</span>, <span class="code-number">2022</span>)
-co2_df = co2_df.rename(columns={<span class="code-string">'value'</span>: <span class="code-string">'co2_kt'</span>})
-
-<span class="code-comment"># Merge datasets</span>
-df = pd.merge(gdp_df, co2_df[[<span class="code-string">'country_code'</span>, <span class="code-string">'year'</span>, <span class="code-string">'co2_kt'</span>]],
-              on=[<span class="code-string">'country_code'</span>, <span class="code-string">'year'</span>], how=<span class="code-string">'outer'</span>)
-
-<span class="code-keyword">print</span>(<span class="code-string">f"Dataset: {len(df)} observations"</span>)
-<span class="code-keyword">print</span>(df.head(<span class="code-number">10</span>))</code></pre>
-          </div>
-          <div class="tab-content" data-lang="r">
-<pre><code><span class="code-comment"># Fetch multiple indicators for multiple countries</span>
-<span class="code-function">library</span>(httr)
-<span class="code-function">library</span>(jsonlite)
-<span class="code-function">library</span>(tidyverse)
-
-fetch_wb_indicator <- <span class="code-keyword">function</span>(indicator, countries, start_year, end_year) {
-  country_str <- <span class="code-function">paste</span>(countries, collapse = <span class="code-string">";"</span>)
-  url <- <span class="code-function">paste0</span>(<span class="code-string">"https://api.worldbank.org/v2/country/"</span>,
-                country_str, <span class="code-string">"/indicator/"</span>, indicator)
-
-  response <- <span class="code-function">GET</span>(url, query = <span class="code-function">list</span>(
-    format = <span class="code-string">"json"</span>,
-    date = <span class="code-function">paste0</span>(start_year, <span class="code-string">":"</span>, end_year),
-    per_page = <span class="code-number">1000</span>
-  ))
-
-  data <- <span class="code-function">content</span>(response, <span class="code-string">"text"</span>) %>% <span class="code-function">fromJSON</span>()
-
-  <span class="code-keyword">if</span> (<span class="code-function">length</span>(data) > <span class="code-number">1</span> && !<span class="code-function">is.null</span>(data[[2]])) {
-    records <- data[[2]]
-    <span class="code-function">tibble</span>(
-      country_code = records$countryiso3code,
-      country = records$country$value,
-      year = <span class="code-function">as.integer</span>(records$date),
-      value = records$value
-    ) %>% <span class="code-function">filter</span>(!<span class="code-function">is.na</span>(value))
-  } <span class="code-keyword">else</span> {
-    <span class="code-function">tibble</span>()
-  }
-}
-
-<span class="code-comment"># Fetch data</span>
-countries <- <span class="code-function">c</span>(<span class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>, <span class="code-string">"DEU"</span>, <span class="code-string">"IND"</span>, <span class="code-string">"BRA"</span>)
-
-gdp_df <- <span class="code-function">fetch_wb_indicator</span>(<span class="code-string">"NY.GDP.MKTP.CD"</span>, countries, <span class="code-number">2010</span>, <span class="code-number">2022</span>) %>%
-  <span class="code-function">rename</span>(gdp = value)
-
-co2_df <- <span class="code-function">fetch_wb_indicator</span>(<span class="code-string">"EN.ATM.CO2E.KT"</span>, countries, <span class="code-number">2010</span>, <span class="code-number">2022</span>) %>%
-  <span class="code-function">rename</span>(co2_kt = value)
-
-<span class="code-comment"># Merge</span>
-df <- gdp_df %>%
-  <span class="code-function">left_join</span>(co2_df %>% <span class="code-function">select</span>(country_code, year, co2_kt),
-            by = <span class="code-function">c</span>(<span class="code-string">"country_code"</span>, <span class="code-string">"year"</span>))
-
-<span class="code-function">print</span>(df)</code></pre>
-          </div>
+     +------------------------------------------+
+     |   countryname   year   ny_gdp_mktp_cd    |
+     |------------------------------------------|
+  1. | United States   2022   <span class="out-num">2.5462e+13</span>        |
+  2. | United States   2021   <span class="out-num">2.3315e+13</span>        |
+  3. | United States   2020   <span class="out-num">2.1264e+13</span>        |
+  4. | United States   2019   <span class="out-num">2.1527e+13</span>        |
+  5. | United States   2018   <span class="out-num">2.0562e+13</span>        |
+  6. | United States   2017   <span class="out-num">1.9612e+13</span>        |
+  7. | United States   2016   <span class="out-num">1.8724e+13</span>        |
+  8. | United States   2015   <span class="out-num">1.8239e+13</span>        |
+     +------------------------------------------+</div>
         </div>
 
-        <div class="output-simulation">
-          <div class="output-header"><span>Python Output</span></div>
-          <div class="output-body">Dataset: <span class="out-num">104</span> observations
-  country_code        country  year           gdp       co2_kt
-<span class="out-num">0</span>          USA  United States  <span class="out-num">2022</span>  <span class="out-num">2.546206e+13</span>         NaN
-<span class="out-num">1</span>          USA  United States  <span class="out-num">2021</span>  <span class="out-num">2.331481e+13</span>  <span class="out-num">4982180.0</span>
-<span class="out-num">2</span>          USA  United States  <span class="out-num">2020</span>  <span class="out-num">2.126379e+13</span>  <span class="out-num">4535300.0</span>
-<span class="out-num">3</span>          USA  United States  <span class="out-num">2019</span>  <span class="out-num">2.152748e+13</span>  <span class="out-num">5107390.0</span>
-<span class="out-num">4</span>          CHN          China  <span class="out-num">2022</span>  <span class="out-num">1.796892e+13</span>         NaN
-<span class="out-num">5</span>          CHN          China  <span class="out-num">2021</span>  <span class="out-num">1.778227e+13</span>  <span class="out-num">11472370.0</span></div>
+        <div class="output-simulation" data-output="api-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output (RStudio Console)</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Status: <span class="out-num">200</span>
+<span class="out-str"># A tibble: 8 x 3</span>
+  country        year          gdp
+  <span class="out-blue">&lt;chr&gt;</span>         <span class="out-blue">&lt;int&gt;</span>        <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> United States  <span class="out-num">2022</span> <span class="out-num">25462056000000</span>
+<span class="out-num">2</span> United States  <span class="out-num">2021</span> <span class="out-num">23314810000000</span>
+<span class="out-num">3</span> United States  <span class="out-num">2020</span> <span class="out-num">21263790000000</span>
+<span class="out-num">4</span> United States  <span class="out-num">2019</span> <span class="out-num">21527480000000</span>
+<span class="out-num">5</span> United States  <span class="out-num">2018</span> <span class="out-num">20562420000000</span>
+<span class="out-num">6</span> United States  <span class="out-num">2017</span> <span class="out-num">19611520000000</span>
+<span class="out-num">7</span> United States  <span class="out-num">2016</span> <span class="out-num">18723520000000</span>
+<span class="out-num">8</span> United States  <span class="out-num">2015</span> <span class="out-num">18238930000000</span></div>
         </div>
 
         <!-- Common World Bank Indicators -->
@@ -424,7 +372,7 @@ df <- gdp_df %>%
 
         <div class="concept-box">
           <h4>Why Authentication?</h4>
-          <p style="margin-bottom: 0;">Many APIs require an API key to track usage and prevent abuse. The World Bank API is free and doesn't require authentication, but others (like FRED, Alpha Vantage) do. You typically get a key by registering on the provider's website.</p>
+          <p style="margin-bottom: 0;">Many APIs require an <strong>API key</strong> to track usage and prevent abuse. The World Bank API is free and doesn't require authentication, but others (like FRED, Alpha Vantage, OpenAI) do. You typically get a key by registering on the provider's website.</p>
         </div>
 
         <div class="code-tabs">
@@ -434,16 +382,18 @@ df <- gdp_df %>%
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Example: Using an API key (FRED API)</span>
 <span class="code-keyword">import</span> requests
-<span class="code-keyword">import</span> os
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="os module: Provides functions for interacting with the operating system, including environment variables">os</span>
 
-<span class="code-comment"># NEVER hardcode API keys! Use environment variables</span>
-api_key = os.environ.get(<span class="code-string">'FRED_API_KEY'</span>)  <span class="code-comment"># Set in terminal: export FRED_API_KEY=your_key</span>
+<span class="code-comment"># NEVER hardcode API keys in your code!</span>
+<span class="code-comment"># Instead, use environment variables for security</span>
+<span class="code-tooltip" data-tip="os.environ.get() retrieves environment variables - safer than hardcoding secrets">api_key</span> = os.environ.get(<span class="code-string">'FRED_API_KEY'</span>)
+<span class="code-comment"># Set in terminal: export FRED_API_KEY=your_key_here</span>
 
 url = <span class="code-string">"https://api.stlouisfed.org/fred/series/observations"</span>
 params = {
-    <span class="code-string">"series_id"</span>: <span class="code-string">"GDP"</span>,
-    <span class="code-string">"api_key"</span>: api_key,
-    <span class="code-string">"file_type"</span>: <span class="code-string">"json"</span>
+    <span class="code-string">"series_id"</span>: <span class="code-string">"GDP"</span>,       <span class="code-comment"># The data series to fetch</span>
+    <span class="code-string">"api_key"</span>: api_key,        <span class="code-comment"># Your authentication key</span>
+    <span class="code-string">"file_type"</span>: <span class="code-string">"json"</span>       <span class="code-comment"># Response format</span>
 }
 
 response = requests.get(url, params=params)</code></pre>
@@ -452,23 +402,9 @@ response = requests.get(url, params=params)</code></pre>
 
         <div class="info-box warning">
           <div class="info-box-title">Security Warning</div>
-          <p style="margin-bottom: 0;"><strong>Never commit API keys to Git!</strong> Use environment variables or a <code>.env</code> file (and add it to <code>.gitignore</code>). Exposed keys can be stolen and abused.</p>
-        </div>
-
-        <!-- Azure and Cloud APIs -->
-        <h2>Cloud APIs: Azure Example</h2>
-
-        <p>Microsoft Azure provides APIs for advanced capabilities like text analysis and image recognition. These are useful for research involving unstructured data.</p>
-
-        <div class="info-box note">
-          <div class="info-box-title">Azure Cognitive Services</div>
-          <p>Azure offers APIs for:</p>
-          <ul style="margin-bottom: 0;">
-            <li><strong>Text Analytics:</strong> Sentiment analysis, key phrase extraction</li>
-            <li><strong>Computer Vision:</strong> Image classification, OCR</li>
-            <li><strong>Translator:</strong> Multilingual text translation</li>
-          </ul>
-          <p style="margin-top: 1rem;">Demo and documentation: <a href="https://azure.microsoft.com/en-us/products/cognitive-services" target="_blank">Azure Cognitive Services</a></p>
+          <p><strong>Never commit API keys to Git!</strong> We haven't covered Git yet (that's in <a href="08-github.html">Module 8</a>), but this is important enough to mention now. Git is a version control system that tracks all your code changes&mdash;including any secrets you accidentally include.</p>
+          <p>Use environment variables or a <code>.env</code> file (and add it to <code>.gitignore</code>). Exposed keys can be stolen and abused, potentially costing you money or compromising your accounts.</p>
+          <p style="margin-bottom: 0;"><strong>We'll explain Git, commits, and <code>.gitignore</code> properly in <a href="08-github.html">Module 8: Git & GitHub</a>.</strong></p>
         </div>
 
         <!-- Next Steps -->
@@ -516,5 +452,53 @@ response = requests.get(url, params=params)</code></pre>
   <script src="../js/main.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
+
+  <!-- Run button and output toggle script -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle Run button clicks
+    document.querySelectorAll('.run-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const lang = this.dataset.lang;
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+
+        // Hide all outputs for this code block
+        document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+          out.classList.remove('visible');
+        });
+
+        // Show the output for the selected language
+        const output = document.querySelector(`.output-simulation[data-output="${outputId}"][data-lang="${lang}"]`);
+        if (output) {
+          output.classList.add('visible');
+          // Scroll to output
+          output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
+    // Handle close output buttons
+    document.querySelectorAll('.close-output').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.output-simulation').classList.remove('visible');
+      });
+    });
+
+    // Update Run button when language tab changes
+    document.querySelectorAll('.code-tabs .tab-button').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+        if (outputId) {
+          // Hide all outputs when switching tabs
+          document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+            out.classList.remove('visible');
+          });
+        }
+      });
+    });
+  });
+  </script>
 </body>
 </html>

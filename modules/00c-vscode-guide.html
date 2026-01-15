@@ -110,7 +110,13 @@
             </ul>
           </li>
           <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
-          <li><a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a></li>
+          <li>
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-data-exploration.html">Data Exploration</a></li>
+              <li><a href="02b-apis.html">Working with APIs</a></li>
+            </ul>
+          </li>
           <li><a href="03-data-cleaning.html"><span class="module-number">3</span> Data Cleaning</a></li>
           <li><a href="04-data-analysis.html"><span class="module-number">4</span> Data Analysis</a></li>
           <li><a href="05-causal-inference.html"><span class="module-number">5</span> Causal Inference</a></li>
@@ -423,6 +429,332 @@
             </tr>
           </tbody>
         </table>
+
+        <h2 id="virtual-environments">Python Virtual Environments</h2>
+
+        <p class="lead">
+          Virtual environments are one of the most important concepts in Python development. If you skip this section, you <em>will</em> run into problems eventually. Trust me on this one.
+        </p>
+
+        <h3>What is a Virtual Environment?</h3>
+
+        <p>
+          Imagine your computer is an apartment building. Python is the building itself, and <strong>packages</strong> (like pandas, numpy, matplotlib) are furniture. Now imagine every project you work on is a different apartment in that building.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">The Apartment Building Analogy</div>
+          <p>
+            <strong>Without virtual environments:</strong> Every apartment shares the same furniture. If Project A needs a red couch (pandas version 1.5) but Project B needs a blue couch (pandas version 2.0), you have a problem. You can only have one couch in the building.
+          </p>
+          <p>
+            <strong>With virtual environments:</strong> Each apartment has its own furniture. Project A's apartment has a red couch, Project B's apartment has a blue couch. They don't interfere with each other.
+          </p>
+        </div>
+
+        <p>
+          In technical terms, a virtual environment is an <strong>isolated Python installation</strong> with its own set of packages. When you activate a virtual environment, any packages you install go into that environment only, not your system-wide Python.
+        </p>
+
+        <h3>Why Do You Need Virtual Environments?</h3>
+
+        <p>
+          Here are the real-world problems that virtual environments solve:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Problem</th>
+              <th>Without Virtual Environments</th>
+              <th>With Virtual Environments</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Version conflicts</strong></td>
+              <td>Project A breaks when you update pandas for Project B</td>
+              <td>Each project has its own pandas version</td>
+            </tr>
+            <tr>
+              <td><strong>Reproducibility</strong></td>
+              <td>"It works on my machine" but not your colleague's</td>
+              <td>Export exact package versions with <code>requirements.txt</code></td>
+            </tr>
+            <tr>
+              <td><strong>Clean uninstall</strong></td>
+              <td>Packages scattered across your system</td>
+              <td>Delete the folder, everything's gone</td>
+            </tr>
+            <tr>
+              <td><strong>System safety</strong></td>
+              <td>Risk breaking system Python tools</td>
+              <td>System Python stays untouched</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Real Story from the Trenches</div>
+          <p>
+            I once spent two days debugging why a student's code wouldn't run. The problem? They had installed packages globally, and a system update had changed their Python version. All their packages were installed for Python 3.9, but the system was now running Python 3.11. A virtual environment would have prevented this entirely.
+          </p>
+        </div>
+
+        <h3>Creating a Virtual Environment</h3>
+
+        <p>
+          Python has a built-in tool called <code>venv</code> for creating virtual environments. Here's how to use it:
+        </p>
+
+        <h4>Step 1: Open Terminal in VS Code</h4>
+        <p>Press <code>Ctrl + `</code> (backtick) to open the integrated terminal.</p>
+
+        <h4>Step 2: Navigate to Your Project Folder</h4>
+        <pre><code><span class="code-comment"># Example: navigate to your project</span>
+cd ~/Documents/protools_er1/my_project</code></pre>
+
+        <h4>Step 3: Create the Virtual Environment</h4>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="windows">Windows</button>
+            <button class="tab-button" data-lang="mac">Mac/Linux</button>
+          </div>
+          <div class="tab-content active" data-lang="windows">
+<pre><code><span class="code-comment"># Create a virtual environment named 'venv'</span>
+python -m venv venv
+
+<span class="code-comment"># Or with a more descriptive name</span>
+python -m venv my_project_env</code></pre>
+          </div>
+          <div class="tab-content" data-lang="mac">
+<pre><code><span class="code-comment"># Create a virtual environment named 'venv'</span>
+python3 -m venv venv
+
+<span class="code-comment"># Or with a more descriptive name</span>
+python3 -m venv my_project_env</code></pre>
+          </div>
+        </div>
+
+        <p>
+          This creates a new folder (called <code>venv</code> or whatever name you chose) containing a complete Python installation.
+        </p>
+
+        <h4>Step 4: Activate the Virtual Environment</h4>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="windows">Windows (PowerShell)</button>
+            <button class="tab-button" data-lang="cmd">Windows (CMD)</button>
+            <button class="tab-button" data-lang="mac">Mac/Linux</button>
+          </div>
+          <div class="tab-content active" data-lang="windows">
+<pre><code><span class="code-comment"># Activate the environment</span>
+.\venv\Scripts\Activate.ps1
+
+<span class="code-comment"># If you get an execution policy error, run this first:</span>
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></pre>
+          </div>
+          <div class="tab-content" data-lang="cmd">
+<pre><code><span class="code-comment"># Activate the environment</span>
+venv\Scripts\activate.bat</code></pre>
+          </div>
+          <div class="tab-content" data-lang="mac">
+<pre><code><span class="code-comment"># Activate the environment</span>
+source venv/bin/activate</code></pre>
+          </div>
+        </div>
+
+        <p>
+          <strong>You'll know it worked</strong> when you see <code>(venv)</code> at the beginning of your terminal prompt:
+        </p>
+
+        <div style="background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 8px; font-family: var(--font-code); margin: 1rem 0;">
+          <span style="color: #4ec9b0;">(venv)</span> <span style="color: #569cd6;">C:\Users\yourname\my_project&gt;</span> _
+        </div>
+
+        <h4>Step 5: Install Packages</h4>
+        <p>
+          Now any packages you install will go into this virtual environment:
+        </p>
+
+<pre><code><span class="code-comment"># Install packages (they go into the venv only)</span>
+pip install pandas numpy matplotlib statsmodels
+
+<span class="code-comment"># See what's installed in this environment</span>
+pip list</code></pre>
+
+        <h4>Step 6: Deactivate When Done</h4>
+<pre><code><span class="code-comment"># Leave the virtual environment</span>
+deactivate</code></pre>
+
+        <h3>How to Check Which Environment You're In</h3>
+
+        <p>There are several ways to verify your current Python environment:</p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="terminal">Terminal Check</button>
+            <button class="tab-button" data-lang="python">Python Check</button>
+            <button class="tab-button" data-lang="vscode">VS Code Check</button>
+          </div>
+          <div class="tab-content active" data-lang="terminal">
+<pre><code><span class="code-comment"># Method 1: Look at your prompt</span>
+<span class="code-comment"># If you see (venv) at the start, you're in the venv</span>
+
+<span class="code-comment"># Method 2: Check which Python is being used</span>
+which python     <span class="code-comment"># Mac/Linux</span>
+where python     <span class="code-comment"># Windows</span>
+
+<span class="code-comment"># If it shows a path inside your project's venv folder, you're in the venv</span>
+<span class="code-comment"># Example output: /Users/yourname/my_project/venv/bin/python</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="python">
+<pre><code><span class="code-keyword">import</span> sys
+<span class="code-function">print</span>(sys.executable)
+<span class="code-comment"># Shows the full path to the Python interpreter</span>
+<span class="code-comment"># If it's inside your venv folder, you're in the venv</span>
+
+<span class="code-keyword">import</span> sys
+<span class="code-function">print</span>(sys.prefix)
+<span class="code-comment"># Shows the base location of the Python installation</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="vscode">
+<pre><code><span class="code-comment"># Look at the bottom-left of VS Code</span>
+<span class="code-comment"># You'll see something like: Python 3.11.5 ('venv': venv)</span>
+
+<span class="code-comment"># Or press Ctrl+Shift+P and type "Python: Select Interpreter"</span>
+<span class="code-comment"># This shows all available environments</span></code></pre>
+          </div>
+        </div>
+
+        <h3>Where is the Virtual Environment Stored?</h3>
+
+        <p>
+          The virtual environment is simply a folder in your project directory. Here's what's inside:
+        </p>
+
+        <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem; font-family: var(--font-code); font-size: 0.9rem; margin: 1rem 0;">
+          <span style="color: #6c757d;">my_project/</span><br>
+          ├── <span style="color: #0d6efd;">venv/</span> <span style="color: #6c757d;">← The virtual environment folder</span><br>
+          │   ├── <span style="color: #198754;">bin/</span> (Mac/Linux) or <span style="color: #198754;">Scripts/</span> (Windows)<br>
+          │   │   ├── python <span style="color: #6c757d;">← The Python interpreter for this env</span><br>
+          │   │   ├── pip <span style="color: #6c757d;">← Package installer for this env</span><br>
+          │   │   └── activate <span style="color: #6c757d;">← Activation script</span><br>
+          │   ├── <span style="color: #198754;">lib/</span><br>
+          │   │   └── python3.11/site-packages/ <span style="color: #6c757d;">← Installed packages live here</span><br>
+          │   └── pyvenv.cfg <span style="color: #6c757d;">← Configuration file</span><br>
+          ├── my_script.py <span style="color: #6c757d;">← Your code</span><br>
+          └── requirements.txt <span style="color: #6c757d;">← Package list for sharing</span>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Don't commit venv to Git!</div>
+          <p>
+            The <code>venv</code> folder can be hundreds of megabytes. Never commit it to Git. Instead, add it to your <code>.gitignore</code> file and share a <code>requirements.txt</code> instead. We'll cover this in <a href="08-github.html">Module 8: Git & GitHub</a>.
+          </p>
+        </div>
+
+        <h3>Sharing Your Environment: requirements.txt</h3>
+
+        <p>
+          To share your project with others (or recreate it on a new computer), you save the list of installed packages:
+        </p>
+
+<pre><code><span class="code-comment"># Save your current packages to a file</span>
+pip freeze > requirements.txt
+
+<span class="code-comment"># On a new computer, recreate the environment:</span>
+python -m venv venv
+source venv/bin/activate  <span class="code-comment"># or .\venv\Scripts\Activate.ps1 on Windows</span>
+pip install -r requirements.txt</code></pre>
+
+        <p>
+          The <code>requirements.txt</code> file looks like this:
+        </p>
+
+        <div style="background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 8px; font-family: var(--font-code); margin: 1rem 0;">
+pandas==2.1.0<br>
+numpy==1.25.2<br>
+matplotlib==3.7.2<br>
+statsmodels==0.14.0
+        </div>
+
+        <h3>VS Code and Virtual Environments</h3>
+
+        <p>
+          VS Code automatically detects virtual environments in your project. Here's how to ensure VS Code uses the right one:
+        </p>
+
+        <ol>
+          <li>Open your project folder in VS Code</li>
+          <li>Create and activate a virtual environment (as shown above)</li>
+          <li>Press <code>Ctrl + Shift + P</code> and type <strong>Python: Select Interpreter</strong></li>
+          <li>Choose the interpreter that shows <code>('venv': venv)</code> or your environment name</li>
+        </ol>
+
+        <p>
+          From now on, VS Code will use this environment for:
+        </p>
+        <ul>
+          <li>Running Python files (<code>F5</code> or <code>Ctrl+F5</code>)</li>
+          <li>Running code in the terminal</li>
+          <li>IntelliSense and autocomplete</li>
+          <li>Jupyter notebooks</li>
+        </ul>
+
+        <h3>Common Virtual Environment Issues</h3>
+
+        <details>
+          <summary><strong>"python" command not found</strong></summary>
+          <div style="padding: 1rem;">
+            <p>On Mac/Linux, try <code>python3</code> instead of <code>python</code>. On Windows, make sure Python is added to your PATH during installation, or reinstall Python and check the "Add Python to PATH" box.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary><strong>PowerShell execution policy error (Windows)</strong></summary>
+          <div style="padding: 1rem;">
+            <p>Run this command in PowerShell as Administrator:</p>
+            <pre><code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></pre>
+          </div>
+        </details>
+
+        <details>
+          <summary><strong>VS Code doesn't detect my virtual environment</strong></summary>
+          <div style="padding: 1rem;">
+            <p>Make sure:</p>
+            <ul>
+              <li>The venv folder is inside your project folder (not somewhere else)</li>
+              <li>You've opened the project <em>folder</em> in VS Code (not just a file)</li>
+              <li>Try <code>Ctrl+Shift+P</code> → "Python: Select Interpreter" → "Enter interpreter path" and navigate to the Python executable inside your venv</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary><strong>Packages installed but "ModuleNotFoundError"</strong></summary>
+          <div style="padding: 1rem;">
+            <p>This usually means you installed packages in the wrong environment. Check:</p>
+            <ol>
+              <li>Is your terminal prompt showing <code>(venv)</code>?</li>
+              <li>Is VS Code using the right interpreter? (Check bottom-left corner)</li>
+              <li>Run <code>pip list</code> to see what's installed in the current environment</li>
+            </ol>
+          </div>
+        </details>
+
+        <h3>Further Learning</h3>
+
+        <div class="info-box note">
+          <div class="info-box-title">Videos and Documentation</div>
+          <ul>
+            <li><a href="https://www.youtube.com/watch?v=KxvKCSwlUv8" target="_blank">Python Virtual Environments Explained</a> (YouTube, ~10 min) — Clear beginner-friendly explanation</li>
+            <li><a href="https://www.youtube.com/watch?v=APOPm01BVrk" target="_blank">How to Use Virtual Environments in VS Code</a> (YouTube, ~8 min) — VS Code-specific walkthrough</li>
+            <li><a href="https://docs.python.org/3/library/venv.html" target="_blank">Python venv Documentation</a> — Official Python documentation</li>
+            <li><a href="https://realpython.com/python-virtual-environments-a-primer/" target="_blank">Python Virtual Environments: A Primer</a> — In-depth Real Python tutorial</li>
+            <li><a href="https://code.visualstudio.com/docs/python/environments" target="_blank">VS Code: Python Environments</a> — Official VS Code documentation</li>
+          </ul>
+        </div>
 
         <h2>Essential Keyboard Shortcuts</h2>
 

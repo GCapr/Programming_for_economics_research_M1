@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 2b: Working with APIs | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .output-simulation { background: #1e1e1e; border-radius: 8px; margin: 1rem 0; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.8rem; }
+    .output-header { background: #333; padding: 0.5rem 1rem; color: #ccc; font-size: 0.75rem; }
+    .output-body { padding: 1rem; color: #d4d4d4; white-space: pre-wrap; overflow-x: auto; max-height: 300px; overflow-y: auto; }
+    .out-green { color: #4ec9b0; }
+    .out-yellow { color: #dcdcaa; }
+    .out-blue { color: #569cd6; }
+    .out-num { color: #b5cea8; }
+    .out-str { color: #ce9178; }
+    .research-banner { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 1.5rem; border-radius: 12px; margin: 2rem 0; }
+    .research-banner h3 { color: white; margin-top: 0; }
+    .concept-box { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+    .concept-box h4 { color: #1e40af; margin-top: 0; }
+    .api-diagram { background: #f8f9fa; border-radius: 12px; padding: 2rem; margin: 2rem 0; text-align: center; }
+    .api-flow { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .api-box { background: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); min-width: 120px; }
+    .api-box.client { background: #dbeafe; border: 2px solid #3b82f6; }
+    .api-box.server { background: #dcfce7; border: 2px solid #22c55e; }
+    .api-arrow { font-size: 2rem; color: #6b7280; }
+    .api-label { font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Please enter the course password to access the materials.</p>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+      <button id="password-submit">Access Course</button>
+      <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li>
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li>
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-data-exploration.html">Data Exploration</a></li>
+              <li><a href="02b-apis.html" class="active">Working with APIs</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-cleaning.html"><span class="module-number">3</span> Data Cleaning</a></li>
+          <li><a href="04-data-analysis.html"><span class="module-number">4</span> Data Analysis</a></li>
+          <li><a href="05-causal-inference.html"><span class="module-number">5</span> Causal Inference</a></li>
+          <li><a href="06-estimation.html"><span class="module-number">6</span> Estimation Methods</a></li>
+          <li><a href="07-replicability.html"><span class="module-number">7</span> Replicability</a></li>
+          <li><a href="08-github.html"><span class="module-number">8</span> Git & GitHub</a></li>
+          <li><a href="09-nlp-history.html"><span class="module-number">9</span> History of NLP</a></li>
+          <li><a href="10-machine-learning.html"><span class="module-number">10</span> Machine Learning</a></li>
+          <li><a href="11-llms.html"><span class="module-number">11</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact &amp; Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>2b &nbsp;Working with APIs</h1>
+          <div class="module-meta">
+            <span>~3 hours</span>
+            <span>APIs, HTTP, JSON</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Understand what an API is and how it works technically</li>
+            <li>Make API requests and parse JSON responses</li>
+            <li>Use the World Bank API for economic research data</li>
+            <li>Handle authentication and rate limits</li>
+          </ul>
+        </div>
+
+        <div class="research-banner">
+          <h3>Research Project: Fetching Climate & Economic Data</h3>
+          <p style="margin-bottom: 0;">In this module, we'll use the World Bank API to programmatically download CO2 emissions, GDP, and climate indicators for our research on climate vulnerability and economic growth.</p>
+        </div>
+
+        <!-- What is an API? -->
+        <h2>What is an API?</h2>
+
+        <div class="concept-box">
+          <h4>API = Application Programming Interface</h4>
+          <p>An API is a structured way for programs to communicate. Instead of downloading a CSV file manually, you send a <strong>request</strong> to a server, and it sends back <strong>data</strong> in a structured format (usually JSON).</p>
+          <p style="margin-bottom: 0;"><strong>Analogy:</strong> Think of a restaurant. You (the client) don't go into the kitchen. Instead, you tell the waiter (the API) what you want, and the waiter brings your food (the data) from the kitchen (the server).</p>
+        </div>
+
+        <!-- API Diagram -->
+        <div class="api-diagram">
+          <h4 style="margin-top: 0;">How an API Request Works</h4>
+          <div class="api-flow">
+            <div class="api-box client">
+              <strong>Your Code</strong>
+              <div class="api-label">(Client)</div>
+            </div>
+            <div>
+              <div class="api-arrow">&rarr;</div>
+              <div class="api-label">HTTP Request<br>"GET /countries/USA/gdp"</div>
+            </div>
+            <div class="api-box server">
+              <strong>World Bank Server</strong>
+              <div class="api-label">(API)</div>
+            </div>
+            <div>
+              <div class="api-arrow">&rarr;</div>
+              <div class="api-label">JSON Response<br>{"gdp": 25000000000000}</div>
+            </div>
+            <div class="api-box client">
+              <strong>Your Code</strong>
+              <div class="api-label">(Receives Data)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HTTP and URLs -->
+        <h2>Understanding API URLs</h2>
+
+        <p>API requests use URLs with specific structures:</p>
+
+        <pre style="background: #f8f9fa; padding: 1rem; border-radius: 8px; overflow-x: auto;">
+https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD?format=json
+|_____||________________||_||___||_____________________________||___________|
+   |          |          |    |              |                        |
+Protocol    Host      Version  Country   Indicator Code          Parameters</pre>
+
+        <div class="concept-box">
+          <h4>Key Components</h4>
+          <ul style="margin-bottom: 0;">
+            <li><strong>Host:</strong> The server address (api.worldbank.org)</li>
+            <li><strong>Endpoint:</strong> The specific resource you want (/country/USA/indicator/...)</li>
+            <li><strong>Parameters:</strong> Options like format, date range (?format=json&date=2010:2020)</li>
+          </ul>
+        </div>
+
+        <!-- Your First API Call -->
+        <h2>Your First API Call</h2>
+
+        <p>Let's fetch GDP data from the World Bank API. This is a complete, runnable example:</p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># COMPLETE EXAMPLE: Fetch GDP data from World Bank API</span>
+<span class="code-keyword">import</span> requests
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># World Bank API endpoint for GDP (current US$)</span>
+<span class="code-comment"># Indicator: NY.GDP.MKTP.CD</span>
+url = <span class="code-string">"https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD"</span>
+params = {
+    <span class="code-string">"format"</span>: <span class="code-string">"json"</span>,
+    <span class="code-string">"date"</span>: <span class="code-string">"2015:2022"</span>,
+    <span class="code-string">"per_page"</span>: <span class="code-number">100</span>
+}
+
+<span class="code-comment"># Make the request</span>
+response = requests.get(url, params=params)
+<span class="code-keyword">print</span>(<span class="code-string">f"Status Code: {response.status_code}"</span>)  <span class="code-comment"># 200 = success</span>
+
+<span class="code-comment"># Parse JSON response</span>
+data = response.json()
+
+<span class="code-comment"># The World Bank API returns [metadata, actual_data]</span>
+records = data[<span class="code-number">1</span>]
+
+<span class="code-comment"># Convert to DataFrame</span>
+df = pd.DataFrame([{
+    <span class="code-string">'country'</span>: r[<span class="code-string">'country'</span>][<span class="code-string">'value'</span>],
+    <span class="code-string">'year'</span>: <span class="code-keyword">int</span>(r[<span class="code-string">'date'</span>]),
+    <span class="code-string">'gdp'</span>: r[<span class="code-string">'value'</span>]
+} <span class="code-keyword">for</span> r <span class="code-keyword">in</span> records <span class="code-keyword">if</span> r[<span class="code-string">'value'</span>] <span class="code-keyword">is not None</span>])
+
+<span class="code-keyword">print</span>(df)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: API calls require additional setup</span>
+<span class="code-comment">* Option 1: Use Python via Stata 17+ integration</span>
+<span class="code-comment">* Option 2: Download the data and import</span>
+
+<span class="code-comment">* For World Bank data, use the wbopendata package</span>
+<span class="code-keyword">ssc</span> install wbopendata
+
+<span class="code-comment">* Fetch GDP data directly</span>
+<span class="code-keyword">wbopendata</span>, indicator(NY.GDP.MKTP.CD) country(USA) year(2015:2022) clear
+
+<span class="code-comment">* View the data</span>
+<span class="code-keyword">list</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># COMPLETE EXAMPLE: Fetch GDP data from World Bank API</span>
+<span class="code-function">library</span>(httr)
+<span class="code-function">library</span>(jsonlite)
+<span class="code-function">library</span>(tidyverse)
+
+<span class="code-comment"># World Bank API endpoint</span>
+url <- <span class="code-string">"https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD"</span>
+
+<span class="code-comment"># Make request with parameters</span>
+response <- <span class="code-function">GET</span>(url, query = <span class="code-function">list</span>(
+  format = <span class="code-string">"json"</span>,
+  date = <span class="code-string">"2015:2022"</span>,
+  per_page = <span class="code-number">100</span>
+))
+
+<span class="code-function">cat</span>(<span class="code-string">"Status:"</span>, <span class="code-function">status_code</span>(response), <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># Parse JSON</span>
+data <- <span class="code-function">content</span>(response, <span class="code-string">"text"</span>) %>% <span class="code-function">fromJSON</span>()
+
+<span class="code-comment"># Extract records (second element)</span>
+records <- data[[2]]
+
+<span class="code-comment"># Create tibble</span>
+df <- <span class="code-function">tibble</span>(
+  country = records$country$value,
+  year = <span class="code-function">as.integer</span>(records$date),
+  gdp = records$value
+) %>% <span class="code-function">filter</span>(!<span class="code-function">is.na</span>(gdp))
+
+<span class="code-function">print</span>(df)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-simulation">
+          <div class="output-header"><span>Python Output</span></div>
+          <div class="output-body">Status Code: <span class="out-num">200</span>
+        country  year           gdp
+<span class="out-num">0</span>  United States  <span class="out-num">2022</span>  <span class="out-num">2.546206e+13</span>
+<span class="out-num">1</span>  United States  <span class="out-num">2021</span>  <span class="out-num">2.331481e+13</span>
+<span class="out-num">2</span>  United States  <span class="out-num">2020</span>  <span class="out-num">2.126379e+13</span>
+<span class="out-num">3</span>  United States  <span class="out-num">2019</span>  <span class="out-num">2.152748e+13</span>
+<span class="out-num">4</span>  United States  <span class="out-num">2018</span>  <span class="out-num">2.056242e+13</span>
+<span class="out-num">5</span>  United States  <span class="out-num">2017</span>  <span class="out-num">1.961152e+13</span>
+<span class="out-num">6</span>  United States  <span class="out-num">2016</span>  <span class="out-num">1.872352e+13</span>
+<span class="out-num">7</span>  United States  <span class="out-num">2015</span>  <span class="out-num">1.823893e+13</span></div>
+        </div>
+
+        <!-- Fetching Multiple Countries -->
+        <h2>Fetching Data for Multiple Countries</h2>
+
+        <p>For our research project, we need data for many countries. Here's how:</p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Fetch GDP and CO2 emissions for multiple countries</span>
+<span class="code-keyword">import</span> requests
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-keyword">def</span> <span class="code-function">fetch_wb_indicator</span>(indicator, countries, start_year, end_year):
+    <span class="code-string">"""Fetch World Bank indicator for multiple countries."""</span>
+    all_data = []
+
+    <span class="code-comment"># Join country codes with semicolon</span>
+    country_str = <span class="code-string">";"</span>.join(countries)
+
+    url = <span class="code-string">f"https://api.worldbank.org/v2/country/{country_str}/indicator/{indicator}"</span>
+    params = {
+        <span class="code-string">"format"</span>: <span class="code-string">"json"</span>,
+        <span class="code-string">"date"</span>: <span class="code-string">f"{start_year}:{end_year}"</span>,
+        <span class="code-string">"per_page"</span>: <span class="code-number">1000</span>
+    }
+
+    response = requests.get(url, params=params)
+    <span class="code-keyword">if</span> response.status_code == <span class="code-number">200</span>:
+        data = response.json()
+        <span class="code-keyword">if</span> len(data) > <span class="code-number">1</span> <span class="code-keyword">and</span> data[<span class="code-number">1</span>]:
+            <span class="code-keyword">for</span> r <span class="code-keyword">in</span> data[<span class="code-number">1</span>]:
+                <span class="code-keyword">if</span> r[<span class="code-string">'value'</span>] <span class="code-keyword">is not None</span>:
+                    all_data.append({
+                        <span class="code-string">'country_code'</span>: r[<span class="code-string">'countryiso3code'</span>],
+                        <span class="code-string">'country'</span>: r[<span class="code-string">'country'</span>][<span class="code-string">'value'</span>],
+                        <span class="code-string">'year'</span>: <span class="code-keyword">int</span>(r[<span class="code-string">'date'</span>]),
+                        <span class="code-string">'value'</span>: r[<span class="code-string">'value'</span>]
+                    })
+
+    <span class="code-keyword">return</span> pd.DataFrame(all_data)
+
+<span class="code-comment"># Countries for our climate research</span>
+countries = [<span class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>, <span class="code-string">'DEU'</span>, <span class="code-string">'IND'</span>, <span class="code-string">'BRA'</span>, <span class="code-string">'GBR'</span>, <span class="code-string">'FRA'</span>, <span class="code-string">'JPN'</span>]
+
+<span class="code-comment"># Fetch GDP (NY.GDP.MKTP.CD) and CO2 emissions (EN.ATM.CO2E.KT)</span>
+gdp_df = fetch_wb_indicator(<span class="code-string">'NY.GDP.MKTP.CD'</span>, countries, <span class="code-number">2010</span>, <span class="code-number">2022</span>)
+gdp_df = gdp_df.rename(columns={<span class="code-string">'value'</span>: <span class="code-string">'gdp'</span>})
+
+co2_df = fetch_wb_indicator(<span class="code-string">'EN.ATM.CO2E.KT'</span>, countries, <span class="code-number">2010</span>, <span class="code-number">2022</span>)
+co2_df = co2_df.rename(columns={<span class="code-string">'value'</span>: <span class="code-string">'co2_kt'</span>})
+
+<span class="code-comment"># Merge datasets</span>
+df = pd.merge(gdp_df, co2_df[[<span class="code-string">'country_code'</span>, <span class="code-string">'year'</span>, <span class="code-string">'co2_kt'</span>]],
+              on=[<span class="code-string">'country_code'</span>, <span class="code-string">'year'</span>], how=<span class="code-string">'outer'</span>)
+
+<span class="code-keyword">print</span>(<span class="code-string">f"Dataset: {len(df)} observations"</span>)
+<span class="code-keyword">print</span>(df.head(<span class="code-number">10</span>))</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># Fetch multiple indicators for multiple countries</span>
+<span class="code-function">library</span>(httr)
+<span class="code-function">library</span>(jsonlite)
+<span class="code-function">library</span>(tidyverse)
+
+fetch_wb_indicator <- <span class="code-keyword">function</span>(indicator, countries, start_year, end_year) {
+  country_str <- <span class="code-function">paste</span>(countries, collapse = <span class="code-string">";"</span>)
+  url <- <span class="code-function">paste0</span>(<span class="code-string">"https://api.worldbank.org/v2/country/"</span>,
+                country_str, <span class="code-string">"/indicator/"</span>, indicator)
+
+  response <- <span class="code-function">GET</span>(url, query = <span class="code-function">list</span>(
+    format = <span class="code-string">"json"</span>,
+    date = <span class="code-function">paste0</span>(start_year, <span class="code-string">":"</span>, end_year),
+    per_page = <span class="code-number">1000</span>
+  ))
+
+  data <- <span class="code-function">content</span>(response, <span class="code-string">"text"</span>) %>% <span class="code-function">fromJSON</span>()
+
+  <span class="code-keyword">if</span> (<span class="code-function">length</span>(data) > <span class="code-number">1</span> && !<span class="code-function">is.null</span>(data[[2]])) {
+    records <- data[[2]]
+    <span class="code-function">tibble</span>(
+      country_code = records$countryiso3code,
+      country = records$country$value,
+      year = <span class="code-function">as.integer</span>(records$date),
+      value = records$value
+    ) %>% <span class="code-function">filter</span>(!<span class="code-function">is.na</span>(value))
+  } <span class="code-keyword">else</span> {
+    <span class="code-function">tibble</span>()
+  }
+}
+
+<span class="code-comment"># Fetch data</span>
+countries <- <span class="code-function">c</span>(<span class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>, <span class="code-string">"DEU"</span>, <span class="code-string">"IND"</span>, <span class="code-string">"BRA"</span>)
+
+gdp_df <- <span class="code-function">fetch_wb_indicator</span>(<span class="code-string">"NY.GDP.MKTP.CD"</span>, countries, <span class="code-number">2010</span>, <span class="code-number">2022</span>) %>%
+  <span class="code-function">rename</span>(gdp = value)
+
+co2_df <- <span class="code-function">fetch_wb_indicator</span>(<span class="code-string">"EN.ATM.CO2E.KT"</span>, countries, <span class="code-number">2010</span>, <span class="code-number">2022</span>) %>%
+  <span class="code-function">rename</span>(co2_kt = value)
+
+<span class="code-comment"># Merge</span>
+df <- gdp_df %>%
+  <span class="code-function">left_join</span>(co2_df %>% <span class="code-function">select</span>(country_code, year, co2_kt),
+            by = <span class="code-function">c</span>(<span class="code-string">"country_code"</span>, <span class="code-string">"year"</span>))
+
+<span class="code-function">print</span>(df)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-simulation">
+          <div class="output-header"><span>Python Output</span></div>
+          <div class="output-body">Dataset: <span class="out-num">104</span> observations
+  country_code        country  year           gdp       co2_kt
+<span class="out-num">0</span>          USA  United States  <span class="out-num">2022</span>  <span class="out-num">2.546206e+13</span>         NaN
+<span class="out-num">1</span>          USA  United States  <span class="out-num">2021</span>  <span class="out-num">2.331481e+13</span>  <span class="out-num">4982180.0</span>
+<span class="out-num">2</span>          USA  United States  <span class="out-num">2020</span>  <span class="out-num">2.126379e+13</span>  <span class="out-num">4535300.0</span>
+<span class="out-num">3</span>          USA  United States  <span class="out-num">2019</span>  <span class="out-num">2.152748e+13</span>  <span class="out-num">5107390.0</span>
+<span class="out-num">4</span>          CHN          China  <span class="out-num">2022</span>  <span class="out-num">1.796892e+13</span>         NaN
+<span class="out-num">5</span>          CHN          China  <span class="out-num">2021</span>  <span class="out-num">1.778227e+13</span>  <span class="out-num">11472370.0</span></div>
+        </div>
+
+        <!-- Common World Bank Indicators -->
+        <h2>Useful World Bank Indicators</h2>
+
+        <p>Here are key indicators for economic and climate research:</p>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+          <thead>
+            <tr style="background: #f8f9fa;">
+              <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Indicator Code</th>
+              <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>NY.GDP.MKTP.CD</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">GDP (current US$)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>NY.GDP.PCAP.CD</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">GDP per capita (current US$)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EN.ATM.CO2E.KT</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">CO2 emissions (kt)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EN.ATM.CO2E.PC</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">CO2 emissions per capita (metric tons)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>SP.POP.TOTL</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Total population</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EG.USE.PCAP.KG.OE</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Energy use per capita (kg oil equivalent)</td></tr>
+            <tr><td style="padding: 0.5rem;"><code>AG.LND.FRST.ZS</code></td><td style="padding: 0.5rem;">Forest area (% of land area)</td></tr>
+          </tbody>
+        </table>
+
+        <p>Full list: <a href="https://data.worldbank.org/indicator" target="_blank">data.worldbank.org/indicator</a></p>
+
+        <!-- API Authentication -->
+        <h2>API Authentication</h2>
+
+        <div class="concept-box">
+          <h4>Why Authentication?</h4>
+          <p style="margin-bottom: 0;">Many APIs require an API key to track usage and prevent abuse. The World Bank API is free and doesn't require authentication, but others (like FRED, Alpha Vantage) do. You typically get a key by registering on the provider's website.</p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Example: Using an API key (FRED API)</span>
+<span class="code-keyword">import</span> requests
+<span class="code-keyword">import</span> os
+
+<span class="code-comment"># NEVER hardcode API keys! Use environment variables</span>
+api_key = os.environ.get(<span class="code-string">'FRED_API_KEY'</span>)  <span class="code-comment"># Set in terminal: export FRED_API_KEY=your_key</span>
+
+url = <span class="code-string">"https://api.stlouisfed.org/fred/series/observations"</span>
+params = {
+    <span class="code-string">"series_id"</span>: <span class="code-string">"GDP"</span>,
+    <span class="code-string">"api_key"</span>: api_key,
+    <span class="code-string">"file_type"</span>: <span class="code-string">"json"</span>
+}
+
+response = requests.get(url, params=params)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Security Warning</div>
+          <p style="margin-bottom: 0;"><strong>Never commit API keys to Git!</strong> Use environment variables or a <code>.env</code> file (and add it to <code>.gitignore</code>). Exposed keys can be stolen and abused.</p>
+        </div>
+
+        <!-- Azure and Cloud APIs -->
+        <h2>Cloud APIs: Azure Example</h2>
+
+        <p>Microsoft Azure provides APIs for advanced capabilities like text analysis and image recognition. These are useful for research involving unstructured data.</p>
+
+        <div class="info-box note">
+          <div class="info-box-title">Azure Cognitive Services</div>
+          <p>Azure offers APIs for:</p>
+          <ul style="margin-bottom: 0;">
+            <li><strong>Text Analytics:</strong> Sentiment analysis, key phrase extraction</li>
+            <li><strong>Computer Vision:</strong> Image classification, OCR</li>
+            <li><strong>Translator:</strong> Multilingual text translation</li>
+          </ul>
+          <p style="margin-top: 1rem;">Demo and documentation: <a href="https://azure.microsoft.com/en-us/products/cognitive-services" target="_blank">Azure Cognitive Services</a></p>
+        </div>
+
+        <!-- Next Steps -->
+        <h2>Next Steps</h2>
+
+        <p>In the next module (Data Cleaning), we'll take the data we fetched and:</p>
+        <ul>
+          <li>Handle missing values in our GDP and CO2 data</li>
+          <li>Merge with additional datasets</li>
+          <li>Create derived variables for analysis</li>
+        </ul>
+
+        <div class="nav-footer">
+          <a href="02a-data-exploration.html" class="nav-link prev">Module 2a: Data Exploration</a>
+          <a href="03-data-cleaning.html" class="nav-link next">Module 3: Data Cleaning</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I can help with questions about APIs, Python, R, or the course material.</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+</body>
+</html>

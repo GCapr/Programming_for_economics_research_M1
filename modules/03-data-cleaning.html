@@ -47,7 +47,13 @@
             </ul>
           </li>
           <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
-          <li><a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a></li>
+          <li>
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-data-exploration.html">Data Exploration</a></li>
+              <li><a href="02b-apis.html">Working with APIs</a></li>
+            </ul>
+          </li>
           <li><a href="03-data-cleaning.html" class="active"><span class="module-number">3</span> Data Cleaning</a></li>
           <li><a href="04-data-analysis.html"><span class="module-number">4</span> Data Analysis</a></li>
           <li><a href="05-causal-inference.html"><span class="module-number">5</span> Causal Inference</a></li>
@@ -285,6 +291,137 @@ msno.heatmap(df)  <span class="code-comment"># Correlation of missingness</span>
           See the complete case study code in the downloadable course materials. The cleaning process covers: handling CPS missing value codes, creating consistent variable labels, constructing hourly wages from earnings and hours, and creating demographic indicators.
         </p>
 
+        <h2 id="exercises">3.7 Exercises</h2>
+
+        <!-- Exercise 3.1: Interactive -->
+        <div class="interactive-exercise" data-exercise="3.1">
+          <h4>Exercise 3.1: Handling Missing Data</h4>
+          <p>Practice identifying and handling missing values. Complete these tasks:</p>
+          <ol>
+            <li>Check for missing values in a dataset</li>
+            <li>Drop or fill missing values</li>
+            <li>Create a missing indicator variable</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Check for missing values
+# Task 2: Handle missing values (drop or fill)
+# Task 3: Create a missing indicator
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Check for missing values
+* Task 2: Handle missing values (drop or fill)
+* Task 3: Create a missing indicator
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Check for missing values
+# Task 2: Handle missing values (drop or fill)
+# Task 3: Create a missing indicator
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <!-- Python Solutions -->
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Check for missing values</div>
+              <pre class="step-code"><code><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Check for missing values</span>
+<span class="code-function">print</span>(df.isnull().sum())          <span class="code-comment"># Count by column</span>
+<span class="code-function">print</span>(df.isnull().mean() * 100)  <span class="code-comment"># Percentage missing</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Handle missing values</div>
+              <pre class="step-code"><code><span class="code-comment"># Drop rows with missing values</span>
+df_clean = df.dropna()
+
+<span class="code-comment"># Or fill with mean/median</span>
+df[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].mean(), inplace=<span class="code-keyword">True</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a missing indicator</div>
+              <pre class="step-code"><code><span class="code-comment"># Create indicator for missing values</span>
+df[<span class="code-string">'income_missing'</span>] = df[<span class="code-string">'income'</span>].isnull().astype(int)</code></pre>
+            </div>
+
+            <!-- Stata Solutions -->
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Check for missing values</div>
+              <pre class="step-code"><code><span class="code-comment">* Check for missing values</span>
+<span class="code-keyword">misstable</span> summarize
+<span class="code-keyword">misstable</span> patterns</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Handle missing values</div>
+              <pre class="step-code"><code><span class="code-comment">* Drop observations with missing values</span>
+<span class="code-keyword">drop</span> if missing(income)
+
+<span class="code-comment">* Or fill with mean</span>
+<span class="code-keyword">summarize</span> income
+<span class="code-keyword">replace</span> income = r(mean) if missing(income)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a missing indicator</div>
+              <pre class="step-code"><code><span class="code-comment">* Create missing indicator</span>
+<span class="code-keyword">gen</span> income_missing = missing(income)</code></pre>
+            </div>
+
+            <!-- R Solutions -->
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Check for missing values</div>
+              <pre class="step-code"><code><span class="code-function">library</span>(tidyverse)
+
+<span class="code-comment"># Check for missing values</span>
+<span class="code-function">sum</span>(<span class="code-function">is.na</span>(df))                 <span class="code-comment"># Total missing</span>
+<span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df))             <span class="code-comment"># By column</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Handle missing values</div>
+              <pre class="step-code"><code><span class="code-comment"># Drop missing values</span>
+df_clean <- df %>% <span class="code-function">drop_na</span>()
+
+<span class="code-comment"># Or fill with mean</span>
+df <- df %>% <span class="code-function">mutate</span>(income = <span class="code-function">replace_na</span>(income, <span class="code-function">mean</span>(income, na.rm = TRUE)))</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a missing indicator</div>
+              <pre class="step-code"><code><span class="code-comment"># Create missing indicator</span>
+df <- df %>% <span class="code-function">mutate</span>(income_missing = <span class="code-function">as.integer</span>(<span class="code-function">is.na</span>(income)))</code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
         <div class="nav-footer">
           <a href="02-data-harnessing.html" class="nav-link prev">Module 2: Data Harnessing</a>
           <a href="04-data-analysis.html" class="nav-link next">Module 4: Data Analysis</a>
@@ -321,5 +458,168 @@ msno.heatmap(df)  <span class="code-comment"># Correlation of missingness</span>
   <script src="../js/main.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
+
+  <!-- Interactive Exercise Script -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const exercisePatterns = {
+      '3.1': {
+        python: {
+          patterns: [
+            // Check missing - accepts: isnull, isna, notna, info, describe with nulls
+            { regex: /\.isnull\s*\(|\.isna\s*\(|\.notna\s*\(|pd\.isnull|pd\.isna|\.info\s*\(|any\s*\(.*null|sum\s*\(.*null|is\.na|missing/i, points: 34, description: 'Check for missing values' },
+            // Handle missing - accepts: dropna, fillna, interpolate, replace with mean/median
+            { regex: /\.dropna\s*\(|\.fillna\s*\(|\.interpolate\s*\(|drop.*na|fill.*na|\.mean\s*\(\)|\.median\s*\(\)|impute|replace.*nan/i, points: 33, description: 'Handle missing values' },
+            // Missing indicator - accepts: isnull().astype, isna().astype, creating indicator column
+            { regex: /isnull\s*\(\)\.astype|isna\s*\(\)\.astype|_missing\s*=|missing.*=.*isnull|missing.*=.*isna|\[.*missing.*\]\s*=/i, points: 33, description: 'Create missing indicator' }
+          ]
+        },
+        stata: {
+          patterns: [
+            // Check missing - accepts: misstable, mdesc, missing(), count if missing
+            { regex: /misstable|mdesc|missing\s*\(|count\s+if\s+missing|tab.*missing|sum.*missing/i, points: 34, description: 'Check for missing values' },
+            // Handle missing - accepts: drop if missing, replace if missing, mi impute
+            { regex: /drop\s+if\s+missing|keep\s+if\s+!missing|replace.*if\s+missing|mi\s+impute|impute/i, points: 33, description: 'Handle missing values' },
+            // Missing indicator - accepts: gen...missing(), generate missing indicator
+            { regex: /gen(erate)?\s+\w+\s*=\s*missing|gen.*_missing|_missing\s*=\s*missing/i, points: 33, description: 'Create missing indicator' }
+          ]
+        },
+        r: {
+          patterns: [
+            // Check missing - accepts: is.na, sum(is.na), any(is.na), complete.cases, na.omit info
+            { regex: /is\.na\s*\(|sum\s*\(\s*is\.na|any\s*\(\s*is\.na|complete\.cases|colSums.*is\.na|colMeans.*is\.na/i, points: 34, description: 'Check for missing values' },
+            // Handle missing - accepts: drop_na, na.omit, replace_na, fill, impute
+            { regex: /drop_na|na\.omit|na\.exclude|replace_na|fill\s*\(|impute|ifelse.*is\.na|if_else.*is\.na|coalesce/i, points: 33, description: 'Handle missing values' },
+            // Missing indicator - accepts: as.integer(is.na, creating indicator column
+            { regex: /as\.integer\s*\(\s*is\.na|as\.numeric\s*\(\s*is\.na|_missing\s*=|missing.*<-.*is\.na/i, points: 33, description: 'Create missing indicator' }
+          ]
+        }
+      }
+    };
+
+    // Initialize interactive exercises
+    document.querySelectorAll('.interactive-exercise').forEach(exercise => {
+      const exerciseId = exercise.dataset.exercise;
+      let currentLang = 'python';
+      let currentStep = 0;
+      let hasCheckedScore = false;
+
+      exercise.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const lang = this.dataset.lang;
+          currentLang = lang;
+          exercise.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          exercise.querySelectorAll('.code-editor').forEach(editor => {
+            editor.style.display = editor.dataset.lang === lang ? 'block' : 'none';
+          });
+          if (hasCheckedScore) resetSolutionSteps();
+        });
+      });
+
+      const checkBtn = exercise.querySelector('.btn-check-score');
+      const scoreDisplay = exercise.querySelector('.score-display');
+      const scoreValue = exercise.querySelector('.score-value');
+      const scoreFeedback = exercise.querySelector('.score-feedback');
+      const showSolutionBtn = exercise.querySelector('.btn-show-solution');
+
+      checkBtn.addEventListener('click', function() {
+        const editor = exercise.querySelector(`.code-editor[data-lang="${currentLang}"]`);
+        const code = editor.value;
+        const patterns = exercisePatterns[exerciseId]?.[currentLang]?.patterns || [];
+
+        let score = 0;
+        let matched = [];
+        let missed = [];
+
+        patterns.forEach(p => {
+          if (p.regex.test(code)) {
+            score += p.points;
+            matched.push(p.description);
+          } else {
+            missed.push(p.description);
+          }
+        });
+
+        score = Math.min(100, score);
+        scoreValue.textContent = score;
+        scoreValue.className = 'score-value';
+        if (score >= 80) scoreValue.classList.add('score-high');
+        else if (score >= 50) scoreValue.classList.add('score-medium');
+        else scoreValue.classList.add('score-low');
+
+        if (score === 100) {
+          scoreFeedback.textContent = 'Perfect! All tasks completed correctly.';
+        } else if (score >= 70) {
+          scoreFeedback.textContent = `Good work! Missing: ${missed.join(', ')}.`;
+        } else if (score >= 40) {
+          scoreFeedback.textContent = `Getting there. Missing: ${missed.join(', ')}.`;
+        } else {
+          scoreFeedback.textContent = `Keep trying! Check: ${missed.slice(0, 2).join(', ')}.`;
+        }
+
+        scoreDisplay.style.display = 'flex';
+        showSolutionBtn.style.display = 'inline-block';
+        hasCheckedScore = true;
+      });
+
+      const solutionSteps = exercise.querySelector('.solution-steps');
+      const prevBtn = exercise.querySelector('.btn-prev-step');
+      const nextBtn = exercise.querySelector('.btn-next-step');
+      const currentStepEl = exercise.querySelector('.current-step');
+      const totalStepsEl = exercise.querySelector('.total-steps');
+
+      function resetSolutionSteps() {
+        currentStep = 0;
+        currentStepEl.textContent = '0';
+        exercise.querySelectorAll('.solution-step').forEach(step => {
+          step.style.display = 'none';
+        });
+        updateNavButtons();
+      }
+
+      function updateNavButtons() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        totalStepsEl.textContent = totalSteps;
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep >= totalSteps;
+        nextBtn.textContent = currentStep >= totalSteps ? 'Complete' : 'Next Step';
+      }
+
+      function showStep(stepNum) {
+        const steps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`);
+        steps.forEach((step, idx) => {
+          step.style.display = (idx + 1) <= stepNum ? 'block' : 'none';
+        });
+        currentStepEl.textContent = stepNum;
+      }
+
+      showSolutionBtn.addEventListener('click', function() {
+        solutionSteps.style.display = 'block';
+        resetSolutionSteps();
+        this.style.display = 'none';
+      });
+
+      nextBtn.addEventListener('click', function() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        if (currentStep < totalSteps) {
+          currentStep++;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      prevBtn.addEventListener('click', function() {
+        if (currentStep > 0) {
+          currentStep--;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      updateNavButtons();
+    });
+  });
+  </script>
 </body>
 </html>

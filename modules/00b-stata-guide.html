@@ -78,6 +78,9 @@
       color: var(--color-text-light);
       font-style: italic;
     }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; width: max-content; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; line-height: 1.4; text-align: left; font-family: var(--font-body); font-style: normal; }
+    .code-tooltip:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -392,8 +395,8 @@
         </p>
         <ul>
           <li>Go to <strong>Window > Do-file Editor > New Do-file Editor</strong></li>
-          <li>Or press <code>Ctrl+9</code> (Windows) / <code>Cmd+9</code> (Mac)</li>
-          <li>Or type <code>doedit</code> in the Command window</li>
+          <li>Or press <code class="code-tooltip" data-tip="Hold Ctrl and press the number 9 key. Opens the Do-file Editor where you write your scripts.">Ctrl+9</code> (Windows) / <code class="code-tooltip" data-tip="On Mac, use Cmd (Command key) + 9">Cmd+9</code> (Mac)</li>
+          <li>Or type <code class="code-tooltip" data-tip="The command to open the Do-file Editor from the Command window. You can also add a filename like 'doedit myfile.do' to open or create a specific file.">doedit</code> in the Command window</li>
         </ul>
 
         <h2>Essential Stata Commands</h2>
@@ -412,44 +415,44 @@
           </thead>
           <tbody>
             <tr>
-              <td><code>use</code></td>
+              <td><code class="code-tooltip" data-tip="Opens a Stata dataset file (.dta) so you can work with it. Always use 'clear' to remove any previous data from memory first.">use</code></td>
               <td>Load a dataset</td>
-              <td><code>use "data.dta", clear</code></td>
+              <td><code class="code-tooltip" data-tip="Loads the file data.dta from your working directory. The 'clear' option removes any data currently in memory.">use "data.dta", clear</code></td>
             </tr>
             <tr>
-              <td><code>describe</code></td>
+              <td><code class="code-tooltip" data-tip="Shows a list of all variables in your dataset with their names, types (numeric/string), and labels. First command to run after loading data.">describe</code></td>
               <td>Show variable names and types</td>
-              <td><code>describe</code></td>
+              <td><code class="code-tooltip" data-tip="Shows information about all variables. You can also describe specific variables like 'describe income age'.">describe</code></td>
             </tr>
             <tr>
-              <td><code>summarize</code></td>
+              <td><code class="code-tooltip" data-tip="Calculates basic statistics: mean, standard deviation, min, max, and count. Add 'detail' for more stats like percentiles.">summarize</code></td>
               <td>Summary statistics</td>
-              <td><code>summarize income age</code></td>
+              <td><code class="code-tooltip" data-tip="Shows statistics for the income and age variables. Can abbreviate as 'sum income age'.">summarize income age</code></td>
             </tr>
             <tr>
-              <td><code>tabulate</code></td>
+              <td><code class="code-tooltip" data-tip="Creates a frequency table showing how many observations fall into each category. Great for categorical variables.">tabulate</code></td>
               <td>Frequency tables</td>
-              <td><code>tab education</code></td>
+              <td><code class="code-tooltip" data-tip="Shows count and percentage for each education level. 'tab' is the abbreviation for 'tabulate'.">tab education</code></td>
             </tr>
             <tr>
-              <td><code>generate</code></td>
+              <td><code class="code-tooltip" data-tip="Creates a new variable in your dataset. The new variable is calculated based on existing variables.">generate</code></td>
               <td>Create a new variable</td>
-              <td><code>gen log_income = log(income)</code></td>
+              <td><code class="code-tooltip" data-tip="Creates a new variable called log_income containing the natural log of income. 'gen' is the abbreviation.">gen log_income = log(income)</code></td>
             </tr>
             <tr>
-              <td><code>replace</code></td>
+              <td><code class="code-tooltip" data-tip="Changes values in an existing variable. Unlike 'generate', which creates new variables, 'replace' modifies existing ones.">replace</code></td>
               <td>Modify existing variable</td>
-              <td><code>replace age = . if age < 0</code></td>
+              <td><code class="code-tooltip" data-tip="Sets age to missing (.) wherever age is negative. The dot (.) represents missing values in Stata.">replace age = . if age < 0</code></td>
             </tr>
             <tr>
-              <td><code>regress</code></td>
+              <td><code class="code-tooltip" data-tip="Runs an Ordinary Least Squares (OLS) regression. The first variable is the dependent variable (outcome), rest are independent variables.">regress</code></td>
               <td>OLS regression</td>
-              <td><code>reg income education age</code></td>
+              <td><code class="code-tooltip" data-tip="Regresses income on education and age. 'reg' is the abbreviation. Output shows coefficients, standard errors, R-squared, etc.">reg income education age</code></td>
             </tr>
             <tr>
-              <td><code>help</code></td>
+              <td><code class="code-tooltip" data-tip="Opens Stata's built-in documentation for any command. The help files are excellent and include examples.">help</code></td>
               <td>Get help on any command</td>
-              <td><code>help regress</code></td>
+              <td><code class="code-tooltip" data-tip="Opens the help page for the regress command with syntax, options, and examples.">help regress</code></td>
             </tr>
           </tbody>
         </table>
@@ -473,40 +476,40 @@
  *******************************************************************************/</span>
 
 <span class="code-comment">* Clear everything and set up</span>
-clear all
-set more off
+<span class="code-tooltip" data-tip="Removes all data, variables, and programs from memory. Always start your do-file with this to ensure a clean slate.">clear all</span>
+<span class="code-tooltip" data-tip="Tells Stata not to pause and show '--more--' when output fills the screen. Without this, you'd have to keep pressing Enter.">set more off</span>
 
 <span class="code-comment">* Set working directory (adjust to your path)</span>
-cd "/Users/yourname/research/wage_project"
+<span class="code-tooltip" data-tip="cd = 'change directory'. Sets the folder where Stata looks for files and saves output. Replace with your actual path.">cd "/Users/yourname/research/wage_project"</span>
 
 <span class="code-comment">* Start a log file to save all output</span>
-log using "analysis_log.txt", text replace
+<span class="code-tooltip" data-tip="Starts recording everything in the Results window to a file. 'text' makes it readable in any text editor. 'replace' overwrites any existing file.">log using "analysis_log.txt", text replace</span>
 
 <span class="code-comment">* Load the data</span>
-use "wage_data.dta", clear
+<span class="code-tooltip" data-tip="Opens the wage_data.dta file. The 'clear' option removes any data already in memory before loading.">use "wage_data.dta", clear</span>
 
 <span class="code-comment">* Examine the data</span>
-describe
-summarize
+<span class="code-tooltip" data-tip="Shows all variable names, types, and labels in your dataset.">describe</span>
+<span class="code-tooltip" data-tip="Shows basic statistics (mean, std dev, min, max) for all numeric variables.">summarize</span>
 
 <span class="code-comment">* Summary statistics for key variables</span>
-summarize wage education experience, detail
+<span class="code-tooltip" data-tip="The 'detail' option adds percentiles (10th, 25th, 50th, 75th, 90th), skewness, and kurtosis to the summary statistics.">summarize wage education experience, detail</span>
 
 <span class="code-comment">* Run a simple regression</span>
-regress wage education experience i.female
+<span class="code-tooltip" data-tip="OLS regression of wage on education, experience, and female. The 'i.' prefix treats female as a categorical variable (0/1 dummy).">regress wage education experience i.female</span>
 
 <span class="code-comment">* Close the log file</span>
-log close</code></pre>
+<span class="code-tooltip" data-tip="Stops recording to the log file. Always close your log at the end or you won't be able to open the file while Stata is running.">log close</span></code></pre>
           </div>
         </div>
 
         <div class="info-box tip">
           <div class="info-box-title">Best Practices for Do-files</div>
           <ul style="margin-bottom: 0;">
-            <li><strong>Always start with <code>clear all</code></strong> to ensure a clean environment</li>
-            <li><strong>Use <code>set more off</code></strong> to prevent Stata from pausing output</li>
+            <li><strong>Always start with <code class="code-tooltip" data-tip="Removes all data, matrices, programs, and macros from memory. Ensures your do-file runs the same every time.">clear all</code></strong> to ensure a clean environment</li>
+            <li><strong>Use <code class="code-tooltip" data-tip="Prevents the '--more--' prompt that pauses output when it fills the screen. Lets your code run without interruption.">set more off</code></strong> to prevent Stata from pausing output</li>
             <li><strong>Start a log file</strong> to save all your output</li>
-            <li><strong>Comment liberally</strong> using <code>*</code> or <code>/* */</code></li>
+            <li><strong>Comment liberally</strong> using <code class="code-tooltip" data-tip="An asterisk at the start of a line makes the whole line a comment. Stata ignores it.">*</code> or <code class="code-tooltip" data-tip="Everything between /* and */ is a comment. Can span multiple lines. Good for longer explanations.">/* */</code></li>
             <li><strong>Use relative paths</strong> after setting your working directory</li>
           </ul>
         </div>
@@ -526,12 +529,12 @@ log close</code></pre>
             <span class="code-lang">stata</span>
           </div>
           <pre><code><span class="code-comment">* Start logging to a text file (overwrites if exists)</span>
-log using "my_analysis.log", text replace
+<span class="code-tooltip" data-tip="Begins recording all commands and output. The filename can be anything you choose (with or without extension).">log using</span> <span class="code-tooltip" data-tip="The name of your log file. .log is the conventional extension but you can use any extension.">"my_analysis.log"</span>, <span class="code-tooltip" data-tip="Creates a plain text file readable in any application (Notepad, TextEdit, etc.)">text</span> <span class="code-tooltip" data-tip="If a file with this name already exists, overwrite it. Without this, Stata will give an error if the file exists.">replace</span>
 
 <span class="code-comment">* ... run your analysis here ...</span>
 
 <span class="code-comment">* Stop logging</span>
-log close</code></pre>
+<span class="code-tooltip" data-tip="Stops recording and saves the file. You must close the log before you can open and read the file.">log close</span></code></pre>
         </div>
 
         <p>
@@ -621,10 +624,10 @@ Sorted by:
         <div class="info-box tip">
           <div class="info-box-title">Log File Tips</div>
           <ul style="margin-bottom: 0;">
-            <li>Use <code>log using "filename", append</code> to add to an existing log instead of replacing it</li>
-            <li>Name your logs descriptively: <code>analysis_v2_2026-01-15.log</code></li>
+            <li>Use <code class="code-tooltip" data-tip="The 'append' option adds new output to the end of an existing log file instead of overwriting it. Useful for long projects.">log using "filename", append</code> to add to an existing log instead of replacing it</li>
+            <li>Name your logs descriptively: <code class="code-tooltip" data-tip="Include version numbers and dates in your log names so you can track different versions of your analysis.">analysis_v2_2026-01-15.log</code></li>
             <li>Store logs alongside your do-files for easy reference</li>
-            <li>If you forget to close a log, use <code>log close _all</code> to close any open logs</li>
+            <li>If you forget to close a log, use <code class="code-tooltip" data-tip="Forces all open log files to close. Useful if Stata gives an error that a log is already open.">log close _all</code> to close any open logs</li>
           </ul>
         </div>
 
@@ -640,28 +643,28 @@ Sorted by:
           </thead>
           <tbody>
             <tr>
-              <td><code>Ctrl + D</code></td>
-              <td><code>Cmd + Shift + D</code></td>
+              <td><code class="code-tooltip" data-tip="Select code in the Do-file Editor, then press Ctrl+D to run just that selection. This is how you execute parts of your script.">Ctrl + D</code></td>
+              <td><code class="code-tooltip" data-tip="On Mac, the shortcut requires Shift as well: Command + Shift + D">Cmd + Shift + D</code></td>
               <td>Run selected code in Do-file Editor</td>
             </tr>
             <tr>
-              <td><code>Ctrl + 9</code></td>
-              <td><code>Cmd + 9</code></td>
+              <td><code class="code-tooltip" data-tip="Opens the Do-file Editor - the text editor where you write your Stata scripts (.do files).">Ctrl + 9</code></td>
+              <td><code class="code-tooltip" data-tip="Mac version: Command + 9">Cmd + 9</code></td>
               <td>Open Do-file Editor</td>
             </tr>
             <tr>
-              <td><code>Ctrl + S</code></td>
-              <td><code>Cmd + S</code></td>
+              <td><code class="code-tooltip" data-tip="Saves your current Do-file. Save frequently to avoid losing work!">Ctrl + S</code></td>
+              <td><code class="code-tooltip" data-tip="Mac version: Command + S">Cmd + S</code></td>
               <td>Save current Do-file</td>
             </tr>
             <tr>
-              <td><code>Page Up</code></td>
-              <td><code>Page Up</code></td>
+              <td><code class="code-tooltip" data-tip="When in the Command window, Page Up cycles through previous commands you've typed. Useful for re-running or modifying recent commands.">Page Up</code></td>
+              <td><code class="code-tooltip" data-tip="Works the same on Mac">Page Up</code></td>
               <td>Previous command (in Command window)</td>
             </tr>
             <tr>
-              <td><code>F1</code></td>
-              <td><code>F1</code></td>
+              <td><code class="code-tooltip" data-tip="Select or place cursor on a command, then press F1 to open its help documentation. A fast way to learn command options.">F1</code></td>
+              <td><code class="code-tooltip" data-tip="Works the same on Mac (you may need to hold Fn key on some keyboards)">F1</code></td>
               <td>Help for selected command</td>
             </tr>
           </tbody>
@@ -674,9 +677,9 @@ Sorted by:
         </p>
 
         <ul>
-          <li><code>help regress</code> — Opens help for the regress command</li>
-          <li><code>search panel data</code> — Searches all documentation for "panel data"</li>
-          <li><code>findit xtreg</code> — Searches for user-written commands</li>
+          <li><code class="code-tooltip" data-tip="Opens the official documentation for the regress command, including all options, examples, and technical details.">help regress</code> — Opens help for the regress command</li>
+          <li><code class="code-tooltip" data-tip="Searches Stata's entire documentation library for topics related to 'panel data'. Great when you're not sure which command to use.">search panel data</code> — Searches all documentation for "panel data"</li>
+          <li><code class="code-tooltip" data-tip="Searches both official and community-contributed commands. Many useful commands (like esttab, outreg2) are user-written and found this way.">findit xtreg</code> — Searches for user-written commands</li>
         </ul>
 
         <h2>Video Tutorials</h2>

@@ -52,6 +52,10 @@
     .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
     .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
     .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Tooltip Styles */
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; width: max-content; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+    .code-tooltip:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -184,107 +188,107 @@
 
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Handling missing data</span>
-<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
-<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span>
+<span class="code-tooltip" data-tip="IMPORT: Brings in the pandas library (a toolkit for working with data tables). WHAT: Loads external code so you can use it. WHY: pandas has powerful functions for handling data that Python doesn't have by default."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Brings in numpy (numerical Python). WHAT: A library for mathematical operations on arrays of numbers. WHY: Provides tools for calculations and special values like NaN (Not a Number) for missing data."><span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
 
 <span class="code-comment"># Check for missing values</span>
-<span class="code-function">print</span>(df.isnull().sum())           <span class="code-comment"># Count by column</span>
-<span class="code-function">print</span>(df.isnull().mean() * <span class="code-number">100</span>)   <span class="code-comment"># Percentage missing</span>
+<span class="code-tooltip" data-tip="ISNULL().SUM(): Counts missing values in each column. WHAT: isnull() marks each cell as True (missing) or False (has data), then sum() adds up the Trues. WHY: Helps you see which columns have gaps in your data. HOW: The result shows column names with their missing value counts."><span class="code-function">print</span>(df.isnull().sum())</span>           <span class="code-comment"># Count by column</span>
+<span class="code-tooltip" data-tip="ISNULL().MEAN() * 100: Shows percentage of missing values. WHAT: mean() calculates the proportion of Trues (0 to 1), multiplying by 100 gives a percentage. WHY: Percentages are easier to interpret than raw counts. Example: 25 means 25% of values are missing."><span class="code-function">print</span>(df.isnull().mean() * <span class="code-number">100</span>)</span>   <span class="code-comment"># Percentage missing</span>
 
 <span class="code-comment"># Visualize missing patterns</span>
-<span class="code-keyword">import</span> <span class="code-package">missingno</span> <span class="code-keyword">as</span> <span class="code-variable">msno</span>
-msno.matrix(df)
-msno.heatmap(df)  <span class="code-comment"># Correlation of missingness</span>
+<span class="code-tooltip" data-tip="IMPORT MISSINGNO: A specialized library for visualizing missing data. WHAT: Provides visual tools to see patterns in your missing values. WHY: A picture can reveal patterns that numbers alone might miss - like if certain variables are always missing together."><span class="code-keyword">import</span> <span class="code-package">missingno</span> <span class="code-keyword">as</span> <span class="code-variable">msno</span></span>
+<span class="code-tooltip" data-tip="MSNO.MATRIX(): Creates a visual grid of your data. WHAT: Shows a chart where each row is a data record and white lines indicate missing values. WHY: Instantly see if missing data follows a pattern (e.g., certain rows have many gaps). HOW: White = missing, dark = present.">msno.matrix(df)</span>
+<span class="code-tooltip" data-tip="MSNO.HEATMAP(): Shows which columns tend to be missing together. WHAT: Creates a correlation chart between missing values in different columns. WHY: Reveals if missing data in one column predicts missing data in another. Values near 1 or -1 suggest strong relationships.">msno.heatmap(df)</span>  <span class="code-comment"># Correlation of missingness</span>
 
 <span class="code-comment"># Drop missing values</span>
-<span class="code-variable">df_complete</span> = df.dropna()                    <span class="code-comment"># Drop any row with NA</span>
-<span class="code-variable">df_subset</span> = df.dropna(subset=[<span class="code-string">'income'</span>])    <span class="code-comment"># Drop if income is missing</span>
+<span class="code-tooltip" data-tip="DROPNA(): Removes rows with any missing values. WHAT: Creates a new dataset keeping only complete rows (no gaps). WHY: Some analyses require complete data. CAUTION: You might lose a lot of data if many rows have at least one missing value."><span class="code-variable">df_complete</span> = df.dropna()</span>                    <span class="code-comment"># Drop any row with NA</span>
+<span class="code-tooltip" data-tip="DROPNA(SUBSET=[]): Removes rows only if specific columns are missing. WHAT: Keeps rows that might have gaps elsewhere, but drops those missing 'income'. WHY: More targeted than dropping all incomplete rows - preserves more of your data."><span class="code-variable">df_subset</span> = df.dropna(subset=[<span class="code-string">'income'</span>])</span>    <span class="code-comment"># Drop if income is missing</span>
 
 <span class="code-comment"># Fill missing values</span>
-<span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].mean(), inplace=<span class="code-keyword">True</span>)  <span class="code-comment"># Mean imputation</span>
-<span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].median(), inplace=<span class="code-keyword">True</span>) <span class="code-comment"># Median imputation</span>
-<span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(method=<span class="code-string">'ffill'</span>, inplace=<span class="code-keyword">True</span>)      <span class="code-comment"># Forward fill</span>
+<span class="code-tooltip" data-tip="FILLNA() WITH MEAN: Replaces missing values with the average. WHAT: Calculates the mean of existing income values and puts that number wherever income is missing. WHY: Keeps all rows in your data. CAUTION: Can reduce the variation in your data and bias results."><span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].mean(), inplace=<span class="code-keyword">True</span>)</span>  <span class="code-comment"># Mean imputation</span>
+<span class="code-tooltip" data-tip="FILLNA() WITH MEDIAN: Replaces missing values with the middle value. WHAT: Uses the median (50th percentile) instead of mean. WHY: Better than mean when your data has extreme values (outliers) that would skew the average. More robust choice."><span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].median(), inplace=<span class="code-keyword">True</span>)</span> <span class="code-comment"># Median imputation</span>
+<span class="code-tooltip" data-tip="FILLNA(METHOD='FFILL'): Forward fill - copies the previous value. WHAT: Fills each gap with the value from the row above it. WHY: Useful for time series data where values tend to persist. Example: If Monday's price is missing, use Sunday's."><span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(method=<span class="code-string">'ffill'</span>, inplace=<span class="code-keyword">True</span>)</span>      <span class="code-comment"># Forward fill</span>
 
 <span class="code-comment"># Group-wise imputation</span>
-<span class="code-variable">df</span>[<span class="code-string">'income'</span>] = df.groupby(<span class="code-string">'education'</span>)[<span class="code-string">'income'</span>].transform(
+<span class="code-tooltip" data-tip="GROUPBY().TRANSFORM(): Fill missing values using group-specific values. WHAT: Groups data by education level, then fills each group's missing income with that group's median. WHY: More accurate than overall median - college grads likely earn differently than high school grads."><span class="code-variable">df</span>[<span class="code-string">'income'</span>] = df.groupby(<span class="code-string">'education'</span>)[<span class="code-string">'income'</span>].transform(
     <span class="code-keyword">lambda</span> x: x.fillna(x.median())
-)
+)</span>
 
 <span class="code-comment"># Create missing indicator</span>
-<span class="code-variable">df</span>[<span class="code-string">'income_missing'</span>] = df[<span class="code-string">'income'</span>].isnull().astype(int)</code></pre>
+<span class="code-tooltip" data-tip="CREATE MISSING INDICATOR: Makes a new column tracking where data was missing. WHAT: Creates income_missing = 1 if original income was missing, 0 otherwise. WHY: Lets you analyze whether missingness itself matters. ASTYPE(INT) converts True/False to 1/0."><span class="code-variable">df</span>[<span class="code-string">'income_missing'</span>] = df[<span class="code-string">'income'</span>].isnull().astype(int)</span></code></pre>
           </div>
 
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Handling missing data</span>
 
 <span class="code-comment">* Check for missing values</span>
-<span class="code-keyword">misstable</span> summarize          <span class="code-comment">// Summary of missing patterns</span>
-<span class="code-keyword">misstable</span> patterns           <span class="code-comment">// Missing patterns</span>
-<span class="code-keyword">mdesc</span>                        <span class="code-comment">// Requires: ssc install mdesc</span>
+<span class="code-tooltip" data-tip="MISSTABLE SUMMARIZE: Shows a summary of missing data in your dataset. WHAT: Lists each variable with missing values and how many are missing. WHY: Quick way to identify which variables have gaps. HOW: Displays a table with variable names and missing counts."><span class="code-keyword">misstable</span> summarize</span>          <span class="code-comment">// Summary of missing patterns</span>
+<span class="code-tooltip" data-tip="MISSTABLE PATTERNS: Shows which combinations of variables are missing together. WHAT: Reveals patterns like 'rows 1-50 are missing both income AND education'. WHY: Helps understand if missing data follows a structure. Important for choosing the right handling strategy."><span class="code-keyword">misstable</span> patterns</span>           <span class="code-comment">// Missing patterns</span>
+<span class="code-tooltip" data-tip="MDESC: A user-written command that describes missing data. WHAT: Provides detailed statistics on missing values per variable. WHY: More detailed output than misstable. HOW: Install it first with 'ssc install mdesc', then run mdesc."><span class="code-keyword">mdesc</span></span>                        <span class="code-comment">// Requires: ssc install mdesc</span>
 
 <span class="code-comment">* Count missing by variable</span>
-<span class="code-keyword">foreach</span> var <span class="code-keyword">of</span> varlist * {
-    <span class="code-keyword">count</span> if missing(`var')
-    <span class="code-keyword">display</span> <span class="code-string">"`var': "</span> r(N) <span class="code-string">" missing"</span>
+<span class="code-tooltip" data-tip="FOREACH LOOP: Repeats an action for every variable. WHAT: Goes through each variable in your dataset one by one. WHY: Automates repetitive tasks - instead of writing code for each variable, write it once. VARLIST * means 'all variables'."><span class="code-keyword">foreach</span> var <span class="code-keyword">of</span> varlist * {</span>
+    <span class="code-tooltip" data-tip="COUNT IF MISSING(): Counts rows where a variable has no value. WHAT: missing() returns true when a value is blank/missing. WHY: Gives you the exact number of gaps for each variable. The backticks around var tell Stata to use the loop variable's current value."><span class="code-keyword">count</span> if missing(`var')</span>
+    <span class="code-tooltip" data-tip="DISPLAY: Prints text to the screen. WHAT: Shows the variable name and its missing count. WHY: Makes the output readable. R(N) retrieves the count result from the previous command. Quotes contain text literals."><span class="code-keyword">display</span> <span class="code-string">"`var': "</span> r(N) <span class="code-string">" missing"</span></span>
 }
 
 <span class="code-comment">* Drop observations with missing values</span>
-<span class="code-keyword">drop</span> if missing(income)      <span class="code-comment">// Drop if income missing</span>
-<span class="code-keyword">keep</span> if !missing(income)     <span class="code-comment">// Alternative</span>
+<span class="code-tooltip" data-tip="DROP IF MISSING(): Removes rows where income has no value. WHAT: Permanently deletes observations with missing income from your dataset. WHY: Some analyses require complete data. CAUTION: This is irreversible - consider keeping a backup of your original data."><span class="code-keyword">drop</span> if missing(income)</span>      <span class="code-comment">// Drop if income missing</span>
+<span class="code-tooltip" data-tip="KEEP IF !MISSING(): Alternative way to remove missing values. WHAT: Keeps only rows where income IS present (! means 'not'). WHY: Same result as drop, but some find this logic clearer. Think of it as 'keep the good data' vs 'remove the bad data'."><span class="code-keyword">keep</span> if !missing(income)</span>     <span class="code-comment">// Alternative</span>
 
 <span class="code-comment">* Replace missing with mean</span>
-<span class="code-keyword">summarize</span> income
-<span class="code-keyword">replace</span> income = r(mean) if missing(income)
+<span class="code-tooltip" data-tip="SUMMARIZE: Calculates basic statistics for a variable. WHAT: Computes mean, standard deviation, min, max for income. WHY: We need the mean value to fill in missing data. The mean is stored in r(mean) for the next command to use."><span class="code-keyword">summarize</span> income</span>
+<span class="code-tooltip" data-tip="REPLACE WITH R(MEAN): Fills missing values with the calculated average. WHAT: Changes blank income values to the mean computed above. WHY: Mean imputation keeps all your observations. CAUTION: Can underestimate true variation in your data."><span class="code-keyword">replace</span> income = r(mean) if missing(income)</span>
 
 <span class="code-comment">* Group-wise imputation</span>
-<span class="code-keyword">bysort</span> education: egen income_med = median(income)
-<span class="code-keyword">replace</span> income = income_med if missing(income)
+<span class="code-tooltip" data-tip="BYSORT + EGEN MEDIAN: Creates group-specific median values. WHAT: For each education level, calculates the median income and stores it in a new variable. WHY: People with similar education likely have similar incomes. BYSORT ensures calculation happens within each group."><span class="code-keyword">bysort</span> education: egen income_med = median(income)</span>
+<span class="code-tooltip" data-tip="REPLACE WITH GROUP MEDIAN: Uses the group-specific median to fill gaps. WHAT: If income is missing, fills it with that education group's median. WHY: More accurate than overall median - a missing PhD income gets the PhD median, not the high school median."><span class="code-keyword">replace</span> income = income_med if missing(income)</span>
 
 <span class="code-comment">* Create missing indicator</span>
-<span class="code-keyword">gen</span> income_missing = missing(income)
+<span class="code-tooltip" data-tip="GEN MISSING INDICATOR: Creates a flag variable for missing values. WHAT: New variable = 1 if income was missing, 0 if income was present. WHY: Lets you track and analyze which observations had missing data, even after you fill them in. Useful for sensitivity analysis."><span class="code-keyword">gen</span> income_missing = missing(income)</span>
 
 <span class="code-comment">* Multiple imputation (advanced)</span>
-<span class="code-keyword">mi set</span> mlong
-<span class="code-keyword">mi register</span> imputed income
-<span class="code-keyword">mi impute</span> regress income age education, add(<span class="code-number">20</span>)</code></pre>
+<span class="code-tooltip" data-tip="MI SET MLONG: Sets up Stata for multiple imputation in 'marginal long' format. WHAT: Prepares your dataset to hold multiple imputed versions. WHY: Multiple imputation creates several plausible filled-in datasets, then combines results. More statistically rigorous than single imputation."><span class="code-keyword">mi set</span> mlong</span>
+<span class="code-tooltip" data-tip="MI REGISTER IMPUTED: Tells Stata which variable(s) to impute. WHAT: Marks 'income' as a variable that needs imputation. WHY: Stata needs to know which variables have missing values to be filled. You can register multiple variables."><span class="code-keyword">mi register</span> imputed income</span>
+<span class="code-tooltip" data-tip="MI IMPUTE REGRESS: Fills missing values using regression prediction. WHAT: Predicts missing income from age and education, creating 20 different imputed datasets (add(20)). WHY: Uses relationships between variables to make educated guesses. Multiple datasets capture uncertainty."><span class="code-keyword">mi impute</span> regress income age education, add(<span class="code-number">20</span>)</span></code></pre>
           </div>
 
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Handling missing data</span>
-<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)
-<span class="code-function">library</span>(<span class="code-package">naniar</span>)    <span class="code-comment"># For missing data visualization</span>
+<span class="code-tooltip" data-tip="LIBRARY(TIDYVERSE): Loads a collection of R packages for data science. WHAT: Includes tools for data manipulation (dplyr), visualization (ggplot2), and more. WHY: Makes R code cleaner and more readable with the pipe operator and consistent functions."><span class="code-function">library</span>(<span class="code-package">tidyverse</span>)</span>
+<span class="code-tooltip" data-tip="LIBRARY(NANIAR): Loads a package specialized for missing data. WHAT: Provides tools to visualize and summarize missing values. WHY: Makes it easy to see patterns in your missing data through charts and summaries. Install with install.packages('naniar')."><span class="code-function">library</span>(<span class="code-package">naniar</span>)</span>    <span class="code-comment"># For missing data visualization</span>
 
 <span class="code-comment"># Check for missing values</span>
-<span class="code-function">sum</span>(<span class="code-function">is.na</span>(df))                    <span class="code-comment"># Total missing</span>
-<span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df))                <span class="code-comment"># By column</span>
-<span class="code-function">colMeans</span>(<span class="code-function">is.na</span>(df)) * <span class="code-number">100</span>        <span class="code-comment"># Percentage</span>
+<span class="code-tooltip" data-tip="SUM(IS.NA()): Counts total missing values in entire dataset. WHAT: is.na() returns TRUE for each missing cell, sum() counts the TRUEs. WHY: Quick check to see how much missing data you have overall. Returns a single number."><span class="code-function">sum</span>(<span class="code-function">is.na</span>(df))</span>                    <span class="code-comment"># Total missing</span>
+<span class="code-tooltip" data-tip="COLSUMS(IS.NA()): Counts missing values in each column separately. WHAT: Applies is.na() to each column, then sums each. WHY: Shows which variables have the most gaps. Returns a named list with counts per variable."><span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df))</span>                <span class="code-comment"># By column</span>
+<span class="code-tooltip" data-tip="COLMEANS(IS.NA()) * 100: Shows percentage missing per column. WHAT: Calculates proportion of TRUEs (missing), multiplied by 100 for percentage. WHY: Percentages are easier to interpret than raw counts. A value of 25 means 25% missing."><span class="code-function">colMeans</span>(<span class="code-function">is.na</span>(df)) * <span class="code-number">100</span></span>        <span class="code-comment"># Percentage</span>
 
 <span class="code-comment"># Visualize missing patterns (naniar)</span>
-<span class="code-function">vis_miss</span>(df)
-<span class="code-function">gg_miss_var</span>(df)
-<span class="code-function">gg_miss_upset</span>(df)
+<span class="code-tooltip" data-tip="VIS_MISS(): Creates a visual map of missing data. WHAT: Shows your entire dataset as a grid where missing values are highlighted. WHY: Instantly reveals patterns - do certain rows or columns have clusters of missing data? Dark areas = present, light = missing."><span class="code-function">vis_miss</span>(df)</span>
+<span class="code-tooltip" data-tip="GG_MISS_VAR(): Bar chart of missing values by variable. WHAT: Creates a horizontal bar chart showing how many values are missing in each column. WHY: Easy to compare which variables have the most gaps. Longer bars = more missing data."><span class="code-function">gg_miss_var</span>(df)</span>
+<span class="code-tooltip" data-tip="GG_MISS_UPSET(): Shows combinations of missing values. WHAT: An upset plot revealing which variables tend to be missing together. WHY: Reveals patterns like 'income and hours are often both missing'. Important for understanding why data is missing."><span class="code-function">gg_miss_upset</span>(df)</span>
 
 <span class="code-comment"># Drop missing values</span>
-<span class="code-variable">df_complete</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">drop_na</span>()              <span class="code-comment"># All complete cases</span>
-<span class="code-variable">df_subset</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">drop_na</span>(income)        <span class="code-comment"># Drop if income missing</span>
+<span class="code-tooltip" data-tip="DROP_NA(): Removes all rows with any missing values. WHAT: Keeps only complete cases (rows with no gaps anywhere). WHY: Some analyses require complete data. The pipe (%>%) passes df into drop_na(). CAUTION: May lose many rows."><span class="code-variable">df_complete</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">drop_na</span>()</span>              <span class="code-comment"># All complete cases</span>
+<span class="code-tooltip" data-tip="DROP_NA(COLUMN): Drops rows only if specific column is missing. WHAT: Removes rows where income is NA, but keeps rows with other missing values. WHY: More targeted - preserves more data than dropping all incomplete rows."><span class="code-variable">df_subset</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">drop_na</span>(income)</span>        <span class="code-comment"># Drop if income missing</span>
 
 <span class="code-comment"># Replace missing values</span>
-<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+<span class="code-tooltip" data-tip="MUTATE WITH REPLACE_NA(): Creates or modifies columns, filling missing values. WHAT: replace_na() puts the mean wherever income is NA. na.rm=TRUE tells mean() to ignore NAs when calculating. WHY: Keeps all rows in your analysis."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
   <span class="code-function">mutate</span>(
     income = <span class="code-function">replace_na</span>(income, <span class="code-function">mean</span>(income, na.rm = <span class="code-keyword">TRUE</span>))
-  )
+  )</span>
 
 <span class="code-comment"># Group-wise imputation</span>
-<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+<span class="code-tooltip" data-tip="GROUP_BY + MUTATE: Fills missing values within each group. WHAT: First groups data by education, then for each group, replaces NA income with that group's median. WHY: More accurate - PhD holders probably earn more than high school grads. UNGROUP() removes the grouping after."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
   <span class="code-function">group_by</span>(education) <span class="code-operator">%>%</span>
   <span class="code-function">mutate</span>(
     income = <span class="code-function">ifelse</span>(<span class="code-function">is.na</span>(income), <span class="code-function">median</span>(income, na.rm = <span class="code-keyword">TRUE</span>), income)
   ) <span class="code-operator">%>%</span>
-  <span class="code-function">ungroup</span>()
+  <span class="code-function">ungroup</span>()</span>
 
 <span class="code-comment"># Create missing indicator</span>
-<span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
-  <span class="code-function">mutate</span>(income_missing = <span class="code-function">as.integer</span>(<span class="code-function">is.na</span>(income)))</code></pre>
+<span class="code-tooltip" data-tip="AS.INTEGER(IS.NA()): Creates a 0/1 indicator for missing values. WHAT: is.na() returns TRUE/FALSE, as.integer() converts to 1/0. WHY: Lets you track which rows originally had missing data, even after imputation. Useful for analyzing if missingness matters."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(income_missing = <span class="code-function">as.integer</span>(<span class="code-function">is.na</span>(income)))</span></code></pre>
           </div>
         </div>
 
@@ -389,69 +393,69 @@ msno.heatmap(df)  <span class="code-comment"># Correlation of missingness</span>
             <!-- Python Solutions -->
             <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
               <div class="step-description">Task 1: Check for missing values</div>
-              <pre class="step-code"><code><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="IMPORT PANDAS: Loads the pandas library for data manipulation. WHAT: Brings in powerful tools for working with tables of data. WHY: Python alone cannot read spreadsheets or handle missing data - pandas adds these abilities."><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd</span>
 
 <span class="code-comment"># Check for missing values</span>
-<span class="code-function">print</span>(df.isnull().sum())          <span class="code-comment"># Count by column</span>
-<span class="code-function">print</span>(df.isnull().mean() * 100)  <span class="code-comment"># Percentage missing</span></code></pre>
+<span class="code-tooltip" data-tip="ISNULL().SUM(): Counts missing values per column. WHAT: isnull() checks each cell (True if empty), sum() totals the Trues. WHY: Shows you exactly how many gaps exist in each variable of your dataset."><span class="code-function">print</span>(df.isnull().sum())</span>          <span class="code-comment"># Count by column</span>
+<span class="code-tooltip" data-tip="ISNULL().MEAN() * 100: Shows percentage of missing data. WHAT: mean() gives proportion (0-1), multiply by 100 for percentage. WHY: Easier to interpret than counts. Example: 15.5 means 15.5% of values are missing."><span class="code-function">print</span>(df.isnull().mean() * 100)</span>  <span class="code-comment"># Percentage missing</span></code></pre>
             </div>
             <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
               <div class="step-description">Task 2: Handle missing values</div>
               <pre class="step-code"><code><span class="code-comment"># Drop rows with missing values</span>
-df_clean = df.dropna()
+<span class="code-tooltip" data-tip="DROPNA(): Removes all rows containing any missing value. WHAT: Creates a new clean dataset with only complete rows. WHY: Some statistical methods require complete data. CAUTION: You may lose many observations this way.">df_clean = df.dropna()</span>
 
 <span class="code-comment"># Or fill with mean/median</span>
-df[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].mean(), inplace=<span class="code-keyword">True</span>)</code></pre>
+<span class="code-tooltip" data-tip="FILLNA() WITH MEAN: Replaces missing values with the average. WHAT: Calculates mean of existing income values, puts that number in every empty cell. WHY: Keeps all your rows. INPLACE=TRUE modifies the original data directly.">df[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].mean(), inplace=<span class="code-keyword">True</span>)</span></code></pre>
             </div>
             <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
               <div class="step-description">Task 3: Create a missing indicator</div>
               <pre class="step-code"><code><span class="code-comment"># Create indicator for missing values</span>
-df[<span class="code-string">'income_missing'</span>] = df[<span class="code-string">'income'</span>].isnull().astype(int)</code></pre>
+<span class="code-tooltip" data-tip="CREATE MISSING INDICATOR: Makes a new column flagging where data was missing. WHAT: isnull() gives True/False, astype(int) converts to 1/0. WHY: Lets you track and analyze which rows had missing data, even after you fill them in.">df[<span class="code-string">'income_missing'</span>] = df[<span class="code-string">'income'</span>].isnull().astype(int)</span></code></pre>
             </div>
 
             <!-- Stata Solutions -->
             <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
               <div class="step-description">Task 1: Check for missing values</div>
               <pre class="step-code"><code><span class="code-comment">* Check for missing values</span>
-<span class="code-keyword">misstable</span> summarize
-<span class="code-keyword">misstable</span> patterns</code></pre>
+<span class="code-tooltip" data-tip="MISSTABLE SUMMARIZE: Creates a summary table of missing data. WHAT: Lists each variable with missing values and shows how many observations are missing. WHY: Quick overview to identify which variables have gaps in your data."><span class="code-keyword">misstable</span> summarize</span>
+<span class="code-tooltip" data-tip="MISSTABLE PATTERNS: Shows patterns of missingness across variables. WHAT: Reveals which combinations of variables tend to be missing together. WHY: Helps understand if missing data follows a pattern (e.g., income and hours both missing)."><span class="code-keyword">misstable</span> patterns</span></code></pre>
             </div>
             <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
               <div class="step-description">Task 2: Handle missing values</div>
               <pre class="step-code"><code><span class="code-comment">* Drop observations with missing values</span>
-<span class="code-keyword">drop</span> if missing(income)
+<span class="code-tooltip" data-tip="DROP IF MISSING(): Permanently removes rows where income is blank. WHAT: Deletes all observations that have no income value. WHY: Some analyses require complete data. CAUTION: This is irreversible - save your data first!"><span class="code-keyword">drop</span> if missing(income)</span>
 
 <span class="code-comment">* Or fill with mean</span>
-<span class="code-keyword">summarize</span> income
-<span class="code-keyword">replace</span> income = r(mean) if missing(income)</code></pre>
+<span class="code-tooltip" data-tip="SUMMARIZE: Calculates statistics and stores the mean. WHAT: Computes mean, std dev, min, max for income. WHY: We need the mean value for the next step. The mean is automatically saved in r(mean)."><span class="code-keyword">summarize</span> income</span>
+<span class="code-tooltip" data-tip="REPLACE WITH R(MEAN): Fills missing income with the average value. WHAT: Where income is blank, inserts the mean calculated above. WHY: Keeps all observations in your dataset. CAUTION: May reduce the true variation in your data."><span class="code-keyword">replace</span> income = r(mean) if missing(income)</span></code></pre>
             </div>
             <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
               <div class="step-description">Task 3: Create a missing indicator</div>
               <pre class="step-code"><code><span class="code-comment">* Create missing indicator</span>
-<span class="code-keyword">gen</span> income_missing = missing(income)</code></pre>
+<span class="code-tooltip" data-tip="GEN MISSING(): Creates a new variable flagging missing values. WHAT: income_missing = 1 if income was blank, 0 if it had a value. WHY: Lets you track which observations originally had missing data, useful for analysis and sensitivity checks."><span class="code-keyword">gen</span> income_missing = missing(income)</span></code></pre>
             </div>
 
             <!-- R Solutions -->
             <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
               <div class="step-description">Task 1: Check for missing values</div>
-              <pre class="step-code"><code><span class="code-function">library</span>(tidyverse)
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="LIBRARY(TIDYVERSE): Loads the tidyverse collection of packages. WHAT: Brings in tools for data manipulation, visualization, and more. WHY: Makes R code cleaner with the pipe operator (%>%) and consistent function naming."><span class="code-function">library</span>(tidyverse)</span>
 
 <span class="code-comment"># Check for missing values</span>
-<span class="code-function">sum</span>(<span class="code-function">is.na</span>(df))                 <span class="code-comment"># Total missing</span>
-<span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df))             <span class="code-comment"># By column</span></code></pre>
+<span class="code-tooltip" data-tip="SUM(IS.NA()): Counts total missing values in the entire dataset. WHAT: is.na() marks each cell as TRUE if empty, sum() adds up all the TRUEs. WHY: Quick check to see how much missing data you have overall."><span class="code-function">sum</span>(<span class="code-function">is.na</span>(df))</span>                 <span class="code-comment"># Total missing</span>
+<span class="code-tooltip" data-tip="COLSUMS(IS.NA()): Counts missing values for each column. WHAT: Applies is.na() to each column separately, then sums. WHY: Shows which variables have the most gaps in your data."><span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df))</span>             <span class="code-comment"># By column</span></code></pre>
             </div>
             <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
               <div class="step-description">Task 2: Handle missing values</div>
               <pre class="step-code"><code><span class="code-comment"># Drop missing values</span>
-df_clean <- df %>% <span class="code-function">drop_na</span>()
+<span class="code-tooltip" data-tip="DROP_NA(): Removes all rows with any missing value. WHAT: Keeps only complete cases (rows with no gaps). WHY: Some analyses require complete data. The pipe (%>%) passes df to drop_na(). CAUTION: May lose many rows.">df_clean <- df %>% <span class="code-function">drop_na</span>()</span>
 
 <span class="code-comment"># Or fill with mean</span>
-df <- df %>% <span class="code-function">mutate</span>(income = <span class="code-function">replace_na</span>(income, <span class="code-function">mean</span>(income, na.rm = TRUE)))</code></pre>
+<span class="code-tooltip" data-tip="MUTATE WITH REPLACE_NA(): Fills missing values with the mean. WHAT: replace_na() puts the average wherever income is NA. na.rm=TRUE tells mean() to skip NAs when calculating. WHY: Keeps all your observations.">df <- df %>% <span class="code-function">mutate</span>(income = <span class="code-function">replace_na</span>(income, <span class="code-function">mean</span>(income, na.rm = TRUE)))</span></code></pre>
             </div>
             <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
               <div class="step-description">Task 3: Create a missing indicator</div>
               <pre class="step-code"><code><span class="code-comment"># Create missing indicator</span>
-df <- df %>% <span class="code-function">mutate</span>(income_missing = <span class="code-function">as.integer</span>(<span class="code-function">is.na</span>(income)))</code></pre>
+<span class="code-tooltip" data-tip="AS.INTEGER(IS.NA()): Creates a 0/1 flag for missing values. WHAT: is.na() returns TRUE/FALSE, as.integer() converts to 1/0. WHY: Tracks which rows originally had missing data, useful for later analysis even after filling values.">df <- df %>% <span class="code-function">mutate</span>(income_missing = <span class="code-function">as.integer</span>(<span class="code-function">is.na</span>(income)))</span></code></pre>
             </div>
 
             <div class="solution-navigation">

@@ -15,6 +15,9 @@
       -ms-user-select: none;
       user-select: none;
     }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; width: max-content; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+    .code-tooltip:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -147,8 +150,8 @@
         </p>
 
         <div class="equation">
-          Y<sub>i</sub>(1) = Potential outcome if treated<br>
-          Y<sub>i</sub>(0) = Potential outcome if not treated
+          <span class="code-tooltip" data-tip="Y represents the outcome we care about (e.g., wages, health). The subscript i identifies individual people or units in our study.">Y<sub>i</sub></span>(<span class="code-tooltip" data-tip="The number 1 indicates the treated state - what happens when someone receives the treatment or policy.">1</span>) = <span class="code-tooltip" data-tip="The outcome we would observe if this person receives the treatment. For example, their wage if they got a college degree.">Potential outcome if treated</span><br>
+          <span class="code-tooltip" data-tip="Y represents the outcome we care about. The subscript i identifies individual people or units.">Y<sub>i</sub></span>(<span class="code-tooltip" data-tip="The number 0 indicates the untreated or control state - what happens without the treatment.">0</span>) = <span class="code-tooltip" data-tip="The outcome we would observe if this person does NOT receive the treatment. For example, their wage without a college degree.">Potential outcome if not treated</span>
         </div>
 
         <p>
@@ -156,13 +159,13 @@
         </p>
 
         <div class="equation">
-          t<sub>i</sub> = Y<sub>i</sub>(1) - Y<sub>i</sub>(0)
+          <span class="code-tooltip" data-tip="Tau (t) is the treatment effect - the causal impact of the treatment for person i. It tells us exactly how much better (or worse) off they are because of the treatment.">t<sub>i</sub></span> = <span class="code-tooltip" data-tip="The outcome if person i is treated (e.g., their wage with a college degree).">Y<sub>i</sub>(1)</span> - <span class="code-tooltip" data-tip="The outcome if person i is NOT treated (e.g., their wage without a college degree). This is the counterfactual - what would have happened otherwise.">Y<sub>i</sub>(0)</span>
         </div>
 
         <h3>The Fundamental Problem of Causal Inference</h3>
 
         <p>
-          The fundamental problem is that we can only observe <em>one</em> of the potential outcomes for each unit. If unit <em>i</em> is treated (D<sub>i</sub> = 1), we observe Y<sub>i</sub>(1) but not Y<sub>i</sub>(0). The unobserved outcome is the <strong>counterfactual</strong>.
+          The fundamental problem is that we can only observe <em>one</em> of the potential outcomes for each unit. If unit <em>i</em> is treated (<span class="code-tooltip" data-tip="D is the treatment indicator variable. D=1 means the person received the treatment; D=0 means they did not.">D<sub>i</sub> = 1</span>), we observe <span class="code-tooltip" data-tip="We can see their actual outcome with treatment - e.g., we observe their wage after getting a college degree.">Y<sub>i</sub>(1)</span> but not <span class="code-tooltip" data-tip="We cannot observe what their outcome would have been without treatment - the 'road not taken.' This missing information is why causal inference is hard.">Y<sub>i</sub>(0)</span>. The unobserved outcome is the <strong><span class="code-tooltip" data-tip="The counterfactual is the hypothetical outcome that would have occurred under the alternative treatment status. We never observe it directly - it must be estimated.">counterfactual</span></strong>.
         </p>
 
         <h2 id="ate">5.3 Average Treatment Effects</h2>
@@ -172,7 +175,7 @@
         </p>
 
         <div class="equation">
-          <strong>ATE</strong> = E[Y(1) - Y(0)] = E[Y(1)] - E[Y(0)]
+          <strong><span class="code-tooltip" data-tip="Average Treatment Effect - the average causal effect across the entire population. It tells us: on average, how much does the treatment change outcomes?">ATE</span></strong> = <span class="code-tooltip" data-tip="E[ ] means 'expected value' or 'average.' This is the average of individual treatment effects across everyone.">E[Y(1) - Y(0)]</span> = <span class="code-tooltip" data-tip="Average outcome if everyone were treated">E[Y(1)]</span> - <span class="code-tooltip" data-tip="Average outcome if no one were treated. The difference gives us the average causal effect.">E[Y(0)]</span>
         </div>
 
         <h2 id="selection-bias">5.4 Selection Bias</h2>
@@ -182,7 +185,7 @@
         </p>
 
         <div class="equation">
-          E[Y | D = 1] - E[Y | D = 0] = <span style="color: #38a169;">ATT</span> + <span style="color: #e53e3e;">Selection Bias</span>
+          <span class="code-tooltip" data-tip="Average outcome among those who actually received the treatment. The | symbol means 'given that' or 'conditional on.'">E[Y | D = 1]</span> - <span class="code-tooltip" data-tip="Average outcome among those who did not receive treatment (the control group).">E[Y | D = 0]</span> = <span style="color: #38a169;" class="code-tooltip" data-tip="Average Treatment Effect on the Treated - the causal effect for those who actually got the treatment. This is what we want to estimate.">ATT</span> + <span style="color: #e53e3e;" class="code-tooltip" data-tip="Selection bias occurs when treated and untreated groups differ in ways that affect outcomes. For example, people who choose to go to college may already have higher earning potential.">Selection Bias</span>
         </div>
 
         <h2 id="dags">5.5 Directed Acyclic Graphs (DAGs)</h2>
@@ -207,24 +210,24 @@
           </thead>
           <tbody>
             <tr>
-              <td><strong>Matching</strong></td>
-              <td>Selection on observables (CIA)</td>
-              <td>Rich covariate data</td>
+              <td><strong><span class="code-tooltip" data-tip="Matching pairs treated units with similar untreated units based on observable characteristics. Like finding 'statistical twins' who only differ in whether they received treatment.">Matching</span></strong></td>
+              <td><span class="code-tooltip" data-tip="Conditional Independence Assumption (CIA): after controlling for observable characteristics, treatment assignment is as good as random. Assumes no unmeasured confounders.">Selection on observables (CIA)</span></td>
+              <td><span class="code-tooltip" data-tip="Works well when you have detailed data on characteristics that determine both treatment and outcomes (e.g., demographics, prior test scores, work history).">Rich covariate data</span></td>
             </tr>
             <tr>
-              <td><strong>Difference-in-Differences</strong></td>
-              <td>Parallel trends</td>
-              <td>Policy changes with comparison groups</td>
+              <td><strong><span class="code-tooltip" data-tip="DiD compares changes over time between a treated group and control group. It removes time-invariant differences between groups by looking at trends, not levels.">Difference-in-Differences</span></strong></td>
+              <td><span class="code-tooltip" data-tip="Parallel trends: without treatment, both groups would have followed the same trajectory. This is often shown by demonstrating similar pre-treatment trends.">Parallel trends</span></td>
+              <td><span class="code-tooltip" data-tip="Ideal when a policy affects some regions/groups but not others, and you can observe both before and after the policy change (e.g., minimum wage increase in one state).">Policy changes with comparison groups</span></td>
             </tr>
             <tr>
-              <td><strong>Regression Discontinuity</strong></td>
-              <td>Continuity at cutoff</td>
-              <td>Threshold-based treatments</td>
+              <td><strong><span class="code-tooltip" data-tip="RDD exploits sharp cutoffs in treatment assignment. People just above and below a threshold are nearly identical, so differences in outcomes must be caused by the treatment.">Regression Discontinuity</span></strong></td>
+              <td><span class="code-tooltip" data-tip="Continuity assumption: people just above and below the cutoff would have similar outcomes in the absence of treatment. No manipulation of the running variable.">Continuity at cutoff</span></td>
+              <td><span class="code-tooltip" data-tip="Works when treatment is assigned based on crossing a threshold (e.g., scholarship if GPA > 3.5, program eligibility at age 65, winning an election).">Threshold-based treatments</span></td>
             </tr>
             <tr>
-              <td><strong>Instrumental Variables</strong></td>
-              <td>Exclusion restriction, relevance</td>
-              <td>Exogenous variation in treatment</td>
+              <td><strong><span class="code-tooltip" data-tip="IV uses an external variable (instrument) that affects the outcome ONLY through its effect on treatment. It isolates exogenous variation in treatment.">Instrumental Variables</span></strong></td>
+              <td><span class="code-tooltip" data-tip="Exclusion restriction: the instrument affects outcome only through treatment (not directly). Relevance: the instrument must actually predict treatment.">Exclusion restriction, relevance</span></td>
+              <td><span class="code-tooltip" data-tip="Useful when you have a natural experiment or random assignment that affects treatment but not outcomes directly (e.g., draft lottery affecting military service, distance to college).">Exogenous variation in treatment</span></td>
             </tr>
           </tbody>
         </table>

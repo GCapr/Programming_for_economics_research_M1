@@ -221,11 +221,11 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
 <span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
 
 <span class="code-comment"># Base URL: The API's address</span>
-base = <span class="code-string">"https://api.worldbank.org/v2"</span>
+<span class="code-tooltip" data-tip="BASE URL: The root address of the API—like the street address of a building. All specific requests start from here. The '/v2' means we're using version 2 of this API.">base</span> = <span class="code-tooltip" data-tip="API ENDPOINT: This is the World Bank's data API address. APIs live at specific URLs just like websites. The 'https://' means it's secure."><span class="code-string">"https://api.worldbank.org/v2"</span></span>
 
 <span class="code-comment"># Endpoint: What we want (country/indicator)</span>
-country = <span class="code-string">"USA"</span>                    <span class="code-comment"># Try: "FRA", "CHN", "BRA"</span>
-indicator = <span class="code-string">"NY.GDP.MKTP.CD"</span>       <span class="code-comment"># GDP in current US$</span>
+<span class="code-tooltip" data-tip="COUNTRY CODE: Three-letter ISO code identifying the country. USA=United States, FRA=France, CHN=China. The API uses these codes to know which country's data you want.">country</span> = <span class="code-string">"USA"</span>                    <span class="code-comment"># Try: "FRA", "CHN", "BRA"</span>
+<span class="code-tooltip" data-tip="INDICATOR CODE: A unique identifier for the specific data series. NY.GDP.MKTP.CD = GDP in current US dollars. The World Bank has thousands of indicators—search their database to find others.">indicator</span> = <span class="code-string">"NY.GDP.MKTP.CD"</span>       <span class="code-comment"># GDP in current US$</span>
 
 <span class="code-comment"># Assemble the URL</span>
 <span class="code-tooltip" data-tip="We build the URL by concatenating strings - you can swap country/indicator easily!">url</span> = <span class="code-string">f"</span>{base}<span class="code-string">/country/</span>{country}<span class="code-string">/indicator/</span>{indicator}<span class="code-string">"</span>
@@ -250,14 +250,14 @@ indicator = <span class="code-string">"NY.GDP.MKTP.CD"</span>       <span class=
 <span class="code-tooltip" data-tip=".json() converts the response body from JSON text to Python dictionaries/lists">data</span> = response.json()
 
 <span class="code-comment"># World Bank returns [metadata, records] - we want index 1</span>
-records = data[<span class="code-number">1</span>]
+<span class="code-tooltip" data-tip="INDEXING: The API returns a list with two items: [0] is metadata (info about the response), [1] is the actual data records. We grab index 1 to get just the data we want.">records</span> = data[<span class="code-tooltip" data-tip="INDEX 1: In Python, counting starts at 0. So [1] gets the SECOND item in the list. The first item [0] is metadata we don't need."><span class="code-number">1</span></span>]
 
 <span class="code-comment"># Convert to DataFrame using list comprehension</span>
-df = pd.DataFrame([{
-    <span class="code-string">'country'</span>: r[<span class="code-string">'country'</span>][<span class="code-string">'value'</span>],  <span class="code-comment"># Extract country name</span>
-    <span class="code-string">'year'</span>: <span class="code-keyword">int</span>(r[<span class="code-string">'date'</span>]),           <span class="code-comment"># Convert year to integer</span>
+<span class="code-tooltip" data-tip="DATAFRAME: Pandas' table structure—like an Excel spreadsheet with rows and columns. This is where you'll do all your data analysis. df is a common shorthand name for DataFrame.">df</span> = <span class="code-tooltip" data-tip="pd.DataFrame(): Creates a DataFrame from the data inside the parentheses. Here we're passing a list of dictionaries, where each dictionary becomes one row.">pd.DataFrame</span>([{
+    <span class="code-tooltip" data-tip="NESTED ACCESS: r['country'] gets the country object, then ['value'] gets the actual name from inside it. The API returns nested data, so we dig down to extract what we need."><span class="code-string">'country'</span>: r[<span class="code-string">'country'</span>][<span class="code-string">'value'</span>]</span>,  <span class="code-comment"># Extract country name</span>
+    <span class="code-tooltip" data-tip="TYPE CONVERSION: int() converts the year from text ('2022') to a number (2022). Important for sorting and calculations later. The API returns years as strings."><span class="code-string">'year'</span>: <span class="code-keyword">int</span>(r[<span class="code-string">'date'</span>])</span>,           <span class="code-comment"># Convert year to integer</span>
     <span class="code-string">'gdp'</span>: r[<span class="code-string">'value'</span>]                 <span class="code-comment"># GDP value</span>
-} <span class="code-keyword">for</span> r <span class="code-keyword">in</span> records <span class="code-keyword">if</span> r[<span class="code-string">'value'</span>] <span class="code-keyword">is not None</span>])
+} <span class="code-tooltip" data-tip="LIST COMPREHENSION: A compact way to create a list by looping. This says: 'for each record r in records, create a dictionary with country/year/gdp, but only IF the value isn't None (missing).'"><span class="code-keyword">for</span> r <span class="code-keyword">in</span> records <span class="code-keyword">if</span> r[<span class="code-string">'value'</span>] <span class="code-keyword">is not None</span></span>])
 
 <span class="code-keyword">print</span>(df)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
@@ -267,7 +267,7 @@ df = pd.DataFrame([{
 <span class="code-comment">* The wbopendata package makes World Bank data easy to access</span>
 
 <span class="code-comment">* Install the World Bank Open Data package (run once)</span>
-<span class="code-keyword">ssc</span> install wbopendata
+<span class="code-tooltip" data-tip="SSC INSTALL: Downloads and installs user-written packages from the Statistical Software Components archive. Run this once—the package stays on your computer. Like pip install for Python."><span class="code-keyword">ssc</span> install wbopendata</span>
 
 <span class="code-comment">* ═══════════════════════════════════════════════════════════════════</span>
 <span class="code-comment">* In Stata, wbopendata BUILDS THE URL FOR YOU behind the scenes</span>
@@ -275,15 +275,15 @@ df = pd.DataFrame([{
 <span class="code-comment">* ═══════════════════════════════════════════════════════════════════</span>
 
 <span class="code-comment">* Define our "bricks"</span>
-<span class="code-keyword">local</span> country <span class="code-string">"USA"</span>              <span class="code-comment">// Try: "FRA", "CHN", "BRA"</span>
-<span class="code-keyword">local</span> indicator <span class="code-string">"NY.GDP.MKTP.CD"</span> <span class="code-comment">// GDP in current US$</span>
-<span class="code-keyword">local</span> years <span class="code-string">"2015:2022"</span>         <span class="code-comment">// Time range</span>
+<span class="code-tooltip" data-tip="LOCAL MACRO: Creates a temporary variable storing 'USA'. In Stata, you reference this with `country' (backtick + apostrophe). Locals only exist in the current session/do-file."><span class="code-keyword">local</span> country <span class="code-string">"USA"</span></span>              <span class="code-comment">// Try: "FRA", "CHN", "BRA"</span>
+<span class="code-tooltip" data-tip="INDICATOR MACRO: Stores the World Bank indicator code. The code NY.GDP.MKTP.CD means GDP (MKTP) in current US dollars (CD). Find more codes on the World Bank data portal."><span class="code-keyword">local</span> indicator <span class="code-string">"NY.GDP.MKTP.CD"</span></span> <span class="code-comment">// GDP in current US$</span>
+<span class="code-tooltip" data-tip="DATE RANGE: The colon : syntax specifies a range from 2015 to 2022. The wbopendata package interprets this and fetches all years in between."><span class="code-keyword">local</span> years <span class="code-string">"2015:2022"</span></span>         <span class="code-comment">// Time range</span>
 
 <span class="code-comment">* wbopendata combines these into an API call</span>
-<span class="code-keyword">wbopendata</span>, indicator(`indicator') country(`country') year(`years') clear
+<span class="code-tooltip" data-tip="WBOPENDATA COMMAND: This package handles all the API complexity for you. It builds the URL, sends the request, parses the JSON, and loads data directly into Stata. The 'clear' option removes any existing data first."><span class="code-keyword">wbopendata</span></span>, <span class="code-tooltip" data-tip="OPTIONS: Everything after the comma are options. indicator() specifies what data, country() specifies where, year() specifies when. The backticks `' substitute the local macro values.">indicator(`indicator') country(`country') year(`years') clear</span>
 
 <span class="code-comment">* Display the data</span>
-<span class="code-keyword">list</span> countryname year ny_gdp_mktp_cd</code></pre>
+<span class="code-tooltip" data-tip="LIST COMMAND: Displays the data in the Results window. Here we show three variables: country name, year, and GDP. The variable name ny_gdp_mktp_cd is auto-generated from the indicator code."><span class="code-keyword">list</span></span> countryname year ny_gdp_mktp_cd</code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
@@ -297,11 +297,11 @@ df = pd.DataFrame([{
 <span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
 
 <span class="code-comment"># Base URL: The API's address</span>
-base <- <span class="code-string">"https://api.worldbank.org/v2"</span>
+<span class="code-tooltip" data-tip="BASE URL: The root address of the World Bank API. All requests start from this address. The <- arrow assigns this text to the variable 'base'.">base</span> <- <span class="code-string">"https://api.worldbank.org/v2"</span>
 
 <span class="code-comment"># Endpoint: What we want (country/indicator)</span>
-country <- <span class="code-string">"USA"</span>                   <span class="code-comment"># Try: "FRA", "CHN", "BRA"</span>
-indicator <- <span class="code-string">"NY.GDP.MKTP.CD"</span>      <span class="code-comment"># GDP in current US$</span>
+<span class="code-tooltip" data-tip="COUNTRY CODE: Three-letter ISO code. USA=United States. Change this to get data for different countries (FRA=France, CHN=China, BRA=Brazil).">country</span> <- <span class="code-string">"USA"</span>                   <span class="code-comment"># Try: "FRA", "CHN", "BRA"</span>
+<span class="code-tooltip" data-tip="INDICATOR CODE: Unique identifier for GDP in current US dollars. The World Bank uses standardized codes for all their data series. Browse their site to find other indicators.">indicator</span> <- <span class="code-string">"NY.GDP.MKTP.CD"</span>      <span class="code-comment"># GDP in current US$</span>
 
 <span class="code-comment"># Assemble the URL using paste0()</span>
 <span class="code-tooltip" data-tip="paste0() concatenates strings without spaces - building the URL brick by brick">url</span> <- <span class="code-function">paste0</span>(base, <span class="code-string">"/country/"</span>, country, <span class="code-string">"/indicator/"</span>, indicator)
@@ -325,14 +325,14 @@ indicator <- <span class="code-string">"NY.GDP.MKTP.CD"</span>      <span class=
 <span class="code-tooltip" data-tip="content() extracts response body; fromJSON() parses JSON to R objects">data</span> <- <span class="code-function">content</span>(response, <span class="code-string">"text"</span>) %>% <span class="code-function">fromJSON</span>()
 
 <span class="code-comment"># Extract records (second element of response list)</span>
-records <- data[[2]]
+<span class="code-tooltip" data-tip="DOUBLE BRACKETS: In R, [[2]] extracts the SECOND element as a standalone object. Single brackets [2] would keep it as a list. The API returns metadata first, then data—we want the data.">records</span> <- data[[2]]
 
 <span class="code-comment"># Create tibble (tidyverse data frame)</span>
-df <- <span class="code-function">tibble</span>(
-  country = records$country$value,      <span class="code-comment"># Country name</span>
-  year = <span class="code-function">as.integer</span>(records$date),      <span class="code-comment"># Year as integer</span>
+<span class="code-tooltip" data-tip="TIBBLE: A modern, improved data frame from tidyverse. Like a spreadsheet with rows and columns. Tibbles print nicer and have stricter behavior than base R data frames.">df</span> <- <span class="code-tooltip" data-tip="tibble() FUNCTION: Creates a tibble by specifying column names and their values. Each argument becomes a column. The '=' assigns values to named columns."><span class="code-function">tibble</span></span>(
+  <span class="code-tooltip" data-tip="DOLLAR SIGN ACCESS: records$country$value navigates nested data. First get 'country' from records, then get 'value' from that. This extracts the actual country names from the nested structure.">country = records$country$value</span>,      <span class="code-comment"># Country name</span>
+  <span class="code-tooltip" data-tip="TYPE CONVERSION: as.integer() converts text years ('2022') to numbers (2022). Important for calculations and proper sorting. The API returns years as character strings.">year = <span class="code-function">as.integer</span>(records$date)</span>,      <span class="code-comment"># Year as integer</span>
   gdp = records$value                    <span class="code-comment"># GDP value</span>
-) %>% <span class="code-function">filter</span>(!<span class="code-function">is.na</span>(gdp))              <span class="code-comment"># Remove NAs</span>
+) <span class="code-tooltip" data-tip="PIPE OPERATOR: The %>% takes the result from the left and passes it to the function on the right. Read as 'then': create tibble THEN filter it. Makes code read like a sentence.">%></span> <span class="code-tooltip" data-tip="FILTER: Keeps only rows that meet a condition. Here, !is.na(gdp) means 'NOT missing'. So we keep rows where GDP is NOT NA (missing). Removes incomplete data."><span class="code-function">filter</span>(!<span class="code-function">is.na</span>(gdp))</span>              <span class="code-comment"># Remove NAs</span>
 
 <span class="code-function">print</span>(df)</code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>

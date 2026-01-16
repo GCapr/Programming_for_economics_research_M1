@@ -52,6 +52,9 @@
     .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
     .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
     .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; width: max-content; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+    .code-tooltip:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -260,63 +263,63 @@
 
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Supervised learning with scikit-learn</span>
-<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LinearRegression, LogisticRegression
-<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error, accuracy_score
+<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="sklearn (scikit-learn) is Python's main machine learning library. model_selection contains tools for splitting data and validating models.">sklearn.model_selection</span> <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Randomly divides your data into training (for learning) and test (for evaluation) sets. Essential for honest model evaluation.">train_test_split</span>
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Fits a line through your data to predict continuous numbers (like income, prices). The simplest ML model.">LinearRegression</span>, <span class="code-tooltip" data-tip="Despite its name, this is for classification (yes/no, categories). It predicts probabilities that an observation belongs to a class.">LogisticRegression</span>
+<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Measures prediction error for regression. Lower is better. RMSE tells you roughly how far off your predictions are on average.">mean_squared_error</span>, <span class="code-tooltip" data-tip="Percentage of correct predictions for classification. 0.85 means 85% of predictions were right.">accuracy_score</span>
 <span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
 
 <span class="code-comment"># Load and prepare data</span>
 df = pd.read_csv(<span class="code-string">"data.csv"</span>)
-X = df[[<span class="code-string">'age'</span>, <span class="code-string">'education'</span>, <span class="code-string">'experience'</span>]]
-y = df[<span class="code-string">'income'</span>]
+<span class="code-tooltip" data-tip="X contains the features (inputs) - the information used to make predictions. Think of these as the 'questions' the model learns from.">X = df[[<span class="code-string">'age'</span>, <span class="code-string">'education'</span>, <span class="code-string">'experience'</span>]]</span>
+<span class="code-tooltip" data-tip="y is the target (output) - what we're trying to predict. The model learns the relationship between X and y.">y = df[<span class="code-string">'income'</span>]</span>
 
 <span class="code-comment"># Split into train and test sets</span>
-X_train, X_test, y_train, y_test = train_test_split(
+<span class="code-tooltip" data-tip="Splits data randomly: 80% for training, 20% for testing. random_state=42 ensures the same split every time for reproducibility.">X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=<span class="code-number">0.2</span>, random_state=<span class="code-number">42</span>
-)
+)</span>
 
 <span class="code-comment"># Fit linear regression</span>
-model = LinearRegression()
-model.fit(X_train, y_train)
+<span class="code-tooltip" data-tip="Creates a blank linear regression model. No learning has happened yet - it's just an empty container.">model = LinearRegression()</span>
+<span class="code-tooltip" data-tip="The 'fit' method is where the model actually learns. It finds the best line through the training data.">model.fit(X_train, y_train)</span>
 
 <span class="code-comment"># Predict and evaluate</span>
-y_pred = model.predict(X_test)
-rmse = mean_squared_error(y_test, y_pred, squared=<span class="code-keyword">False</span>)
+<span class="code-tooltip" data-tip="Uses the trained model to make predictions on NEW data it hasn't seen. This tests how well it generalizes.">y_pred = model.predict(X_test)</span>
+<span class="code-tooltip" data-tip="Calculates RMSE: square root of average squared errors. squared=False gives RMSE instead of MSE.">rmse = mean_squared_error(y_test, y_pred, squared=<span class="code-keyword">False</span>)</span>
 <span class="code-function">print</span>(f<span class="code-string">"RMSE: {rmse:.2f}"</span>)
 
 <span class="code-comment"># For classification, use LogisticRegression</span>
-clf = LogisticRegression()
+<span class="code-tooltip" data-tip="Creates a logistic regression classifier. Use this when predicting categories (yes/no, A/B/C) instead of numbers.">clf = LogisticRegression()</span>
 clf.fit(X_train, y_train_binary)
-accuracy = accuracy_score(y_test_binary, clf.predict(X_test))</code></pre>
+<span class="code-tooltip" data-tip="Compares predictions to actual values and returns the fraction that match. 1.0 = perfect, 0.0 = all wrong.">accuracy = accuracy_score(y_test_binary, clf.predict(X_test))</span></code></pre>
           </div>
 
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Supervised learning with tidymodels</span>
-<span class="code-function">library</span>(tidymodels)
+<span class="code-tooltip" data-tip="tidymodels is R's modern ML framework. It provides a consistent interface for many different algorithms, similar to sklearn in Python."><span class="code-function">library</span>(tidymodels)</span>
 
 <span class="code-comment"># Load data</span>
 df <- <span class="code-function">read_csv</span>(<span class="code-string">"data.csv"</span>)
 
 <span class="code-comment"># Split data</span>
-set.seed(<span class="code-number">42</span>)
-split <- <span class="code-function">initial_split</span>(df, prop = <span class="code-number">0.8</span>)
-train <- <span class="code-function">training</span>(split)
-test <- <span class="code-function">testing</span>(split)
+<span class="code-tooltip" data-tip="Sets the random seed to ensure reproducibility. Like random_state in Python - you'll get the same split every time.">set.seed(<span class="code-number">42</span>)</span>
+<span class="code-tooltip" data-tip="Creates a split object with 80% training, 20% testing. The data isn't actually split yet - this just defines how to split it.">split <- <span class="code-function">initial_split</span>(df, prop = <span class="code-number">0.8</span>)</span>
+<span class="code-tooltip" data-tip="Extracts the training portion from the split. This is the data the model will learn from.">train <- <span class="code-function">training</span>(split)</span>
+<span class="code-tooltip" data-tip="Extracts the test portion. This data is held out to evaluate how well the model performs on unseen data.">test <- <span class="code-function">testing</span>(split)</span>
 
 <span class="code-comment"># Define model</span>
-lm_spec <- <span class="code-function">linear_reg</span>() %>%
-  <span class="code-function">set_engine</span>(<span class="code-string">"lm"</span>)
+<span class="code-tooltip" data-tip="Defines a linear regression model specification. The %>% pipe chains operations together for readability.">lm_spec <- <span class="code-function">linear_reg</span>() %>%
+  <span class="code-function">set_engine</span>(<span class="code-string">"lm"</span>)</span>
 
 <span class="code-comment"># Fit model</span>
-lm_fit <- lm_spec %>%
-  <span class="code-function">fit</span>(income ~ age + education + experience, data = train)
+<span class="code-tooltip" data-tip="Fits the model to data. The formula 'income ~ age + education + experience' means: predict income using these three variables.">lm_fit <- lm_spec %>%
+  <span class="code-function">fit</span>(income ~ age + education + experience, data = train)</span>
 
 <span class="code-comment"># Predict and evaluate</span>
-predictions <- <span class="code-function">predict</span>(lm_fit, test)
-results <- test %>% <span class="code-function">bind_cols</span>(predictions)
+<span class="code-tooltip" data-tip="Generates predictions for the test set. Returns a tibble with a .pred column containing predicted values.">predictions <- <span class="code-function">predict</span>(lm_fit, test)</span>
+<span class="code-tooltip" data-tip="Combines predictions with the original test data so we can compare predicted vs actual values.">results <- test %>% <span class="code-function">bind_cols</span>(predictions)</span>
 
-rmse <- results %>%
-  <span class="code-function">rmse</span>(truth = income, estimate = .pred)
+<span class="code-tooltip" data-tip="Calculates RMSE by comparing the true income values to the predictions (.pred). Lower RMSE means better predictions.">rmse <- results %>%
+  <span class="code-function">rmse</span>(truth = income, estimate = .pred)</span>
 <span class="code-function">print</span>(rmse)</code></pre>
           </div>
         </div>
@@ -339,13 +342,13 @@ rmse <- results %>%
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: K-fold cross-validation</span>
-<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> cross_val_score, KFold
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Automates k-fold cross-validation: trains and evaluates your model k times, each time using a different portion as the test set.">cross_val_score</span>, <span class="code-tooltip" data-tip="Splits data into k equal parts (folds). The model trains on k-1 folds and tests on 1 fold, rotating through all combinations.">KFold</span>
 
 <span class="code-comment"># 5-fold cross-validation</span>
-cv = KFold(n_splits=<span class="code-number">5</span>, shuffle=<span class="code-keyword">True</span>, random_state=<span class="code-number">42</span>)
-scores = cross_val_score(model, X, y, cv=cv, scoring=<span class="code-string">'neg_mean_squared_error'</span>)
+<span class="code-tooltip" data-tip="Creates a 5-fold splitter: data divided into 5 parts. shuffle=True randomizes before splitting. Each fold takes a turn being the test set.">cv = KFold(n_splits=<span class="code-number">5</span>, shuffle=<span class="code-keyword">True</span>, random_state=<span class="code-number">42</span>)</span>
+<span class="code-tooltip" data-tip="Runs the model 5 times with different train/test splits and returns 5 scores. More reliable than a single train-test split.">scores = cross_val_score(model, X, y, cv=cv, scoring=<span class="code-string">'neg_mean_squared_error'</span>)</span>
 
-<span class="code-function">print</span>(f<span class="code-string">"CV RMSE: {(-scores.mean())**0.5:.2f} (+/- {scores.std()**0.5:.2f})"</span>)</code></pre>
+<span class="code-tooltip" data-tip="sklearn returns negative MSE (for technical reasons), so we negate it and take the square root to get RMSE. The +/- shows variability across folds."><span class="code-function">print</span>(f<span class="code-string">"CV RMSE: {(-scores.mean())**0.5:.2f} (+/- {scores.std()**0.5:.2f})"</span>)</span></code></pre>
           </div>
         </div>
 
@@ -431,14 +434,14 @@ scores = cross_val_score(model, X, y, cv=cv, scoring=<span class="code-string">'
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: LASSO with cross-validated lambda</span>
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LassoCV
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="LASSO with built-in cross-validation. Automatically finds the best penalty strength (lambda/alpha) by trying many values.">LassoCV</span>
 
 <span class="code-comment"># LASSO with automatic lambda selection</span>
-lasso = LassoCV(cv=<span class="code-number">5</span>, random_state=<span class="code-number">42</span>)
-lasso.fit(X_train, y_train)
+<span class="code-tooltip" data-tip="Creates a LASSO model that uses 5-fold cross-validation to find the optimal regularization strength. cv=5 means 5 different train/test splits.">lasso = LassoCV(cv=<span class="code-number">5</span>, random_state=<span class="code-number">42</span>)</span>
+<span class="code-tooltip" data-tip="Fits the model and automatically selects the best lambda value based on cross-validation performance.">lasso.fit(X_train, y_train)</span>
 
-<span class="code-function">print</span>(f<span class="code-string">"Best lambda: {lasso.alpha_:.4f}"</span>)
-<span class="code-function">print</span>(f<span class="code-string">"Non-zero coefficients: {(lasso.coef_ != 0).sum()}"</span>)</code></pre>
+<span class="code-tooltip" data-tip="alpha_ stores the best lambda value found. Higher alpha = stronger penalty = simpler model with more zeros."><span class="code-function">print</span>(f<span class="code-string">"Best lambda: {lasso.alpha_:.4f}"</span>)</span>
+<span class="code-tooltip" data-tip="Counts how many features have non-zero coefficients. LASSO sets unimportant features exactly to zero, performing automatic feature selection."><span class="code-function">print</span>(f<span class="code-string">"Non-zero coefficients: {(lasso.coef_ != 0).sum()}"</span>)</span></code></pre>
           </div>
         </div>
 
@@ -464,22 +467,22 @@ lasso.fit(X_train, y_train)
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Random Forest and XGBoost</span>
-<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestRegressor
-<span class="code-keyword">import</span> xgboost <span class="code-keyword">as</span> xgb
+<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Random Forest builds many decision trees and averages their predictions. 'Random' because each tree sees random subsets of data and features.">RandomForestRegressor</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="XGBoost (Extreme Gradient Boosting) is a powerful algorithm that builds trees sequentially, with each tree correcting the previous ones' mistakes.">xgboost</span> <span class="code-keyword">as</span> xgb
 
 <span class="code-comment"># Random Forest</span>
-rf = RandomForestRegressor(n_estimators=<span class="code-number">100</span>, max_depth=<span class="code-number">10</span>, random_state=<span class="code-number">42</span>)
-rf.fit(X_train, y_train)
+<span class="code-tooltip" data-tip="Creates a forest of 100 trees, each with max depth 10. More trees = more stable predictions but slower training.">rf = RandomForestRegressor(n_estimators=<span class="code-number">100</span>, max_depth=<span class="code-number">10</span>, random_state=<span class="code-number">42</span>)</span>
+<span class="code-tooltip" data-tip="Trains all 100 trees on the data. Each tree learns from a random subset, reducing overfitting.">rf.fit(X_train, y_train)</span>
 
 <span class="code-comment"># Feature importance</span>
-importance = pd.DataFrame({
+<span class="code-tooltip" data-tip="Feature importance shows which variables matter most for predictions. Random forests compute this by measuring how much each feature improves predictions across all trees.">importance = pd.DataFrame({
     <span class="code-string">'feature'</span>: X.columns,
     <span class="code-string">'importance'</span>: rf.feature_importances_
-}).sort_values(<span class="code-string">'importance'</span>, ascending=<span class="code-keyword">False</span>)
+}).sort_values(<span class="code-string">'importance'</span>, ascending=<span class="code-keyword">False</span>)</span>
 
 <span class="code-comment"># XGBoost</span>
-xgb_model = xgb.XGBRegressor(n_estimators=<span class="code-number">100</span>, learning_rate=<span class="code-number">0.1</span>, max_depth=<span class="code-number">5</span>)
-xgb_model.fit(X_train, y_train)</code></pre>
+<span class="code-tooltip" data-tip="Creates an XGBoost model. learning_rate controls how much each tree contributes (smaller = more conservative). max_depth limits tree complexity.">xgb_model = xgb.XGBRegressor(n_estimators=<span class="code-number">100</span>, learning_rate=<span class="code-number">0.1</span>, max_depth=<span class="code-number">5</span>)</span>
+<span class="code-tooltip" data-tip="Trains XGBoost by building trees one at a time, where each new tree focuses on correcting errors from previous trees.">xgb_model.fit(X_train, y_train)</span></code></pre>
           </div>
         </div>
 
@@ -495,28 +498,28 @@ xgb_model.fit(X_train, y_train)</code></pre>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Neural network with PyTorch</span>
-<span class="code-keyword">import</span> torch
-<span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="PyTorch is a popular deep learning library. It provides tools for building and training neural networks with automatic differentiation.">torch</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="torch.nn contains neural network building blocks: layers, activation functions, loss functions. Think of them as LEGO pieces for building networks.">torch.nn</span> <span class="code-keyword">as</span> nn
 
-<span class="code-keyword">class</span> <span class="code-function">SimpleNN</span>(nn.Module):
-    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, input_size, hidden_size, output_size):
+<span class="code-tooltip" data-tip="Defines a neural network class. nn.Module is the base class for all neural networks in PyTorch - your custom networks inherit from it."><span class="code-keyword">class</span> <span class="code-function">SimpleNN</span>(nn.Module):</span>
+    <span class="code-tooltip" data-tip="The constructor defines the network's architecture - what layers it has. This runs once when you create the model."><span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, input_size, hidden_size, output_size):</span>
         <span class="code-function">super</span>().__init__()
-        self.layer1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
-        self.layer2 = nn.Linear(hidden_size, output_size)
+        <span class="code-tooltip" data-tip="A linear layer (also called 'fully connected' or 'dense'). Takes input_size numbers and outputs hidden_size numbers through weighted sums.">self.layer1 = nn.Linear(input_size, hidden_size)</span>
+        <span class="code-tooltip" data-tip="ReLU (Rectified Linear Unit) activation: outputs the input if positive, zero otherwise. This adds non-linearity so the network can learn complex patterns.">self.relu = nn.ReLU()</span>
+        <span class="code-tooltip" data-tip="Second linear layer: transforms hidden layer to final output. For regression, output_size=1 predicts a single number.">self.layer2 = nn.Linear(hidden_size, output_size)</span>
 
-    <span class="code-keyword">def</span> <span class="code-function">forward</span>(self, x):
-        x = self.layer1(x)
+    <span class="code-tooltip" data-tip="The forward method defines how data flows through the network. PyTorch calls this automatically when you pass data to the model."><span class="code-keyword">def</span> <span class="code-function">forward</span>(self, x):</span>
+        <span class="code-tooltip" data-tip="Data flows: input -> layer1 (linear) -> relu (activation) -> layer2 (linear) -> output. Each step transforms the data.">x = self.layer1(x)
         x = self.relu(x)
-        x = self.layer2(x)
+        x = self.layer2(x)</span>
         <span class="code-keyword">return</span> x
 
 <span class="code-comment"># Create model</span>
-model = SimpleNN(input_size=<span class="code-number">10</span>, hidden_size=<span class="code-number">64</span>, output_size=<span class="code-number">1</span>)
+<span class="code-tooltip" data-tip="Instantiates the network: 10 input features, 64 neurons in hidden layer, 1 output. The hidden layer is where the 'learning' happens.">model = SimpleNN(input_size=<span class="code-number">10</span>, hidden_size=<span class="code-number">64</span>, output_size=<span class="code-number">1</span>)</span>
 
 <span class="code-comment"># Loss and optimizer</span>
-criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=<span class="code-number">0.001</span>)</code></pre>
+<span class="code-tooltip" data-tip="MSE (Mean Squared Error) loss measures how wrong predictions are. The optimizer tries to minimize this during training.">criterion = nn.MSELoss()</span>
+<span class="code-tooltip" data-tip="Adam optimizer updates network weights to reduce loss. lr (learning rate) controls step size - too high = unstable, too low = slow learning.">optimizer = torch.optim.Adam(model.parameters(), lr=<span class="code-number">0.001</span>)</span></code></pre>
           </div>
         </div>
 

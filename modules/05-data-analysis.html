@@ -52,6 +52,10 @@
     .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
     .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
     .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Tooltip Styles */
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; width: max-content; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+    .code-tooltip:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -140,31 +144,31 @@
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Descriptive statistics</span>
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas is a data analysis library that provides DataFrame structures for organizing and manipulating tabular data">pandas</span> <span class="code-keyword">as</span> pd
 
-df.describe()                          <span class="code-comment"># Summary stats</span>
-df[<span class="code-string">'income'</span>].mean()                   <span class="code-comment"># Mean</span>
-df[<span class="code-string">'income'</span>].median()                 <span class="code-comment"># Median</span>
-df[<span class="code-string">'income'</span>].std()                    <span class="code-comment"># Standard deviation</span>
-df[<span class="code-string">'income'</span>].quantile([<span class="code-number">0.25</span>, <span class="code-number">0.75</span>])  <span class="code-comment"># Percentiles</span>
+<span class="code-tooltip" data-tip="df is your DataFrame (data table). describe() automatically calculates count, mean, std, min, 25%, 50%, 75%, and max for all numeric columns">df.describe()</span>                          <span class="code-comment"># Summary stats</span>
+<span class="code-tooltip" data-tip="Calculates the arithmetic average of the income column - sum of all values divided by the number of observations">df[<span class="code-string">'income'</span>].mean()</span>                   <span class="code-comment"># Mean</span>
+<span class="code-tooltip" data-tip="Returns the middle value when data is sorted. Unlike mean, median is robust to outliers - useful for skewed income distributions">df[<span class="code-string">'income'</span>].median()</span>                 <span class="code-comment"># Median</span>
+<span class="code-tooltip" data-tip="Standard deviation measures how spread out values are from the mean. Higher std means more variability in income">df[<span class="code-string">'income'</span>].std()</span>                    <span class="code-comment"># Standard deviation</span>
+<span class="code-tooltip" data-tip="Returns the 25th and 75th percentiles (quartiles). 25% of observations fall below Q1, and 75% fall below Q3. The difference (IQR) measures spread">df[<span class="code-string">'income'</span>].quantile([<span class="code-number">0.25</span>, <span class="code-number">0.75</span>])</span>  <span class="code-comment"># Percentiles</span>
 
 <span class="code-comment"># By group</span>
-df.groupby(<span class="code-string">'education'</span>)[<span class="code-string">'income'</span>].mean()</code></pre>
+<span class="code-tooltip" data-tip="Groups data by education level, then calculates mean income for each group - essential for comparing outcomes across categories">df.groupby(<span class="code-string">'education'</span>)[<span class="code-string">'income'</span>].mean()</span></code></pre>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Descriptive statistics</span>
-<span class="code-keyword">summarize</span> income
-<span class="code-keyword">summarize</span> income, detail
-<span class="code-keyword">tabstat</span> income, by(education) stat(mean sd n)</code></pre>
+<span class="code-tooltip" data-tip="Basic summary: shows number of observations, mean, standard deviation, and min/max values for the income variable">summarize income</span>
+<span class="code-tooltip" data-tip="Detailed summary: adds percentiles (1, 5, 10, 25, 50, 75, 90, 95, 99), skewness (asymmetry), and kurtosis (tail heaviness) to basic stats">summarize income, detail</span>
+<span class="code-tooltip" data-tip="Creates a table showing mean, standard deviation, and count (n) of income for each education level - great for group comparisons">tabstat income, by(education) stat(mean sd n)</span></code></pre>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Descriptive statistics</span>
-<span class="code-function">summary</span>(df$income)
-<span class="code-function">mean</span>(df$income, na.rm = TRUE)
-<span class="code-function">sd</span>(df$income, na.rm = TRUE)
+<span class="code-tooltip" data-tip="Provides a quick overview: minimum, 1st quartile (25%), median (50%), mean, 3rd quartile (75%), and maximum values">summary(df$income)</span>
+<span class="code-tooltip" data-tip="Calculates the arithmetic average. na.rm = TRUE tells R to ignore missing values (NA) - without this, any NA would make the result NA">mean(df$income, na.rm = TRUE)</span>
+<span class="code-tooltip" data-tip="Standard deviation measures spread around the mean. na.rm = TRUE excludes missing values from the calculation">sd(df$income, na.rm = TRUE)</span>
 
 <span class="code-comment"># By group with dplyr</span>
-df %>% <span class="code-function">group_by</span>(education) %>% <span class="code-function">summarize</span>(mean_inc = <span class="code-function">mean</span>(income))</code></pre>
+<span class="code-tooltip" data-tip="The pipe (%>%) passes data through steps: first group by education, then calculate mean income for each group. Creates a summary table">df %>% group_by(education) %>% summarize(mean_inc = mean(income))</span></code></pre>
           </div>
         </div>
 
@@ -179,26 +183,26 @@ df %>% <span class="code-function">group_by</span>(education) %>% <span class="c
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Histogram</span>
-<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="matplotlib.pyplot is the main plotting library in Python. The 'plt' alias is a convention that makes code shorter and easier to read">matplotlib.pyplot</span> <span class="code-keyword">as</span> plt
 
-plt.hist(df[<span class="code-string">'income'</span>], bins=<span class="code-number">30</span>, edgecolor=<span class="code-string">'white'</span>)
-plt.xlabel(<span class="code-string">'Income'</span>)
-plt.ylabel(<span class="code-string">'Frequency'</span>)
-plt.title(<span class="code-string">'Distribution of Income'</span>)
-plt.savefig(<span class="code-string">'histogram.png'</span>)</code></pre>
+<span class="code-tooltip" data-tip="Creates a histogram showing how income values are distributed. bins=30 divides the range into 30 bars. Useful for spotting skewness, outliers, and the shape of your data">plt.hist(df[<span class="code-string">'income'</span>], bins=<span class="code-number">30</span>, edgecolor=<span class="code-string">'white'</span>)</span>
+<span class="code-tooltip" data-tip="Labels the horizontal axis. Clear axis labels are essential for publication-quality figures">plt.xlabel(<span class="code-string">'Income'</span>)</span>
+<span class="code-tooltip" data-tip="Labels the vertical axis. Frequency shows how many observations fall in each bin (income range)">plt.ylabel(<span class="code-string">'Frequency'</span>)</span>
+<span class="code-tooltip" data-tip="Adds a descriptive title above the plot. Good titles explain what the visualization shows">plt.title(<span class="code-string">'Distribution of Income'</span>)</span>
+<span class="code-tooltip" data-tip="Saves the figure as a PNG image file. You can also use .pdf or .svg for higher quality in publications">plt.savefig(<span class="code-string">'histogram.png'</span>)</span></code></pre>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Histogram</span>
-<span class="code-keyword">histogram</span> income, frequency ///
-    title(<span class="code-string">"Distribution of Income"</span>)
-<span class="code-keyword">graph export</span> <span class="code-string">"histogram.png"</span>, replace</code></pre>
+<span class="code-tooltip" data-tip="Creates a histogram of income. 'frequency' shows counts (how many observations in each bar). The /// allows the command to continue on the next line">histogram income, frequency ///
+    title(<span class="code-string">"Distribution of Income"</span>)</span>
+<span class="code-tooltip" data-tip="Exports the current graph to a PNG file. 'replace' overwrites any existing file with the same name">graph export <span class="code-string">"histogram.png"</span>, replace</span></code></pre>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Histogram with ggplot2</span>
-<span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = income)) +
-  <span class="code-function">geom_histogram</span>(bins = <span class="code-number">30</span>, fill = <span class="code-string">"steelblue"</span>) +
-  <span class="code-function">labs</span>(title = <span class="code-string">"Distribution of Income"</span>)
-<span class="code-function">ggsave</span>(<span class="code-string">"histogram.png"</span>)</code></pre>
+<span class="code-tooltip" data-tip="ggplot2 builds plots in layers. ggplot() sets up the canvas with your data, aes() defines which variables to plot. The + adds more layers">ggplot(df, aes(x = income)) +</span>
+  <span class="code-tooltip" data-tip="Adds the histogram layer. bins=30 creates 30 bars, fill sets the color. More bins show more detail but may look noisy">geom_histogram(bins = <span class="code-number">30</span>, fill = <span class="code-string">"steelblue"</span>) +</span>
+  <span class="code-tooltip" data-tip="labs() adds labels and titles to your plot. You can also add subtitle, caption, and axis labels here">labs(title = <span class="code-string">"Distribution of Income"</span>)</span>
+<span class="code-tooltip" data-tip="Saves the most recent plot to a file. Automatically detects format from extension (.png, .pdf, .svg). Great for reproducible research">ggsave(<span class="code-string">"histogram.png"</span>)</span></code></pre>
           </div>
         </div>
 
@@ -211,21 +215,21 @@ plt.savefig(<span class="code-string">'histogram.png'</span>)</code></pre>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Scatter plot</span>
-<span class="code-keyword">import</span> seaborn <span class="code-keyword">as</span> sns
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="seaborn is a statistical visualization library built on matplotlib. It makes attractive plots with less code and integrates well with pandas DataFrames">seaborn</span> <span class="code-keyword">as</span> sns
 
-sns.scatterplot(data=df, x=<span class="code-string">'gdpPercap'</span>, y=<span class="code-string">'lifeExp'</span>, hue=<span class="code-string">'continent'</span>)
-plt.xscale(<span class="code-string">'log'</span>)
-plt.savefig(<span class="code-string">'scatter.png'</span>)</code></pre>
+<span class="code-tooltip" data-tip="Creates a scatter plot showing relationship between GDP per capita (x-axis) and life expectancy (y-axis). hue colors points by continent to reveal patterns across groups">sns.scatterplot(data=df, x=<span class="code-string">'gdpPercap'</span>, y=<span class="code-string">'lifeExp'</span>, hue=<span class="code-string">'continent'</span>)</span>
+<span class="code-tooltip" data-tip="Transforms x-axis to logarithmic scale. Useful when data spans several orders of magnitude (like income or GDP) to spread out clustered points">plt.xscale(<span class="code-string">'log'</span>)</span>
+<span class="code-tooltip" data-tip="Saves the scatter plot to a PNG file for use in papers or presentations">plt.savefig(<span class="code-string">'scatter.png'</span>)</span></code></pre>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Scatter plot</span>
-<span class="code-keyword">twoway</span> (scatter lifeExp gdpPercap), xscale(log)</code></pre>
+<span class="code-tooltip" data-tip="twoway creates 2D plots. scatter plots lifeExp (y) against gdpPercap (x). xscale(log) uses log scale for x-axis - essential when GDP values vary widely">twoway (scatter lifeExp gdpPercap), xscale(log)</span></code></pre>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Scatter plot</span>
-<span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = gdpPercap, y = lifeExp, color = continent)) +
-  <span class="code-function">geom_point</span>() +
-  <span class="code-function">scale_x_log10</span>()</code></pre>
+<span class="code-tooltip" data-tip="Sets up the plot with GDP per capita on x-axis, life expectancy on y-axis, and colors points by continent to show group differences">ggplot(df, aes(x = gdpPercap, y = lifeExp, color = continent)) +</span>
+  <span class="code-tooltip" data-tip="Adds points to the plot. Each observation becomes one dot. You can customize size, shape, and transparency here">geom_point() +</span>
+  <span class="code-tooltip" data-tip="Transforms x-axis to log base 10 scale. Makes it easier to see relationships when x values span multiple orders of magnitude">scale_x_log10()</span></code></pre>
           </div>
         </div>
 
@@ -239,21 +243,21 @@ plt.savefig(<span class="code-string">'scatter.png'</span>)</code></pre>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Correlation</span>
-df[[<span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'age'</span>]].corr()
+<span class="code-tooltip" data-tip="Creates a correlation matrix showing how strongly each pair of variables moves together. Values range from -1 (perfect negative) to +1 (perfect positive). 0 means no linear relationship">df[[<span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'age'</span>]].corr()</span>
 
 <span class="code-comment"># With p-values</span>
-<span class="code-keyword">from</span> scipy <span class="code-keyword">import</span> stats
-r, p = stats.pearsonr(df[<span class="code-string">'income'</span>], df[<span class="code-string">'education'</span>])</code></pre>
+<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="scipy.stats provides statistical functions including hypothesis tests, distributions, and correlation measures">scipy</span> <span class="code-keyword">import</span> stats
+<span class="code-tooltip" data-tip="Returns both the Pearson correlation coefficient (r) and its p-value. r measures linear relationship strength; p-value tests if correlation is statistically significant (p less than 0.05 is typically significant)">r, p = stats.pearsonr(df[<span class="code-string">'income'</span>], df[<span class="code-string">'education'</span>])</span></code></pre>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Correlation</span>
-<span class="code-keyword">correlate</span> income education age
-<span class="code-keyword">pwcorr</span> income education age, sig star(<span class="code-number">.05</span>)</code></pre>
+<span class="code-tooltip" data-tip="Displays a correlation matrix for the specified variables. Shows pairwise Pearson correlations - how strongly variables move together linearly">correlate income education age</span>
+<span class="code-tooltip" data-tip="Pairwise correlations with significance levels. 'sig' shows p-values below each correlation. star(.05) marks correlations significant at 5% level with an asterisk">pwcorr income education age, sig star(<span class="code-number">.05</span>)</span></code></pre>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Correlation</span>
-<span class="code-function">cor</span>(df[<span class="code-function">c</span>(<span class="code-string">"income"</span>, <span class="code-string">"education"</span>, <span class="code-string">"age"</span>)], use = <span class="code-string">"complete.obs"</span>)
-<span class="code-function">cor.test</span>(df$income, df$education)</code></pre>
+<span class="code-tooltip" data-tip="Computes correlation matrix for selected columns. use='complete.obs' excludes rows with any missing values (listwise deletion) - important for handling NA values">cor(df[c(<span class="code-string">"income"</span>, <span class="code-string">"education"</span>, <span class="code-string">"age"</span>)], use = <span class="code-string">"complete.obs"</span>)</span>
+<span class="code-tooltip" data-tip="Tests if the correlation between two variables is statistically significant. Returns correlation coefficient, p-value, and 95% confidence interval">cor.test(df$income, df$education)</span></code></pre>
           </div>
         </div>
 
@@ -268,29 +272,29 @@ r, p = stats.pearsonr(df[<span class="code-string">'income'</span>], df[<span cl
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Summary table with stargazer</span>
 <span class="code-comment"># pip install stargazer</span>
-<span class="code-keyword">from</span> stargazer.stargazer <span class="code-keyword">import</span> Stargazer
+<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="stargazer creates publication-ready regression tables in LaTeX, HTML, or text format - similar to Stata's esttab or R's stargazer package">stargazer.stargazer</span> <span class="code-keyword">import</span> Stargazer
 
 <span class="code-comment"># For regression tables</span>
-<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
-model = smf.ols(<span class="code-string">'income ~ education + age'</span>, data=df).fit()
-stargazer = Stargazer([model])
-<span class="code-keyword">print</span>(stargazer.render_latex())</code></pre>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="statsmodels provides statistical models including OLS regression. The formula API lets you write models like 'y ~ x1 + x2' similar to R syntax">statsmodels.formula.api</span> <span class="code-keyword">as</span> smf
+<span class="code-tooltip" data-tip="Runs Ordinary Least Squares (OLS) regression: income = b0 + b1*education + b2*age + error. This estimates how education and age relate to income, controlling for each other">model = smf.ols(<span class="code-string">'income ~ education + age'</span>, data=df).fit()</span>
+<span class="code-tooltip" data-tip="Creates a Stargazer object that can format one or more regression models into a professional table">stargazer = Stargazer([model])</span>
+<span class="code-tooltip" data-tip="Outputs the table in LaTeX format for academic papers. You can also use render_html() for web pages or render_text() for console output">print(stargazer.render_latex())</span></code></pre>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Summary tables with estout</span>
-<span class="code-keyword">eststo clear</span>
-<span class="code-keyword">eststo</span>: reg income education
-<span class="code-keyword">eststo</span>: reg income education age
-<span class="code-keyword">esttab</span> using <span class="code-string">"table.tex"</span>, replace se star(* <span class="code-number">0.1</span> ** <span class="code-number">0.05</span> *** <span class="code-number">0.01</span>)</code></pre>
+<span class="code-tooltip" data-tip="Clears any previously stored estimation results. Always do this before storing new models to avoid mixing old and new results">eststo clear</span>
+<span class="code-tooltip" data-tip="eststo stores the regression results. 'reg' runs OLS: income = b0 + b1*education. The coefficient b1 shows how much income changes per unit of education">eststo: reg income education</span>
+<span class="code-tooltip" data-tip="Adds a second model with age as a control variable. Comparing models shows if education effect changes when controlling for age">eststo: reg income education age</span>
+<span class="code-tooltip" data-tip="Exports all stored models to a LaTeX table. 'se' shows standard errors below coefficients. Stars indicate significance: * p less than 0.1, ** p less than 0.05, *** p less than 0.01">esttab using <span class="code-string">"table.tex"</span>, replace se star(* <span class="code-number">0.1</span> ** <span class="code-number">0.05</span> *** <span class="code-number">0.01</span>)</span></code></pre>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Summary tables with modelsummary</span>
-<span class="code-function">library</span>(modelsummary)
+<span class="code-tooltip" data-tip="modelsummary is a modern R package for creating publication-quality tables from regression models. Supports many output formats">library(modelsummary)</span>
 
-model1 <- <span class="code-function">lm</span>(income ~ education, data = df)
-model2 <- <span class="code-function">lm</span>(income ~ education + age, data = df)
+<span class="code-tooltip" data-tip="lm() fits a linear model (OLS regression). This estimates: income = b0 + b1*education + error. b1 is the estimated effect of education on income">model1 <- lm(income ~ education, data = df)</span>
+<span class="code-tooltip" data-tip="Adds age as a control variable. Now b1 measures education's effect while holding age constant - important for isolating the education effect">model2 <- lm(income ~ education + age, data = df)</span>
 
-<span class="code-function">modelsummary</span>(<span class="code-function">list</span>(model1, model2), stars = TRUE, output = <span class="code-string">"table.tex"</span>)</code></pre>
+<span class="code-tooltip" data-tip="Creates a side-by-side comparison table. stars=TRUE adds significance indicators. output='table.tex' saves as LaTeX for papers">modelsummary(list(model1, model2), stars = TRUE, output = <span class="code-string">"table.tex"</span>)</span></code></pre>
           </div>
         </div>
 
@@ -353,68 +357,68 @@ model2 <- <span class="code-function">lm</span>(income ~ education + age, data =
             <!-- Python Solutions -->
             <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
               <div class="step-description">Task 1: Calculate descriptive statistics</div>
-              <pre class="step-code"><code><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+              <pre class="step-code"><code><span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas is the go-to library for data manipulation in Python, providing DataFrames (like Excel spreadsheets) for organizing data">pandas</span> <span class="code-keyword">as</span> pd
 
 <span class="code-comment"># Descriptive statistics</span>
-df.describe()
-df[<span class="code-string">'income'</span>].mean()
-df[<span class="code-string">'income'</span>].median()
-df[<span class="code-string">'income'</span>].std()</code></pre>
+<span class="code-tooltip" data-tip="Shows summary stats for all numeric columns: count, mean, standard deviation, min, 25th/50th/75th percentiles, and max">df.describe()</span>
+<span class="code-tooltip" data-tip="Calculates the average income - add all values and divide by number of observations">df[<span class="code-string">'income'</span>].mean()</span>
+<span class="code-tooltip" data-tip="Returns the middle value when sorted - more robust to outliers than the mean">df[<span class="code-string">'income'</span>].median()</span>
+<span class="code-tooltip" data-tip="Standard deviation measures how spread out values are from the mean">df[<span class="code-string">'income'</span>].std()</span></code></pre>
             </div>
             <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
               <div class="step-description">Task 2: Create a histogram</div>
-              <pre class="step-code"><code><span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+              <pre class="step-code"><code><span class="code-keyword">import</span> <span class="code-tooltip" data-tip="matplotlib.pyplot is Python's main plotting library - plt is the standard shorthand alias">matplotlib.pyplot</span> <span class="code-keyword">as</span> plt
 
-plt.hist(df[<span class="code-string">'income'</span>], bins=<span class="code-number">30</span>)
-plt.xlabel(<span class="code-string">'Income'</span>)
-plt.ylabel(<span class="code-string">'Frequency'</span>)
-plt.show()</code></pre>
+<span class="code-tooltip" data-tip="Creates a histogram dividing income into 30 bins (bars) to show the distribution shape">plt.hist(df[<span class="code-string">'income'</span>], bins=<span class="code-number">30</span>)</span>
+<span class="code-tooltip" data-tip="Labels the x-axis to explain what the horizontal values represent">plt.xlabel(<span class="code-string">'Income'</span>)</span>
+<span class="code-tooltip" data-tip="Labels the y-axis - frequency shows how many observations fall in each income range">plt.ylabel(<span class="code-string">'Frequency'</span>)</span>
+<span class="code-tooltip" data-tip="Displays the plot on screen - in Jupyter notebooks this may happen automatically">plt.show()</span></code></pre>
             </div>
             <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
               <div class="step-description">Task 3: Create a scatter plot</div>
-              <pre class="step-code"><code>plt.scatter(df[<span class="code-string">'gdpPercap'</span>], df[<span class="code-string">'lifeExp'</span>])
-plt.xlabel(<span class="code-string">'GDP per Capita'</span>)
-plt.ylabel(<span class="code-string">'Life Expectancy'</span>)
-plt.show()</code></pre>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="Creates a scatter plot with GDP per capita on x-axis and life expectancy on y-axis - each point is one observation">plt.scatter(df[<span class="code-string">'gdpPercap'</span>], df[<span class="code-string">'lifeExp'</span>])</span>
+<span class="code-tooltip" data-tip="Labels the x-axis to identify the variable being plotted horizontally">plt.xlabel(<span class="code-string">'GDP per Capita'</span>)</span>
+<span class="code-tooltip" data-tip="Labels the y-axis to identify the variable being plotted vertically">plt.ylabel(<span class="code-string">'Life Expectancy'</span>)</span>
+<span class="code-tooltip" data-tip="Renders and displays the scatter plot">plt.show()</span></code></pre>
             </div>
 
             <!-- Stata Solutions -->
             <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
               <div class="step-description">Task 1: Calculate descriptive statistics</div>
               <pre class="step-code"><code><span class="code-comment">* Descriptive statistics</span>
-<span class="code-keyword">summarize</span> income
-<span class="code-keyword">summarize</span> income, detail</code></pre>
+<span class="code-tooltip" data-tip="Basic summary showing observation count, mean, standard deviation, min, and max values">summarize income</span>
+<span class="code-tooltip" data-tip="Detailed summary adding percentiles, skewness, and kurtosis - gives fuller picture of distribution shape">summarize income, detail</span></code></pre>
             </div>
             <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
               <div class="step-description">Task 2: Create a histogram</div>
-              <pre class="step-code"><code><span class="code-keyword">histogram</span> income, frequency
-<span class="code-keyword">graph export</span> <span class="code-string">"histogram.png"</span>, replace</code></pre>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="Creates a histogram showing income distribution. 'frequency' displays counts rather than density">histogram income, frequency</span>
+<span class="code-tooltip" data-tip="Saves the current graph as a PNG file. 'replace' overwrites if file already exists">graph export <span class="code-string">"histogram.png"</span>, replace</span></code></pre>
             </div>
             <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
               <div class="step-description">Task 3: Create a scatter plot</div>
-              <pre class="step-code"><code><span class="code-keyword">twoway</span> (scatter lifeExp gdpPercap)
-<span class="code-keyword">graph export</span> <span class="code-string">"scatter.png"</span>, replace</code></pre>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="twoway creates 2D graphs. scatter plots life expectancy (y-axis) against GDP per capita (x-axis)">twoway (scatter lifeExp gdpPercap)</span>
+<span class="code-tooltip" data-tip="Exports the scatter plot to a PNG image file for use in documents or presentations">graph export <span class="code-string">"scatter.png"</span>, replace</span></code></pre>
             </div>
 
             <!-- R Solutions -->
             <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
               <div class="step-description">Task 1: Calculate descriptive statistics</div>
               <pre class="step-code"><code><span class="code-comment"># Descriptive statistics</span>
-<span class="code-function">summary</span>(df$income)
-<span class="code-function">mean</span>(df$income, na.rm = TRUE)
-<span class="code-function">sd</span>(df$income, na.rm = TRUE)</code></pre>
+<span class="code-tooltip" data-tip="Shows min, 1st quartile, median, mean, 3rd quartile, and max - a quick overview of your data">summary(df$income)</span>
+<span class="code-tooltip" data-tip="Calculates the arithmetic mean. na.rm=TRUE ignores missing values (NA) so the calculation works even with incomplete data">mean(df$income, na.rm = TRUE)</span>
+<span class="code-tooltip" data-tip="Computes standard deviation - measures how spread out values are. na.rm=TRUE handles missing data">sd(df$income, na.rm = TRUE)</span></code></pre>
             </div>
             <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
               <div class="step-description">Task 2: Create a histogram</div>
-              <pre class="step-code"><code><span class="code-function">library</span>(ggplot2)
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="Loads ggplot2, the most popular R visualization package. Only need to load once per session">library(ggplot2)</span>
 
-<span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = income)) +
-  <span class="code-function">geom_histogram</span>(bins = 30)</code></pre>
+<span class="code-tooltip" data-tip="ggplot() initializes the plot with data; aes() maps income to x-axis. The + symbol adds layers">ggplot(df, aes(x = income)) +</span>
+  <span class="code-tooltip" data-tip="Adds histogram layer with 30 bins. You can customize fill color, border, and transparency here">geom_histogram(bins = 30)</span></code></pre>
             </div>
             <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
               <div class="step-description">Task 3: Create a scatter plot</div>
-              <pre class="step-code"><code><span class="code-function">ggplot</span>(df, <span class="code-function">aes</span>(x = gdpPercap, y = lifeExp)) +
-  <span class="code-function">geom_point</span>()</code></pre>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="Sets up the plot with GDP per capita on x-axis and life expectancy on y-axis">ggplot(df, aes(x = gdpPercap, y = lifeExp)) +</span>
+  <span class="code-tooltip" data-tip="Adds points to create a scatter plot - each point represents one observation in your data">geom_point()</span></code></pre>
             </div>
 
             <div class="solution-navigation">

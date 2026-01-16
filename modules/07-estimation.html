@@ -15,6 +15,9 @@
       -ms-user-select: none;
       user-select: none;
     }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; width: max-content; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+    .code-tooltip:hover::after { opacity: 1; }
     /* Interactive Exercise Styles */
     .interactive-exercise { background: white; border: 2px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .exercise-editor { margin: 1rem 0; }
@@ -122,11 +125,11 @@
         <div class="learning-objectives">
           <h3>Learning Objectives</h3>
           <ul>
-            <li>Implement OLS regression with proper standard errors</li>
-            <li>Apply matching methods (PSM, exact matching, CEM)</li>
-            <li>Estimate difference-in-differences models</li>
-            <li>Implement regression discontinuity designs</li>
-            <li>Understand and apply instrumental variables</li>
+            <li>Implement <span class="code-tooltip" data-tip="OLS is the foundation of regression analysis. Proper standard errors account for things like heteroskedasticity (unequal variance) or clustering in your data.">OLS regression with proper standard errors</span></li>
+            <li>Apply <span class="code-tooltip" data-tip="PSM = Propensity Score Matching (matches on probability of treatment), Exact Matching (requires identical values), CEM = Coarsened Exact Matching (matches on binned values).">matching methods (PSM, exact matching, CEM)</span></li>
+            <li>Estimate <span class="code-tooltip" data-tip="DiD compares changes over time between treated and control groups. The key is having a 'before and after' comparison for both groups.">difference-in-differences models</span></li>
+            <li>Implement <span class="code-tooltip" data-tip="RDD exploits cutoffs in treatment assignment. You compare people just above vs just below a threshold where treatment is assigned.">regression discontinuity designs</span></li>
+            <li>Understand and apply <span class="code-tooltip" data-tip="IV uses external variation (instruments) to identify causal effects when treatment is not randomly assigned. Classic examples include draft lotteries and geographic distances.">instrumental variables</span></li>
           </ul>
         </div>
 
@@ -142,40 +145,40 @@
           </ul>
         </div>
 
-        <h2 id="ols">6.1 Ordinary Least Squares (OLS)</h2>
+        <h2 id="ols">6.1 <span class="code-tooltip" data-tip="Ordinary Least Squares is a method that finds the line (or surface) that best fits your data by minimizing the sum of squared distances between observed values and predicted values.">Ordinary Least Squares (OLS)</span></h2>
 
         <p>
-          OLS regression is the workhorse of empirical research. While OLS alone doesn't identify causal effects, it's the foundation for most estimation methods.
+          <span class="code-tooltip" data-tip="OLS finds the best-fitting line through your data points. It minimizes the squared errors between predicted and actual values. Think of it as drawing the 'average' relationship between variables.">OLS regression</span> is the workhorse of empirical research. While OLS alone doesn't identify causal effects, it's the foundation for most estimation methods.
         </p>
 
-        <h2 id="matching">6.2 Matching Methods</h2>
+        <h2 id="matching">6.2 <span class="code-tooltip" data-tip="Matching methods pair treated individuals with similar untreated individuals based on their characteristics. This creates an 'apples to apples' comparison by finding statistical twins.">Matching Methods</span></h2>
 
         <p>
-          Matching methods attempt to create comparable treatment and control groups by matching on observed characteristics. The key assumption is <strong>selection on observables</strong>: conditional on covariates X, treatment is independent of potential outcomes.
+          Matching methods attempt to create comparable treatment and control groups by matching on observed characteristics. The key assumption is <strong><span class="code-tooltip" data-tip="This assumes that once we account for observable characteristics (like age, education, income), treatment assignment is essentially random. Any remaining differences are just chance.">selection on observables</span></strong>: conditional on <span class="code-tooltip" data-tip="Covariates are the control variables - characteristics like age, gender, education, location - that we use to match treated and untreated individuals.">covariates X</span>, treatment is independent of potential outcomes.
         </p>
 
-        <h2 id="did">6.3 Difference-in-Differences</h2>
+        <h2 id="did">6.3 <span class="code-tooltip" data-tip="DiD is a powerful method that compares how outcomes change over time for a treated group versus a control group. By looking at the difference in changes, it removes fixed differences between groups.">Difference-in-Differences</span></h2>
 
         <p>
-          Difference-in-differences (DiD) compares changes over time between a treatment and control group. The key assumption is <strong>parallel trends</strong>: absent treatment, the groups would have followed similar trajectories.
+          <span class="code-tooltip" data-tip="DiD takes two differences: (1) before vs. after for the treated group, (2) before vs. after for the control group. The difference between these differences isolates the treatment effect.">Difference-in-differences (DiD)</span> compares changes over time between a treatment and control group. The key assumption is <strong><span class="code-tooltip" data-tip="Parallel trends means that without the treatment, both groups would have changed at the same rate. We often check this by showing that pre-treatment trends were similar.">parallel trends</span></strong>: absent treatment, the groups would have followed similar trajectories.
         </p>
 
-        <h2 id="rdd">6.4 Regression Discontinuity</h2>
+        <h2 id="rdd">6.4 <span class="code-tooltip" data-tip="RDD exploits sharp cutoffs in treatment assignment. Since people just above and just below a threshold are nearly identical, any jump in outcomes at the threshold must be caused by the treatment.">Regression Discontinuity</span></h2>
 
         <p>
-          Regression Discontinuity (RDD) exploits situations where treatment is assigned based on whether a running variable crosses a cutoff. The key assumption is <strong>continuity</strong>: potential outcomes are continuous at the cutoff.
+          <span class="code-tooltip" data-tip="RDD compares people just above vs just below a cutoff. For example, comparing students who scored 79% vs 81% on an exam where 80% is the scholarship threshold. These students are virtually identical, so differences reflect the scholarship effect.">Regression Discontinuity (RDD)</span> exploits situations where treatment is assigned based on whether a <span class="code-tooltip" data-tip="The running variable is the score or measure that determines treatment. Examples: test scores, age, income level, vote share. Treatment is assigned when this variable crosses the cutoff.">running variable</span> crosses a cutoff. The key assumption is <strong><span class="code-tooltip" data-tip="Continuity means that without treatment, outcomes would change smoothly across the cutoff. There should be no other factors that change abruptly at the threshold.">continuity</span></strong>: potential outcomes are continuous at the cutoff.
         </p>
 
-        <h2 id="iv">6.5 Instrumental Variables</h2>
+        <h2 id="iv">6.5 <span class="code-tooltip" data-tip="IV is used when treatment is 'endogenous' (correlated with unobserved factors). It uses an external 'instrument' that affects treatment but has no direct effect on the outcome.">Instrumental Variables</span></h2>
 
         <p>
-          Instrumental Variables (IV) uses an external source of variation (the instrument Z) to identify causal effects when the treatment is endogenous. The instrument must be: (1) relevant (correlated with treatment), and (2) exogenous (affects outcome only through treatment).
+          <span class="code-tooltip" data-tip="IV finds a variable (the instrument) that creates random-like variation in treatment. Classic example: distance to college affects whether you attend college but doesn't directly affect your future wages.">Instrumental Variables (IV)</span> uses an external source of variation (the <span class="code-tooltip" data-tip="The instrument (Z) is a variable that affects whether someone gets treated, but has no other effect on the outcome. It provides 'exogenous' variation we can exploit.">instrument Z</span>) to identify causal effects when the treatment is <span class="code-tooltip" data-tip="Endogenous means the treatment is correlated with unobserved factors that also affect the outcome. For example, motivation affects both college attendance and earnings.">endogenous</span>. The instrument must be: (1) <span class="code-tooltip" data-tip="Relevance: the instrument must actually predict treatment. If distance to college doesn't affect whether people attend college, it's not a useful instrument.">relevant</span> (correlated with treatment), and (2) <span class="code-tooltip" data-tip="Exogenous / Exclusion restriction: the instrument must only affect outcomes through treatment. Distance to college shouldn't directly affect wages except through its effect on college attendance.">exogenous</span> (affects outcome only through treatment).
         </p>
 
         <h2 id="case-study">6.6 Case Study: Minimum Wage and Employment</h2>
 
         <p>
-          The effect of minimum wage on employment is one of the most studied questions in labor economics. Card and Krueger (1994) used a difference-in-differences design comparing New Jersey (which raised its minimum wage) to neighboring Pennsylvania.
+          The effect of minimum wage on employment is one of the most studied questions in labor economics. <span class="code-tooltip" data-tip="Card and Krueger's 1994 paper revolutionized empirical economics. They compared fast-food employment in NJ (which raised minimum wage) vs PA (which didn't), finding little evidence of job loss.">Card and Krueger (1994)</span> used a <span class="code-tooltip" data-tip="DiD was ideal here because: (1) NJ raised its minimum wage but PA did not, (2) they had data before and after the increase, (3) PA fast-food restaurants served as a natural comparison group.">difference-in-differences design</span> comparing <span class="code-tooltip" data-tip="New Jersey increased its minimum wage from $4.25 to $5.05 in April 1992, while Pennsylvania kept it at $4.25. This created a natural experiment.">New Jersey (which raised its minimum wage)</span> to neighboring Pennsylvania.
         </p>
 
         <div class="citation">
@@ -245,23 +248,23 @@
             <!-- Python Solutions -->
             <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
               <div class="step-description">Task 1: Run a simple OLS regression</div>
-              <pre class="step-code"><code><span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+              <pre class="step-code"><code><span class="code-keyword">import</span> <span class="code-tooltip" data-tip="statsmodels is a Python library for statistical modeling. The formula API lets you specify models using R-style formulas like 'y ~ x'.">statsmodels.formula.api</span> <span class="code-keyword">as</span> smf
 
 <span class="code-comment"># Simple OLS regression</span>
-model = smf.ols(<span class="code-string">'income ~ education'</span>, data=df).fit()
-<span class="code-function">print</span>(model.summary())</code></pre>
+model = smf.<span class="code-tooltip" data-tip="The ols() function creates an Ordinary Least Squares model. It finds the best-fitting line through your data.">ols</span>(<span class="code-string"><span class="code-tooltip" data-tip="This formula means: predict income using education. The ~ symbol reads as 'depends on' or 'is explained by'.">'income ~ education'</span></span>, data=df).<span class="code-tooltip" data-tip="The fit() method runs the regression and estimates the coefficients. Without this, the model is just defined but not computed.">fit()</span>
+<span class="code-function">print</span>(model.<span class="code-tooltip" data-tip="summary() displays the full regression output including coefficients, standard errors, R-squared, p-values, and confidence intervals.">summary()</span>)</code></pre>
             </div>
             <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
               <div class="step-description">Task 2: Add control variables</div>
               <pre class="step-code"><code><span class="code-comment"># OLS with controls</span>
-model = smf.ols(<span class="code-string">'income ~ education + age + experience'</span>, data=df).fit()
+model = smf.ols(<span class="code-string"><span class="code-tooltip" data-tip="Adding + age + experience includes these as control variables. This lets us estimate the effect of education while holding age and experience constant.">'income ~ education + age + experience'</span></span>, data=df).fit()
 <span class="code-function">print</span>(model.summary())</code></pre>
             </div>
             <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
               <div class="step-description">Task 3: Implement difference-in-differences</div>
               <pre class="step-code"><code><span class="code-comment"># Difference-in-differences</span>
-model = smf.ols(<span class="code-string">'outcome ~ treated + post + treated:post'</span>, data=df).fit()
-<span class="code-comment"># The DiD estimate is the coefficient on treated:post</span>
+model = smf.ols(<span class="code-string"><span class="code-tooltip" data-tip="DiD formula: 'treated' captures baseline differences between groups, 'post' captures time trends, 'treated:post' is the interaction term - THE DiD EFFECT.">'outcome ~ treated + post + treated:post'</span></span>, data=df).fit()
+<span class="code-comment"># The DiD estimate is the coefficient on <span class="code-tooltip" data-tip="treated:post is the interaction between being in the treatment group AND being in the post-treatment period. This coefficient IS the causal effect estimate.">treated:post</span></span>
 <span class="code-function">print</span>(model.summary())</code></pre>
             </div>
 
@@ -269,38 +272,38 @@ model = smf.ols(<span class="code-string">'outcome ~ treated + post + treated:po
             <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
               <div class="step-description">Task 1: Run a simple OLS regression</div>
               <pre class="step-code"><code><span class="code-comment">* Simple OLS regression</span>
-<span class="code-keyword">reg</span> income education</code></pre>
+<span class="code-keyword"><span class="code-tooltip" data-tip="The 'reg' command (short for 'regress') runs an OLS regression in Stata. The first variable after reg is the outcome (dependent variable).">reg</span></span> <span class="code-tooltip" data-tip="income is the dependent variable (what we're trying to explain/predict).">income</span> <span class="code-tooltip" data-tip="education is the independent variable (what we think affects income). Stata lists the outcome first, then explanatory variables.">education</span></code></pre>
             </div>
             <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
               <div class="step-description">Task 2: Add control variables</div>
               <pre class="step-code"><code><span class="code-comment">* OLS with controls</span>
-<span class="code-keyword">reg</span> income education age experience</code></pre>
+<span class="code-keyword">reg</span> income education <span class="code-tooltip" data-tip="Adding age and experience as control variables. Stata will estimate the effect of education while holding these variables constant.">age experience</span></code></pre>
             </div>
             <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
               <div class="step-description">Task 3: Implement difference-in-differences</div>
               <pre class="step-code"><code><span class="code-comment">* Difference-in-differences</span>
-<span class="code-keyword">reg</span> outcome i.treated##i.post
-<span class="code-comment">* The DiD estimate is the coefficient on 1.treated#1.post</span></code></pre>
+<span class="code-keyword">reg</span> outcome <span class="code-tooltip" data-tip="i.treated##i.post is Stata's factor notation. The i. prefix treats variables as categorical. The ## creates all main effects AND the interaction automatically.">i.treated##i.post</span>
+<span class="code-comment">* The DiD estimate is the coefficient on <span class="code-tooltip" data-tip="1.treated#1.post is the interaction term representing being treated AND in the post period. This coefficient IS the difference-in-differences causal effect estimate.">1.treated#1.post</span></span></code></pre>
             </div>
 
             <!-- R Solutions -->
             <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
               <div class="step-description">Task 1: Run a simple OLS regression</div>
               <pre class="step-code"><code><span class="code-comment"># Simple OLS regression</span>
-model <- <span class="code-function">lm</span>(income ~ education, data = df)
-<span class="code-function">summary</span>(model)</code></pre>
+model <- <span class="code-function"><span class="code-tooltip" data-tip="lm() stands for 'linear model' and runs OLS regression in R. It's R's built-in function for fitting linear regression models.">lm</span></span>(<span class="code-tooltip" data-tip="This formula means: predict income from education. The ~ symbol reads as 'is modeled by' or 'depends on'."">income ~ education</span>, data = df)
+<span class="code-function"><span class="code-tooltip" data-tip="summary() displays the full regression output including coefficients, standard errors, t-values, p-values, R-squared, and F-statistic.">summary</span></span>(model)</code></pre>
             </div>
             <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
               <div class="step-description">Task 2: Add control variables</div>
               <pre class="step-code"><code><span class="code-comment"># OLS with controls</span>
-model <- <span class="code-function">lm</span>(income ~ education + age + experience, data = df)
+model <- <span class="code-function">lm</span>(<span class="code-tooltip" data-tip="The + symbol adds control variables. R will estimate each coefficient while holding the other variables constant.">income ~ education + age + experience</span>, data = df)
 <span class="code-function">summary</span>(model)</code></pre>
             </div>
             <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
               <div class="step-description">Task 3: Implement difference-in-differences</div>
               <pre class="step-code"><code><span class="code-comment"># Difference-in-differences</span>
-model <- <span class="code-function">lm</span>(outcome ~ treated * post, data = df)
-<span class="code-comment"># The DiD estimate is the coefficient on treated:post</span>
+model <- <span class="code-function">lm</span>(<span class="code-tooltip" data-tip="The * operator is R shorthand that includes both main effects (treated, post) AND their interaction (treated:post). It's equivalent to: treated + post + treated:post">outcome ~ treated * post</span>, data = df)
+<span class="code-comment"># The DiD estimate is the coefficient on <span class="code-tooltip" data-tip="treated:post is the interaction term. In DiD, this coefficient represents the causal effect - how much MORE the treated group changed compared to the control group.">treated:post</span></span>
 <span class="code-function">summary</span>(model)</code></pre>
             </div>
 

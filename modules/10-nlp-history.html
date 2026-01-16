@@ -15,6 +15,9 @@
       -ms-user-select: none;
       user-select: none;
     }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; }
+    .code-tooltip::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; width: max-content; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+    .code-tooltip:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -161,21 +164,21 @@ ELIZA: Tell me more about your family.
             <button class="tab-button active" data-lang="python">N-gram Example</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Bigram (n=2) probability</span>
-<span class="code-comment"># P(word | previous_word) = count(prev, word) / count(prev)</span>
+<pre><code><span class="code-comment"># <span class="code-tooltip" data-tip="A bigram model predicts the next word using only the one previous word. 'Bi' means two - it looks at pairs of words.">Bigram (n=2)</span> probability</span>
+<span class="code-comment"># <span class="code-tooltip" data-tip="This formula calculates probability: how often does 'word' follow 'previous_word' divided by how often 'previous_word' appears total.">P(word | previous_word) = count(prev, word) / count(prev)</span></span>
 
 <span class="code-comment"># Example corpus: "the cat sat on the mat"</span>
 
-<span class="code-comment"># Bigram counts:</span>
+<span class="code-comment"># <span class="code-tooltip" data-tip="We count how many times each word pair appears in our text. These counts are the raw data for calculating probabilities.">Bigram counts</span>:</span>
 <span class="code-comment"># "the cat": 1, "cat sat": 1, "sat on": 1, "on the": 1, "the mat": 1</span>
 
-<span class="code-comment"># P("cat" | "the") = count("the cat") / count("the") = 1/2</span>
-<span class="code-comment"># P("mat" | "the") = count("the mat") / count("the") = 1/2</span>
+<span class="code-comment"># <span class="code-tooltip" data-tip="Given 'the', what's the chance the next word is 'cat'? We saw 'the' twice, and 'the cat' once, so probability is 1/2 = 50%.">P("cat" | "the") = count("the cat") / count("the") = 1/2</span></span>
+<span class="code-comment"># <span class="code-tooltip" data-tip="Similarly, 'mat' follows 'the' once out of two times 'the' appears, giving 50% probability.">P("mat" | "the") = count("the mat") / count("the") = 1/2</span></span>
 
 <span class="code-comment"># Problem: What about "the dog"?</span>
-<span class="code-comment"># P("dog" | "the") = 0/2 = 0  (Never seen -> impossible!)</span>
+<span class="code-comment"># <span class="code-tooltip" data-tip="The zero probability problem: if we never saw 'the dog' in training, the model says it's impossible - even though it's perfectly valid English!">P("dog" | "the") = 0/2 = 0  (Never seen -> impossible!)</span></span>
 
-<span class="code-comment"># Solution: Smoothing (add small counts to unseen n-grams)</span></code></pre>
+<span class="code-comment"># Solution: <span class="code-tooltip" data-tip="Smoothing fixes the zero problem by adding a small count to ALL possible word pairs, including unseen ones. This ensures nothing has zero probability.">Smoothing</span> (add small counts to unseen n-grams)</span></code></pre>
           </div>
         </div>
 
@@ -215,8 +218,8 @@ ELIZA: Tell me more about your family.
             Word2Vec famously captured semantic relationships as vector arithmetic:
           </p>
 <pre style="background: #f7fafc; padding: 1rem; margin-top: 0.5rem; font-family: var(--font-code); font-size: 0.85rem;">
-vector("king") - vector("man") + vector("woman") = vector("queen")
-vector("paris") - vector("france") + vector("italy") = vector("rome")
+<span class="code-tooltip" data-tip="Word vectors capture meaning as numbers. Subtracting 'man' removes the male concept, adding 'woman' adds the female concept, and the result points to 'queen' - the female equivalent of king!">vector("king") - vector("man") + vector("woman") = vector("queen")</span>
+<span class="code-tooltip" data-tip="Similarly, removing France's identity from Paris and adding Italy's gives you Rome - the model learned that Paris is to France as Rome is to Italy.">vector("paris") - vector("france") + vector("italy") = vector("rome")</span>
 </pre>
           <p>The model learned these relationships purely from text co-occurrence patterns--no explicit knowledge was provided!</p>
         </div>

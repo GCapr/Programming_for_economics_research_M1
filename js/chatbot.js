@@ -509,6 +509,7 @@
     let isPanelOpen = false;
 
     function showSpeechBubble(toggle) {
+        // Don't show speech bubbles when panel is open
         if (isPanelOpen) return;
 
         // Remove existing bubble if any
@@ -521,15 +522,21 @@
         bubble.textContent = SPEECH_BUBBLES[Math.floor(Math.random() * SPEECH_BUBBLES.length)];
         toggle.parentElement.appendChild(bubble);
 
-        // Animate in
+        // Animate in (only if panel still closed)
         requestAnimationFrame(() => {
-            bubble.classList.add('visible');
+            if (!isPanelOpen) {
+                bubble.classList.add('visible');
+            } else {
+                bubble.remove();
+            }
         });
 
         // Remove after 5 seconds (longer display time)
         setTimeout(() => {
-            bubble.classList.remove('visible');
-            setTimeout(() => bubble.remove(), 300);
+            if (bubble.parentElement) {
+                bubble.classList.remove('visible');
+                setTimeout(() => bubble.remove(), 300);
+            }
         }, 5000);
     }
 

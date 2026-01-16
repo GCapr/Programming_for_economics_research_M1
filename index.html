@@ -373,6 +373,62 @@
     .chatbot-spotlight-overlay.visible {
       opacity: 1;
     }
+
+    /* AI Assistant Details Styling */
+    .ai-assistant-details {
+      padding: 0.5rem 0;
+    }
+
+    .ai-assistant-details h4 {
+      margin: 0 0 0.75rem 0;
+      color: var(--color-primary);
+      font-size: 1rem;
+    }
+
+    .chatbot-steps {
+      margin: 0 0 1rem 0;
+      padding-left: 1.25rem;
+      line-height: 1.7;
+    }
+
+    .chatbot-steps li {
+      margin-bottom: 0.6rem;
+      color: #4a5568;
+    }
+
+    .chatbot-steps li:last-child {
+      margin-bottom: 0;
+    }
+
+    .chatbot-notice {
+      background: #fff8e6;
+      border: 1px solid #f6c23e;
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      margin-top: 1rem;
+    }
+
+    .chatbot-notice strong {
+      display: block;
+      color: #b7791f;
+      margin-bottom: 0.4rem;
+    }
+
+    .chatbot-notice p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #744210;
+      line-height: 1.5;
+    }
+
+    #ai-assistant-section {
+      cursor: pointer;
+      transition: box-shadow 0.2s ease;
+    }
+
+    #ai-assistant-section:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -594,8 +650,23 @@ df = pd.read_csv(<span class="code-string">"your_data.csv"</span>)
         <div class="feature-section" id="ai-assistant-section">
           <h3><span class="feature-icon">🤖</span> AI Teaching Assistant</h3>
           <p class="feature-description">
-            Look for the chat icon in the <strong>bottom-right corner</strong> of every page. This AI assistant is trained on the course material and can help you understand concepts, debug code, or work through exercises. Try clicking it now!
+            Look for the chat icon in the <strong>bottom-right corner</strong> of every page. This AI assistant is trained on the course material and can help you understand concepts, debug code, or work through exercises.
           </p>
+          <div class="feature-demo">
+            <div class="feature-demo-label">Hover here to see the chatbot</div>
+            <div class="ai-assistant-details">
+              <h4>How It Works</h4>
+              <ol class="chatbot-steps">
+                <li><strong>FAQ Lookup:</strong> Your question is first matched against a curated list of frequently asked questions about the course content. If a match is found, you get an instant answer.</li>
+                <li><strong>LLM Processing:</strong> If no FAQ match is found, your question is sent to a large language model (LLM) that has been provided context about the course material to generate a helpful response.</li>
+              </ol>
+
+              <div class="chatbot-notice">
+                <strong>⚠️ Please Use Responsibly</strong>
+                <p>Your questions and the chatbot's answers are logged to help improve the course materials and identify common points of confusion. However, the chatbot is a <strong>shared resource</strong> with usage limits — please don't abuse it! Use it for genuine questions about the course content, not for unrelated queries or excessive testing.</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="info-box tip">
@@ -966,14 +1037,14 @@ df = pd.read_csv(<span class="code-string">"your_data.csv"</span>)
       });
     });
 
-    // === Chatbot Spotlight Animation on Scroll ===
+    // === Chatbot Spotlight Animation on Hover ===
     (function() {
       const aiSection = document.getElementById('ai-assistant-section');
       const chatbotToggle = document.getElementById('chatbot-toggle');
 
       if (!aiSection || !chatbotToggle) return;
 
-      let hasAnimated = false;
+      let isAnimating = false;
 
       // Create overlay element
       const overlay = document.createElement('div');
@@ -981,8 +1052,8 @@ df = pd.read_csv(<span class="code-string">"your_data.csv"</span>)
       document.body.appendChild(overlay);
 
       function triggerSpotlightAnimation() {
-        if (hasAnimated) return;
-        hasAnimated = true;
+        if (isAnimating) return;
+        isAnimating = true;
 
         // Show overlay
         overlay.classList.add('visible');
@@ -994,22 +1065,14 @@ df = pd.read_csv(<span class="code-string">"your_data.csv"</span>)
         setTimeout(() => {
           chatbotToggle.classList.remove('spotlight-animation');
           overlay.classList.remove('visible');
+          isAnimating = false;
         }, 3000);
       }
 
-      // Use Intersection Observer to detect when AI section is in view
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !hasAnimated) {
-            // Small delay so user sees the section first
-            setTimeout(triggerSpotlightAnimation, 300);
-          }
-        });
-      }, {
-        threshold: 0.5 // Trigger when 50% of section is visible
+      // Trigger animation on mouse enter (hover)
+      aiSection.addEventListener('mouseenter', function() {
+        triggerSpotlightAnimation();
       });
-
-      observer.observe(aiSection);
     })();
   })();
   </script>

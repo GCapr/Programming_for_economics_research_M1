@@ -1,10 +1,10 @@
 /**
  * ProTools ER1 Chatbot - Cloudflare Worker
- * Connects to Google Gemini API
- * Includes request limiting to stay within free tier
+ * Connects to OpenAI API
+ * Includes request limiting to stay within budget
  */
 
-const DAILY_LIMIT = 99000; // Stop before hitting 100k free tier limit
+const DAILY_LIMIT = 99000;
 
 export default {
   async fetch(request, env) {
@@ -29,7 +29,7 @@ export default {
 
     try {
       // Get today's date as key (resets daily)
-      const today = new Date().toISOString().split('T')[0]; // e.g., "2026-01-16"
+      const today = new Date().toISOString().split('T')[0];
       const countKey = `requests_${today}`;
 
       // Get current count from KV
@@ -58,17 +58,19 @@ export default {
         });
       }
 
-      // Call Gemini API
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${env.GEMINI_API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: message }] }],
-            systemInstruction: {
-              parts: [{
-                text: `You are a helpful teaching assistant for ProTools ER1, an economics programming course.
+      // Call OpenAI API
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `You are a helpful teaching assistant for ProTools ER1, an economics programming course.
 
 The course covers:
 - Module 0: Languages & Platforms (Python, Stata, R, VS Code, RStudio, Jupyter)
@@ -90,20 +92,21 @@ Guidelines:
 - Include code examples in Python, Stata, or R when relevant
 - Point students to specific modules when appropriate
 - Be encouraging and supportive`
-              }]
             },
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 1024,
+            {
+              role: "user",
+              content: message
             }
-          }),
-        }
-      );
+          ],
+          max_tokens: 1024,
+          temperature: 0.7,
+        }),
+      });
 
       const data = await response.json();
 
       if (data.error) {
-        console.error("Gemini API error:", data.error);
+        console.error("OpenAI API error:", data.error);
         return new Response(JSON.stringify({ error: "API error", details: data.error.message }), {
           status: 500,
           headers: {
@@ -115,10 +118,10 @@ Guidelines:
 
       // Increment counter after successful API call
       await env.REQUEST_COUNTER.put(countKey, String(currentCount + 1), {
-        expirationTtl: 86400 * 2 // Expire after 2 days to clean up old keys
+        expirationTtl: 86400 * 2
       });
 
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      const reply = data.choices?.[0]?.message?.content ||
         "Sorry, I couldn't generate a response. Please try again.";
 
       return new Response(JSON.stringify({ reply }), {

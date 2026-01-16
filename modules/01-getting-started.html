@@ -392,38 +392,67 @@
       cursor: not-allowed;
     }
 
-    /* Code tooltips - hover explanations */
+    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
     .code-tooltip {
       position: relative;
       cursor: help;
       border-bottom: 1px dotted #888;
       text-decoration: none;
     }
-    .code-tooltip::after {
-      content: attr(data-tip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
+
+    /* Tooltip element created by JavaScript */
+    .tooltip-popup {
+      position: fixed;
       background: #1f2937;
       color: white;
       padding: 0.5rem 0.75rem;
       border-radius: 6px;
       font-size: 0.75rem;
       white-space: normal;
-      width: max-content;
       max-width: 300px;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s;
-      z-index: 100;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
       line-height: 1.4;
       text-align: left;
       font-family: var(--font-body);
       font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    .code-tooltip:hover::after {
+    .tooltip-popup.visible {
       opacity: 1;
+    }
+
+    /* Small arrow pointer */
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1f2937;
+    }
+    .tooltip-popup.arrow-top::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #1f2937;
+    }
+    .tooltip-popup.arrow-left::after {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1f2937;
+    }
+    .tooltip-popup.arrow-right::after {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      border-left-color: #1f2937;
     }
   </style>
 </head>
@@ -1384,6 +1413,145 @@ numbers <- <span class="code-number">1</span>:<span class="code-number">5</span>
       updateNavButtons();
     });
   });
+  </script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    // Create a single tooltip element that will be reused
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup'; // Reset classes
+
+      // Get target position
+      const targetRect = target.getBoundingClientRect();
+
+      // Find the code block container (pre or .tab-content or .code-tabs)
+      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
+      let containerRect = container ? container.getBoundingClientRect() : {
+        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
+      };
+
+      // Use viewport as fallback boundary
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10; // Minimum distance from edges
+
+      // Temporarily show to measure
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      // Calculate ideal position (above the element, centered)
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8; // 8px gap
+      let arrowClass = 'arrow-bottom';
+
+      // Check if tooltip would go above viewport - if so, show below
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      // Check if tooltip would go below viewport when shown below
+      if (top + tooltipHeight > viewportHeight - padding) {
+        top = targetRect.top - tooltipHeight - 8;
+        arrowClass = 'arrow-bottom';
+      }
+
+      // Horizontal boundary checks - keep within viewport
+      if (left < padding) {
+        left = padding;
+      }
+      if (left + tooltipWidth > viewportWidth - padding) {
+        left = viewportWidth - tooltipWidth - padding;
+      }
+
+      // Additional check: keep within code container horizontally if possible
+      if (container) {
+        const minLeft = Math.max(padding, containerRect.left);
+        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
+
+        if (left < minLeft) {
+          left = minLeft;
+        }
+        if (left + tooltipWidth > maxRight) {
+          left = maxRight - tooltipWidth;
+        }
+      }
+
+      // Apply position
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+      }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) {
+          tooltipEl.classList.remove('visible');
+        }
+        currentTarget = null;
+      }, 100);
+    }
+
+    // Event delegation for all tooltips
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) {
+        showTooltip(e.target);
+      }
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) {
+        hideTooltip();
+      }
+    }, true);
+
+    // Handle scroll - reposition if visible
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) {
+        positionTooltip(currentTarget);
+      }
+    }, true);
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) {
+        positionTooltip(currentTarget);
+      }
+    });
+  })();
   </script>
 </body>
 </html>

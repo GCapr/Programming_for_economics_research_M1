@@ -517,7 +517,9 @@
         'chatbot-bounce',
         'chatbot-wiggle',
         'chatbot-pulse',
-        'chatbot-wave'
+        'chatbot-wave',
+        'chatbot-hop-left-right',
+        'chatbot-color-shift'
     ];
 
     let speechBubbleTimeout = null;
@@ -542,11 +544,11 @@
             bubble.classList.add('visible');
         });
 
-        // Remove after 3 seconds
+        // Remove after 5 seconds (longer display time)
         setTimeout(() => {
             bubble.classList.remove('visible');
             setTimeout(() => bubble.remove(), 300);
-        }, 3000);
+        }, 5000);
     }
 
     function triggerAnimation(toggle) {
@@ -559,17 +561,18 @@
         const animation = ANIMATIONS[Math.floor(Math.random() * ANIMATIONS.length)];
         toggle.classList.add(animation);
 
-        // Remove after animation completes
+        // Remove after animation completes (longer for hop and color animations)
+        const duration = (animation === 'chatbot-hop-left-right' || animation === 'chatbot-color-shift') ? 1800 : 1000;
         setTimeout(() => {
             toggle.classList.remove(animation);
-        }, 1000);
+        }, duration);
     }
 
     function scheduleNextAnimation(toggle) {
         if (isPanelOpen) return;
 
-        // Random interval between 8-15 seconds for animation
-        const animDelay = 8000 + Math.random() * 7000;
+        // Random interval between 4-8 seconds for animation (more frequent)
+        const animDelay = 4000 + Math.random() * 4000;
         animationTimeout = setTimeout(() => {
             triggerAnimation(toggle);
             scheduleNextAnimation(toggle);
@@ -579,8 +582,8 @@
     function scheduleNextSpeechBubble(toggle) {
         if (isPanelOpen) return;
 
-        // Random interval between 20-40 seconds for speech bubble
-        const bubbleDelay = 20000 + Math.random() * 20000;
+        // Random interval between 12-25 seconds for speech bubble (more frequent)
+        const bubbleDelay = 12000 + Math.random() * 13000;
         speechBubbleTimeout = setTimeout(() => {
             showSpeechBubble(toggle);
             scheduleNextSpeechBubble(toggle);
@@ -735,6 +738,38 @@
             }
             .chatbot-wave {
                 animation: chatbot-wave-anim 1s ease-in-out;
+            }
+
+            /* Hop Left-Right Animation (triple jump) */
+            @keyframes chatbot-hop-lr-anim {
+                0% { transform: translateX(0) translateY(0); }
+                8% { transform: translateX(-15px) translateY(-10px); }
+                16% { transform: translateX(-15px) translateY(0); }
+                24% { transform: translateX(0) translateY(0); }
+                32% { transform: translateX(15px) translateY(-10px); }
+                40% { transform: translateX(15px) translateY(0); }
+                48% { transform: translateX(0) translateY(0); }
+                56% { transform: translateX(-12px) translateY(-8px); }
+                64% { transform: translateX(-12px) translateY(0); }
+                72% { transform: translateX(0) translateY(0); }
+                80% { transform: translateX(12px) translateY(-8px); }
+                88% { transform: translateX(12px) translateY(0); }
+                100% { transform: translateX(0) translateY(0); }
+            }
+            .chatbot-hop-left-right {
+                animation: chatbot-hop-lr-anim 1.6s ease-in-out;
+            }
+
+            /* Color Shift Animation */
+            @keyframes chatbot-color-anim {
+                0%, 100% { background: var(--color-primary); }
+                20% { background: #e53e3e; }
+                40% { background: #38a169; }
+                60% { background: #805ad5; }
+                80% { background: #dd6b20; }
+            }
+            .chatbot-color-shift {
+                animation: chatbot-color-anim 1.5s ease-in-out;
             }
         `;
         document.head.appendChild(style);

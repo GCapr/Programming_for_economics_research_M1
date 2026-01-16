@@ -181,6 +181,25 @@ https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD?format=json
           </ul>
         </div>
 
+        <!-- Building URLs Brick by Brick -->
+        <div class="concept-box" style="background: #ecfdf5; border-left-color: #059669;">
+          <h4 style="color: #047857;">Building URLs: Brick by Brick</h4>
+          <p>In your code, you <strong>construct</strong> the API URL piece by piece before sending the request. Think of it like building with LEGO blocks:</p>
+          <ol style="margin-bottom: 1rem;">
+            <li><strong>Base URL</strong> &mdash; The foundation (e.g., <code>https://api.worldbank.org/v2/</code>)</li>
+            <li><strong>Endpoint path</strong> &mdash; What you want (e.g., <code>country/USA/indicator/NY.GDP.MKTP.CD</code>)</li>
+            <li><strong>Query parameters</strong> &mdash; Filters and options (e.g., <code>?format=json&date=2015:2022</code>)</li>
+          </ol>
+          <p style="margin-bottom: 0.5rem;">Your code assembles these pieces, then makes a single HTTP request. The server processes the URL and returns the data.</p>
+          <pre style="background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 0;"><span style="color: #9ca3af;"># Python example: building the URL brick by brick</span>
+base = <span style="color: #fbbf24;">"https://api.worldbank.org/v2"</span>    <span style="color: #9ca3af;"># Foundation</span>
+endpoint = <span style="color: #fbbf24;">"/country/USA/indicator/NY.GDP.MKTP.CD"</span>  <span style="color: #9ca3af;"># What we want</span>
+params = <span style="color: #fbbf24;">"?format=json&date=2015:2022"</span>    <span style="color: #9ca3af;"># Options</span>
+
+full_url = base + endpoint + params       <span style="color: #9ca3af;"># Assemble the bricks</span>
+response = requests.get(full_url)         <span style="color: #9ca3af;"># Send to server!</span></pre>
+        </div>
+
         <!-- Your First API Call -->
         <h2>Your First API Call</h2>
 
@@ -197,18 +216,33 @@ https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD?format=json
 <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="requests: Library for making HTTP requests to web servers">requests</span>
 <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas: Data manipulation library, aliased as 'pd' by convention">pandas</span> <span class="code-keyword">as</span> pd
 
-<span class="code-comment"># Define the API endpoint URL</span>
-<span class="code-comment"># NY.GDP.MKTP.CD is the World Bank code for GDP in current US dollars</span>
-<span class="code-tooltip" data-tip="The base URL pointing to the World Bank API endpoint for USA's GDP indicator">url</span> = <span class="code-string">"https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD"</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment"># STEP 1: BUILD THE URL (brick by brick)</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
 
-<span class="code-comment"># Set query parameters to customize the request</span>
+<span class="code-comment"># Base URL: The API's address</span>
+base = <span class="code-string">"https://api.worldbank.org/v2"</span>
+
+<span class="code-comment"># Endpoint: What we want (country/indicator)</span>
+country = <span class="code-string">"USA"</span>                    <span class="code-comment"># Try: "FRA", "CHN", "BRA"</span>
+indicator = <span class="code-string">"NY.GDP.MKTP.CD"</span>       <span class="code-comment"># GDP in current US$</span>
+
+<span class="code-comment"># Assemble the URL</span>
+<span class="code-tooltip" data-tip="We build the URL by concatenating strings - you can swap country/indicator easily!">url</span> = <span class="code-string">f"</span>{base}<span class="code-string">/country/</span>{country}<span class="code-string">/indicator/</span>{indicator}<span class="code-string">"</span>
+<span class="code-keyword">print</span>(<span class="code-string">f"URL built: {url}"</span>)
+
+<span class="code-comment"># Parameters: Filters added to the URL as ?key=value&key=value</span>
 <span class="code-tooltip" data-tip="Dictionary of parameters: format=json for JSON output, date for year range, per_page for max results">params</span> = {
     <span class="code-string">"format"</span>: <span class="code-string">"json"</span>,      <span class="code-comment"># Return data as JSON (not XML)</span>
     <span class="code-string">"date"</span>: <span class="code-string">"2015:2022"</span>,   <span class="code-comment"># Get data from 2015 to 2022</span>
     <span class="code-string">"per_page"</span>: <span class="code-number">100</span>        <span class="code-comment"># Maximum records per page</span>
 }
 
-<span class="code-comment"># Send GET request to the API</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment"># STEP 2: SEND THE REQUEST</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+
+<span class="code-comment"># requests.get() combines url + params and sends to server</span>
 <span class="code-tooltip" data-tip="requests.get() sends an HTTP GET request and returns a Response object">response</span> = requests.get(url, params=params)
 <span class="code-keyword">print</span>(<span class="code-string">f"Status Code: {response.status_code}"</span>)  <span class="code-comment"># 200 = success</span>
 
@@ -235,12 +269,18 @@ df = pd.DataFrame([{
 <span class="code-comment">* Install the World Bank Open Data package (run once)</span>
 <span class="code-keyword">ssc</span> install wbopendata
 
-<span class="code-comment">* Fetch GDP data for USA from 2015-2022</span>
-<span class="code-comment">* indicator(): World Bank indicator code for GDP</span>
-<span class="code-comment">* country(): ISO country code</span>
-<span class="code-comment">* year(): time range</span>
-<span class="code-comment">* clear: replace current data in memory</span>
-<span class="code-keyword">wbopendata</span>, indicator(NY.GDP.MKTP.CD) country(USA) year(2015:2022) clear
+<span class="code-comment">* ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment">* In Stata, wbopendata BUILDS THE URL FOR YOU behind the scenes</span>
+<span class="code-comment">* You provide the "bricks" as options:</span>
+<span class="code-comment">* ═══════════════════════════════════════════════════════════════════</span>
+
+<span class="code-comment">* Define our "bricks"</span>
+<span class="code-keyword">local</span> country <span class="code-string">"USA"</span>              <span class="code-comment">// Try: "FRA", "CHN", "BRA"</span>
+<span class="code-keyword">local</span> indicator <span class="code-string">"NY.GDP.MKTP.CD"</span> <span class="code-comment">// GDP in current US$</span>
+<span class="code-keyword">local</span> years <span class="code-string">"2015:2022"</span>         <span class="code-comment">// Time range</span>
+
+<span class="code-comment">* wbopendata combines these into an API call</span>
+<span class="code-keyword">wbopendata</span>, indicator(`indicator') country(`country') year(`years') clear
 
 <span class="code-comment">* Display the data</span>
 <span class="code-keyword">list</span> countryname year ny_gdp_mktp_cd</code></pre>
@@ -252,10 +292,26 @@ df = pd.DataFrame([{
 <span class="code-function">library</span>(<span class="code-tooltip" data-tip="jsonlite: Library for parsing JSON data">jsonlite</span>)
 <span class="code-function">library</span>(<span class="code-tooltip" data-tip="tidyverse: Collection of data science packages including dplyr and ggplot2">tidyverse</span>)
 
-<span class="code-comment"># Define the API endpoint URL</span>
-url <- <span class="code-string">"https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD"</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment"># STEP 1: BUILD THE URL (brick by brick)</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
 
-<span class="code-comment"># Make GET request with query parameters</span>
+<span class="code-comment"># Base URL: The API's address</span>
+base <- <span class="code-string">"https://api.worldbank.org/v2"</span>
+
+<span class="code-comment"># Endpoint: What we want (country/indicator)</span>
+country <- <span class="code-string">"USA"</span>                   <span class="code-comment"># Try: "FRA", "CHN", "BRA"</span>
+indicator <- <span class="code-string">"NY.GDP.MKTP.CD"</span>      <span class="code-comment"># GDP in current US$</span>
+
+<span class="code-comment"># Assemble the URL using paste0()</span>
+<span class="code-tooltip" data-tip="paste0() concatenates strings without spaces - building the URL brick by brick">url</span> <- <span class="code-function">paste0</span>(base, <span class="code-string">"/country/"</span>, country, <span class="code-string">"/indicator/"</span>, indicator)
+<span class="code-function">cat</span>(<span class="code-string">"URL built:"</span>, url, <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment"># STEP 2: SEND THE REQUEST</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+
+<span class="code-comment"># GET() combines url + query params and sends to server</span>
 <span class="code-tooltip" data-tip="GET() from httr sends an HTTP GET request; query= adds URL parameters">response</span> <- <span class="code-function">GET</span>(url, query = <span class="code-function">list</span>(
   format = <span class="code-string">"json"</span>,      <span class="code-comment"># Request JSON format</span>
   date = <span class="code-string">"2015:2022"</span>,   <span class="code-comment"># Year range</span>
@@ -344,10 +400,11 @@ df <- <span class="code-function">tibble</span>(
 <span class="out-num">8</span> United States  <span class="out-num">2015</span> <span class="out-num">18238930000000</span></div>
         </div>
 
-        <!-- Common World Bank Indicators -->
-        <h2>Useful World Bank Indicators</h2>
-
-        <p>Here are key indicators for economic and climate research:</p>
+        <!-- Common World Bank Indicators - Research Project Context -->
+        <div class="research-banner">
+          <h3>Research Project: Indicator Codes</h3>
+          <p style="margin-bottom: 0.75rem;">For our "Climate Vulnerability and Economic Growth" project, we'll use these World Bank indicator codes. You plug these codes into your API URL to fetch specific data:</p>
+        </div>
 
         <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
           <thead>

@@ -165,21 +165,33 @@
             <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Sharing data, web downloads, exports</p>
           </div>
           <div class="format-card">
-            <h4>Excel <span class="ext">.xlsx</span></h4>
+            <h4>Excel <span class="ext">.xlsx / .xls</span></h4>
             <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Microsoft spreadsheet format. Can have multiple sheets.</p>
             <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Business data, government reports</p>
           </div>
           <div class="format-card">
             <h4>Stata <span class="ext">.dta</span></h4>
-            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Stata's native format. Preserves labels and types.</p>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Stata's native format. Preserves variable labels and types.</p>
             <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Academic datasets, IPUMS, replication files</p>
           </div>
           <div class="format-card">
-            <h4>Parquet <span class="ext">.parquet</span></h4>
-            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Columnar storage. Fast, compressed, big data friendly.</p>
-            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Large datasets, data engineering</p>
+            <h4>R Data <span class="ext">.rds / .RData</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">R's native formats. .rds = single object, .RData = multiple objects.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Saving R work, sharing with R users</p>
+          </div>
+          <div class="format-card">
+            <h4>JSON <span class="ext">.json</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">JavaScript Object Notation. Hierarchical/nested data.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> API responses, web data, configuration</p>
+          </div>
+          <div class="format-card">
+            <h4>Fixed-width <span class="ext">.txt / .dat</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Columns defined by character positions. No delimiters.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Census data, older government files</p>
           </div>
         </div>
+
+        <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;"><strong>Tip:</strong> For a comprehensive guide on all file formats (data files, scripts, notebooks), see <a href="00-languages-platforms.html#file-formats">Module 0: File Formats Reference</a>.</p>
 
         <!-- Section 2: Loading Data -->
         <h2>Loading Data from Files</h2>
@@ -360,8 +372,8 @@ df = pd.read_stata(<span class="code-string">"data.dta"</span>)
     <span class="code-comment"># Process each chunk</span>
     <span class="code-keyword">pass</span>
 
-<span class="code-comment"># Parquet (fast, compressed)</span>
-df = pd.read_parquet(<span class="code-string">"data.parquet"</span>)</code></pre>
+<span class="code-comment"># JSON files (common from APIs)</span>
+df = pd.read_json(<span class="code-string">"data.json"</span>)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
@@ -408,9 +420,9 @@ all_data <- <span class="code-function">map</span>(sheets, ~<span class="code-fu
 <span class="code-comment"># Stata files (preserves labels!)</span>
 df <- <span class="code-function"><span class="code-tooltip" data-tip="read_dta() from haven reads Stata files and preserves variable/value labels">read_dta</span></span>(<span class="code-string">"data.dta"</span>)
 
-<span class="code-comment"># Parquet (fast, compressed)</span>
-<span class="code-function">library</span>(arrow)
-df <- <span class="code-function">read_parquet</span>(<span class="code-string">"data.parquet"</span>)</code></pre>
+<span class="code-comment"># R native formats</span>
+df <- <span class="code-function">readRDS</span>(<span class="code-string">"data.rds"</span>)       <span class="code-comment"># Single object</span>
+<span class="code-function">load</span>(<span class="code-string">"workspace.RData"</span>)         <span class="code-comment"># Multiple objects</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -471,6 +483,70 @@ Contains data from data.dta
         </div>
 
         <h3>Types of Merges</h3>
+
+        <!-- Interactive Merge Visualizer -->
+        <div class="merge-visualizer" style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin-top: 0; color: #1e40af;">Interactive Merge Visualizer</h4>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Select a merge type to see how the two datasets combine:</p>
+
+          <div class="merge-controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            <button class="merge-type-btn active" data-type="inner" style="padding: 0.5rem 1rem; border: 2px solid #2563eb; background: #2563eb; color: white; border-radius: 6px; cursor: pointer; font-weight: 600;">Inner Join</button>
+            <button class="merge-type-btn" data-type="left" style="padding: 0.5rem 1rem; border: 2px solid #2563eb; background: white; color: #2563eb; border-radius: 6px; cursor: pointer; font-weight: 600;">Left Join</button>
+            <button class="merge-type-btn" data-type="right" style="padding: 0.5rem 1rem; border: 2px solid #2563eb; background: white; color: #2563eb; border-radius: 6px; cursor: pointer; font-weight: 600;">Right Join</button>
+            <button class="merge-type-btn" data-type="outer" style="padding: 0.5rem 1rem; border: 2px solid #2563eb; background: white; color: #2563eb; border-radius: 6px; cursor: pointer; font-weight: 600;">Outer (Full) Join</button>
+          </div>
+
+          <div class="merge-diagram" style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start;">
+            <!-- Left Dataset -->
+            <div class="dataset-box" style="background: #dbeafe; border-radius: 8px; padding: 1rem;">
+              <div style="font-weight: 600; color: #1e40af; margin-bottom: 0.5rem; text-align: center;">GDP Data (Left)</div>
+              <table style="width: 100%; font-size: 0.85rem; background: white; border-radius: 4px;">
+                <thead><tr style="background: #1e40af; color: white;"><th>country</th><th>gdp</th></tr></thead>
+                <tbody>
+                  <tr class="merge-row" data-key="USA"><td>USA</td><td>21000</td></tr>
+                  <tr class="merge-row" data-key="CHN"><td>CHN</td><td>14700</td></tr>
+                  <tr class="merge-row" data-key="DEU"><td>DEU</td><td>3800</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Arrow -->
+            <div style="display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #2563eb; padding-top: 2rem;">
+              ⟹
+            </div>
+
+            <!-- Right Dataset -->
+            <div class="dataset-box" style="background: #dcfce7; border-radius: 8px; padding: 1rem;">
+              <div style="font-weight: 600; color: #166534; margin-bottom: 0.5rem; text-align: center;">Population Data (Right)</div>
+              <table style="width: 100%; font-size: 0.85rem; background: white; border-radius: 4px;">
+                <thead><tr style="background: #166534; color: white;"><th>country</th><th>pop</th></tr></thead>
+                <tbody>
+                  <tr class="merge-row" data-key="USA"><td>USA</td><td>331</td></tr>
+                  <tr class="merge-row" data-key="CHN"><td>CHN</td><td>1400</td></tr>
+                  <tr class="merge-row" data-key="JPN"><td>JPN</td><td>126</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Result -->
+          <div class="merge-result" style="margin-top: 1.5rem;">
+            <div style="font-weight: 600; color: #7c3aed; margin-bottom: 0.5rem; text-align: center;">Result: <span class="merge-result-type">Inner Join</span></div>
+            <div class="merge-result-table" style="background: #f3e8ff; border-radius: 8px; padding: 1rem; overflow-x: auto;">
+              <table style="width: 100%; font-size: 0.85rem; background: white; border-radius: 4px;">
+                <thead><tr style="background: #7c3aed; color: white;"><th>country</th><th>gdp</th><th>pop</th></tr></thead>
+                <tbody class="merge-result-body">
+                  <tr><td>USA</td><td>21000</td><td>331</td></tr>
+                  <tr><td>CHN</td><td>14700</td><td>1400</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="merge-explanation" style="font-size: 0.85rem; color: #666; margin-top: 0.75rem; text-align: center;">
+              <strong>Inner join:</strong> Only rows with matching keys in BOTH datasets are kept (2 rows).
+            </p>
+          </div>
+        </div>
+
         <table style="width: 100%; margin: 1rem 0;">
           <thead>
             <tr>
@@ -502,6 +578,57 @@ Contains data from data.dta
             </tr>
           </tbody>
         </table>
+
+        <!-- Merge Terminology Across Languages -->
+        <div class="concept-box" style="background: #fefce8; border-left-color: #ca8a04;">
+          <h4 style="color: #854d0e;">Terminology Across Languages</h4>
+          <p style="margin-bottom: 1rem;">Merging operations have different names in Python, Stata, and R. Use this table to translate:</p>
+          <table style="width: 100%; font-size: 0.9rem; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #fef3c7;">
+                <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #ca8a04;">Operation</th>
+                <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #ca8a04;">Python (pandas)</th>
+                <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #ca8a04;">Stata</th>
+                <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #ca8a04;">R (dplyr)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Inner Join</strong></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>pd.merge(..., how='inner')</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>merge ..., keep(3)</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>inner_join()</code></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Left Join</strong></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>pd.merge(..., how='left')</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>merge ..., keep(1 3)</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>left_join()</code></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Right Join</strong></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>pd.merge(..., how='right')</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>merge ..., keep(2 3)</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>right_join()</code></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Full/Outer Join</strong></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>pd.merge(..., how='outer')</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>merge ...</code> (default)</td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>full_join()</code></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem;"><strong>Match type</strong></td>
+                <td style="padding: 0.5rem;"><code>validate='1:1'</code>, <code>'m:1'</code>, <code>'1:m'</code></td>
+                <td style="padding: 0.5rem;"><code>1:1</code>, <code>m:1</code>, <code>1:m</code>, <code>m:m</code></td>
+                <td style="padding: 0.5rem;"><code>relationship='one-to-one'</code>, etc.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size: 0.85rem; color: #666; margin-top: 0.75rem; margin-bottom: 0;">
+            <strong>Stata note:</strong> <code>_merge</code> values: 1 = master only, 2 = using only, 3 = matched in both.
+          </p>
+        </div>
 
         <div class="code-tabs" data-runnable="merge-1">
           <div class="tab-buttons">
@@ -682,6 +809,73 @@ GDP: <span class="out-num">3</span>, Pop: <span class="out-num">3</span>, Merged
           <h4>Wide vs Long Format</h4>
           <p><strong>Wide format:</strong> One row per unit, with separate columns for each time period (e.g., gdp_2018, gdp_2019, gdp_2020).</p>
           <p style="margin-bottom: 0;"><strong>Long format:</strong> Multiple rows per unit, with a single column for the variable and another for time period. <em>Most statistical analyses require long format.</em></p>
+        </div>
+
+        <!-- Interactive Reshape Visualizer -->
+        <div class="reshape-visualizer" style="background: #fffbeb; border: 2px solid #fbbf24; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin-top: 0; color: #b45309;">Interactive Reshape Visualizer</h4>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Click the button to toggle between wide and long format:</p>
+
+          <div class="reshape-container">
+            <!-- Wide Format (shown by default) -->
+            <div class="reshape-format wide-format" style="transition: all 0.3s ease;">
+              <div style="font-weight: 600; color: #b45309; margin-bottom: 0.5rem; text-align: center;">
+                <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem;">Wide Format</span>
+              </div>
+              <div style="background: white; border-radius: 8px; padding: 1rem; overflow-x: auto; border: 2px solid #f59e0b;">
+                <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background: #f59e0b; color: white;">
+                      <th style="padding: 0.5rem; border: 1px solid #d97706;">country</th>
+                      <th style="padding: 0.5rem; border: 1px solid #d97706; background: #fbbf24;">gdp_2018</th>
+                      <th style="padding: 0.5rem; border: 1px solid #d97706; background: #fcd34d;">gdp_2019</th>
+                      <th style="padding: 0.5rem; border: 1px solid #d97706; background: #fde68a;">gdp_2020</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">USA</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fef3c7;">20500</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fef9c3;">21400</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fefce8;">21000</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">CHN</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fef3c7;">13900</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fef9c3;">14300</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fefce8;">14700</td></tr>
+                  </tbody>
+                </table>
+                <p style="font-size: 0.8rem; color: #92400e; margin: 0.5rem 0 0 0; text-align: center;"><strong>2 rows × 4 columns</strong> — Each year is a separate column</p>
+              </div>
+              <p style="font-size: 0.85rem; color: #92400e; margin-top: 0.75rem; text-align: center;">Good for presentation, side-by-side comparison</p>
+            </div>
+
+            <!-- Long Format (hidden by default) -->
+            <div class="reshape-format long-format" style="display: none; transition: all 0.3s ease;">
+              <div style="font-weight: 600; color: #4338ca; margin-bottom: 0.5rem; text-align: center;">
+                <span style="background: #6366f1; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem;">Long Format</span>
+              </div>
+              <div style="background: white; border-radius: 8px; padding: 1rem; overflow-x: auto; border: 2px solid #6366f1;">
+                <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background: #6366f1; color: white;">
+                      <th style="padding: 0.5rem; border: 1px solid #4f46e5;">country</th>
+                      <th style="padding: 0.5rem; border: 1px solid #4f46e5;">year</th>
+                      <th style="padding: 0.5rem; border: 1px solid #4f46e5;">gdp</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">USA</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #ede9fe;">2018</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">20500</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">USA</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #ddd6fe;">2019</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">21400</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">USA</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #c4b5fd;">2020</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">21000</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">CHN</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #ede9fe;">2018</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">13900</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">CHN</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #ddd6fe;">2019</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">14300</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">CHN</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #c4b5fd;">2020</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">14700</td></tr>
+                  </tbody>
+                </table>
+                <p style="font-size: 0.8rem; color: #4338ca; margin: 0.5rem 0 0 0; text-align: center;"><strong>6 rows × 3 columns</strong> — Each observation is a row</p>
+              </div>
+              <p style="font-size: 0.85rem; color: #4338ca; margin-top: 0.75rem; text-align: center;">Required for most statistical analyses, ggplot2, panel data regressions</p>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 1rem;">
+            <button class="reshape-toggle-btn" style="padding: 0.75rem 2rem; border: none; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);">
+              <span class="reshape-btn-text">Convert to Long →</span>
+            </button>
+          </div>
         </div>
 
         <div class="code-tabs" data-runnable="reshape-1">
@@ -1009,7 +1203,135 @@ wide <- long %>% <span class="code-function">pivot_wider</span>(names_from = yea
 
   <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // =============================================
+    // MERGE VISUALIZER
+    // =============================================
+    const mergeData = {
+      inner: {
+        rows: [
+          { country: 'USA', gdp: '21000', pop: '331' },
+          { country: 'CHN', gdp: '14700', pop: '1400' }
+        ],
+        explanation: '<strong>Inner join:</strong> Only rows with matching keys in BOTH datasets are kept (2 rows).',
+        leftHighlight: ['USA', 'CHN'],
+        rightHighlight: ['USA', 'CHN']
+      },
+      left: {
+        rows: [
+          { country: 'USA', gdp: '21000', pop: '331' },
+          { country: 'CHN', gdp: '14700', pop: '1400' },
+          { country: 'DEU', gdp: '3800', pop: '<span style="color: #dc2626; font-style: italic;">NULL</span>' }
+        ],
+        explanation: '<strong>Left join:</strong> ALL rows from left dataset kept, with matches from right where available (3 rows). DEU has no population data.',
+        leftHighlight: ['USA', 'CHN', 'DEU'],
+        rightHighlight: ['USA', 'CHN']
+      },
+      right: {
+        rows: [
+          { country: 'USA', gdp: '21000', pop: '331' },
+          { country: 'CHN', gdp: '14700', pop: '1400' },
+          { country: 'JPN', gdp: '<span style="color: #dc2626; font-style: italic;">NULL</span>', pop: '126' }
+        ],
+        explanation: '<strong>Right join:</strong> ALL rows from right dataset kept, with matches from left where available (3 rows). JPN has no GDP data.',
+        leftHighlight: ['USA', 'CHN'],
+        rightHighlight: ['USA', 'CHN', 'JPN']
+      },
+      outer: {
+        rows: [
+          { country: 'USA', gdp: '21000', pop: '331' },
+          { country: 'CHN', gdp: '14700', pop: '1400' },
+          { country: 'DEU', gdp: '3800', pop: '<span style="color: #dc2626; font-style: italic;">NULL</span>' },
+          { country: 'JPN', gdp: '<span style="color: #dc2626; font-style: italic;">NULL</span>', pop: '126' }
+        ],
+        explanation: '<strong>Outer (full) join:</strong> ALL rows from BOTH datasets kept, with NULLs where no match (4 rows).',
+        leftHighlight: ['USA', 'CHN', 'DEU'],
+        rightHighlight: ['USA', 'CHN', 'JPN']
+      }
+    };
+
+    document.querySelectorAll('.merge-type-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const type = this.dataset.type;
+        const data = mergeData[type];
+
+        // Update button styles
+        document.querySelectorAll('.merge-type-btn').forEach(b => {
+          b.style.background = 'white';
+          b.style.color = '#2563eb';
+        });
+        this.style.background = '#2563eb';
+        this.style.color = 'white';
+
+        // Update result type label
+        document.querySelector('.merge-result-type').textContent = this.textContent;
+
+        // Update result table
+        const tbody = document.querySelector('.merge-result-body');
+        tbody.innerHTML = data.rows.map(row =>
+          `<tr><td>${row.country}</td><td>${row.gdp}</td><td>${row.pop}</td></tr>`
+        ).join('');
+
+        // Update explanation
+        document.querySelector('.merge-explanation').innerHTML = data.explanation;
+
+        // Highlight rows in source tables
+        document.querySelectorAll('.merge-diagram .merge-row').forEach(row => {
+          row.style.opacity = '0.3';
+          row.style.background = 'transparent';
+        });
+
+        // Highlight left table rows
+        data.leftHighlight.forEach(key => {
+          const leftRow = document.querySelector(`.dataset-box:first-child .merge-row[data-key="${key}"]`);
+          if (leftRow) {
+            leftRow.style.opacity = '1';
+            leftRow.style.background = '#dbeafe';
+          }
+        });
+
+        // Highlight right table rows
+        data.rightHighlight.forEach(key => {
+          const rightRow = document.querySelector(`.dataset-box:last-child .merge-row[data-key="${key}"]`);
+          if (rightRow) {
+            rightRow.style.opacity = '1';
+            rightRow.style.background = '#dcfce7';
+          }
+        });
+      });
+    });
+
+    // =============================================
+    // RESHAPE VISUALIZER
+    // =============================================
+    let isLongFormat = false;
+    const reshapeBtn = document.querySelector('.reshape-toggle-btn');
+    const reshapeBtnText = document.querySelector('.reshape-btn-text');
+    const wideFormat = document.querySelector('.wide-format');
+    const longFormat = document.querySelector('.long-format');
+
+    if (reshapeBtn) {
+      reshapeBtn.addEventListener('click', function() {
+        isLongFormat = !isLongFormat;
+
+        if (isLongFormat) {
+          // Show long format, hide wide
+          wideFormat.style.display = 'none';
+          longFormat.style.display = 'block';
+          reshapeBtnText.textContent = 'Convert to Wide ←';
+          reshapeBtn.style.background = 'linear-gradient(135deg, #6366f1, #4f46e5)';
+        } else {
+          // Show wide format, hide long
+          wideFormat.style.display = 'block';
+          longFormat.style.display = 'none';
+          reshapeBtnText.textContent = 'Convert to Long →';
+          reshapeBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        }
+      });
+    }
+
+    // =============================================
     // Run button handler
+    // =============================================
     document.querySelectorAll('.run-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const lang = this.dataset.lang;

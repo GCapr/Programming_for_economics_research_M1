@@ -46,11 +46,6 @@
     .checklist h4 { color: #166534; margin-top: 0; }
     .checklist ul { margin-bottom: 0; }
     .checklist li { margin-bottom: 0.5rem; }
-    .decision-tree { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; }
-    .decision-node { background: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin: 0.5rem 0; }
-    .decision-node.yes { border-color: #22c55e; }
-    .decision-node.no { border-color: #ef4444; }
-    .decision-node.api { border-color: #3b82f6; }
   </style>
 </head>
 <body>
@@ -161,46 +156,6 @@
           </ol>
         </div>
 
-        <h3>Decision Framework</h3>
-        <div class="decision-tree">
-          <div class="decision-node">
-            <strong>Is there an official downloadable dataset?</strong>
-            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Check the website's "Data", "Downloads", or "Research" sections first.</p>
-          </div>
-          <div style="display: flex; gap: 1rem;">
-            <div class="decision-node yes" style="flex: 1;">
-              <strong style="color: #166534;">YES:</strong> Download it directly. No scraping needed.
-            </div>
-            <div class="decision-node" style="flex: 1;">
-              <strong>NO:</strong> Check for an API...
-            </div>
-          </div>
-          <div class="decision-node api">
-            <strong>Does the site provide an API?</strong>
-            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Look for "API", "Developers", or "Data Access" links. Even if not obvious, many sites have APIs.</p>
-          </div>
-          <div style="display: flex; gap: 1rem;">
-            <div class="decision-node yes" style="flex: 1;">
-              <strong style="color: #166534;">YES:</strong> Use the API. See <a href="02b-apis.html">Module 2b</a>.
-            </div>
-            <div class="decision-node" style="flex: 1;">
-              <strong>NO:</strong> Consider contacting them...
-            </div>
-          </div>
-          <div class="decision-node">
-            <strong>Can you request the data directly?</strong>
-            <p style="margin: 0.5rem 0; font-size: 0.9rem;">Many organizations will provide data for academic research upon request. Email them!</p>
-          </div>
-          <div style="display: flex; gap: 1rem;">
-            <div class="decision-node yes" style="flex: 1;">
-              <strong style="color: #166534;">YES:</strong> Request it. Often faster than building a scraper.
-            </div>
-            <div class="decision-node no" style="flex: 1;">
-              <strong style="color: #dc2626;">Last resort:</strong> Consider scraping, but check legality first.
-            </div>
-          </div>
-        </div>
-
         <!-- Section 2: Legal Framework -->
         <h2 id="legal-framework">2c.2 Legal Framework</h2>
 
@@ -255,27 +210,93 @@ Crawl-delay: 10        <span class="comment"># Wait 10 seconds between requests<
         </ul>
 
         <h4>4. The Computer Fraud and Abuse Act (CFAA) - US</h4>
-        <p>The CFAA prohibits "unauthorized access" to computer systems. Key cases:</p>
+        <p>The CFAA prohibits "unauthorized access" to computer systems. Recent court decisions have significantly <strong>clarified researchers' rights</strong>:</p>
+
+        <div class="concept-box" style="background: #ecfdf5; border-left-color: #059669;">
+          <h4 style="color: #047857;">Key Legal Precedents Favoring Researchers</h4>
+          <ul style="margin-bottom: 0;">
+            <li><strong>hiQ Labs v. LinkedIn (9th Cir. 2022)</strong>: The court ruled that scraping <em>publicly accessible</em> data does not constitute "unauthorized access" under the CFAA. LinkedIn could not use the CFAA to block hiQ from scraping public profiles. This is a landmark decision for researchers working with public web data.</li>
+            <li><strong>Van Buren v. United States (Supreme Court, 2021)</strong>: The Supreme Court narrowed the CFAA's scope, ruling that "exceeds authorized access" only applies to accessing areas of a system one wasn't entitled to access&mdash;not to misusing information from areas one <em>was</em> authorized to access. Violating Terms of Service alone does not trigger criminal CFAA liability.</li>
+            <li><strong>Sandvig v. Barr (D.D.C. 2020)</strong>: Researchers challenged CFAA restrictions on audit testing. The court ruled that the CFAA does not criminalize mere ToS violations, protecting researchers conducting discrimination audits via scraping.</li>
+            <li><strong>Clearview AI Litigation (ongoing)</strong>: While Clearview faced lawsuits, courts have distinguished between commercial and research uses. Academic research has stronger protections than commercial exploitation.</li>
+          </ul>
+        </div>
+
+        <h4>5. European Union Regulation</h4>
+        <p>The EU has established explicit legal frameworks that <strong>protect research scraping</strong>:</p>
+
+        <div class="concept-box" style="background: #eff6ff; border-left-color: #2563eb;">
+          <h4 style="color: #1e40af;">EU Text and Data Mining (TDM) Exceptions</h4>
+          <p>The <strong>Digital Single Market (DSM) Directive 2019/790</strong> created specific exceptions for text and data mining:</p>
+          <ul>
+            <li><strong>Article 3 &mdash; Research Exception</strong>: Research organizations and cultural heritage institutions may perform text and data mining on works they have lawful access to, <em>regardless of contractual terms</em>. This explicitly overrides ToS restrictions for legitimate research.</li>
+            <li><strong>Article 4 &mdash; General TDM Exception</strong>: Any lawful access holder may perform TDM unless the rightsholder has expressly reserved this right in a machine-readable format. Mere ToS language is insufficient; reservations must be explicit.</li>
+          </ul>
+          <p style="margin-bottom: 0;"><strong>Practical implication:</strong> In the EU, academic researchers at recognized institutions have a statutory right to scrape publicly accessible content for research purposes, even if ToS prohibit it.</p>
+        </div>
+
+        <div class="concept-box" style="background: #fefce8; border-left-color: #ca8a04;">
+          <h4 style="color: #854d0e;">GDPR and Research</h4>
+          <p>The GDPR provides specific accommodations for research:</p>
+          <ul style="margin-bottom: 0;">
+            <li><strong>Article 89</strong>: Allows processing of personal data for scientific research with appropriate safeguards</li>
+            <li><strong>Recital 159</strong>: Broadly defines "scientific research" to include technological development, fundamental research, and applied research</li>
+            <li><strong>Research requires</strong>: Data minimization, pseudonymization where possible, and documented public interest justification</li>
+          </ul>
+        </div>
+
+        <h4>6. Recent Legal Developments (2023-2025)</h4>
         <ul>
-          <li><strong>hiQ vs. LinkedIn (2022)</strong>: Scraping public data generally isn't "unauthorized access"</li>
-          <li><strong>Van Buren v. United States (2021)</strong>: Narrowed CFAA scope&mdash;violating ToS alone may not be criminal</li>
+          <li><strong>AI Training Data Debates</strong>: While commercial AI companies face copyright challenges, academic research maintains stronger fair use/fair dealing protections</li>
+          <li><strong>US Copyright Office Guidance (2023)</strong>: Affirmed that factual data extraction generally does not constitute copyright infringement</li>
+          <li><strong>EU AI Act (2024)</strong>: Distinguishes research uses from commercial deployment; research scraping for AI development has explicit carve-outs</li>
+          <li><strong>Meta v. Bright Data (2024)</strong>: Court found that scraping publicly available data does not violate the CFAA, reinforcing hiQ precedent</li>
         </ul>
-        <p><strong>However:</strong> The law varies by jurisdiction and is still evolving. What's legal in the US may not be legal in the EU or elsewhere.</p>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Jurisdiction Matters</div>
+          <p style="margin-bottom: 0;">Legal protections vary by country. EU researchers generally have stronger statutory protections than US researchers. If your institution spans multiple jurisdictions, consult with legal counsel about which framework applies to your specific project.</p>
+        </div>
 
         <h3>Research-Specific Considerations</h3>
+
+        <div class="danger-box">
+          <h4>Document Your Decision-Making Process</h4>
+          <p>If your scraping is ever questioned, you need a clear record showing you acted in good faith. Courts and ethics committees look favorably on researchers who demonstrate thoughtful consideration of legal and ethical issues.</p>
+          <p style="margin-bottom: 0;"><strong>Your documentation should be created BEFORE you scrape</strong>&mdash;not reconstructed afterward.</p>
+        </div>
 
         <div class="checklist">
           <h4>Pre-Scraping Checklist for Researchers</h4>
           <ul>
             <li><strong>Check for existing datasets</strong> &mdash; ICPSR, Harvard Dataverse, Kaggle, data.gov</li>
             <li><strong>Check for an API</strong> &mdash; Even if undocumented, try adding /api/ to the URL</li>
-            <li><strong>Read the Terms of Service</strong> &mdash; Document that you checked</li>
-            <li><strong>Check robots.txt</strong> &mdash; Respect all directives</li>
-            <li><strong>Consider fair use</strong> &mdash; Is your use transformative? Non-commercial?</li>
+            <li><strong>Read the Terms of Service</strong> &mdash; Document that you checked and your interpretation</li>
+            <li><strong>Check robots.txt</strong> &mdash; Respect all directives and document compliance</li>
+            <li><strong>Consider fair use/TDM exceptions</strong> &mdash; Is your use transformative? Non-commercial? Does EU Article 3 apply?</li>
             <li><strong>Contact your IRB</strong> &mdash; Human subjects data may require approval</li>
-            <li><strong>Document everything</strong> &mdash; Keep records of your decisions and rationale</li>
             <li><strong>Consult your institution</strong> &mdash; Many universities have policies on scraping</li>
           </ul>
+        </div>
+
+        <div class="concept-box" style="background: #f0fdf4; border-left-color: #22c55e;">
+          <h4 style="color: #166534;">Documentation Template for Research Scraping</h4>
+          <p>Create a dated memo that includes:</p>
+          <ol>
+            <li><strong>Research purpose</strong>: What question are you investigating? Why is web data necessary?</li>
+            <li><strong>Data source assessment</strong>: Did you check for official datasets, APIs, or data request options?</li>
+            <li><strong>Legal analysis</strong>:
+              <ul>
+                <li>ToS review: What do the terms say? How does your use comply or qualify for exceptions?</li>
+                <li>robots.txt review: What does it permit/prohibit? How will you comply?</li>
+                <li>Applicable law: Which jurisdiction applies? What protections exist (CFAA/hiQ, EU TDM)?</li>
+              </ul>
+            </li>
+            <li><strong>Ethical considerations</strong>: Is the data sensitive? Could individuals be harmed? What safeguards will you implement?</li>
+            <li><strong>Technical safeguards</strong>: Rate limiting, caching, minimal data collection, secure storage</li>
+            <li><strong>Institutional approvals</strong>: IRB status, departmental sign-off, legal consultation</li>
+          </ol>
+          <p style="margin-bottom: 0;"><strong>Keep this document with your project files.</strong> If questions arise years later during peer review or legal inquiry, this contemporaneous record demonstrates good faith.</p>
         </div>
 
         <!-- Section 3: HTML Basics -->
@@ -316,6 +337,31 @@ Crawl-delay: 10        <span class="comment"># Wait 10 seconds between requests<
           <li>In developer tools, you can hover over elements to see their HTML</li>
         </ol>
 
+        <!-- GIF Demonstration -->
+        <div style="margin: 1.5rem 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+          <div style="background: #1f2937; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div>
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #fbbf24;"></div>
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #22c55e;"></div>
+            <span style="color: #9ca3af; font-size: 0.8rem; margin-left: 0.5rem;">Chrome Developer Tools Demo</span>
+          </div>
+          <div id="inspect-demo-container">
+            <img src="../images/inspect-element-demo.gif" alt="Animation showing how to use Chrome DevTools to inspect elements" style="width: 100%; display: block;" onerror="this.parentElement.innerHTML = `
+              <div style='background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); padding: 3rem 2rem; text-align: center; color: white;'>
+                <div style='font-size: 3rem; margin-bottom: 1rem;'>🔍</div>
+                <div style='font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;'>Try it yourself!</div>
+                <div style='opacity: 0.9; font-size: 0.9rem; line-height: 1.6;'>
+                  <strong>1.</strong> Right-click anywhere on this page<br>
+                  <strong>2.</strong> Select &quot;Inspect&quot; or &quot;Inspect Element&quot;<br>
+                  <strong>3.</strong> Hover over HTML elements in the panel<br>
+                  <strong>4.</strong> Watch them highlight on the page!
+                </div>
+              </div>
+            `">
+          </div>
+        </div>
+        <p style="font-size: 0.85rem; color: #666; text-align: center; margin-top: 0.5rem;"><em>Right-click → Inspect → Hover over HTML to highlight elements on the page</em></p>
+
         <div class="info-box tip">
           <div class="info-box-title">Pro Tip: Use the Element Picker</div>
           <p style="margin-bottom: 0;">In Chrome/Firefox developer tools, click the element picker icon (cursor in box) then click any element on the page. The HTML for that element will be highlighted in the developer panel.</p>
@@ -351,7 +397,7 @@ Crawl-delay: 10        <span class="comment"># Wait 10 seconds between requests<
         <!-- Section 4: Basic Scraping -->
         <h2 id="basic-scraping">2c.4 Basic Scraping Techniques</h2>
 
-        <p>We'll use <strong>Python with BeautifulSoup</strong> (most common) and <strong>R with rvest</strong>. Stata doesn't have native scraping capabilities, but you can call Python from Stata.</p>
+        <p>We'll use <strong>Python with BeautifulSoup</strong> (most common) and <strong>R with rvest</strong>. Stata doesn't have native scraping capabilities, but you can call Python from Stata (not covered here, but you can ask the chatbot if you're interested!).</p>
 
         <h3>Step 1: Fetch the Page</h3>
 

@@ -496,6 +496,111 @@
         }
     }
 
+    // ===========================================
+    // CHATBOT ANIMATIONS & SPEECH BUBBLES
+    // ===========================================
+
+    const SPEECH_BUBBLES = [
+        "Need help? I'm here!",
+        "Ask me anything!",
+        "Want me to explain something?",
+        "Got questions?",
+        "Stuck on code? Ask me!",
+        "I can help with that!",
+        "Let's figure this out!",
+        "Need a code example?",
+        "Confused? Just ask!",
+        "Python? Stata? R? I got you!"
+    ];
+
+    const ANIMATIONS = [
+        'chatbot-bounce',
+        'chatbot-wiggle',
+        'chatbot-pulse',
+        'chatbot-wave'
+    ];
+
+    let speechBubbleTimeout = null;
+    let animationTimeout = null;
+    let isPanelOpen = false;
+
+    function showSpeechBubble(toggle) {
+        if (isPanelOpen) return;
+
+        // Remove existing bubble if any
+        const existingBubble = document.querySelector('.chatbot-speech-bubble');
+        if (existingBubble) existingBubble.remove();
+
+        // Create speech bubble
+        const bubble = document.createElement('div');
+        bubble.className = 'chatbot-speech-bubble';
+        bubble.textContent = SPEECH_BUBBLES[Math.floor(Math.random() * SPEECH_BUBBLES.length)];
+        toggle.parentElement.appendChild(bubble);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            bubble.classList.add('visible');
+        });
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            bubble.classList.remove('visible');
+            setTimeout(() => bubble.remove(), 300);
+        }, 3000);
+    }
+
+    function triggerAnimation(toggle) {
+        if (isPanelOpen) return;
+
+        // Remove any existing animation classes
+        ANIMATIONS.forEach(anim => toggle.classList.remove(anim));
+
+        // Add random animation
+        const animation = ANIMATIONS[Math.floor(Math.random() * ANIMATIONS.length)];
+        toggle.classList.add(animation);
+
+        // Remove after animation completes
+        setTimeout(() => {
+            toggle.classList.remove(animation);
+        }, 1000);
+    }
+
+    function scheduleNextAnimation(toggle) {
+        if (isPanelOpen) return;
+
+        // Random interval between 8-15 seconds for animation
+        const animDelay = 8000 + Math.random() * 7000;
+        animationTimeout = setTimeout(() => {
+            triggerAnimation(toggle);
+            scheduleNextAnimation(toggle);
+        }, animDelay);
+    }
+
+    function scheduleNextSpeechBubble(toggle) {
+        if (isPanelOpen) return;
+
+        // Random interval between 20-40 seconds for speech bubble
+        const bubbleDelay = 20000 + Math.random() * 20000;
+        speechBubbleTimeout = setTimeout(() => {
+            showSpeechBubble(toggle);
+            scheduleNextSpeechBubble(toggle);
+        }, bubbleDelay);
+    }
+
+    function stopAnimations() {
+        isPanelOpen = true;
+        if (speechBubbleTimeout) clearTimeout(speechBubbleTimeout);
+        if (animationTimeout) clearTimeout(animationTimeout);
+        const existingBubble = document.querySelector('.chatbot-speech-bubble');
+        if (existingBubble) existingBubble.remove();
+    }
+
+    function startAnimations(toggle) {
+        isPanelOpen = false;
+        scheduleNextAnimation(toggle);
+        scheduleNextSpeechBubble(toggle);
+    }
+
     function init() {
         const toggle = document.getElementById('chatbot-toggle');
         const panel = document.getElementById('chatbot-panel');
@@ -507,10 +612,18 @@
 
         toggle.addEventListener('click', () => {
             panel.classList.toggle('open');
-            if (panel.classList.contains('open')) input?.focus();
+            if (panel.classList.contains('open')) {
+                stopAnimations();
+                input?.focus();
+            } else {
+                startAnimations(toggle);
+            }
         });
 
-        closeBtn?.addEventListener('click', () => panel.classList.remove('open'));
+        closeBtn?.addEventListener('click', () => {
+            panel.classList.remove('open');
+            startAnimations(toggle);
+        });
         sendBtn?.addEventListener('click', sendMessage);
         input?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -519,7 +632,7 @@
             }
         });
 
-        // Add styles for code blocks
+        // Add styles for code blocks and animations
         const style = document.createElement('style');
         style.textContent = `
             .chat-message code {
@@ -542,8 +655,98 @@
                 padding: 0;
                 color: #e2e8f0;
             }
+
+            /* Speech Bubble */
+            .chatbot-speech-bubble {
+                position: absolute;
+                bottom: 115px;
+                right: 10px;
+                background: white;
+                color: #1a365d;
+                padding: 12px 18px;
+                border-radius: 18px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                font-size: 0.95rem;
+                font-weight: 600;
+                white-space: nowrap;
+                opacity: 0;
+                transform: translateY(10px) scale(0.9);
+                transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                pointer-events: none;
+                z-index: 9998;
+            }
+            .chatbot-speech-bubble::after {
+                content: '';
+                position: absolute;
+                bottom: -8px;
+                right: 40px;
+                width: 0;
+                height: 0;
+                border-left: 10px solid transparent;
+                border-right: 10px solid transparent;
+                border-top: 10px solid white;
+            }
+            .chatbot-speech-bubble.visible {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            /* Bounce Animation */
+            @keyframes chatbot-bounce-anim {
+                0%, 100% { transform: translateY(0); }
+                25% { transform: translateY(-12px); }
+                50% { transform: translateY(0); }
+                75% { transform: translateY(-6px); }
+            }
+            .chatbot-bounce {
+                animation: chatbot-bounce-anim 0.6s ease-in-out;
+            }
+
+            /* Wiggle Animation */
+            @keyframes chatbot-wiggle-anim {
+                0%, 100% { transform: rotate(0deg); }
+                20% { transform: rotate(-15deg); }
+                40% { transform: rotate(12deg); }
+                60% { transform: rotate(-8deg); }
+                80% { transform: rotate(5deg); }
+            }
+            .chatbot-wiggle {
+                animation: chatbot-wiggle-anim 0.6s ease-in-out;
+            }
+
+            /* Pulse Animation */
+            @keyframes chatbot-pulse-anim {
+                0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+                50% { transform: scale(1.1); box-shadow: 0 6px 20px rgba(237, 137, 54, 0.5); }
+            }
+            .chatbot-pulse {
+                animation: chatbot-pulse-anim 0.8s ease-in-out;
+            }
+
+            /* Wave Animation */
+            @keyframes chatbot-wave-anim {
+                0%, 100% { transform: rotate(0deg); }
+                10% { transform: rotate(14deg); }
+                20% { transform: rotate(-8deg); }
+                30% { transform: rotate(14deg); }
+                40% { transform: rotate(-4deg); }
+                50% { transform: rotate(10deg); }
+                60%, 100% { transform: rotate(0deg); }
+            }
+            .chatbot-wave {
+                animation: chatbot-wave-anim 1s ease-in-out;
+            }
         `;
         document.head.appendChild(style);
+
+        // Start animations after a short delay
+        setTimeout(() => {
+            startAnimations(toggle);
+            // Show initial speech bubble after 5 seconds
+            setTimeout(() => {
+                if (!isPanelOpen) showSpeechBubble(toggle);
+            }, 5000);
+        }, 2000);
     }
 
     if (document.readyState === 'loading') {

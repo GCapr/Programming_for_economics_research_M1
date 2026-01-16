@@ -466,34 +466,16 @@
         addMessage(message, true);
         logChat({ type: 'user', message });
 
-        // First, check knowledge base
-        const kbResult = findBestMatch(message);
-
-        if (kbResult.found) {
-            // Knowledge base has a good answer
-            setTimeout(() => {
-                addMessage(kbResult.answer, false);
-                logChat({ type: 'assistant', message: kbResult.answer, userQuery: message, source: 'knowledge_base' });
-            }, 300);
-        } else if (USE_API_FALLBACK) {
-            // No KB match - use Gemini API
-            addMessage("Thinking...", false);
-            const response = await askGemini(message);
-            // Remove "Thinking..." message
-            const container = document.getElementById('chatbot-messages');
-            if (container && container.lastChild) {
-                container.removeChild(container.lastChild);
-            }
-            addMessage(response, false);
-            logChat({ type: 'assistant', message: response, userQuery: message, source: 'gemini_api' });
-        } else {
-            // No API fallback - show default message
-            const defaultMsg = "I'm not sure about that specific question. Here's what I can help with:\n\n- **Course navigation**: \"Where do I find X?\"\n- **Programming**: Python, Stata, R code questions\n- **Methods**: DiD, IV, RDD, regression\n- **Data**: Loading, cleaning, merging\n- **Tools**: Git, APIs, scraping\n\nTry rephrasing your question!";
-            setTimeout(() => {
-                addMessage(defaultMsg, false);
-                logChat({ type: 'assistant', message: defaultMsg, userQuery: message, source: 'fallback' });
-            }, 300);
+        // Send all questions directly to the LLM
+        addMessage("Thinking...", false);
+        const response = await askGemini(message);
+        // Remove "Thinking..." message
+        const container = document.getElementById('chatbot-messages');
+        if (container && container.lastChild) {
+            container.removeChild(container.lastChild);
         }
+        addMessage(response, false);
+        logChat({ type: 'assistant', message: response, userQuery: message, source: 'gemini_api' });
     }
 
     // ===========================================

@@ -337,6 +337,42 @@
     .try-it-prompt .arrow {
       font-size: 1.1rem;
     }
+
+    /* Chatbot Spotlight Animation */
+    @keyframes chatbot-spotlight-dance {
+      0% { transform: scale(1) translate(0, 0) rotate(0deg); }
+      10% { transform: scale(2) translate(-100px, -50px) rotate(-10deg); }
+      20% { transform: scale(4) translate(-200px, -150px) rotate(0deg); }
+      30% { transform: scale(4) translate(-200px, -150px) rotate(15deg); }
+      40% { transform: scale(4) translate(-200px, -150px) rotate(-15deg); }
+      50% { transform: scale(4) translate(-200px, -150px) rotate(10deg); }
+      60% { transform: scale(4) translate(-200px, -150px) rotate(-10deg); }
+      70% { transform: scale(4) translate(-200px, -150px) rotate(5deg); }
+      80% { transform: scale(2) translate(-100px, -50px) rotate(0deg); }
+      100% { transform: scale(1) translate(0, 0) rotate(0deg); }
+    }
+
+    .chatbot-toggle.spotlight-animation {
+      animation: chatbot-spotlight-dance 3s ease-in-out forwards;
+      z-index: 10001 !important;
+    }
+
+    .chatbot-spotlight-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .chatbot-spotlight-overlay.visible {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
@@ -555,7 +591,7 @@ df = pd.read_csv(<span class="code-string">"your_data.csv"</span>)
         </div>
 
         <!-- Feature 5: AI Assistant -->
-        <div class="feature-section">
+        <div class="feature-section" id="ai-assistant-section">
           <h3><span class="feature-icon">🤖</span> AI Teaching Assistant</h3>
           <p class="feature-description">
             Look for the chat icon in the <strong>bottom-right corner</strong> of every page. This AI assistant is trained on the course material and can help you understand concepts, debug code, or work through exercises. Try clicking it now!
@@ -929,6 +965,52 @@ df = pd.read_csv(<span class="code-string">"your_data.csv"</span>)
         }
       });
     });
+
+    // === Chatbot Spotlight Animation on Scroll ===
+    (function() {
+      const aiSection = document.getElementById('ai-assistant-section');
+      const chatbotToggle = document.getElementById('chatbot-toggle');
+
+      if (!aiSection || !chatbotToggle) return;
+
+      let hasAnimated = false;
+
+      // Create overlay element
+      const overlay = document.createElement('div');
+      overlay.className = 'chatbot-spotlight-overlay';
+      document.body.appendChild(overlay);
+
+      function triggerSpotlightAnimation() {
+        if (hasAnimated) return;
+        hasAnimated = true;
+
+        // Show overlay
+        overlay.classList.add('visible');
+
+        // Start chatbot animation
+        chatbotToggle.classList.add('spotlight-animation');
+
+        // Remove animation after it completes
+        setTimeout(() => {
+          chatbotToggle.classList.remove('spotlight-animation');
+          overlay.classList.remove('visible');
+        }, 3000);
+      }
+
+      // Use Intersection Observer to detect when AI section is in view
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && !hasAnimated) {
+            // Small delay so user sees the section first
+            setTimeout(triggerSpotlightAnimation, 300);
+          }
+        });
+      }, {
+        threshold: 0.5 // Trigger when 50% of section is visible
+      });
+
+      observer.observe(aiSection);
+    })();
   })();
   </script>
 </body>

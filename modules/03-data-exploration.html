@@ -185,7 +185,7 @@
         <div class="info-box warning" style="margin: 2rem 0;">
           <div class="info-box-title">A Critical Mistake I See Constantly</div>
           <p>In my years of teaching, I've watched many students&mdash;(and occasionally also senior researchers...)&mdash;make a costly mistake: <strong>jumping straight into analysis without first getting to know their data.</strong></p>
-          <p>The consequences: running regressions on variables with 80% missing values, drawing conclusions from data entry errors, missing obvious patterns, etc. <strong> Therefore, I designed this module to teach a more disciplined approach.</strong></p>
+          <p>The consequences: running regressions on variables with 80% missing values, drawing conclusions from data entry errors, missing obvious patterns, etc. <strong> In this module I'll share a more disciplined approach.</strong></p>
         </div>
 
         <!-- Workflow -->
@@ -606,7 +606,7 @@ Country Name Country Code         Year        Value
         <!-- STEP 4 & 5: Visualization and Correlation -->
         <h2>Step 4-5: Visualization & Correlations</h2>
 
-        <p>Visual inspection often reveals patterns that statistics miss. Let's plot our GDP data.</p>
+        <p>Visual inspection reveals patterns that summary statistics miss. Before any analysis, you should explore: <strong>distributions</strong> (histograms, density plots), <strong>outliers</strong> (box plots), <strong>relationships</strong> (scatter plots), and <strong>correlations</strong> (heatmaps).</p>
 
         <div class="code-tabs" data-runnable="viz-1">
           <div class="tab-buttons">
@@ -615,68 +615,158 @@ Country Name Country Code         Year        Value
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Import matplotlib for plotting</span>
-<span class="code-tooltip" data-tip="IMPORT: Loads the matplotlib.pyplot module, Python's main plotting library. 'pyplot' is the module within matplotlib that provides a MATLAB-like interface for creating charts."><span class="code-keyword">import</span></span> <span class="code-tooltip" data-tip="MATPLOTLIB.PYPLOT: The standard Python library for creating visualizations - histograms, line charts, scatter plots, etc. Almost always imported as 'plt' for convenience.">matplotlib.pyplot</span> <span class="code-tooltip" data-tip="AS PLT: Creates a short alias. Instead of typing 'matplotlib.pyplot.hist()', you just type 'plt.hist()'. This is the universal convention."><span class="code-keyword">as</span> plt</span>
+<pre><code><span class="code-comment"># Import visualization libraries</span>
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+<span class="code-keyword">import</span> seaborn <span class="code-keyword">as</span> sns
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
 
-<span class="code-comment"># Histogram of GDP values (scaled to billions for readability)</span>
-<span class="code-comment"># dropna() removes missing values before plotting</span>
-<span class="code-tooltip" data-tip="PLT.FIGURE(): Creates a new empty figure (canvas) for your chart. figsize=(10, 5) sets width=10 inches, height=5 inches. Always call this before creating a new plot.">plt.figure</span>(figsize=(<span class="code-number">10</span>, <span class="code-number">5</span>))
-<span class="code-tooltip" data-tip="PLT.HIST(): Creates a histogram - a bar chart showing how often values fall into different ranges (bins). Great for understanding data distribution. Shows if data is normal, skewed, or has outliers.">plt.hist</span>(<span class="code-tooltip" data-tip="DF['Value']: Selects the 'Value' column from the DataFrame. Square brackets with column name is how you access a single column in pandas.">df[<span class="code-string">'Value'</span>]</span><span class="code-tooltip" data-tip="DROPNA(): Removes all missing values (NaN) from the data. Essential before plotting - missing values can cause errors or misleading visualizations.">.dropna()</span><span class="code-tooltip" data-tip="APPLY(LAMBDA X: X/1E9): Transforms each value by dividing by 1 billion (1e9 = 1,000,000,000). Lambda is a mini-function. This converts raw GDP to billions for readability.">.apply(<span class="code-keyword">lambda</span> x: x/<span class="code-number">1e9</span>)</span>, <span class="code-tooltip" data-tip="BINS=50: Divides the data range into 50 equal intervals (bars). More bins = more detail but can look noisy. Fewer bins = smoother but may hide patterns. 50 is a good starting point.">bins=<span class="code-number">50</span></span>, <span class="code-tooltip" data-tip="EDGECOLOR='BLACK': Adds black borders around each bar, making them easier to distinguish. Without this, bars blend together.">edgecolor=<span class="code-string">'black'</span></span>)
-<span class="code-tooltip" data-tip="PLT.XLABEL(): Adds a label to the x-axis (horizontal). Always label your axes so readers know what they're looking at!">plt.xlabel</span>(<span class="code-string">'GDP (Billion USD)'</span>)
-<span class="code-tooltip" data-tip="PLT.YLABEL(): Adds a label to the y-axis (vertical). 'Frequency' means how many observations fall into each bin.">plt.ylabel</span>(<span class="code-string">'Frequency'</span>)
-<span class="code-tooltip" data-tip="PLT.TITLE(): Adds a title above the chart. Good titles describe WHAT the chart shows, not just the variables.">plt.title</span>(<span class="code-string">'Distribution of GDP Across Countries and Years'</span>)
-<span class="code-tooltip" data-tip="PLT.SHOW(): Displays the chart on screen. Without this, the plot is created but not shown. In Jupyter notebooks, this is often automatic.">plt.show()</span>
+<span class="code-comment"># Scale GDP to billions and log-transform for better visualization</span>
+<span class="code-tooltip" data-tip="COPY(): Creates an independent copy of the DataFrame. Without copy(), changes to df_viz would also change df. Always use copy() when creating modified versions for plotting.">df_viz</span> = df.copy()
+<span class="code-tooltip" data-tip="CREATING NEW COLUMN: df['new_col'] = ... adds a new column. Here we scale GDP to billions by dividing by 1e9 (1 billion). Makes numbers more readable.">df_viz[<span class="code-string">'GDP_billions'</span>]</span> = df_viz[<span class="code-string">'Value'</span>] / <span class="code-number">1e9</span>
+<span class="code-tooltip" data-tip="LOG TRANSFORM: np.log10() computes log base 10. Log transforms help visualize right-skewed data (like GDP) by compressing large values. A country with GDP of $1 trillion shows as 3 (log10 of 1000).">df_viz[<span class="code-string">'log_GDP'</span>]</span> = np.log10(df_viz[<span class="code-string">'Value'</span>].replace(<span class="code-number">0</span>, np.nan))
 
-<span class="code-comment"># GDP over time for selected countries</span>
-<span class="code-comment"># Filter to specific country codes using isin()</span>
-<span class="code-tooltip" data-tip="LIST OF COUNTRIES: A Python list containing country codes we want to compare. Lists are created with square brackets and commas between items.">countries</span> = [<span class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>, <span class="code-string">'DEU'</span>, <span class="code-string">'BRA'</span>]
-<span class="code-tooltip" data-tip="FILTERING WITH ISIN(): Keeps only rows where 'Country Code' matches one of our selected countries. The part inside df[...] creates True/False values, and only True rows are kept.">subset</span> = df[df[<span class="code-string">'Country Code'</span>]<span class="code-tooltip" data-tip="ISIN(): Checks if each value is in the given list. Returns True if found, False if not. More efficient than writing multiple == conditions with 'or'.">.isin(countries)</span>]
+<span class="code-comment"># Set up a 2x2 figure for multiple plots</span>
+<span class="code-tooltip" data-tip="PLT.SUBPLOTS(): Creates a figure with multiple plots arranged in a grid. (2,2) means 2 rows x 2 columns = 4 subplots. Returns the figure object and an array of axes (individual plot areas).">fig, axes</span> = plt.subplots(<span class="code-number">2</span>, <span class="code-number">2</span>, figsize=(<span class="code-number">12</span>, <span class="code-number">10</span>))
 
-plt.figure(figsize=(<span class="code-number">10</span>, <span class="code-number">5</span>))
-<span class="code-tooltip" data-tip="FOR LOOP: Repeats the code block for each country in our list. 'country' takes each value in turn: first 'USA', then 'CHN', etc. This lets us draw one line per country."><span class="code-keyword">for</span> country <span class="code-keyword">in</span> countries:</span>
-    <span class="code-tooltip" data-tip="FILTERING ONE COUNTRY: Creates a subset containing only rows for the current country. The == compares each row's Country Code to our loop variable.">data</span> = subset[subset[<span class="code-string">'Country Code'</span>] == country]
-    <span class="code-tooltip" data-tip="PLT.PLOT(): Creates a line chart. First argument (Year) goes on x-axis, second (Value/1e12) on y-axis. label= adds the country name to the legend. Division by 1e12 converts to trillions.">plt.plot</span>(data[<span class="code-string">'Year'</span>], data[<span class="code-string">'Value'</span>]/<span class="code-number">1e12</span>, <span class="code-tooltip" data-tip="LABEL=COUNTRY: Assigns a name to this line for the legend. Each country gets its own label so viewers can identify which line is which.">label=country</span>)
-plt.xlabel(<span class="code-string">'Year'</span>)
-plt.ylabel(<span class="code-string">'GDP (Trillion USD)'</span>)
-<span class="code-tooltip" data-tip="PLT.LEGEND(): Displays a legend box showing which line represents which country. Uses the 'label' values from each plot() call.">plt.legend()</span>
-plt.title(<span class="code-string">'GDP Trends: Selected Countries'</span>)
+<span class="code-comment"># 1. HISTOGRAM WITH DENSITY - Distribution shape</span>
+<span class="code-tooltip" data-tip="SNS.HISTPLOT(): Seaborn's histogram with optional density curve. kde=True adds a smooth kernel density estimate line showing the underlying distribution shape. Better than plt.hist() for exploration.">sns.histplot</span>(df_viz[<span class="code-string">'log_GDP'</span>].dropna(), <span class="code-tooltip" data-tip="KDE=TRUE: Adds a Kernel Density Estimate - a smooth curve showing the probability distribution. Helps see the shape beyond the histogram bars.">kde=<span class="code-keyword">True</span></span>, bins=<span class="code-number">40</span>, ax=axes[<span class="code-number">0</span>,<span class="code-number">0</span>])
+axes[<span class="code-number">0</span>,<span class="code-number">0</span>].set_xlabel(<span class="code-string">'Log10(GDP in USD)'</span>)
+axes[<span class="code-number">0</span>,<span class="code-number">0</span>].set_title(<span class="code-string">'Distribution of GDP (log scale)'</span>)
+
+<span class="code-comment"># 2. BOX PLOT BY DECADE - Outliers and spread over time</span>
+<span class="code-tooltip" data-tip="INTEGER DIVISION //: df['Year']//10*10 rounds years down to decades. 1987//10=198, 198*10=1980. Groups years into decades for comparison.">df_viz[<span class="code-string">'Decade'</span>]</span> = (df_viz[<span class="code-string">'Year'</span>] // <span class="code-number">10</span>) * <span class="code-number">10</span>
+<span class="code-tooltip" data-tip="SNS.BOXPLOT(): Shows distribution summary: median (line), IQR (box), whiskers (typical range), and outliers (dots). x= groups data, y= is the value. Great for comparing distributions across categories.">sns.boxplot</span>(data=df_viz, x=<span class="code-string">'Decade'</span>, y=<span class="code-string">'log_GDP'</span>, ax=axes[<span class="code-number">0</span>,<span class="code-number">1</span>])
+axes[<span class="code-number">0</span>,<span class="code-number">1</span>].set_ylabel(<span class="code-string">'Log10(GDP)'</span>)
+axes[<span class="code-number">0</span>,<span class="code-number">1</span>].set_title(<span class="code-string">'GDP Distribution by Decade'</span>)
+axes[<span class="code-number">0</span>,<span class="code-number">1</span>].tick_params(axis=<span class="code-string">'x'</span>, rotation=<span class="code-number">45</span>)
+
+<span class="code-comment"># 3. TIME SERIES - Trends for selected countries</span>
+countries = [<span class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>, <span class="code-string">'DEU'</span>, <span class="code-string">'BRA'</span>, <span class="code-string">'IND'</span>]
+subset = df_viz[df_viz[<span class="code-string">'Country Code'</span>].isin(countries)]
+<span class="code-keyword">for</span> country <span class="code-keyword">in</span> countries:
+    data = subset[subset[<span class="code-string">'Country Code'</span>] == country]
+    axes[<span class="code-number">1</span>,<span class="code-number">0</span>].plot(data[<span class="code-string">'Year'</span>], data[<span class="code-string">'GDP_billions'</span>], label=country, linewidth=<span class="code-number">2</span>)
+axes[<span class="code-number">1</span>,<span class="code-number">0</span>].set_xlabel(<span class="code-string">'Year'</span>)
+axes[<span class="code-number">1</span>,<span class="code-number">0</span>].set_ylabel(<span class="code-string">'GDP (Billion USD)'</span>)
+axes[<span class="code-number">1</span>,<span class="code-number">0</span>].legend()
+axes[<span class="code-number">1</span>,<span class="code-number">0</span>].set_title(<span class="code-string">'GDP Trends: Major Economies'</span>)
+
+<span class="code-comment"># 4. SCATTER PLOT - Year vs GDP to see global patterns</span>
+<span class="code-tooltip" data-tip="SNS.SCATTERPLOT(): Creates scatter plots with optional grouping by color/size. alpha= controls transparency (0-1), making overlapping points visible. Essential for spotting relationships.">sns.scatterplot</span>(data=df_viz.dropna(), x=<span class="code-string">'Year'</span>, y=<span class="code-string">'log_GDP'</span>,
+                <span class="code-tooltip" data-tip="ALPHA=0.3: Sets transparency. 0=invisible, 1=solid. Low alpha reveals density - darker areas have more overlapping points.">alpha=<span class="code-number">0.3</span></span>, s=<span class="code-number">10</span>, ax=axes[<span class="code-number">1</span>,<span class="code-number">1</span>])
+axes[<span class="code-number">1</span>,<span class="code-number">1</span>].set_ylabel(<span class="code-string">'Log10(GDP)'</span>)
+axes[<span class="code-number">1</span>,<span class="code-number">1</span>].set_title(<span class="code-string">'All Countries: GDP Over Time'</span>)
+
+plt.tight_layout()
+plt.show()
+
+<span class="code-comment"># 5. DENSITY PLOT - Compare distributions across time periods</span>
+fig, ax = plt.subplots(figsize=(<span class="code-number">10</span>, <span class="code-number">5</span>))
+<span class="code-keyword">for</span> decade <span class="code-keyword">in</span> [<span class="code-number">1980</span>, <span class="code-number">2000</span>, <span class="code-number">2020</span>]:
+    data = df_viz[(df_viz[<span class="code-string">'Decade'</span>] == decade) & (df_viz[<span class="code-string">'log_GDP'</span>].notna())]
+    <span class="code-tooltip" data-tip="SNS.KDEPLOT(): Draws a smooth density curve (kernel density estimate). Shows where values concentrate. Multiple kde curves let you compare distributions across groups.">sns.kdeplot</span>(data[<span class="code-string">'log_GDP'</span>], label=<span class="code-string">f'{decade}s'</span>, linewidth=<span class="code-number">2</span>)
+ax.set_xlabel(<span class="code-string">'Log10(GDP)'</span>)
+ax.set_title(<span class="code-string">'GDP Distribution Shift Over Decades'</span>)
+ax.legend(title=<span class="code-string">'Decade'</span>)
 plt.show()</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
-<pre><code><span class="code-comment">* Create histogram of GDP in billions</span>
-<span class="code-comment">* First generate a scaled variable</span>
-<span class="code-tooltip" data-tip="GEN (GENERATE): Creates a new variable in your dataset. Here we create 'gdp_billions' by dividing 'value' by 1 billion (1e9). The new variable is added as a column to your data."><span class="code-keyword">gen</span> gdp_billions</span> = <span class="code-tooltip" data-tip="VALUE / 1E9: Divides the GDP values by 1 billion. 1e9 is scientific notation for 1,000,000,000. This makes the numbers more readable on charts.">value / 1e9</span>
-<span class="code-tooltip" data-tip="HISTOGRAM: Creates a histogram showing the distribution of values. Shows how often values fall into different ranges. Great for spotting outliers, skewness, or unusual patterns in your data."><span class="code-keyword">histogram</span> gdp_billions</span>, <span class="code-tooltip" data-tip="FREQUENCY: Shows actual counts (how many observations) rather than density. More intuitive for beginners - you can see '100 countries' rather than '0.02 density'.">frequency</span> <span class="code-tooltip" data-tip="TITLE(): Adds a title above your chart. Always title your visualizations so viewers know what they're looking at.">title(<span class="code-string">"Distribution of GDP"</span>)</span>
+<pre><code><span class="code-comment">* Scale GDP and create log transform</span>
+<span class="code-tooltip" data-tip="GEN (GENERATE): Creates a new variable. Here we scale GDP to billions by dividing by 1e9 (1 billion)."><span class="code-keyword">gen</span></span> gdp_billions = value / 1e9
+<span class="code-tooltip" data-tip="LOG10(): Computes logarithm base 10. Log transforms help visualize right-skewed data like GDP. Stata's log10() handles missing values automatically."><span class="code-keyword">gen</span></span> log_gdp = log10(value)
+<span class="code-tooltip" data-tip="INTEGER DIVISION: int(year/10)*10 rounds years to decades. int() truncates decimals, so 1987/10=198.7 becomes 198, then *10=1980."><span class="code-keyword">gen</span></span> decade = int(year/10)*10
 
-<span class="code-comment">* Time series for selected countries</span>
-<span class="code-comment">* twoway combines multiple plots</span>
-<span class="code-tooltip" data-tip="TWOWAY: Stata's command for combining multiple graphs into one. Can overlay lines, scatter plots, areas, etc. The plots are listed in parentheses."><span class="code-keyword">twoway</span></span> <span class="code-tooltip" data-tip="(LINE VALUE YEAR IF...): Draws a line connecting year to value, but only for USA observations. The 'if' condition filters which data points to include. Each parenthesis creates one line.">(line value year if countrycode == <span class="code-string">"USA"</span>)</span> <span class="code-tooltip" data-tip="///: Line continuation in Stata. Lets you split long commands across multiple lines for readability. The command continues on the next line.">///</span>
-       (line value year if countrycode == <span class="code-string">"CHN"</span>) ///
-       (line value year if countrycode == <span class="code-string">"DEU"</span>) ///
-       (line value year if countrycode == <span class="code-string">"BRA"</span>), ///
-       <span class="code-tooltip" data-tip="LEGEND(): Adds labels to identify each line. label(1 'USA') names the first line 'USA', label(2 'China') names the second, etc. Numbers correspond to the order of (line...) commands.">legend(label(1 <span class="code-string">"USA"</span>) label(2 <span class="code-string">"China"</span>) label(3 <span class="code-string">"Germany"</span>) label(4 <span class="code-string">"Brazil"</span>))</span> ///
-       <span class="code-tooltip" data-tip="TITLE() YTITLE(): title() adds the main chart title. ytitle() labels the y-axis (vertical). Use xtitle() for x-axis labels.">title(<span class="code-string">"GDP Trends"</span>) ytitle(<span class="code-string">"GDP (USD)"</span>)</span></code></pre>
+<span class="code-comment">* 1. HISTOGRAM WITH DENSITY OVERLAY</span>
+<span class="code-tooltip" data-tip="HISTOGRAM WITH KDENSITY: The kdensity option overlays a smooth density curve on the histogram. Shows distribution shape beyond the bars."><span class="code-keyword">histogram</span></span> log_gdp, <span class="code-tooltip" data-tip="KDENSITY: Adds a kernel density estimate curve - a smooth line showing probability distribution.">kdensity</span> frequency ///
+    title(<span class="code-string">"Distribution of GDP (log scale)"</span>) ///
+    xtitle(<span class="code-string">"Log10(GDP in USD)"</span>)
+
+<span class="code-comment">* 2. BOX PLOT BY DECADE - Shows outliers and spread</span>
+<span class="code-tooltip" data-tip="GRAPH BOX: Creates box plots showing median, quartiles, and outliers. 'over(decade)' creates separate boxes for each decade."><span class="code-keyword">graph box</span></span> log_gdp, <span class="code-tooltip" data-tip="OVER(): Groups data by a categorical variable. Each unique value gets its own box plot.">over(decade)</span> ///
+    title(<span class="code-string">"GDP Distribution by Decade"</span>) ///
+    ytitle(<span class="code-string">"Log10(GDP)"</span>) ///
+    <span class="code-tooltip" data-tip="NOOUTSIDES: Suppresses extreme outliers from display. Use cautiously - outliers may be important! Remove this option to see all outliers.">nooutsides</span>
+
+<span class="code-comment">* 3. TIME SERIES FOR SELECTED COUNTRIES</span>
+<span class="code-keyword">twoway</span> (line gdp_billions year if countrycode == <span class="code-string">"USA"</span>, lwidth(medium)) ///
+       (line gdp_billions year if countrycode == <span class="code-string">"CHN"</span>, lwidth(medium)) ///
+       (line gdp_billions year if countrycode == <span class="code-string">"DEU"</span>, lwidth(medium)) ///
+       (line gdp_billions year if countrycode == <span class="code-string">"BRA"</span>, lwidth(medium)) ///
+       (line gdp_billions year if countrycode == <span class="code-string">"IND"</span>, lwidth(medium)), ///
+       legend(label(1 <span class="code-string">"USA"</span>) label(2 <span class="code-string">"China"</span>) label(3 <span class="code-string">"Germany"</span>) ///
+              label(4 <span class="code-string">"Brazil"</span>) label(5 <span class="code-string">"India"</span>)) ///
+       title(<span class="code-string">"GDP Trends: Major Economies"</span>) ///
+       ytitle(<span class="code-string">"GDP (Billion USD)"</span>) xtitle(<span class="code-string">"Year"</span>)
+
+<span class="code-comment">* 4. SCATTER PLOT - All countries over time</span>
+<span class="code-tooltip" data-tip="SCATTER: Creates scatter plots. 'jitter(2)' adds small random noise to prevent overplotting. 'msize(tiny)' makes points small so patterns emerge."><span class="code-keyword">scatter</span></span> log_gdp year, <span class="code-tooltip" data-tip="MSIZE(TINY): Sets marker size. Options: tiny, vsmall, small, medium, large. Small sizes help when you have many points.">msize(tiny)</span> <span class="code-tooltip" data-tip="MCOLOR(%30): Sets marker transparency. %30 means 30% opaque. Reveals density - darker areas have more overlapping points.">mcolor(%30)</span> ///
+    title(<span class="code-string">"All Countries: GDP Over Time"</span>) ///
+    ytitle(<span class="code-string">"Log10(GDP)"</span>) xtitle(<span class="code-string">"Year"</span>)
+
+<span class="code-comment">* 5. DENSITY COMPARISON ACROSS DECADES</span>
+<span class="code-tooltip" data-tip="TWOWAY KDENSITY: Draws kernel density curves. Combining multiple kdensity plots lets you compare distributions across groups."><span class="code-keyword">twoway</span></span> (kdensity log_gdp if decade == 1980, lwidth(medium)) ///
+       (kdensity log_gdp if decade == 2000, lwidth(medium)) ///
+       (kdensity log_gdp if decade == 2020, lwidth(medium)), ///
+       legend(label(1 <span class="code-string">"1980s"</span>) label(2 <span class="code-string">"2000s"</span>) label(3 <span class="code-string">"2020s"</span>)) ///
+       title(<span class="code-string">"GDP Distribution Shift Over Decades"</span>) ///
+       xtitle(<span class="code-string">"Log10(GDP)"</span>) ytitle(<span class="code-string">"Density"</span>)</code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-comment"># Load ggplot2 (part of tidyverse) for elegant visualizations</span>
-<span class="code-tooltip" data-tip="LIBRARY(GGPLOT2): Loads the ggplot2 package, R's most popular visualization library. Creates publication-quality charts using a 'grammar of graphics' - you build plots by adding layers."><span class="code-function">library</span>(ggplot2)</span>
+<pre><code><span class="code-comment"># Load required libraries</span>
+<span class="code-function">library</span>(tidyverse)  <span class="code-comment"># includes ggplot2, dplyr</span>
+<span class="code-function">library</span>(patchwork)  <span class="code-comment"># for combining plots</span>
 
-<span class="code-comment"># Histogram of GDP distribution</span>
-<span class="code-comment"># ggplot uses layered "grammar of graphics" approach</span>
-<span class="code-tooltip" data-tip="GGPLOT(): Initializes an empty plot canvas. First argument is your data (df), second is aes() which maps variables to visual properties. By itself, ggplot() just creates a blank canvas - you add layers with +."><span class="code-function">ggplot</span></span>(df, <span class="code-tooltip" data-tip="AES(): Short for 'aesthetics'. Maps data variables to visual properties. x= sets what goes on horizontal axis. You can also set y=, color=, size=, etc. Think of it as 'which column should control which visual aspect?'"><span class="code-function">aes</span>(x = Value/<span class="code-number">1e9</span>)</span>) <span class="code-tooltip" data-tip="+: In ggplot2, the + adds layers to your plot. Each layer can be a different type of geometry (bars, lines, points), labels, themes, etc. You build plots piece by piece.">+</span>
-  <span class="code-tooltip" data-tip="GEOM_HISTOGRAM(): Adds a histogram layer showing distribution of values. bins= controls how many bars (more = more detail). fill= sets bar color, color= sets border color."><span class="code-function">geom_histogram</span>(bins = <span class="code-number">50</span>, fill = <span class="code-string">"steelblue"</span>, color = <span class="code-string">"white"</span>)</span> +
-  <span class="code-tooltip" data-tip="LABS(): Adds labels to your plot. x= labels x-axis, y= labels y-axis, title= adds main title. Always label your axes so readers understand what they're seeing!"><span class="code-function">labs</span>(x = <span class="code-string">"GDP (Billion USD)"</span>, y = <span class="code-string">"Frequency"</span>,
-       title = <span class="code-string">"Distribution of GDP Across Countries"</span>)</span>
+<span class="code-comment"># Prepare data with transformations</span>
+df_viz <- df <span class="code-tooltip" data-tip="PIPE OPERATOR %>%: Passes data from left to right. Read as 'then'. Makes code read like a recipe: take df, THEN mutate it, THEN filter it, etc.">%>%</span>
+  <span class="code-tooltip" data-tip="MUTATE(): Adds or modifies columns in a data frame. Can create multiple columns at once, separated by commas."><span class="code-function">mutate</span></span>(
+    GDP_billions = Value / 1e9,
+    <span class="code-tooltip" data-tip="LOG10(): Base-10 logarithm. Log transforms compress right-skewed data. A GDP of $1 trillion becomes log10(1e12) = 12.">log_GDP</span> = log10(Value),
+    <span class="code-tooltip" data-tip="INTEGER DIVISION %/%: R's integer division operator. year %/% 10 gives the decade digit (198 for 1987), then *10 gives 1980.">Decade</span> = (Year %/% 10) * 10
+  )
 
-<span class="code-comment"># Time series for selected countries</span>
-<span class="code-tooltip" data-tip="C(): Combines values into a vector (a list of items). Here we create a vector of country codes we want to analyze. 'c' stands for 'combine' or 'concatenate'.">countries <- <span class="code-function">c</span>(<span class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>, <span class="code-string">"DEU"</span>, <span class="code-string">"BRA"</span>)</span>
-<span class="code-tooltip" data-tip="PIPE OPERATOR %>%: Passes the result on the left to the function on the right. Read it as 'then'. df %>% filter(...) means 'take df, THEN filter it'. Makes code read like a recipe.">df %>%</span>
-  <span class="code-tooltip" data-tip="FILTER(): Keeps only rows that match a condition. %in% checks if Country Code is in our list of countries. Only matching rows pass through to the next step."><span class="code-function">filter</span>(`Country Code` %in% countries)</span> <span class="code-tooltip" data-tip="%>%: The pipe passes our filtered data to the next function. The filtered data becomes the first argument of ggplot().">%>%</span>
-  <span class="code-tooltip" data-tip="GGPLOT() WITH COLOR: When color= is set to a variable (Country Code), ggplot automatically creates separate colored lines for each country. No loop needed - ggplot handles grouping automatically!"><span class="code-function">ggplot</span>(<span class="code-function">aes</span>(x = Year, y = Value/<span class="code-number">1e12</span>, color = `Country Code`))</span> +
-  <span class="code-tooltip" data-tip="GEOM_LINE(): Draws connected lines. Because we set color= in aes(), R automatically draws one line per country in different colors. linewidth= controls line thickness."><span class="code-function">geom_line</span>(linewidth = <span class="code-number">1</span>)</span> +
-  <span class="code-function">labs</span>(y = <span class="code-string">"GDP (Trillion USD)"</span>, title = <span class="code-string">"GDP Trends: Selected Countries"</span>)</code></pre>
+<span class="code-comment"># 1. HISTOGRAM WITH DENSITY - Distribution shape</span>
+p1 <- <span class="code-function">ggplot</span>(df_viz, <span class="code-function">aes</span>(x = log_GDP)) +
+  <span class="code-tooltip" data-tip="GEOM_HISTOGRAM(): Creates histogram bars. aes(y = after_stat(density)) scales y-axis to density (area=1) so we can overlay a density curve."><span class="code-function">geom_histogram</span></span>(<span class="code-function">aes</span>(y = after_stat(density)), bins = 40,
+                   fill = <span class="code-string">"steelblue"</span>, alpha = 0.7) +
+  <span class="code-tooltip" data-tip="GEOM_DENSITY(): Adds a smooth kernel density curve. Shows the underlying distribution shape. color= sets line color, linewidth= sets thickness."><span class="code-function">geom_density</span></span>(color = <span class="code-string">"darkred"</span>, linewidth = 1) +
+  <span class="code-function">labs</span>(x = <span class="code-string">"Log10(GDP in USD)"</span>, y = <span class="code-string">"Density"</span>,
+       title = <span class="code-string">"Distribution of GDP (log scale)"</span>)
+
+<span class="code-comment"># 2. BOX PLOT BY DECADE - Outliers and spread over time</span>
+p2 <- df_viz %>%
+  <span class="code-function">filter</span>(!is.na(log_GDP)) %>%
+  <span class="code-function">ggplot</span>(<span class="code-function">aes</span>(x = <span class="code-function">factor</span>(Decade), y = log_GDP)) +
+  <span class="code-tooltip" data-tip="GEOM_BOXPLOT(): Creates box plots showing median (line), IQR (box), whiskers (1.5*IQR), and outliers (points). fill= sets box color."><span class="code-function">geom_boxplot</span></span>(fill = <span class="code-string">"lightblue"</span>, outlier.alpha = 0.3) +
+  <span class="code-function">labs</span>(x = <span class="code-string">"Decade"</span>, y = <span class="code-string">"Log10(GDP)"</span>,
+       title = <span class="code-string">"GDP Distribution by Decade"</span>)
+
+<span class="code-comment"># 3. TIME SERIES - Trends for selected countries</span>
+countries <- <span class="code-function">c</span>(<span class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>, <span class="code-string">"DEU"</span>, <span class="code-string">"BRA"</span>, <span class="code-string">"IND"</span>)
+p3 <- df_viz %>%
+  <span class="code-function">filter</span>(`Country Code` %in% countries) %>%
+  <span class="code-function">ggplot</span>(<span class="code-function">aes</span>(x = Year, y = GDP_billions, color = `Country Code`)) +
+  <span class="code-tooltip" data-tip="GEOM_LINE(): Draws connected lines. When color= is mapped to a variable, ggplot automatically creates separate colored lines for each group."><span class="code-function">geom_line</span></span>(linewidth = 1.2) +
+  <span class="code-function">labs</span>(y = <span class="code-string">"GDP (Billion USD)"</span>, title = <span class="code-string">"GDP Trends: Major Economies"</span>)
+
+<span class="code-comment"># 4. SCATTER PLOT - Year vs GDP to see global patterns</span>
+p4 <- df_viz %>%
+  <span class="code-function">filter</span>(!is.na(log_GDP)) %>%
+  <span class="code-function">ggplot</span>(<span class="code-function">aes</span>(x = Year, y = log_GDP)) +
+  <span class="code-tooltip" data-tip="GEOM_POINT(): Adds points to the plot. alpha= controls transparency (0-1). Low alpha reveals density where points overlap."><span class="code-function">geom_point</span></span>(alpha = 0.2, size = 0.8) +
+  <span class="code-function">labs</span>(y = <span class="code-string">"Log10(GDP)"</span>, title = <span class="code-string">"All Countries: GDP Over Time"</span>)
+
+<span class="code-comment"># Combine plots in a 2x2 grid using patchwork</span>
+<span class="code-tooltip" data-tip="PATCHWORK SYNTAX: The + combines plots, and plot_layout() arranges them. ncol=2 creates a 2-column grid. Patchwork makes multi-panel figures easy.">(p1 + p2) / (p3 + p4)</span>
+
+<span class="code-comment"># 5. DENSITY COMPARISON ACROSS DECADES</span>
+df_viz %>%
+  <span class="code-function">filter</span>(Decade %in% <span class="code-function">c</span>(1980, 2000, 2020), !is.na(log_GDP)) %>%
+  <span class="code-function">ggplot</span>(<span class="code-function">aes</span>(x = log_GDP, color = <span class="code-function">factor</span>(Decade))) +
+  <span class="code-tooltip" data-tip="GEOM_DENSITY(): When color= is mapped to a grouping variable, creates separate density curves for each group. Perfect for comparing distributions."><span class="code-function">geom_density</span></span>(linewidth = 1.2) +
+  <span class="code-function">labs</span>(x = <span class="code-string">"Log10(GDP)"</span>, y = <span class="code-string">"Density"</span>, color = <span class="code-string">"Decade"</span>,
+       title = <span class="code-string">"GDP Distribution Shift Over Decades"</span>)</code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -684,51 +774,61 @@ plt.show()</code></pre>
         <!-- Output simulations for Step 4-5 -->
         <div class="output-simulation" data-output="viz-1" data-lang="python">
           <div class="output-header">
-            <span>Python Output (Matplotlib)</span>
+            <span>Python Output (Matplotlib/Seaborn)</span>
             <button class="close-output">&times;</button>
           </div>
           <div class="output-body">
-<span class="out-green">Figure 1: Distribution of GDP Across Countries and Years</span>
+<span class="out-green">═══ 2x2 Panel: Exploratory Visualizations ═══</span>
 
-GDP (Billion USD)
-<span class="out-blue">Frequency</span>
-    │
-8000│<span class="out-yellow">████</span>
-    │<span class="out-yellow">████</span>
-6000│<span class="out-yellow">████</span>
-    │<span class="out-yellow">████</span>█
-4000│<span class="out-yellow">████</span>██
-    │<span class="out-yellow">████</span>███
-2000│<span class="out-yellow">████</span>████▄
-    │<span class="out-yellow">████</span>█████▄▃▂▁▁▁▁▁▁▁▁▁▁▁
-   0└──────────────────────────────────
-    0    500   1000  2000  5000  10000+
+<span class="out-blue">┌─ 1. Distribution (log scale) ─┐  ┌─ 2. Box Plot by Decade ──────┐</span>
+│ Density                        │  │ Log10(GDP)                   │
+│ 0.4│       <span class="out-yellow">▄▄▄</span>                  │  │    13│    ○    ○  ○  <span class="out-yellow">○</span>  ○    │
+│    │      <span class="out-yellow">█████</span>                 │  │      │  ┬─┴─┬ ┬┴┬ ┬┴┬ <span class="out-yellow">┬┴┬</span> ┬┴┬  │
+│ 0.3│     <span class="out-yellow">███████</span>  <span class="out-str">─density</span>     │  │    11│  │   │ │ │ │ │ <span class="out-yellow">│ │</span> │ │  │
+│    │    <span class="out-yellow">█████████</span>              │  │      │  ├───┤ ├─┤ ├─┤ <span class="out-yellow">├─┤</span> ├─┤  │
+│ 0.2│   <span class="out-yellow">███████████</span>             │  │     9│  └─┬─┘ └┬┘ └┬┘ <span class="out-yellow">└┬┘</span> └┬┘  │
+│    │  <span class="out-yellow">█████████████</span>            │  │      │    │    │   │   <span class="out-yellow">│</span>   │   │
+│ 0.1│ <span class="out-yellow">███████████████▄</span>▃▂▁       │  │     7│  ──┴──  │   │   <span class="out-yellow">│</span>   │   │
+│   0└────────────────────       │  │      └────────────────────── │
+│    7   8   9  10  11  12  13   │  │     1970 1980 1990 2000 2020 │
+│      Log10(GDP in USD)         │  │           Decade             │
+└────────────────────────────────┘  └──────────────────────────────┘
 
-<span class="out-str">→ Right-skewed: Most countries have GDP &lt; $500B</span>
-<span class="out-str">→ Long tail: Few economies exceed $5 trillion</span>
+<span class="out-blue">┌─ 3. GDP Trends: Major Economies┐  ┌─ 4. All Countries Over Time ─┐</span>
+│ GDP (Billion $)                │  │ Log10(GDP)                   │
+│25000│              <span class="out-blue">╱──USA</span>      │  │    13│<span class="out-yellow">░░░░░░▒▒▒▓▓▓███</span>      │
+│     │            <span class="out-blue">╱</span>            │  │      │<span class="out-yellow">░░░░░▒▒▒▓▓▓████</span>      │
+│20000│          <span class="out-blue">╱</span>   <span class="out-yellow">╱──CHN</span>     │  │    11│<span class="out-yellow">░░░░▒▒▒▓▓▓█████</span>      │
+│     │        <span class="out-blue">╱</span>   <span class="out-yellow">╱</span>             │  │      │<span class="out-yellow">░░░▒▒▒▓▓▓██████</span>      │
+│15000│      <span class="out-blue">╱</span>  <span class="out-yellow">╱</span>                │  │     9│<span class="out-yellow">░░▒▒▒▓▓▓███████</span>      │
+│     │    <span class="out-blue">╱</span> <span class="out-yellow">╱</span>                  │  │      │<span class="out-yellow">░▒▒▒▓▓▓████████</span>      │
+│10000│  <span class="out-blue">╱</span><span class="out-yellow">╱</span>                    │  │     7│<span class="out-yellow">▒▒▒▓▓▓█████████</span>      │
+│     │<span class="out-blue">╱</span><span class="out-yellow">╱</span>    <span class="out-green">───DEU</span>  <span class="out-str">───BRA</span>     │  │      └───────────────────── │
+│ 5000│___<span class="out-green">──────</span><span class="out-str">──────</span>─<span class="out-num">IND</span>     │  │     1970  1990  2010  2025  │
+│    0└──────────────────────    │  │           Year               │
+│    1960  1980  2000   2020     │  │  <span class="out-str">darker = more observations</span>  │
+└────────────────────────────────┘  └──────────────────────────────┘
 
-───────────────────────────────────────────────────
+<span class="out-green">═══ Density Comparison: GDP Distribution Shift ═══</span>
 
-<span class="out-green">Figure 2: GDP Trends: Selected Countries (1960-2027)</span>
+Density
+│       <span class="out-str">1980s</span>   <span class="out-blue">2000s</span>   <span class="out-yellow">2020s</span>
+│         │       │        │
+0.4│       <span class="out-str">▄</span>      <span class="out-blue">▄</span>       <span class="out-yellow">▄</span>
+│        <span class="out-str">███</span>   <span class="out-blue">███</span>    <span class="out-yellow">███</span>
+0.3│       <span class="out-str">████</span> <span class="out-blue">█████</span>  <span class="out-yellow">█████</span>
+│        <span class="out-str">█████</span><span class="out-blue">██████</span><span class="out-yellow">██████</span>
+0.2│       <span class="out-str">██████████████████</span>
+│        <span class="out-str">██████████████████</span>
+0.1│      <span class="out-str">████████████████████</span>
+│       <span class="out-str">██████████████████████</span>▃▂▁
+0 └──────────────────────────────────
+   7    8    9   10   11   12   13
+           Log10(GDP)
 
-GDP (Trillion USD)
-   │                              <span class="out-blue">───USA</span>
-25 │                           ╱
-   │                        ╱
-20 │                      ╱    <span class="out-yellow">───CHN</span>
-   │                    ╱     ╱
-15 │                  ╱    ╱
-   │                ╱   ╱
-10 │              ╱  ╱
-   │           ╱╱
- 5 │        ╱╱        <span class="out-green">───DEU</span>  <span class="out-str">───BRA</span>
-   │     ╱╱___________────────────────
- 0 └────────────────────────────────────
-   1960  1980   2000   2010   2020   2027
-
-<span class="out-str">→ USA: Steady growth, largest economy</span>
-<span class="out-str">→ China: Exponential growth post-2000</span>
-<span class="out-str">→ Germany/Brazil: More modest trajectories</span></div>
+<span class="out-str">→ Distribution shifts right over time (economies growing)</span>
+<span class="out-str">→ Spread increases: inequality between countries grows</span>
+<span class="out-str">→ 2020s shows bimodal hints: emerging vs developed</span></div>
         </div>
 
         <div class="output-simulation" data-output="viz-1" data-lang="stata">
@@ -736,48 +836,81 @@ GDP (Trillion USD)
             <span>Stata Output (Graphics Window)</span>
             <button class="close-output">&times;</button>
           </div>
-          <div class="output-body"><span class="out-str">. histogram gdp_billions, frequency title("Distribution of GDP")</span>
+          <div class="output-body"><span class="out-str">. histogram log_gdp, kdensity frequency ...</span>
 
-<span class="out-green">Graph saved as Graph.gph</span>
+┌─────────────────────────────────────────────────────┐
+│  <span class="out-blue">Distribution of GDP (log scale)</span>                   │
+│                                                     │
+│ Frequency                     <span class="out-str">─ kdensity</span>           │
+│     │       <span class="out-yellow">▄▄▄</span>                                    │
+│ 800 │      <span class="out-yellow">█████</span>╲                                  │
+│     │     <span class="out-yellow">███████</span>╲                                │
+│ 600 │    <span class="out-yellow">█████████</span>─<span class="out-str">╲</span>                              │
+│     │   <span class="out-yellow">███████████</span> <span class="out-str">╲</span>                             │
+│ 400 │  <span class="out-yellow">█████████████</span>  <span class="out-str">╲</span>                            │
+│     │ <span class="out-yellow">███████████████</span>   <span class="out-str">╲▃▂▁</span>                      │
+│ 200 │<span class="out-yellow">█████████████████▄▃▂</span>   ▁▁                     │
+│    0└───────────────────────────                    │
+│     7    8    9   10   11   12   13                 │
+│            Log10(GDP in USD)                        │
+└─────────────────────────────────────────────────────┘
 
-┌──────────────────────────────────────────────────┐
-│     <span class="out-blue">Distribution of GDP</span>                          │
-│                                                  │
-│ Frequency                                        │
-│     │                                            │
-│ 8000│<span class="out-yellow">▓▓</span>                                          │
-│     │<span class="out-yellow">▓▓</span>                                          │
-│ 6000│<span class="out-yellow">▓▓</span>▓                                         │
-│     │<span class="out-yellow">▓▓</span>▓▓                                        │
-│ 4000│<span class="out-yellow">▓▓</span>▓▓▓                                       │
-│     │<span class="out-yellow">▓▓</span>▓▓▓▓                                      │
-│ 2000│<span class="out-yellow">▓▓</span>▓▓▓▓▓░░░                                  │
-│     │<span class="out-yellow">▓▓</span>▓▓▓▓▓▓░░░░ ░ ░                            │
-│    0└────────────────────────────                │
-│     0   500  1000 2000 5000 10000                │
-│              GDP (Billion USD)                   │
-└──────────────────────────────────────────────────┘
+<span class="out-str">. graph box log_gdp, over(decade) ...</span>
 
-<span class="out-str">. twoway (line value year if countrycode == "USA") ...</span>
+┌─────────────────────────────────────────────────────┐
+│  <span class="out-blue">GDP Distribution by Decade</span>                        │
+│                                                     │
+│ Log10(GDP)                                          │
+│    13│         ○       ○    ○    <span class="out-yellow">○</span>    ○            │
+│      │      ┬──┴──┬ ┬──┴┬ ┬─┴─┬ <span class="out-yellow">┬─┴─┬</span> ┬──┴┬         │
+│    11│      │     │ │   │ │   │ <span class="out-yellow">│   │</span> │   │         │
+│      │      ├─────┤ ├───┤ ├───┤ <span class="out-yellow">├───┤</span> ├───┤         │
+│     9│      └──┬──┘ └─┬─┘ └─┬─┘ <span class="out-yellow">└─┬─┘</span> └─┬─┘         │
+│      │         │      │     │    <span class="out-yellow">│</span>     │           │
+│     7│      ───┴───   │     │    <span class="out-yellow">│</span>     │           │
+│      └──────────────────────────────────            │
+│        1970  1980  1990  2000  2020                 │
+│                    Decade                           │
+└─────────────────────────────────────────────────────┘
 
-┌──────────────────────────────────────────────────┐
-│     <span class="out-blue">GDP Trends</span>                                   │
-│                                                  │
-│ GDP (USD)                                        │
-│ 2.5e+13│                          <span class="out-blue">──USA</span>          │
-│        │                       ╱                 │
-│ 2.0e+13│                    ╱                    │
-│        │                 ╱      <span class="out-yellow">──China</span>          │
-│ 1.5e+13│              ╱      ╱                   │
-│        │           ╱     ╱                       │
-│ 1.0e+13│        ╱    ╱                           │
-│        │     ╱  ╱                                │
-│ 5.0e+12│  ╱╱         <span class="out-green">──Germany</span>  <span class="out-str">──Brazil</span>         │
-│        │╱___────────────────                     │
-│       0└──────────────────────                   │
-│        1960  1980  2000  2020                    │
-│                 Year                             │
-└──────────────────────────────────────────────────┘</div>
+<span class="out-str">. twoway (line gdp_billions year if countrycode == "USA") ...</span>
+
+┌─────────────────────────────────────────────────────┐
+│  <span class="out-blue">GDP Trends: Major Economies</span>                       │
+│                                                     │
+│ GDP (Billion USD)                                   │
+│ 25000│                         <span class="out-blue">╱──USA</span>              │
+│      │                      <span class="out-blue">╱</span>                     │
+│ 20000│                   <span class="out-blue">╱</span>     <span class="out-yellow">╱──China</span>           │
+│      │                <span class="out-blue">╱</span>     <span class="out-yellow">╱</span>                    │
+│ 15000│             <span class="out-blue">╱</span>     <span class="out-yellow">╱</span>                       │
+│      │          <span class="out-blue">╱</span>    <span class="out-yellow">╱</span>                          │
+│ 10000│       <span class="out-blue">╱</span>   <span class="out-yellow">╱</span>                               │
+│      │    <span class="out-blue">╱</span> <span class="out-yellow">╱</span>                                   │
+│  5000│ <span class="out-blue">╱</span><span class="out-yellow">╱</span>      <span class="out-green">───Germany</span>  <span class="out-str">───Brazil</span>  <span class="out-num">───India</span>   │
+│      │___<span class="out-green">─────────</span><span class="out-str">─────────</span><span class="out-num">────────</span>             │
+│     0└──────────────────────────────                │
+│      1960   1980   2000   2020                      │
+│                  Year                               │
+└─────────────────────────────────────────────────────┘
+
+<span class="out-str">. twoway (kdensity log_gdp if decade == 1980) ...</span>
+
+┌─────────────────────────────────────────────────────┐
+│  <span class="out-blue">GDP Distribution Shift Over Decades</span>               │
+│                                                     │
+│ Density            <span class="out-str">─1980s</span>  <span class="out-blue">─2000s</span>  <span class="out-yellow">─2020s</span>        │
+│ 0.4│          <span class="out-str">╱╲</span>                                   │
+│    │         <span class="out-str">╱</span>  <span class="out-str">╲</span>   <span class="out-blue">╱╲</span>                            │
+│ 0.3│        <span class="out-str">╱</span>    <span class="out-str">╲</span> <span class="out-blue">╱</span>  <span class="out-blue">╲</span>  <span class="out-yellow">╱╲</span>                       │
+│    │       <span class="out-str">╱</span>      <span class="out-str">╲</span><span class="out-blue">╱</span>    <span class="out-blue">╲</span><span class="out-yellow">╱</span>  <span class="out-yellow">╲</span>                     │
+│ 0.2│      <span class="out-str">╱</span>        <span class="out-blue">│</span>      <span class="out-yellow">│</span>    <span class="out-yellow">╲</span>                   │
+│    │     <span class="out-str">╱</span>         <span class="out-blue">│</span>      <span class="out-yellow">│</span>      <span class="out-yellow">╲</span>                 │
+│ 0.1│  <span class="out-str">__╱</span>          <span class="out-blue">│</span>      <span class="out-yellow">│</span>        <span class="out-yellow">╲___</span>            │
+│   0└───────────────────────────────────             │
+│     7    8    9   10   11   12   13                 │
+│              Log10(GDP)                             │
+└─────────────────────────────────────────────────────┘</div>
         </div>
 
         <div class="output-simulation" data-output="viz-1" data-lang="r">
@@ -785,49 +918,63 @@ GDP (Trillion USD)
             <span>R Output (RStudio Plots Panel)</span>
             <button class="close-output">&times;</button>
           </div>
-          <div class="output-body"><span class="out-str">&gt; ggplot(df, aes(x = Value/1e9)) + geom_histogram(...)</span>
+          <div class="output-body"><span class="out-str">&gt; (p1 + p2) / (p3 + p4)  # patchwork combines plots</span>
 
-┌──────────────────────────────────────────────────┐
-│  <span class="out-blue">Distribution of GDP Across Countries</span>           │
-│                                                  │
-│ Frequency                                        │
-│     │                                            │
-│ 8000│<span class="out-blue">██</span>                                          │
-│     │<span class="out-blue">██</span>                                          │
-│ 6000│<span class="out-blue">██</span>█                                         │
-│     │<span class="out-blue">██</span>██                                        │
-│ 4000│<span class="out-blue">██</span>███                                       │
-│     │<span class="out-blue">██</span>████                                      │
-│ 2000│<span class="out-blue">██</span>█████▒▒                                   │
-│     │<span class="out-blue">██</span>██████▒▒▒░░░░                             │
-│    0└────────────────────────────                │
-│     0   500  1000 2000 5000 10000                │
-│           GDP (Billion USD)                      │
-└──────────────────────────────────────────────────┘
+<span class="out-green">═══ 2x2 Panel: Exploratory Visualizations ═══</span>
 
-<span class="out-str">&gt; df %>% filter(...) %>% ggplot(...) + geom_line(...)</span>
+<span class="out-blue">┌─ Distribution (log scale) ────┐  ┌─ Box Plot by Decade ──────┐</span>
+│ Density                        │  │ Log10(GDP)                 │
+│ 0.4│       <span class="out-blue">▄▄▄</span>                  │  │    13│  ○    ○   ○  <span class="out-yellow">○</span>  ○   │
+│    │      <span class="out-blue">█████</span>╲<span class="out-str">─density</span>       │  │      │ ┬┴┬  ┬┴┬ ┬┴┬ <span class="out-yellow">┬┴┬</span> ┬┴┬  │
+│ 0.3│     <span class="out-blue">███████</span>╲               │  │    11│ │ │  │ │ │ │ <span class="out-yellow">│ │</span> │ │  │
+│    │    <span class="out-blue">█████████</span>╲              │  │      │ ├─┤  ├─┤ ├─┤ <span class="out-yellow">├─┤</span> ├─┤  │
+│ 0.2│   <span class="out-blue">███████████</span>╲             │  │     9│ └┬┘  └┬┘ └┬┘ <span class="out-yellow">└┬┘</span> └┬┘  │
+│    │  <span class="out-blue">█████████████</span>╲            │  │      │  │    │   │   <span class="out-yellow">│</span>   │   │
+│ 0.1│ <span class="out-blue">███████████████▄</span>▃▂▁       │  │     7│ ─┴─   │   │   <span class="out-yellow">│</span>   │   │
+│   0└────────────────────       │  │      └─────────────────── │
+│    7   8   9  10  11  12  13   │  │    1970 1980 1990 2000 2020│
+│      Log10(GDP in USD)         │  │          Decade           │
+└────────────────────────────────┘  └────────────────────────────┘
 
-┌──────────────────────────────────────────────────┐
-│  <span class="out-blue">GDP Trends: Selected Countries</span>                  │
-│                                                  │
-│ GDP (Trillion USD)     Country Code             │
-│    │                   <span class="out-blue">─ USA</span>                    │
-│ 25 │                          ╱ <span class="out-yellow">─ CHN</span>           │
-│    │                       ╱                     │
-│ 20 │                    ╱      <span class="out-green">─ DEU</span>            │
-│    │                 ╱      ╱                    │
-│ 15 │              ╱     ╱    <span class="out-str">─ BRA</span>              │
-│    │           ╱    ╱                            │
-│ 10 │        ╱   ╱                                │
-│    │     ╱ ╱                                     │
-│  5 │  ╱╱                                         │
-│    │╱___────────────────                         │
-│  0 └──────────────────────                       │
-│    1960  1980  2000  2020                        │
-│              Year                                │
-└──────────────────────────────────────────────────┘
+<span class="out-blue">┌─ GDP Trends: Major Economies ─┐  ┌─ All Countries Over Time ──┐</span>
+│ GDP (Billion USD)              │  │ Log10(GDP)                 │
+│25000│              <span class="out-blue">╱─USA</span>       │  │    13│<span class="out-yellow">░░░░░░▒▒▒▓▓▓███</span>    │
+│     │            <span class="out-blue">╱</span>            │  │      │<span class="out-yellow">░░░░░▒▒▒▓▓▓████</span>    │
+│20000│          <span class="out-blue">╱</span>   <span class="out-yellow">╱─CHN</span>      │  │    11│<span class="out-yellow">░░░░▒▒▒▓▓▓█████</span>    │
+│     │        <span class="out-blue">╱</span>   <span class="out-yellow">╱</span>             │  │      │<span class="out-yellow">░░░▒▒▒▓▓▓██████</span>    │
+│15000│      <span class="out-blue">╱</span>  <span class="out-yellow">╱</span>                │  │     9│<span class="out-yellow">░░▒▒▒▓▓▓███████</span>    │
+│     │    <span class="out-blue">╱</span> <span class="out-yellow">╱</span>                  │  │      │<span class="out-yellow">░▒▒▒▓▓▓████████</span>    │
+│10000│  <span class="out-blue">╱</span><span class="out-yellow">╱</span>                    │  │     7│<span class="out-yellow">▒▒▒▓▓▓█████████</span>    │
+│     │<span class="out-blue">╱</span><span class="out-yellow">╱</span>    <span class="out-green">─DEU</span>  <span class="out-str">─BRA</span> <span class="out-num">─IND</span>  │  │      └────────────────── │
+│ 5000│___<span class="out-green">─────</span><span class="out-str">─────</span><span class="out-num">─────</span>      │  │    1970  1990  2010  2025 │
+│    0└──────────────────────    │  │  <span class="out-str">darker = more points</span>     │
+└────────────────────────────────┘  └────────────────────────────┘
 
-<span class="out-green">Plots displayed in RStudio Plots pane</span></div>
+<span class="out-str">&gt; df_viz %>% filter(Decade %in% c(1980, 2000, 2020)) %>% ...</span>
+
+┌─────────────────────────────────────────────────────┐
+│  <span class="out-blue">GDP Distribution Shift Over Decades</span>               │
+│                                                     │
+│ Density           Decade: <span class="out-str">─1980</span>  <span class="out-blue">─2000</span>  <span class="out-yellow">─2020</span>     │
+│ 0.4│          <span class="out-str">╱╲</span>                                   │
+│    │         <span class="out-str">╱</span>  <span class="out-str">╲</span>   <span class="out-blue">╱╲</span>                            │
+│ 0.3│        <span class="out-str">╱</span>    <span class="out-str">╲</span> <span class="out-blue">╱</span>  <span class="out-blue">╲</span>  <span class="out-yellow">╱╲</span>                       │
+│    │       <span class="out-str">╱</span>      <span class="out-str">╲</span><span class="out-blue">╱</span>    <span class="out-blue">╲</span><span class="out-yellow">╱</span>  <span class="out-yellow">╲</span>                     │
+│ 0.2│      <span class="out-str">╱</span>              <span class="out-yellow">│</span>    <span class="out-yellow">╲</span>                   │
+│    │     <span class="out-str">╱</span>               <span class="out-yellow">│</span>      <span class="out-yellow">╲</span>                 │
+│ 0.1│  <span class="out-str">__╱</span>                <span class="out-yellow">│</span>        <span class="out-yellow">╲___</span>            │
+│   0└───────────────────────────────────             │
+│     7    8    9   10   11   12   13                 │
+│              Log10(GDP)                             │
+└─────────────────────────────────────────────────────┘
+
+<span class="out-green">Plots rendered in RStudio Plots pane (Export → Save as PDF)</span>
+
+<span class="out-str">Key Insights:</span>
+→ Distribution shifts right over decades (global growth)
+→ Box plots reveal increasing spread (inequality)
+→ China's exponential rise visible in time series
+→ Scatter plot shows upward trend with high variance</div>
         </div>
 
         <!-- Complete First Analysis Script -->

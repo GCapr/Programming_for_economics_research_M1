@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Hotspot tooltip positioning
   initHotspotTooltips();
+
+  // Collapsible sidebar sub-navigation
+  initCollapsibleSubnav();
 });
 
 /**
@@ -372,4 +375,52 @@ function positionTooltip(hotspot, tooltip) {
   // Update arrow position class
   tooltip.classList.remove('top', 'bottom', 'left', 'right');
   tooltip.classList.add(position);
+}
+
+/**
+ * Initialize collapsible sidebar sub-navigation
+ * Allows clicking on parent items to expand/collapse sub-menus
+ */
+function initCollapsibleSubnav() {
+  const sidebar = document.querySelector('.sidebar nav');
+  if (!sidebar) return;
+
+  // Find all items with sub-navs
+  const itemsWithSubnav = sidebar.querySelectorAll('li > ul.sub-nav');
+
+  itemsWithSubnav.forEach(subnav => {
+    const parentLi = subnav.parentElement;
+    const parentLink = parentLi.querySelector(':scope > a');
+
+    if (!parentLi || !parentLink) return;
+
+    // Mark parent as having subnav
+    parentLi.classList.add('has-subnav');
+
+    // Check if any subitem is active - if so, expand by default
+    const hasActiveChild = subnav.querySelector('a.active') !== null;
+    const parentIsActive = parentLink.classList.contains('active');
+
+    if (hasActiveChild || parentIsActive) {
+      parentLi.classList.add('expanded');
+      subnav.classList.add('expanded');
+    }
+
+    // Create a toggle button for the expand/collapse
+    parentLink.addEventListener('click', function(e) {
+      // Get the href
+      const href = parentLink.getAttribute('href');
+
+      // If the parent link is the current page or user clicks on the expand area, toggle
+      const isCurrentPage = window.location.pathname.endsWith(href) ||
+                           window.location.pathname.endsWith(href.replace('../', ''));
+
+      // Toggle the subnav
+      if (isCurrentPage || e.target === parentLink) {
+        // Allow navigation but also toggle
+        parentLi.classList.toggle('expanded');
+        subnav.classList.toggle('expanded');
+      }
+    });
+  });
 }

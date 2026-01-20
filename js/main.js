@@ -386,20 +386,18 @@ function initCollapsibleSubnav() {
   if (!sidebar) return;
 
   // Find all items with sub-navs
-  const itemsWithSubnav = sidebar.querySelectorAll('li > ul.sub-nav');
+  const itemsWithSubnav = sidebar.querySelectorAll('li.has-subnav');
 
-  itemsWithSubnav.forEach(subnav => {
-    const parentLi = subnav.parentElement;
+  itemsWithSubnav.forEach(parentLi => {
+    const subnav = parentLi.querySelector(':scope > ul.sub-nav');
     const parentLink = parentLi.querySelector(':scope > a');
 
-    if (!parentLi || !parentLink) return;
+    if (!subnav || !parentLink) return;
 
-    // Mark parent as having subnav
-    parentLi.classList.add('has-subnav');
-
-    // Check if any subitem is active - if so, expand by default
-    const hasActiveChild = subnav.querySelector('a.active') !== null;
-    const parentIsActive = parentLink.classList.contains('active');
+    // Check if any subitem is active (active class can be on li or a) - if so, expand by default
+    const hasActiveChild = subnav.querySelector('li.active') !== null ||
+                          subnav.querySelector('a.active') !== null;
+    const parentIsActive = parentLi.classList.contains('active');
 
     if (hasActiveChild || parentIsActive) {
       parentLi.classList.add('expanded');

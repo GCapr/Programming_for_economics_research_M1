@@ -9,115 +9,18 @@
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <style>
-    .protected-content {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
-    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
-    .code-tooltip {
-      position: relative;
-      cursor: help;
-      border-bottom: 1px dotted #888;
-      text-decoration: none;
-    }
-
-    /* Tooltip element created by JavaScript */
-    .tooltip-popup {
-      position: fixed;
-      background: #1f2937;
-      color: white;
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      white-space: normal;
-      max-width: 300px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s ease-in-out;
-      z-index: 10000;
-      line-height: 1.4;
-      text-align: left;
-      font-family: var(--font-body);
-      font-style: normal;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    .tooltip-popup.visible {
-      opacity: 1;
-    }
-
-    /* Small arrow pointer */
-    .tooltip-popup::after {
-      content: '';
-      position: absolute;
-      border: 6px solid transparent;
-    }
-    .tooltip-popup.arrow-bottom::after {
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-top-color: #1f2937;
-    }
-    .tooltip-popup.arrow-top::after {
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-bottom-color: #1f2937;
-    }
-    .tooltip-popup.arrow-left::after {
-      top: 50%;
-      right: 100%;
-      transform: translateY(-50%);
-      border-right-color: #1f2937;
-    }
-    .tooltip-popup.arrow-right::after {
-      top: 50%;
-      left: 100%;
-      transform: translateY(-50%);
-      border-left-color: #1f2937;
-    }
-    /* Interactive Exercise Styles */
-    .interactive-exercise { background: white; border: 2px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .exercise-editor { margin: 1rem 0; }
-    .editor-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
-    .lang-btn { padding: 0.4rem 1rem; border: 1px solid var(--color-border); background: white; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
-    .lang-btn:hover { border-color: var(--color-primary); }
-    .lang-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
-    .code-editor { width: 100%; min-height: 200px; padding: 1rem; font-family: var(--font-code); font-size: 0.9rem; border: none; border-radius: 8px; background: #1a202c; color: #e2e8f0; resize: vertical; line-height: 1.5; }
-    .code-editor:focus { outline: 2px solid var(--color-accent); }
-    .exercise-actions { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
-    .btn-check-score, .btn-show-solution { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .btn-check-score { background: var(--color-primary); color: white; }
-    .btn-check-score:hover { background: var(--color-secondary); transform: translateY(-1px); }
-    .btn-show-solution { background: var(--color-accent); color: white; }
-    .btn-show-solution:hover { background: #c77a3a; }
-    .score-display { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-radius: 8px; }
-    .score-circle { display: flex; align-items: baseline; gap: 2px; }
-    .score-value { font-size: 2rem; font-weight: 700; color: var(--color-primary); }
-    .score-value.score-high { color: #38a169; }
-    .score-value.score-medium { color: #d69e2e; }
-    .score-value.score-low { color: #e53e3e; }
-    .score-label { font-size: 1rem; color: #666; }
-    .score-feedback { font-size: 0.9rem; color: #555; max-width: 300px; }
-    .solution-steps { margin-top: 1.5rem; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
-    .solution-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-bottom: 1px solid var(--color-border); }
-    .solution-header h5 { margin: 0; color: var(--color-primary); }
-    .step-counter { font-size: 0.85rem; color: #666; }
-    .solution-step { padding: 1rem; border-bottom: 1px solid var(--color-border); animation: fadeIn 0.3s ease; }
-    .solution-step:last-of-type { border-bottom: none; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    .step-description { font-weight: 600; color: var(--color-secondary); margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 3px solid var(--color-accent); }
-    .step-code { margin: 0; background: #1e1e1e; border-radius: 6px; padding: 1rem; }
-    .step-code code { color: #d4d4d4; }
-    .solution-navigation { display: flex; justify-content: space-between; padding: 1rem; background: var(--color-bg-alt); }
-    .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
-    .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
-    .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup.visible { opacity: 1; }
+    .distinction-box { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+    @media (max-width: 768px) { .distinction-box { grid-template-columns: 1fr; } }
+    .distinction-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+    .distinction-card h4 { margin: 0 0 0.5rem 0; color: #2563eb; }
+    .distinction-card ul { margin: 0; padding-left: 1.25rem; }
   </style>
 </head>
 <body>
-  <!-- Password Protection Overlay -->
   <div id="password-overlay" class="password-overlay">
     <div class="password-modal">
       <h2>ProTools ER1</h2>
@@ -134,40 +37,33 @@
       <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
       <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
       <nav>
-          <ul>
+        <ul>
           <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
-          <li>
-            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
-            <ul class="sub-nav">
-              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
-              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
-              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
-              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
-            </ul>
-          </li>
-          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
-          <li>
-            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
-            <ul class="sub-nav">
-              <li><a href="02a-file-import.html">Importing from Files</a></li>
-              <li><a href="02b-apis.html">Working with APIs</a></li>
-              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
-            </ul>
-          </li>
-          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
-          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
           <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
-          <li><a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a></li>
+          <li><a href="05a-data-simulation.html"><span class="module-number">5A</span> Data Simulation</a></li>
+          <li>
+            <a href="05b-experiments.html"><span class="module-number">5B</span> Coding for Experiments</a>
+            <ul class="sub-nav">
+              <li><a href="05b1-power-analysis.html">Power Analysis</a></li>
+              <li><a href="05b2-survey-programming.html">Survey Programming</a></li>
+              <li><a href="05b3-randomization.html">Randomization</a></li>
+              <li><a href="05b4-balance-checks.html">Balance Checks</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+            </ul>
+          </li>
           <li class="active"><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
-          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
-          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
-          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
-          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
-          <li><a href="../resources.html">Resources</a></li>
-          <li><a href="contact.html">Contact &amp; Feedback</a></li>
-          </ul>
-        </nav>
+        </ul>
+      </nav>
     </aside>
 
     <main class="main-content">
@@ -175,504 +71,657 @@
         <div class="module-header">
           <h1>7 &nbsp;Estimation Methods</h1>
           <div class="module-meta">
-            <span>~10 hours</span>
-            <span>OLS, Matching, DiD, RDD, IV</span>
-            <span>Advanced</span>
+            <span>~6 hours</span>
+            <span>Standard Errors, Panel Data, Nonlinear Models</span>
+            <span>Intermediate-Advanced</span>
           </div>
         </div>
 
         <div class="learning-objectives">
           <h3>Learning Objectives</h3>
           <ul>
-            <li>Implement <span class="code-tooltip" data-tip="OLS is the foundation of regression analysis. Proper standard errors account for things like heteroskedasticity (unequal variance) or clustering in your data.">OLS regression with proper standard errors</span></li>
-            <li>Apply <span class="code-tooltip" data-tip="PSM = Propensity Score Matching (matches on probability of treatment), Exact Matching (requires identical values), CEM = Coarsened Exact Matching (matches on binned values).">matching methods (PSM, exact matching, CEM)</span></li>
-            <li>Estimate <span class="code-tooltip" data-tip="DiD compares changes over time between treated and control groups. The key is having a 'before and after' comparison for both groups.">difference-in-differences models</span></li>
-            <li>Implement <span class="code-tooltip" data-tip="RDD exploits cutoffs in treatment assignment. You compare people just above vs just below a threshold where treatment is assigned.">regression discontinuity designs</span></li>
-            <li>Understand and apply <span class="code-tooltip" data-tip="IV uses external variation (instruments) to identify causal effects when treatment is not randomly assigned. Classic examples include draft lotteries and geographic distances.">instrumental variables</span></li>
+            <li>Distinguish between identification and estimation</li>
+            <li>Choose appropriate standard errors for your data structure</li>
+            <li>Handle panel data with fixed effects efficiently</li>
+            <li>Implement nonlinear models (logit, probit, Poisson)</li>
+            <li>Understand maximum likelihood and GMM estimation</li>
           </ul>
         </div>
 
         <div class="toc">
           <h3>Table of Contents</h3>
           <ul>
-            <li><a href="#ols">6.1 Ordinary Least Squares (OLS)</a></li>
-            <li><a href="#matching">6.2 Matching Methods</a></li>
-            <li><a href="#did">6.3 Difference-in-Differences</a></li>
-            <li><a href="#rdd">6.4 Regression Discontinuity</a></li>
-            <li><a href="#iv">6.5 Instrumental Variables</a></li>
-            <li><a href="#case-study">6.6 Case Study: Minimum Wage</a></li>
+            <li><a href="#identification-vs-estimation">7.1 Identification vs. Estimation</a></li>
+            <li><a href="#standard-errors">7.2 Standard Errors and Inference</a></li>
+            <li><a href="#panel">7.3 Panel Data Methods</a></li>
+            <li><a href="#nonlinear">7.4 Nonlinear Models</a></li>
+            <li><a href="#mle-gmm">7.5 MLE and GMM</a></li>
+            <li><a href="#bootstrap">7.6 Bootstrap Methods</a></li>
           </ul>
         </div>
 
-        <h2 id="ols">6.1 <span class="code-tooltip" data-tip="Ordinary Least Squares is a method that finds the line (or surface) that best fits your data by minimizing the sum of squared distances between observed values and predicted values.">Ordinary Least Squares (OLS)</span></h2>
+        <h2 id="identification-vs-estimation">7.1 Identification vs. Estimation</h2>
 
         <p>
-          <span class="code-tooltip" data-tip="OLS finds the best-fitting line through your data points. It minimizes the squared errors between predicted and actual values. Think of it as drawing the 'average' relationship between variables.">OLS regression</span> is the workhorse of empirical research. While OLS alone doesn't identify causal effects, it's the foundation for most estimation methods.
+          A common source of confusion: <strong>identification</strong> and <strong>estimation</strong> are different problems.
         </p>
 
-        <h2 id="matching">6.2 <span class="code-tooltip" data-tip="Matching methods pair treated individuals with similar untreated individuals based on their characteristics. This creates an 'apples to apples' comparison by finding statistical twins.">Matching Methods</span></h2>
-
-        <p>
-          Matching methods attempt to create comparable treatment and control groups by matching on observed characteristics. The key assumption is <strong><span class="code-tooltip" data-tip="This assumes that once we account for observable characteristics (like age, education, income), treatment assignment is essentially random. Any remaining differences are just chance.">selection on observables</span></strong>: conditional on <span class="code-tooltip" data-tip="Covariates are the control variables - characteristics like age, gender, education, location - that we use to match treated and untreated individuals.">covariates X</span>, treatment is independent of potential outcomes.
-        </p>
-
-        <h2 id="did">6.3 <span class="code-tooltip" data-tip="DiD is a powerful method that compares how outcomes change over time for a treated group versus a control group. By looking at the difference in changes, it removes fixed differences between groups.">Difference-in-Differences</span></h2>
-
-        <p>
-          <span class="code-tooltip" data-tip="DiD takes two differences: (1) before vs. after for the treated group, (2) before vs. after for the control group. The difference between these differences isolates the treatment effect.">Difference-in-differences (DiD)</span> compares changes over time between a treatment and control group. The key assumption is <strong><span class="code-tooltip" data-tip="Parallel trends means that without the treatment, both groups would have changed at the same rate. We often check this by showing that pre-treatment trends were similar.">parallel trends</span></strong>: absent treatment, the groups would have followed similar trajectories.
-        </p>
-
-        <h2 id="rdd">6.4 <span class="code-tooltip" data-tip="RDD exploits sharp cutoffs in treatment assignment. Since people just above and just below a threshold are nearly identical, any jump in outcomes at the threshold must be caused by the treatment.">Regression Discontinuity</span></h2>
-
-        <p>
-          <span class="code-tooltip" data-tip="RDD compares people just above vs just below a cutoff. For example, comparing students who scored 79% vs 81% on an exam where 80% is the scholarship threshold. These students are virtually identical, so differences reflect the scholarship effect.">Regression Discontinuity (RDD)</span> exploits situations where treatment is assigned based on whether a <span class="code-tooltip" data-tip="The running variable is the score or measure that determines treatment. Examples: test scores, age, income level, vote share. Treatment is assigned when this variable crosses the cutoff.">running variable</span> crosses a cutoff. The key assumption is <strong><span class="code-tooltip" data-tip="Continuity means that without treatment, outcomes would change smoothly across the cutoff. There should be no other factors that change abruptly at the threshold.">continuity</span></strong>: potential outcomes are continuous at the cutoff.
-        </p>
-
-        <h2 id="iv">6.5 <span class="code-tooltip" data-tip="IV is used when treatment is 'endogenous' (correlated with unobserved factors). It uses an external 'instrument' that affects treatment but has no direct effect on the outcome.">Instrumental Variables</span></h2>
-
-        <p>
-          <span class="code-tooltip" data-tip="IV finds a variable (the instrument) that creates random-like variation in treatment. Classic example: distance to college affects whether you attend college but doesn't directly affect your future wages.">Instrumental Variables (IV)</span> uses an external source of variation (the <span class="code-tooltip" data-tip="The instrument (Z) is a variable that affects whether someone gets treated, but has no other effect on the outcome. It provides 'exogenous' variation we can exploit.">instrument Z</span>) to identify causal effects when the treatment is <span class="code-tooltip" data-tip="Endogenous means the treatment is correlated with unobserved factors that also affect the outcome. For example, motivation affects both college attendance and earnings.">endogenous</span>. The instrument must be: (1) <span class="code-tooltip" data-tip="Relevance: the instrument must actually predict treatment. If distance to college doesn't affect whether people attend college, it's not a useful instrument.">relevant</span> (correlated with treatment), and (2) <span class="code-tooltip" data-tip="Exogenous / Exclusion restriction: the instrument must only affect outcomes through treatment. Distance to college shouldn't directly affect wages except through its effect on college attendance.">exogenous</span> (affects outcome only through treatment).
-        </p>
-
-        <h2 id="case-study">6.6 Case Study: Minimum Wage and Employment</h2>
-
-        <p>
-          The effect of minimum wage on employment is one of the most studied questions in labor economics. <span class="code-tooltip" data-tip="Card and Krueger's 1994 paper revolutionized empirical economics. They compared fast-food employment in NJ (which raised minimum wage) vs PA (which didn't), finding little evidence of job loss.">Card and Krueger (1994)</span> used a <span class="code-tooltip" data-tip="DiD was ideal here because: (1) NJ raised its minimum wage but PA did not, (2) they had data before and after the increase, (3) PA fast-food restaurants served as a natural comparison group.">difference-in-differences design</span> comparing <span class="code-tooltip" data-tip="New Jersey increased its minimum wage from $4.25 to $5.05 in April 1992, while Pennsylvania kept it at $4.25. This created a natural experiment.">New Jersey (which raised its minimum wage)</span> to neighboring Pennsylvania.
-        </p>
-
-        <div class="citation">
-          <div class="citation-title">Original Paper</div>
-          <p>
-            Card, D., & Krueger, A. B. (1994). Minimum Wages and Employment: A Case Study of the Fast-Food Industry in New Jersey and Pennsylvania. <em>American Economic Review</em>, 84(4), 772-793.
-          </p>
-          <p>Data available from the <a href="https://davidcard.berkeley.edu/data_sets.html" target="_blank">David Card's website</a>.</p>
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>Identification (Module 6)</h4>
+            <p><em>Can</em> we learn the causal effect from data?</p>
+            <ul>
+              <li>Research design and assumptions</li>
+              <li>What variation identifies the effect?</li>
+              <li>Parallel trends, exclusion restriction, etc.</li>
+              <li>Whether your estimate is causal or just correlational</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>Estimation (This Module)</h4>
+            <p><em>How</em> do we compute the estimate from data?</p>
+            <ul>
+              <li>OLS, MLE, GMM, nonparametric methods</li>
+              <li>Standard errors and inference</li>
+              <li>Handling large datasets efficiently</li>
+              <li>Correcting for clustering, heteroskedasticity</li>
+            </ul>
+          </div>
         </div>
 
-        <h2 id="exercises">6.7 Exercises</h2>
+        <p>
+          You can have correct identification but bad estimation (wrong standard errors), or good estimation but no identification (precise estimate of a biased number). Both matter.
+        </p>
 
-        <!-- Exercise 6.1: Interactive -->
-        <div class="interactive-exercise" data-exercise="6.1">
-          <h4>Exercise 6.1: OLS and Difference-in-Differences</h4>
-          <p>Practice implementing basic estimation methods. Complete these tasks:</p>
-          <ol>
-            <li>Run a simple OLS regression</li>
-            <li>Add control variables to your regression</li>
-            <li>Implement a basic difference-in-differences model</li>
-          </ol>
+        <h2 id="standard-errors">7.2 Standard Errors and Inference</h2>
 
-          <div class="exercise-editor">
-            <div class="editor-tabs">
-              <button class="lang-btn active" data-lang="python">Python</button>
-              <button class="lang-btn" data-lang="stata">Stata</button>
-              <button class="lang-btn" data-lang="r">R</button>
-            </div>
+        <p>
+          Choosing the right standard errors is essential for valid inference. The main considerations are heteroskedasticity and clustering.
+        </p>
 
-            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
-# Task 1: Run a simple OLS regression
-# Task 2: Add control variables
-# Task 3: Implement difference-in-differences
-"></textarea>
+        <h3>Robust (Heteroskedasticity-Consistent) Standard Errors</h3>
 
-            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
-* Task 1: Run a simple OLS regression
-* Task 2: Add control variables
-* Task 3: Implement difference-in-differences
-"></textarea>
-
-            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
-# Task 1: Run a simple OLS regression
-# Task 2: Add control variables
-# Task 3: Implement difference-in-differences
-"></textarea>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
           </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Robust Standard Errors</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
 
-          <div class="exercise-actions">
-            <button class="btn-check-score">Check My Score</button>
-            <div class="score-display" style="display:none;">
-              <div class="score-circle">
-                <span class="score-value">0</span>
-                <span class="score-label">/100</span>
-              </div>
-              <div class="score-feedback"></div>
-            </div>
-            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+<span class="code-comment"># Default (homoskedastic) standard errors</span>
+model = smf.ols(<span class="code-string">'outcome ~ treatment + controls'</span>, data=df).fit()
+
+<span class="code-comment"># Robust (heteroskedasticity-consistent) HC1</span>
+<span class="code-tooltip" data-tip="HC1 is the most common. HC0, HC2, HC3 are alternatives with small-sample adjustments.">model_robust = smf.ols(<span class="code-string">'outcome ~ treatment + controls'</span>, data=df).fit(
+    cov_type=<span class="code-string">'HC1'</span>
+)</span>
+print(model_robust.summary())</code></pre>
           </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Robust Standard Errors</span>
 
-          <div class="solution-steps" style="display:none;">
-            <div class="solution-header">
-              <h5>Solution</h5>
-              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
-            </div>
+<span class="code-comment">* Default standard errors</span>
+reg outcome treatment controls
 
-            <!-- Python Solutions -->
-            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
-              <div class="step-description">Task 1: Run a simple OLS regression</div>
-              <pre class="step-code"><code><span class="code-keyword">import</span> <span class="code-tooltip" data-tip="statsmodels is a Python library for statistical modeling. The formula API lets you specify models using R-style formulas like 'y ~ x'.">statsmodels.formula.api</span> <span class="code-keyword">as</span> smf
+<span class="code-comment">* Robust (heteroskedasticity-consistent) - ALWAYS use this</span>
+<span class="code-tooltip" data-tip="In Stata, 'robust' is the standard option for heteroskedasticity-consistent SEs">reg outcome treatment controls, robust</span>
 
-<span class="code-comment"># Simple OLS regression</span>
-model = smf.<span class="code-tooltip" data-tip="The ols() function creates an Ordinary Least Squares model. It finds the best-fitting line through your data.">ols</span>(<span class="code-string"><span class="code-tooltip" data-tip="This formula means: predict income using education. The ~ symbol reads as 'depends on' or 'is explained by'.">'income ~ education'</span></span>, data=df).<span class="code-tooltip" data-tip="The fit() method runs the regression and estimates the coefficients. Without this, the model is just defined but not computed.">fit()</span>
-<span class="code-function">print</span>(model.<span class="code-tooltip" data-tip="summary() displays the full regression output including coefficients, standard errors, R-squared, p-values, and confidence intervals.">summary()</span>)</code></pre>
-            </div>
-            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
-              <div class="step-description">Task 2: Add control variables</div>
-              <pre class="step-code"><code><span class="code-comment"># OLS with controls</span>
-model = smf.ols(<span class="code-string"><span class="code-tooltip" data-tip="Adding + age + experience includes these as control variables. This lets us estimate the effect of education while holding age and experience constant.">'income ~ education + age + experience'</span></span>, data=df).fit()
-<span class="code-function">print</span>(model.summary())</code></pre>
-            </div>
-            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
-              <div class="step-description">Task 3: Implement difference-in-differences</div>
-              <pre class="step-code"><code><span class="code-comment"># Difference-in-differences</span>
-model = smf.ols(<span class="code-string"><span class="code-tooltip" data-tip="DiD formula: 'treated' captures baseline differences between groups, 'post' captures time trends, 'treated:post' is the interaction term - THE DiD EFFECT.">'outcome ~ treated + post + treated:post'</span></span>, data=df).fit()
-<span class="code-comment"># The DiD estimate is the coefficient on <span class="code-tooltip" data-tip="treated:post is the interaction between being in the treatment group AND being in the post-treatment period. This coefficient IS the causal effect estimate.">treated:post</span></span>
-<span class="code-function">print</span>(model.summary())</code></pre>
-            </div>
-
-            <!-- Stata Solutions -->
-            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
-              <div class="step-description">Task 1: Run a simple OLS regression</div>
-              <pre class="step-code"><code><span class="code-comment">* Simple OLS regression</span>
-<span class="code-keyword"><span class="code-tooltip" data-tip="The 'reg' command (short for 'regress') runs an OLS regression in Stata. The first variable after reg is the outcome (dependent variable).">reg</span></span> <span class="code-tooltip" data-tip="income is the dependent variable (what we're trying to explain/predict).">income</span> <span class="code-tooltip" data-tip="education is the independent variable (what we think affects income). Stata lists the outcome first, then explanatory variables.">education</span></code></pre>
-            </div>
-            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
-              <div class="step-description">Task 2: Add control variables</div>
-              <pre class="step-code"><code><span class="code-comment">* OLS with controls</span>
-<span class="code-keyword">reg</span> income education <span class="code-tooltip" data-tip="Adding age and experience as control variables. Stata will estimate the effect of education while holding these variables constant.">age experience</span></code></pre>
-            </div>
-            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
-              <div class="step-description">Task 3: Implement difference-in-differences</div>
-              <pre class="step-code"><code><span class="code-comment">* Difference-in-differences</span>
-<span class="code-keyword">reg</span> outcome <span class="code-tooltip" data-tip="i.treated##i.post is Stata's factor notation. The i. prefix treats variables as categorical. The ## creates all main effects AND the interaction automatically.">i.treated##i.post</span>
-<span class="code-comment">* The DiD estimate is the coefficient on <span class="code-tooltip" data-tip="1.treated#1.post is the interaction term representing being treated AND in the post period. This coefficient IS the difference-in-differences causal effect estimate.">1.treated#1.post</span></span></code></pre>
-            </div>
-
-            <!-- R Solutions -->
-            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
-              <div class="step-description">Task 1: Run a simple OLS regression</div>
-              <pre class="step-code"><code><span class="code-comment"># Simple OLS regression</span>
-model <- <span class="code-function"><span class="code-tooltip" data-tip="lm() stands for 'linear model' and runs OLS regression in R. It's R's built-in function for fitting linear regression models.">lm</span></span>(<span class="code-tooltip" data-tip="This formula means: predict income from education. The ~ symbol reads as 'is modeled by' or 'depends on'."">income ~ education</span>, data = df)
-<span class="code-function"><span class="code-tooltip" data-tip="summary() displays the full regression output including coefficients, standard errors, t-values, p-values, R-squared, and F-statistic.">summary</span></span>(model)</code></pre>
-            </div>
-            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
-              <div class="step-description">Task 2: Add control variables</div>
-              <pre class="step-code"><code><span class="code-comment"># OLS with controls</span>
-model <- <span class="code-function">lm</span>(<span class="code-tooltip" data-tip="The + symbol adds control variables. R will estimate each coefficient while holding the other variables constant.">income ~ education + age + experience</span>, data = df)
-<span class="code-function">summary</span>(model)</code></pre>
-            </div>
-            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
-              <div class="step-description">Task 3: Implement difference-in-differences</div>
-              <pre class="step-code"><code><span class="code-comment"># Difference-in-differences</span>
-model <- <span class="code-function">lm</span>(<span class="code-tooltip" data-tip="The * operator is R shorthand that includes both main effects (treated, post) AND their interaction (treated:post). It's equivalent to: treated + post + treated:post">outcome ~ treated * post</span>, data = df)
-<span class="code-comment"># The DiD estimate is the coefficient on <span class="code-tooltip" data-tip="treated:post is the interaction term. In DiD, this coefficient represents the causal effect - how much MORE the treated group changed compared to the control group.">treated:post</span></span>
-<span class="code-function">summary</span>(model)</code></pre>
-            </div>
-
-            <div class="solution-navigation">
-              <button class="btn-prev-step" disabled>Previous</button>
-              <button class="btn-next-step">Next Step</button>
-            </div>
+<span class="code-comment">* Equivalent: vce(robust)</span>
+reg outcome treatment controls, vce(robust)</code></pre>
           </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Robust Standard Errors</span>
+<span class="code-keyword">library</span>(sandwich)
+<span class="code-keyword">library</span>(lmtest)
+
+<span class="code-comment"># Fit model</span>
+model <- lm(outcome ~ treatment + controls, data = df)
+
+<span class="code-comment"># Robust standard errors (HC1)</span>
+<span class="code-tooltip" data-tip="vcovHC computes heteroskedasticity-consistent covariance matrix">coeftest(model, vcov = vcovHC(model, type = "HC1"))</span>
+
+<span class="code-comment"># Using fixest (cleaner syntax)</span>
+<span class="code-keyword">library</span>(fixest)
+model <- feols(outcome ~ treatment + controls, data = df, vcov = "hetero")
+summary(model)</code></pre>
+          </div>
+        </div>
+
+        <h3>Clustered Standard Errors</h3>
+
+        <p>
+          When observations are correlated within groups (e.g., students within schools, repeated observations of the same person), you need clustered standard errors.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Clustered Standard Errors</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Cluster at the school level</span>
+<span class="code-tooltip" data-tip="Clustering accounts for within-group correlation. Cluster at the level where treatment varies or errors are correlated.">model = smf.ols(<span class="code-string">'outcome ~ treatment'</span>, data=df).fit(
+    cov_type=<span class="code-string">'cluster'</span>,
+    cov_kwds={<span class="code-string">'groups'</span>: df[<span class="code-string">'school_id'</span>]}
+)</span>
+
+<span class="code-comment"># Two-way clustering (e.g., state and year)</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> PanelOLS
+df_panel = df.set_index([<span class="code-string">'state'</span>, <span class="code-string">'year'</span>])
+model = PanelOLS.from_formula(<span class="code-string">'outcome ~ treatment'</span>, data=df_panel)
+<span class="code-tooltip" data-tip="Two-way clustering accounts for correlation within both dimensions">results = model.fit(cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True, cluster_time=True)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Clustered Standard Errors</span>
+
+<span class="code-comment">* One-way clustering</span>
+<span class="code-tooltip" data-tip="cluster(school_id) clusters SEs at the school level">reg outcome treatment controls, cluster(school_id)</span>
+
+<span class="code-comment">* Two-way clustering</span>
+<span class="code-comment">* ssc install reghdfe</span>
+<span class="code-tooltip" data-tip="Two-way clustering with reghdfe: cluster on both state and year">reghdfe outcome treatment, absorb(state year) cluster(state year)</span>
+
+<span class="code-comment">* Check number of clusters</span>
+<span class="code-tooltip" data-tip="Rule of thumb: need at least 30-50 clusters for reliable inference">tab school_id, matrow(clusters)
+display r(r)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Clustered Standard Errors</span>
+<span class="code-keyword">library</span>(fixest)
+
+<span class="code-comment"># One-way clustering</span>
+<span class="code-tooltip" data-tip="cluster = ~school_id clusters at the school level">model <- feols(outcome ~ treatment + controls,
+               data = df,
+               cluster = ~ school_id)</span>
+summary(model)
+
+<span class="code-comment"># Two-way clustering</span>
+<span class="code-tooltip" data-tip="Two-way clustering with fixest: cluster on both dimensions">model <- feols(outcome ~ treatment | state + year,
+               data = df,
+               cluster = ~ state + year)</span>
+
+<span class="code-comment"># With sandwich package</span>
+<span class="code-keyword">library</span>(sandwich)
+model <- lm(outcome ~ treatment, data = df)
+vcovCL(model, cluster = ~ school_id)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">When to Cluster</div>
+          <p>
+            General rule: cluster at the level where:
+          </p>
+          <ul>
+            <li>Treatment is assigned (for experiments)</li>
+            <li>There's correlation in unobservables (for observational studies)</li>
+          </ul>
+          <p style="margin-bottom: 0;">
+            When in doubt, cluster at a more aggregate level. See <a href="https://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015.pdf" target="_blank">Cameron & Miller (2015)</a> for guidance.
+          </p>
+        </div>
+
+        <h2 id="panel">7.3 Panel Data Methods</h2>
+
+        <p>
+          Panel data (repeated observations of units over time) enables powerful designs but requires appropriate methods.
+        </p>
+
+        <h3>Fixed Effects</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Fixed Effects with linearmodels</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> PanelOLS
+
+<span class="code-comment"># Set panel index</span>
+df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
+
+<span class="code-comment"># Unit fixed effects only</span>
+<span class="code-tooltip" data-tip="entity_effects=True absorbs unit-level fixed effects (within estimator)">model = PanelOLS.from_formula(
+    <span class="code-string">'outcome ~ treatment + time_varying_controls'</span>,
+    data=df,
+    entity_effects=True
+)</span>
+results = model.fit(cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True)
+
+<span class="code-comment"># Two-way fixed effects (unit + time)</span>
+model = PanelOLS.from_formula(
+    <span class="code-string">'outcome ~ treatment'</span>,
+    data=df,
+    entity_effects=True,
+    time_effects=True
+)
+results = model.fit(cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Fixed Effects</span>
+
+<span class="code-comment">* Declare panel structure</span>
+xtset unit_id year
+
+<span class="code-comment">* Unit fixed effects</span>
+<span class="code-tooltip" data-tip="xtreg with fe option does within-transformation (demeans by unit)">xtreg outcome treatment time_varying_controls, fe cluster(unit_id)</span>
+
+<span class="code-comment">* Two-way fixed effects with reghdfe (RECOMMENDED for speed)</span>
+<span class="code-tooltip" data-tip="reghdfe absorbs high-dimensional fixed effects efficiently">reghdfe outcome treatment, absorb(unit_id year) cluster(unit_id)</span>
+
+<span class="code-comment">* With multiple sets of fixed effects</span>
+reghdfe outcome treatment, absorb(unit_id year industry_id) cluster(unit_id)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Fixed Effects with fixest</span>
+<span class="code-keyword">library</span>(fixest)
+
+<span class="code-comment"># Unit fixed effects</span>
+<span class="code-tooltip" data-tip="| unit_id specifies unit fixed effects after the pipe">model <- feols(outcome ~ treatment + controls | unit_id,
+               data = df,
+               cluster = ~ unit_id)</span>
+summary(model)
+
+<span class="code-comment"># Two-way fixed effects</span>
+model <- feols(outcome ~ treatment | unit_id + year,
+               data = df,
+               cluster = ~ unit_id)
+
+<span class="code-comment"># Multiple sets of fixed effects</span>
+model <- feols(outcome ~ treatment | unit_id + year + industry_id,
+               data = df,
+               cluster = ~ unit_id)
+
+<span class="code-comment"># With plm package (older, slower)</span>
+<span class="code-keyword">library</span>(plm)
+pdata <- pdata.frame(df, index = c("unit_id", "year"))
+model <- plm(outcome ~ treatment, data = pdata, model = "within")</code></pre>
+          </div>
+        </div>
+
+        <h3>Random Effects</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Random Effects</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> RandomEffects
+
+df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
+
+<span class="code-tooltip" data-tip="Random effects assumes unit effects are uncorrelated with regressors (stronger assumption)">model = RandomEffects.from_formula(
+    <span class="code-string">'outcome ~ treatment + controls'</span>,
+    data=df
+)</span>
+results = model.fit()
+
+<span class="code-comment"># Hausman test: FE vs RE</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> compare
+<span class="code-tooltip" data-tip="Hausman test: reject means RE is inconsistent, use FE">fe_model = PanelOLS.from_formula(<span class="code-string">'outcome ~ treatment'</span>, data=df, entity_effects=True).fit()
+re_model = RandomEffects.from_formula(<span class="code-string">'outcome ~ treatment'</span>, data=df).fit()
+print(compare({<span class="code-string">'FE'</span>: fe_model, <span class="code-string">'RE'</span>: re_model}))</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Random Effects</span>
+
+<span class="code-comment">* Random effects model</span>
+<span class="code-tooltip" data-tip="RE assumes unit effects are uncorrelated with regressors">xtreg outcome treatment controls, re</span>
+
+<span class="code-comment">* Hausman test</span>
+<span class="code-tooltip" data-tip="Hausman test: significant p-value suggests FE is more appropriate">xtreg outcome treatment controls, fe
+estimates store fe
+xtreg outcome treatment controls, re
+hausman fe .</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Random Effects</span>
+<span class="code-keyword">library</span>(plm)
+
+pdata <- pdata.frame(df, index = c("unit_id", "year"))
+
+<span class="code-comment"># Random effects model</span>
+<span class="code-tooltip" data-tip="model='random' specifies random effects">re_model <- plm(outcome ~ treatment + controls,
+                data = pdata,
+                model = "random")</span>
+summary(re_model)
+
+<span class="code-comment"># Hausman test</span>
+fe_model <- plm(outcome ~ treatment + controls, data = pdata, model = "within")
+<span class="code-tooltip" data-tip="Hausman test: significant p-value means FE is preferred">phtest(fe_model, re_model)</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="nonlinear">7.4 Nonlinear Models</h2>
+
+        <p>
+          When outcomes are binary, counts, or bounded, linear models may be inappropriate.
+        </p>
+
+        <h3>Logit and Probit</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Logit and Probit</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Logit model (binary outcome)</span>
+<span class="code-tooltip" data-tip="Logit uses logistic CDF; probit uses normal CDF. Results are similar in practice.">logit = smf.logit(<span class="code-string">'hired ~ education + experience + age'</span>, data=df).fit()</span>
+print(logit.summary())
+
+<span class="code-comment"># Probit model</span>
+probit = smf.probit(<span class="code-string">'hired ~ education + experience + age'</span>, data=df).fit()
+
+<span class="code-comment"># Marginal effects (more interpretable)</span>
+<span class="code-tooltip" data-tip="Marginal effects give the change in probability for a unit change in X">margeff = logit.get_margeff()
+print(margeff.summary())</span>
+
+<span class="code-comment"># Average marginal effects at specific values</span>
+margeff_at_means = logit.get_margeff(at=<span class="code-string">'mean'</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Logit and Probit</span>
+
+<span class="code-comment">* Logit</span>
+logit hired education experience age
+
+<span class="code-comment">* Probit</span>
+probit hired education experience age
+
+<span class="code-comment">* Marginal effects (average marginal effects)</span>
+<span class="code-tooltip" data-tip="margins, dydx(*) computes average marginal effects for all variables">margins, dydx(*)</span>
+
+<span class="code-comment">* Marginal effects at specific values</span>
+margins, dydx(*) at(education=16 experience=5)
+
+<span class="code-comment">* Odds ratios (for logit)</span>
+<span class="code-tooltip" data-tip="or option reports odds ratios instead of log-odds coefficients">logit hired education experience age, or</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Logit and Probit</span>
+
+<span class="code-comment"># Logit</span>
+<span class="code-tooltip" data-tip="family=binomial() specifies logistic regression">logit <- glm(hired ~ education + experience + age,
+             data = df,
+             family = binomial(link = "logit"))</span>
+summary(logit)
+
+<span class="code-comment"># Probit</span>
+probit <- glm(hired ~ education + experience + age,
+              data = df,
+              family = binomial(link = "probit"))
+
+<span class="code-comment"># Marginal effects with margins package</span>
+<span class="code-keyword">library</span>(margins)
+<span class="code-tooltip" data-tip="margins() computes average marginal effects">margeff <- margins(logit)
+summary(margeff)</span>
+
+<span class="code-comment"># Odds ratios</span>
+exp(coef(logit))</code></pre>
+          </div>
+        </div>
+
+        <h3>Poisson and Negative Binomial (Count Data)</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Poisson Regression</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Poisson (count data)</span>
+<span class="code-tooltip" data-tip="Poisson assumes mean equals variance. Use negative binomial if overdispersed.">poisson = smf.poisson(<span class="code-string">'num_patents ~ rd_spending + firm_size'</span>, data=df).fit()</span>
+print(poisson.summary())
+
+<span class="code-comment"># Negative binomial (allows overdispersion)</span>
+<span class="code-keyword">from</span> statsmodels.discrete.discrete_model <span class="code-keyword">import</span> NegativeBinomial
+<span class="code-tooltip" data-tip="Negative binomial allows variance to exceed mean (overdispersion)">nb = smf.negativebinomial(<span class="code-string">'num_patents ~ rd_spending + firm_size'</span>, data=df).fit()</span>
+
+<span class="code-comment"># Robust Poisson (PPML for trade gravity equations)</span>
+<span class="code-tooltip" data-tip="Poisson with robust SEs is consistent even if not Poisson distributed">poisson_robust = smf.poisson(<span class="code-string">'trade ~ distance + gdp_origin + gdp_dest'</span>, data=df).fit(
+    cov_type=<span class="code-string">'HC1'</span>
+)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Count Data Models</span>
+
+<span class="code-comment">* Poisson</span>
+poisson num_patents rd_spending firm_size
+
+<span class="code-comment">* Negative binomial</span>
+nbreg num_patents rd_spending firm_size
+
+<span class="code-comment">* Poisson with robust SEs (PPML)</span>
+<span class="code-tooltip" data-tip="ppmlhdfe is commonly used for gravity equations in trade">ppmlhdfe trade distance gdp_origin gdp_dest, absorb(origin dest) cluster(pair)</span>
+
+<span class="code-comment">* Check for overdispersion</span>
+<span class="code-tooltip" data-tip="If alpha significantly > 0, use negative binomial">estat gof</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Count Data Models</span>
+
+<span class="code-comment"># Poisson</span>
+<span class="code-tooltip" data-tip="family=poisson() specifies Poisson regression">poisson <- glm(num_patents ~ rd_spending + firm_size,
+               data = df,
+               family = poisson())</span>
+summary(poisson)
+
+<span class="code-comment"># Negative binomial</span>
+<span class="code-keyword">library</span>(MASS)
+<span class="code-tooltip" data-tip="glm.nb handles overdispersion">nb <- glm.nb(num_patents ~ rd_spending + firm_size, data = df)</span>
+summary(nb)
+
+<span class="code-comment"># With fixest (fast, with fixed effects)</span>
+<span class="code-keyword">library</span>(fixest)
+poisson_fe <- fepois(num_patents ~ rd_spending | firm_id + year,
+                     data = df)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="mle-gmm">7.5 MLE and GMM</h2>
+
+        <p>
+          Maximum Likelihood Estimation (MLE) and Generalized Method of Moments (GMM) are general frameworks underlying most estimation methods.
+        </p>
+
+        <h3>Custom MLE</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Custom MLE</span>
+<span class="code-keyword">from</span> scipy.optimize <span class="code-keyword">import</span> minimize
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-keyword">def</span> <span class="code-function">neg_log_likelihood</span>(params, X, y):
+    <span class="code-string">"""Negative log-likelihood for linear regression."""</span>
+    beta = params[:-1]
+    sigma = params[-1]
+    <span class="code-keyword">if</span> sigma <= 0:
+        <span class="code-keyword">return</span> np.inf
+
+    y_hat = X @ beta
+    residuals = y - y_hat
+
+    <span class="code-comment"># Normal log-likelihood</span>
+    ll = -0.5 * len(y) * np.log(2 * np.pi * sigma**2)
+    ll -= np.sum(residuals**2) / (2 * sigma**2)
+    <span class="code-keyword">return</span> -ll  <span class="code-comment"># negative because we minimize</span>
+
+<span class="code-comment"># Estimate</span>
+X = np.column_stack([np.ones(len(df)), df[<span class="code-string">'x1'</span>], df[<span class="code-string">'x2'</span>]])
+y = df[<span class="code-string">'y'</span>].values
+initial = np.zeros(X.shape[1] + 1)
+initial[-1] = 1  <span class="code-comment"># initial sigma</span>
+
+<span class="code-tooltip" data-tip="MLE finds parameters that maximize the probability of observed data">result = minimize(neg_log_likelihood, initial, args=(X, y), method=<span class="code-string">'BFGS'</span>)
+print(<span class="code-string">"MLE estimates:"</span>, result.x)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Custom MLE with ml</span>
+
+<span class="code-comment">* Define the log-likelihood function</span>
+program mylogit_ll
+    args lnf xb
+    quietly replace `lnf' = $ML_y1 * `xb' - ln(1 + exp(`xb'))
+end
+
+<span class="code-comment">* Estimate</span>
+<span class="code-tooltip" data-tip="ml model lf defines the likelihood; ml maximize estimates">ml model lf mylogit_ll (outcome = x1 x2)
+ml maximize</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Custom MLE</span>
+
+<span class="code-comment"># Define negative log-likelihood</span>
+neg_ll <- function(params, X, y) {
+  beta <- params[-length(params)]
+  sigma <- params[length(params)]
+  <span class="code-keyword">if</span> (sigma <= 0) return(Inf)
+
+  y_hat <- X %*% beta
+  resid <- y - y_hat
+
+  ll <- -0.5 * length(y) * log(2 * pi * sigma^2)
+  ll <- ll - sum(resid^2) / (2 * sigma^2)
+  return(-ll)
+}
+
+<span class="code-comment"># Estimate</span>
+X <- cbind(1, df$x1, df$x2)
+y <- df$y
+initial <- c(rep(0, ncol(X)), 1)
+
+<span class="code-tooltip" data-tip="optim minimizes the negative log-likelihood">result <- optim(initial, neg_ll, X = X, y = y, method = "BFGS", hessian = TRUE)
+print(result$par)</span>
+
+<span class="code-comment"># Standard errors from Hessian</span>
+se <- sqrt(diag(solve(result$hessian)))</code></pre>
+          </div>
+        </div>
+
+        <h2 id="bootstrap">7.6 Bootstrap Methods</h2>
+
+        <p>
+          Bootstrap provides standard errors and confidence intervals when analytical formulas are complex or unavailable.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Bootstrap</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-keyword">def</span> <span class="code-function">bootstrap_coef</span>(df, formula, n_bootstrap=1000):
+    <span class="code-string">"""Bootstrap standard errors for regression coefficients."""</span>
+    n = len(df)
+    coefs = []
+
+    <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(n_bootstrap):
+        <span class="code-comment"># Resample with replacement</span>
+        sample = df.sample(n, replace=True)
+        model = smf.ols(formula, data=sample).fit()
+        coefs.append(model.params.values)
+
+    coefs = np.array(coefs)
+    <span class="code-keyword">return</span> {
+        <span class="code-string">'mean'</span>: coefs.mean(axis=0),
+        <span class="code-string">'se'</span>: coefs.std(axis=0),
+        <span class="code-string">'ci_lower'</span>: np.percentile(coefs, 2.5, axis=0),
+        <span class="code-string">'ci_upper'</span>: np.percentile(coefs, 97.5, axis=0)
+    }
+
+<span class="code-tooltip" data-tip="Bootstrap: resample data, re-estimate, repeat many times">results = bootstrap_coef(df, <span class="code-string">'y ~ x1 + x2'</span>)
+print(<span class="code-string">"Bootstrap SEs:"</span>, results[<span class="code-string">'se'</span>])</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Bootstrap</span>
+
+<span class="code-comment">* Simple bootstrap</span>
+<span class="code-tooltip" data-tip="bootstrap resamples data and re-estimates reps times">bootstrap _b, reps(1000) seed(12345): reg outcome treatment controls</span>
+
+<span class="code-comment">* Cluster bootstrap (for clustered data)</span>
+<span class="code-tooltip" data-tip="cluster() option resamples whole clusters">bootstrap _b, reps(1000) seed(12345) cluster(school_id): ///
+    reg outcome treatment controls</span>
+
+<span class="code-comment">* Pairs cluster bootstrap (Stata 18+)</span>
+vce(bootstrap, cluster(school_id) reps(1000))</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Bootstrap</span>
+<span class="code-keyword">library</span>(boot)
+
+<span class="code-comment"># Function to extract coefficients</span>
+boot_fn <- function(data, indices) {
+  d <- data[indices, ]
+  model <- lm(y ~ x1 + x2, data = d)
+  return(coef(model))
+}
+
+<span class="code-comment"># Run bootstrap</span>
+<span class="code-tooltip" data-tip="boot() resamples and re-estimates R times">results <- boot(df, boot_fn, R = 1000)</span>
+print(results)
+
+<span class="code-comment"># Confidence intervals</span>
+<span class="code-tooltip" data-tip="boot.ci computes various bootstrap CI types">boot.ci(results, type = c("perc", "bca"), index = 2)</span>
+
+<span class="code-comment"># Cluster bootstrap</span>
+<span class="code-keyword">library</span>(fwildclusterboot)
+model <- lm(outcome ~ treatment, data = df)
+<span class="code-tooltip" data-tip="Wild cluster bootstrap for few clusters">boottest(model, param = "treatment", clustid = ~ school_id, B = 999)</span></code></pre>
+          </div>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Key References</div>
+          <ul>
+            <li><strong>Cameron, A.C. & Trivedi, P.</strong> (2005). <em>Microeconometrics: Methods and Applications</em>. Cambridge.</li>
+            <li><strong>Wooldridge, J.</strong> (2010). <em>Econometric Analysis of Cross Section and Panel Data</em>. MIT Press.</li>
+            <li><strong>Cameron, A.C. & Miller, D.</strong> (2015). "A Practitioner's Guide to Cluster-Robust Inference." <em>JHR</em>.</li>
+            <li><strong>Abadie, A., Athey, S., Imbens, G., & Wooldridge, J.</strong> (2023). "When Should You Adjust Standard Errors for Clustering?" <em>QJE</em>.</li>
+          </ul>
         </div>
 
         <div class="nav-footer">
-          <a href="06-causal-inference.html" class="nav-link prev">Module 6: Causal Inference</a>
+          <a href="06e-synthetic-control.html" class="nav-link prev">6E: Synthetic Control</a>
           <a href="08-replicability.html" class="nav-link next">Module 8: Replicability</a>
         </div>
       </div>
     </main>
   </div>
 
-  <!-- Chatbot Widget -->
-  <div id="chatbot-widget" class="chatbot-widget">
-    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-      </svg>
-    </button>
-    <div id="chatbot-panel" class="chatbot-panel">
-      <div class="chatbot-header">
-        <h3>ProTools ER1 Assistant</h3>
-        <button id="chatbot-close" class="chatbot-close">&times;</button>
-      </div>
-      <div id="chatbot-messages" class="chatbot-messages">
-        <div class="chat-message assistant">
-          <p>Hello! I'm the ProTools ER1 course assistant. I can help you with questions about Python, Stata, R, causal inference methods, or any of the course material. How can I assist you today?</p>
-        </div>
-      </div>
-      <div class="chatbot-input-area">
-        <textarea id="chatbot-input" placeholder="Ask a question about the course..." rows="2"></textarea>
-        <button id="chatbot-send">Send</button>
-      </div>
-    </div>
-  </div>
-
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
   <script src="../js/password-protection.js"></script>
-  <script src="../js/chatbot.js"></script>
-
-  <!-- Interactive Exercise Script -->
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const exercisePatterns = {
-      '6.1': {
-        python: {
-          patterns: [
-            // OLS regression - accepts: ols, OLS, LinearRegression, regress
-            { regex: /smf\.ols|sm\.OLS|statsmodels.*ols|LinearRegression|\.fit\s*\(\)|regress/i, points: 34, description: 'Run OLS regression' },
-            // Control variables - accepts: multiple variables in formula, + signs with variables
-            { regex: /~.*\+.*\+|income\s*~\s*\w+\s*\+\s*\w+|outcome\s*~\s*\w+\s*\+\s*\w+|education.*age|age.*experience/i, points: 33, description: 'Add control variables' },
-            // DiD - accepts: treated:post, treated*post, interaction, ##, i.treated
-            { regex: /treated\s*:\s*post|treated\s*\*\s*post|post\s*:\s*treated|post\s*\*\s*treated|interaction|did|diff.*diff|i\.treated|##/i, points: 33, description: 'Implement difference-in-differences' }
-          ]
-        },
-        stata: {
-          patterns: [
-            // OLS regression - accepts: reg, regress, reg income
-            { regex: /\breg\b\s+\w+|regress\s+\w+/i, points: 34, description: 'Run OLS regression' },
-            // Control variables - accepts: reg y x1 x2 x3
-            { regex: /\breg\b\s+\w+\s+\w+\s+\w+\s+\w+|regress\s+\w+\s+\w+\s+\w+/i, points: 33, description: 'Add control variables' },
-            // DiD - accepts: i.treated##i.post, treated#post, did, diff
-            { regex: /i\.\w+##i\.\w+|\w+#\w+|##.*post|treated.*post.*treated|did\b/i, points: 33, description: 'Implement difference-in-differences' }
-          ]
-        },
-        r: {
-          patterns: [
-            // OLS regression - accepts: lm, lm(), glm, feols, felm
-            { regex: /\blm\s*\(|glm\s*\(|feols\s*\(|felm\s*\(|linear_reg|lm_robust/i, points: 34, description: 'Run OLS regression' },
-            // Control variables - accepts: y ~ x1 + x2 + x3, multiple +
-            { regex: /~.*\+.*\+|income\s*~\s*\w+\s*\+\s*\w+|outcome\s*~\s*\w+\s*\+\s*\w+/i, points: 33, description: 'Add control variables' },
-            // DiD - accepts: treated * post, treated:post, interaction
-            { regex: /treated\s*\*\s*post|post\s*\*\s*treated|treated\s*:\s*post|interaction|did\s*<-/i, points: 33, description: 'Implement difference-in-differences' }
-          ]
-        }
-      }
-    };
-
-    // Initialize interactive exercises
-    document.querySelectorAll('.interactive-exercise').forEach(exercise => {
-      const exerciseId = exercise.dataset.exercise;
-      let currentLang = 'python';
-      let currentStep = 0;
-      let hasCheckedScore = false;
-
-      exercise.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const lang = this.dataset.lang;
-          currentLang = lang;
-          exercise.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-          exercise.querySelectorAll('.code-editor').forEach(editor => {
-            editor.style.display = editor.dataset.lang === lang ? 'block' : 'none';
-          });
-          if (hasCheckedScore) resetSolutionSteps();
-        });
-      });
-
-      const checkBtn = exercise.querySelector('.btn-check-score');
-      const scoreDisplay = exercise.querySelector('.score-display');
-      const scoreValue = exercise.querySelector('.score-value');
-      const scoreFeedback = exercise.querySelector('.score-feedback');
-      const showSolutionBtn = exercise.querySelector('.btn-show-solution');
-
-      checkBtn.addEventListener('click', function() {
-        const editor = exercise.querySelector(`.code-editor[data-lang="${currentLang}"]`);
-        const code = editor.value;
-        const patterns = exercisePatterns[exerciseId]?.[currentLang]?.patterns || [];
-
-        let score = 0;
-        let matched = [];
-        let missed = [];
-
-        patterns.forEach(p => {
-          if (p.regex.test(code)) {
-            score += p.points;
-            matched.push(p.description);
-          } else {
-            missed.push(p.description);
-          }
-        });
-
-        score = Math.min(100, score);
-        scoreValue.textContent = score;
-        scoreValue.className = 'score-value';
-        if (score >= 80) scoreValue.classList.add('score-high');
-        else if (score >= 50) scoreValue.classList.add('score-medium');
-        else scoreValue.classList.add('score-low');
-
-        if (score === 100) {
-          scoreFeedback.textContent = 'Perfect! All tasks completed correctly.';
-        } else if (score >= 70) {
-          scoreFeedback.textContent = `Good work! Missing: ${missed.join(', ')}.`;
-        } else if (score >= 40) {
-          scoreFeedback.textContent = `Getting there. Missing: ${missed.join(', ')}.`;
-        } else {
-          scoreFeedback.textContent = `Keep trying! Check: ${missed.slice(0, 2).join(', ')}.`;
-        }
-
-        scoreDisplay.style.display = 'flex';
-        showSolutionBtn.style.display = 'inline-block';
-        hasCheckedScore = true;
-      });
-
-      const solutionSteps = exercise.querySelector('.solution-steps');
-      const prevBtn = exercise.querySelector('.btn-prev-step');
-      const nextBtn = exercise.querySelector('.btn-next-step');
-      const currentStepEl = exercise.querySelector('.current-step');
-      const totalStepsEl = exercise.querySelector('.total-steps');
-
-      function resetSolutionSteps() {
-        currentStep = 0;
-        currentStepEl.textContent = '0';
-        exercise.querySelectorAll('.solution-step').forEach(step => {
-          step.style.display = 'none';
-        });
-        updateNavButtons();
-      }
-
-      function updateNavButtons() {
-        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
-        totalStepsEl.textContent = totalSteps;
-        prevBtn.disabled = currentStep === 0;
-        nextBtn.disabled = currentStep >= totalSteps;
-        nextBtn.textContent = currentStep >= totalSteps ? 'Complete' : 'Next Step';
-      }
-
-      function showStep(stepNum) {
-        const steps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`);
-        steps.forEach((step, idx) => {
-          step.style.display = (idx + 1) <= stepNum ? 'block' : 'none';
-        });
-        currentStepEl.textContent = stepNum;
-      }
-
-      showSolutionBtn.addEventListener('click', function() {
-        solutionSteps.style.display = 'block';
-        resetSolutionSteps();
-        this.style.display = 'none';
-      });
-
-      nextBtn.addEventListener('click', function() {
-        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
-        if (currentStep < totalSteps) {
-          currentStep++;
-          showStep(currentStep);
-          updateNavButtons();
-        }
-      });
-
-      prevBtn.addEventListener('click', function() {
-        if (currentStep > 0) {
-          currentStep--;
-          showStep(currentStep);
-          updateNavButtons();
-        }
-      });
-
-      updateNavButtons();
-    });
-  });
-  </script>
-
-  <!-- Smart Tooltip Positioning System -->
-  <script>
-  (function() {
-    let tooltipEl = null;
-    let currentTarget = null;
-    let hideTimeout = null;
-
-    function createTooltip() {
-      if (tooltipEl) return tooltipEl;
-      tooltipEl = document.createElement('div');
-      tooltipEl.className = 'tooltip-popup';
-      document.body.appendChild(tooltipEl);
-      return tooltipEl;
-    }
-
-    function positionTooltip(target) {
-      const tooltip = createTooltip();
-      const tipText = target.getAttribute('data-tip');
-      if (!tipText) return;
-
-      tooltip.textContent = tipText;
-      tooltip.className = 'tooltip-popup';
-
-      const targetRect = target.getBoundingClientRect();
-      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
-      let containerRect = container ? container.getBoundingClientRect() : {
-        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
-      };
-
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const padding = 10;
-
-      tooltip.style.visibility = 'hidden';
-      tooltip.style.display = 'block';
-      tooltip.classList.add('visible');
-
-      const tooltipRect = tooltip.getBoundingClientRect();
-      const tooltipWidth = tooltipRect.width;
-      const tooltipHeight = tooltipRect.height;
-
-      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
-      let top = targetRect.top - tooltipHeight - 8;
-      let arrowClass = 'arrow-bottom';
-
-      if (top < padding) {
-        top = targetRect.bottom + 8;
-        arrowClass = 'arrow-top';
-      }
-
-      if (top + tooltipHeight > viewportHeight - padding) {
-        top = targetRect.top - tooltipHeight - 8;
-        arrowClass = 'arrow-bottom';
-      }
-
-      if (left < padding) left = padding;
-      if (left + tooltipWidth > viewportWidth - padding) left = viewportWidth - tooltipWidth - padding;
-
-      if (container) {
-        const minLeft = Math.max(padding, containerRect.left);
-        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
-        if (left < minLeft) left = minLeft;
-        if (left + tooltipWidth > maxRight) left = maxRight - tooltipWidth;
-      }
-
-      tooltip.style.left = left + 'px';
-      tooltip.style.top = top + 'px';
-      tooltip.style.visibility = 'visible';
-      tooltip.classList.add(arrowClass);
-    }
-
-    function showTooltip(target) {
-      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
-      currentTarget = target;
-      positionTooltip(target);
-    }
-
-    function hideTooltip() {
-      hideTimeout = setTimeout(function() {
-        if (tooltipEl) tooltipEl.classList.remove('visible');
-        currentTarget = null;
-      }, 100);
-    }
-
-    document.addEventListener('mouseenter', function(e) {
-      if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target);
-    }, true);
-
-    document.addEventListener('mouseleave', function(e) {
-      if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip();
-    }, true);
-
-    document.addEventListener('scroll', function() {
-      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
-    }, true);
-
-    window.addEventListener('resize', function() {
-      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
-    });
-  })();
-  </script>
 </body>
 </html>

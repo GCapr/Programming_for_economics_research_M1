@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>6D Instrumental Variables | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Please enter the course password to access the materials.</p>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+      <button id="password-submit">Access Course</button>
+      <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
+          <li><a href="05a-data-simulation.html"><span class="module-number">5A</span> Data Simulation</a></li>
+          <li>
+            <a href="05b-experiments.html"><span class="module-number">5B</span> Coding for Experiments</a>
+            <ul class="sub-nav">
+              <li><a href="05b1-power-analysis.html">Power Analysis</a></li>
+              <li><a href="05b2-survey-programming.html">Survey Programming</a></li>
+              <li><a href="05b3-randomization.html">Randomization</a></li>
+              <li><a href="05b4-balance-checks.html">Balance Checks</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li class="active"><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <nav class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+          <a href="06-causal-inference.html">6 Causal Inference</a> &raquo; Instrumental Variables
+        </nav>
+
+        <div class="module-header">
+          <h1>6D &nbsp;Instrumental Variables</h1>
+          <div class="module-meta">
+            <span>~2.5 hours</span>
+            <span>2SLS, Weak IV, Bartik</span>
+          </div>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#2sls">Two-Stage Least Squares</a></li>
+            <li><a href="#diagnostics">IV Diagnostics</a></li>
+            <li><a href="#weak">Weak Instruments</a></li>
+            <li><a href="#bartik">Bartik/Shift-Share Instruments</a></li>
+            <li><a href="#multiple">Multiple Instruments</a></li>
+          </ul>
+        </div>
+
+        <h2 id="2sls">Two-Stage Least Squares</h2>
+
+        <p>
+          IV estimation uses an instrument Z that affects treatment D but not the outcome Y directly. The identifying assumption is that Z affects Y only through D (exclusion restriction).
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: 2SLS with linearmodels</span>
+<span class="code-keyword">from</span> linearmodels.iv <span class="code-keyword">import</span> IV2SLS
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Example: effect of education on wages</span>
+<span class="code-comment"># Instrument: distance to college</span>
+
+<span class="code-comment"># 2SLS estimation</span>
+<span class="code-tooltip" data-tip="IV2SLS syntax: dependent ~ exogenous + [endogenous ~ instruments]">model = IV2SLS.from_formula(
+    <span class="code-string">'wage ~ 1 + experience + [education ~ distance_to_college]'</span>,
+    data=df
+)
+results = model.fit(cov_type=<span class="code-string">'robust'</span>)</span>
+print(results.summary)
+
+<span class="code-comment"># With multiple controls</span>
+model = IV2SLS.from_formula(
+    <span class="code-string">'wage ~ 1 + experience + age + [education ~ distance_to_college]'</span>,
+    data=df
+)
+
+<span class="code-comment"># Manual 2SLS (for understanding)</span>
+<span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
+
+<span class="code-comment"># First stage: regress endogenous on instrument</span>
+first_stage = sm.OLS(df[<span class="code-string">'education'</span>],
+                     sm.add_constant(df[[<span class="code-string">'distance_to_college'</span>, <span class="code-string">'experience'</span>]])).fit()
+df[<span class="code-string">'education_hat'</span>] = first_stage.fittedvalues
+
+<span class="code-comment"># Second stage: regress outcome on predicted endogenous</span>
+second_stage = sm.OLS(df[<span class="code-string">'wage'</span>],
+                      sm.add_constant(df[[<span class="code-string">'education_hat'</span>, <span class="code-string">'experience'</span>]])).fit()
+<span class="code-comment"># Note: SEs from manual 2SLS are wrong! Use IV2SLS for correct SEs.</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: 2SLS with ivregress</span>
+
+<span class="code-comment">* Basic 2SLS</span>
+<span class="code-tooltip" data-tip="ivregress 2sls: (endogenous = instruments) controls">ivregress 2sls wage experience (education = distance_to_college), robust</span>
+
+<span class="code-comment">* With first-stage results</span>
+ivregress 2sls wage experience (education = distance_to_college), first robust
+
+<span class="code-comment">* Using ivreg2 (more diagnostics)</span>
+<span class="code-comment">* ssc install ivreg2</span>
+<span class="code-tooltip" data-tip="ivreg2 provides additional diagnostics: weak IV, overid tests">ivreg2 wage experience (education = distance_to_college), robust first</span>
+
+<span class="code-comment">* With clustering</span>
+ivregress 2sls wage experience (education = distance_to_college), ///
+    vce(cluster state)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: 2SLS with ivreg (AER package)</span>
+<span class="code-keyword">library</span>(AER)
+<span class="code-keyword">library</span>(sandwich)
+
+<span class="code-comment"># 2SLS estimation</span>
+<span class="code-tooltip" data-tip="ivreg syntax: outcome ~ exogenous | instruments">iv_model <- ivreg(wage ~ education + experience |
+                  distance_to_college + experience,
+                  data = df)</span>
+summary(iv_model, vcov = vcovHC, diagnostics = TRUE)
+
+<span class="code-comment"># Using fixest (faster, more flexible)</span>
+<span class="code-keyword">library</span>(fixest)
+
+<span class="code-tooltip" data-tip="feols with 1 specifies the endogenous and instruments">iv_model <- feols(wage ~ experience | education ~ distance_to_college,
+                  data = df,
+                  vcov = "hetero")</span>
+summary(iv_model, stage = 1:2)  <span class="code-comment"># show both stages</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="diagnostics">IV Diagnostics</h2>
+
+        <p>
+          Always report: (1) first-stage F-statistic, (2) overidentification test (with multiple instruments), (3) comparison of OLS and IV estimates.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: IV Diagnostics</span>
+<span class="code-keyword">from</span> linearmodels.iv <span class="code-keyword">import</span> IV2SLS
+<span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
+
+<span class="code-comment"># Estimate IV model</span>
+model = IV2SLS.from_formula(
+    <span class="code-string">'wage ~ 1 + experience + [education ~ z1 + z2]'</span>,
+    data=df
+)
+results = model.fit(cov_type=<span class="code-string">'robust'</span>)
+
+<span class="code-comment"># 1. First-stage F-statistic</span>
+<span class="code-tooltip" data-tip="F > 10 is rule of thumb for strong instruments (Stock-Yogo)">first_stage = sm.OLS(df[<span class="code-string">'education'</span>],
+                     sm.add_constant(df[[<span class="code-string">'z1'</span>, <span class="code-string">'z2'</span>, <span class="code-string">'experience'</span>]])).fit()
+print(f<span class="code-string">"First-stage F: {first_stage.fvalue:.2f}"</span>)</span>
+
+<span class="code-comment"># 2. Durbin-Wu-Hausman test (endogeneity test)</span>
+<span class="code-tooltip" data-tip="Tests whether OLS is consistent. Reject = evidence of endogeneity">print(<span class="code-string">"Wu-Hausman test:"</span>, results.wu_hausman())</span>
+
+<span class="code-comment"># 3. Sargan-Hansen overidentification test</span>
+<span class="code-tooltip" data-tip="Tests if all instruments are valid. Reject = at least one invalid">print(<span class="code-string">"Sargan test:"</span>, results.sargan)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: IV Diagnostics</span>
+
+<span class="code-comment">* Estimate with ivreg2 for full diagnostics</span>
+ivreg2 wage experience (education = z1 z2), robust first
+
+<span class="code-comment">* Key diagnostics reported automatically:</span>
+<span class="code-comment">* - Kleibergen-Paap F statistic (weak ID)</span>
+<span class="code-comment">* - Hansen J statistic (overidentification)</span>
+<span class="code-comment">* - Endogeneity test</span>
+
+<span class="code-comment">* Post-estimation tests with ivregress</span>
+ivregress 2sls wage experience (education = z1 z2), robust
+
+<span class="code-comment">* First-stage F</span>
+<span class="code-tooltip" data-tip="estat firststage reports partial R2 and F for each instrument">estat firststage</span>
+
+<span class="code-comment">* Endogeneity test</span>
+estat endogenous
+
+<span class="code-comment">* Overidentification test (requires >1 instrument per endogenous)</span>
+<span class="code-tooltip" data-tip="Sargan/Hansen test: fail to reject means instruments may be valid">estat overid</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: IV Diagnostics</span>
+<span class="code-keyword">library</span>(AER)
+
+<span class="code-comment"># Estimate with diagnostics</span>
+iv_model <- ivreg(wage ~ education + experience |
+                  z1 + z2 + experience,
+                  data = df)
+
+<span class="code-comment"># Full diagnostics</span>
+<span class="code-tooltip" data-tip="diagnostics = TRUE adds weak IV, Wu-Hausman, and Sargan tests">summary(iv_model, diagnostics = TRUE)</span>
+
+<span class="code-comment"># Components:</span>
+<span class="code-comment"># - Weak instruments: F-stat on excluded instruments</span>
+<span class="code-comment"># - Wu-Hausman: endogeneity test (OLS consistent?)</span>
+<span class="code-comment"># - Sargan: overidentification test</span>
+
+<span class="code-comment"># With fixest</span>
+<span class="code-keyword">library</span>(fixest)
+iv_model <- feols(wage ~ experience | education ~ z1 + z2,
+                  data = df)
+<span class="code-tooltip" data-tip="fitstat reports various diagnostic statistics">fitstat(iv_model, ~ ivf + ivwald + sargan)</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="weak">Weak Instruments</h2>
+
+        <p>
+          Weak instruments (low first-stage F) cause biased IV estimates and unreliable inference. Use weak-instrument robust methods when F &lt; 10.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Weak Instrument Robust Inference</span>
+<span class="code-keyword">from</span> linearmodels.iv <span class="code-keyword">import</span> IV2SLS
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Anderson-Rubin confidence interval (weak-IV robust)</span>
+<span class="code-tooltip" data-tip="AR test inverts hypothesis tests to construct CIs valid with weak IV">def anderson_rubin_ci(y, d, z, x, alpha=0.05):
+    <span class="code-string">"""Compute Anderson-Rubin confidence interval."""</span>
+    <span class="code-keyword">from</span> scipy import stats
+
+    <span class="code-comment"># Grid search over beta values</span>
+    betas = np.linspace(-5, 5, 1000)
+    ar_stats = []
+
+    <span class="code-keyword">for</span> beta <span class="code-keyword">in</span> betas:
+        resid = y - beta * d
+        <span class="code-comment"># Regress residual on z (and x)</span>
+        <span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
+        model = sm.OLS(resid, sm.add_constant(np.column_stack([z, x]))).fit()
+        <span class="code-comment"># F-test that coefficients on z are jointly zero</span>
+        ar_stats.append(model.fvalue)
+
+    <span class="code-comment"># CI: betas where we fail to reject</span>
+    critical = stats.f.ppf(1-alpha, dfn=z.shape[1], dfd=len(y)-z.shape[1]-x.shape[1]-1)
+    ci_mask = np.array(ar_stats) < critical
+    <span class="code-keyword">return</span> betas[ci_mask].min(), betas[ci_mask].max()</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Weak Instrument Robust Inference</span>
+
+<span class="code-comment">* Limited Information Maximum Likelihood (LIML)</span>
+<span class="code-tooltip" data-tip="LIML is less biased than 2SLS with weak instruments">ivregress liml wage experience (education = z1 z2), robust</span>
+
+<span class="code-comment">* Weak-IV robust confidence intervals with weakiv</span>
+<span class="code-comment">* ssc install weakiv</span>
+<span class="code-tooltip" data-tip="weakiv computes Anderson-Rubin and other weak-IV robust tests">weakiv ivregress 2sls wage experience (education = z1 z2)</span>
+
+<span class="code-comment">* Check Stock-Yogo critical values</span>
+ivreg2 wage experience (education = z1 z2), first
+<span class="code-comment">* Compare Kleibergen-Paap F to Stock-Yogo critical values</span>
+
+<span class="code-comment">* Continuously updating GMM (CUE) - also weak-IV robust</span>
+ivreg2 wage experience (education = z1 z2), cue robust</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Weak Instrument Robust Inference</span>
+<span class="code-keyword">library</span>(AER)
+<span class="code-keyword">library</span>(ivmodel)
+
+<span class="code-comment"># Check first-stage F</span>
+iv_model <- ivreg(wage ~ education + experience |
+                  z1 + z2 + experience,
+                  data = df)
+summary(iv_model, diagnostics = TRUE)
+
+<span class="code-comment"># Weak-IV robust inference with ivmodel</span>
+<span class="code-tooltip" data-tip="ivmodel provides Anderson-Rubin and other weak-IV robust methods">iv_robust <- ivmodel(Y = df$wage,
+                     D = df$education,
+                     Z = cbind(df$z1, df$z2),
+                     X = df$experience)</span>
+
+<span class="code-comment"># Anderson-Rubin confidence interval</span>
+AR.test(iv_robust)
+
+<span class="code-comment"># LIML estimator</span>
+LIML(iv_robust)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="bartik">Bartik/Shift-Share Instruments</h2>
+
+        <p>
+          Shift-share (Bartik) instruments interact national/sectoral shocks with local industry shares. They're widely used in labor and trade economics. Recent papers clarify when they're valid.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Constructing a Bartik Instrument</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Components:</span>
+<span class="code-comment"># - shares_{l,k}: share of industry k in location l (pre-period)</span>
+<span class="code-comment"># - growth_k: national growth rate in industry k</span>
+
+<span class="code-comment"># Step 1: Calculate industry shares by location (base period)</span>
+base_year = df[df[<span class="code-string">'year'</span>] == 2000]
+shares = base_year.groupby([<span class="code-string">'location'</span>, <span class="code-string">'industry'</span>])[<span class="code-string">'employment'</span>].sum()
+total_emp = base_year.groupby(<span class="code-string">'location'</span>)[<span class="code-string">'employment'</span>].sum()
+shares = shares / total_emp  <span class="code-comment"># shares_{l,k}</span>
+
+<span class="code-comment"># Step 2: Calculate national growth by industry (excluding own location)</span>
+<span class="code-tooltip" data-tip="Leave-one-out: exclude own location to avoid mechanical correlation">def leave_one_out_growth(row, df):
+    industry = row[<span class="code-string">'industry'</span>]
+    location = row[<span class="code-string">'location'</span>]
+    other_locs = df[(df[<span class="code-string">'industry'</span>] == industry) & (df[<span class="code-string">'location'</span>] != location)]
+    growth = other_locs[<span class="code-string">'emp_change'</span>].sum() / other_locs[<span class="code-string">'base_emp'</span>].sum()
+    <span class="code-keyword">return</span> growth</span>
+
+<span class="code-comment"># Step 3: Construct Bartik instrument</span>
+<span class="code-tooltip" data-tip="Bartik = sum over industries of (share × national growth)">bartik = (shares * national_growth).groupby(<span class="code-string">'location'</span>).sum()</span>
+df = df.merge(bartik.rename(<span class="code-string">'bartik'</span>), on=<span class="code-string">'location'</span>)
+
+<span class="code-comment"># Use in IV regression</span>
+<span class="code-keyword">from</span> linearmodels.iv <span class="code-keyword">import</span> IV2SLS
+model = IV2SLS.from_formula(
+    <span class="code-string">'wage ~ 1 + controls + [local_emp_growth ~ bartik]'</span>,
+    data=df
+)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Bartik Instrument</span>
+
+<span class="code-comment">* Assume data has: location, industry, employment, year</span>
+
+<span class="code-comment">* Step 1: Calculate base-year shares</span>
+preserve
+keep if year == 2000
+bysort location: egen total_emp = total(employment)
+gen share = employment / total_emp
+keep location industry share
+tempfile shares
+save `shares'
+restore
+
+<span class="code-comment">* Step 2: Calculate leave-one-out national growth</span>
+<span class="code-tooltip" data-tip="Leave-one-out avoids mechanical correlation from own location">bysort industry: egen nat_growth = total(emp_change)
+bysort industry: egen nat_base = total(base_emp)
+gen loo_growth = (nat_growth - emp_change) / (nat_base - base_emp)</span>
+
+<span class="code-comment">* Step 3: Merge shares and compute Bartik</span>
+merge m:1 location industry using `shares'
+gen bartik_component = share * loo_growth
+bysort location: egen bartik = total(bartik_component)
+
+<span class="code-comment">* Step 4: Use in IV regression</span>
+<span class="code-tooltip" data-tip="ssaggregate from Borusyak et al. automates this correctly">ivregress 2sls wage controls (local_emp_growth = bartik), cluster(location)</span>
+
+<span class="code-comment">* Using ssaggregate (Borusyak, Hull, Jaravel)</span>
+<span class="code-comment">* ssc install ssaggregate</span>
+ssaggregate outcome treatment, ///
+    shares(share) shocks(national_growth) controls(x1 x2) ///
+    cluster(location)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Bartik Instrument</span>
+<span class="code-keyword">library</span>(dplyr)
+<span class="code-keyword">library</span>(fixest)
+
+<span class="code-comment"># Step 1: Calculate base-year shares</span>
+shares <- df %>%
+  filter(year == 2000) %>%
+  group_by(location, industry) %>%
+  summarise(emp = sum(employment)) %>%
+  group_by(location) %>%
+  mutate(share = emp / sum(emp)) %>%
+  select(location, industry, share)
+
+<span class="code-comment"># Step 2: Leave-one-out national growth</span>
+<span class="code-tooltip" data-tip="Exclude own location when calculating national growth">growth <- df %>%
+  group_by(industry, location) %>%
+  summarise(emp_change = sum(emp_change), base_emp = sum(base_emp)) %>%
+  group_by(industry) %>%
+  mutate(
+    loo_growth = (sum(emp_change) - emp_change) / (sum(base_emp) - base_emp)
+  )</span>
+
+<span class="code-comment"># Step 3: Construct Bartik</span>
+bartik <- shares %>%
+  left_join(growth, by = c("location", "industry")) %>%
+  mutate(component = share * loo_growth) %>%
+  group_by(location) %>%
+  summarise(bartik = sum(component, na.rm = TRUE))
+
+<span class="code-comment"># Merge and estimate</span>
+df <- df %>% left_join(bartik, by = "location")
+
+<span class="code-comment"># IV regression</span>
+iv_model <- feols(wage ~ controls | local_emp_growth ~ bartik,
+                  data = df,
+                  cluster = ~ location)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Recent Advances in Shift-Share Identification</div>
+          <p>
+            Recent papers provide new understanding of when Bartik instruments are valid:
+          </p>
+          <ul>
+            <li><strong>Goldsmith-Pinkham, Sorkin, Swift (2020):</strong> Identification comes from the shares; requires shares to be exogenous</li>
+            <li><strong>Borusyak, Hull, Jaravel (2022):</strong> Identification comes from the shocks; requires shocks to be as-good-as-randomly assigned</li>
+            <li><strong>Adão, Kolesár, Morales (2019):</strong> Standard errors need adjustment for exposure-weighted structure</li>
+          </ul>
+          <p style="margin-bottom: 0;">
+            Choose your identification argument and conduct appropriate diagnostics.
+          </p>
+        </div>
+
+        <h2 id="multiple">Multiple Instruments</h2>
+
+        <p>
+          With multiple instruments, you can test overidentifying restrictions, but be careful of overfitting and weak-IV bias magnification.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Multiple Instruments</span>
+<span class="code-keyword">from</span> linearmodels.iv <span class="code-keyword">import</span> IV2SLS
+
+<span class="code-comment"># Multiple instruments for one endogenous variable</span>
+model = IV2SLS.from_formula(
+    <span class="code-string">'wage ~ 1 + experience + [education ~ z1 + z2 + z3]'</span>,
+    data=df
+)
+results = model.fit(cov_type=<span class="code-string">'robust'</span>)
+
+<span class="code-comment"># Overidentification test (Sargan-Hansen)</span>
+<span class="code-tooltip" data-tip="With more instruments than endogenous vars, test if all instruments are valid">print(<span class="code-string">"Sargan J-statistic:"</span>, results.sargan.stat)
+print(<span class="code-string">"p-value:"</span>, results.sargan.pval)</span>
+
+<span class="code-comment"># Multiple endogenous variables</span>
+model = IV2SLS.from_formula(
+    <span class="code-string">'wage ~ 1 + age + [education + experience ~ z1 + z2 + z3 + z4]'</span>,
+    data=df
+)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Multiple Instruments</span>
+
+<span class="code-comment">* Multiple instruments</span>
+ivreg2 wage experience (education = z1 z2 z3), robust first
+
+<span class="code-comment">* Check overidentification</span>
+<span class="code-tooltip" data-tip="Hansen J: fail to reject suggests instruments are consistent with each other">estat overid</span>
+
+<span class="code-comment">* Compare specifications with different instruments</span>
+<span class="code-tooltip" data-tip="Check if estimates are stable across instrument sets">estimates store full
+ivreg2 wage experience (education = z1 z2), robust
+estimates store partial
+estimates table full partial</span>
+
+<span class="code-comment">* Multiple endogenous variables</span>
+ivregress 2sls wage age (education experience = z1 z2 z3 z4), robust</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Multiple Instruments</span>
+<span class="code-keyword">library</span>(AER)
+<span class="code-keyword">library</span>(fixest)
+
+<span class="code-comment"># Multiple instruments</span>
+iv_model <- ivreg(wage ~ education + experience |
+                  z1 + z2 + z3 + experience,
+                  data = df)
+summary(iv_model, diagnostics = TRUE)
+
+<span class="code-comment"># Sargan test for overidentification</span>
+<span class="code-tooltip" data-tip="Sargan test checks if instruments are jointly valid">summary(iv_model, diagnostics = TRUE)$diagnostics["Sargan", ]</span>
+
+<span class="code-comment"># With fixest: check stability across instrument sets</span>
+iv1 <- feols(wage ~ experience | education ~ z1, data = df)
+iv2 <- feols(wage ~ experience | education ~ z1 + z2, data = df)
+iv3 <- feols(wage ~ experience | education ~ z1 + z2 + z3, data = df)
+
+<span class="code-tooltip" data-tip="Compare estimates: stable across instrument sets is reassuring">etable(iv1, iv2, iv3)</span></code></pre>
+          </div>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Key IV References</div>
+          <ul>
+            <li><strong>Angrist, J. & Krueger, A.</strong> (2001). "Instrumental Variables and the Search for Identification." <em>JEP</em>.</li>
+            <li><strong>Stock, J. & Yogo, M.</strong> (2005). "Testing for Weak Instruments." In <em>Identification and Inference</em>.</li>
+            <li><strong>Goldsmith-Pinkham, P., Sorkin, I., & Swift, H.</strong> (2020). "Bartik Instruments: What, When, Why, and How." <em>AER</em>.</li>
+            <li><strong>Borusyak, K., Hull, P., & Jaravel, X.</strong> (2022). "Quasi-Experimental Shift-Share Research Designs." <em>ReStud</em>.</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="06c-rdd.html" class="nav-link prev">6C: Regression Discontinuity</a>
+          <a href="06e-synthetic-control.html" class="nav-link next">6E: Synthetic Control</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+</body>
+</html>

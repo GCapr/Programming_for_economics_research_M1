@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>6C Regression Discontinuity | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Please enter the course password to access the materials.</p>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+      <button id="password-submit">Access Course</button>
+      <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
+          <li><a href="05a-data-simulation.html"><span class="module-number">5A</span> Data Simulation</a></li>
+          <li>
+            <a href="05b-experiments.html"><span class="module-number">5B</span> Coding for Experiments</a>
+            <ul class="sub-nav">
+              <li><a href="05b1-power-analysis.html">Power Analysis</a></li>
+              <li><a href="05b2-survey-programming.html">Survey Programming</a></li>
+              <li><a href="05b3-randomization.html">Randomization</a></li>
+              <li><a href="05b4-balance-checks.html">Balance Checks</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li class="active"><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <nav class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+          <a href="06-causal-inference.html">6 Causal Inference</a> &raquo; Regression Discontinuity
+        </nav>
+
+        <div class="module-header">
+          <h1>6C &nbsp;Regression Discontinuity</h1>
+          <div class="module-meta">
+            <span>~2 hours</span>
+            <span>Sharp, Fuzzy, Diagnostics</span>
+          </div>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#sharp">Sharp RDD</a></li>
+            <li><a href="#bandwidth">Bandwidth Selection</a></li>
+            <li><a href="#fuzzy">Fuzzy RDD</a></li>
+            <li><a href="#diagnostics">Diagnostics and Validity Tests</a></li>
+            <li><a href="#visualization">Visualization</a></li>
+          </ul>
+        </div>
+
+        <h2 id="sharp">Sharp RDD</h2>
+
+        <p>
+          In a sharp RDD, treatment is deterministically assigned at the cutoff: everyone above is treated, everyone below is not.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Sharp RDD with rdrobust</span>
+<span class="code-comment"># pip install rdrobust</span>
+<span class="code-keyword">from</span> rdrobust <span class="code-keyword">import</span> rdrobust, rdbwselect
+
+<span class="code-comment"># running_var: the score that determines treatment (e.g., test score)</span>
+<span class="code-comment"># cutoff: the threshold (e.g., 50 points)</span>
+
+<span class="code-comment"># Center the running variable at cutoff</span>
+df[<span class="code-string">'x_centered'</span>] = df[<span class="code-string">'running_var'</span>] - cutoff
+
+<span class="code-comment"># Sharp RDD estimation</span>
+<span class="code-tooltip" data-tip="rdrobust implements optimal bandwidth selection and bias-corrected estimation">result = rdrobust(
+    y=df[<span class="code-string">'outcome'</span>],
+    x=df[<span class="code-string">'x_centered'</span>],
+    c=0  <span class="code-comment"># cutoff (centered)</span>
+)</span>
+print(result)
+
+<span class="code-comment"># With covariates</span>
+result = rdrobust(
+    y=df[<span class="code-string">'outcome'</span>],
+    x=df[<span class="code-string">'x_centered'</span>],
+    c=0,
+    covs=df[[<span class="code-string">'age'</span>, <span class="code-string">'gender'</span>]]
+)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Sharp RDD with rdrobust</span>
+<span class="code-comment">* ssc install rdrobust</span>
+
+<span class="code-comment">* Center running variable</span>
+gen x_centered = running_var - 50
+
+<span class="code-comment">* Sharp RDD</span>
+<span class="code-tooltip" data-tip="rdrobust uses MSE-optimal bandwidth and robust bias-corrected inference">rdrobust outcome x_centered, c(0)</span>
+
+<span class="code-comment">* With covariates</span>
+rdrobust outcome x_centered, c(0) covs(age gender)
+
+<span class="code-comment">* Specify kernel and polynomial order</span>
+rdrobust outcome x_centered, c(0) kernel(triangular) p(1)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Sharp RDD with rdrobust</span>
+<span class="code-keyword">library</span>(rdrobust)
+
+<span class="code-comment"># Center running variable</span>
+df$x_centered <- df$running_var - 50
+
+<span class="code-comment"># Sharp RDD</span>
+<span class="code-tooltip" data-tip="rdrobust() implements Calonico, Cattaneo, Titiunik (2014) optimal bandwidth">rd_result <- rdrobust(y = df$outcome,
+                      x = df$x_centered,
+                      c = 0)</span>
+summary(rd_result)
+
+<span class="code-comment"># With covariates</span>
+rd_result <- rdrobust(y = df$outcome,
+                      x = df$x_centered,
+                      c = 0,
+                      covs = cbind(df$age, df$gender))</code></pre>
+          </div>
+        </div>
+
+        <h2 id="bandwidth">Bandwidth Selection</h2>
+
+        <p>
+          The bandwidth determines how much data around the cutoff is used. Narrower bandwidth = more local but less precise. Modern methods select optimal bandwidth automatically.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Bandwidth Selection</span>
+<span class="code-keyword">from</span> rdrobust <span class="code-keyword">import</span> rdbwselect
+
+<span class="code-comment"># Optimal bandwidth selection</span>
+<span class="code-tooltip" data-tip="rdbwselect computes MSE-optimal and CER-optimal bandwidths">bw_result = rdbwselect(
+    y=df[<span class="code-string">'outcome'</span>],
+    x=df[<span class="code-string">'x_centered'</span>],
+    c=0
+)</span>
+print(bw_result)
+
+<span class="code-comment"># Use specific bandwidth</span>
+result = rdrobust(
+    y=df[<span class="code-string">'outcome'</span>],
+    x=df[<span class="code-string">'x_centered'</span>],
+    c=0,
+    h=5  <span class="code-comment"># manual bandwidth</span>
+)
+
+<span class="code-comment"># Robustness: different bandwidths</span>
+<span class="code-keyword">for</span> h <span class="code-keyword">in</span> [3, 5, 7, 10]:
+    result = rdrobust(y=df[<span class="code-string">'outcome'</span>], x=df[<span class="code-string">'x_centered'</span>], c=0, h=h)
+    print(f<span class="code-string">"h={h}: estimate={result.coef[0]:.3f}"</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Bandwidth Selection</span>
+
+<span class="code-comment">* Optimal bandwidth</span>
+<span class="code-tooltip" data-tip="rdbwselect reports MSE-optimal, CER-optimal, and other bandwidth choices">rdbwselect outcome x_centered, c(0)</span>
+
+<span class="code-comment">* With different methods</span>
+rdbwselect outcome x_centered, c(0) bwselect(mserd)  <span class="code-comment">// MSE</span>
+rdbwselect outcome x_centered, c(0) bwselect(cerrd)  <span class="code-comment">// CER</span>
+
+<span class="code-comment">* Robustness check: vary bandwidth</span>
+<span class="code-tooltip" data-tip="Check if results are sensitive to bandwidth choice">foreach h in 3 5 7 10 {
+    rdrobust outcome x_centered, c(0) h(`h')
+}</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Bandwidth Selection</span>
+<span class="code-keyword">library</span>(rdrobust)
+
+<span class="code-comment"># Optimal bandwidth</span>
+<span class="code-tooltip" data-tip="rdbwselect() computes optimal bandwidths using different criteria">bw <- rdbwselect(y = df$outcome, x = df$x_centered, c = 0)</span>
+summary(bw)
+
+<span class="code-comment"># Use specific bandwidth</span>
+rd_result <- rdrobust(y = df$outcome, x = df$x_centered, c = 0, h = 5)
+
+<span class="code-comment"># Robustness: multiple bandwidths</span>
+bandwidths <- c(3, 5, 7, 10)
+results <- lapply(bandwidths, function(h) {
+  rdrobust(y = df$outcome, x = df$x_centered, c = 0, h = h)
+})
+<span class="code-comment"># Extract and compare estimates</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="fuzzy">Fuzzy RDD</h2>
+
+        <p>
+          In fuzzy RDD, the probability of treatment jumps at the cutoff but isn't deterministic. This is essentially IV using the threshold as an instrument for treatment.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Fuzzy RDD</span>
+<span class="code-keyword">from</span> rdrobust <span class="code-keyword">import</span> rdrobust
+
+<span class="code-comment"># Fuzzy RDD: treatment is not perfectly determined by cutoff</span>
+<span class="code-tooltip" data-tip="fuzzy parameter takes the actual treatment indicator">result = rdrobust(
+    y=df[<span class="code-string">'outcome'</span>],
+    x=df[<span class="code-string">'x_centered'</span>],
+    c=0,
+    fuzzy=df[<span class="code-string">'treatment'</span>]  <span class="code-comment"># actual treatment status</span>
+)</span>
+print(result)
+
+<span class="code-comment"># First stage: check jump in treatment probability</span>
+first_stage = rdrobust(
+    y=df[<span class="code-string">'treatment'</span>],
+    x=df[<span class="code-string">'x_centered'</span>],
+    c=0
+)
+print(<span class="code-string">"First stage jump:"</span>, first_stage.coef[0])</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Fuzzy RDD</span>
+
+<span class="code-comment">* Fuzzy RDD with treatment indicator</span>
+<span class="code-tooltip" data-tip="fuzzy() option specifies the endogenous treatment variable">rdrobust outcome x_centered, c(0) fuzzy(treatment)</span>
+
+<span class="code-comment">* Check first stage</span>
+rdrobust treatment x_centered, c(0)
+
+<span class="code-comment">* Plot first stage discontinuity</span>
+rdplot treatment x_centered, c(0) graph_options(title("First Stage"))</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Fuzzy RDD</span>
+<span class="code-keyword">library</span>(rdrobust)
+
+<span class="code-comment"># Fuzzy RDD</span>
+<span class="code-tooltip" data-tip="fuzzy parameter specifies the endogenous treatment">rd_fuzzy <- rdrobust(y = df$outcome,
+                     x = df$x_centered,
+                     c = 0,
+                     fuzzy = df$treatment)</span>
+summary(rd_fuzzy)
+
+<span class="code-comment"># First stage: jump in treatment at cutoff</span>
+first_stage <- rdrobust(y = df$treatment,
+                        x = df$x_centered,
+                        c = 0)
+summary(first_stage)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="diagnostics">Diagnostics and Validity Tests</h2>
+
+        <p>
+          Key validity checks: (1) no manipulation of the running variable, (2) continuity of covariates at cutoff.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: RDD Diagnostics</span>
+<span class="code-keyword">from</span> rddensity <span class="code-keyword">import</span> rddensity
+<span class="code-keyword">from</span> rdrobust <span class="code-keyword">import</span> rdrobust
+
+<span class="code-comment"># 1. McCrary density test (manipulation check)</span>
+<span class="code-tooltip" data-tip="Tests for bunching at cutoff - indicates manipulation if density jumps">density_test = rddensity(X=df[<span class="code-string">'x_centered'</span>], c=0)
+print(density_test)</span>
+
+<span class="code-comment"># 2. Covariate balance at cutoff</span>
+<span class="code-tooltip" data-tip="Test that predetermined covariates don't jump at cutoff">covariates = [<span class="code-string">'age'</span>, <span class="code-string">'gender'</span>, <span class="code-string">'prior_income'</span>]
+<span class="code-keyword">for</span> cov <span class="code-keyword">in</span> covariates:
+    result = rdrobust(y=df[cov], x=df[<span class="code-string">'x_centered'</span>], c=0)
+    print(f<span class="code-string">"{cov}: coef={result.coef[0]:.3f}, p={result.pv[0]:.3f}"</span>)</span>
+
+<span class="code-comment"># 3. Placebo cutoffs</span>
+<span class="code-tooltip" data-tip="Test at fake cutoffs where there should be no effect">placebo_cutoffs = [-10, -5, 5, 10]  <span class="code-comment"># relative to true cutoff</span>
+<span class="code-keyword">for</span> pc <span class="code-keyword">in</span> placebo_cutoffs:
+    result = rdrobust(y=df[<span class="code-string">'outcome'</span>], x=df[<span class="code-string">'x_centered'</span>], c=pc)
+    print(f<span class="code-string">"Placebo c={pc}: coef={result.coef[0]:.3f}"</span>)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: RDD Diagnostics</span>
+<span class="code-comment">* ssc install rddensity</span>
+
+<span class="code-comment">* 1. McCrary density test</span>
+<span class="code-tooltip" data-tip="Tests for manipulation - significant result suggests bunching at cutoff">rddensity x_centered, c(0) plot</span>
+
+<span class="code-comment">* 2. Covariate balance tests</span>
+<span class="code-tooltip" data-tip="Predetermined covariates should be continuous at cutoff">foreach var in age gender prior_income {
+    rdrobust `var' x_centered, c(0)
+}</span>
+
+<span class="code-comment">* 3. Placebo cutoffs</span>
+foreach c in -10 -5 5 10 {
+    rdrobust outcome x_centered, c(`c')
+}
+
+<span class="code-comment">* 4. Donut hole test (exclude obs near cutoff)</span>
+<span class="code-tooltip" data-tip="Drop observations very close to cutoff to check if manipulation drives results">rdrobust outcome x_centered if abs(x_centered) > 1, c(0)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: RDD Diagnostics</span>
+<span class="code-keyword">library</span>(rdrobust)
+<span class="code-keyword">library</span>(rddensity)
+
+<span class="code-comment"># 1. McCrary density test</span>
+<span class="code-tooltip" data-tip="Tests for bunching/manipulation at the cutoff">dens_test <- rddensity(X = df$x_centered, c = 0)
+summary(dens_test)</span>
+
+<span class="code-comment"># Plot density</span>
+rdplotdensity(rdd = dens_test, X = df$x_centered)
+
+<span class="code-comment"># 2. Covariate balance tests</span>
+covariates <- c("age", "gender", "prior_income")
+lapply(covariates, function(var) {
+  rdrobust(y = df[[var]], x = df$x_centered, c = 0)
+})
+
+<span class="code-comment"># 3. Placebo cutoffs</span>
+placebo <- c(-10, -5, 5, 10)
+lapply(placebo, function(c) {
+  rdrobust(y = df$outcome, x = df$x_centered, c = c)
+})</code></pre>
+          </div>
+        </div>
+
+        <h2 id="visualization">Visualization</h2>
+
+        <p>
+          Always visualize the discontinuity. Good RDD plots show the raw data and fitted relationships on both sides of the cutoff.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: RDD Plot</span>
+<span class="code-keyword">from</span> rdrobust <span class="code-keyword">import</span> rdplot
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+
+<span class="code-comment"># rdplot creates binned scatter with polynomial fit</span>
+<span class="code-tooltip" data-tip="rdplot bins data and fits separate polynomials on each side">rdplot(
+    y=df[<span class="code-string">'outcome'</span>],
+    x=df[<span class="code-string">'x_centered'</span>],
+    c=0,
+    nbins=[20, 20],  <span class="code-comment"># bins on each side</span>
+    binselect=<span class="code-string">'es'</span>   <span class="code-comment"># evenly spaced</span>
+)</span>
+
+<span class="code-comment"># Custom plot</span>
+fig, ax = plt.subplots(figsize=(10, 6))
+
+<span class="code-comment"># Scatter with bins</span>
+df[<span class="code-string">'bin'</span>] = pd.cut(df[<span class="code-string">'x_centered'</span>], bins=40)
+binned = df.groupby(<span class="code-string">'bin'</span>).agg({
+    <span class="code-string">'x_centered'</span>: <span class="code-string">'mean'</span>,
+    <span class="code-string">'outcome'</span>: <span class="code-string">'mean'</span>
+}).dropna()
+ax.scatter(binned[<span class="code-string">'x_centered'</span>], binned[<span class="code-string">'outcome'</span>], alpha=0.7)
+
+<span class="code-comment"># Fit lines on each side</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">for</span> side, data <span class="code-keyword">in</span> df.groupby(df[<span class="code-string">'x_centered'</span>] >= 0):
+    z = np.polyfit(data[<span class="code-string">'x_centered'</span>], data[<span class="code-string">'outcome'</span>], 1)
+    p = np.poly1d(z)
+    x_range = np.linspace(data[<span class="code-string">'x_centered'</span>].min(), data[<span class="code-string">'x_centered'</span>].max(), 100)
+    ax.plot(x_range, p(x_range), <span class="code-string">'r-'</span>, linewidth=2)
+
+ax.axvline(x=0, color=<span class="code-string">'gray'</span>, linestyle=<span class="code-string">'--'</span>)
+ax.set_xlabel(<span class="code-string">'Running Variable (centered)'</span>)
+ax.set_ylabel(<span class="code-string">'Outcome'</span>)
+plt.show()</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: RDD Plot</span>
+
+<span class="code-comment">* rdplot creates optimal binned scatter plot</span>
+<span class="code-tooltip" data-tip="rdplot bins data optimally and fits polynomials">rdplot outcome x_centered, c(0)</span>
+
+<span class="code-comment">* With options</span>
+rdplot outcome x_centered, c(0) ///
+    nbins(20 20) ///
+    graph_options(title("RDD: Effect of Scholarship") ///
+                  xtitle("Test Score (centered)") ///
+                  ytitle("College Enrollment"))
+
+<span class="code-comment">* CI shade plot</span>
+rdplot outcome x_centered, c(0) ci(95) shade</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: RDD Plot</span>
+<span class="code-keyword">library</span>(rdrobust)
+
+<span class="code-comment"># rdplot creates binned scatter with polynomial fit</span>
+<span class="code-tooltip" data-tip="rdplot() creates publication-ready RDD visualization">rdplot(y = df$outcome,
+       x = df$x_centered,
+       c = 0,
+       title = "RDD: Effect of Scholarship",
+       x.label = "Test Score (centered)",
+       y.label = "College Enrollment")</span>
+
+<span class="code-comment"># Custom ggplot version</span>
+<span class="code-keyword">library</span>(ggplot2)
+
+ggplot(df, aes(x = x_centered, y = outcome)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(data = subset(df, x_centered < 0),
+              method = "lm", se = TRUE, color = "blue") +
+  geom_smooth(data = subset(df, x_centered >= 0),
+              method = "lm", se = TRUE, color = "blue") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  labs(x = "Running Variable (centered)", y = "Outcome")</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Local Average Treatment Effect</div>
+          <p style="margin-bottom: 0;">
+            RDD identifies the effect only at the cutoff—the Local Average Treatment Effect (LATE). This may not generalize to units far from the cutoff. Be careful about extrapolation.
+          </p>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">References</div>
+          <ul>
+            <li><strong>Calonico, S., Cattaneo, M., & Titiunik, R.</strong> (2014). "Robust Nonparametric Confidence Intervals for Regression-Discontinuity Designs." <em>Econometrica</em>.</li>
+            <li><strong>Cattaneo, M., Idrobo, N., & Titiunik, R.</strong> (2020). <em>A Practical Introduction to Regression Discontinuity Designs</em>. Cambridge.</li>
+            <li><strong>Lee, D. & Lemieux, T.</strong> (2010). "Regression Discontinuity Designs in Economics." <em>JEL</em>.</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="06b-did.html" class="nav-link prev">6B: Difference-in-Differences</a>
+          <a href="06d-iv.html" class="nav-link next">6D: Instrumental Variables</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+</body>
+</html>

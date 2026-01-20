@@ -157,7 +157,26 @@
           <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
           <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
           <li class="active"><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
-          <li><a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a></li>
+          <li><a href="05a-data-simulation.html"><span class="module-number">5A</span> Data Simulation</a></li>
+          <li>
+            <a href="05b-experiments.html"><span class="module-number">5B</span> Coding for Experiments</a>
+            <ul class="sub-nav">
+              <li><a href="05b1-power-analysis.html">Power Analysis</a></li>
+              <li><a href="05b2-survey-programming.html">Survey Programming</a></li>
+              <li><a href="05b3-randomization.html">Randomization</a></li>
+              <li><a href="05b4-balance-checks.html">Balance Checks</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+            </ul>
+          </li>
           <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
@@ -184,15 +203,312 @@
         <div class="learning-objectives">
           <h3>Learning Objectives</h3>
           <ul>
+            <li>Organize research projects with clear script naming conventions</li>
+            <li>Create and maintain README files for reproducibility</li>
             <li>Compute and interpret descriptive statistics</li>
             <li>Create publication-quality visualizations</li>
-            <li>Perform exploratory data analysis (EDA)</li>
-            <li>Conduct hypothesis tests</li>
+            <li>Run and interpret regression analyses</li>
             <li>Generate summary tables for papers</li>
           </ul>
         </div>
 
-        <h2>4.1 Descriptive Statistics</h2>
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#project-organization">5.1 Project Organization</a></li>
+            <li><a href="#readme-files">5.2 README Files</a></li>
+            <li><a href="#descriptive-stats">5.3 Descriptive Statistics</a></li>
+            <li><a href="#visualization">5.4 Data Visualization</a></li>
+            <li><a href="#correlation">5.5 Correlation Analysis</a></li>
+            <li><a href="#regression">5.6 Basic Regression Analysis</a></li>
+            <li><a href="#summary-tables">5.7 Summary Tables for Papers</a></li>
+            <li><a href="#exercises">5.8 Exercises</a></li>
+          </ul>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5.1: PROJECT ORGANIZATION            -->
+        <!-- ============================================ -->
+        <h2 id="project-organization">5.1 Project Organization</h2>
+
+        <p>
+          Before diving into analysis, establishing a clear project structure is essential. A well-organized project allows you (and others) to understand what each script does and the order in which to run them. This becomes critical as projects grow in complexity and when sharing code for replication.
+        </p>
+
+        <h3>Script Naming Conventions</h3>
+
+        <p>
+          Script names should reveal <strong>what they do</strong> and the <strong>order to run them</strong>. The most effective approach uses numbered prefixes combined with descriptive names:
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Naming Pattern</div>
+          <p style="margin-bottom: 0;">
+            <code>##_action_description.ext</code><br>
+            where <code>##</code> is a two-digit number (01, 02, 03...) indicating execution order.
+          </p>
+        </div>
+
+        <h4>Example Project Structure</h4>
+
+        <pre style="background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code>project/
+├── <span style="color: #90cdf4;">data/</span>
+│   ├── raw/                    <span style="color: #68d391;"># Original, untouched data</span>
+│   │   ├── census_2020.csv
+│   │   └── survey_responses.xlsx
+│   ├── processed/              <span style="color: #68d391;"># Cleaned, analysis-ready data</span>
+│   │   └── analysis_sample.csv
+│   └── temp/                   <span style="color: #68d391;"># Intermediate files</span>
+│
+├── <span style="color: #90cdf4;">code/</span>
+│   ├── <span style="color: #f6ad55;">01_import_data.py</span>          <span style="color: #68d391;"># Load raw data</span>
+│   ├── <span style="color: #f6ad55;">02_clean_data.py</span>          <span style="color: #68d391;"># Handle missing values, outliers</span>
+│   ├── <span style="color: #f6ad55;">03_merge_datasets.py</span>      <span style="color: #68d391;"># Combine data sources</span>
+│   ├── <span style="color: #f6ad55;">04_create_variables.py</span>    <span style="color: #68d391;"># Generate analysis variables</span>
+│   ├── <span style="color: #f6ad55;">05_descriptive_stats.py</span>   <span style="color: #68d391;"># Summary statistics, EDA</span>
+│   ├── <span style="color: #f6ad55;">06_regression_analysis.py</span> <span style="color: #68d391;"># Main estimation</span>
+│   ├── <span style="color: #f6ad55;">07_robustness_checks.py</span>   <span style="color: #68d391;"># Sensitivity analyses</span>
+│   └── <span style="color: #f6ad55;">08_create_figures.py</span>     <span style="color: #68d391;"># Publication plots</span>
+│
+├── <span style="color: #90cdf4;">output/</span>
+│   ├── tables/
+│   └── figures/
+│
+└── <span style="color: #fc8181;">README.md</span>                    <span style="color: #68d391;"># Project documentation</span></code></pre>
+
+        <h4>Naming Best Practices</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Practice</th>
+              <th>Good</th>
+              <th>Avoid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Use numbers for order</td>
+              <td><code>01_import.py</code></td>
+              <td><code>import.py</code></td>
+            </tr>
+            <tr>
+              <td>Be descriptive</td>
+              <td><code>03_clean_income_vars.do</code></td>
+              <td><code>03_clean.do</code></td>
+            </tr>
+            <tr>
+              <td>Use underscores</td>
+              <td><code>05_merge_datasets.R</code></td>
+              <td><code>05 merge datasets.R</code></td>
+            </tr>
+            <tr>
+              <td>Lowercase</td>
+              <td><code>02_data_prep.py</code></td>
+              <td><code>02_Data_Prep.py</code></td>
+            </tr>
+            <tr>
+              <td>Skip numbers for flexibility</td>
+              <td><code>01, 02, 05, 10</code></td>
+              <td><code>1, 2, 3, 4</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Why Skip Numbers?</div>
+          <p style="margin-bottom: 0;">
+            Leave gaps in your numbering (01, 02, 05, 10...) so you can insert new scripts without renaming everything. If you later need a script between <code>02_clean.py</code> and <code>05_merge.py</code>, you can create <code>03_validate.py</code> without disrupting the sequence.
+          </p>
+        </div>
+
+        <h4>Language-Specific Conventions</h4>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Typical project structure</span>
+<span class="code-comment"># code/</span>
+<span class="code-comment">#   01_import_data.py</span>
+<span class="code-comment">#   02_clean_data.py</span>
+<span class="code-comment">#   03_analysis.py</span>
+<span class="code-comment">#   utils/               # Helper functions</span>
+<span class="code-comment">#     __init__.py</span>
+<span class="code-comment">#     data_helpers.py</span>
+<span class="code-comment">#   config.py            # Settings, paths</span>
+
+<span class="code-comment"># In config.py:</span>
+<span class="code-keyword">from</span> pathlib <span class="code-keyword">import</span> Path
+
+<span class="code-tooltip" data-tip="Path(__file__).parent.parent resolves to the project root by going up two directories from the config file">PROJECT_ROOT</span> = Path(__file__).parent.parent
+DATA_RAW = PROJECT_ROOT / <span class="code-string">"data"</span> / <span class="code-string">"raw"</span>
+DATA_PROCESSED = PROJECT_ROOT / <span class="code-string">"data"</span> / <span class="code-string">"processed"</span>
+OUTPUT = PROJECT_ROOT / <span class="code-string">"output"</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Master do-file pattern</span>
+<span class="code-comment">* Create a 00_master.do that runs everything</span>
+
+<span class="code-comment">* ============================================</span>
+<span class="code-comment">* 00_master.do - Run entire analysis pipeline</span>
+<span class="code-comment">* ============================================</span>
+
+<span class="code-tooltip" data-tip="Set the global macro PROJECT to your project folder - all other paths are relative to this">global PROJECT</span> <span class="code-string">"/Users/researcher/my_project"</span>
+<span class="code-tooltip" data-tip="Define paths as globals so all scripts can access them consistently">global CODE</span>    <span class="code-string">"$PROJECT/code"</span>
+global DATA    <span class="code-string">"$PROJECT/data"</span>
+global OUTPUT  <span class="code-string">"$PROJECT/output"</span>
+
+<span class="code-comment">* Run scripts in order</span>
+<span class="code-tooltip" data-tip="The 'do' command executes another do-file. Running them from a master file ensures correct execution order">do</span> <span class="code-string">"$CODE/01_import_data.do"</span>
+do <span class="code-string">"$CODE/02_clean_data.do"</span>
+do <span class="code-string">"$CODE/03_merge_datasets.do"</span>
+do <span class="code-string">"$CODE/04_analysis.do"</span>
+do <span class="code-string">"$CODE/05_create_tables.do"</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Typical project structure</span>
+<span class="code-comment"># Using here() package for portable paths</span>
+
+<span class="code-comment"># code/</span>
+<span class="code-comment">#   00_main.R            # Master script</span>
+<span class="code-comment">#   01_load_data.R</span>
+<span class="code-comment">#   02_clean_data.R</span>
+<span class="code-comment">#   03_analysis.R</span>
+<span class="code-comment">#   R/                   # Reusable functions</span>
+<span class="code-comment">#     utils.R</span>
+
+<span class="code-comment"># In 00_main.R:</span>
+<span class="code-tooltip" data-tip="The here package finds your project root automatically, making paths work across different computers">library(here)</span>
+
+<span class="code-comment"># Source all scripts in order</span>
+<span class="code-tooltip" data-tip="source() runs an R script. here() constructs the path relative to project root">source(here(<span class="code-string">"code"</span>, <span class="code-string">"01_load_data.R"</span>))</span>
+source(here(<span class="code-string">"code"</span>, <span class="code-string">"02_clean_data.R"</span>))
+source(here(<span class="code-string">"code"</span>, <span class="code-string">"03_analysis.R"</span>))</code></pre>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5.2: README FILES                    -->
+        <!-- ============================================ -->
+        <h2 id="readme-files">5.2 README Files</h2>
+
+        <p>
+          A <strong>README</strong> file is the front door to your project. It tells collaborators (including your future self) what the project does, how to run it, and what to expect. Every research project should have one.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">Deep Dive in Module 8</div>
+          <p style="margin-bottom: 0;">
+            This section introduces README basics. For comprehensive documentation practices, including data dictionaries, codebooks, and replication packages, see <a href="08-replicability.html">Module 8: Replicability</a>.
+          </p>
+        </div>
+
+        <h3>Essential README Elements</h3>
+
+        <p>
+          At minimum, your README should answer these questions:
+        </p>
+
+        <ol>
+          <li><strong>What is this project?</strong> - Brief description of the research question</li>
+          <li><strong>How do I run it?</strong> - Step-by-step instructions to reproduce results</li>
+          <li><strong>What do I need?</strong> - Software requirements, data sources</li>
+          <li><strong>What does each file do?</strong> - Description of key scripts</li>
+        </ol>
+
+        <h3>README Template</h3>
+
+        <pre style="background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span style="color: #f6ad55;"># Project Title</span>
+
+Brief description of your research project and main findings.
+
+<span style="color: #f6ad55;">## Data</span>
+
+- <span style="color: #90cdf4;">**Source:**</span> Describe where data comes from
+- <span style="color: #90cdf4;">**Access:**</span> How to obtain the data (public/restricted)
+- <span style="color: #90cdf4;">**Files:**</span> List main data files
+
+<span style="color: #f6ad55;">## Requirements</span>
+
+<span style="color: #68d391;">### Software</span>
+- Python 3.9+ with packages in `requirements.txt`
+- Stata 17 (for some analyses)
+- R 4.2+ with packages in `renv.lock`
+
+<span style="color: #68d391;">### Installation</span>
+```bash
+pip install -r requirements.txt
+```
+
+<span style="color: #f6ad55;">## How to Replicate</span>
+
+1. Clone this repository
+2. Download data from [source] and place in `data/raw/`
+3. Run scripts in order:
+   - `01_import_data.py` - Load and validate raw data
+   - `02_clean_data.py` - Handle missing values, create variables
+   - `03_analysis.py` - Main regression analysis
+   - `04_figures.py` - Generate all figures
+
+Or run everything with:
+```bash
+python 00_main.py
+```
+
+<span style="color: #f6ad55;">## File Structure</span>
+
+```
+├── code/          # Analysis scripts
+├── data/          # Data files (not tracked in git)
+├── output/        # Tables and figures
+└── README.md      # This file
+```
+
+<span style="color: #f6ad55;">## Authors</span>
+
+Your Name (your.email@university.edu)
+
+<span style="color: #f6ad55;">## License</span>
+
+MIT License (or appropriate license)</code></pre>
+
+        <h3>README for Different Audiences</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Audience</th>
+              <th>Key Information</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Replicator</strong></td>
+              <td>Exact steps to reproduce results, software versions, data access</td>
+            </tr>
+            <tr>
+              <td><strong>Collaborator</strong></td>
+              <td>Code organization, where to add new analyses, coding conventions</td>
+            </tr>
+            <tr>
+              <td><strong>Future You</strong></td>
+              <td>What you were thinking, why certain decisions were made</td>
+            </tr>
+            <tr>
+              <td><strong>Reviewer/Editor</strong></td>
+              <td>What data is included, what is sensitive, how results map to paper</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5.3: DESCRIPTIVE STATISTICS          -->
+        <!-- ============================================ -->
+        <h2 id="descriptive-stats">5.3 Descriptive Statistics</h2>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -230,7 +546,7 @@
           </div>
         </div>
 
-        <h2>4.2 Data Visualization</h2>
+        <h2 id="visualization">5.4 Data Visualization</h2>
 
         <h3>Histograms</h3>
         <div class="code-tabs">
@@ -291,7 +607,7 @@
           </div>
         </div>
 
-        <h2>4.3 Correlation Analysis</h2>
+        <h2 id="correlation">5.5 Correlation Analysis</h2>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -319,7 +635,268 @@
           </div>
         </div>
 
-        <h2>4.4 Summary Tables for Papers</h2>
+        <!-- ============================================ -->
+        <!-- SECTION 5.6: BASIC REGRESSION ANALYSIS       -->
+        <!-- ============================================ -->
+        <h2 id="regression">5.6 Basic Regression Analysis</h2>
+
+        <p>
+          Regression analysis is the foundation of quantitative empirical research. This section covers how to run regressions and—critically—how to interpret what the output means. Understanding these basics is essential before moving to causal inference methods in <a href="06-causal-inference.html">Module 6</a>.
+        </p>
+
+        <h3>Running a Basic Regression</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: OLS Regression with statsmodels</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="statsmodels.formula.api allows you to write regression formulas like 'y ~ x1 + x2' in R-style syntax">statsmodels.formula.api</span> <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Simple regression: income on education</span>
+<span class="code-tooltip" data-tip="The formula 'income ~ education' means: income = b0 + b1*education + error. The ~ symbol separates the dependent variable (left) from independent variables (right)">model = smf.ols(<span class="code-string">'income ~ education'</span>, data=df).fit()</span>
+
+<span class="code-comment"># Multiple regression: add controls</span>
+<span class="code-tooltip" data-tip="Adding + age + experience includes these as control variables. Each coefficient is estimated while holding other variables constant">model = smf.ols(<span class="code-string">'income ~ education + age + experience'</span>, data=df).fit()</span>
+
+<span class="code-comment"># View results</span>
+<span class="code-function">print</span>(model.<span class="code-tooltip" data-tip="summary() displays the full regression output: coefficients, standard errors, t-statistics, p-values, R-squared, F-statistic, and more">summary()</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: OLS Regression</span>
+
+<span class="code-comment">* Simple regression</span>
+<span class="code-tooltip" data-tip="reg (short for regress) runs OLS. First variable is dependent (Y), rest are independent (X). Stata automatically includes a constant">reg income education</span>
+
+<span class="code-comment">* Multiple regression with controls</span>
+<span class="code-tooltip" data-tip="Adding age and experience as controls. Stata will estimate each coefficient while holding other variables constant">reg income education age experience</span>
+
+<span class="code-comment">* Robust standard errors (heteroskedasticity-robust)</span>
+<span class="code-tooltip" data-tip="The 'robust' option uses Huber-White standard errors that are valid even when error variance differs across observations">reg income education age experience, robust</span>
+
+<span class="code-comment">* Clustered standard errors</span>
+<span class="code-tooltip" data-tip="cluster(state) accounts for correlation within states. Essential when observations within a group are not independent">reg income education age experience, cluster(state)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: OLS Regression</span>
+
+<span class="code-comment"># Simple regression</span>
+<span class="code-tooltip" data-tip="lm() fits a linear model. The formula 'income ~ education' means income is explained by education. R automatically includes an intercept">model <- lm(income ~ education, data = df)</span>
+
+<span class="code-comment"># Multiple regression with controls</span>
+<span class="code-tooltip" data-tip="The + symbol adds control variables. R estimates each coefficient while holding other variables constant">model <- lm(income ~ education + age + experience, data = df)</span>
+
+<span class="code-comment"># View results</span>
+<span class="code-tooltip" data-tip="summary() displays coefficients, standard errors, t-values, p-values, R-squared, and F-statistic">summary(model)</span>
+
+<span class="code-comment"># Robust standard errors (using sandwich package)</span>
+<span class="code-keyword">library</span>(sandwich)
+<span class="code-keyword">library</span>(lmtest)
+<span class="code-tooltip" data-tip="coeftest() with vcovHC() applies heteroskedasticity-consistent (robust) standard errors to your model">coeftest(model, vcov = vcovHC(model, type = <span class="code-string">"HC1"</span>))</span></code></pre>
+          </div>
+        </div>
+
+        <h3>Understanding Regression Output</h3>
+
+        <p>
+          A regression output contains many statistics. Here's what each one means and how to interpret it:
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">Example Output</div>
+          <p style="font-family: var(--font-code); font-size: 0.85rem; white-space: pre; margin-bottom: 0; overflow-x: auto;">
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept    15234.50    1205.32     12.639      0.000    12869.45    17599.55
+education     2847.63     142.58     19.972      0.000     2567.83     3127.43
+age            156.24      28.45      5.491      0.000      100.39      212.09
+==============================================================================
+R-squared:                       0.423
+F-statistic:                     285.7
+Prob (F-statistic):           1.23e-89
+==============================================================================</p>
+        </div>
+
+        <h4>Key Components Explained</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>What It Tells You</th>
+              <th>Example Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Coefficient (coef)</strong></td>
+              <td>The estimated effect of a one-unit change in X on Y</td>
+              <td>One more year of education is associated with $2,847.63 higher income</td>
+            </tr>
+            <tr>
+              <td><strong>Standard Error (std err)</strong></td>
+              <td>Uncertainty in the coefficient estimate</td>
+              <td>Our estimate of education's effect could vary by about $142.58</td>
+            </tr>
+            <tr>
+              <td><strong>t-statistic (t)</strong></td>
+              <td>Coefficient divided by standard error; tests if coef differs from 0</td>
+              <td>19.97 is very large, indicating strong evidence of an effect</td>
+            </tr>
+            <tr>
+              <td><strong>P-value (P>|t|)</strong></td>
+              <td>Probability of seeing this result if true effect were zero</td>
+              <td>0.000 means extremely unlikely to see this by chance</td>
+            </tr>
+            <tr>
+              <td><strong>Confidence Interval</strong></td>
+              <td>Range that contains the true coefficient 95% of the time</td>
+              <td>True education effect is likely between $2,568 and $3,127</td>
+            </tr>
+            <tr>
+              <td><strong>R-squared</strong></td>
+              <td>Proportion of variance in Y explained by the model</td>
+              <td>Education and age explain 42.3% of income variation</td>
+            </tr>
+            <tr>
+              <td><strong>F-statistic</strong></td>
+              <td>Tests if all coefficients together are zero</td>
+              <td>High F (285.7) with low p-value means model explains something</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Correlation vs. Causation</div>
+          <p style="margin-bottom: 0;">
+            A regression coefficient measures <strong>association</strong>, not causation. The education coefficient tells us that higher education is <em>associated with</em> higher income—not that education <em>causes</em> higher income. People who get more education may differ in other ways (ability, motivation, family background) that also affect income. To make causal claims, you need the methods covered in <a href="06-causal-inference.html">Module 6: Causal Inference</a>.
+          </p>
+        </div>
+
+        <h4>Statistical Significance</h4>
+
+        <p>
+          A coefficient is "statistically significant" when we can be confident it differs from zero. Common thresholds:
+        </p>
+
+        <ul>
+          <li><strong>p &lt; 0.01</strong> (***): Very strong evidence</li>
+          <li><strong>p &lt; 0.05</strong> (**): Strong evidence (most common threshold)</li>
+          <li><strong>p &lt; 0.10</strong> (*): Weak evidence</li>
+        </ul>
+
+        <p>
+          However, statistical significance tells you nothing about <strong>practical significance</strong>. A coefficient can be statistically significant but economically tiny—or statistically insignificant but potentially meaningful with more data.
+        </p>
+
+        <h3>Common Regression Specifications</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Common specifications</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Log transformation</span>
+<span class="code-tooltip" data-tip="Taking log of income converts the coefficient to approximate percentage changes. Log-linear: 1 unit increase in X = (coef*100)% change in Y">df[<span class="code-string">'log_income'</span>] = np.log(df[<span class="code-string">'income'</span>])</span>
+model = smf.ols(<span class="code-string">'log_income ~ education + age'</span>, data=df).fit()
+
+<span class="code-comment"># Quadratic term (non-linear relationship)</span>
+<span class="code-tooltip" data-tip="I() in formulas prevents + from being interpreted as 'add variable'. This tests if the effect of age diminishes or increases at higher ages">model = smf.ols(<span class="code-string">'income ~ age + I(age**2)'</span>, data=df).fit()</span>
+
+<span class="code-comment"># Interaction terms</span>
+<span class="code-tooltip" data-tip="The * operator includes both main effects AND their interaction. Tests if education's effect differs by gender">model = smf.ols(<span class="code-string">'income ~ education * gender'</span>, data=df).fit()</span>
+
+<span class="code-comment"># Categorical variables (dummy encoding)</span>
+<span class="code-tooltip" data-tip="C() tells statsmodels to treat region as categorical. Creates dummy variables automatically, omitting one category as reference">model = smf.ols(<span class="code-string">'income ~ education + C(region)'</span>, data=df).fit()</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Common specifications</span>
+
+<span class="code-comment">* Log transformation</span>
+<span class="code-tooltip" data-tip="gen creates a new variable. ln() takes natural log. Log-linear regression: coefficients represent approximate percentage changes">gen log_income = ln(income)</span>
+reg log_income education age
+
+<span class="code-comment">* Quadratic term</span>
+<span class="code-tooltip" data-tip="c.age##c.age creates age and age-squared. The ## operator with c. prefix handles continuous variable interactions">reg income c.age##c.age</span>
+
+<span class="code-comment">* Interaction terms</span>
+<span class="code-tooltip" data-tip="c.education##i.female creates education, female dummy, and their interaction. Tests if education effect differs by gender">reg income c.education##i.female</span>
+
+<span class="code-comment">* Categorical variables</span>
+<span class="code-tooltip" data-tip="i.region creates dummy variables for each region automatically. First category is reference (omitted)">reg income education i.region</span>
+
+<span class="code-comment">* Fixed effects</span>
+<span class="code-tooltip" data-tip="areg absorbs state fixed effects. Equivalent to including a dummy for each state. More efficient than i.state for many categories">areg income education age, absorb(state)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Common specifications</span>
+
+<span class="code-comment"># Log transformation</span>
+<span class="code-tooltip" data-tip="log() in R formula applies natural log. Coefficients become approximate percentage changes in the outcome">model <- lm(log(income) ~ education + age, data = df)</span>
+
+<span class="code-comment"># Quadratic term</span>
+<span class="code-tooltip" data-tip="I() protects the arithmetic operation. poly(age, 2) is another option that creates orthogonal polynomials">model <- lm(income ~ age + I(age^2), data = df)</span>
+
+<span class="code-comment"># Interaction terms</span>
+<span class="code-tooltip" data-tip="The * operator includes education, gender, AND their interaction. : would include only the interaction">model <- lm(income ~ education * gender, data = df)</span>
+
+<span class="code-comment"># Categorical variables</span>
+<span class="code-tooltip" data-tip="factor() converts to categorical. R creates dummies automatically. First level is reference by default">model <- lm(income ~ education + factor(region), data = df)</span>
+
+<span class="code-comment"># Fixed effects (using fixest package)</span>
+<span class="code-keyword">library</span>(fixest)
+<span class="code-tooltip" data-tip="feols() efficiently handles fixed effects. The | separates the model from fixed effects. Much faster than lm() with many groups">model <- feols(income ~ education + age | state, data = df)</span></code></pre>
+          </div>
+        </div>
+
+        <h3>Interpreting Log Transformations</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Form</th>
+              <th>Interpretation of b1</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Linear</strong></td>
+              <td>Y = b0 + b1*X</td>
+              <td>1 unit increase in X → b1 unit change in Y</td>
+            </tr>
+            <tr>
+              <td><strong>Log-Linear</strong></td>
+              <td>log(Y) = b0 + b1*X</td>
+              <td>1 unit increase in X → (b1 × 100)% change in Y</td>
+            </tr>
+            <tr>
+              <td><strong>Linear-Log</strong></td>
+              <td>Y = b0 + b1*log(X)</td>
+              <td>1% increase in X → b1/100 unit change in Y</td>
+            </tr>
+            <tr>
+              <td><strong>Log-Log</strong></td>
+              <td>log(Y) = b0 + b1*log(X)</td>
+              <td>1% increase in X → b1% change in Y (elasticity)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5.7: SUMMARY TABLES FOR PAPERS       -->
+        <!-- ============================================ -->
+        <h2 id="summary-tables">5.7 Summary Tables for Papers</h2>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -356,11 +933,11 @@
           </div>
         </div>
 
-        <h2 id="exercises">4.5 Exercises</h2>
+        <h2 id="exercises">5.8 Exercises</h2>
 
-        <!-- Exercise 4.1: Interactive -->
-        <div class="interactive-exercise" data-exercise="4.1">
-          <h4>Exercise 4.1: Descriptive Statistics and Visualization</h4>
+        <!-- Exercise 5.1: Interactive -->
+        <div class="interactive-exercise" data-exercise="5.1">
+          <h4>Exercise 5.1: Descriptive Statistics and Visualization</h4>
           <p>Practice computing statistics and creating visualizations. Complete these tasks:</p>
           <ol>
             <li>Calculate descriptive statistics (mean, median, std)</li>
@@ -527,7 +1104,7 @@
   <script>
   document.addEventListener('DOMContentLoaded', function() {
     const exercisePatterns = {
-      '4.1': {
+      '5.1': {
         python: {
           patterns: [
             // Descriptive stats - accepts: describe, mean, median, std, var, quantile, agg

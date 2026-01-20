@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>6E Synthetic Control | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Please enter the course password to access the materials.</p>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+      <button id="password-submit">Access Course</button>
+      <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
+          <li><a href="05a-data-simulation.html"><span class="module-number">5A</span> Data Simulation</a></li>
+          <li>
+            <a href="05b-experiments.html"><span class="module-number">5B</span> Coding for Experiments</a>
+            <ul class="sub-nav">
+              <li><a href="05b1-power-analysis.html">Power Analysis</a></li>
+              <li><a href="05b2-survey-programming.html">Survey Programming</a></li>
+              <li><a href="05b3-randomization.html">Randomization</a></li>
+              <li><a href="05b4-balance-checks.html">Balance Checks</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li class="active"><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <nav class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+          <a href="06-causal-inference.html">6 Causal Inference</a> &raquo; Synthetic Control
+        </nav>
+
+        <div class="module-header">
+          <h1>6E &nbsp;Synthetic Control</h1>
+          <div class="module-meta">
+            <span>~2 hours</span>
+            <span>SCM, Placebo Tests, Extensions</span>
+          </div>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#basic">Basic Synthetic Control</a></li>
+            <li><a href="#inference">Inference: Placebo Tests</a></li>
+            <li><a href="#critiques">Critiques and Limitations</a></li>
+            <li><a href="#extensions">Modern Extensions</a></li>
+          </ul>
+        </div>
+
+        <h2 id="basic">Basic Synthetic Control</h2>
+
+        <p>
+          Synthetic control constructs a weighted combination of control units that matches the treated unit's pre-treatment characteristics. The post-treatment difference between the treated unit and synthetic control is the estimated treatment effect.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Synthetic Control with SyntheticControlMethods</span>
+<span class="code-comment"># pip install SyntheticControlMethods</span>
+<span class="code-keyword">from</span> SyntheticControlMethods <span class="code-keyword">import</span> Synth
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Data structure: unit, time, outcome, covariates</span>
+<span class="code-comment"># treated_unit: the single treated unit</span>
+<span class="code-comment"># treatment_time: when treatment occurs</span>
+
+<span class="code-comment"># Initialize and fit</span>
+<span class="code-tooltip" data-tip="Synth finds weights that minimize pre-treatment discrepancy">sc = Synth(df,
+           outcome_var=<span class="code-string">"gdp"</span>,
+           id_var=<span class="code-string">"country"</span>,
+           time_var=<span class="code-string">"year"</span>,
+           treatment_period=1990,
+           treated_unit=<span class="code-string">"West Germany"</span>)</span>
+
+<span class="code-comment"># Fit the synthetic control</span>
+sc.fit()
+
+<span class="code-comment"># Get results</span>
+print(sc.summary())
+
+<span class="code-comment"># Plot</span>
+sc.plot([<span class="code-string">"original"</span>, <span class="code-string">"pointwise"</span>])
+
+<span class="code-comment"># Get weights</span>
+print(<span class="code-string">"Donor weights:"</span>)
+print(sc.W)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Synthetic Control with synth</span>
+<span class="code-comment">* ssc install synth</span>
+
+<span class="code-comment">* Set panel structure</span>
+tsset country_id year
+
+<span class="code-comment">* Basic synthetic control</span>
+<span class="code-tooltip" data-tip="synth matches on outcome lags and covariates to find optimal weights">synth gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
+    population trade_openness, ///
+    trunit(7) trperiod(1990) ///
+    figure</span>
+
+<span class="code-comment">* With more options</span>
+synth gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
+    population trade_openness inflation, ///
+    trunit(7) trperiod(1990) ///
+    xperiod(1985(1)1989) ///
+    mspeperiod(1985(1)1989) ///
+    resultsperiod(1985(1)2000) ///
+    keep(synth_results) replace
+
+<span class="code-comment">* Get weights and gaps</span>
+matrix list e(W_weights)  <span class="code-comment">// donor weights</span>
+matrix list e(V_matrix)   <span class="code-comment">// predictor weights</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Synthetic Control with Synth package</span>
+<span class="code-keyword">library</span>(Synth)
+
+<span class="code-comment"># Prepare data for Synth</span>
+<span class="code-tooltip" data-tip="dataprep() formats data for the Synth algorithm">dataprep.out <- dataprep(
+  foo = df,
+  predictors = c("gdp", "population", "trade_openness"),
+  predictors.op = "mean",
+  time.predictors.prior = 1985:1989,
+  dependent = "gdp",
+  unit.variable = "country_id",
+  time.variable = "year",
+  treatment.identifier = 7,  <span class="code-comment"># treated unit</span>
+  controls.identifier = c(1:6, 8:20),  <span class="code-comment"># donor pool</span>
+  time.optimize.ssr = 1985:1989,
+  time.plot = 1985:2000
+)</span>
+
+<span class="code-comment"># Run synthetic control</span>
+<span class="code-tooltip" data-tip="synth() finds optimal weights to minimize pre-treatment MSPE">synth.out <- synth(dataprep.out)</span>
+
+<span class="code-comment"># Results</span>
+synth.tables <- synth.tab(dataprep.res = dataprep.out,
+                          synth.res = synth.out)
+print(synth.tables$tab.w)  <span class="code-comment"># weights</span>
+
+<span class="code-comment"># Plot</span>
+path.plot(synth.res = synth.out,
+          dataprep.res = dataprep.out,
+          Ylab = "GDP",
+          Xlab = "Year",
+          tr.intake = 1990)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="inference">Inference: Placebo Tests</h2>
+
+        <p>
+          Standard errors don't apply to synthetic control. Instead, use placebo tests: apply the method to each control unit as if it were treated and compare the treated unit's effect to the placebo distribution.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Placebo Tests</span>
+<span class="code-keyword">from</span> SyntheticControlMethods <span class="code-keyword">import</span> Synth
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+
+<span class="code-comment"># Run placebo tests (in-space placebos)</span>
+<span class="code-tooltip" data-tip="Treat each control unit as if it were treated and estimate the 'effect'">all_units = df[<span class="code-string">'country'</span>].unique()
+control_units = [u <span class="code-keyword">for</span> u <span class="code-keyword">in</span> all_units <span class="code-keyword">if</span> u != <span class="code-string">'West Germany'</span>]
+
+placebo_effects = {}
+<span class="code-keyword">for</span> unit <span class="code-keyword">in</span> control_units:
+    sc = Synth(df, outcome_var=<span class="code-string">"gdp"</span>, id_var=<span class="code-string">"country"</span>,
+               time_var=<span class="code-string">"year"</span>, treatment_period=1990,
+               treated_unit=unit)
+    sc.fit()
+    placebo_effects[unit] = sc.gaps  <span class="code-comment"># gap = treated - synthetic</span></span>
+
+<span class="code-comment"># Plot all gaps</span>
+fig, ax = plt.subplots(figsize=(10, 6))
+<span class="code-keyword">for</span> unit, gaps <span class="code-keyword">in</span> placebo_effects.items():
+    ax.plot(gaps.index, gaps.values, color=<span class="code-string">'gray'</span>, alpha=0.3)
+ax.plot(treated_gaps.index, treated_gaps.values, color=<span class="code-string">'black'</span>, linewidth=2)
+ax.axvline(x=1990, linestyle=<span class="code-string">'--'</span>, color=<span class="code-string">'red'</span>)
+ax.axhline(y=0, linestyle=<span class="code-string">'-'</span>, color=<span class="code-string">'gray'</span>)
+plt.show()
+
+<span class="code-comment"># Calculate p-value</span>
+<span class="code-tooltip" data-tip="P-value = fraction of placebos with effects as large as the treated unit">post_treatment_mspe = np.mean(treated_gaps[1990:]**2)
+placebo_mspe = [np.mean(gaps[1990:]**2) <span class="code-keyword">for</span> gaps <span class="code-keyword">in</span> placebo_effects.values()]
+pvalue = np.mean(placebo_mspe >= post_treatment_mspe)
+print(f<span class="code-string">"p-value: {pvalue:.3f}"</span>)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Placebo Tests with synth_runner</span>
+<span class="code-comment">* ssc install synth_runner</span>
+
+<span class="code-comment">* Run placebo tests for all control units</span>
+<span class="code-tooltip" data-tip="synth_runner automates placebo tests and inference">synth_runner gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
+    population trade_openness, ///
+    trunit(7) trperiod(1990) ///
+    gen_vars</span>
+
+<span class="code-comment">* Plot with placebos</span>
+effect_graphs
+
+<span class="code-comment">* P-values</span>
+pval_graphs
+
+<span class="code-comment">* RMSPE ratio (pre/post treatment fit)</span>
+<span class="code-tooltip" data-tip="RMSPE ratio: large ratio means effect is unusual compared to placebos">single_treatment_graphs</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Placebo Tests</span>
+<span class="code-keyword">library</span>(Synth)
+
+<span class="code-comment"># Function to run SC for any unit</span>
+run_sc <- function(treated_id, donor_ids) {
+  dp <- dataprep(
+    foo = df,
+    predictors = c("gdp", "population", "trade_openness"),
+    predictors.op = "mean",
+    time.predictors.prior = 1985:1989,
+    dependent = "gdp",
+    unit.variable = "country_id",
+    time.variable = "year",
+    treatment.identifier = treated_id,
+    controls.identifier = donor_ids,
+    time.optimize.ssr = 1985:1989,
+    time.plot = 1985:2000
+  )
+  synth(dp)
+}
+
+<span class="code-comment"># Run placebo for each control unit</span>
+<span class="code-tooltip" data-tip="Apply SC to each control unit as if it were treated">all_ids <- unique(df$country_id)
+treated_id <- 7
+control_ids <- setdiff(all_ids, treated_id)
+
+placebo_gaps <- lapply(control_ids, function(id) {
+  donors <- setdiff(all_ids, id)
+  sc <- run_sc(id, donors)
+  <span class="code-comment"># Calculate gaps</span>
+  ...
+})</span>
+
+<span class="code-comment"># Using tidysynth (tidyverse-friendly)</span>
+<span class="code-keyword">library</span>(tidysynth)
+
+sc <- df %>%
+  synthetic_control(
+    outcome = gdp,
+    unit = country,
+    time = year,
+    i_unit = "West Germany",
+    i_time = 1990,
+    generate_placebos = TRUE  <span class="code-comment"># auto placebo tests</span>
+  ) %>%
+  generate_predictor(...) %>%
+  generate_weights() %>%
+  generate_control()
+
+<span class="code-comment"># Plot with placebos</span>
+sc %>% plot_placebos()</code></pre>
+          </div>
+        </div>
+
+        <h2 id="critiques">Critiques and Limitations</h2>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Known Issues with Synthetic Control</div>
+          <p>Recent methodological work has identified several concerns:</p>
+          <ul>
+            <li><strong>Poor pre-treatment fit:</strong> If synthetic control can't match pre-treatment outcomes well, the counterfactual is unreliable</li>
+            <li><strong>Specification searching:</strong> Researchers may choose predictors/time periods that produce desired results</li>
+            <li><strong>Negative weights are implicitly forbidden:</strong> This restricts the counterfactual to the convex hull of donors, which may not include the treated unit's trajectory</li>
+            <li><strong>No formal inference:</strong> Placebo tests provide intuition but don't give valid p-values in finite samples</li>
+            <li><strong>Extrapolation:</strong> If treated unit is outside the support of controls, the method extrapolates</li>
+          </ul>
+          <p style="margin-bottom: 0;">
+            <strong>Key papers:</strong> Ferman & Pinto (2021), Kaul et al. (2022), Abadie (2021 survey).
+          </p>
+        </div>
+
+        <h3>Diagnostic Checks</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: SC Diagnostics</span>
+
+<span class="code-comment"># 1. Check pre-treatment fit (RMSPE)</span>
+<span class="code-tooltip" data-tip="Pre-treatment RMSPE should be small relative to outcome variation">pre_rmspe = np.sqrt(np.mean((treated_pre - synthetic_pre)**2))
+print(f<span class="code-string">"Pre-treatment RMSPE: {pre_rmspe:.3f}"</span>)</span>
+
+<span class="code-comment"># 2. Check covariate balance</span>
+print(<span class="code-string">"Predictor balance:"</span>)
+print(sc.comparison)  <span class="code-comment"># treated vs synthetic on predictors</span>
+
+<span class="code-comment"># 3. Check weights (few large weights is concerning)</span>
+<span class="code-tooltip" data-tip="Weights concentrated on few donors may indicate poor match">print(<span class="code-string">"Number of donors with weight > 0.05:"</span>)
+print((sc.W > 0.05).sum())</span>
+
+<span class="code-comment"># 4. RMSPE ratio (for inference)</span>
+<span class="code-tooltip" data-tip="Ratio of post/pre RMSPE: how unusual is the effect relative to pre-fit quality?">post_rmspe = np.sqrt(np.mean((treated_post - synthetic_post)**2))
+rmspe_ratio = post_rmspe / pre_rmspe
+print(f<span class="code-string">"RMSPE ratio: {rmspe_ratio:.2f}"</span>)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: SC Diagnostics</span>
+
+<span class="code-comment">* After running synth:</span>
+
+<span class="code-comment">* 1. Pre-treatment RMSPE</span>
+<span class="code-tooltip" data-tip="Small pre-treatment RMSPE indicates good fit">ereturn list
+display <span class="code-string">"Pre-treatment RMSPE: "</span> sqrt(e(RMSPE))</span>
+
+<span class="code-comment">* 2. Predictor balance</span>
+<span class="code-tooltip" data-tip="Compare treated vs synthetic on predictors">matrix list e(Y_balance)</span>
+
+<span class="code-comment">* 3. Donor weights</span>
+matrix list e(W_weights)
+
+<span class="code-comment">* 4. Leave-one-out robustness</span>
+<span class="code-tooltip" data-tip="Check if results depend heavily on any single donor">foreach donor in $donor_list {
+    synth gdp ..., trunit(7) trperiod(1990) ///
+        counit(`=subinstr("$donor_list", "`donor'", "", .)')
+}</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: SC Diagnostics</span>
+<span class="code-keyword">library</span>(Synth)
+
+<span class="code-comment"># 1. Pre-treatment RMSPE</span>
+<span class="code-tooltip" data-tip="synth.tables shows predictor balance and RMSPE">synth.tables$tab.pred  <span class="code-comment"># predictor comparison</span></span>
+
+<span class="code-comment"># 2. Weights</span>
+synth.tables$tab.w  <span class="code-comment"># donor weights</span>
+
+<span class="code-comment"># 3. Check sparsity of weights</span>
+<span class="code-tooltip" data-tip="Ideally, several donors contribute meaningfully">sum(synth.out$solution.w > 0.05)</span>
+
+<span class="code-comment"># 4. Leave-one-out</span>
+<span class="code-tooltip" data-tip="Remove each major donor and re-estimate">loo_results <- lapply(major_donors, function(d) {
+  new_donors <- setdiff(control_ids, d)
+  <span class="code-comment"># Re-run synth without donor d</span>
+  ...
+})</span>
+
+<span class="code-comment"># 5. Pre-treatment fit plot</span>
+path.plot(synth.res = synth.out, dataprep.res = dataprep.out)
+<span class="code-comment"># Visual check: do paths match well before treatment?</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="extensions">Modern Extensions</h2>
+
+        <h3>Augmented Synthetic Control (Ben-Michael et al. 2021)</h3>
+
+        <p>
+          Combines synthetic control with outcome regression to correct for imperfect pre-treatment fit.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="r">
+<pre><code><span class="code-comment"># R: Augmented Synthetic Control</span>
+<span class="code-keyword">library</span>(augsynth)
+
+<span class="code-comment"># Augmented SC with ridge regression</span>
+<span class="code-tooltip" data-tip="augsynth adds bias correction for imperfect pre-treatment fit">asyn <- augsynth(outcome ~ treatment | covariate1 + covariate2,
+                 unit = unit_id,
+                 time = year,
+                 data = df,
+                 progfunc = "Ridge")</span>
+
+<span class="code-comment"># Summary and plot</span>
+summary(asyn)
+plot(asyn)
+
+<span class="code-comment"># Compare to standard SC</span>
+syn <- augsynth(outcome ~ treatment,
+                unit = unit_id,
+                time = year,
+                data = df,
+                progfunc = "None")  <span class="code-comment"># standard SC</span></code></pre>
+          </div>
+        </div>
+
+        <h3>Synthetic Difference-in-Differences (Arkhangelsky et al. 2021)</h3>
+
+        <p>
+          Combines DiD and SC: uses SC weights on units AND time periods to construct the counterfactual.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Synthetic DiD</span>
+<span class="code-comment"># pip install synthdid</span>
+<span class="code-keyword">from</span> synthdid.synthdid <span class="code-keyword">import</span> SynthDID
+
+<span class="code-comment"># Prepare data: Y matrix (units x time), treatment indicator</span>
+<span class="code-tooltip" data-tip="SDID weights both units (like SC) and time periods">sdid = SynthDID(Y, treatment_matrix)</span>
+estimate = sdid.fit()
+print(f<span class="code-string">"SDID estimate: {estimate:.3f}"</span>)
+
+<span class="code-comment"># Get weights</span>
+print(<span class="code-string">"Unit weights:"</span>, sdid.omega)
+print(<span class="code-string">"Time weights:"</span>, sdid.lambda_)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Synthetic DiD</span>
+<span class="code-comment">* ssc install sdid</span>
+
+<span class="code-comment">* Basic SDID</span>
+<span class="code-tooltip" data-tip="sdid combines SC unit weights with DiD time structure">sdid outcome unit_id year treatment, vce(bootstrap) seed(1234)</span>
+
+<span class="code-comment">* With graph</span>
+sdid outcome unit_id year treatment, vce(bootstrap) graph</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Synthetic DiD with synthdid</span>
+<span class="code-keyword">library</span>(synthdid)
+
+<span class="code-comment"># Prepare panel data</span>
+<span class="code-tooltip" data-tip="panel.matrices converts data to required format">setup <- panel.matrices(df,
+                        unit = unit_id,
+                        time = year,
+                        outcome = outcome,
+                        treatment = treatment)</span>
+
+<span class="code-comment"># Estimate SDID</span>
+sdid_est <- synthdid_estimate(setup$Y, setup$N0, setup$T0)
+print(sdid_est)
+
+<span class="code-comment"># Standard errors via bootstrap</span>
+se <- sqrt(vcov(sdid_est, method = "bootstrap"))
+
+<span class="code-comment"># Compare to DiD and SC</span>
+did_est <- did_estimate(setup$Y, setup$N0, setup$T0)
+sc_est <- sc_estimate(setup$Y, setup$N0, setup$T0)
+
+<span class="code-comment"># Plot</span>
+synthdid_plot(sdid_est)</code></pre>
+          </div>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Key References</div>
+          <ul>
+            <li><strong>Abadie, A., Diamond, A., & Hainmueller, J.</strong> (2010). "Synthetic Control Methods for Comparative Case Studies." <em>JASA</em>.</li>
+            <li><strong>Abadie, A.</strong> (2021). "Using Synthetic Controls: Feasibility, Data Requirements, and Methodological Aspects." <em>JEL</em>.</li>
+            <li><strong>Arkhangelsky, D., Athey, S., Hirshberg, D., Imbens, G., & Wager, S.</strong> (2021). "Synthetic Difference-in-Differences." <em>AER</em>.</li>
+            <li><strong>Ben-Michael, E., Feller, A., & Rothstein, J.</strong> (2021). "The Augmented Synthetic Control Method." <em>JASA</em>.</li>
+            <li><strong>Ferman, B. & Pinto, C.</strong> (2021). "Synthetic Control Method: Inference, Sensitivity Analysis and Confidence Sets." <em>JBES</em>.</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="06d-iv.html" class="nav-link prev">6D: Instrumental Variables</a>
+          <a href="07-estimation.html" class="nav-link next">Module 7: Estimation</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+</body>
+</html>

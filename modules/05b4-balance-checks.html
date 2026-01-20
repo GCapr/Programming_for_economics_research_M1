@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5B.4 Balance Checks | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <p style="font-size: 0.9rem; color: #666; margin-bottom: 1.5rem;">Please enter the course password to access the materials.</p>
+      <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+      <button id="password-submit">Access Course</button>
+      <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
+          <li><a href="05a-data-simulation.html"><span class="module-number">5A</span> Data Simulation</a></li>
+          <li>
+            <a href="05b-experiments.html"><span class="module-number">5B</span> Coding for Experiments</a>
+            <ul class="sub-nav">
+              <li><a href="05b1-power-analysis.html">Power Analysis</a></li>
+              <li><a href="05b2-survey-programming.html">Survey Programming</a></li>
+              <li><a href="05b3-randomization.html">Randomization</a></li>
+              <li class="active"><a href="05b4-balance-checks.html">Balance Checks</a></li>
+            </ul>
+          </li>
+          <li><a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a></li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <nav class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+          <a href="05b-experiments.html">5B Experiments</a> &raquo; Balance Checks
+        </nav>
+
+        <div class="module-header">
+          <h1>5B.4 &nbsp;Balance Checks</h1>
+          <div class="module-meta">
+            <span>~2 hours</span>
+            <span>Balance Tables, Attrition</span>
+          </div>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#why-balance">Why Check Balance?</a></li>
+            <li><a href="#balance-tables">Creating Balance Tables</a></li>
+            <li><a href="#interpreting">Interpreting Balance</a></li>
+            <li><a href="#attrition">Attrition Analysis</a></li>
+          </ul>
+        </div>
+
+        <h2 id="why-balance">Why Check Balance?</h2>
+
+        <p>
+          Randomization should create treatment and control groups that are similar on average. A <strong>balance table</strong> compares baseline characteristics across groups to verify this.
+        </p>
+
+        <ul>
+          <li>Detects implementation errors (e.g., randomization code bugs)</li>
+          <li>Identifies accidental imbalances that may need adjustment</li>
+          <li>Required in most experimental papers (typically Table 1)</li>
+          <li>Builds credibility that treatment effect isn't confounded</li>
+        </ul>
+
+        <h2 id="balance-tables">Creating Balance Tables</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Balance table</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> scipy <span class="code-keyword">import</span> stats
+
+<span class="code-keyword">def</span> <span class="code-function">balance_table</span>(df, treatment_col, covariates):
+    <span class="code-string">"""Create a balance table comparing treatment vs control."""</span>
+    results = []
+
+    <span class="code-keyword">for</span> var <span class="code-keyword">in</span> covariates:
+        treat = df[df[treatment_col] == 1][var].dropna()
+        control = df[df[treatment_col] == 0][var].dropna()
+
+        <span class="code-comment"># Means</span>
+        mean_t = treat.mean()
+        mean_c = control.mean()
+        diff = mean_t - mean_c
+
+        <span class="code-comment"># T-test for difference</span>
+        <span class="code-tooltip" data-tip="Two-sample t-test comparing treatment and control means">t_stat, p_val = stats.ttest_ind(treat, control)</span>
+
+        <span class="code-comment"># Standardized difference</span>
+        pooled_sd = np.sqrt((treat.var() + control.var()) / 2)
+        std_diff = diff / pooled_sd if pooled_sd > 0 else 0
+
+        results.append({
+            <span class="code-string">'Variable'</span>: var,
+            <span class="code-string">'Control Mean'</span>: f<span class="code-string">"{mean_c:.3f}"</span>,
+            <span class="code-string">'Treatment Mean'</span>: f<span class="code-string">"{mean_t:.3f}"</span>,
+            <span class="code-string">'Difference'</span>: f<span class="code-string">"{diff:.3f}"</span>,
+            <span class="code-string">'Std. Diff.'</span>: f<span class="code-string">"{std_diff:.3f}"</span>,
+            <span class="code-string">'P-value'</span>: f<span class="code-string">"{p_val:.3f}"</span>
+        })
+
+    <span class="code-keyword">return</span> pd.DataFrame(results)
+
+<span class="code-comment"># Generate balance table</span>
+covariates = [<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'female'</span>]
+balance = balance_table(df, <span class="code-string">'treatment'</span>, covariates)
+<span class="code-function">print</span>(balance.to_markdown(index=False))</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Balance table with iebaltab (World Bank's ietoolkit)</span>
+<span class="code-comment">* Install: ssc install ietoolkit</span>
+
+<span class="code-comment">* Basic balance table</span>
+<span class="code-tooltip" data-tip="iebaltab creates publication-ready balance tables automatically">iebaltab age income education female, ///
+    grpvar(treatment) ///
+    save("balance_table.xlsx") replace</span>
+
+<span class="code-comment">* With additional options</span>
+iebaltab age income education female, ///
+    grpvar(treatment) ///
+    <span class="code-tooltip" data-tip="ftest adds F-test for joint significance of all differences">ftest</span> ///
+    <span class="code-tooltip" data-tip="stdev shows standard deviations instead of standard errors">stdev</span> ///
+    <span class="code-tooltip" data-tip="starlevels sets significance stars">starlevels(0.1 0.05 0.01)</span> ///
+    save("balance_table.xlsx") replace
+
+<span class="code-comment">* Manual approach</span>
+foreach var in age income education female {
+    ttest `var', by(treatment)
+}</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Balance table with cobalt package</span>
+<span class="code-keyword">library</span>(cobalt)
+
+<span class="code-comment"># Create balance table</span>
+<span class="code-tooltip" data-tip="bal.tab() from cobalt creates comprehensive balance statistics">balance <- bal.tab(
+  treatment ~ age + income + education + female,
+  data = df,
+  binary = <span class="code-string">"std"</span>  <span class="code-comment"># Standardize binary variables</span>
+)</span>
+<span class="code-function">print</span>(balance)
+
+<span class="code-comment"># Love plot (visual balance check)</span>
+<span class="code-tooltip" data-tip="love.plot() shows standardized differences visually - dots should be near zero">love.plot(balance, threshold = 0.1)</span>
+
+<span class="code-comment"># Alternative with tableone package</span>
+<span class="code-keyword">library</span>(tableone)
+
+<span class="code-tooltip" data-tip="CreateTableOne generates publication-ready Table 1">tab1 <- CreateTableOne(
+  vars = c(<span class="code-string">"age"</span>, <span class="code-string">"income"</span>, <span class="code-string">"education"</span>, <span class="code-string">"female"</span>),
+  strata = <span class="code-string">"treatment"</span>,
+  data = df,
+  test = TRUE
+)</span>
+<span class="code-function">print</span>(tab1, smd = TRUE)  <span class="code-comment"># Include standardized mean differences</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="interpreting">Interpreting Balance</h2>
+
+        <h3>What to Look For</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Good Balance</th>
+              <th>Concern</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>P-values</strong></td>
+              <td>Most > 0.05, uniformly distributed</td>
+              <td>Many < 0.05, or one very small</td>
+            </tr>
+            <tr>
+              <td><strong>Standardized differences</strong></td>
+              <td>|d| < 0.1</td>
+              <td>|d| > 0.25</td>
+            </tr>
+            <tr>
+              <td><strong>Joint F-test</strong></td>
+              <td>p > 0.05</td>
+              <td>p < 0.05</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box note">
+          <div class="info-box-title">On Statistical Significance</div>
+          <p style="margin-bottom: 0;">
+            With many variables, some will be "significantly" different by chance (5% of tests at α = 0.05). Don't panic about one or two significant differences. Focus on: (1) overall pattern, (2) large standardized differences, (3) theoretically important variables.
+          </p>
+        </div>
+
+        <h2 id="attrition">Attrition Analysis</h2>
+
+        <p>
+          <strong>Attrition</strong> occurs when participants drop out or don't complete the study. Differential attrition (more dropouts in one group) can bias results.
+        </p>
+
+        <h3>Checking for Differential Attrition</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Attrition analysis</span>
+
+<span class="code-comment"># 1. Overall attrition rate by treatment</span>
+df[<span class="code-string">'completed'</span>] = df[<span class="code-string">'outcome'</span>].notna().astype(int)
+attrition = df.groupby(<span class="code-string">'treatment'</span>)[<span class="code-string">'completed'</span>].mean()
+<span class="code-function">print</span>(<span class="code-string">"Completion rates:"</span>)
+<span class="code-function">print</span>(attrition)
+
+<span class="code-comment"># 2. Test if attrition differs by treatment</span>
+<span class="code-tooltip" data-tip="Chi-square test for difference in attrition rates">from scipy.stats import chi2_contingency
+contingency = pd.crosstab(df[<span class="code-string">'treatment'</span>], df[<span class="code-string">'completed'</span>])
+chi2, p, dof, expected = chi2_contingency(contingency)
+<span class="code-function">print</span>(f<span class="code-string">"Chi2 test p-value: {p:.4f}"</span>)</span>
+
+<span class="code-comment"># 3. Check if attrition is related to baseline characteristics</span>
+df_attrit = df[df[<span class="code-string">'completed'</span>] == 0]
+df_complete = df[df[<span class="code-string">'completed'</span>] == 1]
+<span class="code-comment"># Compare baseline characteristics...</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Attrition analysis</span>
+
+<span class="code-comment">* 1. Completion rates</span>
+gen completed = !missing(outcome)
+tab treatment completed, row
+
+<span class="code-comment">* 2. Test for differential attrition</span>
+<span class="code-tooltip" data-tip="prtest compares proportions between groups">prtest completed, by(treatment)</span>
+
+<span class="code-comment">* 3. Lee bounds for treatment effects under selection</span>
+<span class="code-comment">* (Bounds on treatment effect accounting for differential attrition)</span>
+<span class="code-comment">* ssc install leebounds</span>
+leebounds outcome treatment
+
+<span class="code-comment">* 4. Balance among completers vs full sample</span>
+iebaltab age income education female if completed==1, ///
+    grpvar(treatment) save("balance_completers.xlsx") replace</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Attrition analysis</span>
+
+<span class="code-comment"># 1. Completion rates by treatment</span>
+df$completed <- !is.na(df$outcome)
+<span class="code-function">table</span>(df$treatment, df$completed)
+
+<span class="code-comment"># 2. Test for differential attrition</span>
+<span class="code-tooltip" data-tip="prop.test compares completion proportions">prop.test(table(df$treatment, df$completed))</span>
+
+<span class="code-comment"># 3. Regression of attrition on treatment and baseline vars</span>
+attrition_model <- glm(
+  completed ~ treatment + age + income + education,
+  data = df,
+  family = binomial
+)
+<span class="code-function">summary</span>(attrition_model)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">What to Do About Imbalance or Attrition</div>
+          <p style="margin-bottom: 0;">
+            If you find imbalance or differential attrition:<br>
+            1. <strong>Report it transparently</strong> in your paper<br>
+            2. <strong>Control for imbalanced variables</strong> in your main specification<br>
+            3. <strong>Show robustness</strong> with and without controls<br>
+            4. <strong>Compute bounds</strong> on treatment effects (Lee bounds for attrition)
+          </p>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Tools and References</div>
+          <ul>
+            <li><strong>Stata:</strong> <code>iebaltab</code> from ietoolkit (<code>ssc install ietoolkit</code>)</li>
+            <li><strong>R:</strong> <code>cobalt</code> package, <code>tableone</code> package</li>
+            <li><strong>Reference:</strong> Lee, D. S. (2009). "Training, Wages, and Sample Selection: Estimating Sharp Bounds on Treatment Effects." <em>Review of Economic Studies</em>.</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="05b3-randomization.html" class="nav-link prev">5B.3: Randomization</a>
+          <a href="06-causal-inference.html" class="nav-link next">Module 6: Causal Inference</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+</body>
+</html>

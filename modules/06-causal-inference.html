@@ -64,15 +64,10 @@
           </li>
           <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
           <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
-          <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
-          <li><a href="05a-data-simulation.html"><span class="module-number">5A</span> Data Simulation</a></li>
           <li class="has-subnav">
-            <a href="05b-experiments.html"><span class="module-number">5B</span> Experiments</a>
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
             <ul class="sub-nav">
-              <li><a href="05b1-power-analysis.html">Power Analysis</a></li>
-              <li><a href="05b2-survey-programming.html">Survey Programming</a></li>
-              <li><a href="05b3-randomization.html">Randomization</a></li>
-              <li><a href="05b4-balance-checks.html">Balance Checks</a></li>
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
             </ul>
           </li>
           <li class="has-subnav active">
@@ -83,6 +78,7 @@
               <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
               <li><a href="06d-iv.html">Instrumental Variables</a></li>
               <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
             </ul>
           </li>
           <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
@@ -133,45 +129,58 @@
         <h2>Choosing Your Method</h2>
 
         <p>
-          The identification strategy you choose depends on your research context and data. Each method relies on different assumptions about what generates the variation in treatment.
+          The identification strategy depends on what source of variation you can credibly argue is exogenous. Ask yourself: <em>Why do some units get treated and others don't?</em> The answer determines which method is appropriate.
         </p>
 
         <table>
           <thead>
             <tr>
-              <th>Your Context</th>
-              <th>Best Method</th>
-              <th>Key Question</th>
+              <th style="width: 30%;">Data Structure & Variation Source</th>
+              <th style="width: 15%;">Method</th>
+              <th style="width: 35%;">Technical Requirements</th>
+              <th style="width: 20%;">Example Papers</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Rich covariate data, cross-sectional</td>
+              <td><strong>Cross-sectional with rich observables.</strong> Treatment is observationally determined—you believe that after conditioning on X, treatment is as good as random.</td>
               <td><a href="06a-matching.html">Matching</a></td>
-              <td>Can I find comparable untreated units?</td>
+              <td>Substantial covariate overlap (common support); no unmeasured confounders (CIA/unconfoundedness); enough control units with similar propensity scores.</td>
+              <td><a href="https://doi.org/10.1257/aer.96.4.1368" target="_blank">Dehejia & Wahba (2002)</a>; <a href="https://doi.org/10.1093/qje/qju022" target="_blank">Chetty et al. (2014)</a></td>
             </tr>
             <tr>
-              <td>Policy change affecting some units</td>
+              <td><strong>Panel data with staggered policy adoption.</strong> Some units adopt treatment at different times; you assume absent treatment, treated and control units would have evolved similarly.</td>
               <td><a href="06b-did.html">Difference-in-Differences</a></td>
-              <td>Would treated units have trended like controls?</td>
+              <td>Pre-treatment parallel trends (testable in pre-period); no anticipation effects; SUTVA (no spillovers); with staggered timing, beware of negative weighting.</td>
+              <td><a href="https://doi.org/10.1162/00335530360535171" target="_blank">Card & Krueger (1994)</a>; <a href="https://doi.org/10.1257/aer.20161038" target="_blank">Dube et al. (2019)</a></td>
             </tr>
             <tr>
-              <td>Treatment assigned by threshold/cutoff</td>
+              <td><strong>Treatment assigned by a score crossing a cutoff.</strong> Eligibility is determined by whether a running variable exceeds a threshold (test scores, income limits, age cutoffs).</td>
               <td><a href="06c-rdd.html">Regression Discontinuity</a></td>
-              <td>Is there manipulation around the cutoff?</td>
+              <td>No manipulation of the running variable (McCrary density test); continuity of potential outcomes at cutoff; local treatment effect at cutoff (not generalizable).</td>
+              <td><a href="https://doi.org/10.1257/aer.98.5.2055" target="_blank">Lee (2008)</a>; <a href="https://doi.org/10.1257/jel.48.2.281" target="_blank">Lee & Lemieux (2010)</a></td>
             </tr>
             <tr>
-              <td>Exogenous source of variation exists</td>
+              <td><strong>Endogenous treatment with external shifter.</strong> You have a variable Z that affects treatment D but has no direct effect on outcome Y except through D.</td>
               <td><a href="06d-iv.html">Instrumental Variables</a></td>
-              <td>Does the instrument satisfy exclusion?</td>
+              <td>Relevance (strong first stage, F > 10); exclusion restriction (no direct effect); monotonicity for LATE interpretation; beware of weak instruments.</td>
+              <td><a href="https://doi.org/10.1257/aer.101.6.2754" target="_blank">Angrist & Krueger (1991)</a>; <a href="https://doi.org/10.1257/jep.15.4.69" target="_blank">Acemoglu et al. (2001)</a></td>
             </tr>
             <tr>
-              <td>Few treated units, many controls</td>
+              <td><strong>Single treated unit (or very few) with many potential controls.</strong> A policy affects one state/country; you construct a synthetic comparison by weighting other units.</td>
               <td><a href="06e-synthetic-control.html">Synthetic Control</a></td>
-              <td>Can I build a credible counterfactual?</td>
+              <td>Good pre-treatment fit (low RMSPE); donor pool units are unaffected by treatment (SUTVA); sufficient pre-treatment periods for validation.</td>
+              <td><a href="https://doi.org/10.1198/jasa.2009.ap08746" target="_blank">Abadie et al. (2010)</a>; <a href="https://doi.org/10.1257/aer.20190159" target="_blank">Abadie (2021)</a></td>
             </tr>
           </tbody>
         </table>
+
+        <div class="info-box warning">
+          <div class="info-box-title">No Method Is Assumption-Free</div>
+          <p style="margin-bottom: 0;">
+            Every causal inference method requires untestable assumptions. The goal is not to find a "perfect" method but to choose one whose assumptions are most plausible in your context—and then stress-test those assumptions with robustness checks, placebo tests, and sensitivity analysis.
+          </p>
+        </div>
 
         <h2>Method Overview</h2>
 
@@ -179,45 +188,69 @@
           <div class="method-card">
             <h3><a href="06a-matching.html">Matching</a></h3>
             <p>Find untreated units similar to treated units on observable characteristics. Methods include propensity score matching, coarsened exact matching, and nearest-neighbor matching.</p>
-            <p class="assumption"><strong>Assumption:</strong> Selection on observables (no unmeasured confounders)</p>
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 0.75rem; margin-top: 0.75rem;">
+              <p style="margin: 0; font-size: 0.9rem; color: #991b1b;"><strong>Key Assumption:</strong> Conditional Independence (CIA)</p>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #7f1d1d;">After conditioning on observables X, treatment assignment is independent of potential outcomes. <em>There are no unmeasured confounders.</em></p>
+            </div>
           </div>
 
           <div class="method-card">
             <h3><a href="06b-did.html">Difference-in-Differences</a></h3>
             <p>Compare changes over time between treatment and control groups. Includes classic 2x2 DiD, staggered adoption designs, and modern heterogeneous treatment effects estimators.</p>
-            <p class="assumption"><strong>Assumption:</strong> Parallel trends in the absence of treatment</p>
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 0.75rem; margin-top: 0.75rem;">
+              <p style="margin: 0; font-size: 0.9rem; color: #991b1b;"><strong>Key Assumption:</strong> Parallel Trends</p>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #7f1d1d;">In the absence of treatment, treated and control groups would have followed the same trajectory. <em>Trends, not levels, must be equal.</em></p>
+            </div>
           </div>
 
           <div class="method-card">
             <h3><a href="06c-rdd.html">Regression Discontinuity</a></h3>
             <p>Exploit discontinuous changes in treatment probability at a threshold. Sharp RDD (deterministic assignment) and fuzzy RDD (probabilistic assignment).</p>
-            <p class="assumption"><strong>Assumption:</strong> Continuity at cutoff, no manipulation</p>
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 0.75rem; margin-top: 0.75rem;">
+              <p style="margin: 0; font-size: 0.9rem; color: #991b1b;"><strong>Key Assumptions:</strong> Continuity + No Manipulation</p>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #7f1d1d;">Potential outcomes are continuous at the cutoff; units cannot precisely manipulate their running variable. <em>Effect is local to the cutoff.</em></p>
+            </div>
           </div>
 
           <div class="method-card">
             <h3><a href="06d-iv.html">Instrumental Variables</a></h3>
             <p>Use external variation that affects treatment but not outcomes directly. Includes Bartik/shift-share instruments and recent econometric advances.</p>
-            <p class="assumption"><strong>Assumption:</strong> Exclusion restriction, instrument relevance</p>
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 0.75rem; margin-top: 0.75rem;">
+              <p style="margin: 0; font-size: 0.9rem; color: #991b1b;"><strong>Key Assumptions:</strong> Relevance + Exclusion</p>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #7f1d1d;">Z must affect D (first stage); Z must only affect Y through D (exclusion). <em>Exclusion restriction is untestable.</em></p>
+            </div>
           </div>
 
           <div class="method-card">
             <h3><a href="06e-synthetic-control.html">Synthetic Control</a></h3>
             <p>Construct a weighted combination of control units to match the treated unit's pre-treatment trajectory. Ideal for case studies and policy evaluations.</p>
-            <p class="assumption"><strong>Assumption:</strong> Good pre-treatment fit, no spillovers</p>
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 0.75rem; margin-top: 0.75rem;">
+              <p style="margin: 0; font-size: 0.9rem; color: #991b1b;"><strong>Key Assumptions:</strong> Fit + SUTVA</p>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #7f1d1d;">Synthetic control matches pre-treatment outcomes well; donor pool units are unaffected. <em>Good fit ≠ identification, but poor fit is a red flag.</em></p>
+            </div>
+          </div>
+
+          <div class="method-card">
+            <h3><a href="05b-experiments.html">Experiments (RCTs)</a></h3>
+            <p>Randomly assign treatment to ensure comparability between groups. The gold standard for causal inference when feasible.</p>
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 0.75rem; margin-top: 0.75rem;">
+              <p style="margin: 0; font-size: 0.9rem; color: #166534;"><strong>Key Assumption:</strong> Proper Randomization</p>
+              <p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: #14532d;">Randomization was correctly implemented and maintained (no differential attrition, no compliance issues). <em>Check balance on observables.</em></p>
+            </div>
           </div>
         </div>
 
         <h2>Modern Developments</h2>
 
         <p>
-          Causal inference methods have seen major advances in recent years. This module covers:
+          Causal inference methods have seen major advances in recent years. Each subpage covers these modern techniques with implementation code:
         </p>
 
         <ul>
-          <li><strong>Staggered DiD:</strong> Callaway-Sant'Anna (2021), Sun-Abraham (2021), de Chaisemartin-D'Haultfoeuille (2020) for heterogeneous effects with staggered adoption</li>
-          <li><strong>Double/Debiased ML:</strong> Chernozhukov et al. (2018) for high-dimensional confounders</li>
-          <li><strong>Synthetic Control Extensions:</strong> Augmented SC (Ben-Michael et al. 2021), synthetic DiD (Arkhangelsky et al. 2021)</li>
-          <li><strong>Shift-Share/Bartik Instruments:</strong> Goldsmith-Pinkham et al. (2020), Borusyak et al. (2022) on identification and inference</li>
+          <li><strong><a href="06b-did.html#staggered">Staggered DiD</a>:</strong> When treatment adoption varies across time, classic two-way fixed effects can be biased. New estimators by <a href="https://doi.org/10.1016/j.jeconom.2020.12.001" target="_blank">Callaway & Sant'Anna (2021)</a>, <a href="https://doi.org/10.1016/j.jeconom.2020.09.006" target="_blank">Sun & Abraham (2021)</a>, and <a href="https://doi.org/10.1257/aer.20181169" target="_blank">de Chaisemartin & D'Haultfoeuille (2020)</a> provide solutions.</li>
+          <li><strong><a href="06a-matching.html#doubly-robust">Double/Debiased ML</a>:</strong> When you have many potential confounders, machine learning can help select controls while maintaining valid inference. See <a href="https://doi.org/10.1111/ectj.12097" target="_blank">Chernozhukov et al. (2018)</a>.</li>
+          <li><strong><a href="06e-synthetic-control.html#extensions">Synthetic Control Extensions</a>:</strong> Augmented SC (<a href="https://doi.org/10.1080/01621459.2021.1891924" target="_blank">Ben-Michael et al. 2021</a>) and Synthetic DiD (<a href="https://doi.org/10.1257/aer.20190159" target="_blank">Arkhangelsky et al. 2021</a>) combine matching with DiD logic.</li>
+          <li><strong><a href="06d-iv.html#bartik">Shift-Share/Bartik Instruments</a>:</strong> Popular in labor and trade, but with subtle identification issues. See <a href="https://doi.org/10.1257/aer.20181047" target="_blank">Goldsmith-Pinkham et al. (2020)</a> and <a href="https://doi.org/10.1093/restud/rdab030" target="_blank">Borusyak et al. (2022)</a> on when they work.</li>
         </ul>
 
         <div class="info-box note">

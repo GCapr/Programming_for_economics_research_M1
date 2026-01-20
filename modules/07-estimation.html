@@ -59,15 +59,10 @@
           </li>
           <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
           <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
-          <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
-          <li><a href="05a-data-simulation.html"><span class="module-number">5A</span> Data Simulation</a></li>
           <li class="has-subnav">
-            <a href="05b-experiments.html"><span class="module-number">5B</span> Experiments</a>
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
             <ul class="sub-nav">
-              <li><a href="05b1-power-analysis.html">Power Analysis</a></li>
-              <li><a href="05b2-survey-programming.html">Survey Programming</a></li>
-              <li><a href="05b3-randomization.html">Randomization</a></li>
-              <li><a href="05b4-balance-checks.html">Balance Checks</a></li>
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
             </ul>
           </li>
           <li class="has-subnav">
@@ -78,6 +73,7 @@
               <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
               <li><a href="06d-iv.html">Instrumental Variables</a></li>
               <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
             </ul>
           </li>
           <li class="active"><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
@@ -162,10 +158,25 @@
         <h2 id="standard-errors">7.2 Standard Errors and Inference</h2>
 
         <p>
-          Choosing the right standard errors is essential for valid inference. The main considerations are heteroskedasticity and clustering.
+          Choosing the right standard errors is essential for valid inference. Using incorrect standard errors can lead to dramatically wrong conclusions—confidence intervals that are too narrow (false precision) or too wide (lost power). The two main considerations are:
         </p>
+        <ul>
+          <li><strong>Heteroskedasticity:</strong> When the variance of the error term varies across observations (e.g., income variance differs by wealth level)</li>
+          <li><strong>Clustering:</strong> When observations are correlated within groups (e.g., students in the same classroom, repeated observations of the same person)</li>
+        </ul>
 
         <h3>Robust (Heteroskedasticity-Consistent) Standard Errors</h3>
+
+        <p>
+          Classical OLS standard errors assume homoskedasticity: constant error variance across all observations. In practice, this rarely holds. Robust standard errors (also called Huber-White or sandwich standard errors) remain valid under heteroskedasticity without requiring you to model its form.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p style="margin-bottom: 0;">
+            The key parameter is <code>cov_type='HC1'</code> (Python), <code>robust</code> or <code>vce(robust)</code> (Stata), or <code>vcov = vcovHC()</code> (R). HC0-HC3 are variants with different small-sample corrections—HC1 is the most common. In the output, compare standard errors: robust SEs are often larger than classical OLS SEs when heteroskedasticity is present, leading to wider confidence intervals and more conservative inference.
+          </p>
+        </div>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -219,8 +230,21 @@ summary(model)</code></pre>
         <h3>Clustered Standard Errors</h3>
 
         <p>
-          When observations are correlated within groups (e.g., students within schools, repeated observations of the same person), you need clustered standard errors.
+          When observations are correlated within groups, standard errors that ignore this correlation will be too small—often dramatically so. Common examples include:
         </p>
+        <ul>
+          <li><strong>Students within schools:</strong> Students in the same school share teachers, facilities, and peer effects</li>
+          <li><strong>Workers within firms:</strong> Workers at the same company share management, culture, and industry shocks</li>
+          <li><strong>Repeated observations:</strong> The same individual observed multiple times over a panel</li>
+          <li><strong>Geographic clustering:</strong> Individuals in the same state/region share local policies and economic conditions</li>
+        </ul>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p style="margin-bottom: 0;">
+            The clustering variable is specified via <code>cov_kwds={'groups': df['cluster_var']}</code> (Python), <code>cluster(cluster_var)</code> (Stata), or <code>cluster = ~cluster_var</code> (R/fixest). The output will report the number of clusters—a rule of thumb is that you need at least 30-50 clusters for clustered standard errors to be reliable. With few clusters, consider wild cluster bootstrap (shown in Section 7.6).
+          </p>
+        </div>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -297,10 +321,24 @@ vcovCL(model, cluster = ~ school_id)</code></pre>
         <h2 id="panel">7.3 Panel Data Methods</h2>
 
         <p>
-          Panel data (repeated observations of units over time) enables powerful designs but requires appropriate methods.
+          Panel data (repeated observations of units over time) is the workhorse of applied microeconomics because it enables researchers to control for unobserved heterogeneity. The key intuition: if individuals differ in unobserved ways that affect both treatment and outcomes, cross-sectional comparisons are biased. Panel data lets us compare the <em>same</em> individual over time, differencing out time-invariant unobservables.
         </p>
 
         <h3>Fixed Effects</h3>
+
+        <p>
+          Fixed effects estimation includes a separate intercept for each unit (person, firm, country), absorbing all time-invariant characteristics. Mechanically, this is equivalent to "demeaning"—subtracting each unit's mean from all its observations. The identifying variation comes only from <em>within-unit</em> changes over time.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p>
+            The key syntax elements are: <code>entity_effects=True</code> (Python linearmodels), <code>fe</code> or <code>absorb(unit_id)</code> (Stata), and <code>| unit_id</code> after the formula (R fixest). Two-way fixed effects add time fixed effects as well, controlling for common shocks (e.g., recessions) that affect all units.
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong>Important:</strong> You can only estimate coefficients on variables that vary <em>within</em> units over time. Time-invariant characteristics (gender, race, birth cohort) are absorbed by the fixed effects and cannot be estimated—but they are controlled for.
+          </p>
+        </div>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -376,6 +414,17 @@ model <- plm(outcome ~ treatment, data = pdata, model = "within")</code></pre>
 
         <h3>Random Effects</h3>
 
+        <p>
+          Random effects (RE) treats unit-specific effects as random draws from a distribution rather than fixed parameters. This is more efficient than fixed effects (smaller standard errors) but requires a stronger assumption: the unit effects must be uncorrelated with the regressors. If this assumption fails, RE estimates are inconsistent.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">When to use Random Effects</div>
+          <p style="margin-bottom: 0;">
+            In practice, RE is rarely preferred in economics research because the key assumption (unit effects uncorrelated with regressors) is hard to justify. The Hausman test compares FE and RE: if they differ significantly, RE is inconsistent and FE should be used. RE remains useful when you need to estimate coefficients on time-invariant variables, or when sample sizes are small and efficiency gains matter.
+          </p>
+        </div>
+
         <div class="code-tabs">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
@@ -433,10 +482,29 @@ fe_model <- plm(outcome ~ treatment + controls, data = pdata, model = "within")
         <h2 id="nonlinear">7.4 Nonlinear Models</h2>
 
         <p>
-          When outcomes are binary, counts, or bounded, linear models may be inappropriate.
+          Linear models assume the conditional mean of Y given X is a linear function of parameters. This breaks down when:
+        </p>
+        <ul>
+          <li><strong>Binary outcomes:</strong> Linear probability models can predict probabilities outside [0,1]</li>
+          <li><strong>Count data:</strong> Counts are non-negative integers, but OLS can predict negative values</li>
+          <li><strong>Bounded/skewed outcomes:</strong> Expenditure data, durations, and other inherently positive variables</li>
+        </ul>
+        <p>
+          Nonlinear models address these issues by modeling a transformed version of the outcome or using appropriate distributional assumptions.
         </p>
 
         <h3>Logit and Probit</h3>
+
+        <p>
+          For binary outcomes (0/1), logit and probit models estimate the probability P(Y=1|X). They differ in the link function: logit uses the logistic CDF, probit uses the normal CDF. In practice, they give very similar results—the choice is often a matter of convention (probit is traditional in labor economics, logit in epidemiology).
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Interpreting the output</div>
+          <p style="margin-bottom: 0;">
+            Raw logit/probit coefficients are in log-odds (logit) or z-scores (probit), which are hard to interpret. Always compute <strong>marginal effects</strong>—the change in probability for a unit change in X. Average marginal effects (AME) average across all observations; marginal effects at the mean (MEM) evaluate at sample means. AME is generally preferred as it doesn't depend on a potentially unrepresentative "average" person.
+          </p>
+        </div>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -506,6 +574,17 @@ exp(coef(logit))</code></pre>
 
         <h3>Poisson and Negative Binomial (Count Data)</h3>
 
+        <p>
+          Count outcomes (number of patents, doctor visits, accidents) require models that respect their non-negative, integer nature. The Poisson model assumes E[Y|X] = exp(Xβ) and Var(Y|X) = E[Y|X]—the mean equals the variance. This "equidispersion" assumption often fails in practice; when variance exceeds the mean (overdispersion), use negative binomial instead.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Pseudo-Poisson MLE (PPML)</div>
+          <p style="margin-bottom: 0;">
+            An important insight: Poisson regression with robust standard errors is consistent even if the data aren't Poisson-distributed, as long as the conditional mean is correctly specified. This "Poisson Pseudo-MLE" is widely used in trade economics for gravity equations (Santos Silva & Tenreyro, 2006) because it handles zeros naturally and is robust to heteroskedasticity.
+          </p>
+        </div>
+
         <div class="code-tabs">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
@@ -568,10 +647,44 @@ poisson_fe <- fepois(num_patents ~ rd_spending | firm_id + year,
         <h2 id="mle-gmm">7.5 MLE and GMM</h2>
 
         <p>
-          Maximum Likelihood Estimation (MLE) and Generalized Method of Moments (GMM) are general frameworks underlying most estimation methods.
+          Maximum Likelihood Estimation (MLE) and Generalized Method of Moments (GMM) are the two general frameworks underlying most econometric estimators. Understanding them helps you: (1) implement custom models not available in standard packages, (2) understand the properties of standard estimators, and (3) diagnose estimation problems.
         </p>
 
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>Maximum Likelihood (MLE)</h4>
+            <p>Find parameters that maximize the probability of observing the data.</p>
+            <ul>
+              <li>Requires specifying the full distribution of Y|X</li>
+              <li>Efficient if the distribution is correct</li>
+              <li>Inconsistent if distribution is misspecified</li>
+              <li>Examples: Logit, Probit, Tobit, Poisson</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>Generalized Method of Moments (GMM)</h4>
+            <p>Find parameters that make moment conditions hold in the sample.</p>
+            <ul>
+              <li>Only requires specifying moment conditions (E[g(Y,X,θ)]=0)</li>
+              <li>More robust but less efficient than MLE</li>
+              <li>Includes OLS and IV as special cases</li>
+              <li>Examples: IV/2SLS, panel GMM, difference GMM</li>
+            </ul>
+          </div>
+        </div>
+
         <h3>Custom MLE</h3>
+
+        <p>
+          Sometimes you need to estimate a model that isn't available in standard packages. The approach is straightforward: (1) write down the log-likelihood function, (2) use numerical optimization to find the maximum. The code below shows a simple example—linear regression estimated via MLE rather than OLS.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p style="margin-bottom: 0;">
+            The key components are: (1) defining the negative log-likelihood function (negative because optimizers minimize by default), (2) choosing starting values, and (3) selecting an optimization algorithm (BFGS is a good default). Standard errors come from the inverse of the Hessian matrix at the optimum. For complex models, check that the optimizer converged and try multiple starting values.
+          </p>
+        </div>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -654,8 +767,26 @@ se <- sqrt(diag(solve(result$hessian)))</code></pre>
         <h2 id="bootstrap">7.6 Bootstrap Methods</h2>
 
         <p>
-          Bootstrap provides standard errors and confidence intervals when analytical formulas are complex or unavailable.
+          Bootstrap is a resampling method that estimates the sampling distribution of a statistic by repeatedly drawing samples (with replacement) from the original data. It's especially useful when:
         </p>
+        <ul>
+          <li><strong>Analytical formulas don't exist:</strong> Complex estimators, ratios, quantiles</li>
+          <li><strong>Asymptotic approximations are poor:</strong> Small samples, heavy-tailed distributions</li>
+          <li><strong>Testing with few clusters:</strong> Wild cluster bootstrap for reliable inference with 10-50 clusters</li>
+        </ul>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Types of bootstrap</div>
+          <p>
+            <strong>Nonparametric:</strong> Resample observations with replacement (shown below). Works for most situations.
+          </p>
+          <p>
+            <strong>Cluster bootstrap:</strong> Resample entire clusters, not individual observations. Essential for clustered data.
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong>Wild cluster bootstrap:</strong> A variant that works well with few clusters (Cameron, Gelbach & Miller, 2008). Particularly important for difference-in-differences with few treated states/periods.
+          </p>
+        </div>
 
         <div class="code-tabs">
           <div class="tab-buttons">

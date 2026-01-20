@@ -404,18 +404,45 @@ function initCollapsibleSubnav() {
       subnav.classList.add('expanded');
     }
 
-    // Create a toggle button for the expand/collapse
+    // Create a clickable toggle button for expand/collapse (the +/- indicator)
+    const toggleBtn = document.createElement('span');
+    toggleBtn.className = 'subnav-toggle';
+    toggleBtn.setAttribute('aria-label', 'Toggle submenu');
+    toggleBtn.setAttribute('role', 'button');
+    toggleBtn.setAttribute('tabindex', '0');
+    parentLink.appendChild(toggleBtn);
+
+    // Toggle on clicking the toggle button (prevents navigation)
+    toggleBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      parentLi.classList.toggle('expanded');
+      subnav.classList.toggle('expanded');
+    });
+
+    // Allow keyboard activation
+    toggleBtn.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        parentLi.classList.toggle('expanded');
+        subnav.classList.toggle('expanded');
+      }
+    });
+
+    // If clicking the link text and already on that page, just toggle (don't navigate)
     parentLink.addEventListener('click', function(e) {
-      // Get the href
+      // If clicked on toggle button, it's already handled
+      if (e.target === toggleBtn) return;
+
       const href = parentLink.getAttribute('href');
+      const currentPath = window.location.pathname;
+      const isCurrentPage = currentPath.endsWith(href) ||
+                           currentPath.endsWith(href.replace('../', '')) ||
+                           currentPath.endsWith(href.replace('./', ''));
 
-      // If the parent link is the current page or user clicks on the expand area, toggle
-      const isCurrentPage = window.location.pathname.endsWith(href) ||
-                           window.location.pathname.endsWith(href.replace('../', ''));
-
-      // Toggle the subnav
-      if (isCurrentPage || e.target === parentLink) {
-        // Allow navigation but also toggle
+      if (isCurrentPage) {
+        e.preventDefault();
         parentLi.classList.toggle('expanded');
         subnav.classList.toggle('expanded');
       }

@@ -54,15 +54,10 @@
           </li>
           <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
           <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
-          <li><a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a></li>
-          <li><a href="05a-data-simulation.html"><span class="module-number">5A</span> Data Simulation</a></li>
           <li class="has-subnav">
-            <a href="05b-experiments.html"><span class="module-number">5B</span> Experiments</a>
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
             <ul class="sub-nav">
-              <li><a href="05b1-power-analysis.html">Power Analysis</a></li>
-              <li><a href="05b2-survey-programming.html">Survey Programming</a></li>
-              <li><a href="05b3-randomization.html">Randomization</a></li>
-              <li><a href="05b4-balance-checks.html">Balance Checks</a></li>
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
             </ul>
           </li>
           <li class="has-subnav active">
@@ -73,6 +68,7 @@
               <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
               <li><a href="06d-iv.html">Instrumental Variables</a></li>
               <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
             </ul>
           </li>
           <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
@@ -104,6 +100,7 @@
         <div class="toc">
           <h3>Table of Contents</h3>
           <ul>
+            <li><a href="#theory">The Logic of Matching</a></li>
             <li><a href="#psm">Propensity Score Matching</a></li>
             <li><a href="#cem">Coarsened Exact Matching</a></li>
             <li><a href="#nn">Nearest Neighbor Matching</a></li>
@@ -112,11 +109,95 @@
           </ul>
         </div>
 
+        <!-- Theory Introduction Section -->
+        <h2 id="theory">The Logic of Matching</h2>
+
+        <div class="prereq-box" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #3b82f6;">
+          <h3 style="color: #1e40af;">The Fundamental Problem</h3>
+          <p>
+            We want to estimate the effect of a treatment D on outcome Y. The problem: treated and untreated units may differ systematically in ways that also affect Y. For example, people who participate in job training programs (treatment) may be more motivated—and motivation affects employment (outcome) regardless of training.
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong>Matching solution:</strong> Find untreated units that "look like" treated units on observable characteristics X. If we can find comparison units with identical X values, comparing outcomes gives us a causal effect—<em>provided there are no unmeasured confounders</em>.
+          </p>
+        </div>
+
+        <!-- Visual Demo: The Intuition -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin-top: 0; color: #1e40af;">Visual Intuition: How Matching Works</h4>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; justify-content: center; margin: 1rem 0;">
+            <div style="flex: 1; min-width: 280px; text-align: center;">
+              <div style="font-weight: 600; margin-bottom: 0.5rem;">Step 1: Raw Data</div>
+              <svg viewBox="0 0 200 150" style="max-width: 200px; height: auto;">
+                <!-- Treated units (filled circles) - higher income cluster -->
+                <circle cx="140" cy="30" r="8" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+                <circle cx="160" cy="45" r="8" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+                <circle cx="150" cy="55" r="8" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+                <circle cx="170" cy="35" r="8" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+                <circle cx="130" cy="50" r="8" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+                <!-- Control units (hollow circles) - lower income cluster -->
+                <circle cx="40" cy="100" r="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
+                <circle cx="60" cy="110" r="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
+                <circle cx="50" cy="120" r="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
+                <circle cx="70" cy="95" r="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
+                <circle cx="80" cy="105" r="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
+                <!-- Overlap region - both types -->
+                <circle cx="100" cy="75" r="8" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+                <circle cx="90" cy="85" r="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
+                <!-- Axes -->
+                <line x1="20" y1="140" x2="190" y2="140" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="20" y1="140" x2="20" y2="10" stroke="#94a3b8" stroke-width="1"/>
+                <text x="105" y="148" font-size="10" fill="#64748b" text-anchor="middle">Income</text>
+                <text x="12" y="75" font-size="10" fill="#64748b" transform="rotate(-90 12 75)">Age</text>
+              </svg>
+              <p style="font-size: 0.85rem; color: #64748b;">Treated (red) and control (blue) differ systematically</p>
+            </div>
+            <div style="flex: 0; font-size: 2rem; color: #94a3b8;">→</div>
+            <div style="flex: 1; min-width: 280px; text-align: center;">
+              <div style="font-weight: 600; margin-bottom: 0.5rem;">Step 2: After Matching</div>
+              <svg viewBox="0 0 200 150" style="max-width: 200px; height: auto;">
+                <!-- Matched pairs in overlap region -->
+                <circle cx="100" cy="75" r="8" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
+                <circle cx="90" cy="85" r="8" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1"/>
+                <!-- Connecting line showing match -->
+                <line x1="100" y1="75" x2="90" y2="85" stroke="#10b981" stroke-width="2" stroke-dasharray="4"/>
+                <!-- Faded unmatched units -->
+                <circle cx="140" cy="30" r="8" fill="#fca5a5" stroke="#fca5a5" stroke-width="1" opacity="0.3"/>
+                <circle cx="160" cy="45" r="8" fill="#fca5a5" stroke="#fca5a5" stroke-width="1" opacity="0.3"/>
+                <circle cx="40" cy="100" r="8" fill="#93c5fd" stroke="#93c5fd" stroke-width="1" opacity="0.3"/>
+                <circle cx="60" cy="110" r="8" fill="#93c5fd" stroke="#93c5fd" stroke-width="1" opacity="0.3"/>
+                <!-- Axes -->
+                <line x1="20" y1="140" x2="190" y2="140" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="20" y1="140" x2="20" y2="10" stroke="#94a3b8" stroke-width="1"/>
+                <text x="105" y="148" font-size="10" fill="#64748b" text-anchor="middle">Income</text>
+                <text x="12" y="75" font-size="10" fill="#64748b" transform="rotate(-90 12 75)">Age</text>
+              </svg>
+              <p style="font-size: 0.85rem; color: #64748b;">Compare only similar units (matched pairs)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box note">
+          <div class="info-box-title">Further Reading: Theory & Intuition</div>
+          <ul style="margin-bottom: 0;">
+            <li><a href="https://www.jstatsoft.org/article/view/v042i08" target="_blank">Ho et al. (2007)</a> - "Matching as Nonparametric Preprocessing" explains why matching is preprocessing, not a method itself</li>
+            <li><a href="https://mixtape.scunning.com/05-matching_and_subclassification" target="_blank">Causal Inference: The Mixtape, Ch. 5</a> - Excellent intuitive treatment of matching</li>
+            <li><a href="https://www.tandfonline.com/doi/abs/10.1198/016214504000001042" target="_blank">Rosenbaum & Rubin (1983)</a> - Original propensity score paper</li>
+          </ul>
+        </div>
+
         <h2 id="psm">Propensity Score Matching</h2>
 
         <p>
-          The propensity score is the probability of treatment given observed covariates: <em>e(X) = P(D=1|X)</em>. Units with similar propensity scores are compared, reducing many covariates to a single dimension.
+          The propensity score is the probability of treatment given observed covariates: <em>e(X) = P(D=1|X)</em>. The key insight (<a href="https://doi.org/10.1093/biomet/70.1.41" target="_blank">Rosenbaum & Rubin, 1983</a>) is that conditioning on the propensity score balances all covariates, reducing many dimensions to one.
         </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p style="margin-bottom: 0;">
+            The process has 4 steps: (1) Estimate propensity scores using logistic regression, (2) Match treated to control units with similar scores, (3) Verify balance improved on all covariates, (4) Estimate treatment effect on matched sample. Watch for overlap/common support—if propensity scores for treated and control don't overlap, matching is impossible.
+          </p>
+        </div>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -201,11 +282,32 @@ summary(att_model)</span></code></pre>
           </div>
         </div>
 
+        <!-- Results Interpretation Box -->
+        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 1.25rem; margin: 1.5rem 0;">
+          <h4 style="margin-top: 0; color: #166534;">Interpreting PSM Results</h4>
+          <p>
+            <strong>Example output:</strong> <code>ATT: 0.342 (SE: 0.089)</code>
+          </p>
+          <p>
+            This means: among those who received treatment, the average effect was a 0.342 unit increase in the outcome compared to what they would have experienced without treatment. The ATT (Average Treatment effect on the Treated) is the relevant estimand when you're evaluating a voluntary program—we want to know whether the program helped those who participated.
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong>Key checks:</strong> (1) How many treated units were matched? (2) What's the average distance between matched pairs? (3) Did covariate balance improve? If you lost many treated units to trimming, your estimate applies only to the "matchable" population, not all treated units.
+          </p>
+        </div>
+
         <h2 id="cem">Coarsened Exact Matching</h2>
 
         <p>
-          CEM temporarily coarsens covariates into bins, performs exact matching within bins, then uses the original (non-coarsened) data for analysis. This avoids propensity score model dependence.
+          CEM (<a href="https://doi.org/10.1093/pan/mpr025" target="_blank">Iacus et al., 2012</a>) temporarily coarsens covariates into bins, performs exact matching within bins, then uses the original (non-coarsened) data for analysis. This avoids propensity score model dependence and guarantees a maximum imbalance bound.
         </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">When to use CEM vs PSM</div>
+          <p style="margin-bottom: 0;">
+            Use CEM when you have a clear sense of what covariate values should be "close enough" (e.g., ages 30-35 are comparable). CEM discards more data but provides stronger balance guarantees. Use PSM when covariates are numerous or continuous without natural groupings.
+          </p>
+        </div>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -440,11 +542,32 @@ summary(m.out)</code></pre>
           </div>
         </div>
 
+        <!-- Balance Results Interpretation -->
+        <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 1.25rem; margin: 1.5rem 0;">
+          <h4 style="margin-top: 0; color: #166534;">Interpreting Balance Diagnostics</h4>
+          <p>
+            <strong>Standardized Mean Difference (SMD):</strong> The difference in means between treated and control, divided by the pooled standard deviation. Rule of thumb: SMD &lt; 0.1 indicates good balance; SMD &lt; 0.25 is acceptable.
+          </p>
+          <p>
+            <strong>Variance Ratio:</strong> Ratio of variances between groups. Should be close to 1.0 (range 0.5-2.0 is acceptable).
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong>What to report:</strong> Always show a balance table or Love plot comparing before/after matching. If balance is poor on key covariates, your matching has failed and you need to: (1) try different matching specifications, (2) include additional covariates, or (3) acknowledge the limitation.
+          </p>
+        </div>
+
         <h2 id="doubly-robust">Doubly Robust Estimation</h2>
 
         <p>
-          Combine propensity score weighting with outcome regression. Consistent if either the propensity score model OR the outcome model is correctly specified.
+          Doubly robust methods (<a href="https://doi.org/10.1080/01621459.1994.10476818" target="_blank">Robins et al., 1994</a>) combine propensity score weighting with outcome regression. The estimator is consistent if <em>either</em> the propensity score model OR the outcome model is correctly specified—you get "two chances" to get it right.
         </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Why doubly robust?</div>
+          <p style="margin-bottom: 0;">
+            Standard matching relies entirely on the propensity score model. If it's misspecified, your estimate is biased. Doubly robust methods add an outcome model as insurance. With modern machine learning (SuperLearner, random forests), you can flexibly estimate both models without imposing restrictive functional forms.
+          </p>
+        </div>
 
         <div class="code-tabs">
           <div class="tab-buttons">

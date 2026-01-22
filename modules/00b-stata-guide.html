@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stata Interface Guide | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    /* Interactive IDE diagram styles */
+    .ide-diagram {
+      position: relative;
+      margin: 2rem 0;
+      border-radius: 8px;
+      overflow: visible;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    .ide-diagram-container {
+      position: relative;
+      background: #f0f0f0;
+      border-radius: 8px 8px 0 0;
+    }
+    .ide-region {
+      position: absolute;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .ide-region:hover {
+      border-color: var(--color-accent);
+      background: rgba(237, 137, 54, 0.15);
+    }
+    .ide-region.active {
+      border-color: var(--color-accent);
+      background: rgba(237, 137, 54, 0.2);
+    }
+    .ide-region-label {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: var(--color-accent);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      z-index: 10;
+    }
+    .ide-info-panel {
+      background: var(--color-bg-alt);
+      padding: 1rem 1.5rem;
+      border-radius: 0 0 8px 8px;
+      min-height: 100px;
+      transition: all 0.2s ease;
+    }
+    .ide-info-panel h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--color-primary);
+    }
+    .ide-info-panel p {
+      margin: 0;
+      color: var(--color-text);
+    }
+    .ide-info-default {
+      color: var(--color-text-light);
+      font-style: italic;
+    }
+    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
+    .code-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #888;
+      text-decoration: none;
+    }
+
+    /* Tooltip element created by JavaScript */
+    .tooltip-popup {
+      position: fixed;
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      max-width: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
+      line-height: 1.4;
+      text-align: left;
+      font-family: var(--font-body);
+      font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tooltip-popup.visible {
+      opacity: 1;
+    }
+
+    /* Small arrow pointer */
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1f2937;
+    }
+    .tooltip-popup.arrow-top::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #1f2937;
+    }
+    .tooltip-popup.arrow-left::after {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1f2937;
+    }
+    .tooltip-popup.arrow-right::after {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      border-left-color: #1f2937;
+    }
+  </style>
+</head>
+<body>
+  <!-- Password Protection Overlay -->
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav active">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li class="active"><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <p style="margin-bottom: 0;"><a href="00-languages-platforms.html">&larr; Back to Module 0: Languages & Platforms</a></p>
+
+        <div class="module-header" style="margin-top: 1rem;">
+          <h1>Stata Interface Guide</h1>
+          <div class="module-meta">
+            <span>~30 min</span>
+            <span>For Stata users</span>
+          </div>
+        </div>
+
+        <p class="lead">
+          <strong>Stata</strong> is the most widely used statistical software in academic economics. It's particularly strong for econometrics, panel data analysis, and survey data. If you're going into applied economics research, you will use Stata.
+        </p>
+
+        <h2>What is Stata?</h2>
+
+        <p>
+          Unlike R and Python, Stata is both a programming language <em>and</em> a complete software package. When you buy Stata, you get everything: the language, the interface, the documentation, and thousands of built-in statistical commands. This "all-in-one" approach is part of why economists love it—everything just works together.
+        </p>
+
+        <details style="margin: 1rem 0; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-radius: 6px; border-left: 3px solid var(--color-accent);">
+          <summary style="cursor: pointer; font-weight: 600; color: var(--color-primary);">For the nerds: more on Stata's language layers</summary>
+          <div style="margin-top: 0.75rem; font-size: 0.95rem;">
+            <p>Stata's language operates at two levels:</p>
+            <ul>
+              <li><strong>Interactive commands / do-files</strong> — The primary way users interact with Stata. You type commands like <code>regress y x1 x2</code> or <code>summarize income</code>, and you can save sequences of commands in <code>.do</code> files to create reproducible scripts.</li>
+              <li><strong>Ado-files</strong> — Stata's higher-level programming language for writing new commands. Most of Stata's built-in commands are actually written in ado, and users can write their own. Ado is interpreted (not compiled).</li>
+            </ul>
+            <p><strong>Mata</strong> then sits underneath as a compiled, C-like matrix language for performance-critical code.</p>
+            <p>So when people say "Stata," they're typically referring to both the software application and its scripting/command language. Mata is a separate but integrated language within the Stata ecosystem.</p>
+          </div>
+        </details>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Stata is Commercial Software</div>
+          <p>
+            Stata requires a license ($125+ for students, more for professionals). However, most universities provide free access through site licenses. Check with your IT department or library. If you're at Sciences Po, Stata is available on campus computers and through remote desktop.
+          </p>
+        </div>
+
+        <h2>Stata Versions</h2>
+
+        <p>
+          Stata comes in several versions. The main differences are in memory capacity and processing speed:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Version</th>
+              <th>Variables Limit</th>
+              <th>Best For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Stata/BE</strong> (Basic Edition)</td>
+              <td>2,048 variables</td>
+              <td>Small datasets, learning</td>
+            </tr>
+            <tr>
+              <td><strong>Stata/SE</strong> (Standard Edition)</td>
+              <td>32,767 variables</td>
+              <td>Most research projects</td>
+            </tr>
+            <tr>
+              <td><strong>Stata/MP</strong> (Multiprocessor)</td>
+              <td>120,000 variables</td>
+              <td>Large datasets, parallel processing</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          For most coursework and research, <strong>Stata/SE</strong> is sufficient. Your university likely provides either SE or MP.
+        </p>
+
+        <h2>The Stata Interface</h2>
+
+        <p>
+          When you open Stata, you'll see a window with five main panels. <strong>Hover over each numbered region below</strong> to learn what it does:
+        </p>
+
+        <!-- Interactive Stata Diagram -->
+        <div class="ide-diagram" id="stata-diagram">
+          <div class="ide-diagram-container">
+            <!-- Stata window mockup -->
+            <div style="background: #f0f0f0; border-radius: 8px 8px 0 0;">
+              <!-- Title bar -->
+              <div style="background: linear-gradient(180deg, #4a6fa5 0%, #3d5a87 100%); padding: 6px 12px; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 8px;">
+                <div style="display: flex; gap: 6px;">
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f57;"></span>
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #febc2e;"></span>
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #28c840;"></span>
+                </div>
+                <span style="color: white; font-size: 0.85rem; font-weight: 500;">Stata/MP 18.0</span>
+              </div>
+              <!-- Main content area -->
+              <div style="display: grid; grid-template-columns: 180px 1fr 200px; min-height: 350px; background: #e8e8e8;">
+                <!-- Left column: Review window (full height) -->
+                <div style="display: flex; flex-direction: column; border-right: 1px solid #ccc;">
+                  <div style="flex: 1; background: white; margin: 4px; border: 1px solid #bbb; position: relative;">
+                    <div style="background: #ddd; padding: 2px 6px; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid #bbb;">Review</div>
+                    <div style="padding: 6px; font-family: var(--font-code); font-size: 0.7rem; color: #333;">
+                      <div>. use "data.dta"</div>
+                      <div>. describe</div>
+                      <div style="color: #0066cc;">. reg income education</div>
+                    </div>
+                    <div class="ide-region" data-region="1" style="top: 0; left: 0; right: 0; bottom: 0;">
+                      <span class="ide-region-label">1</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Center: Results window -->
+                <div style="display: flex; flex-direction: column;">
+                  <div style="flex: 1; background: white; margin: 4px; border: 1px solid #bbb; position: relative; overflow: hidden;">
+                    <div style="background: #ddd; padding: 2px 6px; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid #bbb;">Stata Results</div>
+                    <div style="padding: 8px; font-family: var(--font-code); font-size: 0.65rem; color: #333; line-height: 1.4;">
+                      <div style="color: #0066cc;">. reg income education experience</div>
+                      <br>
+                      <div>Source |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;df&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS</div>
+                      <div>-------+------------------------------</div>
+                      <div>Model |&nbsp;&nbsp;1.2e+10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;6.1e+09</div>
+                      <div>Resid |&nbsp;&nbsp;5.4e+10&nbsp;&nbsp;&nbsp;997&nbsp;&nbsp;5.4e+07</div>
+                      <div>-------+------------------------------</div>
+                      <div>Total |&nbsp;&nbsp;6.6e+10&nbsp;&nbsp;&nbsp;999</div>
+                      <br>
+                      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;R-squared = 0.1842</div>
+                    </div>
+                    <div class="ide-region" data-region="2" style="top: 0; left: 0; right: 0; bottom: 0;">
+                      <span class="ide-region-label">2</span>
+                    </div>
+                  </div>
+                  <!-- Command window -->
+                  <div style="background: white; margin: 4px; margin-top: 0; border: 1px solid #bbb; height: 50px; position: relative;">
+                    <div style="background: #ddd; padding: 2px 6px; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid #bbb;">Command</div>
+                    <div style="padding: 6px; font-family: var(--font-code); font-size: 0.75rem;">
+                      <span style="color: #333;">. </span><span style="color: #666;">|</span>
+                    </div>
+                    <div class="ide-region" data-region="3" style="top: 0; left: 0; right: 0; bottom: 0;">
+                      <span class="ide-region-label">3</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right column: Variables + Properties -->
+                <div style="display: flex; flex-direction: column; border-left: 1px solid #ccc;">
+                  <!-- Variables window -->
+                  <div style="flex: 1; background: white; margin: 4px; border: 1px solid #bbb; position: relative;">
+                    <div style="background: #ddd; padding: 2px 6px; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid #bbb;">Variables</div>
+                    <div style="padding: 6px; font-size: 0.7rem;">
+                      <div style="padding: 2px 0; border-bottom: 1px solid #eee;"><span style="color: #0066cc;">income</span></div>
+                      <div style="padding: 2px 0; border-bottom: 1px solid #eee;"><span style="color: #0066cc;">education</span></div>
+                      <div style="padding: 2px 0; border-bottom: 1px solid #eee;"><span style="color: #0066cc;">experience</span></div>
+                      <div style="padding: 2px 0; border-bottom: 1px solid #eee;"><span style="color: #0066cc;">age</span></div>
+                      <div style="padding: 2px 0;"><span style="color: #0066cc;">female</span></div>
+                    </div>
+                    <div class="ide-region" data-region="4" style="top: 0; left: 0; right: 0; bottom: 0;">
+                      <span class="ide-region-label">4</span>
+                    </div>
+                  </div>
+                  <!-- Properties window -->
+                  <div style="flex: 1; background: white; margin: 4px; margin-top: 0; border: 1px solid #bbb; position: relative;">
+                    <div style="background: #ddd; padding: 2px 6px; font-size: 0.7rem; font-weight: 600; border-bottom: 1px solid #bbb;">Properties</div>
+                    <div style="padding: 6px; font-size: 0.7rem; color: #555;">
+                      <div><strong>Variables:</strong> 12</div>
+                      <div><strong>Observations:</strong> 1,000</div>
+                      <div><strong>Size:</strong> 68 KB</div>
+                    </div>
+                    <div class="ide-region" data-region="5" style="top: 0; left: 0; right: 0; bottom: 0;">
+                      <span class="ide-region-label">5</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Info panel that updates on hover -->
+          <div class="ide-info-panel" id="stata-info">
+            <p class="ide-info-default">Hover over a numbered region to learn about that part of Stata.</p>
+          </div>
+        </div>
+
+        <script>
+          (function() {
+            const infoPanel = document.getElementById('stata-info');
+            const regions = document.querySelectorAll('#stata-diagram .ide-region');
+
+            const regionInfo = {
+              '1': {
+                title: 'Review Window (Left)',
+                description: 'Shows your command history—every command you\'ve run in this session. Click on a previous command to re-run it. This is very useful for building up your analysis iteratively and recalling commands you want to modify.'
+              },
+              '2': {
+                title: 'Results Window (Center)',
+                description: 'This is where all output appears: regression tables, summary statistics, error messages, and more. Everything you "print" in Stata shows up here. This window is scrollable, so you can review previous output. You can save this output using the <code>log</code> command.'
+              },
+              '3': {
+                title: 'Command Window (Bottom)',
+                description: 'Type Stata commands here and press Enter to run them. This is for interactive, one-at-a-time commands. For longer analyses, you\'ll want to use the <strong>Do-file Editor</strong> instead. Press Page Up to cycle through previous commands.'
+              },
+              '4': {
+                title: 'Variables Window (Right, Top)',
+                description: 'Shows all variables in your current dataset. Click on a variable name to insert it into the Command window. You can also see variable labels and types here. This is incredibly useful when working with unfamiliar datasets.'
+              },
+              '5': {
+                title: 'Properties Window (Right, Bottom)',
+                description: 'Displays detailed information about the currently loaded dataset: number of observations, number of variables, dataset label, memory usage, and more. Click on a variable in the Variables window to see its properties here.'
+              }
+            };
+
+            const defaultContent = '<p class="ide-info-default">Hover over a numbered region to learn about that part of Stata.</p>';
+
+            regions.forEach(region => {
+              region.addEventListener('mouseenter', function() {
+                const regionId = this.getAttribute('data-region');
+                const info = regionInfo[regionId];
+                if (info) {
+                  infoPanel.innerHTML = `<h4>${info.title}</h4><p>${info.description}</p>`;
+                  regions.forEach(r => r.classList.remove('active'));
+                  this.classList.add('active');
+                }
+              });
+
+              region.addEventListener('mouseleave', function() {
+                setTimeout(() => {
+                  if (!document.querySelector('#stata-diagram .ide-region:hover')) {
+                    this.classList.remove('active');
+                  }
+                }, 100);
+              });
+            });
+
+            document.getElementById('stata-diagram').addEventListener('mouseleave', function() {
+              setTimeout(() => {
+                if (!document.querySelector('#stata-diagram:hover')) {
+                  infoPanel.innerHTML = defaultContent;
+                  regions.forEach(r => r.classList.remove('active'));
+                }
+              }, 300);
+            });
+          })();
+        </script>
+
+        <h2>The Do-file Editor: Where Real Work Happens</h2>
+
+        <p>
+          The Command window is fine for quick tests, but <strong>all serious Stata work should be done in Do-files</strong>. A Do-file is a script that contains a sequence of Stata commands. Using Do-files makes your work reproducible, shareable, and easier to debug.
+        </p>
+
+        <p>
+          To open the Do-file Editor:
+        </p>
+        <ul>
+          <li>Go to <strong>Window > Do-file Editor > New Do-file Editor</strong></li>
+          <li>Or press <code class="code-tooltip" data-tip="Hold Ctrl and press the number 9 key. Opens the Do-file Editor where you write your scripts.">Ctrl+9</code> (Windows) / <code class="code-tooltip" data-tip="On Mac, use Cmd (Command key) + 9">Cmd+9</code> (Mac)</li>
+          <li>Or type <code class="code-tooltip" data-tip="The command to open the Do-file Editor from the Command window. You can also add a filename like 'doedit myfile.do' to open or create a specific file.">doedit</code> in the Command window</li>
+        </ul>
+
+        <h2>Essential Stata Commands</h2>
+
+        <p>
+          Here are the commands every Stata user needs to know:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>What it does</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Opens a Stata dataset file (.dta) so you can work with it. Always use 'clear' to remove any previous data from memory first.">use</code></td>
+              <td>Load a dataset</td>
+              <td><code class="code-tooltip" data-tip="Loads the file data.dta from your working directory. The 'clear' option removes any data currently in memory.">use "data.dta", clear</code></td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Shows a list of all variables in your dataset with their names, types (numeric/string), and labels. First command to run after loading data.">describe</code></td>
+              <td>Show variable names and types</td>
+              <td><code class="code-tooltip" data-tip="Shows information about all variables. You can also describe specific variables like 'describe income age'.">describe</code></td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Calculates basic statistics: mean, standard deviation, min, max, and count. Add 'detail' for more stats like percentiles.">summarize</code></td>
+              <td>Summary statistics</td>
+              <td><code class="code-tooltip" data-tip="Shows statistics for the income and age variables. Can abbreviate as 'sum income age'.">summarize income age</code></td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Creates a frequency table showing how many observations fall into each category. Great for categorical variables.">tabulate</code></td>
+              <td>Frequency tables</td>
+              <td><code class="code-tooltip" data-tip="Shows count and percentage for each education level. 'tab' is the abbreviation for 'tabulate'.">tab education</code></td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Creates a new variable in your dataset. The new variable is calculated based on existing variables.">generate</code></td>
+              <td>Create a new variable</td>
+              <td><code class="code-tooltip" data-tip="Creates a new variable called log_income containing the natural log of income. 'gen' is the abbreviation.">gen log_income = log(income)</code></td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Changes values in an existing variable. Unlike 'generate', which creates new variables, 'replace' modifies existing ones.">replace</code></td>
+              <td>Modify existing variable</td>
+              <td><code class="code-tooltip" data-tip="Sets age to missing (.) wherever age is negative. The dot (.) represents missing values in Stata.">replace age = . if age < 0</code></td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Runs an Ordinary Least Squares (OLS) regression. The first variable is the dependent variable (outcome), rest are independent variables.">regress</code></td>
+              <td>OLS regression</td>
+              <td><code class="code-tooltip" data-tip="Regresses income on education and age. 'reg' is the abbreviation. Output shows coefficients, standard errors, R-squared, etc.">reg income education age</code></td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Opens Stata's built-in documentation for any command. The help files are excellent and include examples.">help</code></td>
+              <td>Get help on any command</td>
+              <td><code class="code-tooltip" data-tip="Opens the help page for the regress command with syntax, options, and examples.">help regress</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>A Sample Do-file</h2>
+
+        <p>
+          Here's what a typical Do-file looks like. I recommend always starting with the commands shown below:
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="stata">Stata</button>
+          </div>
+          <div class="tab-content active" data-lang="stata">
+<pre><code><span class="code-comment">/*******************************************************************************
+ * Project: Analysis of Wage Data
+ * Author:  Your Name
+ * Date:    January 2026
+ * Purpose: Explore determinants of wages
+ *******************************************************************************/</span>
+
+<span class="code-comment">* Clear everything and set up</span>
+<span class="code-tooltip" data-tip="Removes all data, variables, and programs from memory. Always start your do-file with this to ensure a clean slate.">clear all</span>
+<span class="code-tooltip" data-tip="Tells Stata not to pause and show '--more--' when output fills the screen. Without this, you'd have to keep pressing Enter.">set more off</span>
+
+<span class="code-comment">* Set working directory (adjust to your path)</span>
+<span class="code-tooltip" data-tip="cd = 'change directory'. Sets the folder where Stata looks for files and saves output. Replace with your actual path.">cd "/Users/yourname/research/wage_project"</span>
+
+<span class="code-comment">* Start a log file to save all output</span>
+<span class="code-tooltip" data-tip="Starts recording everything in the Results window to a file. 'text' makes it readable in any text editor. 'replace' overwrites any existing file.">log using "analysis_log.txt", text replace</span>
+
+<span class="code-comment">* Load the data</span>
+<span class="code-tooltip" data-tip="Opens the wage_data.dta file. The 'clear' option removes any data already in memory before loading.">use "wage_data.dta", clear</span>
+
+<span class="code-comment">* Examine the data</span>
+<span class="code-tooltip" data-tip="Shows all variable names, types, and labels in your dataset.">describe</span>
+<span class="code-tooltip" data-tip="Shows basic statistics (mean, std dev, min, max) for all numeric variables.">summarize</span>
+
+<span class="code-comment">* Summary statistics for key variables</span>
+<span class="code-tooltip" data-tip="The 'detail' option adds percentiles (10th, 25th, 50th, 75th, 90th), skewness, and kurtosis to the summary statistics.">summarize wage education experience, detail</span>
+
+<span class="code-comment">* Run a simple regression</span>
+<span class="code-tooltip" data-tip="OLS regression of wage on education, experience, and female. The 'i.' prefix treats female as a categorical variable (0/1 dummy).">regress wage education experience i.female</span>
+
+<span class="code-comment">* Close the log file</span>
+<span class="code-tooltip" data-tip="Stops recording to the log file. Always close your log at the end or you won't be able to open the file while Stata is running.">log close</span></code></pre>
+          </div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Best Practices for Do-files</div>
+          <ul style="margin-bottom: 0;">
+            <li><strong>Always start with <code class="code-tooltip" data-tip="Removes all data, matrices, programs, and macros from memory. Ensures your do-file runs the same every time.">clear all</code></strong> to ensure a clean environment</li>
+            <li><strong>Use <code class="code-tooltip" data-tip="Prevents the '--more--' prompt that pauses output when it fills the screen. Lets your code run without interruption.">set more off</code></strong> to prevent Stata from pausing output</li>
+            <li><strong>Start a log file</strong> to save all your output</li>
+            <li><strong>Comment liberally</strong> using <code class="code-tooltip" data-tip="An asterisk at the start of a line makes the whole line a comment. Stata ignores it.">*</code> or <code class="code-tooltip" data-tip="Everything between /* and */ is a comment. Can span multiple lines. Good for longer explanations.">/* */</code></li>
+            <li><strong>Use relative paths</strong> after setting your working directory</li>
+          </ul>
+        </div>
+
+        <h2>Understanding Log Files</h2>
+
+        <p>
+          A <strong>log file</strong> is a text record of everything that happens in your Stata session: every command you run and all the output it produces. Log files are essential for reproducibility—they let you (and others) see exactly what you did and what results you got.
+        </p>
+
+        <h3>Creating a Log File</h3>
+
+        <p>You start and stop logging with simple commands:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">stata</span>
+          </div>
+          <pre><code><span class="code-comment">* Start logging to a text file (overwrites if exists)</span>
+<span class="code-tooltip" data-tip="Begins recording all commands and output. The filename can be anything you choose (with or without extension).">log using</span> <span class="code-tooltip" data-tip="The name of your log file. .log is the conventional extension but you can use any extension.">"my_analysis.log"</span>, <span class="code-tooltip" data-tip="Creates a plain text file readable in any application (Notepad, TextEdit, etc.)">text</span> <span class="code-tooltip" data-tip="If a file with this name already exists, overwrite it. Without this, Stata will give an error if the file exists.">replace</span>
+
+<span class="code-comment">* ... run your analysis here ...</span>
+
+<span class="code-comment">* Stop logging</span>
+<span class="code-tooltip" data-tip="Stops recording and saves the file. You must close the log before you can open and read the file.">log close</span></code></pre>
+        </div>
+
+        <p>
+          The <code>text</code> option creates a plain text file (readable anywhere). Without it, Stata creates a <code>.smcl</code> file (Stata Markup and Control Language), which preserves formatting but only opens in Stata.
+        </p>
+
+        <h3>Sample Log File</h3>
+
+        <p>Here's what a typical log file looks like after running some basic analysis:</p>
+
+        <div class="code-block">
+          <div class="code-header">
+            <span class="code-lang">my_analysis.log</span>
+          </div>
+          <pre><code style="font-size: 0.8rem; line-height: 1.5;">-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/researcher/projects/wages/my_analysis.log
+  log type:  text
+ opened on:  15 Jan 2026, 10:32:15
+
+. * Load the dataset
+. use "wages.dta", clear
+
+. * Describe the data
+. describe
+
+Contains data from wages.dta
+ Observations:         1,000
+    Variables:             5                  15 Jan 2026 09:15
+-------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+-------------------------------------------------------------------------------
+wage            float   %9.0g                 Hourly wage (dollars)
+education       byte    %9.0g                 Years of education
+experience      byte    %9.0g                 Years of experience
+female          byte    %9.0g      sex        1 = Female
+age             byte    %9.0g                 Age in years
+-------------------------------------------------------------------------------
+Sorted by:
+
+. * Summary statistics
+. summarize wage education experience
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+        wage |      1,000       22.47       12.35       5.25      98.50
+   education |      1,000       13.24        2.68          8         20
+  experience |      1,000       17.82       11.45          0         45
+
+. * Run regression
+. regress wage education experience female
+
+      Source |       SS           df       MS      Number of obs   =     1,000
+-------------+----------------------------------   F(3, 996)       =    142.56
+       Model |   45892.123         3  15297.374   Prob > F        =    0.0000
+    Residual |  106834.877       996   107.263   R-squared       =    0.3005
+-------------+----------------------------------   Adj R-squared   =    0.2984
+       Total |  152727.000       999   152.880   Root MSE        =    10.357
+
+------------------------------------------------------------------------------
+        wage | Coefficient  Std. err.      t    P>|t|     [95% conf. interval]
+-------------+----------------------------------------------------------------
+   education |    2.4521     0.1423    17.23   0.000      2.1728      2.7314
+  experience |    0.3845     0.0412     9.33   0.000      0.3036      0.4654
+      female |   -3.2156     0.6534    -4.92   0.000     -4.4982     -1.9330
+       _cons |   -8.7234     2.0145    -4.33   0.000    -12.6781     -4.7687
+------------------------------------------------------------------------------
+
+. log close
+      name:  <unnamed>
+       log:  /Users/researcher/projects/wages/my_analysis.log
+  log type:  text
+ closed on:  15 Jan 2026, 10:32:18
+-------------------------------------------------------------------------------</code></pre>
+        </div>
+
+        <h3>Key Parts of a Log File</h3>
+
+        <ul>
+          <li><strong>Header</strong> — Shows when and where the log was created</li>
+          <li><strong>Commands</strong> — Each command you ran appears after a dot (<code>.</code>)</li>
+          <li><strong>Output</strong> — The results of each command appear directly below it</li>
+          <li><strong>Footer</strong> — Shows when the log was closed</li>
+        </ul>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Log File Tips</div>
+          <ul style="margin-bottom: 0;">
+            <li>Use <code class="code-tooltip" data-tip="The 'append' option adds new output to the end of an existing log file instead of overwriting it. Useful for long projects.">log using "filename", append</code> to add to an existing log instead of replacing it</li>
+            <li>Name your logs descriptively: <code class="code-tooltip" data-tip="Include version numbers and dates in your log names so you can track different versions of your analysis.">analysis_v2_2026-01-15.log</code></li>
+            <li>Store logs alongside your do-files for easy reference</li>
+            <li>If you forget to close a log, use <code class="code-tooltip" data-tip="Forces all open log files to close. Useful if Stata gives an error that a log is already open.">log close _all</code> to close any open logs</li>
+          </ul>
+        </div>
+
+        <h2>Essential Keyboard Shortcuts</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Shortcut (Windows)</th>
+              <th>Shortcut (Mac)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Select code in the Do-file Editor, then press Ctrl+D to run just that selection. This is how you execute parts of your script.">Ctrl + D</code></td>
+              <td><code class="code-tooltip" data-tip="On Mac, the shortcut requires Shift as well: Command + Shift + D">Cmd + Shift + D</code></td>
+              <td>Run selected code in Do-file Editor</td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Opens the Do-file Editor - the text editor where you write your Stata scripts (.do files).">Ctrl + 9</code></td>
+              <td><code class="code-tooltip" data-tip="Mac version: Command + 9">Cmd + 9</code></td>
+              <td>Open Do-file Editor</td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Saves your current Do-file. Save frequently to avoid losing work!">Ctrl + S</code></td>
+              <td><code class="code-tooltip" data-tip="Mac version: Command + S">Cmd + S</code></td>
+              <td>Save current Do-file</td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="When in the Command window, Page Up cycles through previous commands you've typed. Useful for re-running or modifying recent commands.">Page Up</code></td>
+              <td><code class="code-tooltip" data-tip="Works the same on Mac">Page Up</code></td>
+              <td>Previous command (in Command window)</td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Select or place cursor on a command, then press F1 to open its help documentation. A fast way to learn command options.">F1</code></td>
+              <td><code class="code-tooltip" data-tip="Works the same on Mac (you may need to hold Fn key on some keyboards)">F1</code></td>
+              <td>Help for selected command</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Getting Help in Stata</h2>
+
+        <p>
+          Stata has excellent built-in documentation. To get help on any command:
+        </p>
+
+        <ul>
+          <li><code class="code-tooltip" data-tip="Opens the official documentation for the regress command, including all options, examples, and technical details.">help regress</code> — Opens help for the regress command</li>
+          <li><code class="code-tooltip" data-tip="Searches Stata's entire documentation library for topics related to 'panel data'. Great when you're not sure which command to use.">search panel data</code> — Searches all documentation for "panel data"</li>
+          <li><code class="code-tooltip" data-tip="Searches both official and community-contributed commands. Many useful commands (like esttab, outreg2) are user-written and found this way.">findit xtreg</code> — Searches for user-written commands</li>
+        </ul>
+
+        <h2>Video Tutorials</h2>
+
+        <div class="info-box note">
+          <div class="info-box-title">Recommended Videos</div>
+          <ul>
+            <li><a href="https://www.stata.com/links/video-tutorials/" target="_blank">Official Stata Video Tutorials</a> — Free tutorials from StataCorp</li>
+            <li><a href="https://www.youtube.com/watch?v=aCgXdaTe_8c" target="_blank">Stata Tutorial: Introduction to Stata</a> (YouTube) — Good beginner overview</li>
+            <li><a href="https://www.youtube.com/c/statacorp" target="_blank">StataCorp YouTube Channel</a> — Official channel with many tutorials</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="00a-rstudio-guide.html" class="nav-link prev">RStudio Guide</a>
+          <a href="00c-vscode-guide.html" class="nav-link next">VS Code Guide</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I can help you with questions about Stata. What would you like to know?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+
+      const targetRect = target.getBoundingClientRect();
+      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
+      let containerRect = container ? container.getBoundingClientRect() : {
+        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
+      };
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10;
+
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8;
+      let arrowClass = 'arrow-bottom';
+
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      if (top + tooltipHeight > viewportHeight - padding) {
+        top = targetRect.top - tooltipHeight - 8;
+        arrowClass = 'arrow-bottom';
+      }
+
+      if (left < padding) left = padding;
+      if (left + tooltipWidth > viewportWidth - padding) left = viewportWidth - tooltipWidth - padding;
+
+      if (container) {
+        const minLeft = Math.max(padding, containerRect.left);
+        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
+        if (left < minLeft) left = minLeft;
+        if (left + tooltipWidth > maxRight) left = maxRight - tooltipWidth;
+      }
+
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) tooltipEl.classList.remove('visible');
+        currentTarget = null;
+      }, 100);
+    }
+
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target);
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip();
+    }, true);
+
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    }, true);
+
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    });
+  })();
+  </script>
+</body>
+</html>

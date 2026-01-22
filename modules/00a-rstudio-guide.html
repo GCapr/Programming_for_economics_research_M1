@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RStudio Interface Guide | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    /* Interactive IDE diagram styles */
+    .ide-diagram {
+      position: relative;
+      margin: 2rem 0;
+      border-radius: 8px;
+      overflow: visible;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    .ide-diagram-container {
+      position: relative;
+      background: #1e1e1e;
+      border-radius: 8px;
+    }
+    .ide-region {
+      position: absolute;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+    .ide-region:hover {
+      border-color: var(--color-accent);
+      background: rgba(237, 137, 54, 0.15);
+    }
+    .ide-region.active {
+      border-color: var(--color-accent);
+      background: rgba(237, 137, 54, 0.2);
+    }
+    .ide-region-label {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: var(--color-accent);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .ide-info-panel {
+      background: var(--color-bg-alt);
+      padding: 1rem 1.5rem;
+      border-radius: 0 0 8px 8px;
+      min-height: 100px;
+      transition: all 0.2s ease;
+    }
+    .ide-info-panel h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--color-primary);
+    }
+    .ide-info-panel p {
+      margin: 0;
+      color: var(--color-text);
+    }
+    .ide-info-default {
+      color: var(--color-text-light);
+      font-style: italic;
+    }
+    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
+    .code-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #888;
+      text-decoration: none;
+    }
+
+    /* Tooltip element created by JavaScript */
+    .tooltip-popup {
+      position: fixed;
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      max-width: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
+      line-height: 1.4;
+      text-align: left;
+      font-family: var(--font-body);
+      font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tooltip-popup.visible {
+      opacity: 1;
+    }
+
+    /* Small arrow pointer */
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1f2937;
+    }
+    .tooltip-popup.arrow-top::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #1f2937;
+    }
+    .tooltip-popup.arrow-left::after {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1f2937;
+    }
+    .tooltip-popup.arrow-right::after {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      border-left-color: #1f2937;
+    }
+  </style>
+</head>
+<body>
+  <!-- Password Protection Overlay -->
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav active">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li class="active"><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <p style="margin-bottom: 0;"><a href="00-languages-platforms.html">&larr; Back to Module 0: Languages & Platforms</a></p>
+
+        <div class="module-header" style="margin-top: 1rem;">
+          <h1>RStudio Interface Guide</h1>
+          <div class="module-meta">
+            <span>~30 min</span>
+            <span>For R users</span>
+          </div>
+        </div>
+
+        <p class="lead">
+          <strong>RStudio</strong> is the most popular IDE (Integrated Development Environment) for R. It's free, powerful, and designed specifically for statistical analysis and research. If you'll be using R for this course, this is where you'll spend most of your time.
+        </p>
+
+        <h2>What is RStudio?</h2>
+
+        <p>
+          RStudio is not the R language itself—it's a program that makes writing R code much easier. Think of it like this: R is the engine, and RStudio is the car with the steering wheel, dashboard, and comfortable seats. You could drive the engine directly (by running R in a terminal), but RStudio makes the experience much more pleasant.
+        </p>
+
+        <h2>Installing RStudio</h2>
+
+        <p>
+          Before installing RStudio, you need to install R itself. Here's the order:
+        </p>
+
+        <ol>
+          <li><strong>Install R first:</strong> Download from <a href="https://cran.r-project.org/" target="_blank">cran.r-project.org</a></li>
+          <li><strong>Then install RStudio:</strong> Download from <a href="https://posit.co/download/rstudio-desktop/" target="_blank">posit.co/download/rstudio-desktop</a></li>
+        </ol>
+
+        <div class="info-box note">
+          <div class="info-box-title">Why Two Installations?</div>
+          <p>
+            RStudio needs R to function—it's just a nice interface around R. If you try to run RStudio without R installed, it won't work. Always install R first, then RStudio.
+          </p>
+        </div>
+
+        <h2>The RStudio Interface</h2>
+
+        <p>
+          When you first open RStudio, you'll see a window divided into four panels. <strong>Hover over each numbered region below</strong> to learn what it does:
+        </p>
+
+        <!-- Interactive RStudio Diagram -->
+        <div class="ide-diagram" id="rstudio-diagram">
+          <div class="ide-diagram-container">
+            <!-- RStudio mockup with 4 quadrants -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; min-height: 380px;">
+              <!-- Source Editor (top-left) -->
+              <div style="background: #1e1e1e; border-right: 1px solid #3c3c3c; border-bottom: 1px solid #3c3c3c; padding: 12px; position: relative;">
+                <div style="color: #808080; font-size: 0.75rem; margin-bottom: 8px;">Source</div>
+                <div style="font-family: var(--font-code); font-size: 0.8rem; color: #d4d4d4; line-height: 1.6;">
+                  <span style="color: #6c7086;"># Load packages</span><br>
+                  <span style="color: #cba6f7;">library</span>(<span style="color: #a6e3a1;">tidyverse</span>)<br>
+                  <span style="color: #cba6f7;">library</span>(<span style="color: #a6e3a1;">fixest</span>)<br><br>
+                  <span style="color: #6c7086;"># Load data</span><br>
+                  df <- <span style="color: #89b4fa;">read_csv</span>(<span style="color: #a6e3a1;">"data.csv"</span>)
+                </div>
+                <div class="ide-region" data-region="1" style="top: 0; left: 0; right: 0; bottom: 0;">
+                  <span class="ide-region-label">1</span>
+                </div>
+              </div>
+
+              <!-- Environment (top-right) -->
+              <div style="background: #252526; border-bottom: 1px solid #3c3c3c; padding: 12px; position: relative;">
+                <div style="color: #808080; font-size: 0.75rem; margin-bottom: 8px;">Environment</div>
+                <div style="font-size: 0.8rem; color: #cccccc;">
+                  <div style="padding: 4px 0; border-bottom: 1px solid #3c3c3c;">
+                    <span style="color: #89b4fa;">df</span> &nbsp; <span style="color: #808080;">1000 obs. of 5 variables</span>
+                  </div>
+                  <div style="padding: 4px 0;">
+                    <span style="color: #89b4fa;">model1</span> &nbsp; <span style="color: #808080;">List of 12</span>
+                  </div>
+                </div>
+                <div class="ide-region" data-region="2" style="top: 0; left: 0; right: 0; bottom: 0;">
+                  <span class="ide-region-label">2</span>
+                </div>
+              </div>
+
+              <!-- Console (bottom-left) -->
+              <div style="background: #1e1e1e; border-right: 1px solid #3c3c3c; padding: 12px; position: relative;">
+                <div style="color: #808080; font-size: 0.75rem; margin-bottom: 8px;">Console</div>
+                <div style="font-family: var(--font-code); font-size: 0.8rem; color: #d4d4d4;">
+                  <span style="color: #4ec9b0;">&gt;</span> summary(df$income)<br>
+                  <span style="color: #808080;">Min. 1st Qu. Median Mean 3rd Qu. Max.</span><br>
+                  <span style="color: #808080;">15000 35000 52000 58400 75000 250000</span><br>
+                  <span style="color: #4ec9b0;">&gt;</span> <span style="color: #ffffff;">|</span>
+                </div>
+                <div class="ide-region" data-region="3" style="top: 0; left: 0; right: 0; bottom: 0;">
+                  <span class="ide-region-label">3</span>
+                </div>
+              </div>
+
+              <!-- Files/Plots (bottom-right) -->
+              <div style="background: #252526; padding: 12px; position: relative;">
+                <div style="display: flex; gap: 12px; margin-bottom: 8px;">
+                  <span style="color: #ffffff; font-size: 0.75rem; padding-bottom: 4px; border-bottom: 2px solid #ed8936;">Plots</span>
+                  <span style="color: #808080; font-size: 0.75rem;">Files</span>
+                  <span style="color: #808080; font-size: 0.75rem;">Packages</span>
+                  <span style="color: #808080; font-size: 0.75rem;">Help</span>
+                </div>
+                <div style="background: #1e1e1e; height: 100px; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                  <span style="color: #808080; font-size: 0.85rem;">[Plot appears here]</span>
+                </div>
+                <div class="ide-region" data-region="4" style="top: 0; left: 0; right: 0; bottom: 0;">
+                  <span class="ide-region-label">4</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Info panel that updates on hover -->
+          <div class="ide-info-panel" id="rstudio-info">
+            <p class="ide-info-default">Hover over a numbered region to learn about that part of RStudio.</p>
+          </div>
+        </div>
+
+        <script>
+          (function() {
+            const infoPanel = document.getElementById('rstudio-info');
+            const regions = document.querySelectorAll('#rstudio-diagram .ide-region');
+
+            const regionInfo = {
+              '1': {
+                title: 'Source Editor (Top Left)',
+                description: 'This is where you write your R scripts. Think of it as a text editor specifically designed for code. You can have multiple files open in tabs. <strong>Key shortcut:</strong> Press <code>Ctrl+Enter</code> (or <code>Cmd+Enter</code> on Mac) to run the current line of code.'
+              },
+              '2': {
+                title: 'Environment/History (Top Right)',
+                description: 'The <strong>Environment</strong> tab shows all the variables, data frames, and objects currently in memory. Click on a data frame to view it in a spreadsheet-like viewer. The <strong>History</strong> tab shows all commands you\'ve run in this session.'
+              },
+              '3': {
+                title: 'Console (Bottom Left)',
+                description: 'The Console is where R actually runs your code. When you run a line from the Source Editor, it appears here along with its output. You can also type commands directly into the Console for quick tests. The <code>&gt;</code> symbol is R waiting for your input.'
+              },
+              '4': {
+                title: 'Files/Plots/Packages/Help (Bottom Right)',
+                description: 'This multi-purpose panel has several tabs: <strong>Files</strong> — Browse your project files. <strong>Plots</strong> — Your visualizations appear here. <strong>Packages</strong> — Install and manage R packages. <strong>Help</strong> — Documentation for functions (type <code>?function_name</code> in Console).'
+              }
+            };
+
+            const defaultContent = '<p class="ide-info-default">Hover over a numbered region to learn about that part of RStudio.</p>';
+
+            regions.forEach(region => {
+              region.addEventListener('mouseenter', function() {
+                const regionId = this.getAttribute('data-region');
+                const info = regionInfo[regionId];
+                if (info) {
+                  infoPanel.innerHTML = `<h4>${info.title}</h4><p>${info.description}</p>`;
+                  regions.forEach(r => r.classList.remove('active'));
+                  this.classList.add('active');
+                }
+              });
+
+              region.addEventListener('mouseleave', function() {
+                // Keep the info visible but remove active state after a delay
+                setTimeout(() => {
+                  if (!document.querySelector('#rstudio-diagram .ide-region:hover')) {
+                    this.classList.remove('active');
+                  }
+                }, 100);
+              });
+            });
+
+            // Reset to default when leaving the entire diagram
+            document.getElementById('rstudio-diagram').addEventListener('mouseleave', function() {
+              setTimeout(() => {
+                if (!document.querySelector('#rstudio-diagram:hover')) {
+                  infoPanel.innerHTML = defaultContent;
+                  regions.forEach(r => r.classList.remove('active'));
+                }
+              }, 300);
+            });
+          })();
+        </script>
+
+        <h2>Essential Keyboard Shortcuts</h2>
+
+        <p>
+          Learning these shortcuts will dramatically speed up your workflow:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Shortcut (Windows/Linux)</th>
+              <th>Shortcut (Mac)</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Hold Ctrl and press Enter. This is the shortcut you'll use most often - it runs whatever line your cursor is on.">Ctrl + Enter</code></td>
+              <td><code class="code-tooltip" data-tip="On Mac, use Cmd (Command) instead of Ctrl. The key with the clover symbol.">Cmd + Enter</code></td>
+              <td>Run current line or selection</td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Hold Ctrl and Shift, then press Enter. Runs your entire script from top to bottom.">Ctrl + Shift + Enter</code></td>
+              <td><code class="code-tooltip" data-tip="Mac version: Command + Shift + Enter">Cmd + Shift + Enter</code></td>
+              <td>Run entire script</td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Clears all text from the Console window. Useful when output gets cluttered.">Ctrl + L</code></td>
+              <td><code class="code-tooltip" data-tip="Mac version of clear console">Cmd + L</code></td>
+              <td>Clear the Console</td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Start typing a function or variable name, then press Tab. RStudio will suggest completions. Press Tab again to accept.">Tab</code></td>
+              <td><code class="code-tooltip" data-tip="Works the same on Mac - Tab key triggers autocomplete">Tab</code></td>
+              <td>Autocomplete function/variable names</td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Comments are notes in your code that R ignores. This shortcut adds or removes the # symbol at the start of selected lines.">Ctrl + Shift + C</code></td>
+              <td><code class="code-tooltip" data-tip="Mac version for toggling comments">Cmd + Shift + C</code></td>
+              <td>Comment/uncomment selected lines</td>
+            </tr>
+            <tr>
+              <td><code class="code-tooltip" data-tip="Saves your script file. Get in the habit of saving frequently!">Ctrl + S</code></td>
+              <td><code class="code-tooltip" data-tip="Mac version of save">Cmd + S</code></td>
+              <td>Save current file</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Your First R Script</h2>
+
+        <p>
+          Let's write a simple script to make sure everything is working. In RStudio:
+        </p>
+
+        <ol>
+          <li>Go to <strong>File > New File > R Script</strong> (or press <code class="code-tooltip" data-tip="Hold Ctrl and Shift, then press N. Creates a new empty R script file where you can write code.">Ctrl+Shift+N</code>)</li>
+          <li>Type the following code in the Source Editor:</li>
+        </ol>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="r">
+<pre><code><span class="code-comment"># My first R script</span>
+<span class="code-comment"># This is a comment - R ignores lines starting with #</span>
+
+<span class="code-comment"># Print a message</span>
+<span class="code-function code-tooltip" data-tip="print() displays output in the Console. Whatever you put inside the parentheses will be shown.">print</span>(<span class="code-string">"Hello, RStudio!"</span>)
+
+<span class="code-comment"># Create some data</span>
+<span class="code-tooltip" data-tip="x is a variable name - you're creating a container to store data. You can name variables almost anything (no spaces or special characters).">x</span> <span class="code-tooltip" data-tip="The assignment operator in R. It means 'store the value on the right into the variable on the left'. You can also use = but <- is the R convention.">&lt;-</span> <span class="code-function code-tooltip" data-tip="c() means 'combine' or 'concatenate'. It groups multiple values together into a vector (a list of values).">c</span>(<span class="code-number">1</span>, <span class="code-number">2</span>, <span class="code-number">3</span>, <span class="code-number">4</span>, <span class="code-number">5</span>)
+<span class="code-tooltip" data-tip="Creating a new variable y by multiplying each value in x by 2. R automatically applies the operation to every element.">y <- x * 2</span>
+
+<span class="code-comment"># Calculate the mean</span>
+<span class="code-function code-tooltip" data-tip="mean() calculates the average of all values in the vector. Many statistical functions are built into R.">mean</span>(y)
+
+<span class="code-comment"># Create a simple plot</span>
+<span class="code-function code-tooltip" data-tip="plot() creates a basic scatter plot or line graph. The first argument is x-axis data, second is y-axis data.">plot</span>(<span class="code-tooltip" data-tip="The variable containing x-axis values">x</span>, <span class="code-tooltip" data-tip="The variable containing y-axis values">y</span>, <span class="code-tooltip" data-tip="main = sets the title that appears above your plot">main</span> = <span class="code-string">"My First Plot"</span>)</code></pre>
+          </div>
+        </div>
+
+        <ol start="3">
+          <li>Place your cursor on the first line and press <code class="code-tooltip" data-tip="This runs the current line and moves your cursor to the next line. Keep pressing to step through your code line by line.">Ctrl+Enter</code> repeatedly to run each line</li>
+          <li>Watch the output appear in the Console, and the plot appear in the Plots panel</li>
+        </ol>
+
+        <h2>Cloud Alternative: Posit Cloud</h2>
+
+        <p>
+          If you don't want to install anything, you can use <strong>Posit Cloud</strong> (formerly RStudio Cloud) in your browser. It's the same RStudio interface, running in the cloud.
+        </p>
+
+        <p>
+          <a href="https://posit.cloud/" target="_blank" style="display: inline-block; padding: 0.75rem 1.5rem; background: var(--color-r); color: white; border-radius: 6px; text-decoration: none; font-weight: 600;">Try Posit Cloud (Free) &rarr;</a>
+        </p>
+
+        <h2>Video Tutorial</h2>
+
+        <div class="info-box note">
+          <div class="info-box-title">Recommended: Official RStudio Tutorial</div>
+          <p>
+            For a visual walkthrough of the RStudio interface, I recommend this official video from Posit:
+          </p>
+          <ul>
+            <li><a href="https://www.youtube.com/watch?v=FIrsOBy5k58" target="_blank">RStudio IDE Tutorial</a> (YouTube, ~8 min) — A quick tour of the interface</li>
+            <li><a href="https://docs.posit.co/ide/user/" target="_blank">RStudio User Guide</a> — Official documentation</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="00-languages-platforms.html" class="nav-link prev">Module 0: Overview</a>
+          <a href="00b-stata-guide.html" class="nav-link next">Stata Interface Guide</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I can help you with questions about RStudio. What would you like to know?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+
+      const targetRect = target.getBoundingClientRect();
+      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
+      let containerRect = container ? container.getBoundingClientRect() : {
+        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
+      };
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10;
+
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8;
+      let arrowClass = 'arrow-bottom';
+
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      if (top + tooltipHeight > viewportHeight - padding) {
+        top = targetRect.top - tooltipHeight - 8;
+        arrowClass = 'arrow-bottom';
+      }
+
+      if (left < padding) left = padding;
+      if (left + tooltipWidth > viewportWidth - padding) left = viewportWidth - tooltipWidth - padding;
+
+      if (container) {
+        const minLeft = Math.max(padding, containerRect.left);
+        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
+        if (left < minLeft) left = minLeft;
+        if (left + tooltipWidth > maxRight) left = maxRight - tooltipWidth;
+      }
+
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) tooltipEl.classList.remove('visible');
+        currentTarget = null;
+      }, 100);
+    }
+
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target);
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip();
+    }, true);
+
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    }, true);
+
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    });
+  })();
+  </script>
+</body>
+</html>

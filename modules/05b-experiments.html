@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 5B: Coding for Experiments | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    /* Code tooltips */
+    .code-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #888;
+      text-decoration: none;
+    }
+    .tooltip-popup {
+      position: fixed;
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      max-width: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
+      line-height: 1.4;
+      text-align: left;
+      font-family: var(--font-body);
+      font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tooltip-popup.visible { opacity: 1; }
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after { top: 100%; left: 50%; transform: translateX(-50%); border-top-color: #1f2937; }
+    .tooltip-popup.arrow-top::after { bottom: 100%; left: 50%; transform: translateX(-50%); border-bottom-color: #1f2937; }
+    /* Subpage cards */
+    .subpage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    .subpage-card {
+      background: white;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .subpage-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .subpage-card h3 {
+      color: var(--color-primary);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+    .subpage-card p {
+      color: #666;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    .subpage-card .card-meta {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <!-- Password Protection Overlay -->
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav active">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li class="active"><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>5B &nbsp;Coding for Experiments</h1>
+          <div class="module-meta">
+            <span>~10 hours</span>
+            <span>Power, Surveys, Randomization</span>
+            <span>Intermediate-Advanced</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Calculate statistical power and determine required sample sizes</li>
+            <li>Program surveys and integrate with platforms like Qualtrics</li>
+            <li>Implement randomization with proper stratification</li>
+            <li>Distribute experiments via Prolific and other platforms</li>
+            <li>Verify randomization and check balance of covariates</li>
+          </ul>
+        </div>
+
+        <p>
+          Running experiments requires careful planning and precise implementation. This module covers the programming aspects of experimental research—from determining how many participants you need, to building your survey, randomizing treatments, and verifying that everything worked correctly.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">Essential Reference</div>
+          <p style="margin-bottom: 0;">
+            This module draws heavily on:<br>
+            <strong>Duflo, E., Glennerster, R., & Kremer, M.</strong> (2007). "Using Randomization in Development Economics Research: A Toolkit." <em>Handbook of Development Economics, Vol. 4</em>.<br>
+            Available at: <a href="https://www.povertyactionlab.org/sites/default/files/research-resources/Using%20Randomization%20in%20Development%20Economics.pdf" target="_blank">J-PAL Resources</a>
+          </p>
+        </div>
+
+        <h2>Module Overview</h2>
+
+        <p>
+          This module is organized into four subpages, each covering a critical aspect of experimental implementation:
+        </p>
+
+        <div class="subpage-grid">
+          <a href="05b1-power-analysis.html" class="subpage-card">
+            <h3>5B.1 Power Analysis</h3>
+            <p>How many participants do you need? Learn to calculate statistical power, determine minimum detectable effects, and plan sample sizes for simple and complex designs.</p>
+            <div class="card-meta">Formulas, simulation, Stata/R/Python tools</div>
+          </a>
+
+          <a href="05b2-survey-programming.html" class="subpage-card">
+            <h3>5B.2 Survey Programming</h3>
+            <p>Build surveys programmatically, integrate with Qualtrics, manage URL parameters for treatment assignment, and connect with panel platforms like Prolific.</p>
+            <div class="card-meta">Qualtrics, Prolific, URL parameters</div>
+          </a>
+
+          <a href="05b3-randomization.html" class="subpage-card">
+            <h3>5B.3 Randomization</h3>
+            <p>Implement proper randomization: simple random assignment, stratified randomization, block randomization, and cluster randomization. Verify integrity.</p>
+            <div class="card-meta">randtreat, randomizr, stratification</div>
+          </a>
+
+          <a href="05b4-balance-checks.html" class="subpage-card">
+            <h3>5B.4 Balance Checks</h3>
+            <p>Verify that randomization worked: create balance tables, test for systematic differences, and handle attrition. Publication-ready tables.</p>
+            <div class="card-meta">iebaltab, cobalt, attrition analysis</div>
+          </a>
+        </div>
+
+        <h2>The Experimental Pipeline</h2>
+
+        <p>
+          A well-executed experiment follows this workflow:
+        </p>
+
+        <ol>
+          <li>
+            <strong>Power Analysis (Pre-registration)</strong><br>
+            <em>Before data collection:</em> Determine how many participants you need to detect your effect of interest. Write a pre-analysis plan.
+          </li>
+          <li>
+            <strong>Survey/Instrument Design</strong><br>
+            <em>Before launch:</em> Program your survey, set up treatment arms, test thoroughly with pilot participants.
+          </li>
+          <li>
+            <strong>Randomization</strong><br>
+            <em>At recruitment:</em> Randomly assign participants to treatment and control groups, potentially stratifying on key variables.
+          </li>
+          <li>
+            <strong>Data Collection</strong><br>
+            <em>During experiment:</em> Monitor response rates, check for technical issues, manage panel recruitment.
+          </li>
+          <li>
+            <strong>Balance Verification</strong><br>
+            <em>After collection:</em> Confirm that randomization produced comparable groups before analyzing outcomes.
+          </li>
+          <li>
+            <strong>Analysis</strong><br>
+            <em>Final stage:</em> Estimate treatment effects following your pre-analysis plan. See <a href="06-causal-inference.html">Module 6</a>.
+          </li>
+        </ol>
+
+        <h2>Key Concepts Preview</h2>
+
+        <h3>Statistical Power</h3>
+
+        <p>
+          <strong>Power</strong> is the probability of detecting an effect when it truly exists. The standard target is 80% power at a 5% significance level. The minimum detectable effect (MDE) depends on:
+        </p>
+
+        <ul>
+          <li><strong>Sample size (N):</strong> More participants = smaller detectable effects</li>
+          <li><strong>Outcome variance (σ²):</strong> More noise = need more data</li>
+          <li><strong>Treatment allocation (P):</strong> 50-50 split is optimal for simple designs</li>
+          <li><strong>Significance level (α):</strong> Usually 0.05</li>
+        </ul>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Power Formula (Simple RCT)</div>
+          <p style="font-family: var(--font-code); margin-bottom: 0;">
+MDE = (t<sub>1-κ</sub> + t<sub>α/2</sub>) × √[ σ² / (P × (1-P) × N) ]
+
+Where:
+- t<sub>1-κ</sub> ≈ 0.84 for 80% power
+- t<sub>α/2</sub> ≈ 1.96 for 5% significance (two-sided)
+- P = proportion treated (often 0.5)
+- σ² = outcome variance
+- N = total sample size
+          </p>
+        </div>
+
+        <h3>Randomization Methods</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Description</th>
+              <th>Use When</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Simple</strong></td>
+              <td>Coin flip for each unit</td>
+              <td>Large samples, no important stratifying variables</td>
+            </tr>
+            <tr>
+              <td><strong>Stratified</strong></td>
+              <td>Randomize within subgroups</td>
+              <td>Want balance on key variables (gender, region)</td>
+            </tr>
+            <tr>
+              <td><strong>Block</strong></td>
+              <td>Fixed number per block</td>
+              <td>Want exact proportions in each stratum</td>
+            </tr>
+            <tr>
+              <td><strong>Cluster</strong></td>
+              <td>Randomize groups, not individuals</td>
+              <td>Treatment at group level (schools, villages)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Balance Tables</h3>
+
+        <p>
+          A balance table compares treatment and control groups on baseline characteristics. It typically shows:
+        </p>
+
+        <ul>
+          <li>Mean (or proportion) in each group</li>
+          <li>Difference between groups</li>
+          <li>P-value testing if difference is statistically significant</li>
+          <li>Standardized difference (effect size)</li>
+        </ul>
+
+        <p>
+          Good randomization should produce <em>no</em> systematic differences—p-values should be distributed uniformly, and you should not see more significant differences than expected by chance.
+        </p>
+
+        <div class="citation">
+          <div class="citation-title">Essential Tools</div>
+          <ul>
+            <li><strong>Stata:</strong> <code>randtreat</code> (randomization), <code>iebaltab</code> (balance tables)</li>
+            <li><strong>R:</strong> <code>randomizr</code> package, <code>cobalt</code> package</li>
+            <li><strong>Python:</strong> <code>randomization</code> module, custom implementations</li>
+            <li><strong>Survey platforms:</strong> Qualtrics, SurveyMonkey, Google Forms</li>
+            <li><strong>Panels:</strong> Prolific, MTurk, CloudResearch</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="05a-data-simulation.html" class="nav-link prev">Module 5A: Data Simulation</a>
+          <a href="05b1-power-analysis.html" class="nav-link next">5B.1: Power Analysis</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I'm the ProTools ER1 course assistant. I can help you with questions about experimental design, power analysis, survey programming, or any of the course material. How can I assist you today?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question about the course..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+
+      const targetRect = target.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10;
+
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8;
+      let arrowClass = 'arrow-bottom';
+
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      if (left < padding) left = padding;
+      if (left + tooltipWidth > viewportWidth - padding) left = viewportWidth - tooltipWidth - padding;
+
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) tooltipEl.classList.remove('visible');
+        currentTarget = null;
+      }, 100);
+    }
+
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target);
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip();
+    }, true);
+  })();
+  </script>
+</body>
+</html>

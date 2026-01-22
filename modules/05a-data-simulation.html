@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 5A: Data Simulation | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
+    .code-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #888;
+      text-decoration: none;
+    }
+
+    /* Tooltip element created by JavaScript */
+    .tooltip-popup {
+      position: fixed;
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      max-width: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
+      line-height: 1.4;
+      text-align: left;
+      font-family: var(--font-body);
+      font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tooltip-popup.visible {
+      opacity: 1;
+    }
+
+    /* Small arrow pointer */
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1f2937;
+    }
+    .tooltip-popup.arrow-top::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #1f2937;
+    }
+    .tooltip-popup.arrow-left::after {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1f2937;
+    }
+    .tooltip-popup.arrow-right::after {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      border-left-color: #1f2937;
+    }
+  </style>
+</head>
+<body>
+  <!-- Password Protection Overlay -->
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav active">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li class="active"><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>5A &nbsp;Data Simulation</h1>
+          <div class="module-meta">
+            <span>~4 hours</span>
+            <span>Synthetic Data, Privacy, Pre-Analysis</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Generate synthetic data that preserves the statistical properties of real datasets</li>
+            <li>Use simulated data safely with LLMs while protecting privacy</li>
+            <li>Develop and test cleaning code before survey/experiment data arrives</li>
+            <li>Conduct power analyses through simulation</li>
+            <li>Understand privacy-preserving data generation methods</li>
+          </ul>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#why-simulate">5A.1 Why Simulate Data?</a></li>
+            <li><a href="#basic-simulation">5A.2 Basic Data Simulation</a></li>
+            <li><a href="#structure-preserving">5A.3 Structure-Preserving Synthetic Data</a></li>
+            <li><a href="#llm-safe">5A.4 LLM-Safe Data for AI Assistance</a></li>
+            <li><a href="#pre-analysis">5A.5 Pre-Analysis Code Development</a></li>
+            <li><a href="#power-analysis">5A.6 Power Analysis Through Simulation</a></li>
+          </ul>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5A.1: WHY SIMULATE DATA?             -->
+        <!-- ============================================ -->
+        <h2 id="why-simulate">5A.1 Why Simulate Data?</h2>
+
+        <p>
+          Data simulation is the process of generating fake data that resembles real data. While this might seem counterintuitive for empirical research, simulated data serves several critical purposes:
+        </p>
+
+        <ul>
+          <li><strong>Privacy protection:</strong> Share data structure with LLMs or collaborators without exposing sensitive information</li>
+          <li><strong>Code development:</strong> Write and test cleaning/analysis code before real data arrives</li>
+          <li><strong>Power analysis:</strong> Determine required sample sizes through Monte Carlo simulation</li>
+          <li><strong>Method validation:</strong> Test whether your estimation strategy recovers known treatment effects</li>
+          <li><strong>Teaching and documentation:</strong> Create reproducible examples without restricted data</li>
+        </ul>
+
+        <div class="info-box note">
+          <div class="info-box-title">When to Use Simulated vs. Real Data</div>
+          <p style="margin-bottom: 0;">
+            <strong>Use simulated data for:</strong> Code development, debugging, documentation, sharing with AI assistants, power calculations, teaching.<br>
+            <strong>Use real data for:</strong> Actual analysis, publication, drawing conclusions about the world.
+          </p>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5A.2: BASIC DATA SIMULATION          -->
+        <!-- ============================================ -->
+        <h2 id="basic-simulation">5A.2 Basic Data Simulation</h2>
+
+        <p>
+          The simplest approach generates random data from known distributions, specifying the parameters you want.
+        </p>
+
+        <h3>Generating Random Variables</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Basic data simulation</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Set seed for reproducibility</span>
+<span class="code-tooltip" data-tip="Setting a seed ensures you get the same 'random' numbers every time. Critical for reproducible research.">np.random.seed(42)</span>
+
+n = 1000  <span class="code-comment"># Sample size</span>
+
+<span class="code-comment"># Continuous variables</span>
+<span class="code-tooltip" data-tip="Generates 1000 values from a normal distribution with mean=50000, standard deviation=15000">income = np.random.normal(loc=50000, scale=15000, size=n)</span>
+<span class="code-tooltip" data-tip="Uniform distribution between 18 and 65. astype(int) converts to integers.">age = np.random.uniform(low=18, high=65, size=n).astype(int)</span>
+
+<span class="code-comment"># Categorical variables</span>
+<span class="code-tooltip" data-tip="Randomly chooses from the list with specified probabilities. p must sum to 1.">education = np.random.choice(
+    [<span class="code-string">'High School'</span>, <span class="code-string">'Bachelors'</span>, <span class="code-string">'Masters'</span>, <span class="code-string">'PhD'</span>],
+    size=n,
+    p=[0.4, 0.35, 0.2, 0.05]
+)</span>
+
+<span class="code-comment"># Binary variables</span>
+<span class="code-tooltip" data-tip="Bernoulli distribution: 1 with probability 0.3, 0 with probability 0.7">treatment = np.random.binomial(n=1, p=0.3, size=n)</span>
+
+<span class="code-comment"># Combine into DataFrame</span>
+df = pd.DataFrame({
+    <span class="code-string">'id'</span>: range(1, n+1),
+    <span class="code-string">'age'</span>: age,
+    <span class="code-string">'income'</span>: income,
+    <span class="code-string">'education'</span>: education,
+    <span class="code-string">'treatment'</span>: treatment
+})</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Basic data simulation</span>
+
+<span class="code-comment">* Set seed for reproducibility</span>
+<span class="code-tooltip" data-tip="set seed ensures you get the same random numbers every run. Use any integer.">set seed 42</span>
+
+<span class="code-comment">* Set number of observations</span>
+<span class="code-tooltip" data-tip="Creates an empty dataset with 1000 observations">clear
+set obs 1000</span>
+
+<span class="code-comment">* Generate ID</span>
+gen id = _n
+
+<span class="code-comment">* Continuous variables</span>
+<span class="code-tooltip" data-tip="rnormal(mean, sd) generates from normal distribution. Here: mean=50000, sd=15000">gen income = rnormal(50000, 15000)</span>
+<span class="code-tooltip" data-tip="runiform(a,b) generates uniform random numbers between a and b. int() truncates to integer">gen age = int(runiform(18, 65))</span>
+
+<span class="code-comment">* Categorical variables (using runiform for custom probabilities)</span>
+gen edu_rand = runiform()
+<span class="code-tooltip" data-tip="Creates categories based on cumulative probabilities. 40% HS, 35% BA, 20% MA, 5% PhD">gen education = cond(edu_rand < 0.4, 1, ///
+                cond(edu_rand < 0.75, 2, ///
+                cond(edu_rand < 0.95, 3, 4)))</span>
+label define edu_lbl 1 "High School" 2 "Bachelors" 3 "Masters" 4 "PhD"
+label values education edu_lbl
+
+<span class="code-comment">* Binary treatment (30% treated)</span>
+<span class="code-tooltip" data-tip="rbinomial(n, p) generates from binomial. With n=1, it's a Bernoulli trial">gen treatment = rbinomial(1, 0.3)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Basic data simulation</span>
+
+<span class="code-comment"># Set seed for reproducibility</span>
+<span class="code-tooltip" data-tip="set.seed() ensures reproducible random numbers. Use any integer.">set.seed(42)</span>
+
+n <- 1000  <span class="code-comment"># Sample size</span>
+
+<span class="code-comment"># Continuous variables</span>
+<span class="code-tooltip" data-tip="rnorm(n, mean, sd) generates n values from normal distribution">income <- rnorm(n, mean = 50000, sd = 15000)</span>
+<span class="code-tooltip" data-tip="runif(n, min, max) generates uniform random numbers. floor() rounds down to integer">age <- floor(runif(n, min = 18, max = 65))</span>
+
+<span class="code-comment"># Categorical variables</span>
+<span class="code-tooltip" data-tip="sample() draws from a vector with replacement. prob specifies selection probabilities.">education <- sample(
+  c(<span class="code-string">"High School"</span>, <span class="code-string">"Bachelors"</span>, <span class="code-string">"Masters"</span>, <span class="code-string">"PhD"</span>),
+  size = n,
+  replace = TRUE,
+  prob = c(0.4, 0.35, 0.2, 0.05)
+)</span>
+
+<span class="code-comment"># Binary treatment</span>
+<span class="code-tooltip" data-tip="rbinom(n, size, prob) generates binomial. With size=1, it's Bernoulli (0 or 1)">treatment <- rbinom(n, size = 1, prob = 0.3)</span>
+
+<span class="code-comment"># Combine into data frame</span>
+df <- data.frame(
+  id = 1:n,
+  age = age,
+  income = income,
+  education = education,
+  treatment = treatment
+)</code></pre>
+          </div>
+        </div>
+
+        <h3>Simulating Correlated Variables</h3>
+
+        <p>
+          Real data has correlations between variables. To simulate realistic data, you need to generate variables that are related to each other.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Simulating correlated variables</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+np.random.seed(42)
+n = 1000
+
+<span class="code-comment"># Method 1: Build relationships directly</span>
+education_years = np.random.normal(14, 3, n)  <span class="code-comment"># Mean 14 years, SD 3</span>
+<span class="code-tooltip" data-tip="Income depends on education. Each year of education adds ~$3000 + random noise">income = 20000 + 3000 * education_years + np.random.normal(0, 10000, n)</span>
+
+<span class="code-comment"># Method 2: Multivariate normal for correlated draws</span>
+<span class="code-tooltip" data-tip="Define the correlation matrix: diagonal is 1, off-diagonal is the correlation between variables">cov_matrix = [[1, 0.6, 0.4],      <span class="code-comment"># education</span>
+              [0.6, 1, 0.5],      <span class="code-comment"># income</span>
+              [0.4, 0.5, 1]]      <span class="code-comment"># age</span></span>
+
+<span class="code-tooltip" data-tip="multivariate_normal draws from joint distribution with specified correlations">data = np.random.multivariate_normal(
+    mean=[14, 50000, 40],  <span class="code-comment"># Means</span>
+    cov=cov_matrix,
+    size=n
+)</span>
+
+df = pd.DataFrame(data, columns=[<span class="code-string">'education'</span>, <span class="code-string">'income'</span>, <span class="code-string">'age'</span>])
+<span class="code-function">print</span>(df.corr())  <span class="code-comment"># Verify correlations</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Simulating correlated variables</span>
+clear
+set seed 42
+set obs 1000
+
+<span class="code-comment">* Method 1: Build relationships directly</span>
+gen education_years = rnormal(14, 3)
+<span class="code-tooltip" data-tip="Income is a function of education plus random error. Creates positive correlation.">gen income = 20000 + 3000 * education_years + rnormal(0, 10000)</span>
+
+<span class="code-comment">* Method 2: Using drawnorm for multivariate normal</span>
+<span class="code-tooltip" data-tip="matrix define creates a correlation matrix. drawnorm generates correlated draws.">matrix C = (1, 0.6, 0.4 \ 0.6, 1, 0.5 \ 0.4, 0.5, 1)</span>
+drawnorm edu inc age, corr(C) means(14, 50000, 40) sds(3, 15000, 10)
+
+<span class="code-comment">* Verify correlations</span>
+correlate edu inc age</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Simulating correlated variables</span>
+<span class="code-keyword">library</span>(MASS)  <span class="code-comment"># For mvrnorm</span>
+
+set.seed(42)
+n <- 1000
+
+<span class="code-comment"># Method 1: Build relationships directly</span>
+education_years <- rnorm(n, mean = 14, sd = 3)
+<span class="code-tooltip" data-tip="Income depends on education. Each year adds ~$3000 + random noise">income <- 20000 + 3000 * education_years + rnorm(n, 0, 10000)</span>
+
+<span class="code-comment"># Method 2: Multivariate normal for correlated draws</span>
+<span class="code-tooltip" data-tip="Define the covariance matrix. Convert from correlation if needed.">cov_matrix <- matrix(c(
+  9,      2700,    12,      <span class="code-comment"># education variance=9, cov with income=2700</span>
+  2700,   225000000, 7500,  <span class="code-comment"># income variance, cov with age</span>
+  12,     7500,    100      <span class="code-comment"># age variance=100</span>
+), nrow = 3)</span>
+
+<span class="code-tooltip" data-tip="mvrnorm generates multivariate normal with specified means and covariance">data <- mvrnorm(n, mu = c(14, 50000, 40), Sigma = cov_matrix)</span>
+
+df <- data.frame(
+  education = data[, 1],
+  income = data[, 2],
+  age = data[, 3]
+)
+<span class="code-function">print</span>(cor(df))  <span class="code-comment"># Verify correlations</span></code></pre>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5A.3: STRUCTURE-PRESERVING SYNTHETIC DATA -->
+        <!-- ============================================ -->
+        <h2 id="structure-preserving">5A.3 Structure-Preserving Synthetic Data</h2>
+
+        <p>
+          When you have existing data and want to create a synthetic version that preserves its statistical properties, you can use specialized libraries that learn the data structure and generate realistic synthetic samples.
+        </p>
+
+        <h3>Using Synthpop (R)</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button active" data-lang="r">R</button>
+          </div>
+          <div class="tab-content" data-lang="python">
+<pre><code><span class="code-comment"># Python: Synthetic data with SDV (Synthetic Data Vault)</span>
+<span class="code-comment"># pip install sdv</span>
+<span class="code-keyword">from</span> sdv.single_table <span class="code-keyword">import</span> GaussianCopulaSynthesizer
+<span class="code-keyword">from</span> sdv.metadata <span class="code-keyword">import</span> SingleTableMetadata
+
+<span class="code-comment"># Create metadata from your real data</span>
+<span class="code-tooltip" data-tip="Metadata describes your data structure - column types, relationships, constraints">metadata = SingleTableMetadata()</span>
+metadata.detect_from_dataframe(real_df)
+
+<span class="code-comment"># Fit the synthesizer</span>
+<span class="code-tooltip" data-tip="GaussianCopula learns the joint distribution of your data, preserving correlations">synthesizer = GaussianCopulaSynthesizer(metadata)</span>
+synthesizer.fit(real_df)
+
+<span class="code-comment"># Generate synthetic data</span>
+<span class="code-tooltip" data-tip="Creates new synthetic rows with same statistical properties as original">synthetic_df = synthesizer.sample(num_rows=1000)</span>
+
+<span class="code-comment"># Compare distributions</span>
+<span class="code-function">print</span>(<span class="code-string">"Real data:"</span>)
+<span class="code-function">print</span>(real_df.describe())
+<span class="code-function">print</span>(<span class="code-string">"\nSynthetic data:"</span>)
+<span class="code-function">print</span>(synthetic_df.describe())</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: No native synthpop equivalent</span>
+<span class="code-comment">* Best approach: Use R via rcall or export to R</span>
+
+<span class="code-comment">* Alternative: Manual parametric bootstrap</span>
+<span class="code-comment">* 1. Estimate distributions from real data</span>
+summarize income, detail
+<span class="code-tooltip" data-tip="Store the statistics in local macros for generating synthetic data">local mean_inc = r(mean)</span>
+local sd_inc = r(sd)
+
+<span class="code-comment">* 2. Generate synthetic data with same parameters</span>
+clear
+set obs 1000
+gen income_synth = rnormal(`mean_inc', `sd_inc')
+
+<span class="code-comment">* For categorical: use observed proportions</span>
+tab education
+<span class="code-comment">* Then use those proportions in random generation</span></code></pre>
+          </div>
+          <div class="tab-content active" data-lang="r">
+<pre><code><span class="code-comment"># R: Synthetic data with synthpop</span>
+<span class="code-comment"># install.packages("synthpop")</span>
+<span class="code-keyword">library</span>(synthpop)
+
+<span class="code-comment"># Load your real data</span>
+real_df <- read.csv(<span class="code-string">"sensitive_data.csv"</span>)
+
+<span class="code-comment"># Generate synthetic data</span>
+<span class="code-tooltip" data-tip="syn() learns the structure of your data and generates synthetic records. It preserves relationships between variables.">synth_obj <- syn(real_df, seed = 42)</span>
+
+<span class="code-comment"># Extract the synthetic dataset</span>
+<span class="code-tooltip" data-tip="The synthetic data is stored in $syn. Each row is fake but the overall patterns match the real data.">synthetic_df <- synth_obj$syn</span>
+
+<span class="code-comment"># Compare real vs synthetic</span>
+<span class="code-tooltip" data-tip="compare() creates visual comparisons of distributions between real and synthetic data">compare(synth_obj, real_df)</span>
+
+<span class="code-comment"># Check utility - how well does synthetic preserve analysis results?</span>
+<span class="code-tooltip" data-tip="utility.gen() runs the same analysis on both datasets and compares results">utility.gen(synth_obj, real_df,
+            method = <span class="code-string">"logit"</span>,
+            formula = income ~ education + age)</span>
+
+<span class="code-comment"># Save synthetic data</span>
+write.csv(synthetic_df, <span class="code-string">"synthetic_data.csv"</span>, row.names = FALSE)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Choosing a Method</div>
+          <p style="margin-bottom: 0;">
+            <strong>synthpop (R):</strong> Best for survey-style data, preserves multivariate relationships, produces "safe" data.<br>
+            <strong>SDV/CTGAN (Python):</strong> Uses deep learning, good for complex patterns, more flexible but requires more data.<br>
+            <strong>Manual simulation:</strong> Full control, best when you know the data generating process.
+          </p>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5A.4: LLM-SAFE DATA                  -->
+        <!-- ============================================ -->
+        <h2 id="llm-safe">5A.4 LLM-Safe Data for AI Assistance</h2>
+
+        <p>
+          Large Language Models (LLMs) like Claude, ChatGPT, and Copilot are powerful coding assistants. However, sharing real research data with these tools raises serious privacy and ethical concerns. Synthetic data solves this problem.
+        </p>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Never Share Sensitive Data with LLMs</div>
+          <p style="margin-bottom: 0;">
+            Real data containing personal information, proprietary data, or restricted-access datasets should <strong>never</strong> be pasted into LLM interfaces. Even "anonymized" data can be risky. Always use synthetic data when seeking AI assistance with your code.
+          </p>
+        </div>
+
+        <h3>Creating LLM-Safe Sample Data</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Create LLM-safe sample data from real data structure</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> faker <span class="code-keyword">import</span> Faker
+
+<span class="code-tooltip" data-tip="Faker generates realistic fake data - names, addresses, etc. that look real but aren't.">fake = Faker()</span>
+Faker.seed(42)
+np.random.seed(42)
+
+<span class="code-keyword">def</span> <span class="code-function">create_llm_safe_sample</span>(real_df, n_samples=50):
+    <span class="code-string">"""
+    Create a small, privacy-safe sample that preserves
+    the structure of real data for sharing with LLMs.
+    """</span>
+    sample = pd.DataFrame()
+
+    <span class="code-keyword">for</span> col <span class="code-keyword">in</span> real_df.columns:
+        dtype = real_df[col].dtype
+
+        <span class="code-keyword">if</span> dtype == <span class="code-string">'object'</span>:  <span class="code-comment"># Categorical/string</span>
+            <span class="code-comment"># Use observed categories but shuffle</span>
+            categories = real_df[col].dropna().unique()
+            sample[col] = np.random.choice(categories, n_samples)
+
+        <span class="code-keyword">elif</span> np.issubdtype(dtype, np.number):  <span class="code-comment"># Numeric</span>
+            <span class="code-comment"># Generate from normal with same mean/std</span>
+            mean, std = real_df[col].mean(), real_df[col].std()
+            sample[col] = np.random.normal(mean, std, n_samples)
+            <span class="code-comment"># Round integers</span>
+            <span class="code-keyword">if</span> np.issubdtype(dtype, np.integer):
+                sample[col] = sample[col].round().astype(int)
+
+    <span class="code-keyword">return</span> sample
+
+<span class="code-comment"># Create safe sample</span>
+safe_sample = create_llm_safe_sample(real_df, n_samples=50)
+
+<span class="code-comment"># Print in a format you can paste to LLM</span>
+<span class="code-function">print</span>(safe_sample.head(10).to_markdown())</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Create LLM-safe sample</span>
+<span class="code-comment">* Save the structure of your real data, then generate fake version</span>
+
+<span class="code-comment">* Step 1: Examine your real data structure</span>
+describe
+summarize
+
+<span class="code-comment">* Step 2: Create fake data with same structure</span>
+clear
+set seed 42
+set obs 50
+
+<span class="code-comment">* Generate fake versions of each variable</span>
+<span class="code-tooltip" data-tip="Replace with your actual variable names and appropriate distributions">gen id = _n</span>
+gen age = int(rnormal(45, 10))
+gen income = rnormal(55000, 20000)
+gen education = int(runiform(1, 5))
+gen treatment = rbinomial(1, 0.4)
+
+<span class="code-comment">* Add labels to match your real data</span>
+label define edu_lbl 1 "HS" 2 "Some College" 3 "BA" 4 "MA" 5 "PhD"
+label values education edu_lbl
+
+<span class="code-comment">* Export for sharing with LLM</span>
+list in 1/10
+<span class="code-comment">* Or: export delimited "llm_safe_sample.csv", replace</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Create LLM-safe sample</span>
+
+create_llm_safe_sample <- <span class="code-keyword">function</span>(real_df, n_samples = 50) {
+  set.seed(42)
+  sample_df <- data.frame(row.names = 1:n_samples)
+
+  <span class="code-keyword">for</span> (col <span class="code-keyword">in</span> names(real_df)) {
+    <span class="code-keyword">if</span> (is.factor(real_df[[col]]) || is.character(real_df[[col]])) {
+      <span class="code-comment"># Categorical: sample from observed levels</span>
+      levels <- unique(na.omit(real_df[[col]]))
+      sample_df[[col]] <- sample(levels, n_samples, replace = TRUE)
+
+    } <span class="code-keyword">else if</span> (is.numeric(real_df[[col]])) {
+      <span class="code-comment"># Numeric: generate from normal with same parameters</span>
+      m <- mean(real_df[[col]], na.rm = TRUE)
+      s <- sd(real_df[[col]], na.rm = TRUE)
+      sample_df[[col]] <- rnorm(n_samples, m, s)
+
+      <span class="code-comment"># Round integers</span>
+      <span class="code-keyword">if</span> (all(real_df[[col]] == floor(real_df[[col]]), na.rm = TRUE)) {
+        sample_df[[col]] <- round(sample_df[[col]])
+      }
+    }
+  }
+  <span class="code-keyword">return</span>(sample_df)
+}
+
+<span class="code-comment"># Create safe sample</span>
+safe_sample <- create_llm_safe_sample(real_df, n_samples = 50)
+
+<span class="code-comment"># Print in markdown format for LLM</span>
+<span class="code-keyword">library</span>(knitr)
+<span class="code-function">print</span>(kable(head(safe_sample, 10), format = <span class="code-string">"markdown"</span>))</code></pre>
+          </div>
+        </div>
+
+        <h3>What to Include When Asking LLMs for Help</h3>
+
+        <p>When sharing data with an LLM, include:</p>
+
+        <ol>
+          <li><strong>Small sample</strong> (10-50 rows of synthetic data)</li>
+          <li><strong>Variable types</strong> (numeric, categorical, date)</li>
+          <li><strong>Variable descriptions</strong> (what each column represents)</li>
+          <li><strong>Your goal</strong> (what you're trying to accomplish)</li>
+          <li><strong>Error messages</strong> (if debugging)</li>
+        </ol>
+
+        <div class="info-box note">
+          <div class="info-box-title">Example LLM Prompt</div>
+          <p style="font-family: var(--font-code); font-size: 0.85rem; white-space: pre-wrap; margin-bottom: 0;">
+I have a dataset with the following structure (synthetic sample):
+
+| id | age | income | education | treatment |
+|----|-----|--------|-----------|-----------|
+| 1  | 34  | 45000  | Bachelors | 1         |
+| 2  | 52  | 62000  | Masters   | 0         |
+| 3  | 28  | 38000  | HS        | 1         |
+
+Variables:
+- id: unique identifier
+- age: respondent age (integer, 18-65)
+- income: annual income in USD (continuous)
+- education: highest degree (categorical)
+- treatment: received intervention (binary 0/1)
+
+Goal: I want to create a difference-in-differences analysis comparing income changes for treated vs untreated before/after the intervention. How do I set this up in Python/statsmodels?</p>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5A.5: PRE-ANALYSIS CODE DEVELOPMENT  -->
+        <!-- ============================================ -->
+        <h2 id="pre-analysis">5A.5 Pre-Analysis Code Development</h2>
+
+        <p>
+          One of the most valuable uses of simulated data is developing your analysis code <em>before</em> the real data arrives. This is especially important for experiments and surveys where you're waiting for data collection to complete.
+        </p>
+
+        <h3>The Pre-Analysis Workflow</h3>
+
+        <ol>
+          <li><strong>Design your analysis:</strong> Specify what you'll measure and how</li>
+          <li><strong>Simulate expected data:</strong> Create fake data matching your survey/experiment design</li>
+          <li><strong>Write cleaning code:</strong> Handle the issues you expect (missing values, outliers)</li>
+          <li><strong>Write analysis code:</strong> Implement your full analysis pipeline</li>
+          <li><strong>Test everything:</strong> Verify code runs without errors</li>
+          <li><strong>Swap in real data:</strong> When it arrives, just change the file path</li>
+        </ol>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Simulate survey data for code development</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+np.random.seed(42)
+
+<span class="code-keyword">def</span> <span class="code-function">simulate_survey_data</span>(n=500, response_rate=0.7):
+    <span class="code-string">"""
+    Simulate survey data matching expected structure.
+    Include realistic problems: missing data, outliers, etc.
+    """</span>
+
+    <span class="code-comment"># Generate complete data</span>
+    df = pd.DataFrame({
+        <span class="code-string">'respondent_id'</span>: range(1, n+1),
+        <span class="code-string">'age'</span>: np.random.normal(35, 12, n).astype(int),
+        <span class="code-string">'income'</span>: np.random.lognormal(10.5, 0.8, n),
+        <span class="code-string">'treatment'</span>: np.random.binomial(1, 0.5, n),
+        <span class="code-string">'satisfaction'</span>: np.random.randint(1, 8, n),  <span class="code-comment"># 1-7 scale</span>
+    })
+
+    <span class="code-comment"># Add realistic problems</span>
+    <span class="code-comment"># 1. Missing values (random)</span>
+    <span class="code-tooltip" data-tip="Simulate realistic missingness - income often has more missing values">missing_mask = np.random.random(n) > response_rate</span>
+    df.loc[missing_mask, <span class="code-string">'income'</span>] = np.nan
+
+    <span class="code-comment"># 2. Some outliers in income</span>
+    outlier_idx = np.random.choice(n, size=5, replace=False)
+    df.loc[outlier_idx, <span class="code-string">'income'</span>] *= 10  <span class="code-comment"># Some very high values</span>
+
+    <span class="code-comment"># 3. Data entry errors</span>
+    df.loc[10, <span class="code-string">'age'</span>] = 999  <span class="code-comment"># Obvious error</span>
+    df.loc[25, <span class="code-string">'satisfaction'</span>] = 9  <span class="code-comment"># Out of range</span>
+
+    <span class="code-keyword">return</span> df
+
+<span class="code-comment"># Generate simulated data</span>
+sim_df = simulate_survey_data(n=500)
+
+<span class="code-comment"># Now write your cleaning and analysis code...</span>
+<span class="code-comment"># When real data arrives, just replace the data source</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Simulate survey data for code development</span>
+
+<span class="code-comment">* ============================================</span>
+<span class="code-comment">* simulate_survey.do - Generate test data</span>
+<span class="code-comment">* ============================================</span>
+
+clear
+set seed 42
+set obs 500
+
+<span class="code-comment">* Generate base variables</span>
+gen respondent_id = _n
+gen age = int(rnormal(35, 12))
+gen income = exp(rnormal(10.5, 0.8))
+gen treatment = rbinomial(1, 0.5)
+gen satisfaction = int(runiform(1, 8))
+
+<span class="code-comment">* Add realistic problems</span>
+<span class="code-comment">* 1. Missing values</span>
+<span class="code-tooltip" data-tip="Replace ~30% of income values with missing">replace income = . if runiform() > 0.7</span>
+
+<span class="code-comment">* 2. Outliers</span>
+replace income = income * 10 in 1/5
+
+<span class="code-comment">* 3. Data entry errors</span>
+replace age = 999 in 10
+replace satisfaction = 9 in 25
+
+<span class="code-comment">* Save simulated data</span>
+save "data/temp/simulated_survey.dta", replace
+
+<span class="code-comment">* ============================================</span>
+<span class="code-comment">* Later: Your analysis code uses either:</span>
+<span class="code-comment">* use "data/temp/simulated_survey.dta"  (testing)</span>
+<span class="code-comment">* use "data/raw/real_survey.dta"        (production)</span>
+<span class="code-comment">* ============================================</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Simulate survey data for code development</span>
+
+simulate_survey_data <- <span class="code-keyword">function</span>(n = 500, response_rate = 0.7) {
+  set.seed(42)
+
+  df <- data.frame(
+    respondent_id = 1:n,
+    age = as.integer(rnorm(n, 35, 12)),
+    income = exp(rnorm(n, 10.5, 0.8)),
+    treatment = rbinom(n, 1, 0.5),
+    satisfaction = sample(1:7, n, replace = TRUE)
+  )
+
+  <span class="code-comment"># Add realistic problems</span>
+  <span class="code-comment"># 1. Missing values</span>
+  <span class="code-tooltip" data-tip="Set ~30% of income values to NA">missing_mask <- runif(n) > response_rate</span>
+  df$income[missing_mask] <- NA
+
+  <span class="code-comment"># 2. Outliers</span>
+  outlier_idx <- sample(n, 5)
+  df$income[outlier_idx] <- df$income[outlier_idx] * 10
+
+  <span class="code-comment"># 3. Data entry errors</span>
+  df$age[10] <- 999
+  df$satisfaction[25] <- 9
+
+  <span class="code-keyword">return</span>(df)
+}
+
+<span class="code-comment"># Generate simulated data</span>
+sim_df <- simulate_survey_data(n = 500)
+
+<span class="code-comment"># Write cleaning and analysis code here...</span>
+<span class="code-comment"># When real data arrives, change: read.csv("path/to/real_data.csv")</span></code></pre>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5A.6: POWER ANALYSIS THROUGH SIMULATION -->
+        <!-- ============================================ -->
+        <h2 id="power-analysis">5A.6 Power Analysis Through Simulation</h2>
+
+        <p>
+          Statistical power is the probability of detecting an effect when it truly exists. Simulation-based power analysis lets you determine sample size requirements by repeatedly generating data, running your analysis, and checking how often you detect the effect.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">Connection to Experiments Module</div>
+          <p style="margin-bottom: 0;">
+            For comprehensive coverage of power analysis in experimental design, including analytical formulas and design considerations, see <a href="05b-experiments.html">Module 5B: Coding for Experiments</a>.
+          </p>
+        </div>
+
+        <h3>Simulation-Based Power Analysis</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Power analysis through simulation</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+<span class="code-keyword">from</span> tqdm <span class="code-keyword">import</span> tqdm
+
+<span class="code-keyword">def</span> <span class="code-function">simulate_experiment</span>(n, true_effect, noise_sd):
+    <span class="code-string">"""Simulate one experiment and return p-value."""</span>
+    treatment = np.random.binomial(1, 0.5, n)
+    outcome = 10 + true_effect * treatment + np.random.normal(0, noise_sd, n)
+
+    df = pd.DataFrame({<span class="code-string">'treatment'</span>: treatment, <span class="code-string">'outcome'</span>: outcome})
+    model = smf.ols(<span class="code-string">'outcome ~ treatment'</span>, data=df).fit()
+
+    <span class="code-keyword">return</span> model.pvalues[<span class="code-string">'treatment'</span>]
+
+<span class="code-keyword">def</span> <span class="code-function">power_analysis</span>(n, true_effect, noise_sd, n_sims=1000, alpha=0.05):
+    <span class="code-string">"""Calculate power through simulation."""</span>
+    <span class="code-tooltip" data-tip="Run many simulated experiments and count how often we correctly reject the null">significant_count = sum(
+        simulate_experiment(n, true_effect, noise_sd) < alpha
+        <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> tqdm(range(n_sims))
+    )</span>
+    <span class="code-keyword">return</span> significant_count / n_sims
+
+<span class="code-comment"># Find required sample size for 80% power</span>
+sample_sizes = [50, 100, 200, 400, 800]
+true_effect = 2.0  <span class="code-comment"># Effect size we want to detect</span>
+noise_sd = 10      <span class="code-comment"># Standard deviation of outcome</span>
+
+<span class="code-function">print</span>(<span class="code-string">"Sample Size | Power"</span>)
+<span class="code-function">print</span>(<span class="code-string">"-" * 20</span>)
+<span class="code-keyword">for</span> n <span class="code-keyword">in</span> sample_sizes:
+    power = power_analysis(n, true_effect, noise_sd, n_sims=500)
+    <span class="code-function">print</span>(<span class="code-string">f"{n:11} | {power:.2%}"</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Power analysis through simulation</span>
+
+<span class="code-comment">* Define simulation program</span>
+capture program drop power_sim
+program define power_sim, rclass
+    args n true_effect noise_sd
+
+    <span class="code-comment">* Generate data</span>
+    clear
+    quietly set obs `n'
+    gen treatment = rbinomial(1, 0.5)
+    gen outcome = 10 + `true_effect' * treatment + rnormal(0, `noise_sd')
+
+    <span class="code-comment">* Run regression</span>
+    quietly reg outcome treatment
+
+    <span class="code-comment">* Return p-value</span>
+    <span class="code-tooltip" data-tip="Store the p-value for treatment coefficient">return scalar pval = 2*ttail(e(df_r), abs(_b[treatment]/_se[treatment]))</span>
+end
+
+<span class="code-comment">* Run power simulation</span>
+local true_effect = 2.0
+local noise_sd = 10
+local n_sims = 500
+local alpha = 0.05
+
+<span class="code-keyword">foreach</span> n <span class="code-keyword">in</span> 50 100 200 400 800 {
+    <span class="code-tooltip" data-tip="simulate runs the program many times and collects results">simulate pval=r(pval), reps(`n_sims') seed(42): power_sim `n' `true_effect' `noise_sd'</span>
+    quietly count if pval < `alpha'
+    local power = r(N) / `n_sims'
+    display "N = `n': Power = " %5.1f `power'*100 "%"
+}</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Power analysis through simulation</span>
+
+simulate_experiment <- <span class="code-keyword">function</span>(n, true_effect, noise_sd) {
+  <span class="code-comment"># Generate data</span>
+  treatment <- rbinom(n, 1, 0.5)
+  outcome <- 10 + true_effect * treatment + rnorm(n, 0, noise_sd)
+
+  <span class="code-comment"># Run regression and get p-value</span>
+  model <- lm(outcome ~ treatment)
+  p_value <- summary(model)$coefficients[<span class="code-string">"treatment"</span>, <span class="code-string">"Pr(>|t|)"</span>]
+
+  <span class="code-keyword">return</span>(p_value)
+}
+
+power_analysis <- <span class="code-keyword">function</span>(n, true_effect, noise_sd, n_sims = 1000, alpha = 0.05) {
+  <span class="code-tooltip" data-tip="replicate() runs the simulation n_sims times and returns results">p_values <- replicate(n_sims, simulate_experiment(n, true_effect, noise_sd))</span>
+  power <- mean(p_values < alpha)
+  <span class="code-keyword">return</span>(power)
+}
+
+<span class="code-comment"># Find required sample size</span>
+sample_sizes <- c(50, 100, 200, 400, 800)
+true_effect <- 2.0
+noise_sd <- 10
+
+cat(<span class="code-string">"Sample Size | Power\n"</span>)
+cat(<span class="code-string">rep("-", 20), "\n", sep = ""</span>)
+
+<span class="code-keyword">for</span> (n <span class="code-keyword">in</span> sample_sizes) {
+  set.seed(42)
+  power <- power_analysis(n, true_effect, noise_sd, n_sims = 500)
+  cat(sprintf(<span class="code-string">"%11d | %.1f%%\n"</span>, n, power * 100))
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Further Reading</div>
+          <ul>
+            <li><strong>Duflo, E., Glennerster, R., & Kremer, M.</strong> (2007). Using Randomization in Development Economics Research: A Toolkit. <em>Handbook of Development Economics</em>.</li>
+            <li><strong>synthpop package:</strong> <a href="https://www.synthpop.org.uk" target="_blank">synthpop.org.uk</a></li>
+            <li><strong>SDV (Synthetic Data Vault):</strong> <a href="https://sdv.dev" target="_blank">sdv.dev</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="05-data-analysis.html" class="nav-link prev">Module 5: Data Analysis</a>
+          <a href="06-causal-inference.html" class="nav-link next">Module 6: Causal Inference</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I'm the ProTools ER1 course assistant. I can help you with questions about Python, Stata, R, data simulation, or any of the course material. How can I assist you today?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question about the course..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+
+      const targetRect = target.getBoundingClientRect();
+      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
+      let containerRect = container ? container.getBoundingClientRect() : {
+        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
+      };
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10;
+
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8;
+      let arrowClass = 'arrow-bottom';
+
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      if (top + tooltipHeight > viewportHeight - padding) {
+        top = targetRect.top - tooltipHeight - 8;
+        arrowClass = 'arrow-bottom';
+      }
+
+      if (left < padding) left = padding;
+      if (left + tooltipWidth > viewportWidth - padding) left = viewportWidth - tooltipWidth - padding;
+
+      if (container) {
+        const minLeft = Math.max(padding, containerRect.left);
+        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
+        if (left < minLeft) left = minLeft;
+        if (left + tooltipWidth > maxRight) left = maxRight - tooltipWidth;
+      }
+
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) tooltipEl.classList.remove('visible');
+        currentTarget = null;
+      }, 100);
+    }
+
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target);
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip();
+    }, true);
+
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    }, true);
+
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    });
+  })();
+  </script>
+</body>
+</html>

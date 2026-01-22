@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>5B.1 Power Analysis | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; line-height: 1.4; text-align: left; font-family: var(--font-body); font-style: normal; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .tooltip-popup.visible { opacity: 1; }
+    .tooltip-popup::after { content: ''; position: absolute; border: 6px solid transparent; }
+    .tooltip-popup.arrow-bottom::after { top: 100%; left: 50%; transform: translateX(-50%); border-top-color: #1f2937; }
+    .tooltip-popup.arrow-top::after { bottom: 100%; left: 50%; transform: translateX(-50%); border-bottom-color: #1f2937; }
+    .formula-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; font-family: var(--font-code); }
+    .formula-box h4 { margin-top: 0; color: var(--color-primary); }
+  </style>
+</head>
+<body>
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav active">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li class="active"><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <nav class="breadcrumb" style="margin-bottom: 1rem; font-size: 0.9rem; color: #666;">
+          <a href="05b-experiments.html">5B Experiments</a> &raquo; Power Analysis
+        </nav>
+
+        <div class="module-header">
+          <h1>5B.1 &nbsp;Power Analysis</h1>
+          <div class="module-meta">
+            <span>~3 hours</span>
+            <span>Sample Size, MDE, Simulation</span>
+          </div>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#what-is-power">What is Statistical Power?</a></li>
+            <li><a href="#key-parameters">Key Parameters</a></li>
+            <li><a href="#analytical-formulas">Analytical Formulas</a></li>
+            <li><a href="#power-commands">Power Commands in Stata/R/Python</a></li>
+            <li><a href="#simulation-approach">Simulation-Based Power Analysis</a></li>
+            <li><a href="#complex-designs">Complex Designs</a></li>
+          </ul>
+        </div>
+
+        <h2 id="what-is-power">What is Statistical Power?</h2>
+
+        <p>
+          <strong>Statistical power</strong> is the probability of correctly rejecting the null hypothesis when it is false—in other words, the probability of detecting an effect when one truly exists.
+        </p>
+
+        <ul>
+          <li><strong>Power = 1 - β</strong>, where β is the probability of a Type II error (false negative)</li>
+          <li><strong>Standard target:</strong> 80% power (β = 0.20)</li>
+          <li><strong>More stringent:</strong> 90% power for high-stakes decisions</li>
+        </ul>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Why Power Matters</div>
+          <p style="margin-bottom: 0;">
+            An underpowered study wastes resources—you collect data but can't detect effects even if they exist. It's ethically problematic (participants' time for nothing), scientifically problematic (contributes to publication bias), and practically problematic (you don't learn what you set out to learn).
+          </p>
+        </div>
+
+        <h2 id="key-parameters">Key Parameters</h2>
+
+        <p>Power depends on four interconnected quantities:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Symbol</th>
+              <th>Effect on Power</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Sample size</strong></td>
+              <td>N</td>
+              <td>↑ N → ↑ Power</td>
+            </tr>
+            <tr>
+              <td><strong>Effect size</strong></td>
+              <td>δ or d</td>
+              <td>↑ Effect → ↑ Power</td>
+            </tr>
+            <tr>
+              <td><strong>Variance/noise</strong></td>
+              <td>σ²</td>
+              <td>↑ Variance → ↓ Power</td>
+            </tr>
+            <tr>
+              <td><strong>Significance level</strong></td>
+              <td>α</td>
+              <td>↑ α → ↑ Power (but more false positives)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Given any three, you can solve for the fourth. Common scenarios:
+        </p>
+
+        <ul>
+          <li><strong>Sample size calculation:</strong> Given target power (80%), effect size, and variance → find required N</li>
+          <li><strong>Minimum detectable effect:</strong> Given N, power, and variance → find smallest effect you can detect</li>
+          <li><strong>Power calculation:</strong> Given N, effect size, and variance → find your actual power</li>
+        </ul>
+
+        <h2 id="analytical-formulas">Analytical Formulas</h2>
+
+        <div class="formula-box">
+          <h4>Simple Two-Group Comparison (t-test)</h4>
+          <p>Sample size per group for comparing means:</p>
+          <pre style="margin: 1rem 0;">
+n = 2 × [(z<sub>1-α/2</sub> + z<sub>1-β</sub>)² × σ²] / δ²
+
+Where:
+  n = sample size per group
+  z<sub>1-α/2</sub> = 1.96 for α = 0.05 (two-sided)
+  z<sub>1-β</sub> = 0.84 for 80% power, 1.28 for 90%
+  σ² = pooled variance of outcome
+  δ = minimum detectable effect (difference in means)
+          </pre>
+        </div>
+
+        <div class="formula-box">
+          <h4>Minimum Detectable Effect (MDE)</h4>
+          <p>Given sample size, what's the smallest effect you can detect?</p>
+          <pre style="margin: 1rem 0;">
+MDE = (z<sub>1-α/2</sub> + z<sub>1-β</sub>) × σ × √[1/(P(1-P)N)]
+
+Where:
+  P = proportion assigned to treatment
+  N = total sample size
+  σ = standard deviation of outcome
+          </pre>
+          <p style="margin-bottom: 0;">
+            For P = 0.5 (50% treated): MDE = 2.8 × σ / √N (at 80% power, α = 0.05)
+          </p>
+        </div>
+
+        <h2 id="power-commands">Power Commands in Stata/R/Python</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Power analysis with statsmodels</span>
+<span class="code-keyword">from</span> statsmodels.stats.power <span class="code-keyword">import</span> TTestIndPower
+
+analysis = TTestIndPower()
+
+<span class="code-comment"># Calculate required sample size</span>
+<span class="code-tooltip" data-tip="effect_size is Cohen's d = (mean1 - mean2) / pooled_sd. A 'small' effect is 0.2, 'medium' is 0.5, 'large' is 0.8">n = analysis.solve_power(
+    effect_size=0.3,     <span class="code-comment"># Cohen's d</span>
+    power=0.8,           <span class="code-comment"># Target power</span>
+    alpha=0.05,          <span class="code-comment"># Significance level</span>
+    ratio=1.0,           <span class="code-comment"># n2/n1 ratio</span>
+    alternative=<span class="code-string">'two-sided'</span>
+)</span>
+<span class="code-function">print</span>(<span class="code-string">f"Required n per group: {n:.0f}"</span>)
+
+<span class="code-comment"># Calculate power given sample size</span>
+<span class="code-tooltip" data-tip="If you already know your sample size, calculate what power you'll have">power = analysis.solve_power(
+    effect_size=0.3,
+    nobs1=100,           <span class="code-comment"># Sample size group 1</span>
+    alpha=0.05,
+    ratio=1.0,
+    alternative=<span class="code-string">'two-sided'</span>
+)</span>
+<span class="code-function">print</span>(<span class="code-string">f"Power: {power:.1%}"</span>)
+
+<span class="code-comment"># Calculate MDE given sample size and power</span>
+<span class="code-tooltip" data-tip="Find the minimum effect size you can detect with your sample">mde = analysis.solve_power(
+    power=0.8,
+    nobs1=200,
+    alpha=0.05,
+    ratio=1.0,
+    alternative=<span class="code-string">'two-sided'</span>
+)</span>
+<span class="code-function">print</span>(<span class="code-string">f"MDE (Cohen's d): {mde:.3f}"</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Built-in power commands</span>
+
+<span class="code-comment">* Calculate required sample size for two-sample t-test</span>
+<span class="code-tooltip" data-tip="power twomeans calculates sample size for comparing two means. Specify the means and standard deviation.">power twomeans 50 55, sd(15) power(0.8)</span>
+<span class="code-comment">* Output: n per group needed to detect difference of 5 (50 vs 55)</span>
+
+<span class="code-comment">* Calculate power given sample size</span>
+<span class="code-tooltip" data-tip="n(100) specifies 100 per group. Stata returns the power you'll achieve.">power twomeans 50 55, sd(15) n(100)</span>
+
+<span class="code-comment">* Calculate MDE given sample size and power</span>
+<span class="code-tooltip" data-tip="Omit the second mean, specify n and power. Stata finds the detectable difference.">power twomeans 50, sd(15) n(200) power(0.8)</span>
+
+<span class="code-comment">* Two-sample proportions</span>
+<span class="code-tooltip" data-tip="For binary outcomes, use power twoproportions">power twoproportions 0.3 0.4, power(0.8)</span>
+
+<span class="code-comment">* Create power curve table</span>
+<span class="code-tooltip" data-tip="n(50(50)300) tests sample sizes from 50 to 300 in steps of 50">power twomeans 50 55, sd(15) n(50(50)300) table</span>
+
+<span class="code-comment">* Create power curve graph</span>
+power twomeans 50 55, sd(15) n(50(50)300) graph</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Power analysis with pwr package</span>
+<span class="code-keyword">library</span>(pwr)
+
+<span class="code-comment"># Calculate required sample size</span>
+<span class="code-tooltip" data-tip="d is Cohen's d = effect/sd. Leave n as NULL to solve for it.">result <- pwr.t.test(
+  d = 0.3,              <span class="code-comment"># Cohen's d effect size</span>
+  sig.level = 0.05,     <span class="code-comment"># Alpha</span>
+  power = 0.8,          <span class="code-comment"># Target power</span>
+  type = <span class="code-string">"two.sample"</span>, <span class="code-comment"># Two-group comparison</span>
+  alternative = <span class="code-string">"two.sided"</span>
+)</span>
+<span class="code-function">print</span>(result)
+<span class="code-comment"># n is per group</span>
+
+<span class="code-comment"># Calculate power given sample size</span>
+<span class="code-tooltip" data-tip="Specify n (per group) to find power">result <- pwr.t.test(
+  d = 0.3,
+  n = 100,
+  sig.level = 0.05,
+  type = <span class="code-string">"two.sample"</span>
+)</span>
+<span class="code-function">print</span>(result$power)
+
+<span class="code-comment"># Calculate MDE given sample size</span>
+<span class="code-tooltip" data-tip="Leave d as NULL to find the minimum detectable effect">result <- pwr.t.test(
+  n = 200,
+  sig.level = 0.05,
+  power = 0.8,
+  type = <span class="code-string">"two.sample"</span>
+)</span>
+<span class="code-function">print</span>(result$d)
+
+<span class="code-comment"># Power curve plot</span>
+<span class="code-tooltip" data-tip="plot() on a pwr object creates a nice power curve">plot(result)</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="simulation-approach">Simulation-Based Power Analysis</h2>
+
+        <p>
+          When analytical formulas don't apply (complex designs, non-standard estimators), use simulation:
+        </p>
+
+        <ol>
+          <li>Specify the data generating process with your assumed effect</li>
+          <li>Simulate many datasets (1000+)</li>
+          <li>Run your analysis on each dataset</li>
+          <li>Count how often you reject the null (that's your power)</li>
+        </ol>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Simulation-based power for clustered design</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+<span class="code-keyword">from</span> tqdm <span class="code-keyword">import</span> tqdm
+
+<span class="code-keyword">def</span> <span class="code-function">simulate_cluster_rct</span>(n_clusters, cluster_size, effect, icc=0.1):
+    <span class="code-string">"""Simulate a cluster-randomized trial."""</span>
+    <span class="code-comment"># Total variance = 1, split between cluster and individual</span>
+    cluster_var = icc
+    indiv_var = 1 - icc
+
+    <span class="code-comment"># Generate data</span>
+    data = []
+    <span class="code-keyword">for</span> c <span class="code-keyword">in</span> range(n_clusters):
+        <span class="code-tooltip" data-tip="Cluster-level treatment assignment and random effect">treated = np.random.binomial(1, 0.5)
+        cluster_effect = np.random.normal(0, np.sqrt(cluster_var))</span>
+
+        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(cluster_size):
+            indiv_error = np.random.normal(0, np.sqrt(indiv_var))
+            y = effect * treated + cluster_effect + indiv_error
+            data.append({<span class="code-string">'cluster'</span>: c, <span class="code-string">'treated'</span>: treated, <span class="code-string">'y'</span>: y})
+
+    <span class="code-keyword">return</span> pd.DataFrame(data)
+
+<span class="code-keyword">def</span> <span class="code-function">run_analysis</span>(df):
+    <span class="code-string">"""Run analysis with cluster-robust SEs."""</span>
+    model = smf.ols(<span class="code-string">'y ~ treated'</span>, data=df).fit(
+        cov_type=<span class="code-string">'cluster'</span>, cov_kwds={<span class="code-string">'groups'</span>: df[<span class="code-string">'cluster'</span>]}
+    )
+    <span class="code-keyword">return</span> model.pvalues[<span class="code-string">'treated'</span>]
+
+<span class="code-comment"># Run power simulation</span>
+n_sims = 1000
+effect_size = 0.3
+n_clusters = 30
+cluster_size = 20
+
+<span class="code-tooltip" data-tip="Count significant results across many simulations">significant = 0
+<span class="code-keyword">for</span> _ <span class="code-keyword">in</span> tqdm(range(n_sims)):
+    df = simulate_cluster_rct(n_clusters, cluster_size, effect_size)
+    pval = run_analysis(df)
+    <span class="code-keyword">if</span> pval < 0.05:
+        significant += 1</span>
+
+power = significant / n_sims
+<span class="code-function">print</span>(<span class="code-string">f"Estimated power: {power:.1%}"</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Simulation-based power</span>
+
+<span class="code-comment">* Define program for one simulation</span>
+capture program drop sim_cluster
+program define sim_cluster, rclass
+    args n_clusters cluster_size effect icc
+
+    clear
+    local total = `n_clusters' * `cluster_size'
+    set obs `total'
+
+    <span class="code-comment">* Generate cluster IDs</span>
+    gen cluster = ceil(_n / `cluster_size')
+
+    <span class="code-comment">* Cluster-level treatment (randomize at cluster level)</span>
+    bysort cluster: gen treated = (runiform() < 0.5) if _n == 1
+    bysort cluster: replace treated = treated[1]
+
+    <span class="code-comment">* Generate outcome with ICC</span>
+    local clust_sd = sqrt(`icc')
+    local ind_sd = sqrt(1 - `icc')
+
+    <span class="code-tooltip" data-tip="Generate cluster random effect once per cluster">bysort cluster: gen cluster_fe = rnormal(0, `clust_sd') if _n == 1
+    bysort cluster: replace cluster_fe = cluster_fe[1]</span>
+
+    gen y = `effect' * treated + cluster_fe + rnormal(0, `ind_sd')
+
+    <span class="code-comment">* Run analysis with clustered SEs</span>
+    quietly reg y treated, cluster(cluster)
+    <span class="code-tooltip" data-tip="Return p-value for treatment coefficient">return scalar pval = 2*ttail(e(df_r), abs(_b[treated]/_se[treated]))</span>
+end
+
+<span class="code-comment">* Run simulations</span>
+simulate pval=r(pval), reps(1000) seed(42): ///
+    sim_cluster 30 20 0.3 0.1
+
+<span class="code-comment">* Calculate power</span>
+count if pval < 0.05
+display "Power: " r(N)/1000</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Simulation-based power for cluster RCT</span>
+<span class="code-keyword">library</span>(lme4)
+<span class="code-keyword">library</span>(lmerTest)
+
+simulate_cluster_rct <- <span class="code-keyword">function</span>(n_clusters, cluster_size, effect, icc = 0.1) {
+  cluster_var <- icc
+  indiv_var <- 1 - icc
+
+  data <- do.call(rbind, lapply(1:n_clusters, <span class="code-keyword">function</span>(c) {
+    <span class="code-tooltip" data-tip="Treatment assigned at cluster level">treated <- rbinom(1, 1, 0.5)
+    cluster_effect <- rnorm(1, 0, sqrt(cluster_var))</span>
+
+    data.frame(
+      cluster = c,
+      treated = treated,
+      y = effect * treated + cluster_effect + rnorm(cluster_size, 0, sqrt(indiv_var))
+    )
+  }))
+
+  <span class="code-keyword">return</span>(data)
+}
+
+run_analysis <- <span class="code-keyword">function</span>(df) {
+  <span class="code-comment"># Cluster-robust SEs via mixed model</span>
+  <span class="code-tooltip" data-tip="Using random intercept for clusters accounts for clustering">model <- lmer(y ~ treated + (1|cluster), data = df)</span>
+  p_value <- summary(model)$coefficients[<span class="code-string">"treated"</span>, <span class="code-string">"Pr(>|t|)"</span>]
+  <span class="code-keyword">return</span>(p_value)
+}
+
+<span class="code-comment"># Run power simulation</span>
+set.seed(42)
+n_sims <- 1000
+effect_size <- 0.3
+
+<span class="code-tooltip" data-tip="replicate() runs the simulation n_sims times">p_values <- replicate(n_sims, {
+  df <- simulate_cluster_rct(30, 20, effect_size)
+  run_analysis(df)
+})</span>
+
+power <- mean(p_values < 0.05)
+cat(sprintf(<span class="code-string">"Estimated power: %.1f%%\n"</span>, power * 100))</code></pre>
+          </div>
+        </div>
+
+        <h2 id="complex-designs">Complex Designs</h2>
+
+        <h3>Cluster Randomization</h3>
+
+        <p>When treatment is assigned at the group level (schools, villages), you need to account for <strong>intraclass correlation (ICC)</strong>:</p>
+
+        <div class="formula-box">
+          <h4>Design Effect</h4>
+          <pre style="margin: 0;">
+Design Effect (DEFF) = 1 + (m - 1) × ICC
+
+Where:
+  m = cluster size
+  ICC = intraclass correlation (typically 0.01-0.20)
+
+Effective sample size = N / DEFF
+          </pre>
+          <p style="margin: 1rem 0 0 0;">
+            With ICC = 0.1 and cluster size = 20: DEFF = 1 + 19 × 0.1 = 2.9<br>
+            You need ~3x as many observations as in individual-level randomization!
+          </p>
+        </div>
+
+        <h3>Multiple Treatment Arms</h3>
+
+        <p>
+          With k treatment arms, you need larger samples. For pairwise comparisons, apply a multiple testing correction (e.g., Bonferroni: α/k) and recalculate power.
+        </p>
+
+        <h3>Pre-Post Designs (ANCOVA)</h3>
+
+        <p>
+          If you have a baseline measure of the outcome, ANCOVA can dramatically increase power:
+        </p>
+
+        <div class="formula-box">
+          <h4>ANCOVA Power Gain</h4>
+          <pre style="margin: 0;">
+Required N (ANCOVA) = Required N (simple) × (1 - ρ²)
+
+Where ρ = correlation between baseline and endline outcome.
+
+If ρ = 0.5: Need only 75% as many observations
+If ρ = 0.7: Need only 51% as many observations
+          </pre>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Further Reading</div>
+          <ul>
+            <li><strong>Duflo, Glennerster, & Kremer (2007)</strong>: Sections on power analysis in experimental economics</li>
+            <li><strong>Optimal Design:</strong> Free software for power analysis: <a href="https://wtgrantfoundation.org/optimal-design" target="_blank">optimal-design</a></li>
+            <li><strong>EGAP Methods Guide:</strong> Power analysis for experiments: <a href="https://egap.org/methods-guides/10-things-to-know-about-statistical-power" target="_blank">EGAP Power Guide</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="05b-experiments.html" class="nav-link prev">5B: Coding for Experiments</a>
+          <a href="05b2-survey-programming.html" class="nav-link next">5B.2: Survey Programming</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I can help with power analysis questions. How can I assist you?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+      const targetRect = target.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const padding = 10;
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+      const tooltipRect = tooltip.getBoundingClientRect();
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+      let top = targetRect.top - tooltipRect.height - 8;
+      let arrowClass = 'arrow-bottom';
+      if (top < padding) { top = targetRect.bottom + 8; arrowClass = 'arrow-top'; }
+      if (left < padding) left = padding;
+      if (left + tooltipRect.width > viewportWidth - padding) left = viewportWidth - tooltipRect.width - padding;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) { if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; } currentTarget = target; positionTooltip(target); }
+    function hideTooltip() { hideTimeout = setTimeout(function() { if (tooltipEl) tooltipEl.classList.remove('visible'); currentTarget = null; }, 100); }
+
+    document.addEventListener('mouseenter', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target); }, true);
+    document.addEventListener('mouseleave', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip(); }, true);
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 2b: Working with APIs | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .output-simulation { background: #1e1e1e; border-radius: 8px; margin: 1rem 0; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.8rem; display: none; }
+    .output-simulation.visible { display: block; }
+    .output-header { background: #333; padding: 0.5rem 1rem; color: #ccc; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+    .output-body { padding: 1rem; color: #d4d4d4; white-space: pre-wrap; overflow-x: auto; max-height: 300px; overflow-y: auto; }
+    .out-green { color: #4ec9b0; }
+    .out-yellow { color: #dcdcaa; }
+    .out-blue { color: #569cd6; }
+    .out-num { color: #b5cea8; }
+    .out-str { color: #ce9178; }
+    .research-banner { background: #4a5568; color: white; padding: 1.5rem; border-radius: 12px; margin: 2rem 0; border-left: 5px solid #ed8936; }
+    .research-banner h3 { color: white; margin-top: 0; }
+    .concept-box { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+    .concept-box h4 { color: #1e40af; margin-top: 0; }
+    /* API Diagram - darker colors */
+    .api-diagram { background: #e2e8f0; border-radius: 12px; padding: 2rem; margin: 2rem 0; text-align: center; }
+    .api-flow { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .api-box { background: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); min-width: 120px; }
+    .api-box.client { background: #1e40af; border: 2px solid #1e3a8a; color: white; }
+    .api-box.client strong { color: white; }
+    .api-box.server { background: #166534; border: 2px solid #14532d; color: white; }
+    .api-box.server strong { color: white; }
+    .api-arrow { font-size: 2rem; color: #374151; font-weight: bold; }
+    .api-label { font-size: 0.8rem; color: #374151; margin-top: 0.25rem; font-weight: 500; }
+    .api-box .api-label { color: rgba(255,255,255,0.9); }
+    /* Run button */
+    .run-btn { background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .run-btn:hover { background: #16a34a; }
+    .run-btn::before { content: '▶'; font-size: 0.7rem; }
+    .close-output { background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; }
+    .close-output:hover { color: white; }
+    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
+    .code-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #888;
+      text-decoration: none;
+    }
+
+    /* Tooltip element created by JavaScript */
+    .tooltip-popup {
+      position: fixed;
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      max-width: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
+      line-height: 1.4;
+      text-align: left;
+      font-family: var(--font-body);
+      font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tooltip-popup.visible {
+      opacity: 1;
+    }
+
+    /* Small arrow pointer */
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1f2937;
+    }
+    .tooltip-popup.arrow-top::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #1f2937;
+    }
+    .tooltip-popup.arrow-left::after {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1f2937;
+    }
+    .tooltip-popup.arrow-right::after {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      border-left-color: #1f2937;
+    }
+  </style>
+</head>
+<body>
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav active">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li class="active"><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>2b &nbsp;Working with APIs</h1>
+          <div class="module-meta">
+            <span>~3 hours</span>
+            <span>APIs, HTTP, JSON</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Understand what an API is and how it works technically</li>
+            <li>Make API requests and parse JSON responses</li>
+            <li>Use the World Bank API for economic research data</li>
+            <li>Handle authentication and rate limits</li>
+          </ul>
+        </div>
+
+        <div class="research-banner">
+          <h3>Research Project: Fetching Climate & Economic Data</h3>
+          <p style="margin-bottom: 0;">In this module, we'll use the World Bank API to programmatically download CO2 emissions, GDP, and climate indicators for our research on climate vulnerability and economic growth.</p>
+        </div>
+
+        <!-- What is an API? -->
+        <h2>What is an API?</h2>
+
+        <div class="concept-box">
+          <h4>API = Application Programming Interface</h4>
+          <p>An API is a structured way for programs to communicate. Instead of downloading a CSV file manually, you send a <strong>request</strong> to a server, and it sends back <strong>data</strong> in a structured format (usually JSON).</p>
+          <p style="margin-bottom: 0;"><strong>Analogy:</strong> Think of a restaurant. You (the client) don't go into the kitchen. Instead, you tell the waiter (the API) what you want, and the waiter brings your food (the data) from the kitchen (the server).</p>
+        </div>
+
+        <!-- API Diagram - DARKER COLORS -->
+        <div class="api-diagram">
+          <h4 style="margin-top: 0; color: #1f2937;">How an API Request Works</h4>
+          <div class="api-flow">
+            <div class="api-box client">
+              <strong>Your Code</strong>
+              <div class="api-label">(Client)</div>
+            </div>
+            <div>
+              <div class="api-arrow">&rarr;</div>
+              <div class="api-label">HTTP Request<br><code style="background: #374151; color: #e5e7eb; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem;">GET /countries/USA/gdp</code></div>
+            </div>
+            <div class="api-box server">
+              <strong>World Bank Server</strong>
+              <div class="api-label">(API)</div>
+            </div>
+            <div>
+              <div class="api-arrow">&rarr;</div>
+              <div class="api-label">JSON Response<br><code style="background: #374151; color: #e5e7eb; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.7rem;">{"gdp": 25e12}</code></div>
+            </div>
+            <div class="api-box client">
+              <strong>Your Code</strong>
+              <div class="api-label">(Receives Data)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HTTP and URLs -->
+        <h2>Understanding API URLs</h2>
+
+        <p>API requests use URLs with specific structures:</p>
+
+        <pre style="background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem;">
+https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD?format=json
+<span style="color: #fbbf24;">|_____|</span><span style="color: #60a5fa;">|________________|</span><span style="color: #34d399;">|__|</span><span style="color: #f472b6;">|___|</span><span style="color: #a78bfa;">|_____________________________|</span><span style="color: #fb923c;">|___________|</span>
+   <span style="color: #fbbf24;">|</span>          <span style="color: #60a5fa;">|</span>            <span style="color: #34d399;">|</span>    <span style="color: #f472b6;">|</span>              <span style="color: #a78bfa;">|</span>                        <span style="color: #fb923c;">|</span>
+<span style="color: #fbbf24;">Protocol</span>    <span style="color: #60a5fa;">Host</span>       <span style="color: #34d399;">Version</span>  <span style="color: #f472b6;">Country</span>   <span style="color: #a78bfa;">Indicator Code</span>          <span style="color: #fb923c;">Parameters</span></pre>
+
+        <div class="concept-box">
+          <h4>Key Components</h4>
+          <ul style="margin-bottom: 0;">
+            <li><strong>Host:</strong> The server address (api.worldbank.org)</li>
+            <li><strong>Endpoint:</strong> The specific resource you want (/country/USA/indicator/...)</li>
+            <li><strong>Parameters:</strong> Options like format, date range (?format=json&date=2010:2020)</li>
+          </ul>
+        </div>
+
+        <!-- Building URLs Brick by Brick -->
+        <div class="concept-box" style="background: #ecfdf5; border-left-color: #059669;">
+          <h4 style="color: #047857;">Building URLs: Brick by Brick</h4>
+          <p>In your code, you <strong>construct</strong> the API URL piece by piece before sending the request. Think of it like building with LEGO blocks:</p>
+          <ol style="margin-bottom: 1rem;">
+            <li><strong>Base URL</strong> &mdash; The foundation (e.g., <code>https://api.worldbank.org/v2/</code>)</li>
+            <li><strong>Endpoint path</strong> &mdash; What you want (e.g., <code>country/USA/indicator/NY.GDP.MKTP.CD</code>)</li>
+            <li><strong>Query parameters</strong> &mdash; Filters and options (e.g., <code>?format=json&date=2015:2022</code>)</li>
+          </ol>
+          <p style="margin-bottom: 0.5rem;">Your code assembles these pieces, then makes a single HTTP request. The server processes the URL and returns the data.</p>
+          <pre style="background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 6px; font-size: 0.85rem; margin-bottom: 0;"><span style="color: #9ca3af;"># Python example: building the URL brick by brick</span>
+base = <span style="color: #fbbf24;">"https://api.worldbank.org/v2"</span>    <span style="color: #9ca3af;"># Foundation</span>
+endpoint = <span style="color: #fbbf24;">"/country/USA/indicator/NY.GDP.MKTP.CD"</span>  <span style="color: #9ca3af;"># What we want</span>
+params = <span style="color: #fbbf24;">"?format=json&date=2015:2022"</span>    <span style="color: #9ca3af;"># Options</span>
+
+full_url = base + endpoint + params       <span style="color: #9ca3af;"># Assemble the bricks</span>
+response = requests.get(full_url)         <span style="color: #9ca3af;"># Send to server!</span></pre>
+        </div>
+
+        <!-- Your First API Call -->
+        <h2>Your First API Call</h2>
+
+        <p>Let's fetch GDP data from the World Bank API. Click <strong>Run</strong> below each code block to see the output:</p>
+
+        <div class="code-tabs" data-runnable="api-1">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Import the requests library for making HTTP calls</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="requests: Library for making HTTP requests to web servers">requests</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas: Data manipulation library, aliased as 'pd' by convention">pandas</span> <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment"># STEP 1: BUILD THE URL (brick by brick)</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+
+<span class="code-comment"># Base URL: The API's address</span>
+<span class="code-tooltip" data-tip="BASE URL: The root address of the API—like the street address of a building. All specific requests start from here. The '/v2' means we're using version 2 of this API.">base</span> = <span class="code-tooltip" data-tip="API ENDPOINT: This is the World Bank's data API address. APIs live at specific URLs just like websites. The 'https://' means it's secure."><span class="code-string">"https://api.worldbank.org/v2"</span></span>
+
+<span class="code-comment"># Endpoint: What we want (country/indicator)</span>
+<span class="code-tooltip" data-tip="COUNTRY CODE: Three-letter ISO code identifying the country. USA=United States, FRA=France, CHN=China. The API uses these codes to know which country's data you want.">country</span> = <span class="code-string">"USA"</span>                    <span class="code-comment"># Try: "FRA", "CHN", "BRA"</span>
+<span class="code-tooltip" data-tip="INDICATOR CODE: A unique identifier for the specific data series. NY.GDP.MKTP.CD = GDP in current US dollars. The World Bank has thousands of indicators—search their database to find others.">indicator</span> = <span class="code-string">"NY.GDP.MKTP.CD"</span>       <span class="code-comment"># GDP in current US$</span>
+
+<span class="code-comment"># Assemble the URL</span>
+<span class="code-tooltip" data-tip="We build the URL by concatenating strings - you can swap country/indicator easily!">url</span> = <span class="code-string">f"</span>{base}<span class="code-string">/country/</span>{country}<span class="code-string">/indicator/</span>{indicator}<span class="code-string">"</span>
+<span class="code-keyword">print</span>(<span class="code-string">f"URL built: {url}"</span>)
+
+<span class="code-comment"># Parameters: Filters added to the URL as ?key=value&key=value</span>
+<span class="code-tooltip" data-tip="Dictionary of parameters: format=json for JSON output, date for year range, per_page for max results">params</span> = {
+    <span class="code-string">"format"</span>: <span class="code-string">"json"</span>,      <span class="code-comment"># Return data as JSON (not XML)</span>
+    <span class="code-string">"date"</span>: <span class="code-string">"2015:2022"</span>,   <span class="code-comment"># Get data from 2015 to 2022</span>
+    <span class="code-string">"per_page"</span>: <span class="code-number">100</span>        <span class="code-comment"># Maximum records per page</span>
+}
+
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment"># STEP 2: SEND THE REQUEST</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+
+<span class="code-comment"># requests.get() combines url + params and sends to server</span>
+<span class="code-tooltip" data-tip="requests.get() sends an HTTP GET request and returns a Response object">response</span> = requests.get(url, params=params)
+<span class="code-keyword">print</span>(<span class="code-string">f"Status Code: {response.status_code}"</span>)  <span class="code-comment"># 200 = success</span>
+
+<span class="code-comment"># Parse the JSON response into a Python object</span>
+<span class="code-tooltip" data-tip=".json() converts the response body from JSON text to Python dictionaries/lists">data</span> = response.json()
+
+<span class="code-comment"># World Bank returns [metadata, records] - we want index 1</span>
+<span class="code-tooltip" data-tip="INDEXING: The API returns a list with two items: [0] is metadata (info about the response), [1] is the actual data records. We grab index 1 to get just the data we want.">records</span> = data[<span class="code-tooltip" data-tip="INDEX 1: In Python, counting starts at 0. So [1] gets the SECOND item in the list. The first item [0] is metadata we don't need."><span class="code-number">1</span></span>]
+
+<span class="code-comment"># Convert to DataFrame using list comprehension</span>
+<span class="code-tooltip" data-tip="DATAFRAME: Pandas' table structure—like an Excel spreadsheet with rows and columns. This is where you'll do all your data analysis. df is a common shorthand name for DataFrame.">df</span> = <span class="code-tooltip" data-tip="pd.DataFrame(): Creates a DataFrame from the data inside the parentheses. Here we're passing a list of dictionaries, where each dictionary becomes one row.">pd.DataFrame</span>([{
+    <span class="code-tooltip" data-tip="NESTED ACCESS: r['country'] gets the country object, then ['value'] gets the actual name from inside it. The API returns nested data, so we dig down to extract what we need."><span class="code-string">'country'</span>: r[<span class="code-string">'country'</span>][<span class="code-string">'value'</span>]</span>,  <span class="code-comment"># Extract country name</span>
+    <span class="code-tooltip" data-tip="TYPE CONVERSION: int() converts the year from text ('2022') to a number (2022). Important for sorting and calculations later. The API returns years as strings."><span class="code-string">'year'</span>: <span class="code-keyword">int</span>(r[<span class="code-string">'date'</span>])</span>,           <span class="code-comment"># Convert year to integer</span>
+    <span class="code-string">'gdp'</span>: r[<span class="code-string">'value'</span>]                 <span class="code-comment"># GDP value</span>
+} <span class="code-tooltip" data-tip="LIST COMPREHENSION: A compact way to create a list by looping. This says: 'for each record r in records, create a dictionary with country/year/gdp, but only IF the value isn't None (missing).'"><span class="code-keyword">for</span> r <span class="code-keyword">in</span> records <span class="code-keyword">if</span> r[<span class="code-string">'value'</span>] <span class="code-keyword">is not None</span></span>])
+
+<span class="code-keyword">print</span>(df)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata requires additional packages for API calls</span>
+<span class="code-comment">* The wbopendata package makes World Bank data easy to access</span>
+
+<span class="code-comment">* Install the World Bank Open Data package (run once)</span>
+<span class="code-tooltip" data-tip="SSC INSTALL: Downloads and installs user-written packages from the Statistical Software Components archive. Run this once—the package stays on your computer. Like pip install for Python."><span class="code-keyword">ssc</span> install wbopendata</span>
+
+<span class="code-comment">* ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment">* In Stata, wbopendata BUILDS THE URL FOR YOU behind the scenes</span>
+<span class="code-comment">* You provide the "bricks" as options:</span>
+<span class="code-comment">* ═══════════════════════════════════════════════════════════════════</span>
+
+<span class="code-comment">* Define our "bricks"</span>
+<span class="code-tooltip" data-tip="LOCAL MACRO: Creates a temporary variable storing 'USA'. In Stata, you reference this with `country' (backtick + apostrophe). Locals only exist in the current session/do-file."><span class="code-keyword">local</span> country <span class="code-string">"USA"</span></span>              <span class="code-comment">// Try: "FRA", "CHN", "BRA"</span>
+<span class="code-tooltip" data-tip="INDICATOR MACRO: Stores the World Bank indicator code. The code NY.GDP.MKTP.CD means GDP (MKTP) in current US dollars (CD). Find more codes on the World Bank data portal."><span class="code-keyword">local</span> indicator <span class="code-string">"NY.GDP.MKTP.CD"</span></span> <span class="code-comment">// GDP in current US$</span>
+<span class="code-tooltip" data-tip="DATE RANGE: The colon : syntax specifies a range from 2015 to 2022. The wbopendata package interprets this and fetches all years in between."><span class="code-keyword">local</span> years <span class="code-string">"2015:2022"</span></span>         <span class="code-comment">// Time range</span>
+
+<span class="code-comment">* wbopendata combines these into an API call</span>
+<span class="code-tooltip" data-tip="WBOPENDATA COMMAND: This package handles all the API complexity for you. It builds the URL, sends the request, parses the JSON, and loads data directly into Stata. The 'clear' option removes any existing data first."><span class="code-keyword">wbopendata</span></span>, <span class="code-tooltip" data-tip="OPTIONS: Everything after the comma are options. indicator() specifies what data, country() specifies where, year() specifies when. The backticks `' substitute the local macro values.">indicator(`indicator') country(`country') year(`years') clear</span>
+
+<span class="code-comment">* Display the data</span>
+<span class="code-tooltip" data-tip="LIST COMMAND: Displays the data in the Results window. Here we show three variables: country name, year, and GDP. The variable name ny_gdp_mktp_cd is auto-generated from the indicator code."><span class="code-keyword">list</span></span> countryname year ny_gdp_mktp_cd</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># Load required libraries</span>
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="httr: HTTP client library for making web requests">httr</span>)
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="jsonlite: Library for parsing JSON data">jsonlite</span>)
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="tidyverse: Collection of data science packages including dplyr and ggplot2">tidyverse</span>)
+
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment"># STEP 1: BUILD THE URL (brick by brick)</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+
+<span class="code-comment"># Base URL: The API's address</span>
+<span class="code-tooltip" data-tip="BASE URL: The root address of the World Bank API. All requests start from this address. The <- arrow assigns this text to the variable 'base'.">base</span> <- <span class="code-string">"https://api.worldbank.org/v2"</span>
+
+<span class="code-comment"># Endpoint: What we want (country/indicator)</span>
+<span class="code-tooltip" data-tip="COUNTRY CODE: Three-letter ISO code. USA=United States. Change this to get data for different countries (FRA=France, CHN=China, BRA=Brazil).">country</span> <- <span class="code-string">"USA"</span>                   <span class="code-comment"># Try: "FRA", "CHN", "BRA"</span>
+<span class="code-tooltip" data-tip="INDICATOR CODE: Unique identifier for GDP in current US dollars. The World Bank uses standardized codes for all their data series. Browse their site to find other indicators.">indicator</span> <- <span class="code-string">"NY.GDP.MKTP.CD"</span>      <span class="code-comment"># GDP in current US$</span>
+
+<span class="code-comment"># Assemble the URL using paste0()</span>
+<span class="code-tooltip" data-tip="paste0() concatenates strings without spaces - building the URL brick by brick">url</span> <- <span class="code-function">paste0</span>(base, <span class="code-string">"/country/"</span>, country, <span class="code-string">"/indicator/"</span>, indicator)
+<span class="code-function">cat</span>(<span class="code-string">"URL built:"</span>, url, <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+<span class="code-comment"># STEP 2: SEND THE REQUEST</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
+
+<span class="code-comment"># GET() combines url + query params and sends to server</span>
+<span class="code-tooltip" data-tip="GET() from httr sends an HTTP GET request; query= adds URL parameters">response</span> <- <span class="code-function">GET</span>(url, query = <span class="code-function">list</span>(
+  format = <span class="code-string">"json"</span>,      <span class="code-comment"># Request JSON format</span>
+  date = <span class="code-string">"2015:2022"</span>,   <span class="code-comment"># Year range</span>
+  per_page = <span class="code-number">100</span>        <span class="code-comment"># Max results</span>
+))
+
+<span class="code-comment"># Check response status</span>
+<span class="code-function">cat</span>(<span class="code-string">"Status:"</span>, <span class="code-function">status_code</span>(response), <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># Parse JSON response</span>
+<span class="code-tooltip" data-tip="content() extracts response body; fromJSON() parses JSON to R objects">data</span> <- <span class="code-function">content</span>(response, <span class="code-string">"text"</span>) %>% <span class="code-function">fromJSON</span>()
+
+<span class="code-comment"># Extract records (second element of response list)</span>
+<span class="code-tooltip" data-tip="DOUBLE BRACKETS: In R, [[2]] extracts the SECOND element as a standalone object. Single brackets [2] would keep it as a list. The API returns metadata first, then data—we want the data.">records</span> <- data[[2]]
+
+<span class="code-comment"># Create tibble (tidyverse data frame)</span>
+<span class="code-tooltip" data-tip="TIBBLE: A modern, improved data frame from tidyverse. Like a spreadsheet with rows and columns. Tibbles print nicer and have stricter behavior than base R data frames.">df</span> <- <span class="code-tooltip" data-tip="tibble() FUNCTION: Creates a tibble by specifying column names and their values. Each argument becomes a column. The '=' assigns values to named columns."><span class="code-function">tibble</span></span>(
+  <span class="code-tooltip" data-tip="DOLLAR SIGN ACCESS: records$country$value navigates nested data. First get 'country' from records, then get 'value' from that. This extracts the actual country names from the nested structure.">country = records$country$value</span>,      <span class="code-comment"># Country name</span>
+  <span class="code-tooltip" data-tip="TYPE CONVERSION: as.integer() converts text years ('2022') to numbers (2022). Important for calculations and proper sorting. The API returns years as character strings.">year = <span class="code-function">as.integer</span>(records$date)</span>,      <span class="code-comment"># Year as integer</span>
+  gdp = records$value                    <span class="code-comment"># GDP value</span>
+) <span class="code-tooltip" data-tip="PIPE OPERATOR: The %>% takes the result from the left and passes it to the function on the right. Read as 'then': create tibble THEN filter it. Makes code read like a sentence.">%></span> <span class="code-tooltip" data-tip="FILTER: Keeps only rows that meet a condition. Here, !is.na(gdp) means 'NOT missing'. So we keep rows where GDP is NOT NA (missing). Removes incomplete data."><span class="code-function">filter</span>(!<span class="code-function">is.na</span>(gdp))</span>              <span class="code-comment"># Remove NAs</span>
+
+<span class="code-function">print</span>(df)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulations (hidden by default, shown on click) -->
+        <div class="output-simulation" data-output="api-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Status Code: <span class="out-num">200</span>
+        country  year           gdp
+<span class="out-num">0</span>  United States  <span class="out-num">2022</span>  <span class="out-num">2.546206e+13</span>
+<span class="out-num">1</span>  United States  <span class="out-num">2021</span>  <span class="out-num">2.331481e+13</span>
+<span class="out-num">2</span>  United States  <span class="out-num">2020</span>  <span class="out-num">2.126379e+13</span>
+<span class="out-num">3</span>  United States  <span class="out-num">2019</span>  <span class="out-num">2.152748e+13</span>
+<span class="out-num">4</span>  United States  <span class="out-num">2018</span>  <span class="out-num">2.056242e+13</span>
+<span class="out-num">5</span>  United States  <span class="out-num">2017</span>  <span class="out-num">1.961152e+13</span>
+<span class="out-num">6</span>  United States  <span class="out-num">2016</span>  <span class="out-num">1.872352e+13</span>
+<span class="out-num">7</span>  United States  <span class="out-num">2015</span>  <span class="out-num">1.823893e+13</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="api-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. wbopendata, indicator(NY.GDP.MKTP.CD) country(USA) year(2015:2022) clear</span>
+(8 vars, 8 obs)
+
+<span class="out-str">. list countryname year ny_gdp_mktp_cd</span>
+
+     +------------------------------------------+
+     |   countryname   year   ny_gdp_mktp_cd    |
+     |------------------------------------------|
+  1. | United States   2022   <span class="out-num">2.5462e+13</span>        |
+  2. | United States   2021   <span class="out-num">2.3315e+13</span>        |
+  3. | United States   2020   <span class="out-num">2.1264e+13</span>        |
+  4. | United States   2019   <span class="out-num">2.1527e+13</span>        |
+  5. | United States   2018   <span class="out-num">2.0562e+13</span>        |
+  6. | United States   2017   <span class="out-num">1.9612e+13</span>        |
+  7. | United States   2016   <span class="out-num">1.8724e+13</span>        |
+  8. | United States   2015   <span class="out-num">1.8239e+13</span>        |
+     +------------------------------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="api-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output (RStudio Console)</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Status: <span class="out-num">200</span>
+<span class="out-str"># A tibble: 8 x 3</span>
+  country        year          gdp
+  <span class="out-blue">&lt;chr&gt;</span>         <span class="out-blue">&lt;int&gt;</span>        <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> United States  <span class="out-num">2022</span> <span class="out-num">25462056000000</span>
+<span class="out-num">2</span> United States  <span class="out-num">2021</span> <span class="out-num">23314810000000</span>
+<span class="out-num">3</span> United States  <span class="out-num">2020</span> <span class="out-num">21263790000000</span>
+<span class="out-num">4</span> United States  <span class="out-num">2019</span> <span class="out-num">21527480000000</span>
+<span class="out-num">5</span> United States  <span class="out-num">2018</span> <span class="out-num">20562420000000</span>
+<span class="out-num">6</span> United States  <span class="out-num">2017</span> <span class="out-num">19611520000000</span>
+<span class="out-num">7</span> United States  <span class="out-num">2016</span> <span class="out-num">18723520000000</span>
+<span class="out-num">8</span> United States  <span class="out-num">2015</span> <span class="out-num">18238930000000</span></div>
+        </div>
+
+        <!-- Common World Bank Indicators - Research Project Context -->
+        <div class="research-banner">
+          <h3>Research Project: Indicator Codes</h3>
+          <p style="margin-bottom: 0.75rem;">For our "Climate Vulnerability and Economic Growth" project, we'll use these World Bank indicator codes. You plug these codes into your API URL to fetch specific data:</p>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+          <thead>
+            <tr style="background: #f8f9fa;">
+              <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Indicator Code</th>
+              <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>NY.GDP.MKTP.CD</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">GDP (current US$)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>NY.GDP.PCAP.CD</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">GDP per capita (current US$)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EN.ATM.CO2E.KT</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">CO2 emissions (kt)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EN.ATM.CO2E.PC</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">CO2 emissions per capita (metric tons)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>SP.POP.TOTL</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Total population</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EG.USE.PCAP.KG.OE</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Energy use per capita (kg oil equivalent)</td></tr>
+            <tr><td style="padding: 0.5rem;"><code>AG.LND.FRST.ZS</code></td><td style="padding: 0.5rem;">Forest area (% of land area)</td></tr>
+          </tbody>
+        </table>
+
+        <p>Full list: <a href="https://data.worldbank.org/indicator" target="_blank">data.worldbank.org/indicator</a></p>
+
+        <!-- API Authentication -->
+        <h2>API Authentication</h2>
+
+        <div class="concept-box">
+          <h4>Why Authentication?</h4>
+          <p style="margin-bottom: 0;">Many APIs require an <strong>API key</strong> to track usage and prevent abuse. The World Bank API is free and doesn't require authentication, but others (like FRED, Alpha Vantage, OpenAI) do. You typically get a key by registering on the provider's website.</p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Example: Using an API key (FRED API)</span>
+<span class="code-keyword">import</span> requests
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="os module: Provides functions for interacting with the operating system, including environment variables">os</span>
+
+<span class="code-comment"># NEVER hardcode API keys in your code!</span>
+<span class="code-comment"># Instead, use environment variables for security</span>
+<span class="code-tooltip" data-tip="os.environ.get() retrieves environment variables - safer than hardcoding secrets">api_key</span> = os.environ.get(<span class="code-string">'FRED_API_KEY'</span>)
+<span class="code-comment"># Set in terminal: export FRED_API_KEY=your_key_here</span>
+
+url = <span class="code-string">"https://api.stlouisfed.org/fred/series/observations"</span>
+params = {
+    <span class="code-string">"series_id"</span>: <span class="code-string">"GDP"</span>,       <span class="code-comment"># The data series to fetch</span>
+    <span class="code-string">"api_key"</span>: api_key,        <span class="code-comment"># Your authentication key</span>
+    <span class="code-string">"file_type"</span>: <span class="code-string">"json"</span>       <span class="code-comment"># Response format</span>
+}
+
+response = requests.get(url, params=params)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Security Warning</div>
+          <p><strong>Never commit API keys to Git!</strong> We haven't covered Git yet (that's in <a href="08-github.html">Module 8</a>), but this is important enough to mention now. Git is a version control system that tracks all your code changes&mdash;including any secrets you accidentally include.</p>
+          <p>Use environment variables or a <code>.env</code> file (and add it to <code>.gitignore</code>). Exposed keys can be stolen and abused, potentially costing you money or compromising your accounts.</p>
+          <p style="margin-bottom: 0;"><strong>We'll explain Git, commits, and <code>.gitignore</code> properly in <a href="08-github.html">Module 8: Git & GitHub</a>.</strong></p>
+        </div>
+
+        <!-- Next Steps -->
+        <h2>Next Steps</h2>
+
+        <p>In the next module (Data Cleaning), we'll take the data we fetched and:</p>
+        <ul>
+          <li>Handle missing values in our GDP and CO2 data</li>
+          <li>Merge with additional datasets</li>
+          <li>Create derived variables for analysis</li>
+        </ul>
+
+        <div class="nav-footer">
+          <a href="02a-file-import.html" class="nav-link prev">Importing from Files (02a)</a>
+          <a href="02c-web-scraping.html" class="nav-link next">Web Scraping (02c)</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I can help with questions about APIs, Python, R, or the course material.</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Run button and output toggle script -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle Run button clicks
+    document.querySelectorAll('.run-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const lang = this.dataset.lang;
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+
+        // Hide all outputs for this code block
+        document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+          out.classList.remove('visible');
+        });
+
+        // Show the output for the selected language
+        const output = document.querySelector(`.output-simulation[data-output="${outputId}"][data-lang="${lang}"]`);
+        if (output) {
+          output.classList.add('visible');
+          // Scroll to output
+          output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
+    // Handle close output buttons
+    document.querySelectorAll('.close-output').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.output-simulation').classList.remove('visible');
+      });
+    });
+
+    // Update Run button when language tab changes
+    document.querySelectorAll('.code-tabs .tab-button').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+        if (outputId) {
+          // Hide all outputs when switching tabs
+          document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+            out.classList.remove('visible');
+          });
+        }
+      });
+    });
+  });
+  </script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    // Create a single tooltip element that will be reused
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup'; // Reset classes
+
+      // Get target position
+      const targetRect = target.getBoundingClientRect();
+
+      // Find the code block container (pre or .tab-content or .code-tabs)
+      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
+      let containerRect = container ? container.getBoundingClientRect() : {
+        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
+      };
+
+      // Use viewport as fallback boundary
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10; // Minimum distance from edges
+
+      // Temporarily show to measure
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      // Calculate ideal position (above the element, centered)
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8; // 8px gap
+      let arrowClass = 'arrow-bottom';
+
+      // Check if tooltip would go above viewport - if so, show below
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      // Check if tooltip would go below viewport when shown below
+      if (top + tooltipHeight > viewportHeight - padding) {
+        top = targetRect.top - tooltipHeight - 8;
+        arrowClass = 'arrow-bottom';
+      }
+
+      // Horizontal boundary checks - keep within viewport
+      if (left < padding) {
+        left = padding;
+      }
+      if (left + tooltipWidth > viewportWidth - padding) {
+        left = viewportWidth - tooltipWidth - padding;
+      }
+
+      // Additional check: keep within code container horizontally if possible
+      if (container) {
+        const minLeft = Math.max(padding, containerRect.left);
+        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
+
+        if (left < minLeft) {
+          left = minLeft;
+        }
+        if (left + tooltipWidth > maxRight) {
+          left = maxRight - tooltipWidth;
+        }
+      }
+
+      // Apply position
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+      }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) {
+          tooltipEl.classList.remove('visible');
+        }
+        currentTarget = null;
+      }, 100);
+    }
+
+    // Event delegation for all tooltips
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) {
+        showTooltip(e.target);
+      }
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) {
+        hideTooltip();
+      }
+    }, true);
+
+    // Handle scroll - reposition if visible
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) {
+        positionTooltip(currentTarget);
+      }
+    }, true);
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) {
+        positionTooltip(currentTarget);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

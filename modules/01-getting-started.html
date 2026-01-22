@@ -3,29 +3,551 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Module 1: Getting Started | Data Science Foundations</title>
+  <title>Module 1: Getting Started | ProTools ER1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    /* Solution dropdown styles */
+    .solution-dropdown {
+      margin-top: 1rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .solution-dropdown summary {
+      padding: 0.75rem 1rem;
+      background: var(--color-bg-alt);
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .solution-dropdown summary:hover {
+      background: #e8e8e8;
+    }
+
+    .solution-dropdown summary::before {
+      content: "💡";
+    }
+
+    .solution-dropdown[open] summary {
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .solution-content {
+      padding: 1rem;
+    }
+
+    .solution-content .code-tabs {
+      margin: 0;
+    }
+
+    /* Code mask container */
+    .code-mask-container {
+      position: relative;
+    }
+
+    .code-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 1rem;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 10;
+      overflow: auto;
+    }
+
+    .code-mask.revealed {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .mask-hint {
+      background: var(--color-accent);
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 1rem;
+      align-self: flex-start;
+    }
+
+    .mask-pseudocode {
+      background: transparent !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 0.9rem !important;
+    }
+
+    .mask-pseudocode code {
+      background: transparent !important;
+      color: #555 !important;
+    }
+
+    .pseudo-comment {
+      color: #2d7d46 !important;
+      font-weight: 600;
+    }
+
+    .pseudo-step {
+      color: #666 !important;
+      font-style: italic;
+      padding-left: 1rem;
+      display: block;
+      margin: 0.25rem 0;
+    }
+
+    .code-revealed {
+      margin: 0 !important;
+    }
+
+    /* Interactive Exercise Styles */
+    .interactive-exercise {
+      background: white;
+      border: 2px solid var(--color-border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .exercise-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .exercise-header h4 {
+      margin: 0;
+      color: var(--color-primary);
+    }
+
+    .exercise-lang-select {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .lang-btn {
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--color-border);
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .lang-btn:hover {
+      border-color: var(--color-primary);
+    }
+
+    .lang-btn.active {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .exercise-tasks {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: var(--color-bg-alt);
+      border-radius: 8px;
+    }
+
+    .exercise-tasks ol {
+      margin: 0.5rem 0 0 1.2rem;
+      padding: 0;
+    }
+
+    .exercise-tasks li {
+      margin-bottom: 0.3rem;
+    }
+
+    .code-editor-container {
+      margin: 1rem 0;
+    }
+
+    .editor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: #2d3748;
+      border-radius: 8px 8px 0 0;
+      color: white;
+    }
+
+    .editor-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .editor-hint {
+      font-size: 0.8rem;
+      color: #a0aec0;
+    }
+
+    .code-editor {
+      width: 100%;
+      min-height: 200px;
+      padding: 1rem;
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 0 0 8px 8px;
+      background: #1a202c;
+      color: #e2e8f0;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .code-editor:focus {
+      outline: 2px solid var(--color-accent);
+    }
+
+    .exercise-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-check-score, .btn-show-solution {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-check-score {
+      background: var(--color-primary);
+      color: white;
+    }
+
+    .btn-check-score:hover {
+      background: var(--color-secondary);
+      transform: translateY(-1px);
+    }
+
+    .btn-show-solution {
+      background: var(--color-accent);
+      color: white;
+    }
+
+    .btn-show-solution:hover {
+      background: #c77a3a;
+    }
+
+    .score-display {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--color-bg-alt);
+      border-radius: 8px;
+    }
+
+    .score-circle {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+    }
+
+    .score-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    .score-value.score-high { color: #38a169; }
+    .score-value.score-medium { color: #d69e2e; }
+    .score-value.score-low { color: #e53e3e; }
+
+    .score-label {
+      font-size: 1rem;
+      color: #666;
+    }
+
+    .score-feedback {
+      font-size: 0.9rem;
+      color: #555;
+      max-width: 300px;
+    }
+
+    .solution-steps {
+      margin-top: 1.5rem;
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .solution-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--color-bg-alt);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .solution-header h5 {
+      margin: 0;
+      color: var(--color-primary);
+    }
+
+    .step-counter {
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+    .solution-step {
+      padding: 1rem;
+      border-bottom: 1px solid var(--color-border);
+      animation: fadeIn 0.3s ease;
+    }
+
+    .solution-step:last-of-type {
+      border-bottom: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-description {
+      font-weight: 600;
+      color: var(--color-secondary);
+      margin-bottom: 0.75rem;
+      padding-left: 0.5rem;
+      border-left: 3px solid var(--color-accent);
+    }
+
+    .step-code {
+      margin: 0;
+      background: #1e1e1e;
+      border-radius: 6px;
+      padding: 1rem;
+    }
+
+    .step-code code {
+      color: #d4d4d4;
+    }
+
+    .solution-navigation {
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem;
+      background: var(--color-bg-alt);
+    }
+
+    .btn-prev-step, .btn-next-step {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--color-border);
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    .btn-prev-step:disabled, .btn-next-step:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
+    .code-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #888;
+      text-decoration: none;
+    }
+
+    /* Tooltip element created by JavaScript */
+    .tooltip-popup {
+      position: fixed;
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      max-width: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
+      line-height: 1.4;
+      text-align: left;
+      font-family: var(--font-body);
+      font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tooltip-popup.visible {
+      opacity: 1;
+    }
+
+    /* Small arrow pointer */
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1f2937;
+    }
+    .tooltip-popup.arrow-top::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #1f2937;
+    }
+    .tooltip-popup.arrow-left::after {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1f2937;
+    }
+    .tooltip-popup.arrow-right::after {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      border-left-color: #1f2937;
+    }
+  </style>
 </head>
 <body>
-  <div class="page-wrapper">
+  <!-- Password Protection Overlay -->
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
-      <a href="../index.html" class="sidebar-logo">Data Science Foundations</a>
-      <span class="sidebar-subtitle">Python, Stata & R for Causal Inference</span>
-      
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+
       <nav>
         <ul>
-          <li><a href="../index.html">Welcome</a></li>
-          <li><a href="01-getting-started.html" class="active"><span class="module-number">1</span> Getting Started</a></li>
-          <li><a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a></li>
-          <li><a href="03-data-cleaning.html"><span class="module-number">3</span> Data Cleaning</a></li>
-          <li><a href="04-data-analysis.html"><span class="module-number">4</span> Data Analysis & Visualization</a></li>
-          <li><a href="05-causal-inference.html"><span class="module-number">5</span> Causal Inference</a></li>
-          <li><a href="06-estimation.html"><span class="module-number">6</span> Estimation Methods</a></li>
-          <li><a href="../resources.html">Resources & References</a></li>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li class="active"><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
         </ul>
       </nav>
     </aside>
@@ -36,14 +558,14 @@
         <div class="module-header">
           <h1>1 &nbsp;Getting Started</h1>
           <div class="module-meta">
-            <span>⏱️ ~4 hours</span>
-            <span>📊 Setup & Basics</span>
-            <span>🎯 Beginner</span>
+            <span>~4 hours</span>
+            <span>Setup & Basics</span>
+            <span>Beginner</span>
           </div>
         </div>
 
         <div class="learning-objectives">
-          <h3>🎯 Learning Objectives</h3>
+          <h3>Learning Objectives</h3>
           <ul>
             <li>Install and configure Python, Stata, and R environments</li>
             <li>Understand the differences between the three languages</li>
@@ -57,79 +579,37 @@
           <h3>Table of Contents</h3>
           <ul>
             <li><a href="#why-three">1.1 Why Learn Three Languages?</a></li>
-            <li><a href="#installation">1.2 Installation Guide</a></li>
-            <li><a href="#basic-syntax">1.3 Basic Syntax Comparison</a></li>
-            <li><a href="#packages">1.4 Package Management</a></li>
-            <li><a href="#first-script">1.5 Your First Script</a></li>
-            <li><a href="#exercises">1.6 Exercises</a></li>
+            <li><a href="#basic-syntax">1.2 Basic Syntax Comparison</a></li>
+            <li><a href="#packages">1.3 Package Management</a></li>
+            <li><a href="#first-script">1.4 Your First Script</a></li>
+            <li><a href="#exercises">1.5 Exercises</a></li>
           </ul>
         </div>
 
         <h2 id="why-three">1.1 Why Learn Three Languages?</h2>
 
         <p>
-          You might wonder why we teach Python, Stata, and R simultaneously rather than focusing on just one. The answer is practical: different fields and organizations have standardized on different tools.
+          You might wonder why I teach Python, Stata, and R simultaneously rather than focusing on just one. The answer is practical: different fields and organizations have standardized on different tools, and being fluent in multiple languages makes you a more versatile researcher.
         </p>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Language</th>
-              <th>Strengths</th>
-              <th>Common Fields</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="lang-badge python">Python</span></td>
-              <td>General-purpose, machine learning, web scraping</td>
-              <td>Tech, data science, computer science</td>
-            </tr>
-            <tr>
-              <td><span class="lang-badge stata">Stata</span></td>
-              <td>Econometrics, survey data, reproducibility</td>
-              <td>Economics, political science, epidemiology</td>
-            </tr>
-            <tr>
-              <td><span class="lang-badge r">R</span></td>
-              <td>Statistical computing, visualization, packages</td>
-              <td>Statistics, biostatistics, social sciences</td>
-            </tr>
-          </tbody>
-        </table>
 
         <p>
           Learning all three gives you flexibility in your career and allows you to collaborate with researchers across disciplines. You'll also find that concepts learned in one language transfer easily to others.
         </p>
 
-        <h2 id="installation">1.2 Installation Guide</h2>
-
-        <h3>Python Installation</h3>
-        
-        <p>
-          We recommend installing Python through <strong>Anaconda</strong>, which includes Python along with commonly used data science packages. Download it from <a href="https://www.anaconda.com/download" target="_blank">anaconda.com/download</a>.
-        </p>
-
-        <div class="info-box tip">
-          <div class="info-box-title">💡 IDE Recommendation</div>
+        <div class="info-box note">
+          <div class="info-box-title">Installation & Setup</div>
           <p>
-            For Python, we recommend <strong>VS Code</strong> with the Python extension, or <strong>JupyterLab</strong> for interactive notebooks. Both come with Anaconda.
+            If you haven't already set up your programming environment, please refer to <a href="00-languages-platforms.html">Module 0: Languages & Platforms</a> for detailed installation guides for each language and IDE. That module covers:
           </p>
+          <ul style="margin-bottom: 0;">
+            <li><a href="00c-vscode-guide.html">VS Code</a> for Python development</li>
+            <li><a href="00b-stata-guide.html">Stata</a> interface and setup</li>
+            <li><a href="00a-rstudio-guide.html">RStudio</a> for R programming</li>
+            <li><a href="00d-notebooks-guide.html">Jupyter Notebooks</a> for interactive coding</li>
+          </ul>
         </div>
 
-        <h3>Stata Installation</h3>
-        
-        <p>
-          Stata requires a license and can be purchased from <a href="https://www.stata.com" target="_blank">stata.com</a>. Many universities provide site licenses for students. If you don't have access to Stata, you can follow along with the Python or R code—the concepts are identical.
-        </p>
-
-        <h3>R Installation</h3>
-        
-        <p>
-          Install R from <a href="https://cran.r-project.org/" target="_blank">CRAN</a>, then install <strong>RStudio</strong> from <a href="https://posit.co/download/rstudio-desktop/" target="_blank">posit.co</a>. RStudio is the standard IDE for R and makes working with the language much more pleasant.
-        </p>
-
-        <h2 id="basic-syntax">1.3 Basic Syntax Comparison</h2>
+        <h2 id="basic-syntax">1.2 Basic Syntax Comparison</h2>
 
         <p>
           Let's start by comparing basic syntax across all three languages. Understanding these fundamentals will make everything else easier.
@@ -147,92 +627,92 @@
             <button class="tab-button" data-lang="stata">Stata</button>
             <button class="tab-button" data-lang="r">R</button>
           </div>
-          
+
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Variables and basic types</span>
 
 <span class="code-comment"># Numeric types</span>
-<span class="code-variable">age</span> = <span class="code-number">25</span>                    <span class="code-comment"># Integer</span>
-<span class="code-variable">income</span> = <span class="code-number">55000.50</span>           <span class="code-comment"># Float</span>
+<span class="code-tooltip" data-tip="VARIABLE ASSIGNMENT: The '=' sign stores the value 25 into a container called 'age'. Think of it like putting a number into a labeled box. From now on, whenever you write 'age', Python knows you mean 25.">age</span> = <span class="code-tooltip" data-tip="INTEGER: A whole number without decimals. Python automatically recognizes this as an integer (int) type. Integers are used for counting, indexing, and exact quantities."><span class="code-number">25</span></span>                    <span class="code-comment"># Integer</span>
+<span class="code-tooltip" data-tip="VARIABLE NAMING: Use descriptive names like 'income' instead of 'x' or 'i'. This makes your code readable. Python variable names can't start with numbers and can't have spaces.">income</span> = <span class="code-tooltip" data-tip="FLOAT: A decimal number (short for 'floating-point'). Python automatically recognizes numbers with decimals as floats. Used for money, measurements, and continuous values."><span class="code-number">55000.50</span></span>           <span class="code-comment"># Float</span>
 
 <span class="code-comment"># String</span>
-<span class="code-variable">name</span> = <span class="code-string">"Alice"</span>              <span class="code-comment"># String (text)</span>
+<span class="code-variable">name</span> = <span class="code-tooltip" data-tip="STRING: Text data enclosed in quotes (single ' or double &quot; both work). Strings store names, addresses, descriptions—any text. The quotes tell Python 'this is text, not code'."><span class="code-string">"Alice"</span></span>              <span class="code-comment"># String (text)</span>
 
 <span class="code-comment"># Boolean</span>
-<span class="code-variable">is_employed</span> = <span class="code-keyword">True</span>          <span class="code-comment"># Boolean (True/False)</span>
+<span class="code-variable">is_employed</span> = <span class="code-tooltip" data-tip="BOOLEAN: A True/False value. Booleans are used for yes/no questions, conditions, and flags. Note: Python uses capital True/False (not true/false like some languages)."><span class="code-keyword">True</span></span>          <span class="code-comment"># Boolean (True/False)</span>
 
 <span class="code-comment"># Lists (arrays)</span>
-<span class="code-variable">scores</span> = [<span class="code-number">85</span>, <span class="code-number">92</span>, <span class="code-number">78</span>, <span class="code-number">95</span>]   <span class="code-comment"># List of numbers</span>
+<span class="code-tooltip" data-tip="LIST: An ordered collection of items inside square brackets []. Lists can hold any type of data and can be changed (add, remove, modify items). They're one of Python's most useful data structures.">scores</span> = <span class="code-tooltip" data-tip="LIST LITERAL: Creating a list by writing items between [ ]. Items are separated by commas. Order matters—the first item is at position 0, second at position 1, etc.">[<span class="code-number">85</span>, <span class="code-number">92</span>, <span class="code-number">78</span>, <span class="code-number">95</span>]</span>   <span class="code-comment"># List of numbers</span>
 
 <span class="code-comment"># Dictionary (key-value pairs)</span>
-<span class="code-variable">person</span> = {
-    <span class="code-string">"name"</span>: <span class="code-string">"Alice"</span>,
+<span class="code-tooltip" data-tip="DICTIONARY: A collection of key-value pairs inside curly braces {}. Unlike lists (which use position numbers), dictionaries use named keys to access values. Perfect for storing related information about one thing.">person</span> = {
+    <span class="code-tooltip" data-tip="KEY-VALUE PAIR: The key 'name' points to the value 'Alice'. You access it with person['name']. Keys must be unique; values can repeat."><span class="code-string">"name"</span>: <span class="code-string">"Alice"</span></span>,
     <span class="code-string">"age"</span>: <span class="code-number">25</span>,
     <span class="code-string">"city"</span>: <span class="code-string">"Boston"</span>
 }
 
 <span class="code-comment"># Print values</span>
-<span class="code-function">print</span>(f<span class="code-string">"Name: {name}, Age: {age}"</span>)
-<span class="code-function">print</span>(f<span class="code-string">"Average score: {sum(scores)/len(scores)}"</span>)</code></pre>
+<span class="code-tooltip" data-tip="PRINT FUNCTION: Displays output to the screen. The f before the string makes it an 'f-string' (formatted string), which lets you insert variables inside {curly braces}. This is Python 3.6+ syntax."><span class="code-function">print</span></span>(<span class="code-tooltip" data-tip="F-STRING: The 'f' prefix allows you to embed variables directly in the text using {variable_name}. Python replaces {name} with 'Alice' and {age} with 25 when running.">f<span class="code-string">"Name: {name}, Age: {age}"</span></span>)
+<span class="code-tooltip" data-tip="FUNCTION CALLS INSIDE F-STRINGS: You can put calculations inside the {} braces. Here, sum(scores) adds all numbers, len(scores) counts how many items, and dividing gives the average."><span class="code-function">print</span></span>(f<span class="code-string">"Average score: {<span class="code-tooltip" data-tip="SUM FUNCTION: Built-in function that adds up all items in a list. sum([85,92,78,95]) returns 350.">sum(scores)</span>/<span class="code-tooltip" data-tip="LEN FUNCTION: Built-in function that counts items in a list. len([85,92,78,95]) returns 4. Dividing sum by len gives the average.">len(scores)</span>}"</span>)</code></pre>
           </div>
-          
+
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Variables and basic types</span>
 
 <span class="code-comment">* Stata works with datasets, not individual variables</span>
 <span class="code-comment">* First, let's create some local macros (temporary variables)</span>
 
-<span class="code-keyword">local</span> age = <span class="code-number">25</span>
+<span class="code-tooltip" data-tip="LOCAL MACRO: Stata's way of storing temporary values. Unlike Python/R variables, Stata 'macros' are text substitutions—Stata literally replaces `age' with 25 before running. Local macros only exist in the current do-file or session."><span class="code-keyword">local</span></span> <span class="code-tooltip" data-tip="MACRO NAME: This creates a container named 'age'. To USE this value later, you write `age' (with backtick and apostrophe), not just age.">age</span> = <span class="code-number">25</span>
 <span class="code-keyword">local</span> income = <span class="code-number">55000.50</span>
-<span class="code-keyword">local</span> name <span class="code-string">"Alice"</span>
+<span class="code-tooltip" data-tip="STRING MACRO: For text values, you don't need the = sign. Stata stores 'Alice' in the macro. To use it: `name' (backtick + name + apostrophe)."><span class="code-keyword">local</span> name <span class="code-string">"Alice"</span></span>
 
 <span class="code-comment">* Display values</span>
-<span class="code-keyword">display</span> <span class="code-string">"Name: `name', Age: `age'"</span>
+<span class="code-tooltip" data-tip="DISPLAY COMMAND: Stata's way to print output. Like Python's print(). Shows results in the output window."><span class="code-keyword">display</span></span> <span class="code-tooltip" data-tip="MACRO SUBSTITUTION: The backtick ` and apostrophe ' around macro names tell Stata to insert the stored value. So `name' becomes Alice and `age' becomes 25."><span class="code-string">"Name: `name', Age: `age'"</span></span>
 
 <span class="code-comment">* Global macros persist across programs</span>
-<span class="code-keyword">global</span> project_name <span class="code-string">"My Analysis"</span>
-<span class="code-keyword">display</span> <span class="code-string">"$project_name"</span>
+<span class="code-tooltip" data-tip="GLOBAL MACRO: Unlike locals, globals persist across do-files and the entire Stata session. Use $ to access them (e.g., $project_name). Be careful—they can cause conflicts if you forget they exist!"><span class="code-keyword">global</span></span> project_name <span class="code-string">"My Analysis"</span>
+<span class="code-keyword">display</span> <span class="code-tooltip" data-tip="ACCESSING GLOBAL: Use $ before the name to get a global macro's value. This prints 'My Analysis'."><span class="code-string">"$project_name"</span></span>
 
 <span class="code-comment">* Create a small dataset</span>
-<span class="code-keyword">clear</span>
-<span class="code-keyword">input</span> score
+<span class="code-tooltip" data-tip="CLEAR: Removes any existing data from memory. Stata can only hold ONE dataset at a time in memory, so you must clear before loading new data. Always a good habit at the start of do-files."><span class="code-keyword">clear</span></span>
+<span class="code-tooltip" data-tip="INPUT COMMAND: Manually enter data row by row. First line names the variable(s), then each following line is a data row. 'end' signals you're done entering data. Useful for tiny datasets or examples."><span class="code-keyword">input</span></span> <span class="code-tooltip" data-tip="VARIABLE NAME: This creates a new variable called 'score' in your dataset. In Stata, variables are columns of data—each observation (row) has a value for 'score'.">score</span>
     <span class="code-number">85</span>
     <span class="code-number">92</span>
     <span class="code-number">78</span>
     <span class="code-number">95</span>
-<span class="code-keyword">end</span>
+<span class="code-tooltip" data-tip="END: Marks the end of the input block. After this, Stata has a dataset with 4 observations and 1 variable called 'score'."><span class="code-keyword">end</span></span>
 
 <span class="code-comment">* Calculate mean</span>
-<span class="code-keyword">summarize</span> score
-<span class="code-keyword">display</span> <span class="code-string">"Average score: "</span> r(mean)</code></pre>
+<span class="code-tooltip" data-tip="SUMMARIZE: Stata's workhorse command for descriptive statistics. Shows count, mean, std. dev., min, and max. Add ', detail' for percentiles, skewness, and kurtosis."><span class="code-keyword">summarize</span></span> score
+<span class="code-keyword">display</span> <span class="code-tooltip" data-tip="r(mean): Stata stores results in 'return values'. After summarize, r(mean) holds the calculated mean. This is how you capture and reuse statistics in Stata. Use 'return list' to see all available r() values."><span class="code-string">"Average score: "</span> r(mean)</span></code></pre>
           </div>
-          
+
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Variables and basic types</span>
 
 <span class="code-comment"># Numeric types</span>
-<span class="code-variable">age</span> <span class="code-operator"><-</span> <span class="code-number">25</span>                    <span class="code-comment"># Integer</span>
-<span class="code-variable">income</span> <span class="code-operator"><-</span> <span class="code-number">55000.50</span>           <span class="code-comment"># Numeric</span>
+<span class="code-tooltip" data-tip="VARIABLE ASSIGNMENT: In R, the arrow <- assigns values to variables. Think of it as 'put 25 into age'. You can also use = but <- is the R convention and makes code more readable.">age</span> <span class="code-tooltip" data-tip="ASSIGNMENT OPERATOR: The <- arrow points from the value to the variable name. It's R's preferred assignment style. Keyboard shortcut: Alt+- (Windows) or Option+- (Mac) in RStudio."><span class="code-operator"><-</span></span> <span class="code-number">25</span>                    <span class="code-comment"># Integer</span>
+<span class="code-variable">income</span> <span class="code-operator"><-</span> <span class="code-tooltip" data-tip="NUMERIC: R stores all numbers as 'numeric' by default (similar to Python's float). For true integers, you'd write 25L. But for most research work, numeric is fine."><span class="code-number">55000.50</span></span>           <span class="code-comment"># Numeric</span>
 
 <span class="code-comment"># Character (string)</span>
-<span class="code-variable">name</span> <span class="code-operator"><-</span> <span class="code-string">"Alice"</span>              <span class="code-comment"># Character</span>
+<span class="code-variable">name</span> <span class="code-operator"><-</span> <span class="code-tooltip" data-tip="CHARACTER: R's name for text/strings. Unlike Python, R doesn't distinguish between single and double quotes—both work. Character variables store text data like names, categories, etc."><span class="code-string">"Alice"</span></span>              <span class="code-comment"># Character</span>
 
 <span class="code-comment"># Logical (boolean)</span>
-<span class="code-variable">is_employed</span> <span class="code-operator"><-</span> <span class="code-keyword">TRUE</span>          <span class="code-comment"># Logical</span>
+<span class="code-variable">is_employed</span> <span class="code-operator"><-</span> <span class="code-tooltip" data-tip="LOGICAL: R's TRUE/FALSE values (like Python's bool). Must be all caps—TRUE and FALSE. You can abbreviate to T and F, but full words are clearer. Logical values are used for filtering and conditions."><span class="code-keyword">TRUE</span></span>          <span class="code-comment"># Logical</span>
 
 <span class="code-comment"># Vectors (R's primary data structure)</span>
-<span class="code-variable">scores</span> <span class="code-operator"><-</span> <span class="code-function">c</span>(<span class="code-number">85</span>, <span class="code-number">92</span>, <span class="code-number">78</span>, <span class="code-number">95</span>)   <span class="code-comment"># Numeric vector</span>
+<span class="code-tooltip" data-tip="VECTOR: R's fundamental data structure—a sequence of values of the SAME type. Unlike Python lists, vectors must be homogeneous (all numbers, all text, etc.). Most R operations work on entire vectors at once.">scores</span> <span class="code-operator"><-</span> <span class="code-tooltip" data-tip="c() FUNCTION: 'Combine' or 'concatenate' values into a vector. This is THE most common way to create vectors in R. c(85, 92, 78, 95) creates a numeric vector with 4 elements."><span class="code-function">c</span>(<span class="code-number">85</span>, <span class="code-number">92</span>, <span class="code-number">78</span>, <span class="code-number">95</span>)</span>   <span class="code-comment"># Numeric vector</span>
 
 <span class="code-comment"># List (like Python dictionary)</span>
-<span class="code-variable">person</span> <span class="code-operator"><-</span> <span class="code-function">list</span>(
+<span class="code-tooltip" data-tip="LIST: Unlike vectors, lists can hold DIFFERENT types of data together. Each element can be named (like a dictionary) or unnamed. Lists are flexible but slightly more complex to work with than vectors.">person</span> <span class="code-operator"><-</span> <span class="code-tooltip" data-tip="list() FUNCTION: Creates a named list. The syntax name = value assigns names to each element. Access with person$name or person[['name']]. Lists are R's way of grouping related but different types of data."><span class="code-function">list</span>(
   name = <span class="code-string">"Alice"</span>,
   age = <span class="code-number">25</span>,
   city = <span class="code-string">"Boston"</span>
-)
+)</span>
 
 <span class="code-comment"># Print values</span>
-<span class="code-function">cat</span>(<span class="code-string">"Name:"</span>, name, <span class="code-string">", Age:"</span>, age, <span class="code-string">"\n"</span>)
-<span class="code-function">cat</span>(<span class="code-string">"Average score:"</span>, <span class="code-function">mean</span>(scores), <span class="code-string">"\n"</span>)</code></pre>
+<span class="code-tooltip" data-tip="cat() FUNCTION: 'Concatenate and print'. Unlike print(), cat() combines multiple pieces and outputs them without quotes or line numbers. The \n at the end adds a line break."><span class="code-function">cat</span></span>(<span class="code-string">"Name:"</span>, name, <span class="code-string">", Age:"</span>, age, <span class="code-tooltip" data-tip="NEWLINE: The \n is an 'escape sequence' that creates a line break. Without it, the next output would appear on the same line."><span class="code-string">"\n"</span></span>)
+<span class="code-function">cat</span>(<span class="code-string">"Average score:"</span>, <span class="code-tooltip" data-tip="mean() FUNCTION: Calculates the arithmetic mean (average) of a vector. One of R's many built-in statistical functions. R was designed for statistics, so functions like mean(), median(), sd() are built right in."><span class="code-function">mean</span>(scores)</span>, <span class="code-string">"\n"</span>)</code></pre>
           </div>
         </div>
 
@@ -248,47 +728,47 @@
             <button class="tab-button" data-lang="stata">Stata</button>
             <button class="tab-button" data-lang="r">R</button>
           </div>
-          
+
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Arithmetic operations</span>
 
 <span class="code-variable">a</span> = <span class="code-number">10</span>
 <span class="code-variable">b</span> = <span class="code-number">3</span>
 
-<span class="code-function">print</span>(f<span class="code-string">"Addition: {a + b}"</span>)        <span class="code-comment"># 13</span>
-<span class="code-function">print</span>(f<span class="code-string">"Subtraction: {a - b}"</span>)     <span class="code-comment"># 7</span>
-<span class="code-function">print</span>(f<span class="code-string">"Multiplication: {a * b}"</span>)  <span class="code-comment"># 30</span>
-<span class="code-function">print</span>(f<span class="code-string">"Division: {a / b}"</span>)        <span class="code-comment"># 3.333...</span>
-<span class="code-function">print</span>(f<span class="code-string">"Integer division: {a // b}"</span>) <span class="code-comment"># 3</span>
-<span class="code-function">print</span>(f<span class="code-string">"Modulo: {a % b}"</span>)          <span class="code-comment"># 1</span>
-<span class="code-function">print</span>(f<span class="code-string">"Power: {a ** b}"</span>)          <span class="code-comment"># 1000</span>
+<span class="code-function">print</span>(f<span class="code-string">"Addition: {<span class="code-tooltip" data-tip="ADDITION: The + operator adds two numbers. Works with integers, floats, and even strings (concatenation). a + b = 10 + 3 = 13.">a + b</span>}"</span>)        <span class="code-comment"># 13</span>
+<span class="code-function">print</span>(f<span class="code-string">"Subtraction: {<span class="code-tooltip" data-tip="SUBTRACTION: The - operator subtracts the right number from the left. a - b = 10 - 3 = 7.">a - b</span>}"</span>)     <span class="code-comment"># 7</span>
+<span class="code-function">print</span>(f<span class="code-string">"Multiplication: {<span class="code-tooltip" data-tip="MULTIPLICATION: The * operator multiplies two numbers. a * b = 10 * 3 = 30. With strings, it repeats them: 'hi' * 3 = 'hihihi'.">a * b</span>}"</span>)  <span class="code-comment"># 30</span>
+<span class="code-function">print</span>(f<span class="code-string">"Division: {<span class="code-tooltip" data-tip="DIVISION: The / operator performs 'true division' and ALWAYS returns a decimal (float), even for whole numbers. 10 / 3 = 3.333...">a / b</span>}"</span>)        <span class="code-comment"># 3.333...</span>
+<span class="code-function">print</span>(f<span class="code-string">"Integer division: {<span class="code-tooltip" data-tip="INTEGER (FLOOR) DIVISION: The // operator divides and rounds DOWN to the nearest whole number. Useful when you need a whole number result. 10 // 3 = 3 (not 3.333).">a // b</span>}"</span>) <span class="code-comment"># 3</span>
+<span class="code-function">print</span>(f<span class="code-string">"Modulo: {<span class="code-tooltip" data-tip="MODULO (REMAINDER): The % operator gives the remainder after division. 10 % 3 = 1 because 10 = 3×3 + 1. Very useful for checking if numbers are even/odd (x % 2).">a % b</span>}"</span>)          <span class="code-comment"># 1</span>
+<span class="code-function">print</span>(f<span class="code-string">"Power: {<span class="code-tooltip" data-tip="EXPONENTIATION: The ** operator raises a number to a power. a ** b = 10³ = 10 × 10 × 10 = 1000. Note: Python uses ** not ^.">a ** b</span>}"</span>)          <span class="code-comment"># 1000</span>
 
 <span class="code-comment"># Comparison operators</span>
-<span class="code-function">print</span>(f<span class="code-string">"a > b: {a > b}"</span>)          <span class="code-comment"># True</span>
-<span class="code-function">print</span>(f<span class="code-string">"a == b: {a == b}"</span>)        <span class="code-comment"># False</span>
-<span class="code-function">print</span>(f<span class="code-string">"a != b: {a != b}"</span>)        <span class="code-comment"># True</span></code></pre>
+<span class="code-function">print</span>(f<span class="code-string">"a > b: {<span class="code-tooltip" data-tip="GREATER THAN: Compares two values and returns True if left is larger. 10 > 3 is True. Other comparisons: < (less than), >= (greater or equal), <= (less or equal).">a > b</span>}"</span>)          <span class="code-comment"># True</span>
+<span class="code-function">print</span>(f<span class="code-string">"a == b: {<span class="code-tooltip" data-tip="EQUALITY: Double equals == checks if two values are the same. Returns True or False. Note: = is assignment, == is comparison. This is a common source of bugs!">a == b</span>}"</span>)        <span class="code-comment"># False</span>
+<span class="code-function">print</span>(f<span class="code-string">"a != b: {<span class="code-tooltip" data-tip="NOT EQUAL: The != operator checks if two values are different. Returns True if they're NOT the same. 10 != 3 is True because 10 is not equal to 3.">a != b</span>}"</span>)        <span class="code-comment"># True</span></code></pre>
           </div>
-          
+
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Arithmetic operations</span>
 
 <span class="code-keyword">local</span> a = <span class="code-number">10</span>
 <span class="code-keyword">local</span> b = <span class="code-number">3</span>
 
-<span class="code-keyword">display</span> <span class="code-string">"Addition: "</span> `a' + `b'           <span class="code-comment">// 13</span>
+<span class="code-keyword">display</span> <span class="code-string">"Addition: "</span> <span class="code-tooltip" data-tip="MACRO REFERENCE: The backticks and apostrophes (`a' and `b') tell Stata to substitute the stored values. Stata replaces `a' with 10 and `b' with 3 before doing the math.">`a' + `b'</span>           <span class="code-comment">// 13</span>
 <span class="code-keyword">display</span> <span class="code-string">"Subtraction: "</span> `a' - `b'        <span class="code-comment">// 7</span>
 <span class="code-keyword">display</span> <span class="code-string">"Multiplication: "</span> `a' * `b'     <span class="code-comment">// 30</span>
 <span class="code-keyword">display</span> <span class="code-string">"Division: "</span> `a' / `b'           <span class="code-comment">// 3.333...</span>
-<span class="code-keyword">display</span> <span class="code-string">"Integer division: "</span> floor(`a'/`b') <span class="code-comment">// 3</span>
-<span class="code-keyword">display</span> <span class="code-string">"Modulo: "</span> mod(`a', `b')        <span class="code-comment">// 1</span>
-<span class="code-keyword">display</span> <span class="code-string">"Power: "</span> `a'^`b'               <span class="code-comment">// 1000</span>
+<span class="code-keyword">display</span> <span class="code-string">"Integer division: "</span> <span class="code-tooltip" data-tip="FLOOR FUNCTION: Stata's floor() rounds DOWN to the nearest integer. Unlike Python's //, Stata doesn't have a built-in integer division operator, so you use floor(a/b).">floor(`a'/`b')</span> <span class="code-comment">// 3</span>
+<span class="code-keyword">display</span> <span class="code-string">"Modulo: "</span> <span class="code-tooltip" data-tip="MOD FUNCTION: Stata's mod(a, b) gives the remainder when a is divided by b. mod(10, 3) = 1 because 10 = 3×3 + 1.">mod(`a', `b')</span>        <span class="code-comment">// 1</span>
+<span class="code-keyword">display</span> <span class="code-string">"Power: "</span> <span class="code-tooltip" data-tip="EXPONENTIATION: In Stata, use ^ for powers. `a'^`b' = 10^3 = 1000. Note: Stata uses ^ while Python uses **."> `a'^`b'</span>               <span class="code-comment">// 1000</span>
 
 <span class="code-comment">* Comparison operators (return 1 for true, 0 for false)</span>
-<span class="code-keyword">display</span> <span class="code-string">"a > b: "</span> (`a' > `b')           <span class="code-comment">// 1</span>
-<span class="code-keyword">display</span> <span class="code-string">"a == b: "</span> (`a' == `b')         <span class="code-comment">// 0</span>
-<span class="code-keyword">display</span> <span class="code-string">"a != b: "</span> (`a' != `b')         <span class="code-comment">// 1</span></code></pre>
+<span class="code-keyword">display</span> <span class="code-string">"a > b: "</span> <span class="code-tooltip" data-tip="COMPARISON IN STATA: Returns 1 for true, 0 for false (not True/False like Python). The parentheses () ensure the comparison is evaluated before display.">(`a' > `b')</span>           <span class="code-comment">// 1</span>
+<span class="code-keyword">display</span> <span class="code-string">"a == b: "</span> <span class="code-tooltip" data-tip="EQUALITY CHECK: Double equals == tests if values are the same. Returns 1 (true) or 0 (false). Single = is for assignment; double == is for comparison.">(`a' == `b')</span>         <span class="code-comment">// 0</span>
+<span class="code-keyword">display</span> <span class="code-string">"a != b: "</span> <span class="code-tooltip" data-tip="NOT EQUAL: The != operator checks if values are different. You can also use ~= in Stata for 'not equal'.">(`a' != `b')</span>         <span class="code-comment">// 1</span></code></pre>
           </div>
-          
+
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Arithmetic operations</span>
 
@@ -299,24 +779,24 @@
 <span class="code-function">cat</span>(<span class="code-string">"Subtraction:"</span>, a - b, <span class="code-string">"\n"</span>)       <span class="code-comment"># 7</span>
 <span class="code-function">cat</span>(<span class="code-string">"Multiplication:"</span>, a * b, <span class="code-string">"\n"</span>)    <span class="code-comment"># 30</span>
 <span class="code-function">cat</span>(<span class="code-string">"Division:"</span>, a / b, <span class="code-string">"\n"</span>)          <span class="code-comment"># 3.333...</span>
-<span class="code-function">cat</span>(<span class="code-string">"Integer division:"</span>, a %/% b, <span class="code-string">"\n"</span>) <span class="code-comment"># 3</span>
-<span class="code-function">cat</span>(<span class="code-string">"Modulo:"</span>, a %% b, <span class="code-string">"\n"</span>)           <span class="code-comment"># 1</span>
-<span class="code-function">cat</span>(<span class="code-string">"Power:"</span>, a ^ b, <span class="code-string">"\n"</span>)             <span class="code-comment"># 1000</span>
+<span class="code-function">cat</span>(<span class="code-string">"Integer division:"</span>, <span class="code-tooltip" data-tip="INTEGER DIVISION: R uses %/% (percent-slash-percent) for integer division. It divides and drops the decimal part. 10 %/% 3 = 3. The %...% pattern is how R does special operators.">a %/% b</span>, <span class="code-string">"\n"</span>) <span class="code-comment"># 3</span>
+<span class="code-function">cat</span>(<span class="code-string">"Modulo:"</span>, <span class="code-tooltip" data-tip="MODULO: R uses %% (double percent) for the remainder operation. 10 %% 3 = 1 because 10 = 3×3 + 1. Remember: %/% for integer division, %% for remainder.">a %% b</span>, <span class="code-string">"\n"</span>)           <span class="code-comment"># 1</span>
+<span class="code-function">cat</span>(<span class="code-string">"Power:"</span>, <span class="code-tooltip" data-tip="EXPONENTIATION: R uses ^ for powers, like Stata. a ^ b = 10^3 = 1000. You can also use ** in R (like Python), but ^ is more common in R code.">a ^ b</span>, <span class="code-string">"\n"</span>)             <span class="code-comment"># 1000</span>
 
 <span class="code-comment"># Comparison operators</span>
-<span class="code-function">cat</span>(<span class="code-string">"a > b:"</span>, a > b, <span class="code-string">"\n"</span>)            <span class="code-comment"># TRUE</span>
-<span class="code-function">cat</span>(<span class="code-string">"a == b:"</span>, a == b, <span class="code-string">"\n"</span>)          <span class="code-comment"># FALSE</span>
-<span class="code-function">cat</span>(<span class="code-string">"a != b:"</span>, a != b, <span class="code-string">"\n"</span>)          <span class="code-comment"># TRUE</span></code></pre>
+<span class="code-function">cat</span>(<span class="code-string">"a > b:"</span>, <span class="code-tooltip" data-tip="COMPARISON: Returns TRUE or FALSE (R's logical values). These comparisons work element-wise on vectors too—comparing each pair of elements.">a > b</span>, <span class="code-string">"\n"</span>)            <span class="code-comment"># TRUE</span>
+<span class="code-function">cat</span>(<span class="code-string">"a == b:"</span>, <span class="code-tooltip" data-tip="EQUALITY CHECK: Double == tests if values are equal. Returns TRUE or FALSE. For comparing multiple values at once, consider identical() or all.equal() for more robust comparisons.">a == b</span>, <span class="code-string">"\n"</span>)          <span class="code-comment"># FALSE</span>
+<span class="code-function">cat</span>(<span class="code-string">"a != b:"</span>, <span class="code-tooltip" data-tip="NOT EQUAL: The != operator checks if values differ. Returns TRUE if they're different. Useful for filtering: data[data$x != 0, ] keeps non-zero rows.">a != b</span>, <span class="code-string">"\n"</span>)          <span class="code-comment"># TRUE</span></code></pre>
           </div>
         </div>
 
-        <h2 id="packages">1.4 Package Management</h2>
+        <h2 id="packages">1.3 Package Management</h2>
 
         <p>
           One of the most powerful features of all three languages is their extensibility through packages (also called libraries or modules). Packages provide pre-written functions that save you from reinventing the wheel.
         </p>
 
-        <h3>Essential Packages for Data Science</h3>
+        <h3>Essential Packages for ProTools ER1</h3>
 
         <table>
           <thead>
@@ -363,29 +843,27 @@
             <button class="tab-button" data-lang="stata">Stata</button>
             <button class="tab-button" data-lang="r">R</button>
           </div>
-          
+
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Installing and importing packages</span>
 
 <span class="code-comment"># Install from command line/terminal:</span>
 <span class="code-comment"># pip install pandas numpy matplotlib seaborn</span>
-<span class="code-comment"># or with conda:</span>
-<span class="code-comment"># conda install pandas numpy matplotlib seaborn</span>
 
 <span class="code-comment"># Import packages in your script</span>
-<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>        <span class="code-comment"># Data manipulation</span>
-<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span>         <span class="code-comment"># Numerical computing</span>
-<span class="code-keyword">import</span> <span class="code-package">matplotlib.pyplot</span> <span class="code-keyword">as</span> <span class="code-variable">plt</span>  <span class="code-comment"># Plotting</span>
-<span class="code-keyword">import</span> <span class="code-package">seaborn</span> <span class="code-keyword">as</span> <span class="code-variable">sns</span>       <span class="code-comment"># Statistical visualization</span>
+<span class="code-tooltip" data-tip="IMPORT STATEMENT: Loads a package so you can use its functions. Without importing, Python doesn't know the package exists."><span class="code-keyword">import</span></span> <span class="code-tooltip" data-tip="PANDAS: The essential data manipulation library. Provides DataFrame (like Excel/Stata datasets) and tools for cleaning, filtering, and analyzing data. Every data project uses pandas."><span class="code-package">pandas</span></span> <span class="code-tooltip" data-tip="ALIAS: The 'as pd' creates a shortcut. Instead of writing pandas.read_csv(), you write pd.read_csv(). Standard convention—everyone uses pd for pandas."><span class="code-keyword">as</span> <span class="code-variable">pd</span></span>        <span class="code-comment"># Data manipulation</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="NUMPY: Numerical Python—handles arrays, matrices, and fast math operations. Many packages (including pandas) are built on numpy. Alias 'np' is universal convention."><span class="code-package">numpy</span></span> <span class="code-keyword">as</span> <span class="code-variable">np</span>         <span class="code-comment"># Numerical computing</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="MATPLOTLIB: Python's core plotting library. 'pyplot' is its state-based interface (easy to use). Alias 'plt' is standard. Creates line plots, scatter plots, histograms, etc."><span class="code-package">matplotlib.pyplot</span></span> <span class="code-keyword">as</span> <span class="code-variable">plt</span>  <span class="code-comment"># Plotting</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="SEABORN: Built on matplotlib, makes statistical visualizations beautiful by default. Great for heatmaps, distributions, and regression plots. Alias 'sns' is standard."><span class="code-package">seaborn</span></span> <span class="code-keyword">as</span> <span class="code-variable">sns</span>       <span class="code-comment"># Statistical visualization</span>
 
 <span class="code-comment"># Import specific functions</span>
-<span class="code-keyword">from</span> <span class="code-package">scipy</span> <span class="code-keyword">import</span> stats
-<span class="code-keyword">from</span> <span class="code-package">statsmodels.formula.api</span> <span class="code-keyword">import</span> ols
+<span class="code-tooltip" data-tip="FROM...IMPORT: Instead of importing the whole package, grab just what you need. More efficient and makes code clearer about what functions you're actually using."><span class="code-keyword">from</span></span> <span class="code-tooltip" data-tip="SCIPY: Scientific Python—advanced statistics, optimization, signal processing. The 'stats' submodule has probability distributions, statistical tests (t-tests, chi-square), etc."><span class="code-package">scipy</span></span> <span class="code-keyword">import</span> stats
+<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="STATSMODELS: For regression analysis and statistical modeling. 'formula.api' lets you write R-style formulas like 'y ~ x1 + x2'. Great for econometrics and reproducing Stata results."><span class="code-package">statsmodels.formula.api</span></span> <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="OLS: Ordinary Least Squares regression function. Use like: model = ols('income ~ education + experience', data=df).fit(). Returns coefficient estimates, standard errors, R-squared, etc.">ols</span>
 
 <span class="code-comment"># Check package version</span>
-<span class="code-function">print</span>(f<span class="code-string">"Pandas version: {pd.__version__}"</span>)</code></pre>
+<span class="code-function">print</span>(f<span class="code-string">"Pandas version: {<span class="code-tooltip" data-tip="DUNDER VERSION: The __version__ attribute (double underscores = 'dunder') stores the package version number. Useful for checking compatibility or reporting in papers.">pd.__version__</span>}"</span>)</code></pre>
           </div>
-          
+
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Installing and using packages</span>
 
@@ -393,53 +871,53 @@
 <span class="code-comment">* User-written packages come from SSC (Statistical Software Components)</span>
 
 <span class="code-comment">* Install a package from SSC</span>
-<span class="code-keyword">ssc install</span> rdrobust      <span class="code-comment">// RD estimation</span>
-<span class="code-keyword">ssc install</span> outreg2       <span class="code-comment">// Export regression tables</span>
-<span class="code-keyword">ssc install</span> estout        <span class="code-comment">// More regression output options</span>
+<span class="code-tooltip" data-tip="SSC INSTALL: The Statistical Software Components archive is Stata's main package repository. Run this once—after installation, the package is always available. Like pip install for Python."><span class="code-keyword">ssc install</span></span> <span class="code-tooltip" data-tip="RDROBUST: Package for regression discontinuity designs. Implements optimal bandwidth selection and robust confidence intervals. Essential for RD analysis in economics.">rdrobust</span>      <span class="code-comment">// RD estimation</span>
+<span class="code-keyword">ssc install</span> <span class="code-tooltip" data-tip="OUTREG2: Creates publication-ready regression tables. Exports to Word, Excel, or LaTeX. Automatically formats coefficients, standard errors, significance stars.">outreg2</span>       <span class="code-comment">// Export regression tables</span>
+<span class="code-keyword">ssc install</span> <span class="code-tooltip" data-tip="ESTOUT: Powerful package for regression output. More flexible than outreg2. Can create custom table formats and export multiple model specifications side-by-side.">estout</span>        <span class="code-comment">// More regression output options</span>
 
 <span class="code-comment">* Install from GitHub (using net install)</span>
-<span class="code-keyword">net install</span> did, from(<span class="code-string">"https://raw.githubusercontent.com/bcallaway11/did/master/stata/"</span>) replace
+<span class="code-tooltip" data-tip="NET INSTALL: Installs packages from any URL. Used for packages not on SSC, like newer research code hosted on GitHub. The 'replace' option updates if already installed."><span class="code-keyword">net install</span></span> <span class="code-tooltip" data-tip="DID PACKAGE: Implements Callaway & Sant'Anna (2021) difference-in-differences estimator for staggered treatment timing. Addresses bias in traditional two-way fixed effects.">did</span>, from(<span class="code-string">"https://raw.githubusercontent.com/bcallaway11/did/master/stata/"</span>) <span class="code-tooltip" data-tip="REPLACE OPTION: If the package is already installed, replace overwrites it with the new version. Without this, Stata would error if the package exists.">replace</span>
 
 <span class="code-comment">* Update all installed packages</span>
-<span class="code-keyword">adoupdate</span>, update
+<span class="code-tooltip" data-tip="ADOUPDATE: Checks all your installed user-written packages for updates. The ', update' option automatically installs any available updates. Run periodically to stay current."><span class="code-keyword">adoupdate</span>, update</span>
 
 <span class="code-comment">* Search for packages</span>
-<span class="code-keyword">search</span> difference-in-differences
+<span class="code-tooltip" data-tip="SEARCH: Finds packages related to your topic. Searches SSC, Stata Journal, and other repositories. Useful when you don't know the exact package name."><span class="code-keyword">search</span></span> difference-in-differences
 
 <span class="code-comment">* Check installed packages</span>
-<span class="code-keyword">ado dir</span></code></pre>
+<span class="code-tooltip" data-tip="ADO DIR: Lists all your installed user-written packages. Shows package name, version, and where it's stored. Useful for troubleshooting and documentation."><span class="code-keyword">ado dir</span></span></code></pre>
           </div>
-          
+
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Installing and loading packages</span>
 
 <span class="code-comment"># Install packages (only need to do once)</span>
-<span class="code-function">install.packages</span>(<span class="code-string">"tidyverse"</span>)   <span class="code-comment"># Includes dplyr, ggplot2, tidyr, etc.</span>
-<span class="code-function">install.packages</span>(<span class="code-string">"fixest"</span>)      <span class="code-comment"># Fast fixed effects estimation</span>
-<span class="code-function">install.packages</span>(<span class="code-string">"rdrobust"</span>)    <span class="code-comment"># Regression discontinuity</span>
+<span class="code-tooltip" data-tip="INSTALL.PACKAGES: Downloads and installs a package from CRAN (R's package repository). Run once—the package stays on your computer. Must be in quotes."><span class="code-function">install.packages</span></span>(<span class="code-tooltip" data-tip="TIDYVERSE: A collection of 8+ packages designed to work together: dplyr (data manipulation), ggplot2 (visualization), tidyr (reshaping), readr (importing), and more. Installing tidyverse gives you all of them."><span class="code-string">"tidyverse"</span></span>)   <span class="code-comment"># Includes dplyr, ggplot2, tidyr, etc.</span>
+<span class="code-function">install.packages</span>(<span class="code-tooltip" data-tip="FIXEST: Fast fixed effects estimation. Much faster than lfe or plm for large datasets. Supports multiple fixed effects, instrumental variables, and clustered standard errors."><span class="code-string">"fixest"</span></span>)      <span class="code-comment"># Fast fixed effects estimation</span>
+<span class="code-function">install.packages</span>(<span class="code-tooltip" data-tip="RDROBUST: Regression discontinuity package—same as Stata's. Implements optimal bandwidth selection, robust inference. Essential for RD designs in economics."><span class="code-string">"rdrobust"</span></span>)    <span class="code-comment"># Regression discontinuity</span>
 
 <span class="code-comment"># Load packages (do every session)</span>
-<span class="code-function">library</span>(<span class="code-package">tidyverse</span>)   <span class="code-comment"># Data manipulation & viz</span>
+<span class="code-tooltip" data-tip="LIBRARY: Activates an installed package for use. Unlike install.packages() (run once), library() must be called every time you start R. Without it, functions won't be recognized."><span class="code-function">library</span></span>(<span class="code-tooltip" data-tip="NO QUOTES NEEDED: Inside library(), package names don't need quotes. But install.packages() DOES need quotes. This inconsistency is a quirk of R."><span class="code-package">tidyverse</span></span>)   <span class="code-comment"># Data manipulation & viz</span>
 <span class="code-function">library</span>(<span class="code-package">fixest</span>)      <span class="code-comment"># Econometrics</span>
-<span class="code-function">library</span>(<span class="code-package">haven</span>)       <span class="code-comment"># Read Stata/SPSS/SAS files</span>
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="HAVEN: Reads data files from Stata (.dta), SPSS (.sav), and SAS (.sas7bdat). Preserves variable labels and value labels. Essential for working with Stata datasets in R."><span class="code-package">haven</span></span>)       <span class="code-comment"># Read Stata/SPSS/SAS files</span>
 
 <span class="code-comment"># Install from GitHub</span>
 <span class="code-comment"># install.packages("devtools")</span>
 <span class="code-comment"># devtools::install_github("author/package")</span>
 
 <span class="code-comment"># Check package version</span>
-<span class="code-function">packageVersion</span>(<span class="code-string">"tidyverse"</span>)</code></pre>
+<span class="code-tooltip" data-tip="PACKAGEVERSION: Returns the version number of an installed package. Useful for debugging and ensuring you have the right version for replication."><span class="code-function">packageVersion</span></span>(<span class="code-string">"tidyverse"</span>)</code></pre>
           </div>
         </div>
 
-        <h2 id="first-script">1.5 Your First Script</h2>
+        <h2 id="first-script">1.4 Your First Script</h2>
 
         <p>
           Let's put everything together by writing a simple script that loads data, performs basic calculations, and creates a visualization. We'll use the famous <strong>Gapminder</strong> dataset, which contains life expectancy, GDP per capita, and population data for countries over time.
         </p>
 
         <div class="info-box note">
-          <div class="info-box-title">📊 Dataset: Gapminder</div>
+          <div class="info-box-title">Dataset: Gapminder</div>
           <p>
             The Gapminder dataset was popularized by Hans Rosling's famous TED talks. It's an excellent dataset for learning because it's clean, intuitive, and contains both numeric and categorical variables. Access it via the <a href="https://www.gapminder.org/data/" target="_blank">Gapminder website</a> or through packages in each language.
           </p>
@@ -451,7 +929,7 @@
             <button class="tab-button" data-lang="stata">Stata</button>
             <button class="tab-button" data-lang="r">R</button>
           </div>
-          
+
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: First script with Gapminder data</span>
 <span class="code-comment"># Script: 01_gapminder_analysis.py</span>
@@ -489,7 +967,7 @@
 
 <span class="code-comment"># Create a scatter plot</span>
 plt.figure(figsize=(<span class="code-number">10</span>, <span class="code-number">6</span>))
-plt.scatter(gap_2007[<span class="code-string">'gdpPercap'</span>], gap_2007[<span class="code-string">'lifeExp'</span>], 
+plt.scatter(gap_2007[<span class="code-string">'gdpPercap'</span>], gap_2007[<span class="code-string">'lifeExp'</span>],
             s=gap_2007[<span class="code-string">'pop'</span>]/<span class="code-number">1e6</span>, alpha=<span class="code-number">0.6</span>)
 plt.xlabel(<span class="code-string">'GDP per capita'</span>)
 plt.ylabel(<span class="code-string">'Life expectancy'</span>)
@@ -498,13 +976,13 @@ plt.xscale(<span class="code-string">'log'</span>)
 plt.savefig(<span class="code-string">'gapminder_plot.png'</span>, dpi=<span class="code-number">150</span>)
 plt.show()</code></pre>
           </div>
-          
+
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: First script with Gapminder data</span>
 <span class="code-comment">* Script: 01_gapminder_analysis.do</span>
 
 <span class="code-comment">* Set working directory (change to your path)</span>
-<span class="code-keyword">cd</span> <span class="code-string">"~/Documents/data_science_course"</span>
+<span class="code-keyword">cd</span> <span class="code-string">"~/Documents/protools_er1"</span>
 
 <span class="code-comment">* Load Gapminder data from URL</span>
 <span class="code-keyword">import</span> delimited <span class="code-string">"https://raw.githubusercontent.com/jennybc/gapminder/main/data-raw/08_gap-every-five-years.tsv"</span>, clear
@@ -538,7 +1016,7 @@ plt.show()</code></pre>
 
 <span class="code-keyword">graph export</span> <span class="code-string">"gapminder_plot.png"</span>, replace</code></pre>
           </div>
-          
+
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: First script with Gapminder data</span>
 <span class="code-comment"># Script: 01_gapminder_analysis.R</span>
@@ -569,7 +1047,7 @@ plt.show()</code></pre>
 <span class="code-function">print</span>(life_exp_by_continent)
 
 <span class="code-comment"># Create a scatter plot with ggplot2</span>
-<span class="code-function">ggplot</span>(gap_2007, <span class="code-function">aes</span>(x = gdpPercap, y = lifeExp, 
+<span class="code-function">ggplot</span>(gap_2007, <span class="code-function">aes</span>(x = gdpPercap, y = lifeExp,
                       size = pop, color = continent)) +
   <span class="code-function">geom_point</span>(alpha = <span class="code-number">0.7</span>) +
   <span class="code-function">scale_x_log10</span>(labels = scales::comma) +
@@ -586,38 +1064,157 @@ plt.show()</code></pre>
           </div>
         </div>
 
-        <h2 id="exercises">1.6 Exercises</h2>
+        <h2 id="exercises">1.5 Exercises</h2>
 
-        <div class="exercise">
-          <h4>📝 Exercise 1.1: Setup Verification</h4>
-          <p>
-            Verify your installation is working correctly by running the following commands and checking the output:
-          </p>
-          <ol>
-            <li>Print "Hello, Data Science!" to the console</li>
-            <li>Calculate 2^10 (2 to the power of 10)</li>
-            <li>Create a list/vector of numbers 1-5 and calculate their sum</li>
-          </ol>
+        <!-- Interactive Exercise 1.1 -->
+        <div class="interactive-exercise" data-exercise="1.1">
+          <div class="exercise-header">
+            <h4>Exercise 1.1: Setup Verification</h4>
+            <div class="exercise-lang-select">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+          </div>
+
+          <div class="exercise-tasks">
+            <p>Write code to accomplish these tasks:</p>
+            <ol>
+              <li>Print "Hello, ProTools ER1!" to the console</li>
+              <li>Calculate 2<sup>10</sup> (2 to the power of 10)</li>
+              <li>Create a list/vector of numbers 1-5 and calculate their sum</li>
+            </ol>
+          </div>
+
+          <div class="code-editor-container">
+            <div class="editor-header">
+              <span class="editor-title">Your Solution</span>
+              <span class="editor-hint">Write your code below, then check your score</span>
+            </div>
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here...
+# Task 1: Print greeting
+
+# Task 2: Calculate 2^10
+
+# Task 3: Sum of 1-5
+"></textarea>
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here...
+* Task 1: Print greeting
+
+* Task 2: Calculate 2^10
+
+* Task 3: Sum of 1-5
+"></textarea>
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here...
+# Task 1: Print greeting
+
+# Task 2: Calculate 2^10
+
+# Task 3: Sum of 1-5
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <!-- Python Solutions -->
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Print a greeting message</div>
+              <pre class="step-code"><code><span class="code-comment"># Task 1: Print greeting</span>
+<span class="code-function">print</span>(<span class="code-string">"Hello, ProTools ER1!"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Calculate 2 to the power of 10 using ** operator</div>
+              <pre class="step-code"><code><span class="code-comment"># Task 2: Calculate 2^10</span>
+<span class="code-function">print</span>(<span class="code-number">2</span> ** <span class="code-number">10</span>)  <span class="code-comment"># Output: 1024</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a list and sum its elements</div>
+              <pre class="step-code"><code><span class="code-comment"># Task 3: Sum of 1-5</span>
+numbers = [<span class="code-number">1</span>, <span class="code-number">2</span>, <span class="code-number">3</span>, <span class="code-number">4</span>, <span class="code-number">5</span>]
+<span class="code-function">print</span>(<span class="code-function">sum</span>(numbers))  <span class="code-comment"># Output: 15</span></code></pre>
+            </div>
+
+            <!-- Stata Solutions -->
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Display a greeting message</div>
+              <pre class="step-code"><code><span class="code-comment">* Task 1: Print greeting</span>
+<span class="code-keyword">display</span> <span class="code-string">"Hello, ProTools ER1!"</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Calculate 2 to the power of 10 using ^ operator</div>
+              <pre class="step-code"><code><span class="code-comment">* Task 2: Calculate 2^10</span>
+<span class="code-keyword">display</span> <span class="code-number">2</span>^<span class="code-number">10</span>  <span class="code-comment">// Output: 1024</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create observations and sum them</div>
+              <pre class="step-code"><code><span class="code-comment">* Task 3: Sum of 1-5</span>
+<span class="code-keyword">clear</span>
+<span class="code-keyword">set obs</span> <span class="code-number">5</span>
+<span class="code-keyword">gen</span> numbers = _n
+<span class="code-keyword">summarize</span> numbers  <span class="code-comment">// Sum shown in output</span></code></pre>
+            </div>
+
+            <!-- R Solutions -->
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Print a greeting message</div>
+              <pre class="step-code"><code><span class="code-comment"># Task 1: Print greeting</span>
+<span class="code-function">print</span>(<span class="code-string">"Hello, ProTools ER1!"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Calculate 2 to the power of 10 using ^ operator</div>
+              <pre class="step-code"><code><span class="code-comment"># Task 2: Calculate 2^10</span>
+<span class="code-function">print</span>(<span class="code-number">2</span>^<span class="code-number">10</span>)  <span class="code-comment"># Output: 1024</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a vector and sum its elements</div>
+              <pre class="step-code"><code><span class="code-comment"># Task 3: Sum of 1-5</span>
+numbers <- <span class="code-number">1</span>:<span class="code-number">5</span>
+<span class="code-function">print</span>(<span class="code-function">sum</span>(numbers))  <span class="code-comment"># Output: 15</span></code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
         </div>
 
+        <!-- Exercise 1.2 (simpler version) -->
         <div class="exercise">
-          <h4>📝 Exercise 1.2: Gapminder Exploration</h4>
-          <p>
-            Using the Gapminder dataset:
-          </p>
+          <h4>Exercise 1.2: Gapminder Exploration</h4>
+          <p>Using the Gapminder dataset, answer these questions in your preferred language:</p>
           <ol>
             <li>How many unique countries are in the dataset?</li>
             <li>What was the average GDP per capita in 1952 vs 2007?</li>
             <li>Which country had the highest life expectancy in 2007?</li>
             <li>Create a line plot showing life expectancy over time for a country of your choice</li>
           </ol>
+          <div class="info-box tip">
+            <div class="info-box-title">Hint</div>
+            <p>Load the data from: <code>https://raw.githubusercontent.com/jennybc/gapminder/main/data-raw/08_gap-every-five-years.tsv</code></p>
+          </div>
         </div>
 
+        <!-- Exercise 1.3 -->
         <div class="exercise">
-          <h4>📝 Exercise 1.3: Package Installation</h4>
-          <p>
-            Install the following packages, which we'll use throughout the course:
-          </p>
+          <h4>Exercise 1.3: Package Installation</h4>
+          <p>Install the following packages, which I use throughout the course:</p>
           <ul>
             <li><strong>Python:</strong> <code>pandas</code>, <code>numpy</code>, <code>matplotlib</code>, <code>seaborn</code>, <code>statsmodels</code></li>
             <li><strong>Stata:</strong> <code>outreg2</code>, <code>rdrobust</code>, <code>estout</code></li>
@@ -635,15 +1232,366 @@ plt.show()</code></pre>
         </div>
 
         <div class="nav-footer">
-          <a href="../index.html" class="nav-link prev">Welcome</a>
+          <a href="00-languages-platforms.html" class="nav-link prev">Module 0: Languages & Platforms</a>
           <a href="02-data-harnessing.html" class="nav-link next">Module 2: Data Harnessing</a>
         </div>
       </div>
     </main>
   </div>
 
-  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">☰</button>
-  
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I'm the ProTools ER1 course assistant. I can help you with questions about Python, Stata, R, causal inference methods, or any of the course material. How can I assist you today?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question about the course..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+
   <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Interactive Exercise Script -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Exercise scoring patterns for each language
+    const exercisePatterns = {
+      '1.1': {
+        python: {
+          patterns: [
+            // Print greeting - accepts: print("Hello..."), print('Hello...'), f-strings, variables
+            { regex: /print\s*\(.*["'].*[Hh]ello.*["'].*\)|print\s*\([^)]*[Hh]ello|print\s*\(.*[Pp]ro[Tt]ools|print\s*\(.*greeting|print\s*\(.*message/i, points: 33, description: 'Print greeting' },
+            // Calculate 2^10 - accepts: 2**10, pow(2,10), 2^10 in comments, storing result in variable
+            { regex: /2\s*\*\*\s*10|pow\s*\(\s*2\s*,\s*10\s*\)|math\.pow\s*\(\s*2\s*,\s*10|1024|2\^10/i, points: 33, description: 'Calculate 2^10' },
+            // Sum function - accepts: sum(), numpy sum, pandas sum, reduce with add
+            { regex: /sum\s*\(|\.sum\s*\(|np\.sum|numpy\.sum|reduce\s*\(.*add/i, points: 17, description: 'Use sum function' },
+            // Create list 1-5 - accepts: literal list, range(), list comprehension, numpy arange
+            { regex: /\[\s*1\s*,\s*2\s*,\s*3\s*,\s*4\s*,\s*5\s*\]|range\s*\(\s*1\s*,\s*6\s*\)|range\s*\(\s*5\s*\)|list\s*\(\s*range|\[\s*i\s+for\s+i\s+in|np\.arange\s*\(\s*1\s*,\s*6|numpy\.arange/i, points: 17, description: 'Create list 1-5' }
+          ]
+        },
+        stata: {
+          patterns: [
+            // Display greeting - accepts: display, di, dis (Stata abbreviations), with various quotes
+            { regex: /di(splay)?\s*["'`].*[Hh]ello|di(splay)?\s*["'`].*[Pp]ro[Tt]ools|di\s+["'`]/i, points: 33, description: 'Display greeting' },
+            // Calculate 2^10 - accepts: display 2^10, di 2^10, scalar, local with result, 1024
+            { regex: /di(splay)?\s+2\s*\^\s*10|di\s+2\s*\*\*\s*10|scalar.*2\s*\^\s*10|local.*2\s*\^\s*10|1024|=\s*2\s*\^\s*10/i, points: 33, description: 'Calculate 2^10' },
+            // Summarize/sum - accepts: summarize, sum, tabstat, total, collapse (sum)
+            { regex: /summarize|sum\s|tabstat|total\s|collapse.*sum|su\s+|sum,|mean\s/i, points: 17, description: 'Summarize/sum' },
+            // Generate numbers - accepts: gen, generate, egen, forvalues, numlist, _n, seq()
+            { regex: /gen(erate)?\s+|egen\s+|_n|forval(ues)?|numlist|seq\s*\(|set\s+obs/i, points: 17, description: 'Generate numbers' }
+          ]
+        },
+        r: {
+          patterns: [
+            // Print greeting - accepts: print(), cat(), paste(), message(), writeLines(), sprintf
+            { regex: /print\s*\(.*["'].*[Hh]ello|cat\s*\(.*["'].*[Hh]ello|message\s*\(.*[Hh]ello|writeLines\s*\(|paste.*[Hh]ello|sprintf.*[Hh]ello|print\s*\(.*[Pp]ro[Tt]ools|cat\s*\(.*[Pp]ro[Tt]ools/i, points: 33, description: 'Print greeting' },
+            // Calculate 2^10 - accepts: 2^10, 2**10, 1024, storing in variable
+            { regex: /2\s*\^\s*10|2\s*\*\*\s*10|1024|<-\s*2\s*\^|=\s*2\s*\^/i, points: 33, description: 'Calculate 2^10' },
+            // Sum function - accepts: sum(), Reduce("+"), colSums, rowSums, aggregate with sum
+            { regex: /sum\s*\(|Reduce\s*\(\s*["']\+["']|colSums|rowSums|aggregate.*sum|summarise.*sum|summarize.*sum/i, points: 17, description: 'Use sum function' },
+            // Create vector 1-5 - accepts: 1:5, c(1,2,3,4,5), seq(), sequence()
+            { regex: /1\s*:\s*5|c\s*\(\s*1\s*,\s*2\s*,\s*3\s*,\s*4\s*,\s*5\s*\)|seq\s*\(\s*1\s*,\s*5|seq\s*\(\s*5\s*\)|seq_len\s*\(\s*5|sequence\s*\(/i, points: 17, description: 'Create vector 1-5' }
+          ]
+        }
+      }
+    };
+
+    // Initialize interactive exercises
+    document.querySelectorAll('.interactive-exercise').forEach(exercise => {
+      const exerciseId = exercise.dataset.exercise;
+      let currentLang = 'python';
+      let currentStep = 0;
+      let hasCheckedScore = false;
+
+      // Language switching
+      exercise.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const lang = this.dataset.lang;
+          currentLang = lang;
+
+          // Update button states
+          exercise.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+
+          // Switch editor
+          exercise.querySelectorAll('.code-editor').forEach(editor => {
+            editor.style.display = editor.dataset.lang === lang ? 'block' : 'none';
+          });
+
+          // Reset solution steps if visible
+          if (hasCheckedScore) {
+            resetSolutionSteps();
+          }
+        });
+      });
+
+      // Check score button
+      const checkBtn = exercise.querySelector('.btn-check-score');
+      const scoreDisplay = exercise.querySelector('.score-display');
+      const scoreValue = exercise.querySelector('.score-value');
+      const scoreFeedback = exercise.querySelector('.score-feedback');
+      const showSolutionBtn = exercise.querySelector('.btn-show-solution');
+
+      checkBtn.addEventListener('click', function() {
+        const editor = exercise.querySelector(`.code-editor[data-lang="${currentLang}"]`);
+        const code = editor.value;
+        const patterns = exercisePatterns[exerciseId]?.[currentLang]?.patterns || [];
+
+        let score = 0;
+        let matched = [];
+        let missed = [];
+
+        patterns.forEach(p => {
+          if (p.regex.test(code)) {
+            score += p.points;
+            matched.push(p.description);
+          } else {
+            missed.push(p.description);
+          }
+        });
+
+        // Cap at 100
+        score = Math.min(100, score);
+
+        // Update display
+        scoreValue.textContent = score;
+        scoreValue.className = 'score-value';
+        if (score >= 80) scoreValue.classList.add('score-high');
+        else if (score >= 50) scoreValue.classList.add('score-medium');
+        else scoreValue.classList.add('score-low');
+
+        // Feedback
+        if (score === 100) {
+          scoreFeedback.textContent = 'Perfect! All tasks completed correctly.';
+        } else if (score >= 70) {
+          scoreFeedback.textContent = `Good work! Missing: ${missed.join(', ')}.`;
+        } else if (score >= 40) {
+          scoreFeedback.textContent = `Getting there. Missing: ${missed.join(', ')}.`;
+        } else {
+          scoreFeedback.textContent = `Keep trying! Check: ${missed.slice(0, 2).join(', ')}.`;
+        }
+
+        scoreDisplay.style.display = 'flex';
+        showSolutionBtn.style.display = 'inline-block';
+        hasCheckedScore = true;
+      });
+
+      // Show solution step by step
+      const solutionSteps = exercise.querySelector('.solution-steps');
+      const prevBtn = exercise.querySelector('.btn-prev-step');
+      const nextBtn = exercise.querySelector('.btn-next-step');
+      const currentStepEl = exercise.querySelector('.current-step');
+      const totalStepsEl = exercise.querySelector('.total-steps');
+
+      function resetSolutionSteps() {
+        currentStep = 0;
+        currentStepEl.textContent = '0';
+        exercise.querySelectorAll('.solution-step').forEach(step => {
+          step.style.display = 'none';
+        });
+        updateNavButtons();
+      }
+
+      function updateNavButtons() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        totalStepsEl.textContent = totalSteps;
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep >= totalSteps;
+        nextBtn.textContent = currentStep >= totalSteps ? 'Complete' : 'Next Step';
+      }
+
+      function showStep(stepNum) {
+        const steps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`);
+        steps.forEach((step, idx) => {
+          step.style.display = (idx + 1) <= stepNum ? 'block' : 'none';
+        });
+        currentStepEl.textContent = stepNum;
+      }
+
+      showSolutionBtn.addEventListener('click', function() {
+        solutionSteps.style.display = 'block';
+        resetSolutionSteps();
+        this.style.display = 'none';
+      });
+
+      nextBtn.addEventListener('click', function() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        if (currentStep < totalSteps) {
+          currentStep++;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      prevBtn.addEventListener('click', function() {
+        if (currentStep > 0) {
+          currentStep--;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      // Initialize
+      updateNavButtons();
+    });
+  });
+  </script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    // Create a single tooltip element that will be reused
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup'; // Reset classes
+
+      // Get target position
+      const targetRect = target.getBoundingClientRect();
+
+      // Find the code block container (pre or .tab-content or .code-tabs)
+      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
+      let containerRect = container ? container.getBoundingClientRect() : {
+        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
+      };
+
+      // Use viewport as fallback boundary
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10; // Minimum distance from edges
+
+      // Temporarily show to measure
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      // Calculate ideal position (above the element, centered)
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8; // 8px gap
+      let arrowClass = 'arrow-bottom';
+
+      // Check if tooltip would go above viewport - if so, show below
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      // Check if tooltip would go below viewport when shown below
+      if (top + tooltipHeight > viewportHeight - padding) {
+        top = targetRect.top - tooltipHeight - 8;
+        arrowClass = 'arrow-bottom';
+      }
+
+      // Horizontal boundary checks - keep within viewport
+      if (left < padding) {
+        left = padding;
+      }
+      if (left + tooltipWidth > viewportWidth - padding) {
+        left = viewportWidth - tooltipWidth - padding;
+      }
+
+      // Additional check: keep within code container horizontally if possible
+      if (container) {
+        const minLeft = Math.max(padding, containerRect.left);
+        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
+
+        if (left < minLeft) {
+          left = minLeft;
+        }
+        if (left + tooltipWidth > maxRight) {
+          left = maxRight - tooltipWidth;
+        }
+      }
+
+      // Apply position
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+      }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) {
+          tooltipEl.classList.remove('visible');
+        }
+        currentTarget = null;
+      }, 100);
+    }
+
+    // Event delegation for all tooltips
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) {
+        showTooltip(e.target);
+      }
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) {
+        hideTooltip();
+      }
+    }, true);
+
+    // Handle scroll - reposition if visible
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) {
+        positionTooltip(currentTarget);
+      }
+    }, true);
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) {
+        positionTooltip(currentTarget);
+      }
+    });
+  })();
+  </script>
 </body>
 </html>

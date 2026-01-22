@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 7: Estimation Methods | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup.visible { opacity: 1; }
+    .distinction-box { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+    @media (max-width: 768px) { .distinction-box { grid-template-columns: 1fr; } }
+    .distinction-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+    .distinction-card h4 { margin: 0 0 0.5rem 0; color: #2563eb; }
+    .distinction-card ul { margin: 0; padding-left: 1.25rem; }
+  </style>
+</head>
+<body>
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li class="active"><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>7 &nbsp;Estimation Methods</h1>
+          <div class="module-meta">
+            <span>~6 hours</span>
+            <span>Standard Errors, Panel Data, Nonlinear Models</span>
+            <span>Intermediate-Advanced</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Distinguish between identification and estimation</li>
+            <li>Choose appropriate standard errors for your data structure</li>
+            <li>Handle panel data with fixed effects efficiently</li>
+            <li>Implement nonlinear models (logit, probit, Poisson)</li>
+            <li>Understand maximum likelihood and GMM estimation</li>
+          </ul>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#identification-vs-estimation">7.1 Identification vs. Estimation</a></li>
+            <li><a href="#standard-errors">7.2 Standard Errors and Inference</a></li>
+            <li><a href="#panel">7.3 Panel Data Methods</a></li>
+            <li><a href="#nonlinear">7.4 Nonlinear Models</a></li>
+            <li><a href="#mle-gmm">7.5 MLE and GMM</a></li>
+            <li><a href="#bootstrap">7.6 Bootstrap Methods</a></li>
+          </ul>
+        </div>
+
+        <h2 id="identification-vs-estimation">7.1 Identification vs. Estimation</h2>
+
+        <p>
+          A common source of confusion: <strong>identification</strong> and <strong>estimation</strong> are different problems.
+        </p>
+
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>Identification (Module 6)</h4>
+            <p><em>Can</em> we learn the causal effect from data?</p>
+            <ul>
+              <li>Research design and assumptions</li>
+              <li>What variation identifies the effect?</li>
+              <li>Parallel trends, exclusion restriction, etc.</li>
+              <li>Whether your estimate is causal or just correlational</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>Estimation (This Module)</h4>
+            <p><em>How</em> do we compute the estimate from data?</p>
+            <ul>
+              <li>OLS, MLE, GMM, nonparametric methods</li>
+              <li>Standard errors and inference</li>
+              <li>Handling large datasets efficiently</li>
+              <li>Correcting for clustering, heteroskedasticity</li>
+            </ul>
+          </div>
+        </div>
+
+        <p>
+          You can have correct identification but bad estimation (wrong standard errors), or good estimation but no identification (precise estimate of a biased number). Both matter.
+        </p>
+
+        <h2 id="standard-errors">7.2 Standard Errors and Inference</h2>
+
+        <p>
+          Choosing the right standard errors is essential for valid inference. Using incorrect standard errors can lead to dramatically wrong conclusions—confidence intervals that are too narrow (false precision) or too wide (lost power). The two main considerations are:
+        </p>
+        <ul>
+          <li><strong>Heteroskedasticity:</strong> When the variance of the error term varies across observations (e.g., income variance differs by wealth level)</li>
+          <li><strong>Clustering:</strong> When observations are correlated within groups (e.g., students in the same classroom, repeated observations of the same person)</li>
+        </ul>
+
+        <h3>Robust (Heteroskedasticity-Consistent) Standard Errors</h3>
+
+        <p>
+          Classical OLS standard errors assume homoskedasticity: constant error variance across all observations. In practice, this rarely holds. Robust standard errors (also called Huber-White or sandwich standard errors) remain valid under heteroskedasticity without requiring you to model its form.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p style="margin-bottom: 0;">
+            The key parameter is <code>cov_type='HC1'</code> (Python), <code>robust</code> or <code>vce(robust)</code> (Stata), or <code>vcov = vcovHC()</code> (R). HC0-HC3 are variants with different small-sample corrections—HC1 is the most common. In the output, compare standard errors: robust SEs are often larger than classical OLS SEs when heteroskedasticity is present, leading to wider confidence intervals and more conservative inference.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Robust Standard Errors</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Default (homoskedastic) standard errors</span>
+model = smf.ols(<span class="code-string">'outcome ~ treatment + controls'</span>, data=df).fit()
+
+<span class="code-comment"># Robust (heteroskedasticity-consistent) HC1</span>
+<span class="code-tooltip" data-tip="HC1 is the most common. HC0, HC2, HC3 are alternatives with small-sample adjustments.">model_robust = smf.ols(<span class="code-string">'outcome ~ treatment + controls'</span>, data=df).fit(
+    cov_type=<span class="code-string">'HC1'</span>
+)</span>
+print(model_robust.summary())</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Robust Standard Errors</span>
+
+<span class="code-comment">* Default standard errors</span>
+reg outcome treatment controls
+
+<span class="code-comment">* Robust (heteroskedasticity-consistent) - ALWAYS use this</span>
+<span class="code-tooltip" data-tip="In Stata, 'robust' is the standard option for heteroskedasticity-consistent SEs">reg outcome treatment controls, robust</span>
+
+<span class="code-comment">* Equivalent: vce(robust)</span>
+reg outcome treatment controls, vce(robust)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Robust Standard Errors</span>
+<span class="code-keyword">library</span>(sandwich)
+<span class="code-keyword">library</span>(lmtest)
+
+<span class="code-comment"># Fit model</span>
+model <- lm(outcome ~ treatment + controls, data = df)
+
+<span class="code-comment"># Robust standard errors (HC1)</span>
+<span class="code-tooltip" data-tip="vcovHC computes heteroskedasticity-consistent covariance matrix">coeftest(model, vcov = vcovHC(model, type = "HC1"))</span>
+
+<span class="code-comment"># Using fixest (cleaner syntax)</span>
+<span class="code-keyword">library</span>(fixest)
+model <- feols(outcome ~ treatment + controls, data = df, vcov = "hetero")
+summary(model)</code></pre>
+          </div>
+        </div>
+
+        <h3>Clustered Standard Errors</h3>
+
+        <p>
+          When observations are correlated within groups, standard errors that ignore this correlation will be too small—often dramatically so. Common examples include:
+        </p>
+        <ul>
+          <li><strong>Students within schools:</strong> Students in the same school share teachers, facilities, and peer effects</li>
+          <li><strong>Workers within firms:</strong> Workers at the same company share management, culture, and industry shocks</li>
+          <li><strong>Repeated observations:</strong> The same individual observed multiple times over a panel</li>
+          <li><strong>Geographic clustering:</strong> Individuals in the same state/region share local policies and economic conditions</li>
+        </ul>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p style="margin-bottom: 0;">
+            The clustering variable is specified via <code>cov_kwds={'groups': df['cluster_var']}</code> (Python), <code>cluster(cluster_var)</code> (Stata), or <code>cluster = ~cluster_var</code> (R/fixest). The output will report the number of clusters—a rule of thumb is that you need at least 30-50 clusters for clustered standard errors to be reliable. With few clusters, consider wild cluster bootstrap (shown in Section 7.6).
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Clustered Standard Errors</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Cluster at the school level</span>
+<span class="code-tooltip" data-tip="Clustering accounts for within-group correlation. Cluster at the level where treatment varies or errors are correlated.">model = smf.ols(<span class="code-string">'outcome ~ treatment'</span>, data=df).fit(
+    cov_type=<span class="code-string">'cluster'</span>,
+    cov_kwds={<span class="code-string">'groups'</span>: df[<span class="code-string">'school_id'</span>]}
+)</span>
+
+<span class="code-comment"># Two-way clustering (e.g., state and year)</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> PanelOLS
+df_panel = df.set_index([<span class="code-string">'state'</span>, <span class="code-string">'year'</span>])
+model = PanelOLS.from_formula(<span class="code-string">'outcome ~ treatment'</span>, data=df_panel)
+<span class="code-tooltip" data-tip="Two-way clustering accounts for correlation within both dimensions">results = model.fit(cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True, cluster_time=True)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Clustered Standard Errors</span>
+
+<span class="code-comment">* One-way clustering</span>
+<span class="code-tooltip" data-tip="cluster(school_id) clusters SEs at the school level">reg outcome treatment controls, cluster(school_id)</span>
+
+<span class="code-comment">* Two-way clustering</span>
+<span class="code-comment">* ssc install reghdfe</span>
+<span class="code-tooltip" data-tip="Two-way clustering with reghdfe: cluster on both state and year">reghdfe outcome treatment, absorb(state year) cluster(state year)</span>
+
+<span class="code-comment">* Check number of clusters</span>
+<span class="code-tooltip" data-tip="Rule of thumb: need at least 30-50 clusters for reliable inference">tab school_id, matrow(clusters)
+display r(r)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Clustered Standard Errors</span>
+<span class="code-keyword">library</span>(fixest)
+
+<span class="code-comment"># One-way clustering</span>
+<span class="code-tooltip" data-tip="cluster = ~school_id clusters at the school level">model <- feols(outcome ~ treatment + controls,
+               data = df,
+               cluster = ~ school_id)</span>
+summary(model)
+
+<span class="code-comment"># Two-way clustering</span>
+<span class="code-tooltip" data-tip="Two-way clustering with fixest: cluster on both dimensions">model <- feols(outcome ~ treatment | state + year,
+               data = df,
+               cluster = ~ state + year)</span>
+
+<span class="code-comment"># With sandwich package</span>
+<span class="code-keyword">library</span>(sandwich)
+model <- lm(outcome ~ treatment, data = df)
+vcovCL(model, cluster = ~ school_id)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">When to Cluster</div>
+          <p>
+            General rule: cluster at the level where:
+          </p>
+          <ul>
+            <li>Treatment is assigned (for experiments)</li>
+            <li>There's correlation in unobservables (for observational studies)</li>
+          </ul>
+          <p style="margin-bottom: 0;">
+            When in doubt, cluster at a more aggregate level. See <a href="https://cameron.econ.ucdavis.edu/research/Cameron_Miller_JHR_2015.pdf" target="_blank">Cameron & Miller (2015)</a> for guidance.
+          </p>
+        </div>
+
+        <h2 id="panel">7.3 Panel Data Methods</h2>
+
+        <p>
+          Panel data (repeated observations of units over time) is the workhorse of applied microeconomics because it enables researchers to control for unobserved heterogeneity. The key intuition: if individuals differ in unobserved ways that affect both treatment and outcomes, cross-sectional comparisons are biased. Panel data lets us compare the <em>same</em> individual over time, differencing out time-invariant unobservables.
+        </p>
+
+        <h3>Fixed Effects</h3>
+
+        <p>
+          Fixed effects estimation includes a separate intercept for each unit (person, firm, country), absorbing all time-invariant characteristics. Mechanically, this is equivalent to "demeaning"—subtracting each unit's mean from all its observations. The identifying variation comes only from <em>within-unit</em> changes over time.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p>
+            The key syntax elements are: <code>entity_effects=True</code> (Python linearmodels), <code>fe</code> or <code>absorb(unit_id)</code> (Stata), and <code>| unit_id</code> after the formula (R fixest). Two-way fixed effects add time fixed effects as well, controlling for common shocks (e.g., recessions) that affect all units.
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong>Important:</strong> You can only estimate coefficients on variables that vary <em>within</em> units over time. Time-invariant characteristics (gender, race, birth cohort) are absorbed by the fixed effects and cannot be estimated—but they are controlled for.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Fixed Effects with linearmodels</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> PanelOLS
+
+<span class="code-comment"># Set panel index</span>
+df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
+
+<span class="code-comment"># Unit fixed effects only</span>
+<span class="code-tooltip" data-tip="entity_effects=True absorbs unit-level fixed effects (within estimator)">model = PanelOLS.from_formula(
+    <span class="code-string">'outcome ~ treatment + time_varying_controls'</span>,
+    data=df,
+    entity_effects=True
+)</span>
+results = model.fit(cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True)
+
+<span class="code-comment"># Two-way fixed effects (unit + time)</span>
+model = PanelOLS.from_formula(
+    <span class="code-string">'outcome ~ treatment'</span>,
+    data=df,
+    entity_effects=True,
+    time_effects=True
+)
+results = model.fit(cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Fixed Effects</span>
+
+<span class="code-comment">* Declare panel structure</span>
+xtset unit_id year
+
+<span class="code-comment">* Unit fixed effects</span>
+<span class="code-tooltip" data-tip="xtreg with fe option does within-transformation (demeans by unit)">xtreg outcome treatment time_varying_controls, fe cluster(unit_id)</span>
+
+<span class="code-comment">* Two-way fixed effects with reghdfe (RECOMMENDED for speed)</span>
+<span class="code-tooltip" data-tip="reghdfe absorbs high-dimensional fixed effects efficiently">reghdfe outcome treatment, absorb(unit_id year) cluster(unit_id)</span>
+
+<span class="code-comment">* With multiple sets of fixed effects</span>
+reghdfe outcome treatment, absorb(unit_id year industry_id) cluster(unit_id)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Fixed Effects with fixest</span>
+<span class="code-keyword">library</span>(fixest)
+
+<span class="code-comment"># Unit fixed effects</span>
+<span class="code-tooltip" data-tip="| unit_id specifies unit fixed effects after the pipe">model <- feols(outcome ~ treatment + controls | unit_id,
+               data = df,
+               cluster = ~ unit_id)</span>
+summary(model)
+
+<span class="code-comment"># Two-way fixed effects</span>
+model <- feols(outcome ~ treatment | unit_id + year,
+               data = df,
+               cluster = ~ unit_id)
+
+<span class="code-comment"># Multiple sets of fixed effects</span>
+model <- feols(outcome ~ treatment | unit_id + year + industry_id,
+               data = df,
+               cluster = ~ unit_id)
+
+<span class="code-comment"># With plm package (older, slower)</span>
+<span class="code-keyword">library</span>(plm)
+pdata <- pdata.frame(df, index = c("unit_id", "year"))
+model <- plm(outcome ~ treatment, data = pdata, model = "within")</code></pre>
+          </div>
+        </div>
+
+        <h3>Random Effects</h3>
+
+        <p>
+          Random effects (RE) treats unit-specific effects as random draws from a distribution rather than fixed parameters. This is more efficient than fixed effects (smaller standard errors) but requires a stronger assumption: the unit effects must be uncorrelated with the regressors. If this assumption fails, RE estimates are inconsistent.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">When to use Random Effects</div>
+          <p style="margin-bottom: 0;">
+            In practice, RE is rarely preferred in economics research because the key assumption (unit effects uncorrelated with regressors) is hard to justify. The Hausman test compares FE and RE: if they differ significantly, RE is inconsistent and FE should be used. RE remains useful when you need to estimate coefficients on time-invariant variables, or when sample sizes are small and efficiency gains matter.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Random Effects</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> RandomEffects
+
+df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
+
+<span class="code-tooltip" data-tip="Random effects assumes unit effects are uncorrelated with regressors (stronger assumption)">model = RandomEffects.from_formula(
+    <span class="code-string">'outcome ~ treatment + controls'</span>,
+    data=df
+)</span>
+results = model.fit()
+
+<span class="code-comment"># Hausman test: FE vs RE</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> compare
+<span class="code-tooltip" data-tip="Hausman test: reject means RE is inconsistent, use FE">fe_model = PanelOLS.from_formula(<span class="code-string">'outcome ~ treatment'</span>, data=df, entity_effects=True).fit()
+re_model = RandomEffects.from_formula(<span class="code-string">'outcome ~ treatment'</span>, data=df).fit()
+print(compare({<span class="code-string">'FE'</span>: fe_model, <span class="code-string">'RE'</span>: re_model}))</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Random Effects</span>
+
+<span class="code-comment">* Random effects model</span>
+<span class="code-tooltip" data-tip="RE assumes unit effects are uncorrelated with regressors">xtreg outcome treatment controls, re</span>
+
+<span class="code-comment">* Hausman test</span>
+<span class="code-tooltip" data-tip="Hausman test: significant p-value suggests FE is more appropriate">xtreg outcome treatment controls, fe
+estimates store fe
+xtreg outcome treatment controls, re
+hausman fe .</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Random Effects</span>
+<span class="code-keyword">library</span>(plm)
+
+pdata <- pdata.frame(df, index = c("unit_id", "year"))
+
+<span class="code-comment"># Random effects model</span>
+<span class="code-tooltip" data-tip="model='random' specifies random effects">re_model <- plm(outcome ~ treatment + controls,
+                data = pdata,
+                model = "random")</span>
+summary(re_model)
+
+<span class="code-comment"># Hausman test</span>
+fe_model <- plm(outcome ~ treatment + controls, data = pdata, model = "within")
+<span class="code-tooltip" data-tip="Hausman test: significant p-value means FE is preferred">phtest(fe_model, re_model)</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="nonlinear">7.4 Nonlinear Models</h2>
+
+        <p>
+          Linear models assume the conditional mean of Y given X is a linear function of parameters. This breaks down when:
+        </p>
+        <ul>
+          <li><strong>Binary outcomes:</strong> Linear probability models can predict probabilities outside [0,1]</li>
+          <li><strong>Count data:</strong> Counts are non-negative integers, but OLS can predict negative values</li>
+          <li><strong>Bounded/skewed outcomes:</strong> Expenditure data, durations, and other inherently positive variables</li>
+        </ul>
+        <p>
+          Nonlinear models address these issues by modeling a transformed version of the outcome or using appropriate distributional assumptions.
+        </p>
+
+        <h3>Logit and Probit</h3>
+
+        <p>
+          For binary outcomes (0/1), logit and probit models estimate the probability P(Y=1|X). They differ in the link function: logit uses the logistic CDF, probit uses the normal CDF. In practice, they give very similar results—the choice is often a matter of convention (probit is traditional in labor economics, logit in epidemiology).
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Interpreting the output</div>
+          <p style="margin-bottom: 0;">
+            Raw logit/probit coefficients are in log-odds (logit) or z-scores (probit), which are hard to interpret. Always compute <strong>marginal effects</strong>—the change in probability for a unit change in X. Average marginal effects (AME) average across all observations; marginal effects at the mean (MEM) evaluate at sample means. AME is generally preferred as it doesn't depend on a potentially unrepresentative "average" person.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Logit and Probit</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Logit model (binary outcome)</span>
+<span class="code-tooltip" data-tip="Logit uses logistic CDF; probit uses normal CDF. Results are similar in practice.">logit = smf.logit(<span class="code-string">'hired ~ education + experience + age'</span>, data=df).fit()</span>
+print(logit.summary())
+
+<span class="code-comment"># Probit model</span>
+probit = smf.probit(<span class="code-string">'hired ~ education + experience + age'</span>, data=df).fit()
+
+<span class="code-comment"># Marginal effects (more interpretable)</span>
+<span class="code-tooltip" data-tip="Marginal effects give the change in probability for a unit change in X">margeff = logit.get_margeff()
+print(margeff.summary())</span>
+
+<span class="code-comment"># Average marginal effects at specific values</span>
+margeff_at_means = logit.get_margeff(at=<span class="code-string">'mean'</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Logit and Probit</span>
+
+<span class="code-comment">* Logit</span>
+logit hired education experience age
+
+<span class="code-comment">* Probit</span>
+probit hired education experience age
+
+<span class="code-comment">* Marginal effects (average marginal effects)</span>
+<span class="code-tooltip" data-tip="margins, dydx(*) computes average marginal effects for all variables">margins, dydx(*)</span>
+
+<span class="code-comment">* Marginal effects at specific values</span>
+margins, dydx(*) at(education=16 experience=5)
+
+<span class="code-comment">* Odds ratios (for logit)</span>
+<span class="code-tooltip" data-tip="or option reports odds ratios instead of log-odds coefficients">logit hired education experience age, or</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Logit and Probit</span>
+
+<span class="code-comment"># Logit</span>
+<span class="code-tooltip" data-tip="family=binomial() specifies logistic regression">logit <- glm(hired ~ education + experience + age,
+             data = df,
+             family = binomial(link = "logit"))</span>
+summary(logit)
+
+<span class="code-comment"># Probit</span>
+probit <- glm(hired ~ education + experience + age,
+              data = df,
+              family = binomial(link = "probit"))
+
+<span class="code-comment"># Marginal effects with margins package</span>
+<span class="code-keyword">library</span>(margins)
+<span class="code-tooltip" data-tip="margins() computes average marginal effects">margeff <- margins(logit)
+summary(margeff)</span>
+
+<span class="code-comment"># Odds ratios</span>
+exp(coef(logit))</code></pre>
+          </div>
+        </div>
+
+        <h3>Poisson and Negative Binomial (Count Data)</h3>
+
+        <p>
+          Count outcomes (number of patents, doctor visits, accidents) require models that respect their non-negative, integer nature. The Poisson model assumes E[Y|X] = exp(Xβ) and Var(Y|X) = E[Y|X]—the mean equals the variance. This "equidispersion" assumption often fails in practice; when variance exceeds the mean (overdispersion), use negative binomial instead.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Pseudo-Poisson MLE (PPML)</div>
+          <p style="margin-bottom: 0;">
+            An important insight: Poisson regression with robust standard errors is consistent even if the data aren't Poisson-distributed, as long as the conditional mean is correctly specified. This "Poisson Pseudo-MLE" is widely used in trade economics for gravity equations (Santos Silva & Tenreyro, 2006) because it handles zeros naturally and is robust to heteroskedasticity.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Poisson Regression</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Poisson (count data)</span>
+<span class="code-tooltip" data-tip="Poisson assumes mean equals variance. Use negative binomial if overdispersed.">poisson = smf.poisson(<span class="code-string">'num_patents ~ rd_spending + firm_size'</span>, data=df).fit()</span>
+print(poisson.summary())
+
+<span class="code-comment"># Negative binomial (allows overdispersion)</span>
+<span class="code-keyword">from</span> statsmodels.discrete.discrete_model <span class="code-keyword">import</span> NegativeBinomial
+<span class="code-tooltip" data-tip="Negative binomial allows variance to exceed mean (overdispersion)">nb = smf.negativebinomial(<span class="code-string">'num_patents ~ rd_spending + firm_size'</span>, data=df).fit()</span>
+
+<span class="code-comment"># Robust Poisson (PPML for trade gravity equations)</span>
+<span class="code-tooltip" data-tip="Poisson with robust SEs is consistent even if not Poisson distributed">poisson_robust = smf.poisson(<span class="code-string">'trade ~ distance + gdp_origin + gdp_dest'</span>, data=df).fit(
+    cov_type=<span class="code-string">'HC1'</span>
+)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Count Data Models</span>
+
+<span class="code-comment">* Poisson</span>
+poisson num_patents rd_spending firm_size
+
+<span class="code-comment">* Negative binomial</span>
+nbreg num_patents rd_spending firm_size
+
+<span class="code-comment">* Poisson with robust SEs (PPML)</span>
+<span class="code-tooltip" data-tip="ppmlhdfe is commonly used for gravity equations in trade">ppmlhdfe trade distance gdp_origin gdp_dest, absorb(origin dest) cluster(pair)</span>
+
+<span class="code-comment">* Check for overdispersion</span>
+<span class="code-tooltip" data-tip="If alpha significantly > 0, use negative binomial">estat gof</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Count Data Models</span>
+
+<span class="code-comment"># Poisson</span>
+<span class="code-tooltip" data-tip="family=poisson() specifies Poisson regression">poisson <- glm(num_patents ~ rd_spending + firm_size,
+               data = df,
+               family = poisson())</span>
+summary(poisson)
+
+<span class="code-comment"># Negative binomial</span>
+<span class="code-keyword">library</span>(MASS)
+<span class="code-tooltip" data-tip="glm.nb handles overdispersion">nb <- glm.nb(num_patents ~ rd_spending + firm_size, data = df)</span>
+summary(nb)
+
+<span class="code-comment"># With fixest (fast, with fixed effects)</span>
+<span class="code-keyword">library</span>(fixest)
+poisson_fe <- fepois(num_patents ~ rd_spending | firm_id + year,
+                     data = df)</code></pre>
+          </div>
+        </div>
+
+        <h2 id="mle-gmm">7.5 MLE and GMM</h2>
+
+        <p>
+          Maximum Likelihood Estimation (MLE) and Generalized Method of Moments (GMM) are the two general frameworks underlying most econometric estimators. Understanding them helps you: (1) implement custom models not available in standard packages, (2) understand the properties of standard estimators, and (3) diagnose estimation problems.
+        </p>
+
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>Maximum Likelihood (MLE)</h4>
+            <p>Find parameters that maximize the probability of observing the data.</p>
+            <ul>
+              <li>Requires specifying the full distribution of Y|X</li>
+              <li>Efficient if the distribution is correct</li>
+              <li>Inconsistent if distribution is misspecified</li>
+              <li>Examples: Logit, Probit, Tobit, Poisson</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>Generalized Method of Moments (GMM)</h4>
+            <p>Find parameters that make moment conditions hold in the sample.</p>
+            <ul>
+              <li>Only requires specifying moment conditions (E[g(Y,X,θ)]=0)</li>
+              <li>More robust but less efficient than MLE</li>
+              <li>Includes OLS and IV as special cases</li>
+              <li>Examples: IV/2SLS, panel GMM, difference GMM</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Custom MLE</h3>
+
+        <p>
+          Sometimes you need to estimate a model that isn't available in standard packages. The approach is straightforward: (1) write down the log-likelihood function, (2) use numerical optimization to find the maximum. The code below shows a simple example—linear regression estimated via MLE rather than OLS.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p style="margin-bottom: 0;">
+            The key components are: (1) defining the negative log-likelihood function (negative because optimizers minimize by default), (2) choosing starting values, and (3) selecting an optimization algorithm (BFGS is a good default). Standard errors come from the inverse of the Hessian matrix at the optimum. For complex models, check that the optimizer converged and try multiple starting values.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Custom MLE</span>
+<span class="code-keyword">from</span> scipy.optimize <span class="code-keyword">import</span> minimize
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-keyword">def</span> <span class="code-function">neg_log_likelihood</span>(params, X, y):
+    <span class="code-string">"""Negative log-likelihood for linear regression."""</span>
+    beta = params[:-1]
+    sigma = params[-1]
+    <span class="code-keyword">if</span> sigma <= 0:
+        <span class="code-keyword">return</span> np.inf
+
+    y_hat = X @ beta
+    residuals = y - y_hat
+
+    <span class="code-comment"># Normal log-likelihood</span>
+    ll = -0.5 * len(y) * np.log(2 * np.pi * sigma**2)
+    ll -= np.sum(residuals**2) / (2 * sigma**2)
+    <span class="code-keyword">return</span> -ll  <span class="code-comment"># negative because we minimize</span>
+
+<span class="code-comment"># Estimate</span>
+X = np.column_stack([np.ones(len(df)), df[<span class="code-string">'x1'</span>], df[<span class="code-string">'x2'</span>]])
+y = df[<span class="code-string">'y'</span>].values
+initial = np.zeros(X.shape[1] + 1)
+initial[-1] = 1  <span class="code-comment"># initial sigma</span>
+
+<span class="code-tooltip" data-tip="MLE finds parameters that maximize the probability of observed data">result = minimize(neg_log_likelihood, initial, args=(X, y), method=<span class="code-string">'BFGS'</span>)
+print(<span class="code-string">"MLE estimates:"</span>, result.x)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Custom MLE with ml</span>
+
+<span class="code-comment">* Define the log-likelihood function</span>
+program mylogit_ll
+    args lnf xb
+    quietly replace `lnf' = $ML_y1 * `xb' - ln(1 + exp(`xb'))
+end
+
+<span class="code-comment">* Estimate</span>
+<span class="code-tooltip" data-tip="ml model lf defines the likelihood; ml maximize estimates">ml model lf mylogit_ll (outcome = x1 x2)
+ml maximize</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Custom MLE</span>
+
+<span class="code-comment"># Define negative log-likelihood</span>
+neg_ll <- function(params, X, y) {
+  beta <- params[-length(params)]
+  sigma <- params[length(params)]
+  <span class="code-keyword">if</span> (sigma <= 0) return(Inf)
+
+  y_hat <- X %*% beta
+  resid <- y - y_hat
+
+  ll <- -0.5 * length(y) * log(2 * pi * sigma^2)
+  ll <- ll - sum(resid^2) / (2 * sigma^2)
+  return(-ll)
+}
+
+<span class="code-comment"># Estimate</span>
+X <- cbind(1, df$x1, df$x2)
+y <- df$y
+initial <- c(rep(0, ncol(X)), 1)
+
+<span class="code-tooltip" data-tip="optim minimizes the negative log-likelihood">result <- optim(initial, neg_ll, X = X, y = y, method = "BFGS", hessian = TRUE)
+print(result$par)</span>
+
+<span class="code-comment"># Standard errors from Hessian</span>
+se <- sqrt(diag(solve(result$hessian)))</code></pre>
+          </div>
+        </div>
+
+        <h2 id="bootstrap">7.6 Bootstrap Methods</h2>
+
+        <p>
+          Bootstrap is a resampling method that estimates the sampling distribution of a statistic by repeatedly drawing samples (with replacement) from the original data. It's especially useful when:
+        </p>
+        <ul>
+          <li><strong>Analytical formulas don't exist:</strong> Complex estimators, ratios, quantiles</li>
+          <li><strong>Asymptotic approximations are poor:</strong> Small samples, heavy-tailed distributions</li>
+          <li><strong>Testing with few clusters:</strong> Wild cluster bootstrap for reliable inference with 10-50 clusters</li>
+        </ul>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Types of bootstrap</div>
+          <p>
+            <strong>Nonparametric:</strong> Resample observations with replacement (shown below). Works for most situations.
+          </p>
+          <p>
+            <strong>Cluster bootstrap:</strong> Resample entire clusters, not individual observations. Essential for clustered data.
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong>Wild cluster bootstrap:</strong> A variant that works well with few clusters (Cameron, Gelbach & Miller, 2008). Particularly important for difference-in-differences with few treated states/periods.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Bootstrap</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-keyword">def</span> <span class="code-function">bootstrap_coef</span>(df, formula, n_bootstrap=1000):
+    <span class="code-string">"""Bootstrap standard errors for regression coefficients."""</span>
+    n = len(df)
+    coefs = []
+
+    <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(n_bootstrap):
+        <span class="code-comment"># Resample with replacement</span>
+        sample = df.sample(n, replace=True)
+        model = smf.ols(formula, data=sample).fit()
+        coefs.append(model.params.values)
+
+    coefs = np.array(coefs)
+    <span class="code-keyword">return</span> {
+        <span class="code-string">'mean'</span>: coefs.mean(axis=0),
+        <span class="code-string">'se'</span>: coefs.std(axis=0),
+        <span class="code-string">'ci_lower'</span>: np.percentile(coefs, 2.5, axis=0),
+        <span class="code-string">'ci_upper'</span>: np.percentile(coefs, 97.5, axis=0)
+    }
+
+<span class="code-tooltip" data-tip="Bootstrap: resample data, re-estimate, repeat many times">results = bootstrap_coef(df, <span class="code-string">'y ~ x1 + x2'</span>)
+print(<span class="code-string">"Bootstrap SEs:"</span>, results[<span class="code-string">'se'</span>])</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Bootstrap</span>
+
+<span class="code-comment">* Simple bootstrap</span>
+<span class="code-tooltip" data-tip="bootstrap resamples data and re-estimates reps times">bootstrap _b, reps(1000) seed(12345): reg outcome treatment controls</span>
+
+<span class="code-comment">* Cluster bootstrap (for clustered data)</span>
+<span class="code-tooltip" data-tip="cluster() option resamples whole clusters">bootstrap _b, reps(1000) seed(12345) cluster(school_id): ///
+    reg outcome treatment controls</span>
+
+<span class="code-comment">* Pairs cluster bootstrap (Stata 18+)</span>
+vce(bootstrap, cluster(school_id) reps(1000))</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Bootstrap</span>
+<span class="code-keyword">library</span>(boot)
+
+<span class="code-comment"># Function to extract coefficients</span>
+boot_fn <- function(data, indices) {
+  d <- data[indices, ]
+  model <- lm(y ~ x1 + x2, data = d)
+  return(coef(model))
+}
+
+<span class="code-comment"># Run bootstrap</span>
+<span class="code-tooltip" data-tip="boot() resamples and re-estimates R times">results <- boot(df, boot_fn, R = 1000)</span>
+print(results)
+
+<span class="code-comment"># Confidence intervals</span>
+<span class="code-tooltip" data-tip="boot.ci computes various bootstrap CI types">boot.ci(results, type = c("perc", "bca"), index = 2)</span>
+
+<span class="code-comment"># Cluster bootstrap</span>
+<span class="code-keyword">library</span>(fwildclusterboot)
+model <- lm(outcome ~ treatment, data = df)
+<span class="code-tooltip" data-tip="Wild cluster bootstrap for few clusters">boottest(model, param = "treatment", clustid = ~ school_id, B = 999)</span></code></pre>
+          </div>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Key References</div>
+          <ul>
+            <li><strong>Cameron, A.C. & Trivedi, P.</strong> (2005). <em>Microeconometrics: Methods and Applications</em>. Cambridge.</li>
+            <li><strong>Wooldridge, J.</strong> (2010). <em>Econometric Analysis of Cross Section and Panel Data</em>. MIT Press.</li>
+            <li><strong>Cameron, A.C. & Miller, D.</strong> (2015). "A Practitioner's Guide to Cluster-Robust Inference." <em>JHR</em>.</li>
+            <li><strong>Abadie, A., Athey, S., Imbens, G., & Wooldridge, J.</strong> (2023). "When Should You Adjust Standard Errors for Clustering?" <em>QJE</em>.</li>
+          </ul>
+        </div>
+
+        <div class="nav-footer">
+          <a href="06e-synthetic-control.html" class="nav-link prev">6E: Synthetic Control</a>
+          <a href="08-replicability.html" class="nav-link next">Module 8: Replicability</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+</body>
+</html>

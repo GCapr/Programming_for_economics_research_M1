@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 4: Data Cleaning | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    /* Interactive Exercise Styles */
+    .interactive-exercise { background: white; border: 2px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .exercise-editor { margin: 1rem 0; }
+    .editor-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .lang-btn { padding: 0.4rem 1rem; border: 1px solid var(--color-border); background: white; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .lang-btn:hover { border-color: var(--color-primary); }
+    .lang-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .code-editor { width: 100%; min-height: 200px; padding: 1rem; font-family: var(--font-code); font-size: 0.9rem; border: none; border-radius: 8px; background: #1a202c; color: #e2e8f0; resize: vertical; line-height: 1.5; }
+    .code-editor:focus { outline: 2px solid var(--color-accent); }
+    .exercise-actions { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+    .btn-check-score, .btn-show-solution { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-check-score { background: var(--color-primary); color: white; }
+    .btn-check-score:hover { background: var(--color-secondary); transform: translateY(-1px); }
+    .btn-show-solution { background: var(--color-accent); color: white; }
+    .btn-show-solution:hover { background: #c77a3a; }
+    .score-display { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-radius: 8px; }
+    .score-circle { display: flex; align-items: baseline; gap: 2px; }
+    .score-value { font-size: 2rem; font-weight: 700; color: var(--color-primary); }
+    .score-value.score-high { color: #38a169; }
+    .score-value.score-medium { color: #d69e2e; }
+    .score-value.score-low { color: #e53e3e; }
+    .score-label { font-size: 1rem; color: #666; }
+    .score-feedback { font-size: 0.9rem; color: #555; max-width: 300px; }
+    .solution-steps { margin-top: 1.5rem; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
+    .solution-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-bottom: 1px solid var(--color-border); }
+    .solution-header h5 { margin: 0; color: var(--color-primary); }
+    .step-counter { font-size: 0.85rem; color: #666; }
+    .solution-step { padding: 1rem; border-bottom: 1px solid var(--color-border); animation: fadeIn 0.3s ease; }
+    .solution-step:last-of-type { border-bottom: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .step-description { font-weight: 600; color: var(--color-secondary); margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 3px solid var(--color-accent); }
+    .step-code { margin: 0; background: #1e1e1e; border-radius: 6px; padding: 1rem; }
+    .step-code code { color: #d4d4d4; }
+    .solution-navigation { display: flex; justify-content: space-between; padding: 1rem; background: var(--color-bg-alt); }
+    .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
+    .code-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #888;
+      text-decoration: none;
+    }
+
+    /* Tooltip element created by JavaScript */
+    .tooltip-popup {
+      position: fixed;
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      max-width: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
+      line-height: 1.4;
+      text-align: left;
+      font-family: var(--font-body);
+      font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tooltip-popup.visible {
+      opacity: 1;
+    }
+
+    /* Small arrow pointer */
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1f2937;
+    }
+    .tooltip-popup.arrow-top::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #1f2937;
+    }
+    .tooltip-popup.arrow-left::after {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1f2937;
+    }
+    .tooltip-popup.arrow-right::after {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      border-left-color: #1f2937;
+    }
+  </style>
+</head>
+<body>
+  <!-- Password Protection Overlay -->
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li class="active"><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>4 &nbsp;Data Cleaning</h1>
+          <div class="module-meta">
+            <span>~6 hours</span>
+            <span>Missing Data, Outliers, Validation</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Identify and handle missing values appropriately</li>
+            <li>Detect and treat outliers</li>
+            <li>Clean and manipulate string variables</li>
+            <li>Work with dates and time series data</li>
+            <li>Validate data quality and consistency</li>
+          </ul>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#missing-data">4.1 Handling Missing Data</a></li>
+            <li><a href="#outliers">4.2 Detecting and Treating Outliers</a></li>
+            <li><a href="#strings">4.3 String Manipulation</a></li>
+            <li><a href="#dates">4.4 Working with Dates</a></li>
+            <li><a href="#validation">4.5 Data Validation</a></li>
+            <li><a href="#case-study">4.6 Case Study: CPS Data Cleaning</a></li>
+          </ul>
+        </div>
+
+        <h2 id="missing-data">4.1 Handling Missing Data</h2>
+
+        <p>
+          Missing data is ubiquitous in real-world datasets. Understanding why data is missing is crucial for choosing the appropriate handling strategy. There are three main types of missingness:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>MCAR</strong></td>
+              <td>Missing Completely At Random</td>
+              <td>Survey responses lost due to computer glitch</td>
+            </tr>
+            <tr>
+              <td><strong>MAR</strong></td>
+              <td>Missing At Random (conditional on observed)</td>
+              <td>Income missing more often for older respondents</td>
+            </tr>
+            <tr>
+              <td><strong>MNAR</strong></td>
+              <td>Missing Not At Random</td>
+              <td>High earners refuse to report income</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          As usual, use your mouse to hover over the code below to see explanations of each command and understand how to analyse missingness patterns and handle missing data appropriately in Python, Stata, and R:
+        </p>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Handling missing data</span>
+<span class="code-tooltip" data-tip="IMPORT: Brings in the pandas library (a toolkit for working with data tables). WHAT: Loads external code so you can use it. WHY: pandas has powerful functions for handling data that Python doesn't have by default."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Brings in numpy (numerical Python). WHAT: A library for mathematical operations on arrays of numbers. WHY: Provides tools for calculations and special values like NaN (Not a Number) for missing data."><span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
+
+<span class="code-comment"># Check for missing values</span>
+<span class="code-tooltip" data-tip="ISNULL().SUM(): Counts missing values in each column. WHAT: isnull() marks each cell as True (missing) or False (has data), then sum() adds up the Trues. WHY: Helps you see which columns have gaps in your data. HOW: The result shows column names with their missing value counts."><span class="code-function">print</span>(df.isnull().sum())</span>           <span class="code-comment"># Count by column</span>
+<span class="code-tooltip" data-tip="ISNULL().MEAN() * 100: Shows percentage of missing values. WHAT: mean() calculates the proportion of Trues (0 to 1), multiplying by 100 gives a percentage. WHY: Percentages are easier to interpret than raw counts. Example: 25 means 25% of values are missing."><span class="code-function">print</span>(df.isnull().mean() * <span class="code-number">100</span>)</span>   <span class="code-comment"># Percentage missing</span>
+
+<span class="code-comment"># Visualize missing patterns</span>
+<span class="code-tooltip" data-tip="IMPORT MISSINGNO: A specialized library for visualizing missing data. WHAT: Provides visual tools to see patterns in your missing values. WHY: A picture can reveal patterns that numbers alone might miss - like if certain variables are always missing together."><span class="code-keyword">import</span> <span class="code-package">missingno</span> <span class="code-keyword">as</span> <span class="code-variable">msno</span></span>
+<span class="code-tooltip" data-tip="MSNO.MATRIX(): Creates a visual grid of your data. WHAT: Shows a chart where each row is a data record and white lines indicate missing values. WHY: Instantly see if missing data follows a pattern (e.g., certain rows have many gaps). HOW: White = missing, dark = present.">msno.matrix(df)</span>
+<span class="code-tooltip" data-tip="MSNO.HEATMAP(): Shows which columns tend to be missing together. WHAT: Creates a correlation chart between missing values in different columns. WHY: Reveals if missing data in one column predicts missing data in another. Values near 1 or -1 suggest strong relationships.">msno.heatmap(df)</span>  <span class="code-comment"># Correlation of missingness</span>
+
+<span class="code-comment"># Drop missing values</span>
+<span class="code-tooltip" data-tip="DROPNA(): Removes rows with any missing values. WHAT: Creates a new dataset keeping only complete rows (no gaps). WHY: Some analyses require complete data. CAUTION: You might lose a lot of data if many rows have at least one missing value."><span class="code-variable">df_complete</span> = df.dropna()</span>                    <span class="code-comment"># Drop any row with NA</span>
+<span class="code-tooltip" data-tip="DROPNA(SUBSET=[]): Removes rows only if specific columns are missing. WHAT: Keeps rows that might have gaps elsewhere, but drops those missing 'income'. WHY: More targeted than dropping all incomplete rows - preserves more of your data."><span class="code-variable">df_subset</span> = df.dropna(subset=[<span class="code-string">'income'</span>])</span>    <span class="code-comment"># Drop if income is missing</span>
+
+<span class="code-comment"># Fill missing values</span>
+<span class="code-tooltip" data-tip="FILLNA() WITH MEAN: Replaces missing values with the average. WHAT: Calculates the mean of existing income values and puts that number wherever income is missing. WHY: Keeps all rows in your data. CAUTION: Can reduce the variation in your data and bias results."><span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].mean(), inplace=<span class="code-keyword">True</span>)</span>  <span class="code-comment"># Mean imputation</span>
+<span class="code-tooltip" data-tip="FILLNA() WITH MEDIAN: Replaces missing values with the middle value. WHAT: Uses the median (50th percentile) instead of mean. WHY: Better than mean when your data has extreme values (outliers) that would skew the average. More robust choice."><span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].median(), inplace=<span class="code-keyword">True</span>)</span> <span class="code-comment"># Median imputation</span>
+<span class="code-tooltip" data-tip="FILLNA(METHOD='FFILL'): Forward fill - copies the previous value. WHAT: Fills each gap with the value from the row above it. WHY: Useful for time series data where values tend to persist. Example: If Monday's price is missing, use Sunday's."><span class="code-variable">df</span>[<span class="code-string">'income'</span>].fillna(method=<span class="code-string">'ffill'</span>, inplace=<span class="code-keyword">True</span>)</span>      <span class="code-comment"># Forward fill</span>
+
+<span class="code-comment"># Group-wise imputation</span>
+<span class="code-tooltip" data-tip="GROUPBY().TRANSFORM(): Fill missing values using group-specific values. WHAT: Groups data by education level, then fills each group's missing income with that group's median. WHY: More accurate than overall median - college grads likely earn differently than high school grads."><span class="code-variable">df</span>[<span class="code-string">'income'</span>] = df.groupby(<span class="code-string">'education'</span>)[<span class="code-string">'income'</span>].transform(
+    <span class="code-keyword">lambda</span> x: x.fillna(x.median())
+)</span>
+
+<span class="code-comment"># Create missing indicator</span>
+<span class="code-tooltip" data-tip="CREATE MISSING INDICATOR: Makes a new column tracking where data was missing. WHAT: Creates income_missing = 1 if original income was missing, 0 otherwise. WHY: Lets you analyze whether missingness itself matters. ASTYPE(INT) converts True/False to 1/0."><span class="code-variable">df</span>[<span class="code-string">'income_missing'</span>] = df[<span class="code-string">'income'</span>].isnull().astype(int)</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Handling missing data</span>
+
+<span class="code-comment">* Check for missing values</span>
+<span class="code-tooltip" data-tip="MISSTABLE SUMMARIZE: Shows a summary of missing data in your dataset. WHAT: Lists each variable with missing values and how many are missing. WHY: Quick way to identify which variables have gaps. HOW: Displays a table with variable names and missing counts."><span class="code-keyword">misstable</span> summarize</span>          <span class="code-comment">// Summary of missing patterns</span>
+<span class="code-tooltip" data-tip="MISSTABLE PATTERNS: Shows which combinations of variables are missing together. WHAT: Reveals patterns like 'rows 1-50 are missing both income AND education'. WHY: Helps understand if missing data follows a structure. Important for choosing the right handling strategy."><span class="code-keyword">misstable</span> patterns</span>           <span class="code-comment">// Missing patterns</span>
+<span class="code-tooltip" data-tip="MDESC: A user-written command that describes missing data. WHAT: Provides detailed statistics on missing values per variable. WHY: More detailed output than misstable. HOW: Install it first with 'ssc install mdesc', then run mdesc."><span class="code-keyword">mdesc</span></span>                        <span class="code-comment">// Requires: ssc install mdesc</span>
+
+<span class="code-comment">* Count missing by variable</span>
+<span class="code-tooltip" data-tip="FOREACH LOOP: Repeats an action for every variable. WHAT: Goes through each variable in your dataset one by one. WHY: Automates repetitive tasks - instead of writing code for each variable, write it once. VARLIST * means 'all variables'."><span class="code-keyword">foreach</span> var <span class="code-keyword">of</span> varlist * {</span>
+    <span class="code-tooltip" data-tip="COUNT IF MISSING(): Counts rows where a variable has no value. WHAT: missing() returns true when a value is blank/missing. WHY: Gives you the exact number of gaps for each variable. The backticks around var tell Stata to use the loop variable's current value."><span class="code-keyword">count</span> if missing(`var')</span>
+    <span class="code-tooltip" data-tip="DISPLAY: Prints text to the screen. WHAT: Shows the variable name and its missing count. WHY: Makes the output readable. R(N) retrieves the count result from the previous command. Quotes contain text literals."><span class="code-keyword">display</span> <span class="code-string">"`var': "</span> r(N) <span class="code-string">" missing"</span></span>
+}
+
+<span class="code-comment">* Drop observations with missing values</span>
+<span class="code-tooltip" data-tip="DROP IF MISSING(): Removes rows where income has no value. WHAT: Permanently deletes observations with missing income from your dataset. WHY: Some analyses require complete data. CAUTION: This is irreversible - consider keeping a backup of your original data."><span class="code-keyword">drop</span> if missing(income)</span>      <span class="code-comment">// Drop if income missing</span>
+<span class="code-tooltip" data-tip="KEEP IF !MISSING(): Alternative way to remove missing values. WHAT: Keeps only rows where income IS present (! means 'not'). WHY: Same result as drop, but some find this logic clearer. Think of it as 'keep the good data' vs 'remove the bad data'."><span class="code-keyword">keep</span> if !missing(income)</span>     <span class="code-comment">// Alternative</span>
+
+<span class="code-comment">* Replace missing with mean</span>
+<span class="code-tooltip" data-tip="SUMMARIZE: Calculates basic statistics for a variable. WHAT: Computes mean, standard deviation, min, max for income. WHY: We need the mean value to fill in missing data. The mean is stored in r(mean) for the next command to use."><span class="code-keyword">summarize</span> income</span>
+<span class="code-tooltip" data-tip="REPLACE WITH R(MEAN): Fills missing values with the calculated average. WHAT: Changes blank income values to the mean computed above. WHY: Mean imputation keeps all your observations. CAUTION: Can underestimate true variation in your data."><span class="code-keyword">replace</span> income = r(mean) if missing(income)</span>
+
+<span class="code-comment">* Group-wise imputation</span>
+<span class="code-tooltip" data-tip="BYSORT + EGEN MEDIAN: Creates group-specific median values. WHAT: For each education level, calculates the median income and stores it in a new variable. WHY: People with similar education likely have similar incomes. BYSORT ensures calculation happens within each group."><span class="code-keyword">bysort</span> education: egen income_med = median(income)</span>
+<span class="code-tooltip" data-tip="REPLACE WITH GROUP MEDIAN: Uses the group-specific median to fill gaps. WHAT: If income is missing, fills it with that education group's median. WHY: More accurate than overall median - a missing PhD income gets the PhD median, not the high school median."><span class="code-keyword">replace</span> income = income_med if missing(income)</span>
+
+<span class="code-comment">* Create missing indicator</span>
+<span class="code-tooltip" data-tip="GEN MISSING INDICATOR: Creates a flag variable for missing values. WHAT: New variable = 1 if income was missing, 0 if income was present. WHY: Lets you track and analyze which observations had missing data, even after you fill them in. Useful for sensitivity analysis."><span class="code-keyword">gen</span> income_missing = missing(income)</span>
+
+<span class="code-comment">* Multiple imputation (advanced)</span>
+<span class="code-tooltip" data-tip="MI SET MLONG: Sets up Stata for multiple imputation in 'marginal long' format. WHAT: Prepares your dataset to hold multiple imputed versions. WHY: Multiple imputation creates several plausible filled-in datasets, then combines results. More statistically rigorous than single imputation."><span class="code-keyword">mi set</span> mlong</span>
+<span class="code-tooltip" data-tip="MI REGISTER IMPUTED: Tells Stata which variable(s) to impute. WHAT: Marks 'income' as a variable that needs imputation. WHY: Stata needs to know which variables have missing values to be filled. You can register multiple variables."><span class="code-keyword">mi register</span> imputed income</span>
+<span class="code-tooltip" data-tip="MI IMPUTE REGRESS: Fills missing values using regression prediction. WHAT: Predicts missing income from age and education, creating 20 different imputed datasets (add(20)). WHY: Uses relationships between variables to make educated guesses. Multiple datasets capture uncertainty."><span class="code-keyword">mi impute</span> regress income age education, add(<span class="code-number">20</span>)</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Handling missing data</span>
+<span class="code-tooltip" data-tip="LIBRARY(TIDYVERSE): Loads a collection of R packages for data science. WHAT: Includes tools for data manipulation (dplyr), visualization (ggplot2), and more. WHY: Makes R code cleaner and more readable with the pipe operator and consistent functions."><span class="code-function">library</span>(<span class="code-package">tidyverse</span>)</span>
+<span class="code-tooltip" data-tip="LIBRARY(NANIAR): Loads a package specialized for missing data. WHAT: Provides tools to visualize and summarize missing values. WHY: Makes it easy to see patterns in your missing data through charts and summaries. Install with install.packages('naniar')."><span class="code-function">library</span>(<span class="code-package">naniar</span>)</span>    <span class="code-comment"># For missing data visualization</span>
+
+<span class="code-comment"># Check for missing values</span>
+<span class="code-tooltip" data-tip="SUM(IS.NA()): Counts total missing values in entire dataset. WHAT: is.na() returns TRUE for each missing cell, sum() counts the TRUEs. WHY: Quick check to see how much missing data you have overall. Returns a single number."><span class="code-function">sum</span>(<span class="code-function">is.na</span>(df))</span>                    <span class="code-comment"># Total missing</span>
+<span class="code-tooltip" data-tip="COLSUMS(IS.NA()): Counts missing values in each column separately. WHAT: Applies is.na() to each column, then sums each. WHY: Shows which variables have the most gaps. Returns a named list with counts per variable."><span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df))</span>                <span class="code-comment"># By column</span>
+<span class="code-tooltip" data-tip="COLMEANS(IS.NA()) * 100: Shows percentage missing per column. WHAT: Calculates proportion of TRUEs (missing), multiplied by 100 for percentage. WHY: Percentages are easier to interpret than raw counts. A value of 25 means 25% missing."><span class="code-function">colMeans</span>(<span class="code-function">is.na</span>(df)) * <span class="code-number">100</span></span>        <span class="code-comment"># Percentage</span>
+
+<span class="code-comment"># Visualize missing patterns (naniar)</span>
+<span class="code-tooltip" data-tip="VIS_MISS(): Creates a visual map of missing data. WHAT: Shows your entire dataset as a grid where missing values are highlighted. WHY: Instantly reveals patterns - do certain rows or columns have clusters of missing data? Dark areas = present, light = missing."><span class="code-function">vis_miss</span>(df)</span>
+<span class="code-tooltip" data-tip="GG_MISS_VAR(): Bar chart of missing values by variable. WHAT: Creates a horizontal bar chart showing how many values are missing in each column. WHY: Easy to compare which variables have the most gaps. Longer bars = more missing data."><span class="code-function">gg_miss_var</span>(df)</span>
+<span class="code-tooltip" data-tip="GG_MISS_UPSET(): Shows combinations of missing values. WHAT: An upset plot revealing which variables tend to be missing together. WHY: Reveals patterns like 'income and hours are often both missing'. Important for understanding why data is missing."><span class="code-function">gg_miss_upset</span>(df)</span>
+
+<span class="code-comment"># Drop missing values</span>
+<span class="code-tooltip" data-tip="DROP_NA(): Removes all rows with any missing values. WHAT: Keeps only complete cases (rows with no gaps anywhere). WHY: Some analyses require complete data. The pipe (%>%) passes df into drop_na(). CAUTION: May lose many rows."><span class="code-variable">df_complete</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">drop_na</span>()</span>              <span class="code-comment"># All complete cases</span>
+<span class="code-tooltip" data-tip="DROP_NA(COLUMN): Drops rows only if specific column is missing. WHAT: Removes rows where income is NA, but keeps rows with other missing values. WHY: More targeted - preserves more data than dropping all incomplete rows."><span class="code-variable">df_subset</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">drop_na</span>(income)</span>        <span class="code-comment"># Drop if income missing</span>
+
+<span class="code-comment"># Replace missing values</span>
+<span class="code-tooltip" data-tip="MUTATE WITH REPLACE_NA(): Creates or modifies columns, filling missing values. WHAT: replace_na() puts the mean wherever income is NA. na.rm=TRUE tells mean() to ignore NAs when calculating. WHY: Keeps all rows in your analysis."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    income = <span class="code-function">replace_na</span>(income, <span class="code-function">mean</span>(income, na.rm = <span class="code-keyword">TRUE</span>))
+  )</span>
+
+<span class="code-comment"># Group-wise imputation</span>
+<span class="code-tooltip" data-tip="GROUP_BY + MUTATE: Fills missing values within each group. WHAT: First groups data by education, then for each group, replaces NA income with that group's median. WHY: More accurate - PhD holders probably earn more than high school grads. UNGROUP() removes the grouping after."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">group_by</span>(education) <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    income = <span class="code-function">ifelse</span>(<span class="code-function">is.na</span>(income), <span class="code-function">median</span>(income, na.rm = <span class="code-keyword">TRUE</span>), income)
+  ) <span class="code-operator">%>%</span>
+  <span class="code-function">ungroup</span>()</span>
+
+<span class="code-comment"># Create missing indicator</span>
+<span class="code-tooltip" data-tip="AS.INTEGER(IS.NA()): Creates a 0/1 indicator for missing values. WHAT: is.na() returns TRUE/FALSE, as.integer() converts to 1/0. WHY: Lets you track which rows originally had missing data, even after imputation. Useful for analyzing if missingness matters."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(income_missing = <span class="code-function">as.integer</span>(<span class="code-function">is.na</span>(income)))</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="outliers">4.2 Detecting and Treating Outliers</h2>
+
+        <p>
+          Outliers can significantly affect your analysis. Before removing them, always investigate why they exist—they might be data errors, or they might be genuine extreme values that contain important information. The key question is whether an observation represents a valid data point or a measurement error.
+        </p>
+
+        <p>
+          A common approach is the <strong>z-score method</strong>, which measures how many standard deviations an observation is from the mean. Values with |z| &gt; 3 are typically flagged as potential outliers, as they fall outside 99.7% of a normal distribution (<a href="https://doi.org/10.1080/00031305.1987.10475354" target="_blank">Iglewicz &amp; Hoaglin, 1993</a>). For non-normal data, the <strong>interquartile range (IQR)</strong> method is more robust: values below Q1 - 1.5×IQR or above Q3 + 1.5×IQR are flagged (<a href="https://doi.org/10.1002/0470013192" target="_blank">Tukey, 1977</a>).
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Detecting and treating outliers</span>
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas (data manipulation) and numpy (numerical operations). WHAT: These libraries provide the tools for calculating statistics and handling data. WHY: Python's base functions don't have these capabilities built in."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
+<span class="code-tooltip" data-tip="IMPORT SCIPY.STATS: Loads statistical functions from the scipy library. WHAT: Provides the zscore() function for standardized scores. WHY: More efficient than calculating z-scores manually."><span class="code-keyword">from</span> <span class="code-package">scipy</span> <span class="code-keyword">import</span> <span class="code-package">stats</span></span>
+
+<span class="code-comment"># Method 1: Z-score (for approximately normal data)</span>
+<span class="code-tooltip" data-tip="ZSCORE(): Calculates standardized scores for each value. WHAT: For each value, computes (value - mean) / std_dev. WHY: A z-score of 3 means the value is 3 standard deviations above average. Values with |z| > 3 are potential outliers (only 0.3% of normal data falls outside this range)."><span class="code-variable">z_scores</span> = np.abs(stats.zscore(df[<span class="code-string">'income'</span>]))</span>
+<span class="code-tooltip" data-tip="FILTER BY Z-SCORE: Keeps only rows where z-score is within threshold. WHAT: Creates a boolean mask where True = z < 3, then filters the dataframe. WHY: Removes extreme values while keeping 99.7% of your data. Threshold of 3 is conventional but can be adjusted."><span class="code-variable">df_no_outliers</span> = df[z_scores < <span class="code-number">3</span>]</span>
+<span class="code-function">print</span>(f<span class="code-string">"Removed {len(df) - len(df_no_outliers)} outliers using z-score method"</span>)
+
+<span class="code-comment"># Method 2: IQR (more robust, works for non-normal data)</span>
+<span class="code-tooltip" data-tip="QUANTILE(): Calculates percentile values. WHAT: Q1 is the 25th percentile (25% of values are below), Q3 is the 75th percentile. WHY: These quartiles define the middle 50% of your data, used to identify outliers in a way that's resistant to extreme values."><span class="code-variable">Q1</span> = df[<span class="code-string">'income'</span>].quantile(<span class="code-number">0.25</span>)
+<span class="code-variable">Q3</span> = df[<span class="code-string">'income'</span>].quantile(<span class="code-number">0.75</span>)</span>
+<span class="code-tooltip" data-tip="IQR: Interquartile Range is the spread of the middle 50% of data. WHAT: Q3 minus Q1 gives the range between the 25th and 75th percentiles. WHY: Unlike standard deviation, IQR is not affected by extreme outliers, making it a robust measure of spread."><span class="code-variable">IQR</span> = Q3 - Q1</span>
+<span class="code-tooltip" data-tip="IQR BOUNDS: Defines the 'fence' for detecting outliers. WHAT: Values below Q1 - 1.5*IQR or above Q3 + 1.5*IQR are flagged. WHY: This is Tukey's method - the 1.5 multiplier captures ~99.3% of normal data. Can use 3.0 for more extreme outliers only."><span class="code-variable">lower_bound</span> = Q1 - <span class="code-number">1.5</span> * IQR
+<span class="code-variable">upper_bound</span> = Q3 + <span class="code-number">1.5</span> * IQR</span>
+<span class="code-tooltip" data-tip="FILTER TO IQR BOUNDS: Keeps values within the calculated fence. WHAT: Creates a mask for values between lower and upper bounds, then filters. WHY: Removes outliers while being robust to the outliers themselves (unlike z-score which uses mean/std affected by outliers)."><span class="code-variable">df_iqr_clean</span> = df[(df[<span class="code-string">'income'</span>] >= lower_bound) & (df[<span class="code-string">'income'</span>] <= upper_bound)]</span>
+
+<span class="code-comment"># Winsorization: Cap extreme values instead of removing</span>
+<span class="code-tooltip" data-tip="CLIP(): Caps values at specified bounds instead of removing them. WHAT: Values below lower_bound become lower_bound; values above upper_bound become upper_bound. WHY: Preserves sample size while limiting influence of extremes. Useful when you can't afford to lose observations."><span class="code-variable">df</span>[<span class="code-string">'income_winsorized'</span>] = df[<span class="code-string">'income'</span>].clip(lower=lower_bound, upper=upper_bound)</span>
+
+<span class="code-comment"># Create outlier indicator for analysis</span>
+<span class="code-tooltip" data-tip="CREATE OUTLIER FLAG: Makes a new column marking which rows are outliers. WHAT: is_outlier = 1 if income is outside IQR bounds, 0 otherwise. WHY: Lets you analyze outliers separately or test how sensitive your results are to including them."><span class="code-variable">df</span>[<span class="code-string">'is_outlier'</span>] = ((df[<span class="code-string">'income'</span>] < lower_bound) | (df[<span class="code-string">'income'</span>] > upper_bound)).astype(int)</span>
+<span class="code-function">print</span>(f<span class="code-string">"Outliers flagged: {df['is_outlier'].sum()}"</span>)</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Detecting and treating outliers</span>
+
+<span class="code-comment">* Method 1: Z-score (for approximately normal data)</span>
+<span class="code-tooltip" data-tip="SUMMARIZE: Calculates descriptive statistics for income. WHAT: Computes mean and standard deviation, storing them in r(mean) and r(sd). WHY: These values are needed to calculate z-scores manually."><span class="code-keyword">summarize</span> income</span>
+<span class="code-tooltip" data-tip="GENERATE Z-SCORE: Creates standardized scores for each observation. WHAT: For each value, computes (value - mean) / std_dev. WHY: Z-scores let you identify how extreme each value is. A z-score of 3 means 3 standard deviations from average."><span class="code-keyword">gen</span> z_income = (income - r(mean)) / r(sd)</span>
+<span class="code-tooltip" data-tip="FLAG OUTLIERS BY Z-SCORE: Creates indicator for extreme values. WHAT: is_outlier = 1 if |z-score| > 3, otherwise 0. WHY: Values beyond 3 standard deviations are in the extreme 0.3% of a normal distribution."><span class="code-keyword">gen</span> is_outlier_z = (abs(z_income) > <span class="code-number">3</span>)</span>
+<span class="code-tooltip" data-tip="COUNT OUTLIERS: Shows how many observations are flagged. WHAT: count if gives the number where condition is true. WHY: Helps you understand how many extreme values exist in your data."><span class="code-keyword">count</span> if is_outlier_z == <span class="code-number">1</span></span>
+
+<span class="code-comment">* Method 2: IQR (more robust, works for non-normal data)</span>
+<span class="code-tooltip" data-tip="SUMMARIZE DETAIL: Calculates percentiles including Q1 and Q3. WHAT: The detail option computes 25th (r(p25)) and 75th (r(p75)) percentiles. WHY: These quartiles define the middle 50% of data for the IQR method."><span class="code-keyword">summarize</span> income, detail</span>
+<span class="code-tooltip" data-tip="STORE QUARTILES: Saves Q1 and Q3 values in local macros. WHAT: scalar creates named values you can reference later. WHY: Makes the code cleaner and allows reuse of these calculated values."><span class="code-keyword">scalar</span> Q1 = r(p25)
+<span class="code-keyword">scalar</span> Q3 = r(p75)
+<span class="code-keyword">scalar</span> IQR = Q3 - Q1</span>
+<span class="code-tooltip" data-tip="CALCULATE BOUNDS: Defines outlier thresholds using Tukey's fences. WHAT: Lower fence = Q1 - 1.5*IQR, Upper fence = Q3 + 1.5*IQR. WHY: This method detects outliers without being influenced by the outliers themselves."><span class="code-keyword">scalar</span> lower = Q1 - <span class="code-number">1.5</span> * IQR
+<span class="code-keyword">scalar</span> upper = Q3 + <span class="code-number">1.5</span> * IQR</span>
+<span class="code-tooltip" data-tip="FLAG IQR OUTLIERS: Creates indicator for values outside fences. WHAT: is_outlier = 1 if income is below lower bound OR above upper bound. WHY: These observations may need investigation or special handling."><span class="code-keyword">gen</span> is_outlier_iqr = (income < scalar(lower)) | (income > scalar(upper))</span>
+
+<span class="code-comment">* Winsorization: Cap extreme values instead of removing</span>
+<span class="code-tooltip" data-tip="WINSORIZE: Caps values at the calculated bounds. WHAT: Creates new variable where extreme values are replaced with the bounds. WHY: Preserves sample size while reducing influence of outliers on your analysis."><span class="code-keyword">gen</span> income_winsorized = income
+<span class="code-keyword">replace</span> income_winsorized = scalar(lower) if income < scalar(lower)
+<span class="code-keyword">replace</span> income_winsorized = scalar(upper) if income > scalar(upper)</span>
+
+<span class="code-comment">* Drop outliers (use with caution)</span>
+<span class="code-tooltip" data-tip="DROP OUTLIERS: Removes observations flagged as outliers. WHAT: Permanently deletes rows where is_outlier_iqr equals 1. WHY: Sometimes necessary for analysis, but always document and justify. Consider keeping outliers in a separate dataset."><span class="code-comment">* drop if is_outlier_iqr == 1</span>  <span class="code-comment">// Uncomment to actually drop</span></span>
+
+<span class="code-comment">* Tabulate outlier counts</span>
+<span class="code-tooltip" data-tip="TAB: Creates a frequency table of the outlier indicator. WHAT: Shows count and percentage of outliers vs non-outliers. WHY: Quick summary of how many extreme values you're dealing with."><span class="code-keyword">tab</span> is_outlier_iqr</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Detecting and treating outliers</span>
+<span class="code-tooltip" data-tip="LIBRARY(TIDYVERSE): Loads collection of data science packages. WHAT: Includes dplyr for data manipulation and pipes (%>%). WHY: Makes R code more readable and provides consistent functions."><span class="code-function">library</span>(<span class="code-package">tidyverse</span>)</span>
+
+<span class="code-comment"># Method 1: Z-score (for approximately normal data)</span>
+<span class="code-tooltip" data-tip="SCALE(): Calculates standardized z-scores. WHAT: For each value, computes (value - mean) / std_dev. WHY: Z-scores show how many standard deviations each value is from the mean. Values with |z| > 3 are potential outliers."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(z_income = <span class="code-function">scale</span>(income))</span>
+<span class="code-tooltip" data-tip="FILTER BY Z-SCORE: Keeps observations within 3 standard deviations. WHAT: abs() takes absolute value, filter keeps rows where |z| < 3. WHY: Removes extreme outliers in both tails while keeping 99.7% of normal data."><span class="code-variable">df_no_outliers</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(<span class="code-function">abs</span>(z_income) < <span class="code-number">3</span>)</span>
+<span class="code-function">cat</span>(<span class="code-string">"Removed"</span>, <span class="code-function">nrow</span>(df) - <span class="code-function">nrow</span>(df_no_outliers), <span class="code-string">"outliers using z-score method\n"</span>)
+
+<span class="code-comment"># Method 2: IQR (more robust, works for non-normal data)</span>
+<span class="code-tooltip" data-tip="QUANTILE(): Calculates percentile values. WHAT: Gets the 25th and 75th percentiles of income. WHY: These quartiles define the middle 50% of your data, forming the basis for the IQR method."><span class="code-variable">Q1</span> <span class="code-operator"><-</span> <span class="code-function">quantile</span>(df$income, <span class="code-number">0.25</span>, na.rm = <span class="code-keyword">TRUE</span>)
+<span class="code-variable">Q3</span> <span class="code-operator"><-</span> <span class="code-function">quantile</span>(df$income, <span class="code-number">0.75</span>, na.rm = <span class="code-keyword">TRUE</span>)</span>
+<span class="code-tooltip" data-tip="IQR(): Built-in function for interquartile range. WHAT: Calculates Q3 - Q1, the spread of the middle 50% of data. WHY: IQR is robust to outliers, unlike standard deviation which is influenced by extreme values."><span class="code-variable">IQR_val</span> <span class="code-operator"><-</span> <span class="code-function">IQR</span>(df$income, na.rm = <span class="code-keyword">TRUE</span>)</span>
+<span class="code-tooltip" data-tip="CALCULATE BOUNDS: Defines Tukey's fences for outlier detection. WHAT: Lower = Q1 - 1.5*IQR, Upper = Q3 + 1.5*IQR. WHY: Values outside these bounds are considered outliers. The 1.5 multiplier is conventional (captures ~99.3% of normal data)."><span class="code-variable">lower_bound</span> <span class="code-operator"><-</span> Q1 - <span class="code-number">1.5</span> * IQR_val
+<span class="code-variable">upper_bound</span> <span class="code-operator"><-</span> Q3 + <span class="code-number">1.5</span> * IQR_val</span>
+<span class="code-tooltip" data-tip="FILTER TO IQR BOUNDS: Keeps values within the fences. WHAT: Uses between() to check if income falls within bounds. WHY: Removes outliers using a method robust to the outliers themselves."><span class="code-variable">df_iqr_clean</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(<span class="code-function">between</span>(income, lower_bound, upper_bound))</span>
+
+<span class="code-comment"># Winsorization: Cap extreme values instead of removing</span>
+<span class="code-tooltip" data-tip="PMIN/PMAX: Caps values at bounds (winsorization). WHAT: pmin takes the smaller of income and upper_bound; pmax takes the larger of that result and lower_bound. WHY: Extreme values are capped rather than removed, preserving sample size."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(income_winsorized = <span class="code-function">pmin</span>(<span class="code-function">pmax</span>(income, lower_bound), upper_bound))</span>
+
+<span class="code-comment"># Create outlier indicator for analysis</span>
+<span class="code-tooltip" data-tip="CREATE OUTLIER FLAG: Marks observations outside IQR bounds. WHAT: is_outlier = 1 if income is below lower OR above upper bound, 0 otherwise. WHY: Lets you analyze outliers separately or test sensitivity of results."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(is_outlier = <span class="code-function">as.integer</span>(income < lower_bound | income > upper_bound))</span>
+<span class="code-function">cat</span>(<span class="code-string">"Outliers flagged:"</span>, <span class="code-function">sum</span>(df$is_outlier), <span class="code-string">"\n"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">When to Keep vs. Remove Outliers</div>
+          <p>
+            <strong>Keep outliers</strong> when they represent genuine extreme values (e.g., Bill Gates in an income study) or when your research question specifically concerns extremes. <strong>Remove or cap outliers</strong> when they are data entry errors, measurement failures, or when robust estimates are needed. Always report how you handled outliers and test whether your conclusions change.
+          </p>
+        </div>
+
+        <h2 id="strings">4.3 String Manipulation</h2>
+
+        <p>
+          Text data often requires cleaning—standardizing case, removing whitespace, extracting patterns, and more. Economic datasets frequently contain messy string variables: inconsistent country names, occupation codes with extra characters, or addresses that need parsing.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: String manipulation</span>
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for data manipulation. WHAT: Pandas includes powerful string methods accessible via the .str accessor. WHY: Makes string cleaning on entire columns efficient and readable."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
+
+<span class="code-comment"># Case standardization</span>
+<span class="code-tooltip" data-tip="STR.LOWER(): Converts all characters to lowercase. WHAT: 'NEW YORK' becomes 'new york'. WHY: Makes string matching consistent - 'new york' and 'New York' will now be treated as identical."><span class="code-variable">df</span>[<span class="code-string">'country'</span>] = df[<span class="code-string">'country'</span>].str.lower()</span>
+<span class="code-tooltip" data-tip="STR.UPPER(): Converts all characters to uppercase. WHAT: 'new york' becomes 'NEW YORK'. WHY: Useful for standardizing codes or abbreviations like state codes (CA, NY, TX)."><span class="code-variable">df</span>[<span class="code-string">'state_code'</span>] = df[<span class="code-string">'state_code'</span>].str.upper()</span>
+<span class="code-tooltip" data-tip="STR.TITLE(): Capitalizes first letter of each word. WHAT: 'JOHN DOE' becomes 'John Doe'. WHY: Makes names more readable while maintaining consistency."><span class="code-variable">df</span>[<span class="code-string">'name'</span>] = df[<span class="code-string">'name'</span>].str.title()</span>
+
+<span class="code-comment"># Remove whitespace</span>
+<span class="code-tooltip" data-tip="STR.STRIP(): Removes leading and trailing whitespace. WHAT: '  California  ' becomes 'California'. WHY: Extra spaces cause matching failures - 'California' != ' California '."><span class="code-variable">df</span>[<span class="code-string">'state'</span>] = df[<span class="code-string">'state'</span>].str.strip()</span>
+<span class="code-tooltip" data-tip="STR.REPLACE(): Replaces patterns with new text. WHAT: Replaces multiple spaces with single space. WHY: Normalizes inconsistent spacing like 'New   York' to 'New York'. Regex=True enables pattern matching."><span class="code-variable">df</span>[<span class="code-string">'address'</span>] = df[<span class="code-string">'address'</span>].str.replace(<span class="code-string">r'\s+'</span>, <span class="code-string">' '</span>, regex=<span class="code-keyword">True</span>)</span>
+
+<span class="code-comment"># Extract patterns with regex</span>
+<span class="code-tooltip" data-tip="STR.EXTRACT(): Pulls out text matching a pattern. WHAT: Extracts 5-digit sequences (US zip codes) from address strings. WHY: Useful for parsing structured information from messy text. The parentheses define what to capture."><span class="code-variable">df</span>[<span class="code-string">'zip_code'</span>] = df[<span class="code-string">'address'</span>].str.extract(<span class="code-string">r'(\d{5})'</span>)</span>
+<span class="code-tooltip" data-tip="STR.EXTRACT() WITH GROUPS: Captures multiple patterns. WHAT: Extracts state abbreviation (2 letters) and zip code (5 digits) into separate columns. WHY: Parses structured data efficiently from addresses."><span class="code-variable">df</span>[[<span class="code-string">'state_abbr'</span>, <span class="code-string">'zip'</span>]] = df[<span class="code-string">'address'</span>].str.extract(<span class="code-string">r'([A-Z]{2})\s+(\d{5})'</span>)</span>
+
+<span class="code-comment"># Replace values for standardization</span>
+<span class="code-tooltip" data-tip="REPLACE() WITH DICT: Maps multiple old values to new values. WHAT: Standardizes variations of country names to consistent labels. WHY: 'USA', 'U.S.A', 'United States' should all become 'United States' for analysis."><span class="code-variable">df</span>[<span class="code-string">'country'</span>] = df[<span class="code-string">'country'</span>].replace({
+    <span class="code-string">'usa'</span>: <span class="code-string">'united states'</span>,
+    <span class="code-string">'u.s.a'</span>: <span class="code-string">'united states'</span>,
+    <span class="code-string">'uk'</span>: <span class="code-string">'united kingdom'</span>
+})</span>
+
+<span class="code-comment"># Split strings into multiple columns</span>
+<span class="code-tooltip" data-tip="STR.SPLIT() WITH EXPAND: Splits text and creates new columns. WHAT: Splits 'John Doe' into 'John' and 'Doe' in separate columns. WHY: Names often need to be separated for matching or analysis. expand=True creates a DataFrame."><span class="code-variable">df</span>[[<span class="code-string">'first_name'</span>, <span class="code-string">'last_name'</span>]] = df[<span class="code-string">'full_name'</span>].str.split(<span class="code-string">' '</span>, n=<span class="code-number">1</span>, expand=<span class="code-keyword">True</span>)</span>
+
+<span class="code-comment"># Check for patterns</span>
+<span class="code-tooltip" data-tip="STR.CONTAINS(): Checks if pattern exists in string. WHAT: Creates boolean column - True if 'inc' or 'corp' appears in company name. WHY: Useful for filtering or flagging specific types of observations."><span class="code-variable">df</span>[<span class="code-string">'is_corporation'</span>] = df[<span class="code-string">'company'</span>].str.contains(<span class="code-string">r'inc|corp'</span>, case=<span class="code-keyword">False</span>, regex=<span class="code-keyword">True</span>)</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: String manipulation</span>
+
+<span class="code-comment">* Case standardization</span>
+<span class="code-tooltip" data-tip="LOWER(): Converts string to lowercase. WHAT: 'NEW YORK' becomes 'new york'. WHY: Makes matching consistent - case differences won't cause merge failures."><span class="code-keyword">replace</span> country = lower(country)</span>
+<span class="code-tooltip" data-tip="UPPER(): Converts string to uppercase. WHAT: 'california' becomes 'CALIFORNIA'. WHY: Useful for standardizing codes or abbreviations."><span class="code-keyword">replace</span> state_code = upper(state_code)</span>
+<span class="code-tooltip" data-tip="PROPER(): Capitalizes first letter of each word. WHAT: 'JOHN DOE' becomes 'John Doe'. WHY: Makes names readable and consistently formatted."><span class="code-keyword">replace</span> name = proper(name)</span>
+
+<span class="code-comment">* Remove whitespace</span>
+<span class="code-tooltip" data-tip="STRTRIM(): Removes leading and trailing spaces. WHAT: '  California  ' becomes 'California'. WHY: Extra spaces cause merge and matching failures."><span class="code-keyword">replace</span> state = strtrim(state)</span>
+<span class="code-tooltip" data-tip="STRITRIM(): Collapses multiple internal spaces to one. WHAT: 'New   York' becomes 'New York'. WHY: Normalizes inconsistent spacing within strings."><span class="code-keyword">replace</span> address = stritrim(address)</span>
+
+<span class="code-comment">* Extract patterns with regex</span>
+<span class="code-tooltip" data-tip="REGEXS() WITH REGEXM(): Extracts text matching a pattern. WHAT: regexm() finds the pattern, regexs(0) returns the matched text. WHY: Pulls out zip codes from messy address strings. The pattern \d{5} matches exactly 5 digits."><span class="code-keyword">gen</span> zip_code = regexs(<span class="code-number">0</span>) if regexm(address, <span class="code-string">"[0-9]{5}"</span>)</span>
+
+<span class="code-comment">* Extract with capture groups</span>
+<span class="code-tooltip" data-tip="REGEXS(1): Extracts first captured group. WHAT: Pattern captures state abbreviation (2 letters) in parentheses. WHY: regexs(1) returns just that captured portion, not the full match."><span class="code-keyword">gen</span> state_abbr = regexs(<span class="code-number">1</span>) if regexm(address, <span class="code-string">"([A-Z]{2})\s+[0-9]{5}"</span>)</span>
+
+<span class="code-comment">* Replace values for standardization</span>
+<span class="code-tooltip" data-tip="REPLACE WITH CONDITIONS: Standardizes multiple variations to one value. WHAT: Changes 'usa', 'u.s.a', etc. to 'united states'. WHY: Ensures consistent coding for analysis and merging."><span class="code-keyword">replace</span> country = <span class="code-string">"united states"</span> if inlist(country, <span class="code-string">"usa"</span>, <span class="code-string">"u.s.a"</span>, <span class="code-string">"u.s."</span>)
+<span class="code-keyword">replace</span> country = <span class="code-string">"united kingdom"</span> if country == <span class="code-string">"uk"</span></span>
+
+<span class="code-comment">* Split strings into multiple variables</span>
+<span class="code-tooltip" data-tip="SPLIT: Divides string variable into parts at delimiter. WHAT: Splits 'John Doe' into first_name='John' and full_name2='Doe'. WHY: Names often need separation for matching. The parse() option specifies the delimiter."><span class="code-keyword">split</span> full_name, parse(<span class="code-string">" "</span>) gen(name_part)</span>
+<span class="code-tooltip" data-tip="RENAME SPLIT PARTS: Gives meaningful names to split results. WHAT: Renames the generated name_part1 and name_part2 variables. WHY: Makes the dataset easier to understand and use."><span class="code-keyword">rename</span> name_part1 first_name
+<span class="code-keyword">rename</span> name_part2 last_name</span>
+
+<span class="code-comment">* Check for patterns</span>
+<span class="code-tooltip" data-tip="REGEXM() FOR FLAGS: Creates indicator for pattern presence. WHAT: is_corporation = 1 if company contains 'inc' or 'corp'. WHY: Useful for filtering or categorizing observations based on text."><span class="code-keyword">gen</span> is_corporation = regexm(lower(company), <span class="code-string">"inc|corp"</span>)</span>
+
+<span class="code-comment">* Substring extraction</span>
+<span class="code-tooltip" data-tip="SUBSTR(): Extracts portion of string by position. WHAT: Gets characters 1-2 of state_full (e.g., 'CA' from 'California'). WHY: Useful when data has consistent structure and you need fixed portions."><span class="code-keyword">gen</span> state_abbr2 = substr(state_full, <span class="code-number">1</span>, <span class="code-number">2</span>)</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: String manipulation</span>
+<span class="code-tooltip" data-tip="LIBRARY(TIDYVERSE): Loads tidyverse including stringr for string functions. WHAT: stringr provides consistent, readable string manipulation functions. WHY: Base R string functions have inconsistent naming; stringr uses str_ prefix consistently."><span class="code-function">library</span>(<span class="code-package">tidyverse</span>)</span>  <span class="code-comment"># includes stringr</span>
+
+<span class="code-comment"># Case standardization</span>
+<span class="code-tooltip" data-tip="STR_TO_LOWER(): Converts all characters to lowercase. WHAT: 'NEW YORK' becomes 'new york'. WHY: Makes string matching consistent - case differences won't cause failures."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(country = <span class="code-function">str_to_lower</span>(country))</span>
+<span class="code-tooltip" data-tip="STR_TO_UPPER(): Converts all characters to uppercase. WHAT: 'california' becomes 'CALIFORNIA'. WHY: Useful for standardizing codes or abbreviations."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(state_code = <span class="code-function">str_to_upper</span>(state_code))</span>
+<span class="code-tooltip" data-tip="STR_TO_TITLE(): Capitalizes first letter of each word. WHAT: 'JOHN DOE' becomes 'John Doe'. WHY: Makes names readable while maintaining consistency."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(name = <span class="code-function">str_to_title</span>(name))</span>
+
+<span class="code-comment"># Remove whitespace</span>
+<span class="code-tooltip" data-tip="STR_TRIM(): Removes leading and trailing whitespace. WHAT: '  California  ' becomes 'California'. WHY: Extra spaces cause matching failures - 'California' != ' California '."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(state = <span class="code-function">str_trim</span>(state))</span>
+<span class="code-tooltip" data-tip="STR_SQUISH(): Trims AND collapses internal whitespace. WHAT: '  New   York  ' becomes 'New York'. WHY: Handles both edge spaces and multiple internal spaces in one function."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(address = <span class="code-function">str_squish</span>(address))</span>
+
+<span class="code-comment"># Extract patterns with regex</span>
+<span class="code-tooltip" data-tip="STR_EXTRACT(): Pulls out text matching a pattern. WHAT: Extracts 5-digit sequences (zip codes) from addresses. WHY: Useful for parsing structured info from messy text. \\d{5} matches exactly 5 digits."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(zip_code = <span class="code-function">str_extract</span>(address, <span class="code-string">"\\d{5}"</span>))</span>
+
+<span class="code-comment"># Extract with named capture groups</span>
+<span class="code-tooltip" data-tip="STR_MATCH(): Extracts multiple capture groups as matrix. WHAT: Pattern captures state (2 letters) and zip (5 digits). WHY: Returns all captured groups as columns, which we name with [,2] and [,3] indexing."><span class="code-variable">address_parts</span> <span class="code-operator"><-</span> <span class="code-function">str_match</span>(df$address, <span class="code-string">"([A-Z]{2})\\s+(\\d{5})"</span>)
+<span class="code-variable">df</span>$state_abbr <span class="code-operator"><-</span> address_parts[, <span class="code-number">2</span>]
+<span class="code-variable">df</span>$zip <span class="code-operator"><-</span> address_parts[, <span class="code-number">3</span>]</span>
+
+<span class="code-comment"># Replace values for standardization</span>
+<span class="code-tooltip" data-tip="CASE_WHEN(): Recodes values based on conditions. WHAT: Maps multiple variations to standardized values. WHY: More readable than nested ifelse statements. TRUE ~ country keeps other values unchanged."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(country = <span class="code-function">case_when</span>(
+    country %in% <span class="code-function">c</span>(<span class="code-string">"usa"</span>, <span class="code-string">"u.s.a"</span>, <span class="code-string">"u.s."</span>) ~ <span class="code-string">"united states"</span>,
+    country == <span class="code-string">"uk"</span> ~ <span class="code-string">"united kingdom"</span>,
+    <span class="code-keyword">TRUE</span> ~ country
+  ))</span>
+
+<span class="code-comment"># Split strings into multiple columns</span>
+<span class="code-tooltip" data-tip="SEPARATE(): Splits column into multiple columns at delimiter. WHAT: Splits 'John Doe' into first_name='John' and last_name='Doe'. WHY: Clean way to parse structured text. Extra='merge' keeps extra parts in last column."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">separate</span>(full_name, into = <span class="code-function">c</span>(<span class="code-string">"first_name"</span>, <span class="code-string">"last_name"</span>), sep = <span class="code-string">" "</span>, extra = <span class="code-string">"merge"</span>)</span>
+
+<span class="code-comment"># Check for patterns</span>
+<span class="code-tooltip" data-tip="STR_DETECT(): Checks if pattern exists in string. WHAT: Returns TRUE if 'inc' or 'corp' appears (case-insensitive). WHY: Useful for filtering or flagging. regex(..., ignore_case=TRUE) makes it case-insensitive."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(is_corporation = <span class="code-function">str_detect</span>(company, <span class="code-function">regex</span>(<span class="code-string">"inc|corp"</span>, ignore_case = <span class="code-keyword">TRUE</span>)))</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="dates">4.4 Working with Dates</h2>
+
+        <p>
+          Date handling varies across languages but follows similar principles: parsing string dates, extracting components, and performing date arithmetic. Properly formatted dates are essential for time series analysis, event studies, and panel data methods.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Working with dates</span>
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for date handling. WHAT: Pandas has powerful datetime functions built in. WHY: Makes working with dates in DataFrames straightforward."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
+
+<span class="code-comment"># Parse string dates to datetime</span>
+<span class="code-tooltip" data-tip="TO_DATETIME(): Converts strings to datetime objects. WHAT: '2024-01-15' becomes a proper date that can be sorted, compared, and manipulated. WHY: String dates can't be used for calculations or proper sorting."><span class="code-variable">df</span>[<span class="code-string">'date'</span>] = pd.to_datetime(df[<span class="code-string">'date_string'</span>])</span>
+
+<span class="code-comment"># Specify format for non-standard dates</span>
+<span class="code-tooltip" data-tip="TO_DATETIME WITH FORMAT: Parses dates with specific structure. WHAT: %d/%m/%Y means day/month/year (European format). WHY: Without format, pandas might misinterpret '15/01/2024' as January 15th or 15th month error. Always specify when format is non-standard."><span class="code-variable">df</span>[<span class="code-string">'date'</span>] = pd.to_datetime(df[<span class="code-string">'date_string'</span>], format=<span class="code-string">'%d/%m/%Y'</span>)</span>
+
+<span class="code-comment"># Extract date components</span>
+<span class="code-tooltip" data-tip="DT ACCESSOR: Accesses datetime properties. WHAT: .dt.year extracts the year (e.g., 2024), .dt.month extracts month number (1-12). WHY: Allows grouping by year, filtering by month, or creating time indicators."><span class="code-variable">df</span>[<span class="code-string">'year'</span>] = df[<span class="code-string">'date'</span>].dt.year
+<span class="code-variable">df</span>[<span class="code-string">'month'</span>] = df[<span class="code-string">'date'</span>].dt.month
+<span class="code-variable">df</span>[<span class="code-string">'quarter'</span>] = df[<span class="code-string">'date'</span>].dt.quarter</span>
+<span class="code-tooltip" data-tip="DT.DAY_NAME(): Extracts day of week as text. WHAT: Returns 'Monday', 'Tuesday', etc. WHY: Useful for day-of-week effects in economic analysis (e.g., stock market patterns)."><span class="code-variable">df</span>[<span class="code-string">'day_of_week'</span>] = df[<span class="code-string">'date'</span>].dt.day_name()</span>
+
+<span class="code-comment"># Date arithmetic</span>
+<span class="code-tooltip" data-tip="SUBTRACTING DATES: Calculates time difference between dates. WHAT: Returns a timedelta object representing the gap. WHY: Useful for calculating age, tenure, or time since an event."><span class="code-variable">df</span>[<span class="code-string">'days_since_hire'</span>] = (pd.Timestamp.today() - df[<span class="code-string">'hire_date'</span>]).dt.days</span>
+<span class="code-tooltip" data-tip="TIMEDELTA(): Creates a time offset. WHAT: Adds 30 days to each date in the column. WHY: Useful for creating lead/lag variables or deadline calculations."><span class="code-variable">df</span>[<span class="code-string">'deadline'</span>] = df[<span class="code-string">'start_date'</span>] + pd.Timedelta(days=<span class="code-number">30</span>)</span>
+
+<span class="code-comment"># Filter by date range</span>
+<span class="code-tooltip" data-tip="DATE FILTERING: Selects rows within date range. WHAT: Keeps only observations from 2020 onwards. WHY: Common for subsetting time series data to relevant periods."><span class="code-variable">df_recent</span> = df[df[<span class="code-string">'date'</span>] >= <span class="code-string">'2020-01-01'</span>]</span>
+<span class="code-tooltip" data-tip="BETWEEN(): Checks if date falls in range. WHAT: Creates boolean for dates in 2023. WHY: Cleaner than two separate conditions with & operator."><span class="code-variable">df_2023</span> = df[df[<span class="code-string">'date'</span>].between(<span class="code-string">'2023-01-01'</span>, <span class="code-string">'2023-12-31'</span>)]</span>
+
+<span class="code-comment"># Create period indicators</span>
+<span class="code-tooltip" data-tip="TO_PERIOD(): Converts dates to period format. WHAT: Groups dates into quarterly periods like '2024Q1'. WHY: Useful for panel data or aggregating high-frequency data to lower frequency."><span class="code-variable">df</span>[<span class="code-string">'year_quarter'</span>] = df[<span class="code-string">'date'</span>].dt.to_period(<span class="code-string">'Q'</span>)</span>
+
+<span class="code-comment"># Handle missing or invalid dates</span>
+<span class="code-tooltip" data-tip="ERRORS='COERCE': Handles unparseable dates gracefully. WHAT: Invalid dates become NaT (Not a Time) instead of causing errors. WHY: Real data often has malformed dates that shouldn't crash your script."><span class="code-variable">df</span>[<span class="code-string">'date'</span>] = pd.to_datetime(df[<span class="code-string">'date_string'</span>], errors=<span class="code-string">'coerce'</span>)</span>
+<span class="code-function">print</span>(f<span class="code-string">"Invalid dates: {df['date'].isna().sum()}"</span>)</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Working with dates</span>
+
+<span class="code-comment">* Parse string dates to Stata date format</span>
+<span class="code-tooltip" data-tip="DATE(): Converts string to Stata's date number. WHAT: Parses string like '15jan2024' into days since 1/1/1960. WHY: Stata dates are integers for easy arithmetic. 'DMY' means day-month-year format."><span class="code-keyword">gen</span> date = date(date_string, <span class="code-string">"DMY"</span>)</span>
+<span class="code-tooltip" data-tip="FORMAT %TD: Makes date display readable. WHAT: Changes display from number (23410) to '15jan2024'. WHY: Stata stores dates as numbers; format controls how they appear without changing the underlying value."><span class="code-keyword">format</span> date %td</span>
+
+<span class="code-comment">* Different date formats</span>
+<span class="code-tooltip" data-tip="DATE() WITH YMD: Parses year-month-day format. WHAT: Converts '2024-01-15' format strings. WHY: Different data sources use different formats; specify the correct mask."><span class="code-keyword">gen</span> date_ymd = date(date_string, <span class="code-string">"YMD"</span>)</span>
+<span class="code-tooltip" data-tip="DATE() WITH MDY: Parses American month-day-year format. WHAT: Converts '01/15/2024' (mm/dd/yyyy) format. WHY: Common in US government data."><span class="code-keyword">gen</span> date_mdy = date(date_string, <span class="code-string">"MDY"</span>)</span>
+
+<span class="code-comment">* Extract date components</span>
+<span class="code-tooltip" data-tip="YEAR(): Extracts year from date. WHAT: Converts date number to year (e.g., 2024). WHY: Essential for creating year fixed effects or filtering by year."><span class="code-keyword">gen</span> year = year(date)</span>
+<span class="code-tooltip" data-tip="MONTH(): Extracts month number (1-12). WHAT: January=1, December=12. WHY: Useful for seasonal analysis or month fixed effects."><span class="code-keyword">gen</span> month = month(date)</span>
+<span class="code-tooltip" data-tip="QUARTER(): Extracts quarter (1-4). WHAT: Jan-Mar=1, Apr-Jun=2, etc. WHY: Quarterly data is common in economic analysis."><span class="code-keyword">gen</span> quarter = quarter(date)</span>
+<span class="code-tooltip" data-tip="DOW(): Extracts day of week. WHAT: Returns 0=Sunday through 6=Saturday. WHY: Day-of-week effects matter in finance and labor economics."><span class="code-keyword">gen</span> day_of_week = dow(date)</span>
+
+<span class="code-comment">* Date arithmetic (Stata dates are just numbers)</span>
+<span class="code-tooltip" data-tip="DATE SUBTRACTION: Calculates days between dates. WHAT: today() gives current date; subtracting gives days elapsed. WHY: Useful for tenure, age, or event study timing."><span class="code-keyword">gen</span> days_since_hire = today() - hire_date</span>
+<span class="code-tooltip" data-tip="ADDING DAYS: Creates future date. WHAT: Simply add number of days (dates are integers). WHY: Stata's numeric date format makes arithmetic trivial."><span class="code-keyword">gen</span> deadline = start_date + <span class="code-number">30</span></span>
+
+<span class="code-comment">* Create period indicators</span>
+<span class="code-tooltip" data-tip="YQ(): Creates year-quarter indicator. WHAT: Combines year and quarter into single value (e.g., 256 for 2024q1). WHY: Useful as panel identifier or for quarterly aggregation."><span class="code-keyword">gen</span> year_quarter = yq(year, quarter)
+<span class="code-keyword">format</span> year_quarter %tq</span>
+<span class="code-tooltip" data-tip="YM(): Creates year-month indicator. WHAT: Combines year and month into monthly date. WHY: Useful for monthly panel data or time series."><span class="code-keyword">gen</span> year_month = ym(year, month)
+<span class="code-keyword">format</span> year_month %tm</span>
+
+<span class="code-comment">* Filter by date range</span>
+<span class="code-tooltip" data-tip="KEEP IF DATE: Filters to date range. WHAT: mdy() creates comparison date from month/day/year. WHY: Subsets data to relevant time period."><span class="code-keyword">keep</span> if date >= mdy(<span class="code-number">1</span>, <span class="code-number">1</span>, <span class="code-number">2020</span>)</span>
+
+<span class="code-comment">* Handle datetime (with time component)</span>
+<span class="code-tooltip" data-tip="CLOCK(): Parses datetime strings with time. WHAT: Creates Stata datetime including hours/minutes/seconds. WHY: Necessary for high-frequency data with timestamps. Format %tc displays properly."><span class="code-keyword">gen</span> double datetime = clock(datetime_string, <span class="code-string">"YMDhms"</span>)
+<span class="code-keyword">format</span> datetime %tc</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Working with dates</span>
+<span class="code-tooltip" data-tip="LIBRARY(LUBRIDATE): Loads date handling package. WHAT: Part of tidyverse; provides intuitive date parsing and manipulation. WHY: Base R date functions are less intuitive; lubridate makes dates easy."><span class="code-function">library</span>(<span class="code-package">tidyverse</span>)</span>
+<span class="code-function">library</span>(<span class="code-package">lubridate</span>)  <span class="code-comment"># Part of tidyverse, explicit load for clarity</span>
+
+<span class="code-comment"># Parse string dates to Date objects</span>
+<span class="code-tooltip" data-tip="YMD(): Parses year-month-day format. WHAT: Converts '2024-01-15' or '2024/01/15' to Date. WHY: Intelligently handles various separators. Also: mdy() for month-day-year, dmy() for day-month-year."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(date = <span class="code-function">ymd</span>(date_string))</span>
+
+<span class="code-comment"># Different date formats</span>
+<span class="code-tooltip" data-tip="DMY(): Parses day-month-year (European format). WHAT: Converts '15/01/2024' to Date. WHY: lubridate function names match the order of components in your data."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(date_euro = <span class="code-function">dmy</span>(date_string_euro))</span>
+<span class="code-tooltip" data-tip="MDY(): Parses American month-day-year. WHAT: Converts '01/15/2024' (mm/dd/yyyy) to Date. WHY: Common in US government datasets."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(date_us = <span class="code-function">mdy</span>(date_string_us))</span>
+
+<span class="code-comment"># Extract date components</span>
+<span class="code-tooltip" data-tip="YEAR(), MONTH(), QUARTER(): Extract date parts. WHAT: year() gives 2024, month() gives 1-12, quarter() gives 1-4. WHY: Essential for time-based grouping and analysis."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    year = <span class="code-function">year</span>(date),
+    month = <span class="code-function">month</span>(date),
+    quarter = <span class="code-function">quarter</span>(date),
+    day_of_week = <span class="code-function">wday</span>(date, label = <span class="code-keyword">TRUE</span>)
+  )</span>
+
+<span class="code-comment"># Date arithmetic</span>
+<span class="code-tooltip" data-tip="DATE SUBTRACTION WITH DIFFTIME: Calculates time difference. WHAT: Subtracts dates and specifies units. WHY: as.numeric converts to plain number for calculations. Units can be 'days', 'weeks', 'hours'."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(days_since_hire = <span class="code-function">as.numeric</span>(<span class="code-function">difftime</span>(<span class="code-function">Sys.Date</span>(), hire_date, units = <span class="code-string">"days"</span>)))</span>
+<span class="code-tooltip" data-tip="DAYS(): Adds days to date. WHAT: Creates new date 30 days after start_date. WHY: lubridate provides days(), months(), years() for intuitive arithmetic."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(deadline = start_date + <span class="code-function">days</span>(<span class="code-number">30</span>))</span>
+
+<span class="code-comment"># Filter by date range</span>
+<span class="code-tooltip" data-tip="DATE COMPARISON: Filters to date range. WHAT: Keeps rows where date is 2020 or later. WHY: ymd() creates Date for comparison; standard comparison operators work."><span class="code-variable">df_recent</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(date >= <span class="code-function">ymd</span>(<span class="code-string">"2020-01-01"</span>))</span>
+<span class="code-tooltip" data-tip="BETWEEN(): Checks if date falls in range. WHAT: Returns TRUE if date is in 2023. WHY: Cleaner than using >= and <= with &."><span class="code-variable">df_2023</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(<span class="code-function">between</span>(date, <span class="code-function">ymd</span>(<span class="code-string">"2023-01-01"</span>), <span class="code-function">ymd</span>(<span class="code-string">"2023-12-31"</span>)))</span>
+
+<span class="code-comment"># Create period indicators</span>
+<span class="code-tooltip" data-tip="FLOOR_DATE(): Rounds date down to period start. WHAT: Any date in Q1 2024 becomes 2024-01-01. WHY: Useful for grouping by quarter or month. Also: ceiling_date() rounds up."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(quarter_start = <span class="code-function">floor_date</span>(date, <span class="code-string">"quarter"</span>))</span>
+
+<span class="code-comment"># Handle parsing failures</span>
+<span class="code-tooltip" data-tip="QUIET=TRUE SUPPRESSES WARNINGS: Handles invalid dates silently. WHAT: Unparseable dates become NA without warning messages. WHY: Real data often has malformed dates; check for NAs after parsing."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(date = <span class="code-function">ymd</span>(date_string, quiet = <span class="code-keyword">TRUE</span>))</span>
+<span class="code-function">cat</span>(<span class="code-string">"Invalid dates:"</span>, <span class="code-function">sum</span>(<span class="code-function">is.na</span>(df$date)), <span class="code-string">"\n"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box note">
+          <div class="info-box-title">Common Date Format Codes</div>
+          <p>
+            <strong>Python/R:</strong> %Y = 4-digit year, %m = month (01-12), %d = day (01-31), %H = hour, %M = minute, %S = second<br>
+            <strong>Stata:</strong> Y = year, M = month, D = day, h = hour, m = minute, s = second<br>
+            <strong>Example:</strong> "2024-01-15" = %Y-%m-%d (Python/R) or "YMD" (Stata)
+          </p>
+        </div>
+
+        <h2 id="validation">4.5 Data Validation</h2>
+
+        <p>
+          Before analysis, always validate your data for consistency and logical errors. Validation catches problems that summary statistics might miss: impossible values, logical inconsistencies, and data entry errors. Build validation checks into your workflow and run them after every data transformation.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Data validation</span>
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for data manipulation. WHAT: Pandas provides tools for boolean operations and filtering. WHY: Validation often involves checking conditions across entire columns."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
+
+<span class="code-comment"># Check value ranges (impossible values)</span>
+<span class="code-tooltip" data-tip="RANGE VALIDATION: Checks if values fall within valid bounds. WHAT: Age should be 0-120, income should be non-negative. WHY: Catches data entry errors like age=999 or negative income."><span class="code-function">assert</span> (df[<span class="code-string">'age'</span>] >= <span class="code-number">0</span>).all() & (df[<span class="code-string">'age'</span>] <= <span class="code-number">120</span>).all(), <span class="code-string">"Invalid ages found"</span>
+<span class="code-function">assert</span> (df[<span class="code-string">'income'</span>] >= <span class="code-number">0</span>).all(), <span class="code-string">"Negative income values found"</span></span>
+
+<span class="code-comment"># Find and report violations (without stopping)</span>
+<span class="code-tooltip" data-tip="FIND VIOLATIONS: Identifies rows with invalid values. WHAT: Creates mask for age outside 0-120 range and counts violations. WHY: More informative than assert - shows how many and which rows have problems."><span class="code-variable">invalid_age</span> = (df[<span class="code-string">'age'</span>] < <span class="code-number">0</span>) | (df[<span class="code-string">'age'</span>] > <span class="code-number">120</span>)
+<span class="code-function">print</span>(f<span class="code-string">"Rows with invalid age: {invalid_age.sum()}"</span>)
+<span class="code-function">print</span>(df[invalid_age])  <span class="code-comment"># Show the problematic rows</span></span>
+
+<span class="code-comment"># Check categorical values (unexpected categories)</span>
+<span class="code-tooltip" data-tip="CATEGORICAL VALIDATION: Ensures only valid values exist. WHAT: gender should only contain 'M', 'F', or 'Other'. WHY: Catches typos like 'male' instead of 'M' or unexpected codes."><span class="code-variable">valid_genders</span> = [<span class="code-string">'M'</span>, <span class="code-string">'F'</span>, <span class="code-string">'Other'</span>]
+<span class="code-variable">invalid_gender</span> = ~df[<span class="code-string">'gender'</span>].isin(valid_genders)
+<span class="code-function">print</span>(f<span class="code-string">"Invalid gender values: {df.loc[invalid_gender, 'gender'].unique()}"</span>)</span>
+
+<span class="code-comment"># Check logical consistency (cross-variable rules)</span>
+<span class="code-tooltip" data-tip="CROSS-VARIABLE VALIDATION: Checks relationships between columns. WHAT: Retirement year should be after birth year. WHY: Catches logical impossibilities that column-by-column checks miss."><span class="code-variable">inconsistent</span> = df[<span class="code-string">'retirement_year'</span>] < df[<span class="code-string">'birth_year'</span>]
+<span class="code-function">print</span>(f<span class="code-string">"Retired before birth: {inconsistent.sum()} rows"</span>)</span>
+
+<span class="code-comment"># Check for duplicates</span>
+<span class="code-tooltip" data-tip="DUPLICATED(): Identifies duplicate rows. WHAT: Finds rows where person_id appears more than once. WHY: Duplicate IDs suggest data merge errors or repeated observations that need handling."><span class="code-variable">duplicates</span> = df.duplicated(subset=[<span class="code-string">'person_id'</span>], keep=<span class="code-keyword">False</span>)
+<span class="code-function">print</span>(f<span class="code-string">"Duplicate IDs: {duplicates.sum()}"</span>)</span>
+
+<span class="code-comment"># Validation function for reuse</span>
+<span class="code-tooltip" data-tip="VALIDATION FUNCTION: Bundles all checks into reusable code. WHAT: Runs multiple validation rules and reports all violations. WHY: Run the same checks after each data transformation to catch problems early. Returns True if all pass."><span class="code-keyword">def</span> <span class="code-function">validate_data</span>(df):
+    <span class="code-variable">issues</span> = []
+    <span class="code-keyword">if</span> (df[<span class="code-string">'age'</span>] < <span class="code-number">0</span>).any():
+        issues.append(f<span class="code-string">"Negative ages: {(df['age'] < 0).sum()}"</span>)
+    <span class="code-keyword">if</span> (df[<span class="code-string">'income'</span>] < <span class="code-number">0</span>).any():
+        issues.append(f<span class="code-string">"Negative incomes: {(df['income'] < 0).sum()}"</span>)
+    <span class="code-keyword">if</span> df.duplicated(subset=[<span class="code-string">'person_id'</span>]).any():
+        issues.append(f<span class="code-string">"Duplicate IDs found"</span>)
+    <span class="code-keyword">if</span> issues:
+        <span class="code-function">print</span>(<span class="code-string">"Validation failed:\n"</span> + <span class="code-string">"\n"</span>.join(issues))
+        <span class="code-keyword">return</span> <span class="code-keyword">False</span>
+    <span class="code-function">print</span>(<span class="code-string">"All validation checks passed"</span>)
+    <span class="code-keyword">return</span> <span class="code-keyword">True</span></span>
+
+validate_data(df)</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Data validation</span>
+
+<span class="code-comment">* Check value ranges (impossible values)</span>
+<span class="code-tooltip" data-tip="ASSERT: Checks condition and stops if false. WHAT: Ensures all ages are between 0 and 120. WHY: Catches data entry errors immediately. Stata stops execution if assertion fails."><span class="code-keyword">assert</span> age >= <span class="code-number">0</span> & age <= <span class="code-number">120</span></span>
+<span class="code-tooltip" data-tip="ASSERT INCOME: Validates income is non-negative. WHAT: Stops with error if any income is negative. WHY: Negative income usually indicates coding error or special missing value codes."><span class="code-keyword">assert</span> income >= <span class="code-number">0</span></span>
+
+<span class="code-comment">* Find and report violations (without stopping)</span>
+<span class="code-tooltip" data-tip="COUNT IF: Counts observations meeting condition. WHAT: Shows how many rows have age outside valid range. WHY: More informative than assert - tells you the extent of the problem."><span class="code-keyword">count</span> if age < <span class="code-number">0</span> | age > <span class="code-number">120</span>
+<span class="code-keyword">list</span> if age < <span class="code-number">0</span> | age > <span class="code-number">120</span></span>
+
+<span class="code-comment">* Check categorical values</span>
+<span class="code-tooltip" data-tip="INLIST(): Checks if value is in allowed list. WHAT: Creates flag for genders not in valid set. WHY: Catches typos or unexpected category codes."><span class="code-keyword">count</span> if !inlist(gender, <span class="code-string">"M"</span>, <span class="code-string">"F"</span>, <span class="code-string">"Other"</span>)
+<span class="code-keyword">tab</span> gender if !inlist(gender, <span class="code-string">"M"</span>, <span class="code-string">"F"</span>, <span class="code-string">"Other"</span>)  <span class="code-comment">// Show invalid values</span></span>
+
+<span class="code-comment">* Check logical consistency</span>
+<span class="code-tooltip" data-tip="CROSS-VARIABLE CHECK: Validates relationships between columns. WHAT: Finds cases where retirement year precedes birth year. WHY: Logically impossible - indicates data error."><span class="code-keyword">count</span> if retirement_year < birth_year
+<span class="code-keyword">list</span> person_id birth_year retirement_year if retirement_year < birth_year</span>
+
+<span class="code-comment">* Check for duplicates</span>
+<span class="code-tooltip" data-tip="DUPLICATES REPORT: Identifies duplicate observations. WHAT: Shows how many duplicates exist by person_id. WHY: Panel data should have unique person-year combinations; cross-sectional should have unique IDs."><span class="code-keyword">duplicates</span> report person_id
+<span class="code-keyword">duplicates</span> list person_id</span>
+
+<span class="code-comment">* Create validation summary</span>
+<span class="code-tooltip" data-tip="VALIDATION PROGRAM: Bundles checks into reusable command. WHAT: Defines a program that runs all validation rules. WHY: Can run after each data transformation. Use 'capture' to continue even if some checks fail."><span class="code-keyword">capture program drop</span> validate_data
+<span class="code-keyword">program define</span> validate_data
+    <span class="code-keyword">display</span> <span class="code-string">"Running validation checks..."</span>
+    <span class="code-keyword">quietly count</span> if age < <span class="code-number">0</span> | age > <span class="code-number">120</span>
+    <span class="code-keyword">if</span> r(N) > <span class="code-number">0</span> <span class="code-keyword">display</span> <span class="code-string">"WARNING: "</span> r(N) <span class="code-string">" invalid age values"</span>
+    <span class="code-keyword">quietly count</span> if income < <span class="code-number">0</span>
+    <span class="code-keyword">if</span> r(N) > <span class="code-number">0</span> <span class="code-keyword">display</span> <span class="code-string">"WARNING: "</span> r(N) <span class="code-string">" negative incomes"</span>
+    <span class="code-keyword">quietly duplicates</span> report person_id
+    <span class="code-keyword">display</span> <span class="code-string">"Validation complete"</span>
+<span class="code-keyword">end</span></span>
+
+validate_data</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Data validation</span>
+<span class="code-tooltip" data-tip="LIBRARY(TIDYVERSE): Loads data manipulation tools. WHAT: Provides dplyr for filtering and summarizing. WHY: Makes validation code cleaner and more readable."><span class="code-function">library</span>(<span class="code-package">tidyverse</span>)</span>
+
+<span class="code-comment"># Check value ranges (impossible values)</span>
+<span class="code-tooltip" data-tip="STOPIFNOT(): R's assertion function. WHAT: Stops execution if condition is FALSE. WHY: Catches invalid data before analysis runs. all() ensures every value passes."><span class="code-function">stopifnot</span>(<span class="code-function">all</span>(df$age >= <span class="code-number">0</span> & df$age <= <span class="code-number">120</span>, na.rm = <span class="code-keyword">TRUE</span>))
+<span class="code-function">stopifnot</span>(<span class="code-function">all</span>(df$income >= <span class="code-number">0</span>, na.rm = <span class="code-keyword">TRUE</span>))</span>
+
+<span class="code-comment"># Find and report violations (without stopping)</span>
+<span class="code-tooltip" data-tip="FILTER FOR VIOLATIONS: Identifies rows with invalid values. WHAT: Finds and displays rows where age is outside valid range. WHY: Shows which specific observations have problems."><span class="code-variable">invalid_age</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(age < <span class="code-number">0</span> | age > <span class="code-number">120</span>)
+<span class="code-function">cat</span>(<span class="code-string">"Rows with invalid age:"</span>, <span class="code-function">nrow</span>(invalid_age), <span class="code-string">"\n"</span>)
+<span class="code-function">print</span>(invalid_age)</span>
+
+<span class="code-comment"># Check categorical values</span>
+<span class="code-tooltip" data-tip="CHECK CATEGORIES: Finds values not in allowed list. WHAT: !%in% returns TRUE for values not in valid_genders. WHY: Catches typos or unexpected category codes."><span class="code-variable">valid_genders</span> <span class="code-operator"><-</span> <span class="code-function">c</span>(<span class="code-string">"M"</span>, <span class="code-string">"F"</span>, <span class="code-string">"Other"</span>)
+<span class="code-variable">invalid_gender</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(!gender %in% valid_genders)
+<span class="code-function">cat</span>(<span class="code-string">"Invalid gender values:"</span>, <span class="code-function">unique</span>(invalid_gender$gender), <span class="code-string">"\n"</span>)</span>
+
+<span class="code-comment"># Check logical consistency</span>
+<span class="code-tooltip" data-tip="CROSS-VARIABLE VALIDATION: Checks relationships between columns. WHAT: Finds logically impossible cases (retired before born). WHY: Individual column checks miss these inter-column problems."><span class="code-variable">inconsistent</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(retirement_year < birth_year)
+<span class="code-function">cat</span>(<span class="code-string">"Retired before birth:"</span>, <span class="code-function">nrow</span>(inconsistent), <span class="code-string">"rows\n"</span>)</span>
+
+<span class="code-comment"># Check for duplicates</span>
+<span class="code-tooltip" data-tip="N() > 1 FOR DUPLICATES: Finds duplicate IDs. WHAT: Groups by person_id and keeps groups with more than one row. WHY: Identifies observations that appear multiple times when they shouldn't."><span class="code-variable">duplicates</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">group_by</span>(person_id) <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(<span class="code-function">n</span>() > <span class="code-number">1</span>) <span class="code-operator">%>%</span>
+  <span class="code-function">ungroup</span>()
+<span class="code-function">cat</span>(<span class="code-string">"Duplicate IDs:"</span>, <span class="code-function">nrow</span>(duplicates), <span class="code-string">"\n"</span>)</span>
+
+<span class="code-comment"># Validation function for reuse</span>
+<span class="code-tooltip" data-tip="VALIDATION FUNCTION: Bundles all checks into reusable code. WHAT: Runs multiple validation rules and returns issues list. WHY: Run after each data transformation. Returns empty vector if all pass."><span class="code-variable">validate_data</span> <span class="code-operator"><-</span> <span class="code-keyword">function</span>(df) {
+  <span class="code-variable">issues</span> <span class="code-operator"><-</span> <span class="code-function">c</span>()
+  <span class="code-keyword">if</span> (<span class="code-function">any</span>(df$age < <span class="code-number">0</span>, na.rm = <span class="code-keyword">TRUE</span>)) {
+    issues <span class="code-operator"><-</span> <span class="code-function">c</span>(issues, <span class="code-function">paste</span>(<span class="code-string">"Negative ages:"</span>, <span class="code-function">sum</span>(df$age < <span class="code-number">0</span>, na.rm = <span class="code-keyword">TRUE</span>)))
+  }
+  <span class="code-keyword">if</span> (<span class="code-function">any</span>(df$income < <span class="code-number">0</span>, na.rm = <span class="code-keyword">TRUE</span>)) {
+    issues <span class="code-operator"><-</span> <span class="code-function">c</span>(issues, <span class="code-function">paste</span>(<span class="code-string">"Negative incomes:"</span>, <span class="code-function">sum</span>(df$income < <span class="code-number">0</span>, na.rm = <span class="code-keyword">TRUE</span>)))
+  }
+  <span class="code-keyword">if</span> (<span class="code-function">any</span>(<span class="code-function">duplicated</span>(df$person_id))) {
+    issues <span class="code-operator"><-</span> <span class="code-function">c</span>(issues, <span class="code-string">"Duplicate IDs found"</span>)
+  }
+  <span class="code-keyword">if</span> (<span class="code-function">length</span>(issues) > <span class="code-number">0</span>) {
+    <span class="code-function">cat</span>(<span class="code-string">"Validation failed:\n"</span>, <span class="code-function">paste</span>(issues, collapse = <span class="code-string">"\n"</span>), <span class="code-string">"\n"</span>)
+    <span class="code-keyword">return</span>(<span class="code-keyword">FALSE</span>)
+  }
+  <span class="code-function">cat</span>(<span class="code-string">"All validation checks passed\n"</span>)
+  <span class="code-keyword">return</span>(<span class="code-keyword">TRUE</span>)
+}</span>
+
+<span class="code-function">validate_data</span>(df)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Validation Best Practices</div>
+          <p>
+            <strong>1. Validate early and often</strong> — run checks after loading data and after each transformation.<br>
+            <strong>2. Document expected ranges</strong> — write down what values are valid for each variable.<br>
+            <strong>3. Don't silently fix</strong> — log all corrections for reproducibility.<br>
+            <strong>4. Check relationships</strong> — some errors only appear when comparing multiple variables.
+          </p>
+        </div>
+
+        <h2 id="case-study">4.6 Case Study: CPS Data Cleaning</h2>
+
+        <p>
+          The Current Population Survey (CPS) is a key data source for labor economics research. Let's walk through cleaning a typical CPS extract, applying all the techniques from this module.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">About the CPS</div>
+          <p>
+            The CPS is a monthly survey of about 60,000 households conducted by the Bureau of Labor Statistics. It provides employment, earnings, and demographic data. Access cleaned extracts from <a href="https://cps.ipums.org/" target="_blank">IPUMS CPS</a>.
+          </p>
+          <p class="credit">Data source: Sarah Flood et al. IPUMS CPS: Version 11.0 [dataset]. Minneapolis, MN: IPUMS, 2023.</p>
+        </div>
+
+        <p>
+          The code below demonstrates a realistic cleaning workflow: handling special missing value codes, constructing derived variables like hourly wages, and validating the cleaned data.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: CPS Data Cleaning Pipeline</span>
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas and numpy for data manipulation. WHAT: These provide the core tools for handling CPS data. WHY: Standard imports for any data cleaning workflow."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
+
+<span class="code-comment"># Load CPS data (assume downloaded from IPUMS)</span>
+<span class="code-tooltip" data-tip="READ_CSV: Loads the CPS extract file. WHAT: Reads comma-separated data into a DataFrame. WHY: IPUMS provides data in CSV format."><span class="code-variable">cps</span> = pd.read_csv(<span class="code-string">'cps_extract.csv'</span>)</span>
+
+<span class="code-comment"># Step 1: Handle CPS missing value codes</span>
+<span class="code-comment"># IPUMS uses codes like 999999 or 9999999 for NIU/missing</span>
+<span class="code-tooltip" data-tip="REPLACE MISSING CODES: Converts special codes to NaN. WHAT: CPS uses 9999999 for 'Not in Universe' and 9999998 for 'Missing'. WHY: These aren't real incomes; treating them as missing prevents analysis errors."><span class="code-variable">missing_codes</span> = [<span class="code-number">9999999</span>, <span class="code-number">9999998</span>, <span class="code-number">999999</span>, <span class="code-number">999998</span>]
+<span class="code-variable">cps</span>[<span class="code-string">'incwage'</span>] = cps[<span class="code-string">'incwage'</span>].replace(missing_codes, np.nan)</span>
+<span class="code-tooltip" data-tip="CLEAN HOURS: Handles missing codes for usual hours worked. WHAT: 999 often means 'varies' or 'not applicable'. WHY: Invalid hours would corrupt wage calculations."><span class="code-variable">cps</span>[<span class="code-string">'uhrswork'</span>] = cps[<span class="code-string">'uhrswork'</span>].replace([<span class="code-number">999</span>, <span class="code-number">997</span>], np.nan)</span>
+
+<span class="code-comment"># Step 2: Restrict sample (prime-age workers)</span>
+<span class="code-tooltip" data-tip="SAMPLE RESTRICTION: Keeps only working-age adults with earnings. WHAT: Ages 25-54, with positive income and hours. WHY: Standard labor economics sample - avoids students and retirees."><span class="code-variable">cps</span> = cps[
+    (cps[<span class="code-string">'age'</span>] >= <span class="code-number">25</span>) &
+    (cps[<span class="code-string">'age'</span>] <= <span class="code-number">54</span>) &
+    (cps[<span class="code-string">'incwage'</span>] > <span class="code-number">0</span>) &
+    (cps[<span class="code-string">'uhrswork'</span>] > <span class="code-number">0</span>)
+].copy()</span>
+
+<span class="code-comment"># Step 3: Construct hourly wage</span>
+<span class="code-tooltip" data-tip="CALCULATE HOURLY WAGE: Derives wage from annual earnings and hours. WHAT: Annual income / (hours per week × 52 weeks). WHY: Hourly wage is the standard measure in labor economics. Using 52 assumes full-year work."><span class="code-variable">cps</span>[<span class="code-string">'hourly_wage'</span>] = cps[<span class="code-string">'incwage'</span>] / (cps[<span class="code-string">'uhrswork'</span>] * <span class="code-number">52</span>)</span>
+
+<span class="code-comment"># Step 4: Handle wage outliers</span>
+<span class="code-tooltip" data-tip="WAGE BOUNDS: Removes implausible wage values. WHAT: Drops wages below $3/hour or above $500/hour. WHY: Federal minimum is ~$7; $500/hour is $1M annual. Values outside suggest data errors."><span class="code-variable">cps</span> = cps[(cps[<span class="code-string">'hourly_wage'</span>] >= <span class="code-number">3</span>) & (cps[<span class="code-string">'hourly_wage'</span>] <= <span class="code-number">500</span>)]</span>
+
+<span class="code-comment"># Step 5: Create demographic indicators</span>
+<span class="code-tooltip" data-tip="FEMALE INDICATOR: Creates binary gender variable. WHAT: 1 if sex code is 2 (female), 0 otherwise. WHY: Standard for regression analysis; IPUMS codes male=1, female=2."><span class="code-variable">cps</span>[<span class="code-string">'female'</span>] = (cps[<span class="code-string">'sex'</span>] == <span class="code-number">2</span>).astype(int)</span>
+<span class="code-tooltip" data-tip="EDUCATION CATEGORIES: Groups education into standard levels. WHAT: Maps IPUMS education codes to: less than HS, HS, some college, college+. WHY: Simplifies analysis while capturing key distinctions."><span class="code-variable">cps</span>[<span class="code-string">'educ_cat'</span>] = pd.cut(
+    cps[<span class="code-string">'educ'</span>],
+    bins=[<span class="code-number">0</span>, <span class="code-number">72</span>, <span class="code-number">73</span>, <span class="code-number">110</span>, <span class="code-number">999</span>],
+    labels=[<span class="code-string">'Less than HS'</span>, <span class="code-string">'High School'</span>, <span class="code-string">'Some College'</span>, <span class="code-string">'College+'</span>]
+)</span>
+
+<span class="code-comment"># Step 6: Create log wage (common in labor economics)</span>
+<span class="code-tooltip" data-tip="LOG TRANSFORMATION: Creates natural log of hourly wage. WHAT: ln(wage) for use in Mincer-style regressions. WHY: Log wage is approximately normal and coefficients interpret as percentage effects."><span class="code-variable">cps</span>[<span class="code-string">'ln_wage'</span>] = np.log(cps[<span class="code-string">'hourly_wage'</span>])</span>
+
+<span class="code-comment"># Step 7: Final validation</span>
+<span class="code-tooltip" data-tip="VALIDATION: Confirms cleaning was successful. WHAT: Checks for remaining missing values and impossible values. WHY: Catch any problems before analysis. Print sample size for documentation."><span class="code-function">print</span>(f<span class="code-string">"Final sample size: {len(cps):,}"</span>)
+<span class="code-function">print</span>(f<span class="code-string">"Missing wages: {cps['hourly_wage'].isna().sum()}"</span>)
+<span class="code-function">print</span>(cps[[<span class="code-string">'hourly_wage'</span>, <span class="code-string">'ln_wage'</span>, <span class="code-string">'age'</span>]].describe())</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: CPS Data Cleaning Pipeline</span>
+
+<span class="code-comment">* Load CPS data (assume downloaded from IPUMS)</span>
+<span class="code-tooltip" data-tip="USE/IMPORT: Loads the CPS extract file. WHAT: Reads data into Stata's memory. WHY: IPUMS provides Stata-ready .dta files or CSV exports."><span class="code-keyword">import delimited</span> <span class="code-string">"cps_extract.csv"</span>, clear</span>
+
+<span class="code-comment">* Step 1: Handle CPS missing value codes</span>
+<span class="code-comment">* IPUMS uses codes like 999999 or 9999999 for NIU/missing</span>
+<span class="code-tooltip" data-tip="RECODE TO MISSING: Converts special codes to Stata missing. WHAT: CPS uses 9999999 for 'Not in Universe'. WHY: These codes aren't real values; must be treated as missing."><span class="code-keyword">replace</span> incwage = . if inlist(incwage, <span class="code-number">9999999</span>, <span class="code-number">9999998</span>, <span class="code-number">999999</span>, <span class="code-number">999998</span>)</span>
+<span class="code-tooltip" data-tip="CLEAN HOURS: Handles missing codes for hours. WHAT: 999 and 997 are special codes for varies/NIU. WHY: Invalid hours would corrupt wage calculations."><span class="code-keyword">replace</span> uhrswork = . if inlist(uhrswork, <span class="code-number">999</span>, <span class="code-number">997</span>)</span>
+
+<span class="code-comment">* Step 2: Restrict sample (prime-age workers)</span>
+<span class="code-tooltip" data-tip="SAMPLE RESTRICTION: Keeps only working-age adults. WHAT: Ages 25-54 with positive earnings and hours. WHY: Standard labor economics sample avoiding students and retirees."><span class="code-keyword">keep</span> if age >= <span class="code-number">25</span> & age <= <span class="code-number">54</span>
+<span class="code-keyword">keep</span> if incwage > <span class="code-number">0</span> & !missing(incwage)
+<span class="code-keyword">keep</span> if uhrswork > <span class="code-number">0</span> & !missing(uhrswork)</span>
+
+<span class="code-comment">* Step 3: Construct hourly wage</span>
+<span class="code-tooltip" data-tip="CALCULATE HOURLY WAGE: Annual income divided by annual hours. WHAT: incwage / (hours/week × 52 weeks). WHY: Hourly wage is standard measure in labor economics."><span class="code-keyword">gen</span> hourly_wage = incwage / (uhrswork * <span class="code-number">52</span>)</span>
+<span class="code-tooltip" data-tip="LABEL VARIABLE: Documents the new variable. WHAT: Adds descriptive label visible in describe and browse. WHY: Good practice for reproducibility and collaboration."><span class="code-keyword">label variable</span> hourly_wage <span class="code-string">"Hourly wage (annual earnings / annual hours)"</span></span>
+
+<span class="code-comment">* Step 4: Handle wage outliers</span>
+<span class="code-tooltip" data-tip="WAGE BOUNDS: Removes implausible values. WHAT: Drops wages below $3 or above $500 per hour. WHY: Values outside this range likely represent data errors."><span class="code-keyword">drop</span> if hourly_wage < <span class="code-number">3</span> | hourly_wage > <span class="code-number">500</span></span>
+
+<span class="code-comment">* Step 5: Create demographic indicators</span>
+<span class="code-tooltip" data-tip="FEMALE INDICATOR: Creates binary gender variable. WHAT: female=1 if sex==2, following IPUMS coding (male=1, female=2). WHY: Standard for regression analysis."><span class="code-keyword">gen</span> female = (sex == <span class="code-number">2</span>)
+<span class="code-keyword">label variable</span> female <span class="code-string">"Female indicator"</span>
+<span class="code-keyword">label define</span> female_lbl <span class="code-number">0</span> <span class="code-string">"Male"</span> <span class="code-number">1</span> <span class="code-string">"Female"</span>
+<span class="code-keyword">label values</span> female female_lbl</span>
+
+<span class="code-tooltip" data-tip="EDUCATION CATEGORIES: Groups IPUMS education codes. WHAT: Creates 4 categories from detailed education. WHY: Simplifies analysis; captures key skill distinctions."><span class="code-keyword">gen</span> educ_cat = .
+<span class="code-keyword">replace</span> educ_cat = <span class="code-number">1</span> if educ < <span class="code-number">73</span>
+<span class="code-keyword">replace</span> educ_cat = <span class="code-number">2</span> if educ == <span class="code-number">73</span>
+<span class="code-keyword">replace</span> educ_cat = <span class="code-number">3</span> if educ >= <span class="code-number">80</span> & educ < <span class="code-number">111</span>
+<span class="code-keyword">replace</span> educ_cat = <span class="code-number">4</span> if educ >= <span class="code-number">111</span>
+<span class="code-keyword">label define</span> educ_lbl <span class="code-number">1</span> <span class="code-string">"Less than HS"</span> <span class="code-number">2</span> <span class="code-string">"High School"</span> <span class="code-number">3</span> <span class="code-string">"Some College"</span> <span class="code-number">4</span> <span class="code-string">"College+"</span>
+<span class="code-keyword">label values</span> educ_cat educ_lbl</span>
+
+<span class="code-comment">* Step 6: Create log wage (common in labor economics)</span>
+<span class="code-tooltip" data-tip="LOG TRANSFORMATION: Creates natural log of wage. WHAT: ln(hourly_wage) for Mincer regressions. WHY: Coefficients interpret as percentage effects; distribution more normal."><span class="code-keyword">gen</span> ln_wage = ln(hourly_wage)
+<span class="code-keyword">label variable</span> ln_wage <span class="code-string">"Log hourly wage"</span></span>
+
+<span class="code-comment">* Step 7: Final validation</span>
+<span class="code-tooltip" data-tip="VALIDATION: Checks cleaning success. WHAT: Shows sample size and summary statistics. WHY: Verify no remaining problems before analysis."><span class="code-keyword">count</span>
+<span class="code-keyword">summarize</span> hourly_wage ln_wage age
+<span class="code-keyword">misstable</span> summarize hourly_wage ln_wage</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: CPS Data Cleaning Pipeline</span>
+<span class="code-tooltip" data-tip="LIBRARY: Loads tidyverse for data manipulation. WHAT: Provides dplyr, tidyr, and other tools. WHY: Makes cleaning code readable and efficient."><span class="code-function">library</span>(<span class="code-package">tidyverse</span>)</span>
+
+<span class="code-comment"># Load CPS data (assume downloaded from IPUMS)</span>
+<span class="code-tooltip" data-tip="READ_CSV: Loads the CPS extract file. WHAT: Reads CSV into a tibble (enhanced data frame). WHY: IPUMS provides data in CSV format."><span class="code-variable">cps</span> <span class="code-operator"><-</span> <span class="code-function">read_csv</span>(<span class="code-string">"cps_extract.csv"</span>)</span>
+
+<span class="code-comment"># Step 1: Handle CPS missing value codes</span>
+<span class="code-comment"># IPUMS uses codes like 999999 or 9999999 for NIU/missing</span>
+<span class="code-tooltip" data-tip="NA_IF: Converts specific values to NA. WHAT: Replaces 9999999 etc. with R's NA. WHY: These codes aren't real values; treating as missing prevents errors."><span class="code-variable">cps</span> <span class="code-operator"><-</span> cps <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    incwage = <span class="code-function">if_else</span>(incwage %in% <span class="code-function">c</span>(<span class="code-number">9999999</span>, <span class="code-number">9999998</span>, <span class="code-number">999999</span>, <span class="code-number">999998</span>), <span class="code-keyword">NA_real_</span>, incwage),
+    uhrswork = <span class="code-function">if_else</span>(uhrswork %in% <span class="code-function">c</span>(<span class="code-number">999</span>, <span class="code-number">997</span>), <span class="code-keyword">NA_real_</span>, uhrswork)
+  )</span>
+
+<span class="code-comment"># Step 2: Restrict sample (prime-age workers)</span>
+<span class="code-tooltip" data-tip="FILTER: Keeps only working-age adults with earnings. WHAT: Ages 25-54 with positive income and hours. WHY: Standard labor economics sample - avoids students and retirees."><span class="code-variable">cps</span> <span class="code-operator"><-</span> cps <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(
+    age >= <span class="code-number">25</span> & age <= <span class="code-number">54</span>,
+    incwage > <span class="code-number">0</span>,
+    uhrswork > <span class="code-number">0</span>
+  )</span>
+
+<span class="code-comment"># Step 3: Construct hourly wage</span>
+<span class="code-tooltip" data-tip="CALCULATE HOURLY WAGE: Annual income divided by annual hours. WHAT: incwage / (hours per week × 52 weeks). WHY: Hourly wage is the standard measure in labor economics."><span class="code-variable">cps</span> <span class="code-operator"><-</span> cps <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(hourly_wage = incwage / (uhrswork * <span class="code-number">52</span>))</span>
+
+<span class="code-comment"># Step 4: Handle wage outliers</span>
+<span class="code-tooltip" data-tip="WAGE BOUNDS: Removes implausible wage values. WHAT: Keeps wages between $3 and $500 per hour. WHY: Values outside this range likely represent data errors."><span class="code-variable">cps</span> <span class="code-operator"><-</span> cps <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(hourly_wage >= <span class="code-number">3</span> & hourly_wage <= <span class="code-number">500</span>)</span>
+
+<span class="code-comment"># Step 5: Create demographic indicators</span>
+<span class="code-tooltip" data-tip="FEMALE INDICATOR: Creates binary gender variable. WHAT: female=1 if sex==2 (IPUMS coding). WHY: Standard for regression analysis."><span class="code-variable">cps</span> <span class="code-operator"><-</span> cps <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(female = <span class="code-function">as.integer</span>(sex == <span class="code-number">2</span>))</span>
+
+<span class="code-tooltip" data-tip="EDUCATION CATEGORIES: Groups IPUMS education codes. WHAT: Creates factor with 4 education levels. WHY: Simplifies analysis while capturing key distinctions."><span class="code-variable">cps</span> <span class="code-operator"><-</span> cps <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(
+    educ_cat = <span class="code-function">case_when</span>(
+      educ < <span class="code-number">73</span> ~ <span class="code-string">"Less than HS"</span>,
+      educ == <span class="code-number">73</span> ~ <span class="code-string">"High School"</span>,
+      educ >= <span class="code-number">80</span> & educ < <span class="code-number">111</span> ~ <span class="code-string">"Some College"</span>,
+      educ >= <span class="code-number">111</span> ~ <span class="code-string">"College+"</span>
+    ) <span class="code-operator">%>%</span> <span class="code-function">factor</span>(levels = <span class="code-function">c</span>(<span class="code-string">"Less than HS"</span>, <span class="code-string">"High School"</span>, <span class="code-string">"Some College"</span>, <span class="code-string">"College+"</span>))
+  )</span>
+
+<span class="code-comment"># Step 6: Create log wage (common in labor economics)</span>
+<span class="code-tooltip" data-tip="LOG TRANSFORMATION: Creates natural log of hourly wage. WHAT: ln(wage) for Mincer-style regressions. WHY: Coefficients interpret as percentage effects; more normal distribution."><span class="code-variable">cps</span> <span class="code-operator"><-</span> cps <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(ln_wage = <span class="code-function">log</span>(hourly_wage))</span>
+
+<span class="code-comment"># Step 7: Final validation</span>
+<span class="code-tooltip" data-tip="VALIDATION: Confirms cleaning was successful. WHAT: Shows sample size and summary statistics. WHY: Verify no remaining problems before analysis."><span class="code-function">cat</span>(<span class="code-string">"Final sample size:"</span>, <span class="code-function">nrow</span>(cps), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"Missing wages:"</span>, <span class="code-function">sum</span>(<span class="code-function">is.na</span>(cps$hourly_wage)), <span class="code-string">"\n"</span>)
+cps <span class="code-operator">%>%</span>
+  <span class="code-function">select</span>(hourly_wage, ln_wage, age) <span class="code-operator">%>%</span>
+  <span class="code-function">summary</span>()</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="exercises">4.7 Exercises</h2>
+
+        <!-- Exercise 4.1: Interactive -->
+        <div class="interactive-exercise" data-exercise="4.1">
+          <h4>Exercise 4.1: Handling Missing Data</h4>
+          <p>Practice identifying and handling missing values. Complete these tasks:</p>
+          <ol>
+            <li>Check for missing values in a dataset</li>
+            <li>Drop or fill missing values</li>
+            <li>Create a missing indicator variable</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Check for missing values
+# Task 2: Handle missing values (drop or fill)
+# Task 3: Create a missing indicator
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Check for missing values
+* Task 2: Handle missing values (drop or fill)
+* Task 3: Create a missing indicator
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Check for missing values
+# Task 2: Handle missing values (drop or fill)
+# Task 3: Create a missing indicator
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <!-- Python Solutions -->
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Check for missing values</div>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="IMPORT PANDAS: Loads the pandas library for data manipulation. WHAT: Brings in powerful tools for working with tables of data. WHY: Python alone cannot read spreadsheets or handle missing data - pandas adds these abilities."><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd</span>
+
+<span class="code-comment"># Check for missing values</span>
+<span class="code-tooltip" data-tip="ISNULL().SUM(): Counts missing values per column. WHAT: isnull() checks each cell (True if empty), sum() totals the Trues. WHY: Shows you exactly how many gaps exist in each variable of your dataset."><span class="code-function">print</span>(df.isnull().sum())</span>          <span class="code-comment"># Count by column</span>
+<span class="code-tooltip" data-tip="ISNULL().MEAN() * 100: Shows percentage of missing data. WHAT: mean() gives proportion (0-1), multiply by 100 for percentage. WHY: Easier to interpret than counts. Example: 15.5 means 15.5% of values are missing."><span class="code-function">print</span>(df.isnull().mean() * 100)</span>  <span class="code-comment"># Percentage missing</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Handle missing values</div>
+              <pre class="step-code"><code><span class="code-comment"># Drop rows with missing values</span>
+<span class="code-tooltip" data-tip="DROPNA(): Removes all rows containing any missing value. WHAT: Creates a new clean dataset with only complete rows. WHY: Some statistical methods require complete data. CAUTION: You may lose many observations this way.">df_clean = df.dropna()</span>
+
+<span class="code-comment"># Or fill with mean/median</span>
+<span class="code-tooltip" data-tip="FILLNA() WITH MEAN: Replaces missing values with the average. WHAT: Calculates mean of existing income values, puts that number in every empty cell. WHY: Keeps all your rows. INPLACE=TRUE modifies the original data directly.">df[<span class="code-string">'income'</span>].fillna(df[<span class="code-string">'income'</span>].mean(), inplace=<span class="code-keyword">True</span>)</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a missing indicator</div>
+              <pre class="step-code"><code><span class="code-comment"># Create indicator for missing values</span>
+<span class="code-tooltip" data-tip="CREATE MISSING INDICATOR: Makes a new column flagging where data was missing. WHAT: isnull() gives True/False, astype(int) converts to 1/0. WHY: Lets you track and analyze which rows had missing data, even after you fill them in.">df[<span class="code-string">'income_missing'</span>] = df[<span class="code-string">'income'</span>].isnull().astype(int)</span></code></pre>
+            </div>
+
+            <!-- Stata Solutions -->
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Check for missing values</div>
+              <pre class="step-code"><code><span class="code-comment">* Check for missing values</span>
+<span class="code-tooltip" data-tip="MISSTABLE SUMMARIZE: Creates a summary table of missing data. WHAT: Lists each variable with missing values and shows how many observations are missing. WHY: Quick overview to identify which variables have gaps in your data."><span class="code-keyword">misstable</span> summarize</span>
+<span class="code-tooltip" data-tip="MISSTABLE PATTERNS: Shows patterns of missingness across variables. WHAT: Reveals which combinations of variables tend to be missing together. WHY: Helps understand if missing data follows a pattern (e.g., income and hours both missing)."><span class="code-keyword">misstable</span> patterns</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Handle missing values</div>
+              <pre class="step-code"><code><span class="code-comment">* Drop observations with missing values</span>
+<span class="code-tooltip" data-tip="DROP IF MISSING(): Permanently removes rows where income is blank. WHAT: Deletes all observations that have no income value. WHY: Some analyses require complete data. CAUTION: This is irreversible - save your data first!"><span class="code-keyword">drop</span> if missing(income)</span>
+
+<span class="code-comment">* Or fill with mean</span>
+<span class="code-tooltip" data-tip="SUMMARIZE: Calculates statistics and stores the mean. WHAT: Computes mean, std dev, min, max for income. WHY: We need the mean value for the next step. The mean is automatically saved in r(mean)."><span class="code-keyword">summarize</span> income</span>
+<span class="code-tooltip" data-tip="REPLACE WITH R(MEAN): Fills missing income with the average value. WHAT: Where income is blank, inserts the mean calculated above. WHY: Keeps all observations in your dataset. CAUTION: May reduce the true variation in your data."><span class="code-keyword">replace</span> income = r(mean) if missing(income)</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a missing indicator</div>
+              <pre class="step-code"><code><span class="code-comment">* Create missing indicator</span>
+<span class="code-tooltip" data-tip="GEN MISSING(): Creates a new variable flagging missing values. WHAT: income_missing = 1 if income was blank, 0 if it had a value. WHY: Lets you track which observations originally had missing data, useful for analysis and sensitivity checks."><span class="code-keyword">gen</span> income_missing = missing(income)</span></code></pre>
+            </div>
+
+            <!-- R Solutions -->
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Check for missing values</div>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="LIBRARY(TIDYVERSE): Loads the tidyverse collection of packages. WHAT: Brings in tools for data manipulation, visualization, and more. WHY: Makes R code cleaner with the pipe operator (%>%) and consistent function naming."><span class="code-function">library</span>(tidyverse)</span>
+
+<span class="code-comment"># Check for missing values</span>
+<span class="code-tooltip" data-tip="SUM(IS.NA()): Counts total missing values in the entire dataset. WHAT: is.na() marks each cell as TRUE if empty, sum() adds up all the TRUEs. WHY: Quick check to see how much missing data you have overall."><span class="code-function">sum</span>(<span class="code-function">is.na</span>(df))</span>                 <span class="code-comment"># Total missing</span>
+<span class="code-tooltip" data-tip="COLSUMS(IS.NA()): Counts missing values for each column. WHAT: Applies is.na() to each column separately, then sums. WHY: Shows which variables have the most gaps in your data."><span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df))</span>             <span class="code-comment"># By column</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Handle missing values</div>
+              <pre class="step-code"><code><span class="code-comment"># Drop missing values</span>
+<span class="code-tooltip" data-tip="DROP_NA(): Removes all rows with any missing value. WHAT: Keeps only complete cases (rows with no gaps). WHY: Some analyses require complete data. The pipe (%>%) passes df to drop_na(). CAUTION: May lose many rows.">df_clean <- df %>% <span class="code-function">drop_na</span>()</span>
+
+<span class="code-comment"># Or fill with mean</span>
+<span class="code-tooltip" data-tip="MUTATE WITH REPLACE_NA(): Fills missing values with the mean. WHAT: replace_na() puts the average wherever income is NA. na.rm=TRUE tells mean() to skip NAs when calculating. WHY: Keeps all your observations.">df <- df %>% <span class="code-function">mutate</span>(income = <span class="code-function">replace_na</span>(income, <span class="code-function">mean</span>(income, na.rm = TRUE)))</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a missing indicator</div>
+              <pre class="step-code"><code><span class="code-comment"># Create missing indicator</span>
+<span class="code-tooltip" data-tip="AS.INTEGER(IS.NA()): Creates a 0/1 flag for missing values. WHAT: is.na() returns TRUE/FALSE, as.integer() converts to 1/0. WHY: Tracks which rows originally had missing data, useful for later analysis even after filling values.">df <- df %>% <span class="code-function">mutate</span>(income_missing = <span class="code-function">as.integer</span>(<span class="code-function">is.na</span>(income)))</span></code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise 4.2: Outlier Detection -->
+        <div class="interactive-exercise" data-exercise="4.2">
+          <h4>Exercise 4.2: Detecting Outliers</h4>
+          <p>Practice identifying outliers using the z-score method. Complete these tasks:</p>
+          <ol>
+            <li>Calculate z-scores for a numeric variable</li>
+            <li>Flag observations where |z| &gt; 3 as outliers</li>
+            <li>Remove or winsorize the outliers</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Calculate z-scores
+# Task 2: Flag outliers (|z| > 3)
+# Task 3: Remove or cap outliers
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Calculate z-scores
+* Task 2: Flag outliers (|z| > 3)
+* Task 3: Remove or cap outliers
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Calculate z-scores
+# Task 2: Flag outliers (|z| > 3)
+# Task 3: Remove or cap outliers
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <!-- Python Solutions -->
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Calculate z-scores</div>
+              <pre class="step-code"><code><span class="code-keyword">from</span> scipy <span class="code-keyword">import</span> stats
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Calculate z-scores</span>
+z_scores = np.abs(stats.zscore(df[<span class="code-string">'income'</span>]))</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Flag outliers</div>
+              <pre class="step-code"><code><span class="code-comment"># Flag observations where |z| > 3</span>
+df[<span class="code-string">'is_outlier'</span>] = (z_scores > <span class="code-number">3</span>).astype(int)
+<span class="code-function">print</span>(f<span class="code-string">"Outliers found: {df['is_outlier'].sum()}"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Remove or winsorize outliers</div>
+              <pre class="step-code"><code><span class="code-comment"># Remove outliers</span>
+df_clean = df[z_scores < <span class="code-number">3</span>]
+
+<span class="code-comment"># Or winsorize (cap at bounds)</span>
+Q1, Q3 = df[<span class="code-string">'income'</span>].quantile([<span class="code-number">0.25</span>, <span class="code-number">0.75</span>])
+IQR = Q3 - Q1
+df[<span class="code-string">'income_winsorized'</span>] = df[<span class="code-string">'income'</span>].clip(Q1 - <span class="code-number">1.5</span>*IQR, Q3 + <span class="code-number">1.5</span>*IQR)</code></pre>
+            </div>
+
+            <!-- Stata Solutions -->
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Calculate z-scores</div>
+              <pre class="step-code"><code><span class="code-comment">* Calculate z-scores</span>
+<span class="code-keyword">summarize</span> income
+<span class="code-keyword">gen</span> z_income = (income - r(mean)) / r(sd)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Flag outliers</div>
+              <pre class="step-code"><code><span class="code-comment">* Flag observations where |z| > 3</span>
+<span class="code-keyword">gen</span> is_outlier = (abs(z_income) > <span class="code-number">3</span>)
+<span class="code-keyword">count</span> if is_outlier == <span class="code-number">1</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Remove or winsorize outliers</div>
+              <pre class="step-code"><code><span class="code-comment">* Remove outliers</span>
+<span class="code-keyword">drop</span> if is_outlier == <span class="code-number">1</span>
+
+<span class="code-comment">* Or winsorize using IQR</span>
+<span class="code-keyword">summarize</span> income, detail
+<span class="code-keyword">gen</span> income_winsorized = income
+<span class="code-keyword">replace</span> income_winsorized = r(p25) - <span class="code-number">1.5</span>*(r(p75)-r(p25)) if income < r(p25) - <span class="code-number">1.5</span>*(r(p75)-r(p25))
+<span class="code-keyword">replace</span> income_winsorized = r(p75) + <span class="code-number">1.5</span>*(r(p75)-r(p25)) if income > r(p75) + <span class="code-number">1.5</span>*(r(p75)-r(p25))</code></pre>
+            </div>
+
+            <!-- R Solutions -->
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Calculate z-scores</div>
+              <pre class="step-code"><code><span class="code-function">library</span>(tidyverse)
+
+<span class="code-comment"># Calculate z-scores</span>
+df <- df %>%
+  <span class="code-function">mutate</span>(z_income = <span class="code-function">scale</span>(income))</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Flag outliers</div>
+              <pre class="step-code"><code><span class="code-comment"># Flag observations where |z| > 3</span>
+df <- df %>%
+  <span class="code-function">mutate</span>(is_outlier = <span class="code-function">as.integer</span>(<span class="code-function">abs</span>(z_income) > <span class="code-number">3</span>))
+<span class="code-function">cat</span>(<span class="code-string">"Outliers found:"</span>, <span class="code-function">sum</span>(df$is_outlier))</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Remove or winsorize outliers</div>
+              <pre class="step-code"><code><span class="code-comment"># Remove outliers</span>
+df_clean <- df %>% <span class="code-function">filter</span>(<span class="code-function">abs</span>(z_income) < <span class="code-number">3</span>)
+
+<span class="code-comment"># Or winsorize using IQR</span>
+Q1 <- <span class="code-function">quantile</span>(df$income, <span class="code-number">0.25</span>)
+Q3 <- <span class="code-function">quantile</span>(df$income, <span class="code-number">0.75</span>)
+IQR_val <- Q3 - Q1
+df <- df %>%
+  <span class="code-function">mutate</span>(income_winsorized = <span class="code-function">pmin</span>(<span class="code-function">pmax</span>(income, Q1 - <span class="code-number">1.5</span>*IQR_val), Q3 + <span class="code-number">1.5</span>*IQR_val))</code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise 4.3: String Cleaning -->
+        <div class="interactive-exercise" data-exercise="4.3">
+          <h4>Exercise 4.3: Cleaning String Data</h4>
+          <p>Practice standardizing messy text variables. Complete these tasks:</p>
+          <ol>
+            <li>Standardize case (uppercase or lowercase)</li>
+            <li>Remove extra whitespace</li>
+            <li>Extract a pattern using regex (e.g., zip code)</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Standardize case
+# Task 2: Remove extra whitespace
+# Task 3: Extract a pattern (e.g., zip code)
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Standardize case
+* Task 2: Remove extra whitespace
+* Task 3: Extract a pattern (e.g., zip code)
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Standardize case
+# Task 2: Remove extra whitespace
+# Task 3: Extract a pattern (e.g., zip code)
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <!-- Python Solutions -->
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Standardize case</div>
+              <pre class="step-code"><code><span class="code-comment"># Convert to lowercase</span>
+df[<span class="code-string">'country'</span>] = df[<span class="code-string">'country'</span>].str.lower()
+
+<span class="code-comment"># Or convert to uppercase</span>
+df[<span class="code-string">'state_code'</span>] = df[<span class="code-string">'state_code'</span>].str.upper()</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Remove whitespace</div>
+              <pre class="step-code"><code><span class="code-comment"># Strip leading/trailing spaces</span>
+df[<span class="code-string">'name'</span>] = df[<span class="code-string">'name'</span>].str.strip()
+
+<span class="code-comment"># Collapse multiple spaces to one</span>
+df[<span class="code-string">'address'</span>] = df[<span class="code-string">'address'</span>].str.replace(<span class="code-string">r'\s+'</span>, <span class="code-string">' '</span>, regex=<span class="code-keyword">True</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Extract pattern with regex</div>
+              <pre class="step-code"><code><span class="code-comment"># Extract 5-digit zip code</span>
+df[<span class="code-string">'zip_code'</span>] = df[<span class="code-string">'address'</span>].str.extract(<span class="code-string">r'(\d{5})'</span>)</code></pre>
+            </div>
+
+            <!-- Stata Solutions -->
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Standardize case</div>
+              <pre class="step-code"><code><span class="code-comment">* Convert to lowercase</span>
+<span class="code-keyword">replace</span> country = lower(country)
+
+<span class="code-comment">* Or convert to uppercase</span>
+<span class="code-keyword">replace</span> state_code = upper(state_code)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Remove whitespace</div>
+              <pre class="step-code"><code><span class="code-comment">* Strip leading/trailing spaces</span>
+<span class="code-keyword">replace</span> name = strtrim(name)
+
+<span class="code-comment">* Collapse multiple internal spaces</span>
+<span class="code-keyword">replace</span> address = stritrim(address)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Extract pattern with regex</div>
+              <pre class="step-code"><code><span class="code-comment">* Extract 5-digit zip code</span>
+<span class="code-keyword">gen</span> zip_code = regexs(<span class="code-number">0</span>) if regexm(address, <span class="code-string">"[0-9]{5}"</span>)</code></pre>
+            </div>
+
+            <!-- R Solutions -->
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Standardize case</div>
+              <pre class="step-code"><code><span class="code-function">library</span>(tidyverse)
+
+<span class="code-comment"># Convert to lowercase</span>
+df <- df %>%
+  <span class="code-function">mutate</span>(country = <span class="code-function">str_to_lower</span>(country))
+
+<span class="code-comment"># Or convert to uppercase</span>
+df <- df %>%
+  <span class="code-function">mutate</span>(state_code = <span class="code-function">str_to_upper</span>(state_code))</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Remove whitespace</div>
+              <pre class="step-code"><code><span class="code-comment"># Strip leading/trailing and collapse internal spaces</span>
+df <- df %>%
+  <span class="code-function">mutate</span>(
+    name = <span class="code-function">str_trim</span>(name),
+    address = <span class="code-function">str_squish</span>(address)
+  )</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Extract pattern with regex</div>
+              <pre class="step-code"><code><span class="code-comment"># Extract 5-digit zip code</span>
+df <- df %>%
+  <span class="code-function">mutate</span>(zip_code = <span class="code-function">str_extract</span>(address, <span class="code-string">"\\d{5}"</span>))</code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise 4.4: Date Manipulation -->
+        <div class="interactive-exercise" data-exercise="4.4">
+          <h4>Exercise 4.4: Working with Dates</h4>
+          <p>Practice parsing and manipulating date variables. Complete these tasks:</p>
+          <ol>
+            <li>Parse a date string into a date object</li>
+            <li>Extract year, month, or quarter from a date</li>
+            <li>Calculate time difference between dates</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Parse a date string
+# Task 2: Extract year/month/quarter
+# Task 3: Calculate time difference
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Parse a date string
+* Task 2: Extract year/month/quarter
+* Task 3: Calculate time difference
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Parse a date string
+# Task 2: Extract year/month/quarter
+# Task 3: Calculate time difference
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <!-- Python Solutions -->
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Parse date string</div>
+              <pre class="step-code"><code><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Parse string to datetime</span>
+df[<span class="code-string">'date'</span>] = pd.to_datetime(df[<span class="code-string">'date_string'</span>])</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Extract date components</div>
+              <pre class="step-code"><code><span class="code-comment"># Extract year, month, quarter</span>
+df[<span class="code-string">'year'</span>] = df[<span class="code-string">'date'</span>].dt.year
+df[<span class="code-string">'month'</span>] = df[<span class="code-string">'date'</span>].dt.month
+df[<span class="code-string">'quarter'</span>] = df[<span class="code-string">'date'</span>].dt.quarter</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Calculate time difference</div>
+              <pre class="step-code"><code><span class="code-comment"># Calculate days between dates</span>
+df[<span class="code-string">'days_elapsed'</span>] = (pd.Timestamp.today() - df[<span class="code-string">'start_date'</span>]).dt.days
+
+<span class="code-comment"># Or between two columns</span>
+df[<span class="code-string">'duration'</span>] = (df[<span class="code-string">'end_date'</span>] - df[<span class="code-string">'start_date'</span>]).dt.days</code></pre>
+            </div>
+
+            <!-- Stata Solutions -->
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Parse date string</div>
+              <pre class="step-code"><code><span class="code-comment">* Parse string to Stata date</span>
+<span class="code-keyword">gen</span> date = date(date_string, <span class="code-string">"YMD"</span>)
+<span class="code-keyword">format</span> date %td</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Extract date components</div>
+              <pre class="step-code"><code><span class="code-comment">* Extract year, month, quarter</span>
+<span class="code-keyword">gen</span> year = year(date)
+<span class="code-keyword">gen</span> month = month(date)
+<span class="code-keyword">gen</span> quarter = quarter(date)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Calculate time difference</div>
+              <pre class="step-code"><code><span class="code-comment">* Calculate days between dates</span>
+<span class="code-keyword">gen</span> days_elapsed = today() - start_date
+
+<span class="code-comment">* Or between two columns</span>
+<span class="code-keyword">gen</span> duration = end_date - start_date</code></pre>
+            </div>
+
+            <!-- R Solutions -->
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Parse date string</div>
+              <pre class="step-code"><code><span class="code-function">library</span>(tidyverse)
+<span class="code-function">library</span>(lubridate)
+
+<span class="code-comment"># Parse string to Date</span>
+df <- df %>%
+  <span class="code-function">mutate</span>(date = <span class="code-function">ymd</span>(date_string))</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Extract date components</div>
+              <pre class="step-code"><code><span class="code-comment"># Extract year, month, quarter</span>
+df <- df %>%
+  <span class="code-function">mutate</span>(
+    year = <span class="code-function">year</span>(date),
+    month = <span class="code-function">month</span>(date),
+    quarter = <span class="code-function">quarter</span>(date)
+  )</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Calculate time difference</div>
+              <pre class="step-code"><code><span class="code-comment"># Calculate days between dates</span>
+df <- df %>%
+  <span class="code-function">mutate</span>(
+    days_elapsed = <span class="code-function">as.numeric</span>(<span class="code-function">difftime</span>(<span class="code-function">Sys.Date</span>(), start_date, units = <span class="code-string">"days"</span>)),
+    duration = <span class="code-function">as.numeric</span>(<span class="code-function">difftime</span>(end_date, start_date, units = <span class="code-string">"days"</span>))
+  )</code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise 4.5: Data Validation -->
+        <div class="interactive-exercise" data-exercise="4.5">
+          <h4>Exercise 4.5: Data Validation</h4>
+          <p>Practice validating data for consistency and errors. Complete these tasks:</p>
+          <ol>
+            <li>Check for valid value ranges (e.g., age between 0-120)</li>
+            <li>Identify duplicate records</li>
+            <li>Check logical consistency between variables</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Check value ranges
+# Task 2: Find duplicate records
+# Task 3: Check logical consistency
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Check value ranges
+* Task 2: Find duplicate records
+* Task 3: Check logical consistency
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Check value ranges
+# Task 2: Find duplicate records
+# Task 3: Check logical consistency
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <!-- Python Solutions -->
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Check value ranges</div>
+              <pre class="step-code"><code><span class="code-comment"># Check if age is within valid range</span>
+invalid_age = df[(df[<span class="code-string">'age'</span>] < <span class="code-number">0</span>) | (df[<span class="code-string">'age'</span>] > <span class="code-number">120</span>)]
+<span class="code-function">print</span>(f<span class="code-string">"Invalid ages: {len(invalid_age)}"</span>)
+
+<span class="code-comment"># Using assert for hard validation</span>
+<span class="code-keyword">assert</span> (df[<span class="code-string">'age'</span>] >= <span class="code-number">0</span>).all(), <span class="code-string">"Negative ages found"</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Find duplicates</div>
+              <pre class="step-code"><code><span class="code-comment"># Find duplicate records by ID</span>
+duplicates = df[df.duplicated(subset=[<span class="code-string">'person_id'</span>], keep=<span class="code-keyword">False</span>)]
+<span class="code-function">print</span>(f<span class="code-string">"Duplicate records: {len(duplicates)}"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Check logical consistency</div>
+              <pre class="step-code"><code><span class="code-comment"># Check that end_date is after start_date</span>
+inconsistent = df[df[<span class="code-string">'end_date'</span>] < df[<span class="code-string">'start_date'</span>]]
+<span class="code-function">print</span>(f<span class="code-string">"Logically inconsistent: {len(inconsistent)}"</span>)
+
+<span class="code-comment"># Check that retirement year is after birth year</span>
+invalid = df[df[<span class="code-string">'retirement_year'</span>] < df[<span class="code-string">'birth_year'</span>]]</code></pre>
+            </div>
+
+            <!-- Stata Solutions -->
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Check value ranges</div>
+              <pre class="step-code"><code><span class="code-comment">* Check if age is within valid range</span>
+<span class="code-keyword">count</span> if age < <span class="code-number">0</span> | age > <span class="code-number">120</span>
+<span class="code-keyword">list</span> if age < <span class="code-number">0</span> | age > <span class="code-number">120</span>
+
+<span class="code-comment">* Using assert for hard validation</span>
+<span class="code-keyword">assert</span> age >= <span class="code-number">0</span> & age <= <span class="code-number">120</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Find duplicates</div>
+              <pre class="step-code"><code><span class="code-comment">* Find duplicate records by ID</span>
+<span class="code-keyword">duplicates</span> report person_id
+<span class="code-keyword">duplicates</span> list person_id</code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Check logical consistency</div>
+              <pre class="step-code"><code><span class="code-comment">* Check that end_date is after start_date</span>
+<span class="code-keyword">count</span> if end_date < start_date
+<span class="code-keyword">list</span> if end_date < start_date
+
+<span class="code-comment">* Check that retirement year is after birth year</span>
+<span class="code-keyword">count</span> if retirement_year < birth_year</code></pre>
+            </div>
+
+            <!-- R Solutions -->
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Check value ranges</div>
+              <pre class="step-code"><code><span class="code-function">library</span>(tidyverse)
+
+<span class="code-comment"># Check if age is within valid range</span>
+invalid_age <- df %>%
+  <span class="code-function">filter</span>(age < <span class="code-number">0</span> | age > <span class="code-number">120</span>)
+<span class="code-function">cat</span>(<span class="code-string">"Invalid ages:"</span>, <span class="code-function">nrow</span>(invalid_age), <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># Using stopifnot for hard validation</span>
+<span class="code-function">stopifnot</span>(<span class="code-function">all</span>(df$age >= <span class="code-number">0</span>, na.rm = <span class="code-keyword">TRUE</span>))</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Find duplicates</div>
+              <pre class="step-code"><code><span class="code-comment"># Find duplicate records by ID</span>
+duplicates <- df %>%
+  <span class="code-function">group_by</span>(person_id) %>%
+  <span class="code-function">filter</span>(<span class="code-function">n</span>() > <span class="code-number">1</span>) %>%
+  <span class="code-function">ungroup</span>()
+<span class="code-function">cat</span>(<span class="code-string">"Duplicate records:"</span>, <span class="code-function">nrow</span>(duplicates), <span class="code-string">"\n"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Check logical consistency</div>
+              <pre class="step-code"><code><span class="code-comment"># Check that end_date is after start_date</span>
+inconsistent <- df %>%
+  <span class="code-function">filter</span>(end_date < start_date)
+<span class="code-function">cat</span>(<span class="code-string">"Logically inconsistent:"</span>, <span class="code-function">nrow</span>(inconsistent), <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># Check that retirement year is after birth year</span>
+invalid <- df %>%
+  <span class="code-function">filter</span>(retirement_year < birth_year)</code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-footer">
+          <a href="03-data-exploration.html" class="nav-link prev">Module 3: Data Exploration</a>
+          <a href="05-data-analysis.html" class="nav-link next">Module 5: Data Analysis</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I'm the ProTools ER1 course assistant. I can help you with questions about Python, Stata, R, causal inference methods, or any of the course material. How can I assist you today?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question about the course..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Interactive Exercise Script -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const exercisePatterns = {
+      '4.1': {
+        python: {
+          patterns: [
+            // Check missing - accepts: isnull, isna, notna, info, describe with nulls
+            { regex: /\.isnull\s*\(|\.isna\s*\(|\.notna\s*\(|pd\.isnull|pd\.isna|\.info\s*\(|any\s*\(.*null|sum\s*\(.*null|is\.na|missing/i, points: 34, description: 'Check for missing values' },
+            // Handle missing - accepts: dropna, fillna, interpolate, replace with mean/median
+            { regex: /\.dropna\s*\(|\.fillna\s*\(|\.interpolate\s*\(|drop.*na|fill.*na|\.mean\s*\(\)|\.median\s*\(\)|impute|replace.*nan/i, points: 33, description: 'Handle missing values' },
+            // Missing indicator - accepts: isnull().astype, isna().astype, creating indicator column
+            { regex: /isnull\s*\(\)\.astype|isna\s*\(\)\.astype|_missing\s*=|missing.*=.*isnull|missing.*=.*isna|\[.*missing.*\]\s*=/i, points: 33, description: 'Create missing indicator' }
+          ]
+        },
+        stata: {
+          patterns: [
+            // Check missing - accepts: misstable, mdesc, missing(), count if missing
+            { regex: /misstable|mdesc|missing\s*\(|count\s+if\s+missing|tab.*missing|sum.*missing/i, points: 34, description: 'Check for missing values' },
+            // Handle missing - accepts: drop if missing, replace if missing, mi impute
+            { regex: /drop\s+if\s+missing|keep\s+if\s+!missing|replace.*if\s+missing|mi\s+impute|impute/i, points: 33, description: 'Handle missing values' },
+            // Missing indicator - accepts: gen...missing(), generate missing indicator
+            { regex: /gen(erate)?\s+\w+\s*=\s*missing|gen.*_missing|_missing\s*=\s*missing/i, points: 33, description: 'Create missing indicator' }
+          ]
+        },
+        r: {
+          patterns: [
+            // Check missing - accepts: is.na, sum(is.na), any(is.na), complete.cases, na.omit info
+            { regex: /is\.na\s*\(|sum\s*\(\s*is\.na|any\s*\(\s*is\.na|complete\.cases|colSums.*is\.na|colMeans.*is\.na/i, points: 34, description: 'Check for missing values' },
+            // Handle missing - accepts: drop_na, na.omit, replace_na, fill, impute
+            { regex: /drop_na|na\.omit|na\.exclude|replace_na|fill\s*\(|impute|ifelse.*is\.na|if_else.*is\.na|coalesce/i, points: 33, description: 'Handle missing values' },
+            // Missing indicator - accepts: as.integer(is.na, creating indicator column
+            { regex: /as\.integer\s*\(\s*is\.na|as\.numeric\s*\(\s*is\.na|_missing\s*=|missing.*<-.*is\.na/i, points: 33, description: 'Create missing indicator' }
+          ]
+        }
+      },
+      '4.2': {
+        python: {
+          patterns: [
+            // Calculate z-scores - accepts: zscore, scale, (x - mean)/std
+            { regex: /zscore|scale\s*\(|z_score|z-score|\(\s*\w+\s*-\s*\w*mean|\(\s*\w+\s*-\s*r\(mean/i, points: 34, description: 'Calculate z-scores' },
+            // Flag outliers - accepts: > 3, outlier, is_outlier
+            { regex: />\s*3|<\s*-3|abs\s*\(.*>\s*3|outlier|is_outlier/i, points: 33, description: 'Flag outliers' },
+            // Remove/winsorize - accepts: filter, drop, clip, winsor, IQR
+            { regex: /filter\s*\(.*z|drop.*outlier|\.clip\s*\(|winsor|IQR|quantile.*0\.25|quantile.*0\.75|p25|p75/i, points: 33, description: 'Remove or winsorize outliers' }
+          ]
+        },
+        stata: {
+          patterns: [
+            { regex: /z_\w+\s*=|zscore|\(\s*\w+\s*-\s*r\(mean\).*r\(sd\)/i, points: 34, description: 'Calculate z-scores' },
+            { regex: /abs\s*\(.*>\s*3|is_outlier|outlier/i, points: 33, description: 'Flag outliers' },
+            { regex: /drop\s+if.*outlier|winsor|r\(p25\)|r\(p75\)|scalar.*IQR/i, points: 33, description: 'Remove or winsorize outliers' }
+          ]
+        },
+        r: {
+          patterns: [
+            { regex: /scale\s*\(|z_\w+|zscore/i, points: 34, description: 'Calculate z-scores' },
+            { regex: /abs\s*\(.*>\s*3|is_outlier|outlier/i, points: 33, description: 'Flag outliers' },
+            { regex: /filter\s*\(.*abs.*<\s*3|pmin|pmax|quantile.*0\.25|quantile.*0\.75|IQR/i, points: 33, description: 'Remove or winsorize outliers' }
+          ]
+        }
+      },
+      '4.3': {
+        python: {
+          patterns: [
+            // Standardize case - accepts: .str.lower, .str.upper, .str.title
+            { regex: /\.str\.lower\s*\(|\.str\.upper\s*\(|\.str\.title\s*\(|\.str\.capitalize/i, points: 34, description: 'Standardize case' },
+            // Remove whitespace - accepts: .str.strip, .str.replace with \s
+            { regex: /\.str\.strip\s*\(|\.str\.replace\s*\(.*\\s|strtrim|stritrim/i, points: 33, description: 'Remove whitespace' },
+            // Extract pattern - accepts: .str.extract, regex
+            { regex: /\.str\.extract\s*\(|regexs|str_extract|\\d\{5\}|[0-9]\{5\}/i, points: 33, description: 'Extract pattern with regex' }
+          ]
+        },
+        stata: {
+          patterns: [
+            { regex: /lower\s*\(|upper\s*\(|proper\s*\(/i, points: 34, description: 'Standardize case' },
+            { regex: /strtrim|stritrim|trim\s*\(/i, points: 33, description: 'Remove whitespace' },
+            { regex: /regexm|regexs|substr/i, points: 33, description: 'Extract pattern with regex' }
+          ]
+        },
+        r: {
+          patterns: [
+            { regex: /str_to_lower|str_to_upper|str_to_title|tolower|toupper/i, points: 34, description: 'Standardize case' },
+            { regex: /str_trim|str_squish|trimws/i, points: 33, description: 'Remove whitespace' },
+            { regex: /str_extract|str_match|regmatches|\\\\d\{5\}/i, points: 33, description: 'Extract pattern with regex' }
+          ]
+        }
+      },
+      '4.4': {
+        python: {
+          patterns: [
+            // Parse date - accepts: to_datetime, strptime
+            { regex: /to_datetime|strptime|pd\.Timestamp|parse_date/i, points: 34, description: 'Parse date string' },
+            // Extract components - accepts: .dt.year, .dt.month, .dt.quarter
+            { regex: /\.dt\.year|\.dt\.month|\.dt\.quarter|\.dt\.day|year\s*\(|month\s*\(/i, points: 33, description: 'Extract date components' },
+            // Time difference - accepts: Timedelta, .dt.days, difftime
+            { regex: /Timedelta|\.dt\.days|difftime|today\s*\(\)|Timestamp\.today/i, points: 33, description: 'Calculate time difference' }
+          ]
+        },
+        stata: {
+          patterns: [
+            { regex: /date\s*\(.*,|clock\s*\(|%td|%tc/i, points: 34, description: 'Parse date string' },
+            { regex: /year\s*\(|month\s*\(|quarter\s*\(|day\s*\(/i, points: 33, description: 'Extract date components' },
+            { regex: /today\s*\(\)|end_date\s*-\s*start_date|\w+_date\s*-\s*\w+_date/i, points: 33, description: 'Calculate time difference' }
+          ]
+        },
+        r: {
+          patterns: [
+            { regex: /ymd\s*\(|mdy\s*\(|dmy\s*\(|as\.Date|parse_date|strptime/i, points: 34, description: 'Parse date string' },
+            { regex: /year\s*\(|month\s*\(|quarter\s*\(|day\s*\(/i, points: 33, description: 'Extract date components' },
+            { regex: /difftime|Sys\.Date|as\.numeric.*diff|interval/i, points: 33, description: 'Calculate time difference' }
+          ]
+        }
+      },
+      '4.5': {
+        python: {
+          patterns: [
+            // Check ranges - accepts: assert, comparison operators with bounds
+            { regex: /assert|>=\s*0|<=\s*120|<\s*0|>\s*120|invalid.*age|valid.*range/i, points: 34, description: 'Check value ranges' },
+            // Find duplicates - accepts: duplicated, drop_duplicates
+            { regex: /\.duplicated\s*\(|drop_duplicates|duplicate/i, points: 33, description: 'Find duplicates' },
+            // Check consistency - accepts: comparing columns, logical checks
+            { regex: /end_date.*<.*start_date|retirement.*<.*birth|inconsistent|logical/i, points: 33, description: 'Check logical consistency' }
+          ]
+        },
+        stata: {
+          patterns: [
+            { regex: /assert|count\s+if.*<\s*0|count\s+if.*>\s*120|invalid|valid.*range/i, points: 34, description: 'Check value ranges' },
+            { regex: /duplicates\s+report|duplicates\s+list|duplicates\s+drop/i, points: 33, description: 'Find duplicates' },
+            { regex: /count\s+if.*<.*date|count\s+if.*retirement.*<.*birth|inconsistent/i, points: 33, description: 'Check logical consistency' }
+          ]
+        },
+        r: {
+          patterns: [
+            { regex: /stopifnot|assert|filter.*<\s*0|filter.*>\s*120|invalid|valid/i, points: 34, description: 'Check value ranges' },
+            { regex: /duplicated|n\(\)\s*>\s*1|group_by.*filter.*n\(\)/i, points: 33, description: 'Find duplicates' },
+            { regex: /filter.*end.*<.*start|filter.*retirement.*<.*birth|inconsistent/i, points: 33, description: 'Check logical consistency' }
+          ]
+        }
+      }
+    };
+
+    // Initialize interactive exercises
+    document.querySelectorAll('.interactive-exercise').forEach(exercise => {
+      const exerciseId = exercise.dataset.exercise;
+      let currentLang = 'python';
+      let currentStep = 0;
+      let hasCheckedScore = false;
+
+      exercise.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const lang = this.dataset.lang;
+          currentLang = lang;
+          exercise.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          exercise.querySelectorAll('.code-editor').forEach(editor => {
+            editor.style.display = editor.dataset.lang === lang ? 'block' : 'none';
+          });
+          if (hasCheckedScore) resetSolutionSteps();
+        });
+      });
+
+      const checkBtn = exercise.querySelector('.btn-check-score');
+      const scoreDisplay = exercise.querySelector('.score-display');
+      const scoreValue = exercise.querySelector('.score-value');
+      const scoreFeedback = exercise.querySelector('.score-feedback');
+      const showSolutionBtn = exercise.querySelector('.btn-show-solution');
+
+      checkBtn.addEventListener('click', function() {
+        const editor = exercise.querySelector(`.code-editor[data-lang="${currentLang}"]`);
+        const code = editor.value;
+        const patterns = exercisePatterns[exerciseId]?.[currentLang]?.patterns || [];
+
+        let score = 0;
+        let matched = [];
+        let missed = [];
+
+        patterns.forEach(p => {
+          if (p.regex.test(code)) {
+            score += p.points;
+            matched.push(p.description);
+          } else {
+            missed.push(p.description);
+          }
+        });
+
+        score = Math.min(100, score);
+        scoreValue.textContent = score;
+        scoreValue.className = 'score-value';
+        if (score >= 80) scoreValue.classList.add('score-high');
+        else if (score >= 50) scoreValue.classList.add('score-medium');
+        else scoreValue.classList.add('score-low');
+
+        if (score === 100) {
+          scoreFeedback.textContent = 'Perfect! All tasks completed correctly.';
+        } else if (score >= 70) {
+          scoreFeedback.textContent = `Good work! Missing: ${missed.join(', ')}.`;
+        } else if (score >= 40) {
+          scoreFeedback.textContent = `Getting there. Missing: ${missed.join(', ')}.`;
+        } else {
+          scoreFeedback.textContent = `Keep trying! Check: ${missed.slice(0, 2).join(', ')}.`;
+        }
+
+        scoreDisplay.style.display = 'flex';
+        showSolutionBtn.style.display = 'inline-block';
+        hasCheckedScore = true;
+      });
+
+      const solutionSteps = exercise.querySelector('.solution-steps');
+      const prevBtn = exercise.querySelector('.btn-prev-step');
+      const nextBtn = exercise.querySelector('.btn-next-step');
+      const currentStepEl = exercise.querySelector('.current-step');
+      const totalStepsEl = exercise.querySelector('.total-steps');
+
+      function resetSolutionSteps() {
+        currentStep = 0;
+        currentStepEl.textContent = '0';
+        exercise.querySelectorAll('.solution-step').forEach(step => {
+          step.style.display = 'none';
+        });
+        updateNavButtons();
+      }
+
+      function updateNavButtons() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        totalStepsEl.textContent = totalSteps;
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep >= totalSteps;
+        nextBtn.textContent = currentStep >= totalSteps ? 'Complete' : 'Next Step';
+      }
+
+      function showStep(stepNum) {
+        const steps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`);
+        steps.forEach((step, idx) => {
+          step.style.display = (idx + 1) <= stepNum ? 'block' : 'none';
+        });
+        currentStepEl.textContent = stepNum;
+      }
+
+      showSolutionBtn.addEventListener('click', function() {
+        solutionSteps.style.display = 'block';
+        resetSolutionSteps();
+        this.style.display = 'none';
+      });
+
+      nextBtn.addEventListener('click', function() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        if (currentStep < totalSteps) {
+          currentStep++;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      prevBtn.addEventListener('click', function() {
+        if (currentStep > 0) {
+          currentStep--;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      updateNavButtons();
+    });
+  });
+  </script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+
+      const targetRect = target.getBoundingClientRect();
+      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
+      let containerRect = container ? container.getBoundingClientRect() : {
+        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
+      };
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10;
+
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8;
+      let arrowClass = 'arrow-bottom';
+
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      if (top + tooltipHeight > viewportHeight - padding) {
+        top = targetRect.top - tooltipHeight - 8;
+        arrowClass = 'arrow-bottom';
+      }
+
+      if (left < padding) {
+        left = padding;
+      }
+      if (left + tooltipWidth > viewportWidth - padding) {
+        left = viewportWidth - tooltipWidth - padding;
+      }
+
+      if (container) {
+        const minLeft = Math.max(padding, containerRect.left);
+        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
+        if (left < minLeft) left = minLeft;
+        if (left + tooltipWidth > maxRight) left = maxRight - tooltipWidth;
+      }
+
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) tooltipEl.classList.remove('visible');
+        currentTarget = null;
+      }, 100);
+    }
+
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target);
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip();
+    }, true);
+
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    }, true);
+
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    });
+  })();
+  </script>
+</body>
+</html>

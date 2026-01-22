@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 5: Data Analysis | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    /* Interactive Exercise Styles */
+    .interactive-exercise { background: white; border: 2px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .exercise-editor { margin: 1rem 0; }
+    .editor-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .lang-btn { padding: 0.4rem 1rem; border: 1px solid var(--color-border); background: white; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .lang-btn:hover { border-color: var(--color-primary); }
+    .lang-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .code-editor { width: 100%; min-height: 200px; padding: 1rem; font-family: var(--font-code); font-size: 0.9rem; border: none; border-radius: 8px; background: #1a202c; color: #e2e8f0; resize: vertical; line-height: 1.5; }
+    .code-editor:focus { outline: 2px solid var(--color-accent); }
+    .exercise-actions { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+    .btn-check-score, .btn-show-solution { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-check-score { background: var(--color-primary); color: white; }
+    .btn-check-score:hover { background: var(--color-secondary); transform: translateY(-1px); }
+    .btn-show-solution { background: var(--color-accent); color: white; }
+    .btn-show-solution:hover { background: #c77a3a; }
+    .score-display { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-radius: 8px; }
+    .score-circle { display: flex; align-items: baseline; gap: 2px; }
+    .score-value { font-size: 2rem; font-weight: 700; color: var(--color-primary); }
+    .score-value.score-high { color: #38a169; }
+    .score-value.score-medium { color: #d69e2e; }
+    .score-value.score-low { color: #e53e3e; }
+    .score-label { font-size: 1rem; color: #666; }
+    .score-feedback { font-size: 0.9rem; color: #555; max-width: 300px; }
+    .solution-steps { margin-top: 1.5rem; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
+    .solution-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-bottom: 1px solid var(--color-border); }
+    .solution-header h5 { margin: 0; color: var(--color-primary); }
+    .step-counter { font-size: 0.85rem; color: #666; }
+    .solution-step { padding: 1rem; border-bottom: 1px solid var(--color-border); animation: fadeIn 0.3s ease; }
+    .solution-step:last-of-type { border-bottom: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .step-description { font-weight: 600; color: var(--color-secondary); margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 3px solid var(--color-accent); }
+    .step-code { margin: 0; background: #1e1e1e; border-radius: 6px; padding: 1rem; }
+    .step-code code { color: #d4d4d4; }
+    .solution-navigation { display: flex; justify-content: space-between; padding: 1rem; background: var(--color-bg-alt); }
+    .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
+    .code-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #888;
+      text-decoration: none;
+    }
+
+    /* Tooltip element created by JavaScript */
+    .tooltip-popup {
+      position: fixed;
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      max-width: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
+      line-height: 1.4;
+      text-align: left;
+      font-family: var(--font-body);
+      font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tooltip-popup.visible {
+      opacity: 1;
+    }
+
+    /* Small arrow pointer */
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1f2937;
+    }
+    .tooltip-popup.arrow-top::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #1f2937;
+    }
+    .tooltip-popup.arrow-left::after {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1f2937;
+    }
+    .tooltip-popup.arrow-right::after {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      border-left-color: #1f2937;
+    }
+  </style>
+</head>
+<body>
+  <!-- Password Protection Overlay -->
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav active">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>5 &nbsp;Data Analysis & Visualization</h1>
+          <div class="module-meta">
+            <span>~8 hours</span>
+            <span>EDA, Statistics, Plots</span>
+            <span>Intermediate</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Organize research projects with clear script naming conventions</li>
+            <li>Create and maintain README files for reproducibility</li>
+            <li>Compute and interpret descriptive statistics</li>
+            <li>Create publication-quality visualizations</li>
+            <li>Run and interpret regression analyses</li>
+            <li>Generate summary tables for papers</li>
+          </ul>
+        </div>
+
+        <div class="toc">
+          <h3>Table of Contents</h3>
+          <ul>
+            <li><a href="#project-organization">5.1 Project Organization</a></li>
+            <li><a href="#readme-files">5.2 README Files</a></li>
+            <li><a href="#descriptive-stats">5.3 Descriptive Statistics</a></li>
+            <li><a href="#visualization">5.4 Data Visualization</a></li>
+            <li><a href="#correlation">5.5 Correlation Analysis</a></li>
+            <li><a href="#regression">5.6 Basic Regression Analysis</a></li>
+            <li><a href="#summary-tables">5.7 Summary Tables for Papers</a></li>
+            <li><a href="#exercises">5.8 Exercises</a></li>
+          </ul>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5.1: PROJECT ORGANIZATION            -->
+        <!-- ============================================ -->
+        <h2 id="project-organization">5.1 Project Organization</h2>
+
+        <p>
+          Before diving into analysis, establishing a clear project structure is essential. A well-organized project allows you (and others) to understand what each script does and the order in which to run them. This becomes critical as projects grow in complexity and when sharing code for replication.
+        </p>
+
+        <h3>Script Naming Conventions</h3>
+
+        <p>
+          Script names should reveal <strong>what they do</strong> and the <strong>order to run them</strong>. The most effective approach uses numbered prefixes combined with descriptive names:
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Naming Pattern</div>
+          <p style="margin-bottom: 0;">
+            <code>##_action_description.ext</code><br>
+            where <code>##</code> is a two-digit number (01, 02, 03...) indicating execution order.
+          </p>
+        </div>
+
+        <h4>Example Project Structure</h4>
+
+        <pre style="background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code>project/
+├── <span style="color: #90cdf4;">data/</span>
+│   ├── raw/                    <span style="color: #68d391;"># Original, untouched data</span>
+│   │   ├── census_2020.csv
+│   │   └── survey_responses.xlsx
+│   ├── processed/              <span style="color: #68d391;"># Cleaned, analysis-ready data</span>
+│   │   └── analysis_sample.csv
+│   └── temp/                   <span style="color: #68d391;"># Intermediate files</span>
+│
+├── <span style="color: #90cdf4;">code/</span>
+│   ├── <span style="color: #f6ad55;">01_import_data.py</span>          <span style="color: #68d391;"># Load raw data</span>
+│   ├── <span style="color: #f6ad55;">02_clean_data.py</span>          <span style="color: #68d391;"># Handle missing values, outliers</span>
+│   ├── <span style="color: #f6ad55;">03_merge_datasets.py</span>      <span style="color: #68d391;"># Combine data sources</span>
+│   ├── <span style="color: #f6ad55;">04_create_variables.py</span>    <span style="color: #68d391;"># Generate analysis variables</span>
+│   ├── <span style="color: #f6ad55;">05_descriptive_stats.py</span>   <span style="color: #68d391;"># Summary statistics, EDA</span>
+│   ├── <span style="color: #f6ad55;">06_regression_analysis.py</span> <span style="color: #68d391;"># Main estimation</span>
+│   ├── <span style="color: #f6ad55;">07_robustness_checks.py</span>   <span style="color: #68d391;"># Sensitivity analyses</span>
+│   └── <span style="color: #f6ad55;">08_create_figures.py</span>     <span style="color: #68d391;"># Publication plots</span>
+│
+├── <span style="color: #90cdf4;">output/</span>
+│   ├── tables/
+│   └── figures/
+│
+└── <span style="color: #fc8181;">README.md</span>                    <span style="color: #68d391;"># Project documentation</span></code></pre>
+
+        <h4>Naming Best Practices</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Practice</th>
+              <th>Good</th>
+              <th>Avoid</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Use numbers for order</td>
+              <td><code>01_import.py</code></td>
+              <td><code>import.py</code></td>
+            </tr>
+            <tr>
+              <td>Be descriptive</td>
+              <td><code>03_clean_income_vars.do</code></td>
+              <td><code>03_clean.do</code></td>
+            </tr>
+            <tr>
+              <td>Use underscores</td>
+              <td><code>05_merge_datasets.R</code></td>
+              <td><code>05 merge datasets.R</code></td>
+            </tr>
+            <tr>
+              <td>Lowercase</td>
+              <td><code>02_data_prep.py</code></td>
+              <td><code>02_Data_Prep.py</code></td>
+            </tr>
+            <tr>
+              <td>Skip numbers for flexibility</td>
+              <td><code>01, 02, 05, 10</code></td>
+              <td><code>1, 2, 3, 4</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Why Skip Numbers?</div>
+          <p style="margin-bottom: 0;">
+            Leave gaps in your numbering (01, 02, 05, 10...) so you can insert new scripts without renaming everything. If you later need a script between <code>02_clean.py</code> and <code>05_merge.py</code>, you can create <code>03_validate.py</code> without disrupting the sequence.
+          </p>
+        </div>
+
+        <h4>Language-Specific Conventions</h4>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Typical project structure</span>
+<span class="code-comment"># code/</span>
+<span class="code-comment">#   01_import_data.py</span>
+<span class="code-comment">#   02_clean_data.py</span>
+<span class="code-comment">#   03_analysis.py</span>
+<span class="code-comment">#   utils/               # Helper functions</span>
+<span class="code-comment">#     __init__.py</span>
+<span class="code-comment">#     data_helpers.py</span>
+<span class="code-comment">#   config.py            # Settings, paths</span>
+
+<span class="code-comment"># In config.py:</span>
+<span class="code-keyword">from</span> pathlib <span class="code-keyword">import</span> Path
+
+<span class="code-tooltip" data-tip="Path(__file__).parent.parent resolves to the project root by going up two directories from the config file">PROJECT_ROOT</span> = Path(__file__).parent.parent
+DATA_RAW = PROJECT_ROOT / <span class="code-string">"data"</span> / <span class="code-string">"raw"</span>
+DATA_PROCESSED = PROJECT_ROOT / <span class="code-string">"data"</span> / <span class="code-string">"processed"</span>
+OUTPUT = PROJECT_ROOT / <span class="code-string">"output"</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Master do-file pattern</span>
+<span class="code-comment">* Create a 00_master.do that runs everything</span>
+
+<span class="code-comment">* ============================================</span>
+<span class="code-comment">* 00_master.do - Run entire analysis pipeline</span>
+<span class="code-comment">* ============================================</span>
+
+<span class="code-tooltip" data-tip="Set the global macro PROJECT to your project folder - all other paths are relative to this">global PROJECT</span> <span class="code-string">"/Users/researcher/my_project"</span>
+<span class="code-tooltip" data-tip="Define paths as globals so all scripts can access them consistently">global CODE</span>    <span class="code-string">"$PROJECT/code"</span>
+global DATA    <span class="code-string">"$PROJECT/data"</span>
+global OUTPUT  <span class="code-string">"$PROJECT/output"</span>
+
+<span class="code-comment">* Run scripts in order</span>
+<span class="code-tooltip" data-tip="The 'do' command executes another do-file. Running them from a master file ensures correct execution order">do</span> <span class="code-string">"$CODE/01_import_data.do"</span>
+do <span class="code-string">"$CODE/02_clean_data.do"</span>
+do <span class="code-string">"$CODE/03_merge_datasets.do"</span>
+do <span class="code-string">"$CODE/04_analysis.do"</span>
+do <span class="code-string">"$CODE/05_create_tables.do"</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Typical project structure</span>
+<span class="code-comment"># Using here() package for portable paths</span>
+
+<span class="code-comment"># code/</span>
+<span class="code-comment">#   00_main.R            # Master script</span>
+<span class="code-comment">#   01_load_data.R</span>
+<span class="code-comment">#   02_clean_data.R</span>
+<span class="code-comment">#   03_analysis.R</span>
+<span class="code-comment">#   R/                   # Reusable functions</span>
+<span class="code-comment">#     utils.R</span>
+
+<span class="code-comment"># In 00_main.R:</span>
+<span class="code-tooltip" data-tip="The here package finds your project root automatically, making paths work across different computers">library(here)</span>
+
+<span class="code-comment"># Source all scripts in order</span>
+<span class="code-tooltip" data-tip="source() runs an R script. here() constructs the path relative to project root">source(here(<span class="code-string">"code"</span>, <span class="code-string">"01_load_data.R"</span>))</span>
+source(here(<span class="code-string">"code"</span>, <span class="code-string">"02_clean_data.R"</span>))
+source(here(<span class="code-string">"code"</span>, <span class="code-string">"03_analysis.R"</span>))</code></pre>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5.2: README FILES                    -->
+        <!-- ============================================ -->
+        <h2 id="readme-files">5.2 README Files</h2>
+
+        <p>
+          A <strong>README</strong> file is the front door to your project. It tells collaborators (including your future self) what the project does, how to run it, and what to expect. Every research project should have one.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">Deep Dive in Module 8</div>
+          <p style="margin-bottom: 0;">
+            This section introduces README basics. For comprehensive documentation practices, including data dictionaries, codebooks, and replication packages, see <a href="08-replicability.html">Module 8: Replicability</a>.
+          </p>
+        </div>
+
+        <h3>Essential README Elements</h3>
+
+        <p>
+          At minimum, your README should answer these questions:
+        </p>
+
+        <ol>
+          <li><strong>What is this project?</strong> - Brief description of the research question</li>
+          <li><strong>How do I run it?</strong> - Step-by-step instructions to reproduce results</li>
+          <li><strong>What do I need?</strong> - Software requirements, data sources</li>
+          <li><strong>What does each file do?</strong> - Description of key scripts</li>
+        </ol>
+
+        <h3>README Template</h3>
+
+        <pre style="background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span style="color: #f6ad55;"># Project Title</span>
+
+Brief description of your research project and main findings.
+
+<span style="color: #f6ad55;">## Data</span>
+
+- <span style="color: #90cdf4;">**Source:**</span> Describe where data comes from
+- <span style="color: #90cdf4;">**Access:**</span> How to obtain the data (public/restricted)
+- <span style="color: #90cdf4;">**Files:**</span> List main data files
+
+<span style="color: #f6ad55;">## Requirements</span>
+
+<span style="color: #68d391;">### Software</span>
+- Python 3.9+ with packages in `requirements.txt`
+- Stata 17 (for some analyses)
+- R 4.2+ with packages in `renv.lock`
+
+<span style="color: #68d391;">### Installation</span>
+```bash
+pip install -r requirements.txt
+```
+
+<span style="color: #f6ad55;">## How to Replicate</span>
+
+1. Clone this repository
+2. Download data from [source] and place in `data/raw/`
+3. Run scripts in order:
+   - `01_import_data.py` - Load and validate raw data
+   - `02_clean_data.py` - Handle missing values, create variables
+   - `03_analysis.py` - Main regression analysis
+   - `04_figures.py` - Generate all figures
+
+Or run everything with:
+```bash
+python 00_main.py
+```
+
+<span style="color: #f6ad55;">## File Structure</span>
+
+```
+├── code/          # Analysis scripts
+├── data/          # Data files (not tracked in git)
+├── output/        # Tables and figures
+└── README.md      # This file
+```
+
+<span style="color: #f6ad55;">## Authors</span>
+
+Your Name (your.email@university.edu)
+
+<span style="color: #f6ad55;">## License</span>
+
+MIT License (or appropriate license)</code></pre>
+
+        <h3>README for Different Audiences</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Audience</th>
+              <th>Key Information</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Replicator</strong></td>
+              <td>Exact steps to reproduce results, software versions, data access</td>
+            </tr>
+            <tr>
+              <td><strong>Collaborator</strong></td>
+              <td>Code organization, where to add new analyses, coding conventions</td>
+            </tr>
+            <tr>
+              <td><strong>Future You</strong></td>
+              <td>What you were thinking, why certain decisions were made</td>
+            </tr>
+            <tr>
+              <td><strong>Reviewer/Editor</strong></td>
+              <td>What data is included, what is sensitive, how results map to paper</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5.3: DESCRIPTIVE STATISTICS          -->
+        <!-- ============================================ -->
+        <h2 id="descriptive-stats">5.3 Descriptive Statistics</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Descriptive statistics</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas is a data analysis library that provides DataFrame structures for organizing and manipulating tabular data">pandas</span> <span class="code-keyword">as</span> pd
+
+<span class="code-tooltip" data-tip="df is your DataFrame (data table). describe() automatically calculates count, mean, std, min, 25%, 50%, 75%, and max for all numeric columns">df.describe()</span>                          <span class="code-comment"># Summary stats</span>
+<span class="code-tooltip" data-tip="Calculates the arithmetic average of the income column - sum of all values divided by the number of observations">df[<span class="code-string">'income'</span>].mean()</span>                   <span class="code-comment"># Mean</span>
+<span class="code-tooltip" data-tip="Returns the middle value when data is sorted. Unlike mean, median is robust to outliers - useful for skewed income distributions">df[<span class="code-string">'income'</span>].median()</span>                 <span class="code-comment"># Median</span>
+<span class="code-tooltip" data-tip="Standard deviation measures how spread out values are from the mean. Higher std means more variability in income">df[<span class="code-string">'income'</span>].std()</span>                    <span class="code-comment"># Standard deviation</span>
+<span class="code-tooltip" data-tip="Returns the 25th and 75th percentiles (quartiles). 25% of observations fall below Q1, and 75% fall below Q3. The difference (IQR) measures spread">df[<span class="code-string">'income'</span>].quantile([<span class="code-number">0.25</span>, <span class="code-number">0.75</span>])</span>  <span class="code-comment"># Percentiles</span>
+
+<span class="code-comment"># By group</span>
+<span class="code-tooltip" data-tip="Groups data by education level, then calculates mean income for each group - essential for comparing outcomes across categories">df.groupby(<span class="code-string">'education'</span>)[<span class="code-string">'income'</span>].mean()</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Descriptive statistics</span>
+<span class="code-tooltip" data-tip="Basic summary: shows number of observations, mean, standard deviation, and min/max values for the income variable">summarize income</span>
+<span class="code-tooltip" data-tip="Detailed summary: adds percentiles (1, 5, 10, 25, 50, 75, 90, 95, 99), skewness (asymmetry), and kurtosis (tail heaviness) to basic stats">summarize income, detail</span>
+<span class="code-tooltip" data-tip="Creates a table showing mean, standard deviation, and count (n) of income for each education level - great for group comparisons">tabstat income, by(education) stat(mean sd n)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Descriptive statistics</span>
+<span class="code-tooltip" data-tip="Provides a quick overview: minimum, 1st quartile (25%), median (50%), mean, 3rd quartile (75%), and maximum values">summary(df$income)</span>
+<span class="code-tooltip" data-tip="Calculates the arithmetic average. na.rm = TRUE tells R to ignore missing values (NA) - without this, any NA would make the result NA">mean(df$income, na.rm = TRUE)</span>
+<span class="code-tooltip" data-tip="Standard deviation measures spread around the mean. na.rm = TRUE excludes missing values from the calculation">sd(df$income, na.rm = TRUE)</span>
+
+<span class="code-comment"># By group with dplyr</span>
+<span class="code-tooltip" data-tip="The pipe (%>%) passes data through steps: first group by education, then calculate mean income for each group. Creates a summary table">df %>% group_by(education) %>% summarize(mean_inc = mean(income))</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="visualization">5.4 Data Visualization</h2>
+
+        <h3>Histograms</h3>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Histogram</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="matplotlib.pyplot is the main plotting library in Python. The 'plt' alias is a convention that makes code shorter and easier to read">matplotlib.pyplot</span> <span class="code-keyword">as</span> plt
+
+<span class="code-tooltip" data-tip="Creates a histogram showing how income values are distributed. bins=30 divides the range into 30 bars. Useful for spotting skewness, outliers, and the shape of your data">plt.hist(df[<span class="code-string">'income'</span>], bins=<span class="code-number">30</span>, edgecolor=<span class="code-string">'white'</span>)</span>
+<span class="code-tooltip" data-tip="Labels the horizontal axis. Clear axis labels are essential for publication-quality figures">plt.xlabel(<span class="code-string">'Income'</span>)</span>
+<span class="code-tooltip" data-tip="Labels the vertical axis. Frequency shows how many observations fall in each bin (income range)">plt.ylabel(<span class="code-string">'Frequency'</span>)</span>
+<span class="code-tooltip" data-tip="Adds a descriptive title above the plot. Good titles explain what the visualization shows">plt.title(<span class="code-string">'Distribution of Income'</span>)</span>
+<span class="code-tooltip" data-tip="Saves the figure as a PNG image file. You can also use .pdf or .svg for higher quality in publications">plt.savefig(<span class="code-string">'histogram.png'</span>)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Histogram</span>
+<span class="code-tooltip" data-tip="Creates a histogram of income. 'frequency' shows counts (how many observations in each bar). The /// allows the command to continue on the next line">histogram income, frequency ///
+    title(<span class="code-string">"Distribution of Income"</span>)</span>
+<span class="code-tooltip" data-tip="Exports the current graph to a PNG file. 'replace' overwrites any existing file with the same name">graph export <span class="code-string">"histogram.png"</span>, replace</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Histogram with ggplot2</span>
+<span class="code-tooltip" data-tip="ggplot2 builds plots in layers. ggplot() sets up the canvas with your data, aes() defines which variables to plot. The + adds more layers">ggplot(df, aes(x = income)) +</span>
+  <span class="code-tooltip" data-tip="Adds the histogram layer. bins=30 creates 30 bars, fill sets the color. More bins show more detail but may look noisy">geom_histogram(bins = <span class="code-number">30</span>, fill = <span class="code-string">"steelblue"</span>) +</span>
+  <span class="code-tooltip" data-tip="labs() adds labels and titles to your plot. You can also add subtitle, caption, and axis labels here">labs(title = <span class="code-string">"Distribution of Income"</span>)</span>
+<span class="code-tooltip" data-tip="Saves the most recent plot to a file. Automatically detects format from extension (.png, .pdf, .svg). Great for reproducible research">ggsave(<span class="code-string">"histogram.png"</span>)</span></code></pre>
+          </div>
+        </div>
+
+        <h3>Scatter Plots</h3>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Scatter plot</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="seaborn is a statistical visualization library built on matplotlib. It makes attractive plots with less code and integrates well with pandas DataFrames">seaborn</span> <span class="code-keyword">as</span> sns
+
+<span class="code-tooltip" data-tip="Creates a scatter plot showing relationship between GDP per capita (x-axis) and life expectancy (y-axis). hue colors points by continent to reveal patterns across groups">sns.scatterplot(data=df, x=<span class="code-string">'gdpPercap'</span>, y=<span class="code-string">'lifeExp'</span>, hue=<span class="code-string">'continent'</span>)</span>
+<span class="code-tooltip" data-tip="Transforms x-axis to logarithmic scale. Useful when data spans several orders of magnitude (like income or GDP) to spread out clustered points">plt.xscale(<span class="code-string">'log'</span>)</span>
+<span class="code-tooltip" data-tip="Saves the scatter plot to a PNG file for use in papers or presentations">plt.savefig(<span class="code-string">'scatter.png'</span>)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Scatter plot</span>
+<span class="code-tooltip" data-tip="twoway creates 2D plots. scatter plots lifeExp (y) against gdpPercap (x). xscale(log) uses log scale for x-axis - essential when GDP values vary widely">twoway (scatter lifeExp gdpPercap), xscale(log)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Scatter plot</span>
+<span class="code-tooltip" data-tip="Sets up the plot with GDP per capita on x-axis, life expectancy on y-axis, and colors points by continent to show group differences">ggplot(df, aes(x = gdpPercap, y = lifeExp, color = continent)) +</span>
+  <span class="code-tooltip" data-tip="Adds points to the plot. Each observation becomes one dot. You can customize size, shape, and transparency here">geom_point() +</span>
+  <span class="code-tooltip" data-tip="Transforms x-axis to log base 10 scale. Makes it easier to see relationships when x values span multiple orders of magnitude">scale_x_log10()</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="correlation">5.5 Correlation Analysis</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Correlation</span>
+<span class="code-tooltip" data-tip="Creates a correlation matrix showing how strongly each pair of variables moves together. Values range from -1 (perfect negative) to +1 (perfect positive). 0 means no linear relationship">df[[<span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'age'</span>]].corr()</span>
+
+<span class="code-comment"># With p-values</span>
+<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="scipy.stats provides statistical functions including hypothesis tests, distributions, and correlation measures">scipy</span> <span class="code-keyword">import</span> stats
+<span class="code-tooltip" data-tip="Returns both the Pearson correlation coefficient (r) and its p-value. r measures linear relationship strength; p-value tests if correlation is statistically significant (p less than 0.05 is typically significant)">r, p = stats.pearsonr(df[<span class="code-string">'income'</span>], df[<span class="code-string">'education'</span>])</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Correlation</span>
+<span class="code-tooltip" data-tip="Displays a correlation matrix for the specified variables. Shows pairwise Pearson correlations - how strongly variables move together linearly">correlate income education age</span>
+<span class="code-tooltip" data-tip="Pairwise correlations with significance levels. 'sig' shows p-values below each correlation. star(.05) marks correlations significant at 5% level with an asterisk">pwcorr income education age, sig star(<span class="code-number">.05</span>)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Correlation</span>
+<span class="code-tooltip" data-tip="Computes correlation matrix for selected columns. use='complete.obs' excludes rows with any missing values (listwise deletion) - important for handling NA values">cor(df[c(<span class="code-string">"income"</span>, <span class="code-string">"education"</span>, <span class="code-string">"age"</span>)], use = <span class="code-string">"complete.obs"</span>)</span>
+<span class="code-tooltip" data-tip="Tests if the correlation between two variables is statistically significant. Returns correlation coefficient, p-value, and 95% confidence interval">cor.test(df$income, df$education)</span></code></pre>
+          </div>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5.6: BASIC REGRESSION ANALYSIS       -->
+        <!-- ============================================ -->
+        <h2 id="regression">5.6 Basic Regression Analysis</h2>
+
+        <p>
+          Regression analysis is the foundation of quantitative empirical research. This section covers how to run regressions and—critically—how to interpret what the output means. Understanding these basics is essential before moving to causal inference methods in <a href="06-causal-inference.html">Module 6</a>.
+        </p>
+
+        <h3>Running a Basic Regression</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: OLS Regression with statsmodels</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="statsmodels.formula.api allows you to write regression formulas like 'y ~ x1 + x2' in R-style syntax">statsmodels.formula.api</span> <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Simple regression: income on education</span>
+<span class="code-tooltip" data-tip="The formula 'income ~ education' means: income = b0 + b1*education + error. The ~ symbol separates the dependent variable (left) from independent variables (right)">model = smf.ols(<span class="code-string">'income ~ education'</span>, data=df).fit()</span>
+
+<span class="code-comment"># Multiple regression: add controls</span>
+<span class="code-tooltip" data-tip="Adding + age + experience includes these as control variables. Each coefficient is estimated while holding other variables constant">model = smf.ols(<span class="code-string">'income ~ education + age + experience'</span>, data=df).fit()</span>
+
+<span class="code-comment"># View results</span>
+<span class="code-function">print</span>(model.<span class="code-tooltip" data-tip="summary() displays the full regression output: coefficients, standard errors, t-statistics, p-values, R-squared, F-statistic, and more">summary()</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: OLS Regression</span>
+
+<span class="code-comment">* Simple regression</span>
+<span class="code-tooltip" data-tip="reg (short for regress) runs OLS. First variable is dependent (Y), rest are independent (X). Stata automatically includes a constant">reg income education</span>
+
+<span class="code-comment">* Multiple regression with controls</span>
+<span class="code-tooltip" data-tip="Adding age and experience as controls. Stata will estimate each coefficient while holding other variables constant">reg income education age experience</span>
+
+<span class="code-comment">* Robust standard errors (heteroskedasticity-robust)</span>
+<span class="code-tooltip" data-tip="The 'robust' option uses Huber-White standard errors that are valid even when error variance differs across observations">reg income education age experience, robust</span>
+
+<span class="code-comment">* Clustered standard errors</span>
+<span class="code-tooltip" data-tip="cluster(state) accounts for correlation within states. Essential when observations within a group are not independent">reg income education age experience, cluster(state)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: OLS Regression</span>
+
+<span class="code-comment"># Simple regression</span>
+<span class="code-tooltip" data-tip="lm() fits a linear model. The formula 'income ~ education' means income is explained by education. R automatically includes an intercept">model <- lm(income ~ education, data = df)</span>
+
+<span class="code-comment"># Multiple regression with controls</span>
+<span class="code-tooltip" data-tip="The + symbol adds control variables. R estimates each coefficient while holding other variables constant">model <- lm(income ~ education + age + experience, data = df)</span>
+
+<span class="code-comment"># View results</span>
+<span class="code-tooltip" data-tip="summary() displays coefficients, standard errors, t-values, p-values, R-squared, and F-statistic">summary(model)</span>
+
+<span class="code-comment"># Robust standard errors (using sandwich package)</span>
+<span class="code-keyword">library</span>(sandwich)
+<span class="code-keyword">library</span>(lmtest)
+<span class="code-tooltip" data-tip="coeftest() with vcovHC() applies heteroskedasticity-consistent (robust) standard errors to your model">coeftest(model, vcov = vcovHC(model, type = <span class="code-string">"HC1"</span>))</span></code></pre>
+          </div>
+        </div>
+
+        <h3>Understanding Regression Output</h3>
+
+        <p>
+          A regression output contains many statistics. Here's what each one means and how to interpret it:
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">Example Output</div>
+          <p style="font-family: var(--font-code); font-size: 0.85rem; white-space: pre; margin-bottom: 0; overflow-x: auto;">
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+Intercept    15234.50    1205.32     12.639      0.000    12869.45    17599.55
+education     2847.63     142.58     19.972      0.000     2567.83     3127.43
+age            156.24      28.45      5.491      0.000      100.39      212.09
+==============================================================================
+R-squared:                       0.423
+F-statistic:                     285.7
+Prob (F-statistic):           1.23e-89
+==============================================================================</p>
+        </div>
+
+        <h4>Key Components Explained</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>What It Tells You</th>
+              <th>Example Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Coefficient (coef)</strong></td>
+              <td>The estimated effect of a one-unit change in X on Y</td>
+              <td>One more year of education is associated with $2,847.63 higher income</td>
+            </tr>
+            <tr>
+              <td><strong>Standard Error (std err)</strong></td>
+              <td>Uncertainty in the coefficient estimate</td>
+              <td>Our estimate of education's effect could vary by about $142.58</td>
+            </tr>
+            <tr>
+              <td><strong>t-statistic (t)</strong></td>
+              <td>Coefficient divided by standard error; tests if coef differs from 0</td>
+              <td>19.97 is very large, indicating strong evidence of an effect</td>
+            </tr>
+            <tr>
+              <td><strong>P-value (P>|t|)</strong></td>
+              <td>Probability of seeing this result if true effect were zero</td>
+              <td>0.000 means extremely unlikely to see this by chance</td>
+            </tr>
+            <tr>
+              <td><strong>Confidence Interval</strong></td>
+              <td>Range that contains the true coefficient 95% of the time</td>
+              <td>True education effect is likely between $2,568 and $3,127</td>
+            </tr>
+            <tr>
+              <td><strong>R-squared</strong></td>
+              <td>Proportion of variance in Y explained by the model</td>
+              <td>Education and age explain 42.3% of income variation</td>
+            </tr>
+            <tr>
+              <td><strong>F-statistic</strong></td>
+              <td>Tests if all coefficients together are zero</td>
+              <td>High F (285.7) with low p-value means model explains something</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Correlation vs. Causation</div>
+          <p style="margin-bottom: 0;">
+            A regression coefficient measures <strong>association</strong>, not causation. The education coefficient tells us that higher education is <em>associated with</em> higher income—not that education <em>causes</em> higher income. People who get more education may differ in other ways (ability, motivation, family background) that also affect income. To make causal claims, you need the methods covered in <a href="06-causal-inference.html">Module 6: Causal Inference</a>.
+          </p>
+        </div>
+
+        <h4>Statistical Significance</h4>
+
+        <p>
+          A coefficient is "statistically significant" when we can be confident it differs from zero. Common thresholds:
+        </p>
+
+        <ul>
+          <li><strong>p &lt; 0.01</strong> (***): Very strong evidence</li>
+          <li><strong>p &lt; 0.05</strong> (**): Strong evidence (most common threshold)</li>
+          <li><strong>p &lt; 0.10</strong> (*): Weak evidence</li>
+        </ul>
+
+        <p>
+          However, statistical significance tells you nothing about <strong>practical significance</strong>. A coefficient can be statistically significant but economically tiny—or statistically insignificant but potentially meaningful with more data.
+        </p>
+
+        <h3>Common Regression Specifications</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Common specifications</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Log transformation</span>
+<span class="code-tooltip" data-tip="Taking log of income converts the coefficient to approximate percentage changes. Log-linear: 1 unit increase in X = (coef*100)% change in Y">df[<span class="code-string">'log_income'</span>] = np.log(df[<span class="code-string">'income'</span>])</span>
+model = smf.ols(<span class="code-string">'log_income ~ education + age'</span>, data=df).fit()
+
+<span class="code-comment"># Quadratic term (non-linear relationship)</span>
+<span class="code-tooltip" data-tip="I() in formulas prevents + from being interpreted as 'add variable'. This tests if the effect of age diminishes or increases at higher ages">model = smf.ols(<span class="code-string">'income ~ age + I(age**2)'</span>, data=df).fit()</span>
+
+<span class="code-comment"># Interaction terms</span>
+<span class="code-tooltip" data-tip="The * operator includes both main effects AND their interaction. Tests if education's effect differs by gender">model = smf.ols(<span class="code-string">'income ~ education * gender'</span>, data=df).fit()</span>
+
+<span class="code-comment"># Categorical variables (dummy encoding)</span>
+<span class="code-tooltip" data-tip="C() tells statsmodels to treat region as categorical. Creates dummy variables automatically, omitting one category as reference">model = smf.ols(<span class="code-string">'income ~ education + C(region)'</span>, data=df).fit()</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Common specifications</span>
+
+<span class="code-comment">* Log transformation</span>
+<span class="code-tooltip" data-tip="gen creates a new variable. ln() takes natural log. Log-linear regression: coefficients represent approximate percentage changes">gen log_income = ln(income)</span>
+reg log_income education age
+
+<span class="code-comment">* Quadratic term</span>
+<span class="code-tooltip" data-tip="c.age##c.age creates age and age-squared. The ## operator with c. prefix handles continuous variable interactions">reg income c.age##c.age</span>
+
+<span class="code-comment">* Interaction terms</span>
+<span class="code-tooltip" data-tip="c.education##i.female creates education, female dummy, and their interaction. Tests if education effect differs by gender">reg income c.education##i.female</span>
+
+<span class="code-comment">* Categorical variables</span>
+<span class="code-tooltip" data-tip="i.region creates dummy variables for each region automatically. First category is reference (omitted)">reg income education i.region</span>
+
+<span class="code-comment">* Fixed effects</span>
+<span class="code-tooltip" data-tip="areg absorbs state fixed effects. Equivalent to including a dummy for each state. More efficient than i.state for many categories">areg income education age, absorb(state)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Common specifications</span>
+
+<span class="code-comment"># Log transformation</span>
+<span class="code-tooltip" data-tip="log() in R formula applies natural log. Coefficients become approximate percentage changes in the outcome">model <- lm(log(income) ~ education + age, data = df)</span>
+
+<span class="code-comment"># Quadratic term</span>
+<span class="code-tooltip" data-tip="I() protects the arithmetic operation. poly(age, 2) is another option that creates orthogonal polynomials">model <- lm(income ~ age + I(age^2), data = df)</span>
+
+<span class="code-comment"># Interaction terms</span>
+<span class="code-tooltip" data-tip="The * operator includes education, gender, AND their interaction. : would include only the interaction">model <- lm(income ~ education * gender, data = df)</span>
+
+<span class="code-comment"># Categorical variables</span>
+<span class="code-tooltip" data-tip="factor() converts to categorical. R creates dummies automatically. First level is reference by default">model <- lm(income ~ education + factor(region), data = df)</span>
+
+<span class="code-comment"># Fixed effects (using fixest package)</span>
+<span class="code-keyword">library</span>(fixest)
+<span class="code-tooltip" data-tip="feols() efficiently handles fixed effects. The | separates the model from fixed effects. Much faster than lm() with many groups">model <- feols(income ~ education + age | state, data = df)</span></code></pre>
+          </div>
+        </div>
+
+        <h3>Interpreting Log Transformations</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Form</th>
+              <th>Interpretation of b1</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Linear</strong></td>
+              <td>Y = b0 + b1*X</td>
+              <td>1 unit increase in X → b1 unit change in Y</td>
+            </tr>
+            <tr>
+              <td><strong>Log-Linear</strong></td>
+              <td>log(Y) = b0 + b1*X</td>
+              <td>1 unit increase in X → (b1 × 100)% change in Y</td>
+            </tr>
+            <tr>
+              <td><strong>Linear-Log</strong></td>
+              <td>Y = b0 + b1*log(X)</td>
+              <td>1% increase in X → b1/100 unit change in Y</td>
+            </tr>
+            <tr>
+              <td><strong>Log-Log</strong></td>
+              <td>log(Y) = b0 + b1*log(X)</td>
+              <td>1% increase in X → b1% change in Y (elasticity)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ============================================ -->
+        <!-- SECTION 5.7: SUMMARY TABLES FOR PAPERS       -->
+        <!-- ============================================ -->
+        <h2 id="summary-tables">5.7 Summary Tables for Papers</h2>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Summary table with stargazer</span>
+<span class="code-comment"># pip install stargazer</span>
+<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="stargazer creates publication-ready regression tables in LaTeX, HTML, or text format - similar to Stata's esttab or R's stargazer package">stargazer.stargazer</span> <span class="code-keyword">import</span> Stargazer
+
+<span class="code-comment"># For regression tables</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="statsmodels provides statistical models including OLS regression. The formula API lets you write models like 'y ~ x1 + x2' similar to R syntax">statsmodels.formula.api</span> <span class="code-keyword">as</span> smf
+<span class="code-tooltip" data-tip="Runs Ordinary Least Squares (OLS) regression: income = b0 + b1*education + b2*age + error. This estimates how education and age relate to income, controlling for each other">model = smf.ols(<span class="code-string">'income ~ education + age'</span>, data=df).fit()</span>
+<span class="code-tooltip" data-tip="Creates a Stargazer object that can format one or more regression models into a professional table">stargazer = Stargazer([model])</span>
+<span class="code-tooltip" data-tip="Outputs the table in LaTeX format for academic papers. You can also use render_html() for web pages or render_text() for console output">print(stargazer.render_latex())</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Summary tables with estout</span>
+<span class="code-tooltip" data-tip="Clears any previously stored estimation results. Always do this before storing new models to avoid mixing old and new results">eststo clear</span>
+<span class="code-tooltip" data-tip="eststo stores the regression results. 'reg' runs OLS: income = b0 + b1*education. The coefficient b1 shows how much income changes per unit of education">eststo: reg income education</span>
+<span class="code-tooltip" data-tip="Adds a second model with age as a control variable. Comparing models shows if education effect changes when controlling for age">eststo: reg income education age</span>
+<span class="code-tooltip" data-tip="Exports all stored models to a LaTeX table. 'se' shows standard errors below coefficients. Stars indicate significance: * p less than 0.1, ** p less than 0.05, *** p less than 0.01">esttab using <span class="code-string">"table.tex"</span>, replace se star(* <span class="code-number">0.1</span> ** <span class="code-number">0.05</span> *** <span class="code-number">0.01</span>)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Summary tables with modelsummary</span>
+<span class="code-tooltip" data-tip="modelsummary is a modern R package for creating publication-quality tables from regression models. Supports many output formats">library(modelsummary)</span>
+
+<span class="code-tooltip" data-tip="lm() fits a linear model (OLS regression). This estimates: income = b0 + b1*education + error. b1 is the estimated effect of education on income">model1 <- lm(income ~ education, data = df)</span>
+<span class="code-tooltip" data-tip="Adds age as a control variable. Now b1 measures education's effect while holding age constant - important for isolating the education effect">model2 <- lm(income ~ education + age, data = df)</span>
+
+<span class="code-tooltip" data-tip="Creates a side-by-side comparison table. stars=TRUE adds significance indicators. output='table.tex' saves as LaTeX for papers">modelsummary(list(model1, model2), stars = TRUE, output = <span class="code-string">"table.tex"</span>)</span></code></pre>
+          </div>
+        </div>
+
+        <h2 id="exercises">5.8 Exercises</h2>
+
+        <!-- Exercise 5.1: Interactive -->
+        <div class="interactive-exercise" data-exercise="5.1">
+          <h4>Exercise 5.1: Descriptive Statistics and Visualization</h4>
+          <p>Practice computing statistics and creating visualizations. Complete these tasks:</p>
+          <ol>
+            <li>Calculate descriptive statistics (mean, median, std)</li>
+            <li>Create a histogram</li>
+            <li>Create a scatter plot</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Calculate descriptive statistics
+# Task 2: Create a histogram
+# Task 3: Create a scatter plot
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Calculate descriptive statistics
+* Task 2: Create a histogram
+* Task 3: Create a scatter plot
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Calculate descriptive statistics
+# Task 2: Create a histogram
+# Task 3: Create a scatter plot
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <!-- Python Solutions -->
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Calculate descriptive statistics</div>
+              <pre class="step-code"><code><span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas is the go-to library for data manipulation in Python, providing DataFrames (like Excel spreadsheets) for organizing data">pandas</span> <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Descriptive statistics</span>
+<span class="code-tooltip" data-tip="Shows summary stats for all numeric columns: count, mean, standard deviation, min, 25th/50th/75th percentiles, and max">df.describe()</span>
+<span class="code-tooltip" data-tip="Calculates the average income - add all values and divide by number of observations">df[<span class="code-string">'income'</span>].mean()</span>
+<span class="code-tooltip" data-tip="Returns the middle value when sorted - more robust to outliers than the mean">df[<span class="code-string">'income'</span>].median()</span>
+<span class="code-tooltip" data-tip="Standard deviation measures how spread out values are from the mean">df[<span class="code-string">'income'</span>].std()</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Create a histogram</div>
+              <pre class="step-code"><code><span class="code-keyword">import</span> <span class="code-tooltip" data-tip="matplotlib.pyplot is Python's main plotting library - plt is the standard shorthand alias">matplotlib.pyplot</span> <span class="code-keyword">as</span> plt
+
+<span class="code-tooltip" data-tip="Creates a histogram dividing income into 30 bins (bars) to show the distribution shape">plt.hist(df[<span class="code-string">'income'</span>], bins=<span class="code-number">30</span>)</span>
+<span class="code-tooltip" data-tip="Labels the x-axis to explain what the horizontal values represent">plt.xlabel(<span class="code-string">'Income'</span>)</span>
+<span class="code-tooltip" data-tip="Labels the y-axis - frequency shows how many observations fall in each income range">plt.ylabel(<span class="code-string">'Frequency'</span>)</span>
+<span class="code-tooltip" data-tip="Displays the plot on screen - in Jupyter notebooks this may happen automatically">plt.show()</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a scatter plot</div>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="Creates a scatter plot with GDP per capita on x-axis and life expectancy on y-axis - each point is one observation">plt.scatter(df[<span class="code-string">'gdpPercap'</span>], df[<span class="code-string">'lifeExp'</span>])</span>
+<span class="code-tooltip" data-tip="Labels the x-axis to identify the variable being plotted horizontally">plt.xlabel(<span class="code-string">'GDP per Capita'</span>)</span>
+<span class="code-tooltip" data-tip="Labels the y-axis to identify the variable being plotted vertically">plt.ylabel(<span class="code-string">'Life Expectancy'</span>)</span>
+<span class="code-tooltip" data-tip="Renders and displays the scatter plot">plt.show()</span></code></pre>
+            </div>
+
+            <!-- Stata Solutions -->
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Calculate descriptive statistics</div>
+              <pre class="step-code"><code><span class="code-comment">* Descriptive statistics</span>
+<span class="code-tooltip" data-tip="Basic summary showing observation count, mean, standard deviation, min, and max values">summarize income</span>
+<span class="code-tooltip" data-tip="Detailed summary adding percentiles, skewness, and kurtosis - gives fuller picture of distribution shape">summarize income, detail</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Create a histogram</div>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="Creates a histogram showing income distribution. 'frequency' displays counts rather than density">histogram income, frequency</span>
+<span class="code-tooltip" data-tip="Saves the current graph as a PNG file. 'replace' overwrites if file already exists">graph export <span class="code-string">"histogram.png"</span>, replace</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a scatter plot</div>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="twoway creates 2D graphs. scatter plots life expectancy (y-axis) against GDP per capita (x-axis)">twoway (scatter lifeExp gdpPercap)</span>
+<span class="code-tooltip" data-tip="Exports the scatter plot to a PNG image file for use in documents or presentations">graph export <span class="code-string">"scatter.png"</span>, replace</span></code></pre>
+            </div>
+
+            <!-- R Solutions -->
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Calculate descriptive statistics</div>
+              <pre class="step-code"><code><span class="code-comment"># Descriptive statistics</span>
+<span class="code-tooltip" data-tip="Shows min, 1st quartile, median, mean, 3rd quartile, and max - a quick overview of your data">summary(df$income)</span>
+<span class="code-tooltip" data-tip="Calculates the arithmetic mean. na.rm=TRUE ignores missing values (NA) so the calculation works even with incomplete data">mean(df$income, na.rm = TRUE)</span>
+<span class="code-tooltip" data-tip="Computes standard deviation - measures how spread out values are. na.rm=TRUE handles missing data">sd(df$income, na.rm = TRUE)</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Create a histogram</div>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="Loads ggplot2, the most popular R visualization package. Only need to load once per session">library(ggplot2)</span>
+
+<span class="code-tooltip" data-tip="ggplot() initializes the plot with data; aes() maps income to x-axis. The + symbol adds layers">ggplot(df, aes(x = income)) +</span>
+  <span class="code-tooltip" data-tip="Adds histogram layer with 30 bins. You can customize fill color, border, and transparency here">geom_histogram(bins = 30)</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Create a scatter plot</div>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="Sets up the plot with GDP per capita on x-axis and life expectancy on y-axis">ggplot(df, aes(x = gdpPercap, y = lifeExp)) +</span>
+  <span class="code-tooltip" data-tip="Adds points to create a scatter plot - each point represents one observation in your data">geom_point()</span></code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-footer">
+          <a href="04-data-cleaning.html" class="nav-link prev">Module 4: Data Cleaning</a>
+          <a href="06-causal-inference.html" class="nav-link next">Module 6: Causal Inference</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I'm the ProTools ER1 course assistant. I can help you with questions about Python, Stata, R, causal inference methods, or any of the course material. How can I assist you today?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question about the course..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Interactive Exercise Script -->
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const exercisePatterns = {
+      '5.1': {
+        python: {
+          patterns: [
+            // Descriptive stats - accepts: describe, mean, median, std, var, quantile, agg
+            { regex: /\.describe\s*\(|\.mean\s*\(|\.median\s*\(|\.std\s*\(|\.var\s*\(|\.quantile\s*\(|\.agg\s*\(|statistics\.|np\.mean|np\.std|np\.median/i, points: 34, description: 'Calculate descriptive statistics' },
+            // Histogram - accepts: plt.hist, hist(), sns.histplot, distplot, displot
+            { regex: /plt\.hist\s*\(|\.hist\s*\(|sns\.histplot|sns\.distplot|sns\.displot|histogram|geom_histogram/i, points: 33, description: 'Create histogram' },
+            // Scatter plot - accepts: plt.scatter, scatter(), sns.scatterplot, regplot
+            { regex: /plt\.scatter\s*\(|\.scatter\s*\(|sns\.scatterplot|sns\.regplot|sns\.lmplot|geom_point|scatterplot/i, points: 33, description: 'Create scatter plot' }
+          ]
+        },
+        stata: {
+          patterns: [
+            // Descriptive stats - accepts: summarize, su, sum, tabstat, tab, describe
+            { regex: /summarize|sum\s+|su\s+|tabstat|tabulate|tab\s+|describe/i, points: 34, description: 'Calculate descriptive statistics' },
+            // Histogram - accepts: histogram, hist, kdensity, graph bar
+            { regex: /histogram|hist\s+|kdensity|graph\s+bar/i, points: 33, description: 'Create histogram' },
+            // Scatter plot - accepts: scatter, twoway scatter, graph twoway
+            { regex: /scatter\s+|twoway\s+\(?\s*scatter|graph\s+twoway/i, points: 33, description: 'Create scatter plot' }
+          ]
+        },
+        r: {
+          patterns: [
+            // Descriptive stats - accepts: summary, mean, median, sd, var, describe, summarize/summarise
+            { regex: /summary\s*\(|mean\s*\(|median\s*\(|sd\s*\(|var\s*\(|describe\s*\(|summarize\s*\(|summarise\s*\(/i, points: 34, description: 'Calculate descriptive statistics' },
+            // Histogram - accepts: geom_histogram, hist(), geom_bar, geom_density
+            { regex: /geom_histogram|hist\s*\(|geom_bar|geom_density|histogram/i, points: 33, description: 'Create histogram' },
+            // Scatter plot - accepts: geom_point, plot(), geom_smooth, scatterplot
+            { regex: /geom_point|plot\s*\(.*,|geom_smooth|scatterplot|geom_jitter/i, points: 33, description: 'Create scatter plot' }
+          ]
+        }
+      }
+    };
+
+    // Initialize interactive exercises
+    document.querySelectorAll('.interactive-exercise').forEach(exercise => {
+      const exerciseId = exercise.dataset.exercise;
+      let currentLang = 'python';
+      let currentStep = 0;
+      let hasCheckedScore = false;
+
+      exercise.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const lang = this.dataset.lang;
+          currentLang = lang;
+          exercise.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          exercise.querySelectorAll('.code-editor').forEach(editor => {
+            editor.style.display = editor.dataset.lang === lang ? 'block' : 'none';
+          });
+          if (hasCheckedScore) resetSolutionSteps();
+        });
+      });
+
+      const checkBtn = exercise.querySelector('.btn-check-score');
+      const scoreDisplay = exercise.querySelector('.score-display');
+      const scoreValue = exercise.querySelector('.score-value');
+      const scoreFeedback = exercise.querySelector('.score-feedback');
+      const showSolutionBtn = exercise.querySelector('.btn-show-solution');
+
+      checkBtn.addEventListener('click', function() {
+        const editor = exercise.querySelector(`.code-editor[data-lang="${currentLang}"]`);
+        const code = editor.value;
+        const patterns = exercisePatterns[exerciseId]?.[currentLang]?.patterns || [];
+
+        let score = 0;
+        let matched = [];
+        let missed = [];
+
+        patterns.forEach(p => {
+          if (p.regex.test(code)) {
+            score += p.points;
+            matched.push(p.description);
+          } else {
+            missed.push(p.description);
+          }
+        });
+
+        score = Math.min(100, score);
+        scoreValue.textContent = score;
+        scoreValue.className = 'score-value';
+        if (score >= 80) scoreValue.classList.add('score-high');
+        else if (score >= 50) scoreValue.classList.add('score-medium');
+        else scoreValue.classList.add('score-low');
+
+        if (score === 100) {
+          scoreFeedback.textContent = 'Perfect! All tasks completed correctly.';
+        } else if (score >= 70) {
+          scoreFeedback.textContent = `Good work! Missing: ${missed.join(', ')}.`;
+        } else if (score >= 40) {
+          scoreFeedback.textContent = `Getting there. Missing: ${missed.join(', ')}.`;
+        } else {
+          scoreFeedback.textContent = `Keep trying! Check: ${missed.slice(0, 2).join(', ')}.`;
+        }
+
+        scoreDisplay.style.display = 'flex';
+        showSolutionBtn.style.display = 'inline-block';
+        hasCheckedScore = true;
+      });
+
+      const solutionSteps = exercise.querySelector('.solution-steps');
+      const prevBtn = exercise.querySelector('.btn-prev-step');
+      const nextBtn = exercise.querySelector('.btn-next-step');
+      const currentStepEl = exercise.querySelector('.current-step');
+      const totalStepsEl = exercise.querySelector('.total-steps');
+
+      function resetSolutionSteps() {
+        currentStep = 0;
+        currentStepEl.textContent = '0';
+        exercise.querySelectorAll('.solution-step').forEach(step => {
+          step.style.display = 'none';
+        });
+        updateNavButtons();
+      }
+
+      function updateNavButtons() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        totalStepsEl.textContent = totalSteps;
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep >= totalSteps;
+        nextBtn.textContent = currentStep >= totalSteps ? 'Complete' : 'Next Step';
+      }
+
+      function showStep(stepNum) {
+        const steps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`);
+        steps.forEach((step, idx) => {
+          step.style.display = (idx + 1) <= stepNum ? 'block' : 'none';
+        });
+        currentStepEl.textContent = stepNum;
+      }
+
+      showSolutionBtn.addEventListener('click', function() {
+        solutionSteps.style.display = 'block';
+        resetSolutionSteps();
+        this.style.display = 'none';
+      });
+
+      nextBtn.addEventListener('click', function() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        if (currentStep < totalSteps) {
+          currentStep++;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      prevBtn.addEventListener('click', function() {
+        if (currentStep > 0) {
+          currentStep--;
+          showStep(currentStep);
+          updateNavButtons();
+        }
+      });
+
+      updateNavButtons();
+    });
+  });
+  </script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+
+      const targetRect = target.getBoundingClientRect();
+      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
+      let containerRect = container ? container.getBoundingClientRect() : {
+        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
+      };
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10;
+
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8;
+      let arrowClass = 'arrow-bottom';
+
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      if (top + tooltipHeight > viewportHeight - padding) {
+        top = targetRect.top - tooltipHeight - 8;
+        arrowClass = 'arrow-bottom';
+      }
+
+      if (left < padding) {
+        left = padding;
+      }
+      if (left + tooltipWidth > viewportWidth - padding) {
+        left = viewportWidth - tooltipWidth - padding;
+      }
+
+      if (container) {
+        const minLeft = Math.max(padding, containerRect.left);
+        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
+        if (left < minLeft) left = minLeft;
+        if (left + tooltipWidth > maxRight) left = maxRight - tooltipWidth;
+      }
+
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) tooltipEl.classList.remove('visible');
+        currentTarget = null;
+      }, 100);
+    }
+
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target);
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip();
+    }, true);
+
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    }, true);
+
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module 2a: Importing Data from Files | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .output-simulation { background: #1e1e1e; border-radius: 8px; margin: 1rem 0; overflow: hidden; font-family: 'Fira Code', monospace; font-size: 0.8rem; display: none; }
+    .output-simulation.visible { display: block; }
+    .output-header { background: #333; padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; color: #ccc; font-size: 0.75rem; }
+    .output-body { padding: 1rem; color: #d4d4d4; white-space: pre-wrap; overflow-x: auto; max-height: 350px; overflow-y: auto; }
+    .output-body .out-green { color: #4ec9b0; }
+    .output-body .out-yellow { color: #dcdcaa; }
+    .output-body .out-blue { color: #569cd6; }
+    .output-body .out-num { color: #b5cea8; }
+    .output-body .out-str { color: #ce9178; }
+    .research-banner { background: #4a5568; color: white; padding: 1.5rem; border-radius: 12px; margin: 2rem 0; border-left: 5px solid #ed8936; }
+    .research-banner h3 { color: white; margin-top: 0; }
+    .concept-box { background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.5rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+    .concept-box h4 { color: #1e40af; margin-top: 0; }
+    .run-btn { background: #22c55e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .run-btn:hover { background: #16a34a; }
+    .run-btn::before { content: '▶'; font-size: 0.7rem; }
+    .close-output { background: transparent; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; }
+    .close-output:hover { color: white; }
+    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
+    .code-tooltip {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dotted #888;
+      text-decoration: none;
+    }
+
+    /* Tooltip element created by JavaScript */
+    .tooltip-popup {
+      position: fixed;
+      background: #1f2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      white-space: normal;
+      max-width: 300px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease-in-out;
+      z-index: 10000;
+      line-height: 1.4;
+      text-align: left;
+      font-family: var(--font-body);
+      font-style: normal;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    .tooltip-popup.visible {
+      opacity: 1;
+    }
+
+    /* Small arrow pointer */
+    .tooltip-popup::after {
+      content: '';
+      position: absolute;
+      border: 6px solid transparent;
+    }
+    .tooltip-popup.arrow-bottom::after {
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-top-color: #1f2937;
+    }
+    .tooltip-popup.arrow-top::after {
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom-color: #1f2937;
+    }
+    .tooltip-popup.arrow-left::after {
+      top: 50%;
+      right: 100%;
+      transform: translateY(-50%);
+      border-right-color: #1f2937;
+    }
+    .tooltip-popup.arrow-right::after {
+      top: 50%;
+      left: 100%;
+      transform: translateY(-50%);
+      border-left-color: #1f2937;
+    }
+    .format-comparison { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .format-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+    .format-card h4 { margin-top: 0; color: #1e40af; font-size: 1rem; }
+    .format-card .ext { font-family: 'Fira Code', monospace; background: #e2e8f0; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.85rem; }
+    /* Interactive Exercise Styles */
+    .interactive-exercise { background: white; border: 2px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .exercise-editor { margin: 1rem 0; }
+    .editor-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .lang-btn { padding: 0.4rem 1rem; border: 1px solid var(--color-border); background: white; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .lang-btn:hover { border-color: var(--color-primary); }
+    .lang-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .code-editor { width: 100%; min-height: 200px; padding: 1rem; font-family: var(--font-code); font-size: 0.9rem; border: none; border-radius: 8px; background: #1a202c; color: #e2e8f0; resize: vertical; line-height: 1.5; }
+    .code-editor:focus { outline: 2px solid var(--color-accent); }
+    .exercise-actions { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+    .btn-check-score, .btn-show-solution { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-check-score { background: var(--color-primary); color: white; }
+    .btn-check-score:hover { background: var(--color-secondary); transform: translateY(-1px); }
+    .btn-show-solution { background: var(--color-accent); color: white; }
+    .btn-show-solution:hover { background: #c77a3a; }
+    .score-display { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-radius: 8px; }
+    .score-circle { display: flex; align-items: baseline; gap: 2px; }
+    .score-value { font-size: 2rem; font-weight: 700; color: var(--color-primary); }
+    .score-value.score-high { color: #38a169; }
+    .score-value.score-medium { color: #d69e2e; }
+    .score-value.score-low { color: #e53e3e; }
+    .score-label { font-size: 1rem; color: #666; }
+    .score-feedback { font-size: 0.9rem; color: #555; max-width: 300px; }
+    .solution-steps { margin-top: 1.5rem; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
+    .solution-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-bottom: 1px solid var(--color-border); }
+    .solution-header h5 { margin: 0; color: var(--color-primary); }
+    .step-counter { font-size: 0.85rem; color: #666; }
+    .solution-step { padding: 1rem; border-bottom: 1px solid var(--color-border); animation: fadeIn 0.3s ease; }
+    .solution-step:last-of-type { border-bottom: none; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .step-description { font-weight: 600; color: var(--color-secondary); margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 3px solid var(--color-accent); }
+    .step-code { margin: 0; background: #1e1e1e; border-radius: 6px; padding: 1rem; }
+    .step-code code { color: #d4d4d4; }
+    .solution-navigation { display: flex; justify-content: space-between; padding: 1rem; background: var(--color-bg-alt); }
+    .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+    <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav active">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li class="active"><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content">
+        <div class="module-header">
+          <h1>2a &nbsp;Importing Data from Files</h1>
+          <div class="module-meta">
+            <span>~3 hours</span>
+            <span>CSV, Excel, Stata, Merging, Reshaping</span>
+            <span>Beginner</span>
+          </div>
+        </div>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Load data from CSV, Excel, Stata, and other common formats</li>
+            <li>Understand different file encodings and handle them correctly</li>
+            <li>Merge multiple datasets using key variables</li>
+            <li>Reshape data between wide and long formats</li>
+          </ul>
+        </div>
+
+        <div class="research-banner">
+          <h3>Course Research Project</h3>
+          <p style="margin-bottom: 0;">In this submodule, we'll load our first datasets for the "Climate Vulnerability and Economic Growth" project&mdash;World Bank GDP data and country indicators.</p>
+        </div>
+
+        <!-- Section 1: File Formats -->
+        <h2>Common Data Formats in Economics Research</h2>
+
+        <p>Before loading data, you need to understand what format it's in. Here are the most common formats you'll encounter:</p>
+
+        <div class="format-comparison">
+          <div class="format-card">
+            <h4>CSV <span class="ext">.csv</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Comma-Separated Values. Plain text, universal compatibility.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Sharing data, web downloads, exports</p>
+          </div>
+          <div class="format-card">
+            <h4>Excel <span class="ext">.xlsx / .xls</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Microsoft spreadsheet format. Can have multiple sheets.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Business data, government reports</p>
+          </div>
+          <div class="format-card">
+            <h4>Stata <span class="ext">.dta</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Stata's native format. Preserves variable labels and types.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Academic datasets, IPUMS, replication files</p>
+          </div>
+          <div class="format-card">
+            <h4>R Data <span class="ext">.rds / .RData</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">R's native formats. .rds = single object, .RData = multiple objects.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Saving R work, sharing with R users</p>
+          </div>
+          <div class="format-card">
+            <h4>JSON <span class="ext">.json</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">JavaScript Object Notation. Hierarchical/nested data.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> API responses, web data, configuration</p>
+          </div>
+          <div class="format-card">
+            <h4>Fixed-width <span class="ext">.txt / .dat</span></h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0.5rem;">Columns defined by character positions. No delimiters.</p>
+            <p style="font-size: 0.85rem; color: #666; margin: 0;"><strong>Use:</strong> Census data, older government files</p>
+          </div>
+        </div>
+
+        <p style="font-size: 0.9rem; color: #666; margin-top: 1rem;"><strong>Tip:</strong> For a comprehensive guide on all file formats (data files, scripts, notebooks), see <a href="00-languages-platforms.html#file-formats">Module 0: File Formats Reference</a>.</p>
+
+        <!-- Section 2: Loading Data -->
+        <h2>Loading Data from Files</h2>
+
+        <div class="concept-box">
+          <h4>What Happens When You "Load" Data?</h4>
+          <p style="margin-bottom: 0;">Loading data reads the file from disk into your program's memory as a structured object (DataFrame in Python/R, dataset in Stata). The original file remains unchanged&mdash;you're working with a copy. Any changes you make only exist in memory until you explicitly save them.</p>
+        </div>
+
+        <h3>Loading CSV Files</h3>
+        <p>CSV is the most common format. Here's how to load it in each language:</p>
+
+        <div class="code-tabs" data-runnable="load-csv">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Load CSV with pandas</span>
+<span class="code-tooltip" data-tip="IMPORT: This keyword brings external code libraries into your program. Without importing, you cannot use functions from that library." class="code-keyword">import</span> <span class="code-tooltip" data-tip="PANDAS: The essential Python library for data manipulation. It provides DataFrames (like Excel spreadsheets) and tools for loading, cleaning, and analyzing data. Used in virtually every data science project.">pandas</span> <span class="code-tooltip" data-tip="AS: Creates a shortcut name (alias) for the library. Instead of typing 'pandas.read_csv()', you can now type 'pd.read_csv()'. This is a universal convention - everyone uses 'pd' for pandas." class="code-keyword">as</span> <span class="code-tooltip" data-tip="PD: The standard abbreviation for pandas. When you see 'pd.' in code, it means 'use a function from the pandas library'.">pd</span>
+
+<span class="code-comment"># Basic CSV load from URL</span>
+<span class="code-tooltip" data-tip="DF: Short for 'DataFrame'. A variable name that will store your data table. You can name it anything, but 'df' is a common convention. Think of it as giving a name to your spreadsheet so you can refer to it later.">df</span> <span class="code-tooltip" data-tip="EQUALS SIGN: In programming, '=' means 'assign the value on the right to the variable on the left'. It's not a math equation - it's storing data.">=</span> <span class="code-tooltip" data-tip="PD.READ_CSV(): A pandas function that loads CSV (Comma-Separated Values) files. It automatically detects column names from the first row, guesses data types, and creates a DataFrame. Works with both URLs and local file paths.">pd.read_csv</span>(<span class="code-tooltip" data-tip="URL STRING: The web address where the CSV file is located. Pandas can load data directly from the internet! The file contains World Bank GDP data. Strings (text) are always in quotes." class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>)
+
+<span class="code-comment"># Load from local file</span>
+<span class="code-tooltip" data-tip="DF: Reusing the same variable name overwrites the previous data. The old GDP data is replaced with whatever is in 'my_data.csv'.">df</span> = <span class="code-tooltip" data-tip="PD.READ_CSV(): Same function, but now loading from your computer instead of the internet.">pd.read_csv</span>(<span class="code-tooltip" data-tip="FILE PATH: The location of your file on your computer. 'data/my_data.csv' means: look in a folder called 'data', find the file 'my_data.csv'. Use forward slashes even on Windows." class="code-string">"data/my_data.csv"</span>)
+
+<span class="code-comment"># Handle common issues:</span>
+<span class="code-tooltip" data-tip="DF: Storing the result of our customized CSV load.">df</span> = <span class="code-tooltip" data-tip="PD.READ_CSV(): With extra parameters to handle problematic files. When files don't load correctly, these options help fix common issues.">pd.read_csv</span>(<span class="code-tooltip" data-tip="FILE PATH: The CSV file to load. Could be a local path or URL." class="code-string">"data.csv"</span>,
+    <span class="code-tooltip" data-tip="ENCODING: Specifies how text characters are stored in the file. UTF-8 is the modern standard. Use 'latin-1' for older European files, 'cp1252' for Windows files. If you see garbled characters like 'Ã©' instead of 'e', try a different encoding.">encoding</span>=<span class="code-tooltip" data-tip="UTF-8: A universal text encoding that supports all languages and special characters. This is the default and works for most modern files." class="code-string">"utf-8"</span>,           <span class="code-comment"># or "latin-1", "cp1252"</span>
+    <span class="code-tooltip" data-tip="SEP (SEPARATOR): The character that separates columns in your file. Commas are standard for CSV, but European files often use semicolons (;) because commas are used for decimals. Tab-separated files use '\\t'.">sep</span>=<span class="code-tooltip" data-tip="COMMA: The column separator. Each comma in the file starts a new column." class="code-string">","</span>,                      <span class="code-comment"># delimiter (try ";" or "\t")</span>
+    <span class="code-tooltip" data-tip="NA_VALUES: Tells pandas which text strings should be treated as missing data (NA/NaN). Different datasets use different codes for 'no data': blank cells, 'NA', '.', or numbers like -999. List all the ones your data uses.">na_values</span>=<span class="code-tooltip" data-tip="LIST OF STRINGS: Square brackets [] create a list. This list contains all the text values that mean 'missing data' in your file. Pandas will convert these to NaN (Not a Number).">[<span class="code-string">""</span>, <span class="code-string">"NA"</span>, <span class="code-string">"."</span>, <span class="code-string">"-999"</span>]</span>,  <span class="code-comment"># missing value codes</span>
+    <span class="code-tooltip" data-tip="DTYPE (DATA TYPE): Forces specific columns to be read as certain types. Here, 'id' is forced to be a string (text) even if it looks like a number. This prevents IDs like '001' from becoming 1, or phone numbers from being treated as math.">dtype</span>=<span class="code-tooltip" data-tip="DICTIONARY: Curly braces {} create a dictionary (key-value pairs). This says: for the column named 'id', use the data type 'str' (string/text).">{<span class="code-string">"id"</span>: <span class="code-tooltip" data-tip="STR: Short for 'string' - the data type for text. Forces this column to be treated as text, not numbers.">str</span>}</span>             <span class="code-comment"># force column types</span>
+)
+
+<span class="code-comment"># Verify the load</span>
+<span class="code-tooltip" data-tip="PRINT(): Displays information in the console/output. Essential for checking that your code worked correctly." class="code-keyword">print</span>(<span class="code-tooltip" data-tip="F-STRING: The 'f' before the quotes creates a formatted string. Curly braces {} insert variable values into the text. The ':,' adds thousand separators (21,000 instead of 21000)." class="code-string">f"Loaded {<span class="code-tooltip" data-tip="LEN(DF): Returns the number of rows in your DataFrame. 'len' means 'length'.">len(df)</span>:,} rows, {<span class="code-tooltip" data-tip="LEN(DF.COLUMNS): Returns the number of columns. df.columns is a list of all column names.">len(df.columns)</span>} columns"</span>)
+<span class="code-tooltip" data-tip="PRINT(): Display the result of df.head() to see your data." class="code-keyword">print</span>(<span class="code-tooltip" data-tip="DF.HEAD(): Shows the first 5 rows of your DataFrame. Essential for quickly checking that data loaded correctly. You can specify a number like head(10) to see more rows.">df.head()</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Load CSV files</span>
+
+<span class="code-comment">* Basic CSV load from URL</span>
+<span class="code-tooltip" data-tip="IMPORT DELIMITED: Stata's command to load CSV and other text files with delimiters. It reads the file and creates a dataset in memory. This is the most common way to load external data into Stata." class="code-keyword">import delimited</span> <span class="code-tooltip" data-tip="URL STRING: The web address of the CSV file. Stata can load data directly from the internet! This URL points to World Bank GDP data hosted on GitHub." class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span><span class="code-tooltip" data-tip="COMMA: Separates the file path from the options that follow.">,</span> <span class="code-tooltip" data-tip="CLEAR: Removes any existing data from memory before loading the new file. Stata can only hold one dataset at a time, so 'clear' ensures you start fresh. Without it, Stata will refuse to load if data already exists.">clear</span>
+
+<span class="code-comment">* Load from local file</span>
+<span class="code-tooltip" data-tip="IMPORT DELIMITED: Same command for loading from your computer." class="code-keyword">import delimited</span> <span class="code-tooltip" data-tip="FILE PATH: The location on your computer. Use forward slashes or double backslashes. Relative paths start from your current working directory." class="code-string">"data/my_data.csv"</span><span class="code-tooltip" data-tip="COMMA: Separates file path from options.">,</span> <span class="code-tooltip" data-tip="CLEAR: Removes previous data from memory.">clear</span>
+
+<span class="code-comment">* Handle common issues:</span>
+<span class="code-tooltip" data-tip="IMPORT DELIMITED: With multiple options to handle problematic files." class="code-keyword">import delimited</span> <span class="code-tooltip" data-tip="FILE PATH: The CSV file to load." class="code-string">"data.csv"</span><span class="code-tooltip" data-tip="COMMA: Required before listing options.">,</span> <span class="code-tooltip" data-tip="LINE CONTINUATION: The three slashes /// tell Stata the command continues on the next line. This makes long commands easier to read.">///</span>
+    <span class="code-tooltip" data-tip="ENCODING(): Specifies how text characters are stored. UTF-8 is modern standard. Use 'latin1' for older European files with accented characters, 'windows-1252' for files created on Windows. Fixes garbled characters.">encoding</span>(<span class="code-tooltip" data-tip="UTF-8: Universal text encoding supporting all languages. Most common for modern files.">utf-8</span>) <span class="code-tooltip" data-tip="LINE CONTINUATION: Command continues on next line.">///</span>           <span class="code-comment">// or latin1, windows-1252</span>
+    <span class="code-tooltip" data-tip="DELIMITER(): The character that separates columns. Use comma for standard CSV, semicolon for European files, 'tab' for tab-separated files. Stata usually auto-detects this, but specify it if having problems.">delimiter</span>(<span class="code-tooltip" data-tip="COMMA: The standard CSV column separator." class="code-string">","</span>) <span class="code-tooltip" data-tip="LINE CONTINUATION: Command continues on next line.">///</span>            <span class="code-comment">// try ";" or tab</span>
+    <span class="code-tooltip" data-tip="VARNAMES(): Tells Stata which row contains column names. varnames(1) means 'use row 1 as variable names'. Use varnames(nonames) if there's no header row.">varnames</span>(<span class="code-tooltip" data-tip="1: First row of the file will become variable names.">1</span>) <span class="code-tooltip" data-tip="LINE CONTINUATION: Command continues on next line.">///</span>               <span class="code-comment">// first row = headers</span>
+    <span class="code-tooltip" data-tip="STRINGCOLS(): Forces specific columns to be read as strings (text) instead of numbers. Essential for IDs, codes, or any column where you want to preserve leading zeros. The number refers to column position (1 = first column).">stringcols</span>(<span class="code-tooltip" data-tip="1: Column 1 (first column) will be treated as string/text, even if it looks like numbers.">1</span>) <span class="code-tooltip" data-tip="LINE CONTINUATION: Command continues on next line.">///</span>              <span class="code-comment">// force col 1 as string</span>
+    <span class="code-tooltip" data-tip="CLEAR: Removes any existing data before loading. Always use this to avoid errors.">clear</span>
+
+<span class="code-comment">* Verify the load</span>
+<span class="code-tooltip" data-tip="DESCRIBE: Shows information about your dataset - variable names, types, labels, and memory usage. The 'short' option shows a compact summary." class="code-keyword">describe</span><span class="code-tooltip" data-tip="COMMA: Separates command from options.">,</span> <span class="code-tooltip" data-tip="SHORT: Shows a brief summary instead of listing every variable. Displays observation count, variable count, and total size.">short</span>
+<span class="code-tooltip" data-tip="LIST: Displays actual data values. Without 'in', it would show ALL rows (potentially thousands). Always limit with 'in' or 'if' conditions." class="code-keyword">list</span> <span class="code-tooltip" data-tip="IN 1/5: Shows only rows 1 through 5. The syntax is 'in start/end'. This is how you preview your data without flooding the screen.">in 1/5</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Load CSV with tidyverse</span>
+<span class="code-tooltip" data-tip="LIBRARY(): Loads a package (collection of functions) into R. You must load a package before using its functions. Unlike Python's import, library() makes all functions available without prefixes." class="code-function">library</span>(<span class="code-tooltip" data-tip="TIDYVERSE: A collection of R packages for data science. Includes: readr (CSV loading), dplyr (data manipulation), ggplot2 (visualization), tidyr (reshaping), and more. Loading tidyverse loads all of these at once.">tidyverse</span>)
+
+<span class="code-comment"># Basic CSV load from URL</span>
+<span class="code-tooltip" data-tip="DF: A variable name to store your data. In R, this creates a 'tibble' (modern data frame). You can name it anything meaningful like 'gdp_data' or 'my_df'.">df</span> <span class="code-tooltip" data-tip="ASSIGNMENT OPERATOR: In R, '<-' assigns the value on the right to the variable on the left. You can also use '=' but '<-' is the R convention. Think of it as an arrow pointing where to store the data."><-</span> <span class="code-tooltip" data-tip="READ_CSV(): From the readr package (part of tidyverse). Loads CSV files into R as a tibble. Faster than base R's read.csv(), automatically guesses column types, and shows a helpful message about what it detected." class="code-function">read_csv</span>(<span class="code-tooltip" data-tip="URL STRING: The web address of the CSV file. R can load data directly from URLs. This points to World Bank GDP data. Strings in R use either single or double quotes." class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>)
+
+<span class="code-comment"># Load from local file</span>
+<span class="code-tooltip" data-tip="DF: Reusing this variable name replaces the previous data.">df</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Storing the loaded data in 'df'."><-</span> <span class="code-tooltip" data-tip="READ_CSV(): Loading from your computer this time." class="code-function">read_csv</span>(<span class="code-tooltip" data-tip="FILE PATH: Location of your file. Use forward slashes even on Windows. Paths can be relative (from working directory) or absolute (full path from root)." class="code-string">"data/my_data.csv"</span>)
+
+<span class="code-comment"># Handle common issues:</span>
+<span class="code-tooltip" data-tip="DF: Storing the result of our customized CSV load.">df</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Storing the result."><-</span> <span class="code-tooltip" data-tip="READ_CSV(): With additional parameters to handle problematic files." class="code-function">read_csv</span>(<span class="code-tooltip" data-tip="FILE PATH: The CSV file to load." class="code-string">"data.csv"</span>,
+    <span class="code-tooltip" data-tip="LOCALE: Controls regional settings like text encoding, decimal marks, and date formats. Essential for files from different countries or with special characters.">locale</span> <span class="code-tooltip" data-tip="EQUALS: In function arguments, '=' assigns a value to a parameter. Different from '<-' which creates variables.">=</span> <span class="code-tooltip" data-tip="LOCALE(): Creates a locale specification. Here we're setting the encoding to UTF-8 to handle international characters correctly." class="code-function">locale</span>(<span class="code-tooltip" data-tip="ENCODING: How text characters are stored. UTF-8 handles all languages. Use 'latin1' for older European files.">encoding</span> = <span class="code-tooltip" data-tip="UTF-8: Universal character encoding. Works for all languages and special characters." class="code-string">"UTF-8"</span>),
+    <span class="code-tooltip" data-tip="NA: Specifies which text values should be treated as missing data (NA). Different datasets use different codes for 'no data'. List all the ones your file uses.">na</span> = <span class="code-tooltip" data-tip="C(): The combine function - creates a vector (list) of values. Here it lists all the strings that mean 'missing data' in your file." class="code-function">c</span>(<span class="code-tooltip" data-tip="EMPTY STRING: Blank cells will become NA." class="code-string">""</span>, <span class="code-tooltip" data-tip="NA STRING: The text 'NA' will become R's NA (missing value)." class="code-string">"NA"</span>, <span class="code-tooltip" data-tip="PERIOD: Some datasets use '.' for missing values (common in Stata files)." class="code-string">"."</span>, <span class="code-tooltip" data-tip="-999: Some datasets use special numbers like -999 to indicate missing data." class="code-string">"-999"</span>),
+    <span class="code-tooltip" data-tip="COL_TYPES: Explicitly specifies column data types instead of letting R guess. Use this when R guesses wrong, especially for IDs that look like numbers.">col_types</span> = <span class="code-tooltip" data-tip="COLS(): Defines column specifications. Only specify columns that need special handling - others will be auto-detected." class="code-function">cols</span>(<span class="code-tooltip" data-tip="ID: The column name you want to specify.">id</span> = <span class="code-tooltip" data-tip="COL_CHARACTER(): Forces this column to be read as text (character), not numbers. Preserves leading zeros like '001' and prevents phone numbers from being treated as math." class="code-function">col_character</span>())
+)
+
+<span class="code-comment"># Verify the load</span>
+<span class="code-tooltip" data-tip="CAT(): Concatenates and prints text to the console. More flexible than print() for formatted output." class="code-function">cat</span>(<span class="code-tooltip" data-tip="SPRINTF(): Creates formatted strings. %s inserts a string, %d inserts an integer. The values after the format string fill in the placeholders in order." class="code-function">sprintf</span>(<span class="code-tooltip" data-tip="FORMAT STRING: Template with placeholders. %s = string, %d = integer, \\n = new line." class="code-string">"Loaded %s rows, %d columns\n"</span>,
+    <span class="code-tooltip" data-tip="FORMAT(): Formats a number for display. big.mark=',' adds thousand separators (21,000 instead of 21000)." class="code-function">format</span>(<span class="code-tooltip" data-tip="NROW(): Returns the number of rows in a data frame. 'nrow' = 'number of rows'." class="code-function">nrow</span>(df), <span class="code-tooltip" data-tip="BIG.MARK: Character to use as thousand separator.">big.mark</span>=<span class="code-string">","</span>), <span class="code-tooltip" data-tip="NCOL(): Returns the number of columns. 'ncol' = 'number of columns'." class="code-function">ncol</span>(df)))
+<span class="code-tooltip" data-tip="HEAD(): Shows the first 6 rows of your data frame. Essential for quickly checking that data loaded correctly. Use head(df, 10) to see 10 rows." class="code-function">head</span>(df)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="load-csv" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Loaded <span class="out-num">14,112</span> rows, <span class="out-num">4</span> columns
+
+   Country Name Country Code  Year         Value
+<span class="out-num">0</span>    Arab World          ARB  <span class="out-num">1968</span>  <span class="out-num">2.576068e+10</span>
+<span class="out-num">1</span>    Arab World          ARB  <span class="out-num">1969</span>  <span class="out-num">2.843420e+10</span>
+<span class="out-num">2</span>    Arab World          ARB  <span class="out-num">1970</span>  <span class="out-num">3.138565e+10</span>
+<span class="out-num">3</span>    Arab World          ARB  <span class="out-num">1971</span>  <span class="out-num">3.587548e+10</span>
+<span class="out-num">4</span>    Arab World          ARB  <span class="out-num">1972</span>  <span class="out-num">4.250944e+10</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="load-csv" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. import delimited "https://...gdp.csv", clear</span>
+(encoding automatically selected: UTF-8)
+(4 vars, 14,112 obs)
+
+<span class="out-str">. describe, short</span>
+
+Contains data
+ Observations:        <span class="out-num">14,112</span>
+    Variables:             <span class="out-num">4</span>
+
+<span class="out-str">. list in 1/5</span>
+
+     +--------------------------------------------------+
+     |    countryname   countrycode   year        value |
+     |--------------------------------------------------|
+  1. |     Arab World           ARB   1968   2.5761e+10 |
+  2. |     Arab World           ARB   1969   2.8434e+10 |
+  3. |     Arab World           ARB   1970   3.1386e+10 |
+  4. |     Arab World           ARB   1971   3.5875e+10 |
+  5. |     Arab World           ARB   1972   4.2509e+10 |
+     +--------------------------------------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="load-csv" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-blue">Rows: 14112 Columns: 4</span>
+<span class="out-str">── Column specification ────────────────────────────</span>
+Delimiter: ","
+<span class="out-green">chr</span> (2): Country Name, Country Code
+<span class="out-green">dbl</span> (2): Year, Value
+
+Loaded <span class="out-num">14,112</span> rows, <span class="out-num">4</span> columns
+
+<span class="out-green"># A tibble: 6 x 4</span>
+  `Country Name` `Country Code`  Year        Value
+  <span class="out-blue">&lt;chr&gt;</span>          <span class="out-blue">&lt;chr&gt;</span>          <span class="out-blue">&lt;dbl&gt;</span>        <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> Arab World     ARB             1968  25760680000
+<span class="out-num">2</span> Arab World     ARB             1969  28434200000
+<span class="out-num">3</span> Arab World     ARB             1970  31385650000</div>
+        </div>
+
+        <h3>Loading Excel and Stata Files</h3>
+
+        <div class="code-tabs" data-runnable="load-other">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Load Excel and Stata files</span>
+<span class="code-tooltip" data-tip="IMPORT: Brings the pandas library into your program." class="code-keyword">import</span> <span class="code-tooltip" data-tip="PANDAS: Essential data manipulation library for Python.">pandas</span> <span class="code-tooltip" data-tip="AS: Creates 'pd' as a shortcut for pandas." class="code-keyword">as</span> <span class="code-tooltip" data-tip="PD: Standard abbreviation for pandas.">pd</span>
+
+<span class="code-comment"># Excel files</span>
+<span class="code-tooltip" data-tip="DF: Variable to store the loaded Excel data.">df</span> <span class="code-tooltip" data-tip="EQUALS: Assigns the loaded data to the variable.">=</span> <span class="code-tooltip" data-tip="PD.READ_EXCEL(): Loads Excel files (.xlsx, .xls) into a DataFrame. By default, loads the first sheet. Requires the 'openpyxl' package to be installed (pip install openpyxl).">pd.read_excel</span>(<span class="code-tooltip" data-tip="FILE PATH: The Excel file to load. Can be .xlsx (modern) or .xls (old format)." class="code-string">"data.xlsx"</span>)                      <span class="code-comment"># First sheet</span>
+<span class="code-tooltip" data-tip="DF: Overwriting with data from a specific sheet.">df</span> = <span class="code-tooltip" data-tip="PD.READ_EXCEL(): With sheet_name parameter to select a specific sheet.">pd.read_excel</span>(<span class="code-tooltip" data-tip="FILE PATH: Same Excel file." class="code-string">"data.xlsx"</span>, <span class="code-tooltip" data-tip="SHEET_NAME: Specifies which sheet to load. Can be the sheet name (string) or index (number starting from 0).">sheet_name</span>=<span class="code-tooltip" data-tip="SHEET2: The exact name of the sheet tab in Excel." class="code-string">"Sheet2"</span>) <span class="code-comment"># Specific sheet</span>
+<span class="code-tooltip" data-tip="DF: Overwriting with data from sheet at index 0.">df</span> = <span class="code-tooltip" data-tip="PD.READ_EXCEL(): Loading by sheet index.">pd.read_excel</span>(<span class="code-tooltip" data-tip="FILE PATH: Same Excel file." class="code-string">"data.xlsx"</span>, <span class="code-tooltip" data-tip="SHEET_NAME: Using index 0 (first sheet). Index 1 would be second sheet, etc.">sheet_name</span>=<span class="code-tooltip" data-tip="0: First sheet (Python counts from 0). Use 1 for second sheet, 2 for third, etc." class="code-number">0</span>)        <span class="code-comment"># By index</span>
+
+<span class="code-comment"># Load all sheets into a dictionary</span>
+<span class="code-tooltip" data-tip="ALL_SHEETS: A dictionary where keys are sheet names and values are DataFrames. Example: all_sheets['Sheet1'] gives you the first sheet's data.">all_sheets</span> <span class="code-tooltip" data-tip="EQUALS: Assigns the dictionary of all sheets.">=</span> <span class="code-tooltip" data-tip="PD.READ_EXCEL(): With sheet_name=None to load ALL sheets at once.">pd.read_excel</span>(<span class="code-tooltip" data-tip="FILE PATH: The Excel file with multiple sheets." class="code-string">"data.xlsx"</span>, <span class="code-tooltip" data-tip="SHEET_NAME=NONE: The special value None tells pandas to load every sheet and return them as a dictionary.">sheet_name</span>=<span class="code-tooltip" data-tip="NONE: Python's null value. Here it means 'all sheets' - a special behavior of read_excel()." class="code-keyword">None</span>)
+
+<span class="code-comment"># Stata files (preserves labels!)</span>
+<span class="code-tooltip" data-tip="DF: Variable to store Stata data.">df</span> = <span class="code-tooltip" data-tip="PD.READ_STATA(): Loads Stata .dta files. Great feature: preserves variable labels and value labels from Stata! Access labels via df['varname'].cat.categories or df.attrs.">pd.read_stata</span>(<span class="code-tooltip" data-tip="FILE PATH: Stata data file (.dta). Very common format for academic economics datasets, IPUMS, replication packages." class="code-string">"data.dta"</span>)
+
+<span class="code-comment"># For large Stata files, use iterator</span>
+<span class="code-tooltip" data-tip="FOR LOOP: Iterates through chunks of the file one at a time. Essential for files too large to fit in memory." class="code-keyword">for</span> <span class="code-tooltip" data-tip="CHUNK: A variable that holds each piece of the data. On each loop iteration, chunk contains the next 10,000 rows.">chunk</span> <span class="code-tooltip" data-tip="IN: Part of the for loop syntax - means 'for each item in the following collection'." class="code-keyword">in</span> <span class="code-tooltip" data-tip="PD.READ_STATA(): With chunksize creates an iterator instead of loading everything at once.">pd.read_stata</span>(<span class="code-tooltip" data-tip="FILE PATH: A large Stata file." class="code-string">"big_data.dta"</span>, <span class="code-tooltip" data-tip="CHUNKSIZE: Number of rows to load at a time. Here, 10000 rows per chunk. Lets you process huge files without running out of memory.">chunksize</span>=<span class="code-tooltip" data-tip="10000: Load 10,000 rows at a time." class="code-number">10000</span>):
+    <span class="code-comment"># Process each chunk</span>
+    <span class="code-tooltip" data-tip="PASS: A placeholder that does nothing. In real code, you'd put your data processing here (filtering, calculations, saving results)." class="code-keyword">pass</span>
+
+<span class="code-comment"># JSON files (common from APIs)</span>
+<span class="code-tooltip" data-tip="DF: Variable to store JSON data.">df</span> = <span class="code-tooltip" data-tip="PD.READ_JSON(): Loads JSON files into a DataFrame. JSON is common for API responses and web data. Works best when JSON structure is tabular (array of objects with same fields).">pd.read_json</span>(<span class="code-tooltip" data-tip="FILE PATH: JSON file. Can also be a URL to a JSON API endpoint." class="code-string">"data.json"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Load different file formats</span>
+
+<span class="code-comment">* Stata native format (.dta)</span>
+<span class="code-tooltip" data-tip="USE: Stata's primary command to load .dta files (Stata's native format). Preserves variable labels, value labels, notes, and all metadata. The most common way to load data in Stata." class="code-keyword">use</span> <span class="code-tooltip" data-tip="FILE PATH: Location of the Stata data file. Can be local path or URL." class="code-string">"data.dta"</span><span class="code-tooltip" data-tip="COMMA: Separates the file path from options.">,</span> <span class="code-tooltip" data-tip="CLEAR: Removes existing data from memory. Required because Stata only holds one dataset at a time.">clear</span>
+
+<span class="code-comment">* Load from URL</span>
+<span class="code-tooltip" data-tip="USE: Same command works with web URLs - Stata will download the file." class="code-keyword">use</span> <span class="code-tooltip" data-tip="URL: Web address of a .dta file. Stata downloads and loads it directly into memory." class="code-string">"https://example.com/data.dta"</span><span class="code-tooltip" data-tip="COMMA: Separator before options.">,</span> <span class="code-tooltip" data-tip="CLEAR: Always include when loading data.">clear</span>
+
+<span class="code-comment">* Load only specific variables</span>
+<span class="code-tooltip" data-tip="USE: With variable list to load only specific columns. Much faster and uses less memory for large files." class="code-keyword">use</span> <span class="code-tooltip" data-tip="VARIABLE LIST: Space-separated names of variables you want to keep. Only these columns are loaded into memory.">country year gdp</span> <span class="code-tooltip" data-tip="USING: Keyword that introduces the file path when you specify variables first." class="code-keyword">using</span> <span class="code-tooltip" data-tip="FILE PATH: The Stata data file." class="code-string">"data.dta"</span><span class="code-tooltip" data-tip="COMMA: Separator before options.">,</span> <span class="code-tooltip" data-tip="CLEAR: Removes previous data.">clear</span>
+
+<span class="code-comment">* Load with condition (faster than loading all then dropping)</span>
+<span class="code-tooltip" data-tip="USE: With 'if' condition to load only rows matching the condition. MUCH faster than loading everything then dropping - the filter happens during the load." class="code-keyword">use</span> <span class="code-tooltip" data-tip="FILE PATH: The data file." class="code-string">"data.dta"</span> <span class="code-tooltip" data-tip="IF: Filters rows during loading. Only rows where the condition is true are loaded." class="code-keyword">if</span> <span class="code-tooltip" data-tip="CONDITION: year >= 2000 keeps only rows where year is 2000 or later. The '>=' means 'greater than or equal to'.">year >= 2000</span><span class="code-tooltip" data-tip="COMMA: Separator before options.">,</span> <span class="code-tooltip" data-tip="CLEAR: Removes previous data.">clear</span>
+
+<span class="code-comment">* Excel files</span>
+<span class="code-tooltip" data-tip="IMPORT EXCEL: Reads Microsoft Excel files (.xlsx modern format, .xls old format). Great for data from government reports, business data, or any spreadsheets." class="code-keyword">import excel</span> <span class="code-tooltip" data-tip="FILE PATH: The Excel file to load." class="code-string">"data.xlsx"</span><span class="code-tooltip" data-tip="COMMA: Separates path from options.">,</span> <span class="code-tooltip" data-tip="FIRSTROW: Treats the first row as variable names (column headers). Without this, Stata would name columns A, B, C, etc.">firstrow</span> <span class="code-tooltip" data-tip="CLEAR: Removes existing data before loading.">clear</span>
+<span class="code-tooltip" data-tip="IMPORT EXCEL: Loading a specific sheet from a multi-sheet workbook." class="code-keyword">import excel</span> <span class="code-tooltip" data-tip="FILE PATH: The Excel file." class="code-string">"data.xlsx"</span><span class="code-tooltip" data-tip="COMMA: Separator before options.">,</span> <span class="code-tooltip" data-tip="SHEET(): Specifies which Excel sheet/tab to load. Use the exact name as it appears in Excel.">sheet</span>(<span class="code-tooltip" data-tip="SHEET NAME: The exact name of the sheet tab you want to load." class="code-string">"Sheet2"</span>) <span class="code-tooltip" data-tip="FIRSTROW: First row contains variable names.">firstrow</span> <span class="code-tooltip" data-tip="CLEAR: Remove existing data.">clear</span>
+
+<span class="code-comment">* View available sheets</span>
+<span class="code-tooltip" data-tip="IMPORT EXCEL: With 'describe' option to preview the file without loading it." class="code-keyword">import excel</span> <span class="code-tooltip" data-tip="FILE PATH: The Excel file to examine." class="code-string">"data.xlsx"</span><span class="code-tooltip" data-tip="COMMA: Separator before options.">,</span> <span class="code-tooltip" data-tip="DESCRIBE: Shows information about the Excel file - sheet names and data ranges - without actually loading any data. Useful for exploring unfamiliar files.">describe</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Load different file formats</span>
+<span class="code-tooltip" data-tip="LIBRARY(): Loads a package into R. Must be called before using the package's functions." class="code-function">library</span>(<span class="code-tooltip" data-tip="TIDYVERSE: Collection of R packages including readr, dplyr, ggplot2, and more. One command loads them all.">tidyverse</span>)
+<span class="code-tooltip" data-tip="LIBRARY(): Loading the readxl package for Excel file support." class="code-function">library</span>(<span class="code-tooltip" data-tip="READXL: Package for reading Excel files (.xlsx and .xls). Works without needing Microsoft Excel installed. Part of the tidyverse ecosystem but loaded separately.">readxl</span>)      <span class="code-comment"># For Excel files</span>
+<span class="code-tooltip" data-tip="LIBRARY(): Loading haven for Stata/SPSS/SAS file support." class="code-function">library</span>(<span class="code-tooltip" data-tip="HAVEN: Package for reading statistical software files - Stata (.dta), SPSS (.sav), and SAS (.sas7bdat). Preserves variable labels and value labels!">haven</span>)       <span class="code-comment"># For Stata files</span>
+
+<span class="code-comment"># Excel files</span>
+<span class="code-tooltip" data-tip="DF: Variable to store the Excel data.">df</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the result in df."><-</span> <span class="code-tooltip" data-tip="READ_EXCEL(): Loads Excel files into R. By default loads the first sheet. Returns a tibble (modern data frame)." class="code-function">read_excel</span>(<span class="code-tooltip" data-tip="FILE PATH: The Excel file to load." class="code-string">"data.xlsx"</span>)                       <span class="code-comment"># First sheet</span>
+<span class="code-tooltip" data-tip="DF: Overwriting with data from specific sheet.">df</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the result."><-</span> <span class="code-tooltip" data-tip="READ_EXCEL(): With sheet parameter to select a specific sheet." class="code-function">read_excel</span>(<span class="code-tooltip" data-tip="FILE PATH: Same Excel file." class="code-string">"data.xlsx"</span>, <span class="code-tooltip" data-tip="SHEET: Parameter to specify which sheet to load. Can be sheet name (string) or position (number).">sheet</span> = <span class="code-tooltip" data-tip="SHEET NAME: The exact name of the Excel sheet tab." class="code-string">"Sheet2"</span>)     <span class="code-comment"># Specific sheet</span>
+
+<span class="code-comment"># List available sheets</span>
+<span class="code-tooltip" data-tip="EXCEL_SHEETS(): Returns a vector of all sheet names in the Excel file. Useful for exploring unfamiliar files." class="code-function">excel_sheets</span>(<span class="code-tooltip" data-tip="FILE PATH: The Excel file to examine." class="code-string">"data.xlsx"</span>)
+
+<span class="code-comment"># Load all sheets into a list</span>
+<span class="code-tooltip" data-tip="SHEETS: Variable storing the vector of sheet names.">sheets</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the sheet names."><-</span> <span class="code-tooltip" data-tip="EXCEL_SHEETS(): Gets all sheet names from the file." class="code-function">excel_sheets</span>(<span class="code-tooltip" data-tip="FILE PATH: The Excel file." class="code-string">"data.xlsx"</span>)
+<span class="code-tooltip" data-tip="ALL_DATA: A list containing all sheets' data. Each element is a data frame from one sheet.">all_data</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the list of data frames."><-</span> <span class="code-tooltip" data-tip="MAP(): Applies a function to each element of a list/vector. Here it reads each sheet name and loads that sheet. Returns a list of data frames." class="code-function">map</span>(<span class="code-tooltip" data-tip="SHEETS: The vector of sheet names to iterate over.">sheets</span>, <span class="code-tooltip" data-tip="FORMULA SYNTAX: The ~ creates an anonymous function. .x is the placeholder for each sheet name.">~</span><span class="code-tooltip" data-tip="READ_EXCEL(): Called for each sheet name." class="code-function">read_excel</span>(<span class="code-tooltip" data-tip="FILE PATH: Same file each time." class="code-string">"data.xlsx"</span>, <span class="code-tooltip" data-tip="SHEET: Different sheet each iteration.">sheet</span> = <span class="code-tooltip" data-tip=".X: The current sheet name being processed. This placeholder represents each element as map() iterates through the sheets vector.">.x</span>))
+<span class="code-tooltip" data-tip="NAMES(): Assigns names to list elements. Makes it easier to access specific sheets later (e.g., all_data$Sheet1)." class="code-function">names</span>(<span class="code-tooltip" data-tip="ALL_DATA: The list we're naming.">all_data</span>) <span class="code-tooltip" data-tip="ASSIGNMENT: Sets the names."><-</span> <span class="code-tooltip" data-tip="SHEETS: Using sheet names as list element names.">sheets</span>
+
+<span class="code-comment"># Stata files (preserves labels!)</span>
+<span class="code-tooltip" data-tip="DF: Variable to store Stata data.">df</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the result."><-</span> <span class="code-tooltip" data-tip="READ_DTA(): From haven package. Loads Stata .dta files and preserves all metadata including variable labels and value labels! Access labels with attr(df$varname, 'label')." class="code-function">read_dta</span>(<span class="code-tooltip" data-tip="FILE PATH: Stata data file. Common format for academic economics datasets." class="code-string">"data.dta"</span>)
+
+<span class="code-comment"># R native formats</span>
+<span class="code-tooltip" data-tip="DF: Variable to store the R object.">df</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the result."><-</span> <span class="code-tooltip" data-tip="READRDS(): Loads a single R object from an .rds file. Fast, compressed format for saving R objects. The object could be a data frame, model, list, etc." class="code-function">readRDS</span>(<span class="code-tooltip" data-tip="FILE PATH: R data file. .rds stores a single R object." class="code-string">"data.rds"</span>)       <span class="code-comment"># Single object</span>
+<span class="code-tooltip" data-tip="LOAD(): Loads ALL objects from an .RData file directly into your environment. Unlike readRDS, you don't assign the result - objects appear automatically with their original names." class="code-function">load</span>(<span class="code-tooltip" data-tip="FILE PATH: R workspace file. .RData can contain multiple objects (data frames, models, vectors, etc.) saved together." class="code-string">"workspace.RData"</span>)         <span class="code-comment"># Multiple objects</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="load-other" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">Excel file loaded successfully</span>
+Sheets found: [<span class="out-str">'Data'</span>, <span class="out-str">'Metadata'</span>, <span class="out-str">'Notes'</span>]
+
+<span class="out-green">Stata file loaded successfully</span>
+Loaded <span class="out-num">50,000</span> rows, <span class="out-num">25</span> columns
+<span class="out-blue">Note: Variable labels preserved</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="load-other" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. use "data.dta", clear</span>
+(World Development Indicators)
+
+<span class="out-str">. describe, short</span>
+
+Contains data from data.dta
+ Observations:        <span class="out-num">50,000</span>
+    Variables:            <span class="out-num">25</span>
+
+<span class="out-str">. import excel "data.xlsx", describe</span>
+
+  Sheet name: <span class="out-str">"Data"</span>         range: A1:Z1000
+  Sheet name: <span class="out-str">"Metadata"</span>     range: A1:D200
+  Sheet name: <span class="out-str">"Notes"</span>        range: A1:B50</div>
+        </div>
+
+        <div class="output-simulation" data-output="load-other" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">&gt; excel_sheets("data.xlsx")</span>
+[1] <span class="out-str">"Data"</span>     <span class="out-str">"Metadata"</span> <span class="out-str">"Notes"</span>
+
+<span class="out-str">&gt; df <- read_dta("data.dta")</span>
+<span class="out-green"># A tibble: 50,000 x 25</span>
+<span class="out-blue">Note: Variable labels accessible via attr(df$varname, "label")</span></div>
+        </div>
+
+        <!-- Section 3: Merging -->
+        <h2>Merging Datasets</h2>
+
+        <div class="concept-box">
+          <h4>What is Merging?</h4>
+          <p>Merging (or joining) combines two datasets based on common <strong>key variables</strong>. For example, you might merge GDP data with population data using country code and year as keys. The key variables must uniquely identify observations in at least one of the datasets.</p>
+        </div>
+
+        <h3>Types of Merges</h3>
+
+        <!-- Interactive Merge Visualizer -->
+        <div class="merge-visualizer" style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin-top: 0; color: #1e40af;">Interactive Merge Visualizer</h4>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Select a merge type to see how the two datasets combine:</p>
+
+          <div class="merge-controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            <button class="merge-type-btn active" data-type="inner" style="padding: 0.5rem 1rem; border: 2px solid #2563eb; background: #2563eb; color: white; border-radius: 6px; cursor: pointer; font-weight: 600;">Inner Join</button>
+            <button class="merge-type-btn" data-type="left" style="padding: 0.5rem 1rem; border: 2px solid #2563eb; background: white; color: #2563eb; border-radius: 6px; cursor: pointer; font-weight: 600;">Left Join</button>
+            <button class="merge-type-btn" data-type="right" style="padding: 0.5rem 1rem; border: 2px solid #2563eb; background: white; color: #2563eb; border-radius: 6px; cursor: pointer; font-weight: 600;">Right Join</button>
+            <button class="merge-type-btn" data-type="outer" style="padding: 0.5rem 1rem; border: 2px solid #2563eb; background: white; color: #2563eb; border-radius: 6px; cursor: pointer; font-weight: 600;">Outer (Full) Join</button>
+          </div>
+
+          <div class="merge-diagram" style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: start;">
+            <!-- Left Dataset -->
+            <div class="dataset-box" style="background: #dbeafe; border-radius: 8px; padding: 1rem;">
+              <div style="font-weight: 600; color: #1e40af; margin-bottom: 0.5rem; text-align: center;">GDP Data (Left)</div>
+              <table style="width: 100%; font-size: 0.85rem; background: white; border-radius: 4px;">
+                <thead><tr style="background: #1e40af; color: white;"><th>country</th><th>gdp</th></tr></thead>
+                <tbody>
+                  <tr class="merge-row" data-key="USA"><td>USA</td><td>21000</td></tr>
+                  <tr class="merge-row" data-key="CHN"><td>CHN</td><td>14700</td></tr>
+                  <tr class="merge-row" data-key="DEU"><td>DEU</td><td>3800</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Arrow -->
+            <div style="display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #2563eb; padding-top: 2rem;">
+              ⟹
+            </div>
+
+            <!-- Right Dataset -->
+            <div class="dataset-box" style="background: #dcfce7; border-radius: 8px; padding: 1rem;">
+              <div style="font-weight: 600; color: #166534; margin-bottom: 0.5rem; text-align: center;">Population Data (Right)</div>
+              <table style="width: 100%; font-size: 0.85rem; background: white; border-radius: 4px;">
+                <thead><tr style="background: #166534; color: white;"><th>country</th><th>pop</th></tr></thead>
+                <tbody>
+                  <tr class="merge-row" data-key="USA"><td>USA</td><td>331</td></tr>
+                  <tr class="merge-row" data-key="CHN"><td>CHN</td><td>1400</td></tr>
+                  <tr class="merge-row" data-key="JPN"><td>JPN</td><td>126</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Result -->
+          <div class="merge-result" style="margin-top: 1.5rem;">
+            <div style="font-weight: 600; color: #7c3aed; margin-bottom: 0.5rem; text-align: center;">Result: <span class="merge-result-type">Inner Join</span></div>
+            <div class="merge-result-table" style="background: #f3e8ff; border-radius: 8px; padding: 1rem; overflow-x: auto;">
+              <table style="width: 100%; font-size: 0.85rem; background: white; border-radius: 4px;">
+                <thead><tr style="background: #7c3aed; color: white;"><th>country</th><th>gdp</th><th>pop</th></tr></thead>
+                <tbody class="merge-result-body">
+                  <tr><td>USA</td><td>21000</td><td>331</td></tr>
+                  <tr><td>CHN</td><td>14700</td><td>1400</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="merge-explanation" style="font-size: 0.85rem; color: #666; margin-top: 0.75rem; text-align: center;">
+              <strong>Inner join:</strong> Only rows with matching keys in BOTH datasets are kept (2 rows).
+            </p>
+          </div>
+        </div>
+
+        <table style="width: 100%; margin: 1rem 0;">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Keeps</th>
+              <th>Use When</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Inner</strong></td>
+              <td>Only matching rows</td>
+              <td>You only want complete cases</td>
+            </tr>
+            <tr>
+              <td><strong>Left</strong></td>
+              <td>All from left + matches from right</td>
+              <td>Keep all your main data, add info where available</td>
+            </tr>
+            <tr>
+              <td><strong>Right</strong></td>
+              <td>All from right + matches from left</td>
+              <td>Opposite of left join</td>
+            </tr>
+            <tr>
+              <td><strong>Outer (Full)</strong></td>
+              <td>All rows from both</td>
+              <td>You want to preserve everything</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Merge Terminology Across Languages -->
+        <div class="concept-box" style="background: #fefce8; border-left-color: #ca8a04;">
+          <h4 style="color: #854d0e;">Terminology Across Languages</h4>
+          <p style="margin-bottom: 1rem;">Merging operations have different names in Python, Stata, and R. Use this table to translate:</p>
+          <table style="width: 100%; font-size: 0.9rem; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #fef3c7;">
+                <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #ca8a04;">Operation</th>
+                <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #ca8a04;">Python (pandas)</th>
+                <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #ca8a04;">Stata</th>
+                <th style="padding: 0.5rem; text-align: left; border-bottom: 2px solid #ca8a04;">R (dplyr)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Inner Join</strong></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>pd.merge(..., how='inner')</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>merge ..., keep(3)</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>inner_join()</code></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Left Join</strong></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>pd.merge(..., how='left')</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>merge ..., keep(1 3)</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>left_join()</code></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Right Join</strong></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>pd.merge(..., how='right')</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>merge ..., keep(2 3)</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>right_join()</code></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><strong>Full/Outer Join</strong></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>pd.merge(..., how='outer')</code></td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>merge ...</code> (default)</td>
+                <td style="padding: 0.5rem; border-bottom: 1px solid #e5e7eb;"><code>full_join()</code></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem;"><strong>Match type</strong></td>
+                <td style="padding: 0.5rem;"><code>validate='1:1'</code>, <code>'m:1'</code>, <code>'1:m'</code></td>
+                <td style="padding: 0.5rem;"><code>1:1</code>, <code>m:1</code>, <code>1:m</code>, <code>m:m</code></td>
+                <td style="padding: 0.5rem;"><code>relationship='one-to-one'</code>, etc.</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size: 0.85rem; color: #666; margin-top: 0.75rem; margin-bottom: 0;">
+            <strong>Stata note:</strong> <code>_merge</code> values: 1 = master only, 2 = using only, 3 = matched in both.
+          </p>
+        </div>
+
+        <div class="code-tabs" data-runnable="merge-1">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Merging datasets with pandas</span>
+<span class="code-tooltip" data-tip="IMPORT: Brings pandas library into our program." class="code-keyword">import</span> <span class="code-tooltip" data-tip="PANDAS: Data manipulation library.">pandas</span> <span class="code-tooltip" data-tip="AS: Creates 'pd' shortcut." class="code-keyword">as</span> <span class="code-tooltip" data-tip="PD: Standard pandas abbreviation.">pd</span>
+
+<span class="code-comment"># Create example datasets</span>
+<span class="code-tooltip" data-tip="GDP: Variable name for our first dataset - GDP data by country.">gdp</span> <span class="code-tooltip" data-tip="EQUALS: Assigns the DataFrame to the variable.">=</span> <span class="code-tooltip" data-tip="PD.DATAFRAME(): Creates a new DataFrame (table) from a dictionary. Each key becomes a column name, and each list becomes the column values.">pd.DataFrame</span>(<span class="code-tooltip" data-tip="DICTIONARY: Curly braces {} create a dictionary. Each key is a column name, each value is a list of data for that column.">{
+    <span class="code-tooltip" data-tip="COUNTRY COLUMN: Key variable that will be used to match rows between datasets." class="code-string">'country'</span>: [<span class="code-tooltip" data-tip="LIST OF VALUES: These are the country codes for each row." class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>, <span class="code-string">'DEU'</span>],
+    <span class="code-tooltip" data-tip="YEAR COLUMN: Another key variable for matching." class="code-string">'year'</span>: [<span class="code-tooltip" data-tip="YEARS: All 2020 in this example." class="code-number">2020</span>, <span class="code-number">2020</span>, <span class="code-number">2020</span>],
+    <span class="code-tooltip" data-tip="GDP COLUMN: The actual GDP values (in billions)." class="code-string">'gdp'</span>: [<span class="code-tooltip" data-tip="GDP VALUES: 21000 for USA, 14700 for China, 3800 for Germany." class="code-number">21000</span>, <span class="code-number">14700</span>, <span class="code-number">3800</span>]
+}</span>)
+
+<span class="code-tooltip" data-tip="POP: Variable name for our second dataset - population data.">pop</span> <span class="code-tooltip" data-tip="EQUALS: Assigns the DataFrame.">=</span> <span class="code-tooltip" data-tip="PD.DATAFRAME(): Creating another DataFrame.">pd.DataFrame</span>(<span class="code-tooltip" data-tip="DICTIONARY: Data for the population table.">{
+    <span class="code-tooltip" data-tip="COUNTRY COLUMN: Same key variable as in gdp dataset." class="code-string">'country'</span>: [<span class="code-tooltip" data-tip="COUNTRIES: Note JPN is here but not in gdp dataset." class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>, <span class="code-string">'JPN'</span>],
+    <span class="code-tooltip" data-tip="YEAR COLUMN: Matching key." class="code-string">'year'</span>: [<span class="code-number">2020</span>, <span class="code-number">2020</span>, <span class="code-number">2020</span>],
+    <span class="code-tooltip" data-tip="POPULATION COLUMN: Population in millions." class="code-string">'population'</span>: [<span class="code-tooltip" data-tip="POPULATION VALUES: USA=331M, China=1400M, Japan=126M." class="code-number">331</span>, <span class="code-number">1400</span>, <span class="code-number">126</span>]
+}</span>)
+
+<span class="code-comment"># Inner join (only matches)</span>
+<span class="code-tooltip" data-tip="MERGED: Variable to store the combined dataset.">merged</span> <span class="code-tooltip" data-tip="EQUALS: Assigns the merge result.">=</span> <span class="code-tooltip" data-tip="PD.MERGE(): The main function for combining two DataFrames. Like a SQL join or VLOOKUP in Excel. Matches rows based on key columns.">pd.merge</span>(<span class="code-tooltip" data-tip="GDP: First (left) DataFrame to merge.">gdp</span>, <span class="code-tooltip" data-tip="POP: Second (right) DataFrame to merge.">pop</span>, <span class="code-tooltip" data-tip="ON: Specifies which column(s) to use as matching keys. Both datasets must have these columns with the same names.">on</span>=<span class="code-tooltip" data-tip="KEY COLUMNS: A list of columns to match on. Rows match only if BOTH country AND year are the same.">[<span class="code-string">'country'</span>, <span class="code-string">'year'</span>]</span>)
+
+<span class="code-comment"># Left join (keep all from gdp)</span>
+<span class="code-tooltip" data-tip="MERGED_LEFT: Stores the left join result.">merged_left</span> <span class="code-tooltip" data-tip="EQUALS: Assignment.">=</span> <span class="code-tooltip" data-tip="PD.MERGE(): Same function with different join type.">pd.merge</span>(<span class="code-tooltip" data-tip="GDP: Left DataFrame - all its rows will be kept.">gdp</span>, <span class="code-tooltip" data-tip="POP: Right DataFrame - only matching rows kept.">pop</span>, <span class="code-tooltip" data-tip="ON: Key columns for matching.">on</span>=<span class="code-tooltip" data-tip="KEY LIST: Matching on both country and year.">[<span class="code-string">'country'</span>, <span class="code-string">'year'</span>]</span>, <span class="code-tooltip" data-tip="HOW: Specifies the type of join. Options: 'inner' (default), 'left', 'right', 'outer'. 'left' keeps ALL rows from the left DataFrame, adding NaN where no match exists in the right.">how</span>=<span class="code-tooltip" data-tip="LEFT: Keep all rows from left (gdp) DataFrame. If no match in pop, population will be NaN." class="code-string">'left'</span>)
+
+<span class="code-comment"># Outer join (keep all)</span>
+<span class="code-tooltip" data-tip="MERGED_OUTER: Stores the outer join result.">merged_outer</span> <span class="code-tooltip" data-tip="EQUALS: Assignment.">=</span> <span class="code-tooltip" data-tip="PD.MERGE(): Outer join keeps everything from both sides.">pd.merge</span>(<span class="code-tooltip" data-tip="GDP: First DataFrame.">gdp</span>, <span class="code-tooltip" data-tip="POP: Second DataFrame.">pop</span>, <span class="code-tooltip" data-tip="ON: Key columns.">on</span>=<span class="code-tooltip" data-tip="KEYS: Matching on country and year.">[<span class="code-string">'country'</span>, <span class="code-string">'year'</span>]</span>, <span class="code-tooltip" data-tip="HOW: Type of join.">how</span>=<span class="code-tooltip" data-tip="OUTER: Keeps ALL rows from BOTH DataFrames. Non-matching rows get NaN for missing values. Result includes USA, CHN (matched), DEU (gdp only), JPN (pop only)." class="code-string">'outer'</span>)
+
+<span class="code-comment"># When key columns have different names</span>
+<span class="code-tooltip" data-tip="MERGED: Result when key columns have different names in each dataset.">merged</span> <span class="code-tooltip" data-tip="EQUALS: Assignment.">=</span> <span class="code-tooltip" data-tip="PD.MERGE(): Using left_on and right_on when column names differ.">pd.merge</span>(<span class="code-tooltip" data-tip="GDP: First DataFrame.">gdp</span>, <span class="code-tooltip" data-tip="POP: Second DataFrame.">pop</span>,
+    <span class="code-tooltip" data-tip="LEFT_ON: Key column names in the LEFT DataFrame. Use this when key columns have different names in the two datasets.">left_on</span>=<span class="code-tooltip" data-tip="KEYS FROM GDP: Column names as they appear in the gdp DataFrame.">[<span class="code-string">'country'</span>, <span class="code-string">'year'</span>]</span>,
+    <span class="code-tooltip" data-tip="RIGHT_ON: Key column names in the RIGHT DataFrame. These will be matched to left_on columns in order (country->iso3, year->yr).">right_on</span>=<span class="code-tooltip" data-tip="KEYS FROM POP: Column names as they appear in the pop DataFrame (if different).">[<span class="code-string">'iso3'</span>, <span class="code-string">'yr'</span>]</span>)
+
+<span class="code-comment"># Check merge quality</span>
+<span class="code-tooltip" data-tip="PRINT(): Displays the row counts to verify merge worked correctly." class="code-keyword">print</span>(<span class="code-tooltip" data-tip="F-STRING: Formatted string showing row counts before and after merge. ALWAYS check this to catch merge problems!" class="code-string">f"GDP rows: {<span class="code-tooltip" data-tip="LEN(GDP): Number of rows in original gdp data.">len(gdp)</span>}, Pop rows: {<span class="code-tooltip" data-tip="LEN(POP): Number of rows in original pop data.">len(pop)</span>}, Merged: {<span class="code-tooltip" data-tip="LEN(MERGED): Number of rows after merging. Compare to original counts to understand what happened.">len(merged)</span>}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Merging datasets</span>
+
+<span class="code-comment">* Load master dataset first</span>
+<span class="code-tooltip" data-tip="USE: Load the first (master) dataset into memory. The master is typically your main dataset that you want to add information to." class="code-keyword">use</span> <span class="code-tooltip" data-tip="FILE PATH: The master dataset - your primary data." class="code-string">"gdp.dta"</span><span class="code-tooltip" data-tip="COMMA: Separator before options.">,</span> <span class="code-tooltip" data-tip="CLEAR: Removes any existing data from memory.">clear</span>
+
+<span class="code-comment">* Basic 1:1 merge (one observation per key in both)</span>
+<span class="code-tooltip" data-tip="MERGE: Stata's command to combine two datasets based on key variables. Creates a new variable '_merge' that shows the result for each observation." class="code-keyword">merge</span> <span class="code-tooltip" data-tip="1:1: One-to-one merge. Each key combination appears at most once in BOTH datasets. Use when you have unique identifiers in both files. Stata will warn if keys are duplicated.">1:1</span> <span class="code-tooltip" data-tip="KEY VARIABLES: 'country year' are the variables to match on. Observations match only if BOTH values are identical.">country year</span> <span class="code-tooltip" data-tip="USING: Keyword that introduces the path to the second (using) dataset." class="code-keyword">using</span> <span class="code-tooltip" data-tip="FILE PATH: The 'using' dataset - the file you're merging IN to add to your master data." class="code-string">"population.dta"</span>
+
+<span class="code-comment">* Check merge results (ALWAYS DO THIS!)</span>
+<span class="code-tooltip" data-tip="TAB: Creates a frequency table. Here it shows how many observations fell into each _merge category. CRITICAL for verifying your merge worked correctly!" class="code-keyword">tab</span> <span class="code-tooltip" data-tip="_MERGE: Automatic variable created by merge command. Values: 1='master only' (in gdp but not pop), 2='using only' (in pop but not gdp), 3='matched' (in both). Always check this!">_merge</span>
+
+<span class="code-comment">* m:1 merge (many-to-one: many in master, one in using)</span>
+<span class="code-comment">* Example: household data merged with region characteristics</span>
+<span class="code-tooltip" data-tip="MERGE: Same command with different match type." class="code-keyword">merge</span> <span class="code-tooltip" data-tip="M:1: Many-to-one. Many rows in master can match ONE row in using. Example: multiple households in master, one row per region in using. Each household gets their region's characteristics.">m:1</span> <span class="code-tooltip" data-tip="REGION: The key variable to match on.">region</span> <span class="code-tooltip" data-tip="USING: Introduces the using dataset." class="code-keyword">using</span> <span class="code-tooltip" data-tip="FILE PATH: Region-level data (one row per region)." class="code-string">"region_data.dta"</span>
+
+<span class="code-comment">* 1:m merge (one-to-many)</span>
+<span class="code-tooltip" data-tip="MERGE: Same command, reversed direction." class="code-keyword">merge</span> <span class="code-tooltip" data-tip="1:M: One-to-many. ONE row in master can match MANY rows in using. Example: one country in master, multiple years of data in using.">1:m</span> <span class="code-tooltip" data-tip="COUNTRY: Key variable.">country</span> <span class="code-tooltip" data-tip="USING: Introduces using dataset." class="code-keyword">using</span> <span class="code-tooltip" data-tip="FILE PATH: Dataset with multiple rows per country (yearly observations)." class="code-string">"yearly_data.dta"</span>
+
+<span class="code-comment">* Keep only matched observations</span>
+<span class="code-tooltip" data-tip="KEEP: Keeps only observations meeting the condition. Deletes all other rows." class="code-keyword">keep</span> <span class="code-tooltip" data-tip="IF: Specifies a condition.">if</span> <span class="code-tooltip" data-tip="_MERGE == 3: Keeps only observations that matched in both datasets. The '==' is the equality test (not assignment). Drops unmatched observations.">_merge == 3</span>
+<span class="code-tooltip" data-tip="DROP: Removes variables (columns) from the dataset. Here we remove _merge since we no longer need it." class="code-keyword">drop</span> <span class="code-tooltip" data-tip="_MERGE: The automatic merge indicator variable. Good practice to drop it after checking, so it doesn't interfere with future merges.">_merge</span>
+
+<span class="code-comment">* Or assert all should match</span>
+<span class="code-tooltip" data-tip="ASSERT: Tests a condition and STOPS WITH ERROR if it's false. Use this when you EXPECT all observations to match - it will alert you to data problems." class="code-keyword">assert</span> <span class="code-tooltip" data-tip="_MERGE == 3: Tests that ALL observations matched. If any observation has _merge=1 or _merge=2, Stata will stop and show an error.">_merge == 3</span>
+<span class="code-tooltip" data-tip="DROP: Removes the _merge variable after verification." class="code-keyword">drop</span> <span class="code-tooltip" data-tip="_MERGE: Remove after checking.">_merge</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Merging datasets with dplyr</span>
+<span class="code-tooltip" data-tip="LIBRARY(): Loads the tidyverse packages including dplyr for data manipulation." class="code-function">library</span>(<span class="code-tooltip" data-tip="TIDYVERSE: Includes dplyr which provides the join functions we'll use.">tidyverse</span>)
+
+<span class="code-comment"># Create example datasets</span>
+<span class="code-tooltip" data-tip="GDP: Variable to store our GDP dataset.">gdp</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the tibble in gdp."><-</span> <span class="code-tooltip" data-tip="TIBBLE(): Creates a modern data frame. Like data.frame() but with nicer printing and stricter rules. Part of tidyverse." class="code-function">tibble</span>(
+    <span class="code-tooltip" data-tip="COUNTRY: Column definition. The column name on the left, values on the right.">country</span> = <span class="code-tooltip" data-tip="C(): Combines values into a vector (list)." class="code-function">c</span>(<span class="code-tooltip" data-tip="COUNTRY CODES: USA, China, Germany." class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>, <span class="code-string">"DEU"</span>),
+    <span class="code-tooltip" data-tip="YEAR: The year column.">year</span> = <span class="code-tooltip" data-tip="C(): Creating a vector of years." class="code-function">c</span>(<span class="code-tooltip" data-tip="YEAR VALUES: All 2020 in this example." class="code-number">2020</span>, <span class="code-number">2020</span>, <span class="code-number">2020</span>),
+    <span class="code-tooltip" data-tip="GDP: The GDP values column.">gdp</span> = <span class="code-tooltip" data-tip="C(): Creating GDP values vector." class="code-function">c</span>(<span class="code-tooltip" data-tip="GDP VALUES: In billions of dollars." class="code-number">21000</span>, <span class="code-number">14700</span>, <span class="code-number">3800</span>)
+)
+
+<span class="code-tooltip" data-tip="POP: Variable to store our population dataset.">pop</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the tibble."><-</span> <span class="code-tooltip" data-tip="TIBBLE(): Creates the second data frame." class="code-function">tibble</span>(
+    <span class="code-tooltip" data-tip="COUNTRY: Key column for matching.">country</span> = <span class="code-tooltip" data-tip="C(): Creating country vector." class="code-function">c</span>(<span class="code-tooltip" data-tip="COUNTRIES: Note JPN is here but DEU is not." class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>, <span class="code-string">"JPN"</span>),
+    <span class="code-tooltip" data-tip="YEAR: Key column for matching.">year</span> = <span class="code-tooltip" data-tip="C(): Year values." class="code-function">c</span>(<span class="code-number">2020</span>, <span class="code-number">2020</span>, <span class="code-number">2020</span>),
+    <span class="code-tooltip" data-tip="POPULATION: The population values column.">population</span> = <span class="code-tooltip" data-tip="C(): Creating population vector." class="code-function">c</span>(<span class="code-tooltip" data-tip="POPULATION VALUES: In millions." class="code-number">331</span>, <span class="code-number">1400</span>, <span class="code-number">126</span>)
+)
+
+<span class="code-comment"># Inner join (only matches)</span>
+<span class="code-tooltip" data-tip="MERGED: Stores the result of the inner join.">merged</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the result."><-</span> <span class="code-tooltip" data-tip="INNER_JOIN(): Keeps ONLY rows that match in BOTH datasets. Rows without a match in either dataset are dropped. In this case: USA and CHN match, DEU and JPN are dropped." class="code-function">inner_join</span>(<span class="code-tooltip" data-tip="GDP: First (left) dataset.">gdp</span>, <span class="code-tooltip" data-tip="POP: Second (right) dataset.">pop</span>, <span class="code-tooltip" data-tip="BY: Specifies the key columns to match on.">by</span> = <span class="code-tooltip" data-tip="C(): Creates a vector of column names to join by." class="code-function">c</span>(<span class="code-tooltip" data-tip="KEY COLUMNS: Match on both country and year." class="code-string">"country"</span>, <span class="code-string">"year"</span>))
+
+<span class="code-comment"># Left join (keep all from gdp)</span>
+<span class="code-tooltip" data-tip="MERGED_LEFT: Stores the left join result.">merged_left</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores result."><-</span> <span class="code-tooltip" data-tip="LEFT_JOIN(): Keeps ALL rows from the FIRST (left) dataset. Matching rows from the right are added; non-matching get NA. Result: USA, CHN (matched), DEU (with NA for population)." class="code-function">left_join</span>(<span class="code-tooltip" data-tip="GDP: Left dataset - all rows kept.">gdp</span>, <span class="code-tooltip" data-tip="POP: Right dataset - only matching rows added.">pop</span>, <span class="code-tooltip" data-tip="BY: Key columns.">by</span> = <span class="code-tooltip" data-tip="C(): Key column names." class="code-function">c</span>(<span class="code-string">"country"</span>, <span class="code-string">"year"</span>))
+
+<span class="code-comment"># Full/outer join (keep all)</span>
+<span class="code-tooltip" data-tip="MERGED_FULL: Stores the full join result.">merged_full</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores result."><-</span> <span class="code-tooltip" data-tip="FULL_JOIN(): Keeps ALL rows from BOTH datasets. Non-matching rows get NA for missing values. Result includes all 4 countries: USA, CHN (matched), DEU (gdp only), JPN (pop only)." class="code-function">full_join</span>(<span class="code-tooltip" data-tip="GDP: First dataset.">gdp</span>, <span class="code-tooltip" data-tip="POP: Second dataset.">pop</span>, <span class="code-tooltip" data-tip="BY: Key columns.">by</span> = <span class="code-tooltip" data-tip="C(): Key column names." class="code-function">c</span>(<span class="code-string">"country"</span>, <span class="code-string">"year"</span>))
+
+<span class="code-comment"># When key columns have different names</span>
+<span class="code-tooltip" data-tip="MERGED: Result when keys have different names.">merged</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores result."><-</span> <span class="code-tooltip" data-tip="LEFT_JOIN(): Using named vector for different column names." class="code-function">left_join</span>(<span class="code-tooltip" data-tip="GDP: Left dataset.">gdp</span>, <span class="code-tooltip" data-tip="POP: Right dataset.">pop</span>, <span class="code-tooltip" data-tip="BY: With named vector to map different column names.">by</span> = <span class="code-tooltip" data-tip="C(): Creates a named vector mapping left columns to right columns." class="code-function">c</span>(<span class="code-tooltip" data-tip="MAPPING: 'country' in gdp matches 'iso3' in pop. The left side is the gdp column name, right side is pop column name." class="code-string">"country"</span> = <span class="code-string">"iso3"</span>, <span class="code-tooltip" data-tip="MAPPING: 'year' in gdp matches 'yr' in pop." class="code-string">"year"</span> = <span class="code-string">"yr"</span>))
+
+<span class="code-comment"># Check merge quality</span>
+<span class="code-tooltip" data-tip="CAT(): Prints text to console." class="code-function">cat</span>(<span class="code-tooltip" data-tip="SPRINTF(): Creates formatted string with placeholders." class="code-function">sprintf</span>(<span class="code-tooltip" data-tip="FORMAT STRING: %d is placeholder for integers." class="code-string">"GDP: %d, Pop: %d, Merged: %d\n"</span>,
+    <span class="code-tooltip" data-tip="NROW(): Number of rows in gdp." class="code-function">nrow</span>(<span class="code-tooltip" data-tip="GDP: Original GDP dataset.">gdp</span>), <span class="code-tooltip" data-tip="NROW(): Number of rows in pop." class="code-function">nrow</span>(<span class="code-tooltip" data-tip="POP: Original population dataset.">pop</span>), <span class="code-tooltip" data-tip="NROW(): Number of rows after merge - compare to originals to verify!" class="code-function">nrow</span>(<span class="code-tooltip" data-tip="MERGED: The merged result.">merged</span>)))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="merge-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">Inner join result:</span>
+  country  year    gdp  population
+<span class="out-num">0</span>     USA  <span class="out-num">2020</span>  <span class="out-num">21000</span>         <span class="out-num">331</span>
+<span class="out-num">1</span>     CHN  <span class="out-num">2020</span>  <span class="out-num">14700</span>        <span class="out-num">1400</span>
+
+<span class="out-str">Left join result:</span>
+  country  year    gdp  population
+<span class="out-num">0</span>     USA  <span class="out-num">2020</span>  <span class="out-num">21000</span>       <span class="out-num">331.0</span>
+<span class="out-num">1</span>     CHN  <span class="out-num">2020</span>  <span class="out-num">14700</span>      <span class="out-num">1400.0</span>
+<span class="out-num">2</span>     DEU  <span class="out-num">2020</span>   <span class="out-num">3800</span>         <span class="out-yellow">NaN</span>  <span class="out-str">&lt;-- no match</span>
+
+GDP rows: <span class="out-num">3</span>, Pop rows: <span class="out-num">3</span>, Merged: <span class="out-num">2</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="merge-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. merge 1:1 country year using "population.dta"</span>
+
+    Result                      Number of obs
+    -----------------------------------------
+    Not matched                             2
+        from master                         1  (_merge==1)  <span class="out-yellow">&lt;-- DEU</span>
+        from using                          1  (_merge==2)  <span class="out-yellow">&lt;-- JPN</span>
+    Matched                                 2  (_merge==3)
+    -----------------------------------------
+
+<span class="out-str">. tab _merge</span>
+
+     _merge |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |          1       25.00       25.00
+          2 |          1       25.00       50.00
+          3 |          2       50.00      100.00
+------------+-----------------------------------
+      Total |          4      100.00</div>
+        </div>
+
+        <div class="output-simulation" data-output="merge-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">&gt; merged  # Inner join</span>
+<span class="out-green"># A tibble: 2 x 4</span>
+  country  year   gdp population
+  <span class="out-blue">&lt;chr&gt;</span>   <span class="out-blue">&lt;dbl&gt;</span> <span class="out-blue">&lt;dbl&gt;</span>      <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> USA      2020 21000        331
+<span class="out-num">2</span> CHN      2020 14700       1400
+
+<span class="out-str">&gt; merged_left  # Left join</span>
+<span class="out-green"># A tibble: 3 x 4</span>
+  country  year   gdp population
+<span class="out-num">1</span> USA      2020 21000        331
+<span class="out-num">2</span> CHN      2020 14700       1400
+<span class="out-num">3</span> DEU      2020  3800         <span class="out-yellow">NA</span>
+
+GDP: <span class="out-num">3</span>, Pop: <span class="out-num">3</span>, Merged: <span class="out-num">2</span></div>
+        </div>
+
+        <!-- Section 4: Reshaping -->
+        <h2>Reshaping Data: Wide vs Long</h2>
+
+        <div class="concept-box">
+          <h4>Wide vs Long Format</h4>
+          <p><strong>Wide format:</strong> One row per unit, with separate columns for each time period (e.g., gdp_2018, gdp_2019, gdp_2020).</p>
+          <p style="margin-bottom: 0;"><strong>Long format:</strong> Multiple rows per unit, with a single column for the variable and another for time period. <em>Most statistical analyses require long format.</em></p>
+        </div>
+
+        <!-- Interactive Reshape Visualizer -->
+        <div class="reshape-visualizer" style="background: #fffbeb; border: 2px solid #fbbf24; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin-top: 0; color: #b45309;">Interactive Reshape Visualizer</h4>
+          <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Click the button to toggle between wide and long format:</p>
+
+          <div class="reshape-container">
+            <!-- Wide Format (shown by default) -->
+            <div class="reshape-format wide-format" style="transition: all 0.3s ease;">
+              <div style="font-weight: 600; color: #b45309; margin-bottom: 0.5rem; text-align: center;">
+                <span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem;">Wide Format</span>
+              </div>
+              <div style="background: white; border-radius: 8px; padding: 1rem; overflow-x: auto; border: 2px solid #f59e0b;">
+                <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background: #f59e0b; color: white;">
+                      <th style="padding: 0.5rem; border: 1px solid #d97706;">country</th>
+                      <th style="padding: 0.5rem; border: 1px solid #d97706; background: #fbbf24;">gdp_2018</th>
+                      <th style="padding: 0.5rem; border: 1px solid #d97706; background: #fcd34d;">gdp_2019</th>
+                      <th style="padding: 0.5rem; border: 1px solid #d97706; background: #fde68a;">gdp_2020</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">USA</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fef3c7;">20500</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fef9c3;">21400</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fefce8;">21000</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">CHN</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fef3c7;">13900</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fef9c3;">14300</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #fefce8;">14700</td></tr>
+                  </tbody>
+                </table>
+                <p style="font-size: 0.8rem; color: #92400e; margin: 0.5rem 0 0 0; text-align: center;"><strong>2 rows × 4 columns</strong> — Each year is a separate column</p>
+              </div>
+              <p style="font-size: 0.85rem; color: #92400e; margin-top: 0.75rem; text-align: center;">Good for presentation, side-by-side comparison</p>
+            </div>
+
+            <!-- Long Format (hidden by default) -->
+            <div class="reshape-format long-format" style="display: none; transition: all 0.3s ease;">
+              <div style="font-weight: 600; color: #4338ca; margin-bottom: 0.5rem; text-align: center;">
+                <span style="background: #6366f1; color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem;">Long Format</span>
+              </div>
+              <div style="background: white; border-radius: 8px; padding: 1rem; overflow-x: auto; border: 2px solid #6366f1;">
+                <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background: #6366f1; color: white;">
+                      <th style="padding: 0.5rem; border: 1px solid #4f46e5;">country</th>
+                      <th style="padding: 0.5rem; border: 1px solid #4f46e5;">year</th>
+                      <th style="padding: 0.5rem; border: 1px solid #4f46e5;">gdp</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">USA</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #ede9fe;">2018</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">20500</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">USA</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #ddd6fe;">2019</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">21400</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">USA</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #c4b5fd;">2020</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">21000</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">CHN</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #ede9fe;">2018</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">13900</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">CHN</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #ddd6fe;">2019</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">14300</td></tr>
+                    <tr><td style="padding: 0.5rem; border: 1px solid #e5e7eb; font-weight: 600;">CHN</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb; background: #c4b5fd;">2020</td><td style="padding: 0.5rem; border: 1px solid #e5e7eb;">14700</td></tr>
+                  </tbody>
+                </table>
+                <p style="font-size: 0.8rem; color: #4338ca; margin: 0.5rem 0 0 0; text-align: center;"><strong>6 rows × 3 columns</strong> — Each observation is a row</p>
+              </div>
+              <p style="font-size: 0.85rem; color: #4338ca; margin-top: 0.75rem; text-align: center;">Required for most statistical analyses, ggplot2, panel data regressions</p>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 1rem;">
+            <button class="reshape-toggle-btn" style="padding: 0.75rem 2rem; border: none; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);">
+              <span class="reshape-btn-text">Convert to Long →</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="code-tabs" data-runnable="reshape-1">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Reshaping with pandas</span>
+<span class="code-tooltip" data-tip="IMPORT: Brings pandas into our program." class="code-keyword">import</span> <span class="code-tooltip" data-tip="PANDAS: Data manipulation library.">pandas</span> <span class="code-tooltip" data-tip="AS: Creates shortcut." class="code-keyword">as</span> <span class="code-tooltip" data-tip="PD: Standard abbreviation.">pd</span>
+
+<span class="code-comment"># Example wide data</span>
+<span class="code-tooltip" data-tip="WIDE: Variable storing data in WIDE format - where each time period is a separate column.">wide</span> <span class="code-tooltip" data-tip="EQUALS: Assigns the DataFrame.">=</span> <span class="code-tooltip" data-tip="PD.DATAFRAME(): Creates a new DataFrame.">pd.DataFrame</span>(<span class="code-tooltip" data-tip="DICTIONARY: Data in wide format - notice gdp_2018, gdp_2019, gdp_2020 are separate columns.">{
+    <span class="code-tooltip" data-tip="COUNTRY: Identifier column - stays the same during reshape." class="code-string">'country'</span>: [<span class="code-string">'USA'</span>, <span class="code-string">'CHN'</span>],
+    <span class="code-tooltip" data-tip="GDP_2018: GDP for year 2018 as its own column. This is 'wide' format." class="code-string">'gdp_2018'</span>: [<span class="code-number">20500</span>, <span class="code-number">13900</span>],
+    <span class="code-tooltip" data-tip="GDP_2019: GDP for year 2019 as its own column." class="code-string">'gdp_2019'</span>: [<span class="code-number">21400</span>, <span class="code-number">14300</span>],
+    <span class="code-tooltip" data-tip="GDP_2020: GDP for year 2020 as its own column." class="code-string">'gdp_2020'</span>: [<span class="code-number">21000</span>, <span class="code-number">14700</span>]
+}</span>)
+
+<span class="code-comment"># Wide to Long using melt()</span>
+<span class="code-tooltip" data-tip="LONG: Variable storing data in LONG format - where each observation (country-year) is its own row.">long</span> <span class="code-tooltip" data-tip="EQUALS: Assigns the result.">=</span> <span class="code-tooltip" data-tip="PD.MELT(): Converts wide format to long format. 'Melts' multiple columns into rows. Think of it as unstacking columns into rows.">pd.melt</span>(<span class="code-tooltip" data-tip="WIDE: The wide-format DataFrame to reshape.">wide</span>,
+    <span class="code-tooltip" data-tip="ID_VARS: Identifier variables - columns that should stay as columns (not be melted). These identify each row.">id_vars</span>=<span class="code-tooltip" data-tip="LIST: Columns to keep as-is. Here, 'country' stays as a column.">[<span class="code-string">'country'</span>]</span>,           <span class="code-comment"># Columns to keep</span>
+    <span class="code-tooltip" data-tip="VAR_NAME: Name for the new column that will contain the old column names (gdp_2018, gdp_2019, etc.).">var_name</span>=<span class="code-tooltip" data-tip="YEAR: The melted column names will go into a column called 'year'." class="code-string">'year'</span>,               <span class="code-comment"># Name for the new 'variable' column</span>
+    <span class="code-tooltip" data-tip="VALUE_NAME: Name for the new column that will contain the values (the actual GDP numbers).">value_name</span>=<span class="code-tooltip" data-tip="GDP: The values will go into a column called 'gdp'." class="code-string">'gdp'</span>               <span class="code-comment"># Name for the new 'value' column</span>
+)
+
+<span class="code-comment"># Clean up the year column (remove 'gdp_' prefix)</span>
+<span class="code-tooltip" data-tip="LONG['YEAR']: Accesses the 'year' column of the long DataFrame.">long[<span class="code-string">'year'</span>]</span> <span class="code-tooltip" data-tip="EQUALS: Overwrites the column with cleaned values.">=</span> <span class="code-tooltip" data-tip="LONG['YEAR']: The year column currently contains 'gdp_2018', 'gdp_2019', etc.">long[<span class="code-string">'year'</span>]</span><span class="code-tooltip" data-tip=".STR: Accesses string methods on the column.">.str</span><span class="code-tooltip" data-tip=".REPLACE(): Replaces text. Here removes 'gdp_' prefix to leave just the year.">.replace</span>(<span class="code-tooltip" data-tip="TEXT TO FIND: The prefix we want to remove." class="code-string">'gdp_'</span>, <span class="code-tooltip" data-tip="REPLACEMENT: Empty string - effectively deletes the prefix." class="code-string">''</span>)<span class="code-tooltip" data-tip=".ASTYPE(INT): Converts the string '2018' to integer 2018. Required for proper sorting and calculations.">.astype</span>(<span class="code-tooltip" data-tip="INT: Integer data type.">int</span>)
+
+<span class="code-comment"># Long to Wide using pivot()</span>
+<span class="code-tooltip" data-tip="WIDE_AGAIN: Converting back to wide format to demonstrate the reverse operation.">wide_again</span> <span class="code-tooltip" data-tip="EQUALS: Assigns the result.">=</span> <span class="code-tooltip" data-tip="LONG.PIVOT(): Converts long format to wide format. Spreads rows into columns. The reverse of melt().">long.pivot</span>(
+    <span class="code-tooltip" data-tip="INDEX: Column(s) that identify each row in the output. These become the row labels.">index</span>=<span class="code-tooltip" data-tip="COUNTRY: Each unique country gets one row in the wide format." class="code-string">'country'</span>,               <span class="code-comment"># Row identifier</span>
+    <span class="code-tooltip" data-tip="COLUMNS: Column whose unique values become new column names. Each year becomes its own column.">columns</span>=<span class="code-tooltip" data-tip="YEAR: Values 2018, 2019, 2020 become column names." class="code-string">'year'</span>,                <span class="code-comment"># Create columns from this</span>
+    <span class="code-tooltip" data-tip="VALUES: Column containing the data to fill the cells.">values</span>=<span class="code-tooltip" data-tip="GDP: The GDP values fill in the cells." class="code-string">'gdp'</span>                   <span class="code-comment"># Values to fill cells</span>
+)<span class="code-tooltip" data-tip=".RESET_INDEX(): Converts the row index back to a regular column. Without this, 'country' would be stuck as the index.">.reset_index</span>()
+
+<span class="code-tooltip" data-tip="PRINT(): Displays the result." class="code-keyword">print</span>(<span class="code-tooltip" data-tip="STRING: Label for the output." class="code-string">"Long format:"</span>)
+<span class="code-tooltip" data-tip="PRINT(): Shows the long-format data." class="code-keyword">print</span>(<span class="code-tooltip" data-tip="LONG: The reshaped data with one row per country-year.">long</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Reshaping data</span>
+
+<span class="code-comment">* Example: Start with wide data</span>
+<span class="code-comment">* Variables: country, gdp2018, gdp2019, gdp2020</span>
+
+<span class="code-comment">* Wide to Long</span>
+<span class="code-tooltip" data-tip="RESHAPE: Stata's command to convert between wide and long formats. One of the most important data manipulation commands. 'long' specifies the direction of conversion." class="code-keyword">reshape</span> <span class="code-tooltip" data-tip="LONG: Converts FROM wide TO long format. Multiple columns (gdp2018, gdp2019, gdp2020) become multiple rows with a single 'gdp' column and a new 'year' column.">long</span> <span class="code-tooltip" data-tip="GDP: The 'stub' - the common prefix of the columns to reshape. Stata will look for variables starting with 'gdp' followed by numbers (gdp2018, gdp2019, etc.).">gdp</span><span class="code-tooltip" data-tip="COMMA: Separates the stub from the options.">,</span> <span class="code-tooltip" data-tip="I(): Identifier variable(s) - the columns that uniquely identify each unit (like country). These stay as regular columns and appear in every row for that unit.">i</span>(<span class="code-tooltip" data-tip="COUNTRY: The identifier variable. Each country will have multiple rows (one per year) in long format.">country</span>) <span class="code-tooltip" data-tip="J(): The 'j' variable will contain the suffixes from the column names. The numbers 2018, 2019, 2020 from gdp2018, gdp2019, gdp2020 go into this new variable.">j</span>(<span class="code-tooltip" data-tip="YEAR: Name of the new variable that will contain the year values (2018, 2019, 2020 extracted from column names).">year</span>)
+
+<span class="code-comment">* i() = identifier variables (rows)</span>
+<span class="code-comment">* j() = new variable to hold the suffix (2018, 2019, 2020)</span>
+<span class="code-comment">* 'gdp' = stub of the variables to reshape</span>
+
+<span class="code-comment">* Long to Wide</span>
+<span class="code-tooltip" data-tip="RESHAPE: Same command, different direction." class="code-keyword">reshape</span> <span class="code-tooltip" data-tip="WIDE: Converts FROM long TO wide format. Multiple rows become multiple columns. Each unique value in 'year' becomes a separate column.">wide</span> <span class="code-tooltip" data-tip="GDP: The variable to spread into columns. Will become gdp2018, gdp2019, gdp2020.">gdp</span><span class="code-tooltip" data-tip="COMMA: Separator before options.">,</span> <span class="code-tooltip" data-tip="I(): Identifier - each unique country gets one row in wide format.">i</span>(<span class="code-tooltip" data-tip="COUNTRY: Row identifier.">country</span>) <span class="code-tooltip" data-tip="J(): Variable whose values become column suffixes.">j</span>(<span class="code-tooltip" data-tip="YEAR: Values 2018, 2019, 2020 become suffixes in new column names.">year</span>)
+
+<span class="code-comment">* Verify the reshape</span>
+<span class="code-tooltip" data-tip="LIST: Displays the data. Essential for verifying the reshape worked correctly." class="code-keyword">list</span> <span class="code-tooltip" data-tip="IN 1/6: Shows first 6 rows. Check that the structure looks right.">in 1/6</span>
+
+<span class="code-comment">* Multiple variables at once</span>
+<span class="code-comment">* If you have gdp2018 gdp2019 pop2018 pop2019:</span>
+<span class="code-tooltip" data-tip="RESHAPE: Can reshape multiple variable groups at once." class="code-keyword">reshape</span> <span class="code-tooltip" data-tip="LONG: Converting to long format.">long</span> <span class="code-tooltip" data-tip="GDP POP: Multiple stubs! Stata finds gdp2018, gdp2019 AND pop2018, pop2019 and reshapes all of them together. Both become single columns.">gdp pop</span><span class="code-tooltip" data-tip="COMMA: Separator.">,</span> <span class="code-tooltip" data-tip="I(): Identifier variable.">i</span>(<span class="code-tooltip" data-tip="COUNTRY: Row identifier.">country</span>) <span class="code-tooltip" data-tip="J(): Year variable from suffixes.">j</span>(<span class="code-tooltip" data-tip="YEAR: Holds the year values.">year</span>)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Reshaping with tidyr</span>
+<span class="code-tooltip" data-tip="LIBRARY(): Loads tidyverse which includes tidyr for reshaping functions." class="code-function">library</span>(<span class="code-tooltip" data-tip="TIDYVERSE: Includes tidyr with pivot_longer() and pivot_wider() functions.">tidyverse</span>)
+
+<span class="code-comment"># Example wide data</span>
+<span class="code-tooltip" data-tip="WIDE: Variable storing data in wide format - years as columns.">wide</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the tibble."><-</span> <span class="code-tooltip" data-tip="TIBBLE(): Creates a modern data frame." class="code-function">tibble</span>(
+    <span class="code-tooltip" data-tip="COUNTRY: Identifier column.">country</span> = <span class="code-tooltip" data-tip="C(): Creates vector of countries." class="code-function">c</span>(<span class="code-string">"USA"</span>, <span class="code-string">"CHN"</span>),
+    <span class="code-tooltip" data-tip="GDP_2018: GDP for 2018 as separate column (wide format).">gdp_2018</span> = <span class="code-tooltip" data-tip="C(): GDP values for 2018." class="code-function">c</span>(<span class="code-number">20500</span>, <span class="code-number">13900</span>),
+    <span class="code-tooltip" data-tip="GDP_2019: GDP for 2019 as separate column.">gdp_2019</span> = <span class="code-tooltip" data-tip="C(): GDP values for 2019." class="code-function">c</span>(<span class="code-number">21400</span>, <span class="code-number">14300</span>),
+    <span class="code-tooltip" data-tip="GDP_2020: GDP for 2020 as separate column.">gdp_2020</span> = <span class="code-tooltip" data-tip="C(): GDP values for 2020." class="code-function">c</span>(<span class="code-number">21000</span>, <span class="code-number">14700</span>)
+)
+
+<span class="code-comment"># Wide to Long using pivot_longer()</span>
+<span class="code-tooltip" data-tip="LONG: Variable storing data in long format - one row per observation.">long</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the result."><-</span> <span class="code-tooltip" data-tip="WIDE: Starting with the wide-format data.">wide</span> <span class="code-tooltip" data-tip="PIPE OPERATOR: %>% passes the result on the left as the first argument to the function on the right. Read as 'then'. Makes code read left-to-right instead of inside-out.">%>%</span>
+  <span class="code-tooltip" data-tip="PIVOT_LONGER(): Converts wide to long format. 'Lengthens' data by turning columns into rows. The modern replacement for gather()." class="code-function">pivot_longer</span>(
+    <span class="code-tooltip" data-tip="COLS: Which columns to pivot (turn into rows). Can use helper functions like starts_with(), ends_with(), contains(), or column ranges like col1:col5.">cols</span> = <span class="code-tooltip" data-tip="STARTS_WITH(): Helper function that selects all columns starting with 'gdp_'. Finds gdp_2018, gdp_2019, gdp_2020." class="code-function">starts_with</span>(<span class="code-tooltip" data-tip="PREFIX: Find columns starting with 'gdp_'." class="code-string">"gdp_"</span>),   <span class="code-comment"># Columns to pivot</span>
+    <span class="code-tooltip" data-tip="NAMES_TO: Name of the new column that will contain the old column names.">names_to</span> = <span class="code-tooltip" data-tip="YEAR: Old column names (gdp_2018, etc.) go into a column called 'year'." class="code-string">"year"</span>,             <span class="code-comment"># New column for names</span>
+    <span class="code-tooltip" data-tip="VALUES_TO: Name of the new column that will contain the values.">values_to</span> = <span class="code-tooltip" data-tip="GDP: The actual GDP numbers go into a column called 'gdp'." class="code-string">"gdp"</span>,             <span class="code-comment"># New column for values</span>
+    <span class="code-tooltip" data-tip="NAMES_PREFIX: Text to remove from the beginning of column names. 'gdp_2018' becomes '2018' in the year column.">names_prefix</span> = <span class="code-tooltip" data-tip="PREFIX TO REMOVE: Strips 'gdp_' so you get clean year values." class="code-string">"gdp_"</span>          <span class="code-comment"># Remove this prefix</span>
+  ) <span class="code-tooltip" data-tip="PIPE: Passes result to next function.">%>%</span>
+  <span class="code-tooltip" data-tip="MUTATE(): Creates or modifies columns. Here, converts year from character to integer." class="code-function">mutate</span>(<span class="code-tooltip" data-tip="YEAR: The column to modify.">year</span> = <span class="code-tooltip" data-tip="AS.INTEGER(): Converts text '2018' to number 2018. Important for sorting and calculations." class="code-function">as.integer</span>(<span class="code-tooltip" data-tip="YEAR: Current character values.">year</span>))
+
+<span class="code-comment"># Long to Wide using pivot_wider()</span>
+<span class="code-tooltip" data-tip="WIDE_AGAIN: Converting back to wide format.">wide_again</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores result."><-</span> <span class="code-tooltip" data-tip="LONG: Starting with long-format data.">long</span> <span class="code-tooltip" data-tip="PIPE: Passes to next function.">%>%</span>
+  <span class="code-tooltip" data-tip="PIVOT_WIDER(): Converts long to wide format. 'Widens' data by turning rows into columns. The modern replacement for spread()." class="code-function">pivot_wider</span>(
+    <span class="code-tooltip" data-tip="NAMES_FROM: Column whose unique values become new column names.">names_from</span> = <span class="code-tooltip" data-tip="YEAR: Values 2018, 2019, 2020 become column names.">year</span>,             <span class="code-comment"># Column to spread</span>
+    <span class="code-tooltip" data-tip="VALUES_FROM: Column containing the data that fills the new cells.">values_from</span> = <span class="code-tooltip" data-tip="GDP: These values fill in the cells of the new columns.">gdp</span>,             <span class="code-comment"># Values to fill</span>
+    <span class="code-tooltip" data-tip="NAMES_PREFIX: Text to add before new column names. Turns '2018' into 'gdp_2018'.">names_prefix</span> = <span class="code-tooltip" data-tip="PREFIX TO ADD: Creates column names like gdp_2018, gdp_2019." class="code-string">"gdp_"</span>          <span class="code-comment"># Add prefix to column names</span>
+  )
+
+<span class="code-tooltip" data-tip="PRINT(): Displays the long-format result." class="code-function">print</span>(<span class="code-tooltip" data-tip="LONG: The reshaped data.">long</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="reshape-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Long format:
+  country  year    gdp
+<span class="out-num">0</span>     USA  <span class="out-num">2018</span>  <span class="out-num">20500</span>
+<span class="out-num">1</span>     CHN  <span class="out-num">2018</span>  <span class="out-num">13900</span>
+<span class="out-num">2</span>     USA  <span class="out-num">2019</span>  <span class="out-num">21400</span>
+<span class="out-num">3</span>     CHN  <span class="out-num">2019</span>  <span class="out-num">14300</span>
+<span class="out-num">4</span>     USA  <span class="out-num">2020</span>  <span class="out-num">21000</span>
+<span class="out-num">5</span>     CHN  <span class="out-num">2020</span>  <span class="out-num">14700</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="reshape-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">. reshape long gdp, i(country) j(year)</span>
+(j = 2018 2019 2020)
+
+Data                               Wide   ->   Long
+-----------------------------------------------------------------------------
+Number of observations                2   ->       6
+Number of variables                   4   ->       3
+j variable (3 values)                     ->   year
+xij variables:
+                     gdp2018 gdp2019 gdp2020   ->   gdp
+-----------------------------------------------------------------------------
+
+<span class="out-str">. list</span>
+
+     +-----------------------+
+     | country   year    gdp |
+     |-----------------------|
+  1. |     USA   2018  20500 |
+  2. |     USA   2019  21400 |
+  3. |     USA   2020  21000 |
+  4. |     CHN   2018  13900 |
+  5. |     CHN   2019  14300 |
+  6. |     CHN   2020  14700 |
+     +-----------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="reshape-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">&gt; print(long)</span>
+<span class="out-green"># A tibble: 6 x 3</span>
+  country  year   gdp
+  <span class="out-blue">&lt;chr&gt;</span>   <span class="out-blue">&lt;int&gt;</span> <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> USA      2018 20500
+<span class="out-num">2</span> USA      2019 21400
+<span class="out-num">3</span> USA      2020 21000
+<span class="out-num">4</span> CHN      2018 13900
+<span class="out-num">5</span> CHN      2019 14300
+<span class="out-num">6</span> CHN      2020 14700</div>
+        </div>
+
+        <!-- Exercise -->
+        <h2 id="exercises">Exercise</h2>
+
+        <div class="interactive-exercise" data-exercise="2a.1">
+          <h4>Exercise 2a.1: Data Import and Merging</h4>
+          <p>Practice the core data import skills. Complete these tasks:</p>
+          <ol>
+            <li>Load a CSV file into a dataframe</li>
+            <li>Perform a merge/join operation on two datasets</li>
+            <li>Reshape data from wide to long format (or vice versa)</li>
+          </ol>
+
+          <div class="exercise-editor">
+            <div class="editor-tabs">
+              <button class="lang-btn active" data-lang="python">Python</button>
+              <button class="lang-btn" data-lang="stata">Stata</button>
+              <button class="lang-btn" data-lang="r">R</button>
+            </div>
+
+            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
+# Task 1: Load a CSV file
+# Task 2: Merge two datasets
+# Task 3: Reshape data
+"></textarea>
+
+            <textarea class="code-editor" data-lang="stata" style="display:none;" placeholder="* Write your Stata code here
+* Task 1: Load a CSV file
+* Task 2: Merge two datasets
+* Task 3: Reshape data
+"></textarea>
+
+            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
+# Task 1: Load a CSV file
+# Task 2: Merge two datasets
+# Task 3: Reshape data
+"></textarea>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn-check-score">Check My Score</button>
+            <div class="score-display" style="display:none;">
+              <div class="score-circle">
+                <span class="score-value">0</span>
+                <span class="score-label">/100</span>
+              </div>
+              <div class="score-feedback"></div>
+            </div>
+            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
+          </div>
+
+          <div class="solution-steps" style="display:none;">
+            <div class="solution-header">
+              <h5>Solution</h5>
+              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
+            </div>
+
+            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Load a CSV file using pandas</div>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="IMPORT: Brings external library into your program." class="code-keyword">import</span> <span class="code-tooltip" data-tip="PANDAS: The essential data manipulation library for Python.">pandas</span> <span class="code-tooltip" data-tip="AS: Creates a shortcut name." class="code-keyword">as</span> <span class="code-tooltip" data-tip="PD: Standard abbreviation for pandas.">pd</span>
+
+<span class="code-comment"># Load CSV file</span>
+<span class="code-tooltip" data-tip="DF: Variable name for your DataFrame (data table).">df</span> = <span class="code-tooltip" data-tip="PD.READ_CSV(): Loads a CSV file into a DataFrame. Pass the file path as a string.">pd.read_csv</span>(<span class="code-tooltip" data-tip="FILE PATH: Location of your CSV file." class="code-string">"data.csv"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Merge two datasets using pd.merge()</div>
+              <pre class="step-code"><code><span class="code-comment"># Merge datasets on a key column</span>
+<span class="code-tooltip" data-tip="MERGED: Variable to store the combined dataset.">merged</span> = <span class="code-tooltip" data-tip="PD.MERGE(): Combines two DataFrames based on matching key columns.">pd.merge</span>(<span class="code-tooltip" data-tip="DF1: First DataFrame.">df1</span>, <span class="code-tooltip" data-tip="DF2: Second DataFrame.">df2</span>, <span class="code-tooltip" data-tip="ON: The key column(s) to match on.">on</span>=<span class="code-tooltip" data-tip="ID: Column name used for matching rows." class="code-string">"id"</span>)
+<span class="code-comment"># Or with different join types:</span>
+<span class="code-tooltip" data-tip="MERGED: Result of left join.">merged</span> = <span class="code-tooltip" data-tip="PD.MERGE(): With how='left' keeps all rows from df1.">pd.merge</span>(<span class="code-tooltip" data-tip="DF1: Left DataFrame - all rows kept.">df1</span>, <span class="code-tooltip" data-tip="DF2: Right DataFrame.">df2</span>, <span class="code-tooltip" data-tip="ON: Key column.">on</span>=<span class="code-string">"id"</span>, <span class="code-tooltip" data-tip="HOW: Join type - 'left', 'right', 'inner', or 'outer'.">how</span>=<span class="code-tooltip" data-tip="LEFT: Keeps all rows from left DataFrame." class="code-string">"left"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Reshape data using melt() or pivot()</div>
+              <pre class="step-code"><code><span class="code-comment"># Wide to long</span>
+<span class="code-tooltip" data-tip="LONG: Variable storing long-format data.">long</span> = <span class="code-tooltip" data-tip="PD.MELT(): Converts wide format to long format - columns become rows.">pd.melt</span>(<span class="code-tooltip" data-tip="WIDE: Wide-format DataFrame to reshape.">wide</span>, <span class="code-tooltip" data-tip="ID_VARS: Columns to keep as identifiers.">id_vars</span>=[<span class="code-string">"country"</span>], <span class="code-tooltip" data-tip="VAR_NAME: Name for the new column holding old column names.">var_name</span>=<span class="code-string">"year"</span>)
+
+<span class="code-comment"># Long to wide</span>
+<span class="code-tooltip" data-tip="WIDE: Variable storing wide-format result.">wide</span> = <span class="code-tooltip" data-tip="LONG.PIVOT(): Converts long format to wide - rows become columns.">long.pivot</span>(<span class="code-tooltip" data-tip="INDEX: Column that identifies rows.">index</span>=<span class="code-string">"country"</span>, <span class="code-tooltip" data-tip="COLUMNS: Values become new column names.">columns</span>=<span class="code-string">"year"</span>, <span class="code-tooltip" data-tip="VALUES: Data to fill the cells.">values</span>=<span class="code-string">"gdp"</span>)</code></pre>
+            </div>
+
+            <div class="solution-step" data-lang="stata" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Load a CSV file using import delimited</div>
+              <pre class="step-code"><code><span class="code-comment">* Load CSV file</span>
+<span class="code-tooltip" data-tip="IMPORT DELIMITED: Stata command to load CSV files." class="code-keyword">import delimited</span> <span class="code-tooltip" data-tip="FILE PATH: Location of your CSV file." class="code-string">"data.csv"</span><span class="code-tooltip" data-tip="COMMA: Separates path from options.">,</span> <span class="code-tooltip" data-tip="CLEAR: Removes existing data before loading.">clear</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Merge datasets using merge command</div>
+              <pre class="step-code"><code><span class="code-comment">* Merge with another dataset</span>
+<span class="code-tooltip" data-tip="MERGE: Combines two datasets based on key variables." class="code-keyword">merge</span> <span class="code-tooltip" data-tip="1:1: One-to-one match type.">1:1</span> <span class="code-tooltip" data-tip="ID: Key variable for matching.">id</span> <span class="code-tooltip" data-tip="USING: Introduces the second dataset." class="code-keyword">using</span> <span class="code-tooltip" data-tip="FILE PATH: The dataset to merge in." class="code-string">"other_data.dta"</span>
+<span class="code-tooltip" data-tip="TAB: Creates frequency table to check merge results." class="code-keyword">tab</span> <span class="code-tooltip" data-tip="_MERGE: Shows match status (1=master only, 2=using only, 3=matched).">_merge</span></code></pre>
+            </div>
+            <div class="solution-step" data-lang="stata" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Reshape data using reshape command</div>
+              <pre class="step-code"><code><span class="code-comment">* Reshape wide to long</span>
+<span class="code-tooltip" data-tip="RESHAPE: Converts between wide and long formats." class="code-keyword">reshape</span> <span class="code-tooltip" data-tip="LONG: Convert TO long format.">long</span> <span class="code-tooltip" data-tip="GDP: The variable stub to reshape.">gdp</span><span class="code-tooltip" data-tip="COMMA: Separates stub from options.">,</span> <span class="code-tooltip" data-tip="I(): Identifier variable.">i</span>(<span class="code-tooltip" data-tip="COUNTRY: Row identifier.">country</span>) <span class="code-tooltip" data-tip="J(): New variable for column suffixes.">j</span>(<span class="code-tooltip" data-tip="YEAR: Will hold the year values.">year</span>)</code></pre>
+            </div>
+
+            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
+              <div class="step-description">Task 1: Load a CSV file using read_csv()</div>
+              <pre class="step-code"><code><span class="code-tooltip" data-tip="LIBRARY(): Loads a package into R." class="code-function">library</span>(<span class="code-tooltip" data-tip="TIDYVERSE: Collection of data science packages including readr.">tidyverse</span>)
+
+<span class="code-comment"># Load CSV file</span>
+<span class="code-tooltip" data-tip="DF: Variable name for your data frame.">df</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores the result in df."><-</span> <span class="code-tooltip" data-tip="READ_CSV(): Loads CSV files into R as a tibble." class="code-function">read_csv</span>(<span class="code-tooltip" data-tip="FILE PATH: Location of your CSV file." class="code-string">"data.csv"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
+              <div class="step-description">Task 2: Merge datasets using join functions</div>
+              <pre class="step-code"><code><span class="code-comment"># Merge datasets</span>
+<span class="code-tooltip" data-tip="MERGED: Variable to store merged result.">merged</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores result."><-</span> <span class="code-tooltip" data-tip="INNER_JOIN(): Keeps only matching rows from both datasets." class="code-function">inner_join</span>(<span class="code-tooltip" data-tip="DF1: First data frame.">df1</span>, <span class="code-tooltip" data-tip="DF2: Second data frame.">df2</span>, <span class="code-tooltip" data-tip="BY: Key column(s) for matching.">by</span> = <span class="code-tooltip" data-tip="ID: Column name to match on." class="code-string">"id"</span>)
+<span class="code-comment"># Or left join:</span>
+<span class="code-tooltip" data-tip="MERGED: Left join result.">merged</span> <- <span class="code-tooltip" data-tip="LEFT_JOIN(): Keeps all rows from first dataset." class="code-function">left_join</span>(<span class="code-tooltip" data-tip="DF1: Left dataset - all rows kept.">df1</span>, <span class="code-tooltip" data-tip="DF2: Right dataset.">df2</span>, <span class="code-tooltip" data-tip="BY: Key column.">by</span> = <span class="code-string">"id"</span>)</code></pre>
+            </div>
+            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
+              <div class="step-description">Task 3: Reshape data using pivot functions</div>
+              <pre class="step-code"><code><span class="code-comment"># Wide to long</span>
+<span class="code-tooltip" data-tip="LONG: Variable storing long-format data.">long</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores result."><-</span> <span class="code-tooltip" data-tip="WIDE: Wide-format data to reshape.">wide</span> <span class="code-tooltip" data-tip="PIPE: Passes data to next function.">%>%</span> <span class="code-tooltip" data-tip="PIVOT_LONGER(): Converts wide to long format." class="code-function">pivot_longer</span>(<span class="code-tooltip" data-tip="COLS: Columns to pivot (all except country).">cols</span> = <span class="code-tooltip" data-tip="-COUNTRY: Select all columns EXCEPT country.">-country</span>, <span class="code-tooltip" data-tip="NAMES_TO: New column for old column names.">names_to</span> = <span class="code-string">"year"</span>)
+
+<span class="code-comment"># Long to wide</span>
+<span class="code-tooltip" data-tip="WIDE: Variable storing wide-format result.">wide</span> <span class="code-tooltip" data-tip="ASSIGNMENT: Stores result."><-</span> <span class="code-tooltip" data-tip="LONG: Long-format data to reshape.">long</span> <span class="code-tooltip" data-tip="PIPE: Passes data to next function.">%>%</span> <span class="code-tooltip" data-tip="PIVOT_WIDER(): Converts long to wide format." class="code-function">pivot_wider</span>(<span class="code-tooltip" data-tip="NAMES_FROM: Column whose values become new column names.">names_from</span> = <span class="code-tooltip" data-tip="YEAR: Year values become column names.">year</span>, <span class="code-tooltip" data-tip="VALUES_FROM: Column containing data for cells.">values_from</span> = <span class="code-tooltip" data-tip="VALUE: The data values to fill cells.">value</span>)</code></pre>
+            </div>
+
+            <div class="solution-navigation">
+              <button class="btn-prev-step" disabled>Previous</button>
+              <button class="btn-next-step">Next Step</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-footer">
+          <a href="02-data-harnessing.html" class="nav-link prev">Module 2: Data Harnessing</a>
+          <a href="02b-apis.html" class="nav-link next">Working with APIs (02b)</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>I can help with questions about loading data, merging, reshaping, or any course material.</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // =============================================
+    // MERGE VISUALIZER
+    // =============================================
+    const mergeData = {
+      inner: {
+        rows: [
+          { country: 'USA', gdp: '21000', pop: '331' },
+          { country: 'CHN', gdp: '14700', pop: '1400' }
+        ],
+        explanation: '<strong>Inner join:</strong> Only rows with matching keys in BOTH datasets are kept (2 rows).',
+        leftHighlight: ['USA', 'CHN'],
+        rightHighlight: ['USA', 'CHN']
+      },
+      left: {
+        rows: [
+          { country: 'USA', gdp: '21000', pop: '331' },
+          { country: 'CHN', gdp: '14700', pop: '1400' },
+          { country: 'DEU', gdp: '3800', pop: '<span style="color: #dc2626; font-style: italic;">NULL</span>' }
+        ],
+        explanation: '<strong>Left join:</strong> ALL rows from left dataset kept, with matches from right where available (3 rows). DEU has no population data.',
+        leftHighlight: ['USA', 'CHN', 'DEU'],
+        rightHighlight: ['USA', 'CHN']
+      },
+      right: {
+        rows: [
+          { country: 'USA', gdp: '21000', pop: '331' },
+          { country: 'CHN', gdp: '14700', pop: '1400' },
+          { country: 'JPN', gdp: '<span style="color: #dc2626; font-style: italic;">NULL</span>', pop: '126' }
+        ],
+        explanation: '<strong>Right join:</strong> ALL rows from right dataset kept, with matches from left where available (3 rows). JPN has no GDP data.',
+        leftHighlight: ['USA', 'CHN'],
+        rightHighlight: ['USA', 'CHN', 'JPN']
+      },
+      outer: {
+        rows: [
+          { country: 'USA', gdp: '21000', pop: '331' },
+          { country: 'CHN', gdp: '14700', pop: '1400' },
+          { country: 'DEU', gdp: '3800', pop: '<span style="color: #dc2626; font-style: italic;">NULL</span>' },
+          { country: 'JPN', gdp: '<span style="color: #dc2626; font-style: italic;">NULL</span>', pop: '126' }
+        ],
+        explanation: '<strong>Outer (full) join:</strong> ALL rows from BOTH datasets kept, with NULLs where no match (4 rows).',
+        leftHighlight: ['USA', 'CHN', 'DEU'],
+        rightHighlight: ['USA', 'CHN', 'JPN']
+      }
+    };
+
+    document.querySelectorAll('.merge-type-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const type = this.dataset.type;
+        const data = mergeData[type];
+
+        // Update button styles
+        document.querySelectorAll('.merge-type-btn').forEach(b => {
+          b.style.background = 'white';
+          b.style.color = '#2563eb';
+        });
+        this.style.background = '#2563eb';
+        this.style.color = 'white';
+
+        // Update result type label
+        document.querySelector('.merge-result-type').textContent = this.textContent;
+
+        // Update result table
+        const tbody = document.querySelector('.merge-result-body');
+        tbody.innerHTML = data.rows.map(row =>
+          `<tr><td>${row.country}</td><td>${row.gdp}</td><td>${row.pop}</td></tr>`
+        ).join('');
+
+        // Update explanation
+        document.querySelector('.merge-explanation').innerHTML = data.explanation;
+
+        // Highlight rows in source tables
+        document.querySelectorAll('.merge-diagram .merge-row').forEach(row => {
+          row.style.opacity = '0.3';
+          row.style.background = 'transparent';
+        });
+
+        // Highlight left table rows
+        data.leftHighlight.forEach(key => {
+          const leftRow = document.querySelector(`.dataset-box:first-child .merge-row[data-key="${key}"]`);
+          if (leftRow) {
+            leftRow.style.opacity = '1';
+            leftRow.style.background = '#dbeafe';
+          }
+        });
+
+        // Highlight right table rows
+        data.rightHighlight.forEach(key => {
+          const rightRow = document.querySelector(`.dataset-box:last-child .merge-row[data-key="${key}"]`);
+          if (rightRow) {
+            rightRow.style.opacity = '1';
+            rightRow.style.background = '#dcfce7';
+          }
+        });
+      });
+    });
+
+    // =============================================
+    // RESHAPE VISUALIZER
+    // =============================================
+    let isLongFormat = false;
+    const reshapeBtn = document.querySelector('.reshape-toggle-btn');
+    const reshapeBtnText = document.querySelector('.reshape-btn-text');
+    const wideFormat = document.querySelector('.wide-format');
+    const longFormat = document.querySelector('.long-format');
+
+    if (reshapeBtn) {
+      reshapeBtn.addEventListener('click', function() {
+        isLongFormat = !isLongFormat;
+
+        if (isLongFormat) {
+          // Show long format, hide wide
+          wideFormat.style.display = 'none';
+          longFormat.style.display = 'block';
+          reshapeBtnText.textContent = 'Convert to Wide ←';
+          reshapeBtn.style.background = 'linear-gradient(135deg, #6366f1, #4f46e5)';
+        } else {
+          // Show wide format, hide long
+          wideFormat.style.display = 'block';
+          longFormat.style.display = 'none';
+          reshapeBtnText.textContent = 'Convert to Long →';
+          reshapeBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        }
+      });
+    }
+
+    // =============================================
+    // Run button handler
+    // =============================================
+    document.querySelectorAll('.run-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const lang = this.dataset.lang;
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+        document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+          out.classList.remove('visible');
+        });
+        const output = document.querySelector(`.output-simulation[data-output="${outputId}"][data-lang="${lang}"]`);
+        if (output) {
+          output.classList.add('visible');
+          output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    });
+
+    document.querySelectorAll('.close-output').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('.output-simulation').classList.remove('visible');
+      });
+    });
+
+    document.querySelectorAll('.code-tabs .tab-button').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const codeBlock = this.closest('.code-tabs');
+        const outputId = codeBlock.dataset.runnable;
+        if (outputId) {
+          document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+            out.classList.remove('visible');
+          });
+        }
+      });
+    });
+
+    // Exercise handler
+    const exercisePatterns = {
+      '2a.1': {
+        python: {
+          patterns: [
+            { regex: /read_csv\s*\(|read_table\s*\(|pd\.read_csv|pandas\.read_csv/i, points: 34, description: 'Load CSV file' },
+            { regex: /\.merge\s*\(|pd\.merge|\.join\s*\(/i, points: 33, description: 'Merge datasets' },
+            { regex: /\.melt\s*\(|pd\.melt|\.pivot\s*\(|pivot_table/i, points: 33, description: 'Reshape data' }
+          ]
+        },
+        stata: {
+          patterns: [
+            { regex: /import\s+delimited|insheet/i, points: 34, description: 'Load CSV file' },
+            { regex: /merge\s+[1mn]:[1mn]/i, points: 33, description: 'Merge datasets' },
+            { regex: /reshape\s+(long|wide)/i, points: 33, description: 'Reshape data' }
+          ]
+        },
+        r: {
+          patterns: [
+            { regex: /read_csv\s*\(|read\.csv\s*\(/i, points: 34, description: 'Load CSV file' },
+            { regex: /inner_join|left_join|right_join|full_join|merge\s*\(/i, points: 33, description: 'Merge datasets' },
+            { regex: /pivot_longer|pivot_wider|gather\s*\(|spread\s*\(/i, points: 33, description: 'Reshape data' }
+          ]
+        }
+      }
+    };
+
+    document.querySelectorAll('.interactive-exercise').forEach(exercise => {
+      const exerciseId = exercise.dataset.exercise;
+      let currentLang = 'python';
+      let currentStep = 0;
+      let hasCheckedScore = false;
+
+      exercise.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const lang = this.dataset.lang;
+          currentLang = lang;
+          exercise.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          exercise.querySelectorAll('.code-editor').forEach(editor => {
+            editor.style.display = editor.dataset.lang === lang ? 'block' : 'none';
+          });
+          if (hasCheckedScore) resetSolutionSteps();
+        });
+      });
+
+      const checkBtn = exercise.querySelector('.btn-check-score');
+      const scoreDisplay = exercise.querySelector('.score-display');
+      const scoreValue = exercise.querySelector('.score-value');
+      const scoreFeedback = exercise.querySelector('.score-feedback');
+      const showSolutionBtn = exercise.querySelector('.btn-show-solution');
+
+      checkBtn.addEventListener('click', function() {
+        const editor = exercise.querySelector(`.code-editor[data-lang="${currentLang}"]`);
+        const code = editor.value;
+        const patterns = exercisePatterns[exerciseId]?.[currentLang]?.patterns || [];
+        let score = 0;
+        let matched = [];
+        let missed = [];
+        patterns.forEach(p => {
+          if (p.regex.test(code)) { score += p.points; matched.push(p.description); }
+          else { missed.push(p.description); }
+        });
+        score = Math.min(100, score);
+        scoreValue.textContent = score;
+        scoreValue.className = 'score-value';
+        if (score >= 80) scoreValue.classList.add('score-high');
+        else if (score >= 50) scoreValue.classList.add('score-medium');
+        else scoreValue.classList.add('score-low');
+        if (score === 100) scoreFeedback.textContent = 'Perfect! All tasks completed correctly.';
+        else if (score >= 70) scoreFeedback.textContent = `Good work! Missing: ${missed.join(', ')}.`;
+        else if (score >= 40) scoreFeedback.textContent = `Getting there. Missing: ${missed.join(', ')}.`;
+        else scoreFeedback.textContent = `Keep trying! Check: ${missed.slice(0, 2).join(', ')}.`;
+        scoreDisplay.style.display = 'flex';
+        showSolutionBtn.style.display = 'inline-block';
+        hasCheckedScore = true;
+      });
+
+      const solutionSteps = exercise.querySelector('.solution-steps');
+      const prevBtn = exercise.querySelector('.btn-prev-step');
+      const nextBtn = exercise.querySelector('.btn-next-step');
+      const currentStepEl = exercise.querySelector('.current-step');
+      const totalStepsEl = exercise.querySelector('.total-steps');
+
+      function resetSolutionSteps() {
+        currentStep = 0;
+        currentStepEl.textContent = '0';
+        exercise.querySelectorAll('.solution-step').forEach(step => { step.style.display = 'none'; });
+        updateNavButtons();
+      }
+
+      function updateNavButtons() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        totalStepsEl.textContent = totalSteps;
+        prevBtn.disabled = currentStep === 0;
+        nextBtn.disabled = currentStep >= totalSteps;
+        nextBtn.textContent = currentStep >= totalSteps ? 'Complete' : 'Next Step';
+      }
+
+      function showStep(stepNum) {
+        const steps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`);
+        steps.forEach((step, idx) => { step.style.display = (idx + 1) <= stepNum ? 'block' : 'none'; });
+        currentStepEl.textContent = stepNum;
+      }
+
+      showSolutionBtn.addEventListener('click', function() {
+        solutionSteps.style.display = 'block';
+        resetSolutionSteps();
+        this.style.display = 'none';
+      });
+
+      nextBtn.addEventListener('click', function() {
+        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
+        if (currentStep < totalSteps) { currentStep++; showStep(currentStep); updateNavButtons(); }
+      });
+
+      prevBtn.addEventListener('click', function() {
+        if (currentStep > 0) { currentStep--; showStep(currentStep); updateNavButtons(); }
+      });
+
+      updateNavButtons();
+    });
+  });
+  </script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    // Create a single tooltip element that will be reused
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup'; // Reset classes
+
+      // Get target position
+      const targetRect = target.getBoundingClientRect();
+
+      // Find the code block container (pre or .tab-content or .code-tabs)
+      let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
+      let containerRect = container ? container.getBoundingClientRect() : {
+        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
+      };
+
+      // Use viewport as fallback boundary
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 10; // Minimum distance from edges
+
+      // Temporarily show to measure
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const tooltipWidth = tooltipRect.width;
+      const tooltipHeight = tooltipRect.height;
+
+      // Calculate ideal position (above the element, centered)
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      let top = targetRect.top - tooltipHeight - 8; // 8px gap
+      let arrowClass = 'arrow-bottom';
+
+      // Check if tooltip would go above viewport - if so, show below
+      if (top < padding) {
+        top = targetRect.bottom + 8;
+        arrowClass = 'arrow-top';
+      }
+
+      // Check if tooltip would go below viewport when shown below
+      if (top + tooltipHeight > viewportHeight - padding) {
+        top = targetRect.top - tooltipHeight - 8;
+        arrowClass = 'arrow-bottom';
+      }
+
+      // Horizontal boundary checks - keep within viewport
+      if (left < padding) {
+        left = padding;
+      }
+      if (left + tooltipWidth > viewportWidth - padding) {
+        left = viewportWidth - tooltipWidth - padding;
+      }
+
+      // Additional check: keep within code container horizontally if possible
+      if (container) {
+        const minLeft = Math.max(padding, containerRect.left);
+        const maxRight = Math.min(viewportWidth - padding, containerRect.right);
+
+        if (left < minLeft) {
+          left = minLeft;
+        }
+        if (left + tooltipWidth > maxRight) {
+          left = maxRight - tooltipWidth;
+        }
+      }
+
+      // Apply position
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) {
+        clearTimeout(hideTimeout);
+        hideTimeout = null;
+      }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) {
+          tooltipEl.classList.remove('visible');
+        }
+        currentTarget = null;
+      }, 100);
+    }
+
+    // Event delegation for all tooltips
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) {
+        showTooltip(e.target);
+      }
+    }, true);
+
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) {
+        hideTooltip();
+      }
+    }, true);
+
+    // Handle scroll - reposition if visible
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) {
+        positionTooltip(currentTarget);
+      }
+    }, true);
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) {
+        positionTooltip(currentTarget);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

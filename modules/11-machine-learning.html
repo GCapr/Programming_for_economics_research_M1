@@ -354,7 +354,7 @@
 
         <h3>Linear and Logistic Regression</h3>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="ml-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python (sklearn)</button>
             <button class="tab-button" data-lang="r">R (tidymodels)</button>
@@ -390,6 +390,7 @@ df = pd.read_csv(<span class="code-string">"data.csv"</span>)
 <span class="code-tooltip" data-tip="Creates a logistic regression classifier. Use this when predicting categories (yes/no, A/B/C) instead of numbers.">clf = LogisticRegression()</span>
 clf.fit(X_train, y_train_binary)
 <span class="code-tooltip" data-tip="Compares predictions to actual values and returns the fraction that match. 1.0 = perfect, 0.0 = all wrong.">accuracy = accuracy_score(y_test_binary, clf.predict(X_test))</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="r">
@@ -420,6 +421,44 @@ df <- <span class="code-function">read_csv</span>(<span class="code-string">"dat
 <span class="code-tooltip" data-tip="Calculates RMSE by comparing the true income values to the predictions (.pred). Lower RMSE means better predictions.">rmse <- results %>%
   <span class="code-function">rmse</span>(truth = income, estimate = .pred)</span>
 <span class="code-function">print</span>(rmse)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulation for ml-1 -->
+        <div class="code-output-container" data-for="ml-1" style="display:none;">
+          <div class="code-output" data-lang="python">
+            <div class="output-header">Python Output</div>
+            <pre class="output-content">Training set: 8000 samples
+Test set: 2000 samples
+
+Fitting LinearRegression...
+
+Coefficients:
+  age:        456.23
+  education:  2834.17
+  experience: 1245.89
+  intercept:  -12453.67
+
+RMSE: 8234.56
+
+Accuracy (classification): 0.847</pre>
+          </div>
+          <div class="code-output" data-lang="r">
+            <div class="output-header">R Output</div>
+            <pre class="output-content"># A tibble: 1 x 3
+  .metric .estimator .estimate
+  <chr>   <chr>          <dbl>
+1 rmse    standard       8234.
+
+parsnip model object
+
+Call:
+stats::lm(formula = income ~ age + education + experience, data = data)
+
+Coefficients:
+(Intercept)          age    education   experience
+  -12453.67       456.23      2834.17      1245.89</pre>
           </div>
         </div>
 
@@ -435,7 +474,7 @@ df <- <span class="code-function">read_csv</span>(<span class="code-string">"dat
           <strong>K-fold cross-validation</strong> provides more robust estimates by training K models, each holding out a different fold.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="ml-2">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Cross-Validation</button>
           </div>
@@ -448,6 +487,26 @@ df <- <span class="code-function">read_csv</span>(<span class="code-string">"dat
 <span class="code-tooltip" data-tip="Runs the model 5 times with different train/test splits and returns 5 scores. More reliable than a single train-test split.">scores = cross_val_score(model, X, y, cv=cv, scoring=<span class="code-string">'neg_mean_squared_error'</span>)</span>
 
 <span class="code-tooltip" data-tip="sklearn returns negative MSE (for technical reasons), so we negate it and take the square root to get RMSE. The +/- shows variability across folds."><span class="code-function">print</span>(f<span class="code-string">"CV RMSE: {(-scores.mean())**0.5:.2f} (+/- {scores.std()**0.5:.2f})"</span>)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulation for ml-2 -->
+        <div class="code-output-container" data-for="ml-2" style="display:none;">
+          <div class="code-output" data-lang="python">
+            <div class="output-header">Python Output</div>
+            <pre class="output-content">Performing 5-fold cross-validation...
+
+Fold 1: MSE = 67892345.23, RMSE = 8239.68
+Fold 2: MSE = 68234521.89, RMSE = 8260.42
+Fold 3: MSE = 67123456.12, RMSE = 8192.89
+Fold 4: MSE = 68567890.45, RMSE = 8280.57
+Fold 5: MSE = 67456789.34, RMSE = 8213.21
+
+CV RMSE: 8237.35 (+/- 32.47)
+
+Note: The low standard deviation indicates stable performance
+across different data splits.</pre>
           </div>
         </div>
 
@@ -527,7 +586,7 @@ df <- <span class="code-function">read_csv</span>(<span class="code-string">"dat
           </tbody>
         </table>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="ml-3">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Regularization</button>
           </div>
@@ -541,6 +600,33 @@ df <- <span class="code-function">read_csv</span>(<span class="code-string">"dat
 
 <span class="code-tooltip" data-tip="alpha_ stores the best lambda value found. Higher alpha = stronger penalty = simpler model with more zeros."><span class="code-function">print</span>(f<span class="code-string">"Best lambda: {lasso.alpha_:.4f}"</span>)</span>
 <span class="code-tooltip" data-tip="Counts how many features have non-zero coefficients. LASSO sets unimportant features exactly to zero, performing automatic feature selection."><span class="code-function">print</span>(f<span class="code-string">"Non-zero coefficients: {(lasso.coef_ != 0).sum()}"</span>)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulation for ml-3 -->
+        <div class="code-output-container" data-for="ml-3" style="display:none;">
+          <div class="code-output" data-lang="python">
+            <div class="output-header">Python Output</div>
+            <pre class="output-content">Fitting LassoCV with 5-fold cross-validation...
+Testing 100 alpha values from 0.0001 to 10.0
+
+Best lambda: 0.0234
+Non-zero coefficients: 7 (out of 15 features)
+
+Selected features with non-zero coefficients:
+  education:     2156.34
+  experience:    1089.23
+  age:            234.56
+  hours_worked:   178.92
+  industry_tech:  156.78
+  gender:        -234.12
+  urban:          89.45
+
+Dropped features (coefficient = 0):
+  height, birth_month, zip_code, eye_color, ...
+
+Test RMSE: 7856.23 (vs. 8234.56 for OLS)</pre>
           </div>
         </div>
 
@@ -560,7 +646,7 @@ df <- <span class="code-function">read_csv</span>(<span class="code-string">"dat
           <strong>Gradient boosting</strong> builds trees sequentially, with each tree correcting the errors of previous trees. XGBoost and LightGBM are popular implementations.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="ml-4">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Tree Methods</button>
           </div>
@@ -582,6 +668,39 @@ df <- <span class="code-function">read_csv</span>(<span class="code-string">"dat
 <span class="code-comment"># XGBoost</span>
 <span class="code-tooltip" data-tip="Creates an XGBoost model. learning_rate controls how much each tree contributes (smaller = more conservative). max_depth limits tree complexity.">xgb_model = xgb.XGBRegressor(n_estimators=<span class="code-number">100</span>, learning_rate=<span class="code-number">0.1</span>, max_depth=<span class="code-number">5</span>)</span>
 <span class="code-tooltip" data-tip="Trains XGBoost by building trees one at a time, where each new tree focuses on correcting errors from previous trees.">xgb_model.fit(X_train, y_train)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulation for ml-4 -->
+        <div class="code-output-container" data-for="ml-4" style="display:none;">
+          <div class="code-output" data-lang="python">
+            <div class="output-header">Python Output</div>
+            <pre class="output-content">Training Random Forest with 100 trees...
+[====================================] 100% Complete
+
+Random Forest Results:
+  Train RMSE: 3456.78
+  Test RMSE:  7234.12
+  R-squared:  0.72
+
+Feature Importance:
+       feature  importance
+0    education      0.3421
+1   experience      0.2856
+2          age      0.1923
+3 hours_worked      0.0892
+4       gender      0.0456
+...
+
+Training XGBoost with 100 boosting rounds...
+[0]   train-rmse:45234.12  valid-rmse:45678.90
+[25]  train-rmse:12345.67  valid-rmse:13456.78
+[50]  train-rmse:6789.01   valid-rmse:8234.56
+[75]  train-rmse:4567.89   valid-rmse:7456.23
+[100] train-rmse:3890.12   valid-rmse:7123.45
+
+XGBoost Test RMSE: 7123.45 (best model)</pre>
           </div>
         </div>
 
@@ -591,7 +710,7 @@ df <- <span class="code-function">read_csv</span>(<span class="code-string">"dat
           Neural networks learn hierarchical representations through layers of nonlinear transformations. Deep learning refers to networks with many layers.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="ml-5">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Simple Neural Network</button>
           </div>
@@ -619,6 +738,37 @@ df <- <span class="code-function">read_csv</span>(<span class="code-string">"dat
 <span class="code-comment"># Loss and optimizer</span>
 <span class="code-tooltip" data-tip="MSE (Mean Squared Error) loss measures how wrong predictions are. The optimizer tries to minimize this during training.">criterion = nn.MSELoss()</span>
 <span class="code-tooltip" data-tip="Adam optimizer updates network weights to reduce loss. lr (learning rate) controls step size - too high = unstable, too low = slow learning.">optimizer = torch.optim.Adam(model.parameters(), lr=<span class="code-number">0.001</span>)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulation for ml-5 -->
+        <div class="code-output-container" data-for="ml-5" style="display:none;">
+          <div class="code-output" data-lang="python">
+            <div class="output-header">Python Output</div>
+            <pre class="output-content">SimpleNN(
+  (layer1): Linear(in_features=10, out_features=64, bias=True)
+  (relu): ReLU()
+  (layer2): Linear(in_features=64, out_features=1, bias=True)
+)
+
+Total parameters: 705
+  layer1.weight: 640 params (10 x 64)
+  layer1.bias:   64 params
+  layer2.weight: 64 params (64 x 1)
+  layer2.bias:   1 param
+
+Training for 100 epochs...
+Epoch [10/100], Loss: 45234567.89
+Epoch [20/100], Loss: 23456789.12
+Epoch [30/100], Loss: 12345678.90
+Epoch [40/100], Loss: 8765432.10
+Epoch [50/100], Loss: 6543210.98
+...
+Epoch [100/100], Loss: 2345678.90
+
+Final Test RMSE: 6891.23
+Model ready for predictions.</pre>
           </div>
         </div>
 

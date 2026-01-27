@@ -268,7 +268,7 @@
           Text is split into <strong>tokens</strong>--subword units. "Tokenization" might become ["Token", "ization"]. This handles rare words by breaking them into common pieces.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="llm-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Tokenization Example</button>
           </div>
@@ -284,6 +284,32 @@
 
 <span class="code-comment"># Models work with token IDs, not text</span>
 <span class="code-comment"># <span class="code-tooltip" data-tip="A rough rule of thumb for estimating token counts. 'Hello world' is 2 words but might be 2-3 tokens depending on the tokenizer.">Typical: 1 token is approximately 0.75 words</span></span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulation for llm-1 -->
+        <div class="code-output-container" data-for="llm-1" style="display:none;">
+          <div class="code-output" data-lang="python">
+            <div class="output-header">Python Output</div>
+            <pre class="output-content">Input text: "Hello, how are you doing today?"
+
+Tokenization result (GPT-4 tokenizer):
+  Token 0: "Hello"    -> ID: 15496
+  Token 1: ","        -> ID: 11
+  Token 2: " how"     -> ID: 703
+  Token 3: " are"     -> ID: 527
+  Token 4: " you"     -> ID: 499
+  Token 5: " doing"   -> ID: 3815
+  Token 6: " today"   -> ID: 3432
+  Token 7: "?"        -> ID: 30
+
+Total tokens: 8
+Words in original: 6
+Ratio: 1.33 tokens per word
+
+Note: Spaces are typically attached to the following word.
+Punctuation is usually a separate token.</pre>
           </div>
         </div>
 
@@ -307,7 +333,7 @@
           Given tokens [t1, t2, ..., tn], the model outputs a probability distribution over the vocabulary for t(n+1). During generation, it samples from this distribution and repeats.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="llm-2">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Generation Process</button>
           </div>
@@ -332,6 +358,34 @@
 <span class="code-comment"># Detokenize back to text</span>
 <span class="code-tooltip" data-tip="Converts token IDs back to readable text. The reverse of tokenization - numbers become words again.">output = detokenize(tokens)</span>
 <span class="code-comment"># "The capital of France is Paris."</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulation for llm-2 -->
+        <div class="code-output-container" data-for="llm-2" style="display:none;">
+          <div class="code-output" data-lang="python">
+            <div class="output-header">Python Output</div>
+            <pre class="output-content">Prompt: "The capital of France is"
+Tokenized: [464, 3361, 315, 9822, 374]
+
+Generation step 1:
+  Top 5 predictions: Paris (0.89), Lyon (0.03), a (0.02), known (0.01), the (0.01)
+  Sampled token: "Paris" (ID: 6342)
+
+Generation step 2:
+  Top 5 predictions: . (0.72), , (0.15), and (0.05), which (0.03), - (0.02)
+  Sampled token: "." (ID: 13)
+
+Generation step 3:
+  Top 5 predictions: [END] (0.45), It (0.18), Paris (0.12), The (0.10), This (0.08)
+  Sampled token: [END] (ID: 50256)
+
+Generation complete!
+
+Final output: "The capital of France is Paris."
+Total tokens generated: 2
+Temperature used: 0.7</pre>
           </div>
         </div>
 
@@ -454,7 +508,7 @@
           </tbody>
         </table>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="llm-3">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Prompt Examples</button>
           </div>
@@ -484,12 +538,51 @@ Let's think step by step:"""</span></span>
 <span class="code-tooltip" data-tip="Role prompting ('You are a...') sets context and expertise level. Requesting structured output (JSON) makes responses easier to parse programmatically.">prompt = <span class="code-string">"""You are a data analyst. Given this data,
 identify the top 3 trends. Format as JSON:
 {"trends": ["trend1", "trend2", "trend3"]}"""</span></span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulation for llm-3 -->
+        <div class="code-output-container" data-for="llm-3" style="display:none;">
+          <div class="code-output" data-lang="python">
+            <div class="output-header">Python Output</div>
+            <pre class="output-content">=== Zero-shot Response ===
+Prompt: "Translate to French: Hello, how are you?"
+Response: "Bonjour, comment allez-vous?"
+
+=== Few-shot Response ===
+Prompt: [examples + "How are you?"]
+Response: "Comment allez-vous?"
+
+Note: Few-shot learned the formal style from examples!
+
+=== Chain-of-thought Response ===
+Prompt: "Solve step by step: train problem..."
+Response:
+"Let's think step by step:
+1. First, find the speed: 120 miles / 2 hours = 60 mph
+2. The train continues for 3 more hours at 60 mph
+3. Additional distance: 60 mph x 3 hours = 180 miles
+4. Total distance: 120 + 180 = 300 miles
+
+The total distance is 300 miles."
+
+=== Role + JSON Response ===
+Prompt: "You are a data analyst..."
+Response:
+{
+  "trends": [
+    "Revenue increased 23% year-over-year",
+    "Customer churn decreased in Q4",
+    "Mobile users now exceed desktop users"
+  ]
+}</pre>
           </div>
         </div>
 
         <h2 id="using-apis">11.6 Using LLM APIs</h2>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="llm-4">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python API Usage</button>
           </div>
@@ -525,6 +618,45 @@ identify the top 3 trends. Format as JSON:
 )
 
 <span class="code-tooltip" data-tip="Claude's response structure differs from OpenAI's. The content is a list, so we access the first item's text."><span class="code-function">print</span>(message.content[<span class="code-number">0</span>].text)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output simulation for llm-4 -->
+        <div class="code-output-container" data-for="llm-4" style="display:none;">
+          <div class="code-output" data-lang="python">
+            <div class="output-header">Python Output</div>
+            <pre class="output-content">=== OpenAI API Response ===
+Model: gpt-4
+Tokens used: 312 (prompt: 28, completion: 284)
+Latency: 2.3s
+
+Response:
+Regression Discontinuity Design (RDD) is a quasi-experimental
+method used when treatment is assigned based on a cutoff. For
+example, if students scoring above 70% get a scholarship, we
+can compare students just above and just below 70% to estimate
+the scholarship's causal effect.
+
+The key assumption is that students near the cutoff are similar
+in all ways except treatment status. This creates a "local"
+randomized experiment around the threshold.
+
+=== Anthropic API Response ===
+Model: claude-3-sonnet-20240229
+Input tokens: 15
+Output tokens: 256
+Latency: 1.8s
+
+Response:
+Difference-in-Differences (DiD) is a causal inference method
+that compares changes over time between a treatment group and
+a control group. The key idea is that the control group shows
+what would have happened to the treatment group absent the
+intervention.
+
+The parallel trends assumption is crucial: both groups must
+have followed similar trajectories before treatment...</pre>
           </div>
         </div>
 

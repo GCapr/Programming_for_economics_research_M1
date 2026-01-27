@@ -279,7 +279,7 @@
         <p>
           As usual, use your mouse to hover over the code below to see explanations of each command and understand how to analyse missingness patterns and handle missing data appropriately in Python, Stata, and R:
         </p>
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="missing-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -316,6 +316,7 @@
 
 <span class="code-comment"># Create missing indicator</span>
 <span class="code-tooltip" data-tip="CREATE MISSING INDICATOR: Makes a new column tracking where data was missing. WHAT: Creates income_missing = 1 if original income was missing, 0 otherwise. WHY: Lets you analyze whether missingness itself matters. ASTYPE(INT) converts True/False to 1/0."><span class="code-variable">df</span>[<span class="code-string">'income_missing'</span>] = df[<span class="code-string">'income'</span>].isnull().astype(int)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="stata">
@@ -351,6 +352,7 @@
 <span class="code-tooltip" data-tip="MI SET MLONG: Sets up Stata for multiple imputation in 'marginal long' format. WHAT: Prepares your dataset to hold multiple imputed versions. WHY: Multiple imputation creates several plausible filled-in datasets, then combines results. More statistically rigorous than single imputation."><span class="code-keyword">mi set</span> mlong</span>
 <span class="code-tooltip" data-tip="MI REGISTER IMPUTED: Tells Stata which variable(s) to impute. WHAT: Marks 'income' as a variable that needs imputation. WHY: Stata needs to know which variables have missing values to be filled. You can register multiple variables."><span class="code-keyword">mi register</span> imputed income</span>
 <span class="code-tooltip" data-tip="MI IMPUTE REGRESS: Fills missing values using regression prediction. WHAT: Predicts missing income from age and education, creating 20 different imputed datasets (add(20)). WHY: Uses relationships between variables to make educated guesses. Multiple datasets capture uncertainty."><span class="code-keyword">mi impute</span> regress income age education, add(<span class="code-number">20</span>)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="r">
@@ -389,7 +391,77 @@
 <span class="code-comment"># Create missing indicator</span>
 <span class="code-tooltip" data-tip="AS.INTEGER(IS.NA()): Creates a 0/1 indicator for missing values. WHAT: is.na() returns TRUE/FALSE, as.integer() converts to 1/0. WHY: Lets you track which rows originally had missing data, even after imputation. Useful for analyzing if missingness matters."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
   <span class="code-function">mutate</span>(income_missing = <span class="code-function">as.integer</span>(<span class="code-function">is.na</span>(income)))</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <!-- Output simulations for missing data code block -->
+        <div class="output-simulation" data-output="missing-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-comment"># Count missing by column</span>
+id             <span class="out-num">0</span>
+name           <span class="out-num">3</span>
+income       <span class="out-num">147</span>
+education     <span class="out-num">23</span>
+age            <span class="out-num">0</span>
+dtype: int64
+
+<span class="out-comment"># Percentage missing</span>
+id           <span class="out-num">0.00</span>
+name         <span class="out-num">0.30</span>
+income      <span class="out-num">14.70</span>
+education    <span class="out-num">2.30</span>
+age          <span class="out-num">0.00</span>
+dtype: float64</div>
+        </div>
+
+        <div class="output-simulation" data-output="missing-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. misstable summarize</span>
+
+                                               Obs<.
+                                          +-------------------
+               |                Unique
+      Variable |   Obs=.   Obs>.   Obs<.   values   Min   Max
+  -------------+--------------------------------------------
+        income |    147               0       142     .     .
+     education |     23               0        15     .     .
+          name |      3               0       997     .     .
+
+<span class="out-green">. mi impute regress income age education, add(20)</span>
+
+Univariate imputation           Imputations =       20
+Regression                              added =       20
+Imputed: m=1 through m=20               updated =        0
+
+               |               Observations per m
+               |----------------------------------------------
+      Variable |   Complete   Incomplete   Imputed |     Total
+  -------------+-----------------------------------+----------
+        income |        853          147       147 |      1000</div>
+        </div>
+
+        <div class="output-simulation" data-output="missing-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">&gt; sum(is.na(df))</span>
+[1] <span class="out-num">173</span>
+
+<span class="out-green">&gt; colSums(is.na(df))</span>
+       id      name    income education       age
+        <span class="out-num">0</span>         <span class="out-num">3</span>       <span class="out-num">147</span>        <span class="out-num">23</span>         <span class="out-num">0</span>
+
+<span class="out-green">&gt; colMeans(is.na(df)) * 100</span>
+       id      name    income education       age
+     <span class="out-num">0.0</span>       <span class="out-num">0.3</span>      <span class="out-num">14.7</span>       <span class="out-num">2.3</span>       <span class="out-num">0.0</span></div>
         </div>
 
         <h2 id="outliers">4.2 Detecting and Treating Outliers</h2>
@@ -402,7 +474,7 @@
           A common approach is the <strong>z-score method</strong>, which measures how many standard deviations an observation is from the mean. Values with |z| &gt; 3 are typically flagged as potential outliers, as they fall outside 99.7% of a normal distribution (<a href="https://doi.org/10.1080/00031305.1987.10475354" target="_blank">Iglewicz &amp; Hoaglin, 1993</a>). For non-normal data, the <strong>interquartile range (IQR)</strong> method is more robust: values below Q1 - 1.5×IQR or above Q3 + 1.5×IQR are flagged (<a href="https://doi.org/10.1002/0470013192" target="_blank">Tukey, 1977</a>).
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="outliers-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -434,6 +506,7 @@
 <span class="code-comment"># Create outlier indicator for analysis</span>
 <span class="code-tooltip" data-tip="CREATE OUTLIER FLAG: Makes a new column marking which rows are outliers. WHAT: is_outlier = 1 if income is outside IQR bounds, 0 otherwise. WHY: Lets you analyze outliers separately or test how sensitive your results are to including them."><span class="code-variable">df</span>[<span class="code-string">'is_outlier'</span>] = ((df[<span class="code-string">'income'</span>] < lower_bound) | (df[<span class="code-string">'income'</span>] > upper_bound)).astype(int)</span>
 <span class="code-function">print</span>(f<span class="code-string">"Outliers flagged: {df['is_outlier'].sum()}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="stata">
@@ -464,6 +537,7 @@
 
 <span class="code-comment">* Tabulate outlier counts</span>
 <span class="code-tooltip" data-tip="TAB: Creates a frequency table of the outlier indicator. WHAT: Shows count and percentage of outliers vs non-outliers. WHY: Quick summary of how many extreme values you're dealing with."><span class="code-keyword">tab</span> is_outlier_iqr</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="r">
@@ -494,7 +568,46 @@
 <span class="code-tooltip" data-tip="CREATE OUTLIER FLAG: Marks observations outside IQR bounds. WHAT: is_outlier = 1 if income is below lower OR above upper bound, 0 otherwise. WHY: Lets you analyze outliers separately or test sensitivity of results."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
   <span class="code-function">mutate</span>(is_outlier = <span class="code-function">as.integer</span>(income < lower_bound | income > upper_bound))</span>
 <span class="code-function">cat</span>(<span class="code-string">"Outliers flagged:"</span>, <span class="code-function">sum</span>(df$is_outlier), <span class="code-string">"\n"</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <!-- Output simulations for outliers code block -->
+        <div class="output-simulation" data-output="outliers-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Removed <span class="out-num">12</span> outliers using z-score method
+Outliers flagged: <span class="out-num">47</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="outliers-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. count if is_outlier_z == 1</span>
+  <span class="out-num">12</span>
+
+<span class="out-green">. tab is_outlier_iqr</span>
+
+is_outlier_ |
+        iqr |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        953       95.30       95.30
+          1 |         47        4.70      100.00
+------------+-----------------------------------
+      Total |      1,000      100.00</div>
+        </div>
+
+        <div class="output-simulation" data-output="outliers-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Removed <span class="out-num">12</span> outliers using z-score method
+Outliers flagged: <span class="out-num">47</span></div>
         </div>
 
         <div class="info-box warning">
@@ -510,7 +623,7 @@
           Text data often requires cleaning—standardizing case, removing whitespace, extracting patterns, and more. Economic datasets frequently contain messy string variables: inconsistent country names, occupation codes with extra characters, or addresses that need parsing.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="strings-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -546,6 +659,7 @@
 
 <span class="code-comment"># Check for patterns</span>
 <span class="code-tooltip" data-tip="STR.CONTAINS(): Checks if pattern exists in string. WHAT: Creates boolean column - True if 'inc' or 'corp' appears in company name. WHY: Useful for filtering or flagging specific types of observations."><span class="code-variable">df</span>[<span class="code-string">'is_corporation'</span>] = df[<span class="code-string">'company'</span>].str.contains(<span class="code-string">r'inc|corp'</span>, case=<span class="code-keyword">False</span>, regex=<span class="code-keyword">True</span>)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="stata">
@@ -580,6 +694,7 @@
 
 <span class="code-comment">* Substring extraction</span>
 <span class="code-tooltip" data-tip="SUBSTR(): Extracts portion of string by position. WHAT: Gets characters 1-2 of state_full (e.g., 'CA' from 'California'). WHY: Useful when data has consistent structure and you need fixed portions."><span class="code-keyword">gen</span> state_abbr2 = substr(state_full, <span class="code-number">1</span>, <span class="code-number">2</span>)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="r">
@@ -624,7 +739,50 @@
 <span class="code-comment"># Check for patterns</span>
 <span class="code-tooltip" data-tip="STR_DETECT(): Checks if pattern exists in string. WHAT: Returns TRUE if 'inc' or 'corp' appears (case-insensitive). WHY: Useful for filtering or flagging. regex(..., ignore_case=TRUE) makes it case-insensitive."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
   <span class="code-function">mutate</span>(is_corporation = <span class="code-function">str_detect</span>(company, <span class="code-function">regex</span>(<span class="code-string">"inc|corp"</span>, ignore_case = <span class="code-keyword">TRUE</span>)))</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <!-- Output simulations for strings code block -->
+        <div class="output-simulation" data-output="strings-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-comment"># Example DataFrame after string cleaning</span>
+     country      name first_name last_name is_corporation
+<span class="out-num">0</span>  united states  John Doe       John       Doe          <span class="out-blue">True</span>
+<span class="out-num">1</span>  united kingdom Jane Smith     Jane     Smith         <span class="out-blue">False</span>
+<span class="out-num">2</span>  united states  Bob Wilson      Bob    Wilson          <span class="out-blue">True</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="strings-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. list country name first_name last_name is_corporation in 1/3</span>
+
+     +----------------------------------------------------------------+
+     |         country        name   first_name   last_name   is_corp |
+     |----------------------------------------------------------------|
+  1. |   united states    John Doe         John         Doe         1 |
+  2. | united kingdom   Jane Smith         Jane       Smith         0 |
+  3. |   united states  Bob Wilson          Bob      Wilson         1 |
+     +----------------------------------------------------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="strings-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-comment"># A tibble: 3 × 5</span>
+  country        name       first_name last_name is_corporation
+  <span class="out-blue">&lt;chr&gt;</span>          <span class="out-blue">&lt;chr&gt;</span>      <span class="out-blue">&lt;chr&gt;</span>      <span class="out-blue">&lt;chr&gt;</span>     <span class="out-blue">&lt;lgl&gt;</span>
+<span class="out-num">1</span> united states  John Doe   John       Doe       <span class="out-blue">TRUE</span>
+<span class="out-num">2</span> united kingdom Jane Smith Jane       Smith     <span class="out-blue">FALSE</span>
+<span class="out-num">3</span> united states  Bob Wilson Bob        Wilson    <span class="out-blue">TRUE</span></div>
         </div>
 
         <h2 id="dates">4.4 Working with Dates</h2>
@@ -633,7 +791,7 @@
           Date handling varies across languages but follows similar principles: parsing string dates, extracting components, and performing date arithmetic. Properly formatted dates are essential for time series analysis, event studies, and panel data methods.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="dates-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -670,6 +828,7 @@
 <span class="code-comment"># Handle missing or invalid dates</span>
 <span class="code-tooltip" data-tip="ERRORS='COERCE': Handles unparseable dates gracefully. WHAT: Invalid dates become NaT (Not a Time) instead of causing errors. WHY: Real data often has malformed dates that shouldn't crash your script."><span class="code-variable">df</span>[<span class="code-string">'date'</span>] = pd.to_datetime(df[<span class="code-string">'date_string'</span>], errors=<span class="code-string">'coerce'</span>)</span>
 <span class="code-function">print</span>(f<span class="code-string">"Invalid dates: {df['date'].isna().sum()}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="stata">
@@ -705,6 +864,7 @@
 <span class="code-comment">* Handle datetime (with time component)</span>
 <span class="code-tooltip" data-tip="CLOCK(): Parses datetime strings with time. WHAT: Creates Stata datetime including hours/minutes/seconds. WHY: Necessary for high-frequency data with timestamps. Format %tc displays properly."><span class="code-keyword">gen</span> double datetime = clock(datetime_string, <span class="code-string">"YMDhms"</span>)
 <span class="code-keyword">format</span> datetime %tc</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="r">
@@ -751,7 +911,54 @@
 <span class="code-tooltip" data-tip="QUIET=TRUE SUPPRESSES WARNINGS: Handles invalid dates silently. WHAT: Unparseable dates become NA without warning messages. WHY: Real data often has malformed dates; check for NAs after parsing."><span class="code-variable">df</span> <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
   <span class="code-function">mutate</span>(date = <span class="code-function">ymd</span>(date_string, quiet = <span class="code-keyword">TRUE</span>))</span>
 <span class="code-function">cat</span>(<span class="code-string">"Invalid dates:"</span>, <span class="code-function">sum</span>(<span class="code-function">is.na</span>(df$date)), <span class="code-string">"\n"</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <!-- Output simulations for dates code block -->
+        <div class="output-simulation" data-output="dates-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-comment"># Date columns after processing</span>
+        date  year  month  quarter day_of_week  days_since_hire   deadline
+<span class="out-num">0</span> 2024-01-15  2024      1        1      Monday              365 2024-02-14
+<span class="out-num">1</span> 2024-03-22  2024      3        1       Friday              299 2024-04-21
+<span class="out-num">2</span> 2023-12-01  2023     12        4       Friday              421 2023-12-31
+
+Invalid dates: <span class="out-num">3</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="dates-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. list date year month quarter day_of_week in 1/3</span>
+
+     +--------------------------------------------+
+     |       date   year   month   quarter   dow  |
+     |--------------------------------------------|
+  1. | 15jan2024   2024       1         1      1  |
+  2. | 22mar2024   2024       3         1      5  |
+  3. | 01dec2023   2023      12         4      5  |
+     +--------------------------------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="dates-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-comment"># A tibble: 3 × 6</span>
+  date        year month quarter day_of_week days_since_hire
+  <span class="out-blue">&lt;date&gt;</span>     <span class="out-blue">&lt;dbl&gt;</span> <span class="out-blue">&lt;dbl&gt;</span>   <span class="out-blue">&lt;int&gt;</span> <span class="out-blue">&lt;ord&gt;</span>                 <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> 2024-01-15  2024     1       1 Mon                     365
+<span class="out-num">2</span> 2024-03-22  2024     3       1 Fri                     299
+<span class="out-num">3</span> 2023-12-01  2023    12       4 Fri                     421
+
+Invalid dates: <span class="out-num">3</span></div>
         </div>
 
         <div class="info-box note">
@@ -769,7 +976,7 @@
           Before analysis, always validate your data for consistency and logical errors. Validation catches problems that summary statistics might miss: impossible values, logical inconsistencies, and data entry errors. Build validation checks into your workflow and run them after every data transformation.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="validation-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -818,6 +1025,7 @@
     <span class="code-keyword">return</span> <span class="code-keyword">True</span></span>
 
 validate_data(df)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="stata">
@@ -856,6 +1064,7 @@ validate_data(df)</code></pre>
 <span class="code-keyword">end</span></span>
 
 validate_data</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="r">
@@ -911,7 +1120,80 @@ validate_data</code></pre>
 }</span>
 
 <span class="code-function">validate_data</span>(df)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <!-- Output simulations for validation code block -->
+        <div class="output-simulation" data-output="validation-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Invalid ages (outside 0-120): <span class="out-num">2</span>
+   person_id    age
+<span class="out-num">47</span>      A0048   -999
+<span class="out-num">203</span>     B0204    150
+
+Negative incomes: <span class="out-num">0</span>
+Invalid gender values: <span class="out-num">3</span>
+  gender  count
+     m       1
+     F.      1
+   male      1
+Retired before birth: <span class="out-num">1</span> rows
+Duplicate person_ids: <span class="out-num">4</span>
+Validation failed:
+Invalid ages found
+Duplicate IDs found</div>
+        </div>
+
+        <div class="output-simulation" data-output="validation-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. count if age < 0 | age > 120</span>
+  <span class="out-num">2</span>
+
+<span class="out-green">. count if !inlist(gender, "M", "F", "Other")</span>
+  <span class="out-num">3</span>
+
+<span class="out-green">. duplicates report person_id</span>
+
+Duplicates in terms of person_id
+
+--------------------------------------
+   Copies | Observations       Surplus
+----------+---------------------------
+        1 |          996             0
+        2 |            4             2
+--------------------------------------
+
+<span class="out-green">. validate_data</span>
+Running validation checks...
+WARNING: <span class="out-num">2</span> invalid age values
+Validation complete</div>
+        </div>
+
+        <div class="output-simulation" data-output="validation-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Invalid ages (outside 0-120): <span class="out-num">2</span>
+<span class="out-comment"># A tibble: 2 × 2</span>
+  person_id   age
+  <span class="out-blue">&lt;chr&gt;</span>     <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span> A0048      -999
+<span class="out-num">2</span> B0204       150
+
+Invalid gender values: <span class="out-num">3</span>
+Retired before birth: <span class="out-num">1</span> rows
+Duplicate IDs: <span class="out-num">4</span>
+Validation failed:
+ Invalid ages found
+ Duplicate IDs found</div>
         </div>
 
         <div class="info-box warning">
@@ -942,7 +1224,7 @@ validate_data</code></pre>
           The code below demonstrates a realistic cleaning workflow: handling special missing value codes, constructing derived variables like hourly wages, and validating the cleaned data.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="cps-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -992,6 +1274,7 @@ validate_data</code></pre>
 <span class="code-tooltip" data-tip="VALIDATION: Confirms cleaning was successful. WHAT: Checks for remaining missing values and impossible values. WHY: Catch any problems before analysis. Print sample size for documentation."><span class="code-function">print</span>(f<span class="code-string">"Final sample size: {len(cps):,}"</span>)
 <span class="code-function">print</span>(f<span class="code-string">"Missing wages: {cps['hourly_wage'].isna().sum()}"</span>)
 <span class="code-function">print</span>(cps[[<span class="code-string">'hourly_wage'</span>, <span class="code-string">'ln_wage'</span>, <span class="code-string">'age'</span>]].describe())</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="stata">
@@ -1039,6 +1322,7 @@ validate_data</code></pre>
 <span class="code-tooltip" data-tip="VALIDATION: Checks cleaning success. WHAT: Shows sample size and summary statistics. WHY: Verify no remaining problems before analysis."><span class="code-keyword">count</span>
 <span class="code-keyword">summarize</span> hourly_wage ln_wage age
 <span class="code-keyword">misstable</span> summarize hourly_wage ln_wage</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
 
           <div class="tab-content" data-lang="r">
@@ -1096,7 +1380,71 @@ validate_data</code></pre>
 cps <span class="code-operator">%>%</span>
   <span class="code-function">select</span>(hourly_wage, ln_wage, age) <span class="code-operator">%>%</span>
   <span class="code-function">summary</span>()</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <!-- Output simulations for CPS code block -->
+        <div class="output-simulation" data-output="cps-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Final sample size: <span class="out-num">45,823</span>
+Missing wages: <span class="out-num">0</span>
+
+       hourly_wage      ln_wage        age
+count    <span class="out-num">45823.00</span>    <span class="out-num">45823.00</span>   <span class="out-num">45823.00</span>
+mean        <span class="out-num">28.45</span>        <span class="out-num">3.14</span>      <span class="out-num">39.72</span>
+std         <span class="out-num">22.67</span>        <span class="out-num">0.68</span>       <span class="out-num">8.41</span>
+min          <span class="out-num">3.00</span>        <span class="out-num">1.10</span>      <span class="out-num">25.00</span>
+25%         <span class="out-num">14.42</span>        <span class="out-num">2.67</span>      <span class="out-num">32.00</span>
+50%         <span class="out-num">22.12</span>        <span class="out-num">3.10</span>      <span class="out-num">40.00</span>
+75%         <span class="out-num">35.58</span>        <span class="out-num">3.57</span>      <span class="out-num">48.00</span>
+max        <span class="out-num">480.77</span>        <span class="out-num">6.18</span>      <span class="out-num">54.00</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="cps-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. count</span>
+  <span class="out-num">45,823</span>
+
+<span class="out-green">. summarize hourly_wage ln_wage age</span>
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+ hourly_wage |     45,823    28.45312    22.66934          3     480.77
+     ln_wage |     45,823    3.140215    .6782031   1.098612   6.175867
+         age |     45,823    39.72148    8.413561         25         54
+
+<span class="out-green">. misstable summarize hourly_wage ln_wage</span>
+
+                                         Obs<.
+                                    +---------
+               |                 Unique
+      Variable |    Obs=.    Obs>.    values        Min        Max
+  -------------+------------------------------------------------
+               |                (no missing values found)</div>
+        </div>
+
+        <div class="output-simulation" data-output="cps-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Final sample size: <span class="out-num">45823</span>
+Missing wages: <span class="out-num">0</span>
+
+  hourly_wage         ln_wage           age
+ Min.   :  <span class="out-num">3.00</span>   Min.   :<span class="out-num">1.099</span>   Min.   :<span class="out-num">25.00</span>
+ 1st Qu.: <span class="out-num">14.42</span>   1st Qu.:<span class="out-num">2.669</span>   1st Qu.:<span class="out-num">32.00</span>
+ Median : <span class="out-num">22.12</span>   Median :<span class="out-num">3.096</span>   Median :<span class="out-num">40.00</span>
+ Mean   : <span class="out-num">28.45</span>   Mean   :<span class="out-num">3.140</span>   Mean   :<span class="out-num">39.72</span>
+ 3rd Qu.: <span class="out-num">35.58</span>   3rd Qu.:<span class="out-num">3.572</span>   3rd Qu.:<span class="out-num">48.00</span>
+ Max.   :<span class="out-num">480.77</span>   Max.   :<span class="out-num">6.176</span>   Max.   :<span class="out-num">54.00</span></div>
         </div>
 
         <h2 id="exercises">4.7 Exercises</h2>

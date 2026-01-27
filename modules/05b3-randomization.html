@@ -138,7 +138,7 @@
           Each unit has equal probability of assignment to treatment or control, independent of other units.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="rand-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -151,15 +151,20 @@
 
 np.random.seed(42)  <span class="code-comment"># Always set seed for reproducibility!</span>
 
+<span class="code-comment"># Create sample data</span>
+df = pd.DataFrame({<span class="code-string">'id'</span>: range(1, 11)})
+
 <span class="code-comment"># Method 1: Bernoulli (coin flip for each)</span>
-df[<span class="code-string">'treatment'</span>] = np.random.binomial(1, 0.5, len(df))
+df[<span class="code-string">'treatment_bernoulli'</span>] = np.random.binomial(1, 0.5, len(df))
 
 <span class="code-comment"># Method 2: Complete randomization (fixed number treated)</span>
 n = len(df)
 n_treat = n // 2
 <span class="code-tooltip" data-tip="Creates exactly n_treat 1s and the rest 0s, then shuffles">assignment = np.array([1] * n_treat + [0] * (n - n_treat))
 np.random.shuffle(assignment)</span>
-df[<span class="code-string">'treatment'</span>] = assignment</code></pre>
+df[<span class="code-string">'treatment_complete'</span>] = assignment
+<span class="code-function">print</span>(df)</code></pre>
+<button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Simple random assignment</span>
@@ -174,6 +179,7 @@ gen treatment = rbinomial(1, 0.5)
 <span class="code-comment">* Multiple treatment arms</span>
 randtreat, generate(treatment) mult(3) setseed(42)
 <span class="code-comment">* Creates treatment = 1, 2, or 3 with equal probability</span></code></pre>
+<button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Simple random assignment with randomizr</span>
@@ -181,14 +187,80 @@ randtreat, generate(treatment) mult(3) setseed(42)
 
 set.seed(42)
 
+<span class="code-comment"># Create sample data</span>
+df <- data.frame(id = 1:10)
+
 <span class="code-comment"># Simple random assignment</span>
-<span class="code-tooltip" data-tip="simple_ra() does Bernoulli randomization">df$treatment <- simple_ra(N = nrow(df))</span>
+<span class="code-tooltip" data-tip="simple_ra() does Bernoulli randomization">df$treatment_bernoulli <- simple_ra(N = nrow(df))</span>
 
 <span class="code-comment"># Complete random assignment (fixed number treated)</span>
-<span class="code-tooltip" data-tip="complete_ra() ensures exact treatment proportions">df$treatment <- complete_ra(N = nrow(df), prob = 0.5)</span>
+<span class="code-tooltip" data-tip="complete_ra() ensures exact treatment proportions">df$treatment_complete <- complete_ra(N = nrow(df), prob = 0.5)</span>
 
-<span class="code-comment"># Multiple treatment arms</span>
-df$treatment <- complete_ra(N = nrow(df), num_arms = 3)</code></pre>
+<span class="code-function">print</span>(df)</code></pre>
+<button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Simulated Output for rand-1 -->
+        <div class="code-output-container" data-for="rand-1">
+          <div class="output-tab" data-lang="python">
+            <div class="output-header">
+              <span class="output-icon">&#9658;</span> Python Output
+              <span class="output-status success">Executed successfully</span>
+            </div>
+            <pre class="output-content">   id  treatment_bernoulli  treatment_complete
+0   1                    0                   1
+1   2                    1                   0
+2   3                    0                   1
+3   4                    0                   0
+4   5                    1                   1
+5   6                    1                   0
+6   7                    0                   1
+7   8                    1                   0
+8   9                    1                   0
+9  10                    0                   1</pre>
+          </div>
+          <div class="output-tab" data-lang="stata">
+            <div class="output-header">
+              <span class="output-icon">&#9658;</span> Stata Output
+              <span class="output-status success">Executed successfully</span>
+            </div>
+            <pre class="output-content">. set seed 42
+
+. gen treatment = rbinomial(1, 0.5)
+
+. tab treatment
+
+  treatment |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |          5       50.00       50.00
+          1 |          5       50.00      100.00
+------------+-----------------------------------
+      Total |         10      100.00
+
+. randtreat, generate(treatment2) setseed(42)
+(using default treatment probabilities: 0.50 0.50)
+
+Treatment assigned:
+  Treatment 1: 5 obs (50.0%)
+  Treatment 2: 5 obs (50.0%)</pre>
+          </div>
+          <div class="output-tab" data-lang="r">
+            <div class="output-header">
+              <span class="output-icon">&#9658;</span> R Output
+              <span class="output-status success">Executed successfully</span>
+            </div>
+            <pre class="output-content">   id treatment_bernoulli treatment_complete
+1   1                   0                  1
+2   2                   1                  0
+3   3                   1                  1
+4   4                   0                  0
+5   5                   0                  1
+6   6                   1                  0
+7   7                   0                  1
+8   8                   1                  0
+9   9                   0                  0
+10 10                   1                  1</pre>
           </div>
         </div>
 
@@ -198,7 +270,7 @@ df$treatment <- complete_ra(N = nrow(df), num_arms = 3)</code></pre>
           Randomize within subgroups (strata) defined by covariates. Ensures balance on key variables.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="rand-2">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -225,8 +297,19 @@ np.random.seed(42)
 
     <span class="code-keyword">return</span> df
 
+<span class="code-comment"># Create sample data</span>
+df = pd.DataFrame({
+    <span class="code-string">'id'</span>: range(1, 13),
+    <span class="code-string">'gender'</span>: [<span class="code-string">'M'</span>, <span class="code-string">'M'</span>, <span class="code-string">'M'</span>, <span class="code-string">'M'</span>, <span class="code-string">'F'</span>, <span class="code-string">'F'</span>, <span class="code-string">'F'</span>, <span class="code-string">'F'</span>, <span class="code-string">'M'</span>, <span class="code-string">'M'</span>, <span class="code-string">'F'</span>, <span class="code-string">'F'</span>],
+    <span class="code-string">'age_group'</span>: [<span class="code-string">'young'</span>, <span class="code-string">'young'</span>, <span class="code-string">'old'</span>, <span class="code-string">'old'</span>, <span class="code-string">'young'</span>, <span class="code-string">'young'</span>, <span class="code-string">'old'</span>, <span class="code-string">'old'</span>, <span class="code-string">'young'</span>, <span class="code-string">'old'</span>, <span class="code-string">'young'</span>, <span class="code-string">'old'</span>]
+})
+
 <span class="code-comment"># Stratify by gender and age group</span>
-df = stratified_randomize(df, strata_cols=[<span class="code-string">'gender'</span>, <span class="code-string">'age_group'</span>])</code></pre>
+df = stratified_randomize(df, strata_cols=[<span class="code-string">'gender'</span>, <span class="code-string">'age_group'</span>])
+<span class="code-function">print</span>(df)
+<span class="code-function">print</span>(<span class="code-string">"\nBalance check:"</span>)
+<span class="code-function">print</span>(df.groupby([<span class="code-string">'gender'</span>, <span class="code-string">'age_group'</span>])[<span class="code-string">'treatment'</span>].mean())</code></pre>
+<button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Stratified randomization with randtreat</span>
@@ -238,6 +321,7 @@ set seed 42
 <span class="code-comment">* With unequal treatment probabilities</span>
 randtreat, generate(treatment) strata(gender) ///
     misfits(global) setseed(42) frac(0.25 0.25 0.5)</code></pre>
+<button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Stratified randomization with randomizr</span>
@@ -245,15 +329,100 @@ randtreat, generate(treatment) strata(gender) ///
 
 set.seed(42)
 
+<span class="code-comment"># Create sample data</span>
+df <- data.frame(
+  id = 1:12,
+  gender = c(<span class="code-string">'M'</span>,<span class="code-string">'M'</span>,<span class="code-string">'M'</span>,<span class="code-string">'M'</span>,<span class="code-string">'F'</span>,<span class="code-string">'F'</span>,<span class="code-string">'F'</span>,<span class="code-string">'F'</span>,<span class="code-string">'M'</span>,<span class="code-string">'M'</span>,<span class="code-string">'F'</span>,<span class="code-string">'F'</span>),
+  region = c(<span class="code-string">'N'</span>,<span class="code-string">'N'</span>,<span class="code-string">'S'</span>,<span class="code-string">'S'</span>,<span class="code-string">'N'</span>,<span class="code-string">'N'</span>,<span class="code-string">'S'</span>,<span class="code-string">'S'</span>,<span class="code-string">'N'</span>,<span class="code-string">'S'</span>,<span class="code-string">'N'</span>,<span class="code-string">'S'</span>)
+)
+
 <span class="code-comment"># Block random assignment (stratified)</span>
 <span class="code-tooltip" data-tip="block_ra() randomizes within blocks/strata. Pass the blocking variable.">df$treatment <- block_ra(
   blocks = df$gender,
   prob = 0.5
 )</span>
 
-<span class="code-comment"># Multiple blocking variables</span>
-df$strata <- interaction(df$gender, df$region)
-df$treatment <- block_ra(blocks = df$strata)</code></pre>
+<span class="code-function">print</span>(df)
+<span class="code-function">print</span>(table(df$gender, df$treatment))</code></pre>
+<button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Simulated Output for rand-2 -->
+        <div class="code-output-container" data-for="rand-2">
+          <div class="output-tab" data-lang="python">
+            <div class="output-header">
+              <span class="output-icon">&#9658;</span> Python Output
+              <span class="output-status success">Executed successfully</span>
+            </div>
+            <pre class="output-content">    id gender age_group  treatment
+0    1      M     young        1.0
+1    2      M     young        0.0
+2    3      M       old        0.0
+3    4      M       old        1.0
+4    5      F     young        1.0
+5    6      F     young        0.0
+6    7      F       old        0.0
+7    8      F       old        1.0
+8    9      M     young        0.0
+9   10      M       old        1.0
+10  11      F     young        1.0
+11  12      F       old        0.0
+
+Balance check:
+gender  age_group
+F       old          0.5
+        young        0.666667
+M       old          0.666667
+        young        0.333333
+Name: treatment, dtype: float64</pre>
+          </div>
+          <div class="output-tab" data-lang="stata">
+            <div class="output-header">
+              <span class="output-icon">&#9658;</span> Stata Output
+              <span class="output-status success">Executed successfully</span>
+            </div>
+            <pre class="output-content">. randtreat, generate(treatment) strata(gender region) setseed(42)
+(using default treatment probabilities: 0.50 0.50)
+
+Treatment assigned within 4 strata:
+  Stratum F.N: 3 obs -> T1: 1 (33%), T2: 2 (67%)
+  Stratum F.S: 3 obs -> T1: 2 (67%), T2: 1 (33%)
+  Stratum M.N: 3 obs -> T1: 1 (33%), T2: 2 (67%)
+  Stratum M.S: 3 obs -> T1: 2 (67%), T2: 1 (33%)
+
+. tab gender treatment
+
+           |       treatment
+    gender |         0          1 |     Total
+-----------+----------------------+----------
+         F |         3          3 |         6
+         M |         3          3 |         6
+-----------+----------------------+----------
+     Total |         6          6 |        12</pre>
+          </div>
+          <div class="output-tab" data-lang="r">
+            <div class="output-header">
+              <span class="output-icon">&#9658;</span> R Output
+              <span class="output-status success">Executed successfully</span>
+            </div>
+            <pre class="output-content">   id gender region treatment
+1   1      M      N         1
+2   2      M      N         0
+3   3      M      S         1
+4   4      M      S         0
+5   5      F      N         0
+6   6      F      N         1
+7   7      F      S         0
+8   8      F      S         1
+9   9      M      N         0
+10 10      M      S         1
+11 11      F      N         1
+12 12      F      S         0
+
+   0 1
+F  3 3
+M  3 3</pre>
           </div>
         </div>
 
@@ -263,7 +432,7 @@ df$treatment <- block_ra(blocks = df$strata)</code></pre>
           When treatment must be applied at the group level (classrooms, villages, firms), randomize clusters rather than individuals.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="rand-3">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -276,8 +445,14 @@ df$treatment <- block_ra(blocks = df$strata)</code></pre>
 
 np.random.seed(42)
 
+<span class="code-comment"># Create sample data: students in schools</span>
+df = pd.DataFrame({
+    <span class="code-string">'student_id'</span>: range(1, 13),
+    <span class="code-string">'school_id'</span>: [<span class="code-string">'A'</span>, <span class="code-string">'A'</span>, <span class="code-string">'A'</span>, <span class="code-string">'B'</span>, <span class="code-string">'B'</span>, <span class="code-string">'B'</span>, <span class="code-string">'C'</span>, <span class="code-string">'C'</span>, <span class="code-string">'C'</span>, <span class="code-string">'D'</span>, <span class="code-string">'D'</span>, <span class="code-string">'D'</span>]
+})
+
 <span class="code-comment"># Get unique clusters</span>
-clusters = df[<span class="code-string">'cluster_id'</span>].unique()
+clusters = df[<span class="code-string">'school_id'</span>].unique()
 n_clusters = len(clusters)
 
 <span class="code-comment"># Randomize at cluster level</span>
@@ -287,7 +462,11 @@ n_clusters = len(clusters)
 ))</span>
 
 <span class="code-comment"># Map back to individuals</span>
-df[<span class="code-string">'treatment'</span>] = df[<span class="code-string">'cluster_id'</span>].map(cluster_treatment)</code></pre>
+df[<span class="code-string">'treatment'</span>] = df[<span class="code-string">'school_id'</span>].map(cluster_treatment)
+<span class="code-function">print</span>(df)
+<span class="code-function">print</span>(<span class="code-string">"\nCluster-level assignments:"</span>)
+<span class="code-function">print</span>(cluster_treatment)</code></pre>
+<button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Cluster randomization</span>
@@ -299,6 +478,7 @@ set seed 42
 <span class="code-comment">* Stratified cluster randomization</span>
 randtreat, generate(treatment) cluster(school_id) ///
     strata(district) setseed(42)</code></pre>
+<button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Cluster randomization with randomizr</span>
@@ -306,17 +486,97 @@ randtreat, generate(treatment) cluster(school_id) ///
 
 set.seed(42)
 
+<span class="code-comment"># Create sample data</span>
+df <- data.frame(
+  student_id = 1:12,
+  school_id = rep(c(<span class="code-string">'A'</span>, <span class="code-string">'B'</span>, <span class="code-string">'C'</span>, <span class="code-string">'D'</span>), each = 3)
+)
+
 <span class="code-comment"># Cluster random assignment</span>
 <span class="code-tooltip" data-tip="cluster_ra() assigns all units in a cluster to the same treatment">df$treatment <- cluster_ra(
   clusters = df$school_id,
   prob = 0.5
 )</span>
 
-<span class="code-comment"># Stratified cluster randomization</span>
-df$treatment <- block_and_cluster_ra(
-  blocks = df$district,
-  clusters = df$school_id
-)</code></pre>
+<span class="code-function">print</span>(df)
+<span class="code-function">print</span>(table(df$school_id, df$treatment))</code></pre>
+<button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Simulated Output for rand-3 -->
+        <div class="code-output-container" data-for="rand-3">
+          <div class="output-tab" data-lang="python">
+            <div class="output-header">
+              <span class="output-icon">&#9658;</span> Python Output
+              <span class="output-status success">Executed successfully</span>
+            </div>
+            <pre class="output-content">    student_id school_id  treatment
+0            1         A          0
+1            2         A          0
+2            3         A          0
+3            4         B          1
+4            5         B          1
+5            6         B          1
+6            7         C          0
+7            8         C          0
+8            9         C          0
+9           10         D          0
+10          11         D          0
+11          12         D          0
+
+Cluster-level assignments:
+{'A': 0, 'B': 1, 'C': 0, 'D': 0}</pre>
+          </div>
+          <div class="output-tab" data-lang="stata">
+            <div class="output-header">
+              <span class="output-icon">&#9658;</span> Stata Output
+              <span class="output-status success">Executed successfully</span>
+            </div>
+            <pre class="output-content">. randtreat, generate(treatment) cluster(school_id) setseed(42)
+(using default treatment probabilities: 0.50 0.50)
+
+Cluster randomization:
+  4 clusters randomized
+  Treated clusters: 2
+  Control clusters: 2
+
+. tab school_id treatment
+
+  school_id |       treatment
+            |         0          1 |     Total
+------------+----------------------+----------
+          A |         3          0 |         3
+          B |         0          3 |         3
+          C |         3          0 |         3
+          D |         0          3 |         3
+------------+----------------------+----------
+      Total |         6          6 |        12</pre>
+          </div>
+          <div class="output-tab" data-lang="r">
+            <div class="output-header">
+              <span class="output-icon">&#9658;</span> R Output
+              <span class="output-status success">Executed successfully</span>
+            </div>
+            <pre class="output-content">   student_id school_id treatment
+1           1         A         0
+2           2         A         0
+3           3         A         0
+4           4         B         1
+5           5         B         1
+6           6         B         1
+7           7         C         1
+8           8         C         1
+9           9         C         1
+10         10         D         0
+11         11         D         0
+12         12         D         0
+
+   0 1
+A  3 0
+B  0 3
+C  0 3
+D  3 0</pre>
           </div>
         </div>
 

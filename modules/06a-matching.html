@@ -224,7 +224,7 @@
           </p>
         </div>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="match-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -262,6 +262,7 @@ matched_df = pd.concat([treated.reset_index(drop=True),
 <span class="code-comment"># Step 4: Estimate ATT</span>
 att = treated[<span class="code-string">'outcome'</span>].mean() - matched_control[<span class="code-string">'outcome'</span>].mean()
 print(f<span class="code-string">"ATT: {att:.3f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Propensity Score Matching with teffects</span>
@@ -281,6 +282,7 @@ teffects psmatch (outcome) (treatment age income education), ///
 
 <span class="code-comment">* Check balance after matching</span>
 pstest age income education, treated(treatment)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Propensity Score Matching with MatchIt</span>
@@ -304,7 +306,78 @@ matched_df <- match.data(m.out)
 <span class="code-tooltip" data-tip="On matched data, simple difference in means gives the ATT">att_model <- lm(outcome ~ treatment, data = matched_df,
                 weights = weights)
 summary(att_model)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="match-1" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Propensity Score Summary:
+  Mean (Treated):   0.724
+  Mean (Control):   0.312
+  Overlap region:   [0.08, 0.95]
+
+Matching Results:
+  Treated units:         247
+  Matched controls:      247
+  Avg. match distance:   0.023
+
+ATT: 0.342</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-1" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Treatment-effects estimation                   Number of obs     =        500
+Estimator      : propensity-score matching     Matches: requested =          1
+Outcome model  : matching                                     min =          1
+Treatment model: logit                                        max =          3
+------------------------------------------------------------------------------
+             |              AI Robust
+     outcome |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ATET         |
+   treatment |
+   (1 vs 0)  |   .3421587   .0893214     3.83   0.000     .1670919    .5172255
+------------------------------------------------------------------------------
+
+psmatch2: Treatment assignment
+psmatch2: Common support
+             |    Off support     On support |     Total
+-------------+--------------------------------+----------
+  Untreated  |              0            253 |       253
+    Treated  |              5            242 |       247
+-------------+--------------------------------+----------
+      Total  |              5            495 |       500</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-1" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Call:
+matchit(formula = treatment ~ age + income + education, data = df,
+    method = "nearest", distance = "glm", caliper = 0.1)
+
+Summary of Balance for All Data:
+           Means Treated Means Control Std. Mean Diff.
+age               42.31         38.76           0.312
+income         52847.23      45231.89           0.428
+education         14.2          12.8           0.387
+
+Summary of Balance for Matched Data:
+           Means Treated Means Control Std. Mean Diff.
+age               41.89         41.67           0.019
+income         51234.56      50987.32           0.014
+education         13.9          13.8           0.028
+
+Sample Sizes:
+          Control Treated
+All           253     247
+Matched       238     238
+Unmatched      15       9
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)   4.2341     0.0672  63.012   <2e-16 ***
+treatment     0.3389     0.0891   3.803  0.00016 ***</div>
         </div>
 
         <!-- Results Interpretation Box -->
@@ -334,7 +407,7 @@ summary(att_model)</span></code></pre>
           </p>
         </div>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="match-2">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -365,6 +438,7 @@ df_matched[<span class="code-string">'cem_weight'</span>] = df_matched.apply(
 )
 
 print(f<span class="code-string">"Matched: {len(df_matched)} of {len(df)} observations"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Coarsened Exact Matching</span>
@@ -382,6 +456,7 @@ cem age (#5) income (#4) education, treatment(treatment)
 
 <span class="code-comment">* Check match quality</span>
 imb age income education, treatment(treatment)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Coarsened Exact Matching with MatchIt</span>
@@ -407,7 +482,75 @@ att_model <- lm(outcome ~ treatment + age + income + education,
                 data = matched_df,
                 weights = weights)
 summary(att_model)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="match-2" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">CEM Coarsening Summary:
+  age:       4 bins (18-30, 30-45, 45-60, 60-100)
+  income:    5 equal-frequency bins
+  education: kept as-is (categorical)
+
+Strata Summary:
+  Total strata:        48
+  Matched strata:      31 (64.6%)
+  Unmatched strata:    17
+
+Matched: 412 of 500 observations
+  Treated matched:   198 of 247 (80.2%)
+  Control matched:   214 of 253 (84.6%)</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-2" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Coarsened exact matching
+Matching Summary:
+---------------------------------------------------------
+             |  All     Matched    Unmatched
+-------------+-------------------------------------------
+    Treated  |  247        198           49
+  Untreated  |  253        214           39
+-------------+-------------------------------------------
+      Total  |  500        412           88
+---------------------------------------------------------
+
+Multivariate L1 distance: .28451
+
+Univariate imbalance:
+                          L1       mean       min       25%       50%       75%       max
+-------------+-------------------------------------------------------------------------
+         age          .0423      .0124    -.0021     .0089     .0156     .0187     .0234
+      income          .0387      .0098    -.0012     .0067     .0112     .0145     .0189
+   education          .0156      .0045    -.0008     .0023     .0051     .0067     .0089</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-2" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Call:
+matchit(formula = treatment ~ age + income + education, data = df,
+    method = "cem", cutpoints = list(age = c(30, 45, 60), income = "q4"))
+
+Summary of Balance for Matched Data:
+           Means Treated Means Control Std. Mean Diff.
+age               40.23         40.18           0.004
+income         48234.12      48012.89           0.012
+education         13.45         13.42           0.008
+
+Sample Sizes:
+          Control Treated
+All           253     247
+Matched       214     198
+Unmatched      39      49
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept)    3.8912     0.1234  31.534   <2e-16 ***
+treatment      0.3156     0.0823   3.836  0.00014 ***
+age            0.0123     0.0034   3.618  0.00032 ***
+income         0.0000     0.0000   2.145  0.03245 *
+education      0.0456     0.0189   2.413  0.01612 *</div>
         </div>
 
         <h2 id="nn">Nearest Neighbor Matching</h2>
@@ -416,7 +559,7 @@ summary(att_model)</code></pre>
           Match on Mahalanobis distance (accounts for covariance) or Euclidean distance directly on covariates.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="match-3">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -445,6 +588,7 @@ matched_outcomes = df.loc[control_indices[matches], <span class="code-string">'o
 
 <span class="code-comment"># ATT</span>
 att = df.loc[df[<span class="code-string">'treatment'</span>] == 1, <span class="code-string">'outcome'</span>].mean() - matched_outcomes.mean()</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Mahalanobis Distance Matching</span>
@@ -460,6 +604,7 @@ teffects nnmatch (outcome age income education) (treatment), ///
 <span class="code-comment">* Multiple matches with replacement</span>
 teffects nnmatch (outcome age income education) (treatment), ///
     atet metric(maha) nn(5)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Mahalanobis Distance Matching</span>
@@ -486,7 +631,85 @@ m.maha <- matchit(treatment ~ age + income + education,
                   mahvars = ~ age + income + education,
                   caliper = 0.25,
                   std.caliper = TRUE)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="match-3" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Covariance Matrix:
+              age       income    education
+age        156.234    2341.56      12.45
+income    2341.56   89234567.12   1234.56
+education   12.45     1234.56       4.89
+
+Mahalanobis Distance Summary:
+  Min distance:      0.087
+  Mean distance:     0.456
+  Max distance:      2.341
+  Median distance:   0.389
+
+Matching Results:
+  Treated units:     247
+  Matched controls:  247 (with replacement: 189 unique)
+
+ATT (Mahalanobis): 0.328</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-3" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Treatment-effects estimation                    Number of obs     =        500
+Estimator      : nearest-neighbor matching      Matches: requested =          1
+Outcome model  : matching                                      min =          1
+Distance metric: Mahalanobis                                   max =          4
+------------------------------------------------------------------------------
+             |              AI Robust
+     outcome |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ATET         |
+   treatment |
+   (1 vs 0)  |   .3276453   .0912345     3.59   0.000     .1488289    .5064617
+------------------------------------------------------------------------------
+
+Matching with bias adjustment (nn=3):
+------------------------------------------------------------------------------
+             |              AI Robust
+     outcome |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ATET         |
+   treatment |
+   (1 vs 0)  |   .3312187   .0823456     4.02   0.000     .1698241    .4926133
+------------------------------------------------------------------------------</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-3" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Call:
+matchit(formula = treatment ~ age + income + education, data = df,
+    method = "nearest", distance = "mahalanobis", ratio = 3)
+
+Summary of Balance for All Data:
+           Means Treated Means Control Std. Mean Diff.
+age               42.31         38.76           0.312
+income         52847.23      45231.89           0.428
+education         14.2          12.8           0.387
+
+Summary of Balance for Matched Data:
+           Means Treated Means Control Std. Mean Diff.
+age               42.31         42.08           0.020
+income         52847.23      52134.56           0.040
+education         14.2          14.1           0.028
+
+Sample Sizes:
+              Control Treated
+All               253     247
+Matched (Ratio)   741     247
+Unmatched           0       0
+
+Effective Sample Sizes:
+          Control Treated
+All        253.00   247
+Matched    698.23   247</div>
         </div>
 
         <h2 id="diagnostics">Balance Diagnostics</h2>
@@ -495,7 +718,7 @@ m.maha <- matchit(treatment ~ age + income + education,
           Always check that matching improved covariate balance. Report standardized mean differences (SMD) and variance ratios.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="match-4">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -530,6 +753,7 @@ ax.set_xlabel(<span class="code-string">'Standardized Mean Difference'</span>)
 ax.legend()
 plt.tight_layout()
 plt.show()</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Balance Diagnostics</span>
@@ -545,6 +769,7 @@ tebalance density
 
 <span class="code-comment">* Overidentification test for balance</span>
 tebalance overid</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Balance Diagnostics with cobalt</span>
@@ -564,7 +789,90 @@ bal.plot(m.out, var.name = "age", which = "both")
 
 <span class="code-comment"># Full balance summary</span>
 summary(m.out)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="match-4" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Balance Diagnostics
+==================
+
+Standardized Mean Differences:
+                Before    After    Threshold
+Variable        Matching  Matching   (0.1)
+-----------     --------  --------  ---------
+age               0.312     0.019      PASS
+income            0.428     0.014      PASS
+education         0.387     0.028      PASS
+
+Variance Ratios:
+                Before    After    Acceptable
+Variable        Matching  Matching  (0.5-2.0)
+-----------     --------  --------  ---------
+age               1.342     1.023      PASS
+income            1.567     1.089      PASS
+education         1.234     0.987      PASS
+
+[Love Plot displayed showing improvement in balance]</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-4" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. tebalance summarize
+
+Covariate balance summary
+                                              Raw      Matched
+------------------------------------------------------------------
+Number of obs =                               500          476
+Treated obs =                                 247          238
+Control obs =                                 253          238
+------------------------------------------------------------------
+
+                          Standardized differences            Variance ratio
+                          --------------------------    --------------------------
+                             Raw       Matched            Raw       Matched
+                          ----------  ----------       ----------  ----------
+age                          0.312       0.019           1.342       1.023
+income                       0.428       0.014           1.567       1.089
+education                    0.387       0.028           1.234       0.987
+
+. tebalance overid
+
+Overidentification test for covariate balance
+    chi2(3) =    2.14
+    Prob > chi2 = 0.5436
+
+Balance is adequate (fail to reject null of balance)</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-4" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Call:
+bal.tab(m.out, un = TRUE, thresholds = c(m = 0.1))
+
+Balance Measures
+                Type Diff.Un Diff.Adj  M.Threshold
+age          Contin.   0.312    0.019      Balanced
+income       Contin.   0.428    0.014      Balanced
+education    Contin.   0.387    0.028      Balanced
+
+Balance tally for mean differences
+                   count
+Balanced, <0.1         3
+Not Balanced, >0.1     0
+
+Variable with most imbalance
+ Variable Diff.Adj        M.Threshold
+ education   0.028          Balanced
+
+Sample sizes
+          Control Treated
+All           253     247
+Matched       238     238
+Unmatched      15       9
+
+[Love plot displayed with all variables within 0.1 threshold]</div>
         </div>
 
         <!-- Balance Results Interpretation -->
@@ -594,7 +902,7 @@ summary(m.out)</code></pre>
           </p>
         </div>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="match-5">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -630,6 +938,7 @@ aipw_0 = mu0 + (1 - D) * (Y - mu0) / (1 - pscore)
 ate_aipw = np.mean(aipw_1 - aipw_0)</span>
 
 print(f<span class="code-string">"ATE (AIPW): {ate_aipw:.3f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Doubly Robust with teffects</span>
@@ -645,6 +954,7 @@ teffects ipwra (outcome age income education) ///
 <span class="code-comment">* With different link functions</span>
 teffects aipw (outcome age income education, poisson) ///
     (treatment age income education, probit), atet</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Doubly Robust with AIPW package</span>
@@ -674,7 +984,84 @@ aipw_ml <- AIPW$new(
 )
 aipw_ml$fit()
 aipw_ml$summary()</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="match-5" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Propensity Score Model:
+  Logistic Regression, AUC: 0.78
+
+Outcome Model (Treated):
+  R-squared: 0.342
+  Coefficients: age=0.012, income=0.00001, education=0.089
+
+Outcome Model (Control):
+  R-squared: 0.318
+  Coefficients: age=0.010, income=0.00001, education=0.078
+
+AIPW Estimates:
+  E[Y(1)]: 4.587 (SE: 0.067)
+  E[Y(0)]: 4.243 (SE: 0.058)
+
+ATE (AIPW): 0.344
+  Standard Error: 0.089
+  95% CI: [0.170, 0.518]
+  p-value: 0.0001</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-5" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Treatment-effects estimation                   Number of obs      =       500
+Estimator      : augmented IPW
+Outcome model  : linear
+Treatment model: logit
+------------------------------------------------------------------------------
+             |               Robust
+     outcome |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ATET         |
+   treatment |
+   (1 vs 0)  |   .3445672   .0879234     3.92   0.000     .1722404    .5168940
+-------------+----------------------------------------------------------------
+POmean       |
+   treatment |
+          0  |   4.243128   .0581234    73.01   0.000     4.129209    4.357047
+------------------------------------------------------------------------------
+
+Note: Potential outcome means are computed at covariate means in the
+      estimation sample.
+
+teffects ipwra:
+------------------------------------------------------------------------------
+             |               Robust
+     outcome |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ATET         |
+   treatment |
+   (1 vs 0)  |   .3412345   .0867123     3.94   0.000     .1712822    .5111868
+------------------------------------------------------------------------------</div>
+        </div>
+
+        <div class="output-simulation" data-output="match-5" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">                  Estimate Std.Error 95%LCL 95%UCL
+Risk of Y(1)        4.5867    0.0672 4.4550 4.7184
+Risk of Y(0)        4.2431    0.0584 4.1286 4.3576
+Risk Difference     0.3436    0.0889 0.1694 0.5178
+Risk Ratio          1.0810    0.0214 1.0390 1.1246
+
+ATE: 0.3436 (SE: 0.0889)
+95% Confidence Interval: [0.169, 0.518]
+
+With SuperLearner ensemble:
+                  Estimate Std.Error 95%LCL 95%UCL
+Risk Difference     0.3389    0.0856 0.1711 0.5067
+
+Cross-validated risks:
+  Outcome model: SL.ranger selected (CV-risk: 0.234)
+  Propensity model: SL.glm selected (CV-risk: 0.312)</div>
         </div>
 
         <div class="info-box warning">

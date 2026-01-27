@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Collapsible sidebar sub-navigation
   initCollapsibleSubnav();
+
+  // Run code buttons for output simulation
+  initRunButtons();
 });
 
 /**
@@ -375,6 +378,90 @@ function positionTooltip(hotspot, tooltip) {
   // Update arrow position class
   tooltip.classList.remove('top', 'bottom', 'left', 'right');
   tooltip.classList.add(position);
+}
+
+/**
+ * Initialize run code buttons for output simulation
+ * Handles showing/hiding simulated output for code examples
+ */
+function initRunButtons() {
+  // Handle run button clicks
+  document.querySelectorAll('.run-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const lang = this.dataset.lang;
+      const codeBlock = this.closest('.code-tabs');
+      const outputId = codeBlock ? codeBlock.dataset.runnable : null;
+
+      if (!outputId) return;
+
+      // Change button state temporarily
+      const originalText = this.textContent;
+      this.textContent = 'Running...';
+      this.disabled = true;
+
+      // Simulate a brief delay for "execution"
+      setTimeout(() => {
+        this.textContent = originalText;
+        this.disabled = false;
+
+        // Try both output formats for compatibility:
+        // Format 1: .output-simulation[data-output][data-lang] (legacy)
+        const legacyOutput = document.querySelector(`.output-simulation[data-output="${outputId}"][data-lang="${lang}"]`);
+        if (legacyOutput) {
+          // Hide all outputs for this code block first
+          document.querySelectorAll(`.output-simulation[data-output="${outputId}"]`).forEach(out => {
+            out.classList.remove('visible');
+          });
+          legacyOutput.classList.add('visible');
+          legacyOutput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          return;
+        }
+
+        // Format 2: .code-output-wrapper[data-for] (new format)
+        const newOutput = document.querySelector(`.code-output-wrapper[data-for="${outputId}"]`);
+        if (newOutput) {
+          // Toggle visibility with animation
+          if (newOutput.style.display === 'none' || !newOutput.style.display) {
+            newOutput.style.display = 'block';
+            newOutput.style.opacity = '0';
+            newOutput.style.transform = 'translateY(-10px)';
+            // Trigger reflow
+            newOutput.offsetHeight;
+            newOutput.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            newOutput.style.opacity = '1';
+            newOutput.style.transform = 'translateY(0)';
+            // Scroll into view
+            setTimeout(() => {
+              newOutput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+          }
+        }
+      }, 400);
+    });
+  });
+
+  // Handle close output button clicks (legacy format)
+  document.querySelectorAll('.close-output').forEach(btn => {
+    btn.addEventListener('click', function() {
+      this.closest('.output-simulation').classList.remove('visible');
+    });
+  });
+
+  // Add click-to-close for new format outputs
+  document.querySelectorAll('.code-output-wrapper .output-header').forEach(header => {
+    header.style.cursor = 'pointer';
+    header.title = 'Click to hide output';
+    header.addEventListener('click', function() {
+      const wrapper = this.closest('.code-output-wrapper');
+      if (wrapper) {
+        wrapper.style.opacity = '0';
+        wrapper.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+          wrapper.style.display = 'none';
+        }, 300);
+      }
+    });
+  });
 }
 
 /**

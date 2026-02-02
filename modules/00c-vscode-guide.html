@@ -949,6 +949,190 @@ statsmodels==0.14.0
           </ul>
         </div>
 
+        <h2 id="project-setup">Setting Up Your Project Folder</h2>
+
+        <p>
+          Before diving into data analysis, it's essential to organize your work properly. A well-structured project folder makes your research <strong>reproducible</strong> and helps you (and others) find files easily.
+        </p>
+
+        <h3>Recommended Folder Structure</h3>
+
+        <p>
+          For any research project, I recommend creating a folder structure like this:
+        </p>
+
+        <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem; font-family: var(--font-code); font-size: 0.9rem; margin: 1rem 0;">
+          <span style="color: #0d6efd;">my_project/</span><br>
+          ├── <span style="color: #198754;">data/</span> <span style="color: #6c757d;">← Raw data files (never modify these)</span><br>
+          │   ├── raw/ <span style="color: #6c757d;">← Original downloaded data</span><br>
+          │   └── processed/ <span style="color: #6c757d;">← Cleaned/transformed data</span><br>
+          ├── <span style="color: #198754;">code/</span> <span style="color: #6c757d;">← Your Python scripts</span><br>
+          │   ├── 01_import.py<br>
+          │   ├── 02_clean.py<br>
+          │   └── 03_analysis.py<br>
+          ├── <span style="color: #198754;">notebooks/</span> <span style="color: #6c757d;">← Jupyter notebooks for exploration</span><br>
+          ├── <span style="color: #198754;">output/</span> <span style="color: #6c757d;">← Figures, tables, results</span><br>
+          │   ├── figures/<br>
+          │   └── tables/<br>
+          ├── <span style="color: #198754;">venv/</span> <span style="color: #6c757d;">← Virtual environment (don't commit to Git)</span><br>
+          ├── <span style="color: #198754;">requirements.txt</span> <span style="color: #6c757d;">← Package dependencies</span><br>
+          └── <span style="color: #198754;">README.md</span> <span style="color: #6c757d;">← Description of your project</span>
+        </div>
+
+        <p>
+          You can create this structure using VS Code's Explorer panel or by running these commands in the terminal:
+        </p>
+
+        <div class="code-tabs" data-runnable="vscode-folders">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="windows">Windows (PowerShell)</button>
+            <button class="tab-button" data-lang="mac">Mac/Linux</button>
+            <button class="tab-button" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="windows">
+<pre><code><span class="code-comment"># Create project folder structure (Windows PowerShell)</span>
+<span class="code-tooltip" data-tip="mkdir creates folders. The -Force flag prevents errors if the folder already exists.">mkdir</span> data\raw, data\processed, code, notebooks, output\figures, output\tables <span class="code-tooltip" data-tip="Creates multiple folders in one command.">-Force</span></code></pre>
+            <button class="run-btn" data-lang="shell">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="mac">
+<pre><code><span class="code-comment"># Create project folder structure (Mac/Linux)</span>
+<span class="code-tooltip" data-tip="mkdir -p creates folders and any parent folders that don't exist.">mkdir -p</span> data/raw data/processed code notebooks output/figures output/tables</code></pre>
+            <button class="run-btn" data-lang="shell">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="python">
+<pre><code><span class="code-keyword">import</span> os
+<span class="code-keyword">from</span> pathlib <span class="code-keyword">import</span> Path
+
+<span class="code-comment"># Create project folder structure</span>
+<span class="code-tooltip" data-tip="A list of all folders we want to create.">folders</span> = [
+    <span class="code-string">"data/raw"</span>,
+    <span class="code-string">"data/processed"</span>,
+    <span class="code-string">"code"</span>,
+    <span class="code-string">"notebooks"</span>,
+    <span class="code-string">"output/figures"</span>,
+    <span class="code-string">"output/tables"</span>
+]
+
+<span class="code-keyword">for</span> folder <span class="code-keyword">in</span> folders:
+    <span class="code-function code-tooltip" data-tip="Path().mkdir() creates a folder. parents=True creates parent folders, exist_ok=True prevents errors if it exists.">Path(folder).mkdir</span>(parents=<span class="code-keyword">True</span>, exist_ok=<span class="code-keyword">True</span>)
+    <span class="code-function">print</span>(<span class="code-string">f"Created: </span>{folder}<span class="code-string">"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+        </div>
+
+        <h3>Opening Your Project in VS Code</h3>
+
+        <p>
+          Always open your <strong>project folder</strong> in VS Code, not individual files. This ensures:
+        </p>
+        <ul>
+          <li>The Explorer panel shows all your project files</li>
+          <li>The terminal opens in your project directory</li>
+          <li>VS Code detects your virtual environment</li>
+          <li>File paths work correctly</li>
+        </ul>
+
+        <p>
+          To open a folder: <strong>File → Open Folder</strong> (or <code class="code-tooltip" data-tip="Keyboard shortcut to open a folder in VS Code.">Ctrl+K Ctrl+O</code>)
+        </p>
+
+        <h3>Setting the Working Directory</h3>
+
+        <p>
+          In Python, the <strong>working directory</strong> is where Python looks for files when you use relative paths. Unlike R, Python doesn't have a simple <code>setwd()</code> function—instead, you use the <code>os</code> module.
+        </p>
+
+        <p>
+          To check your current working directory:
+        </p>
+
+<pre><code><span class="code-keyword">import</span> os
+
+<span class="code-comment"># Where is Python looking for files?</span>
+<span class="code-function">print</span>(<span class="code-function code-tooltip" data-tip="os.getcwd() returns the current working directory (cwd = current working directory).">os.getcwd</span>())</code></pre>
+
+        <p>
+          To change your working directory:
+        </p>
+
+<pre><code><span class="code-keyword">import</span> os
+
+<span class="code-comment"># Change to your project folder</span>
+<span class="code-function code-tooltip" data-tip="os.chdir() changes the current working directory. All relative file paths will now be relative to this folder.">os.chdir</span>(<span class="code-string code-tooltip" data-tip="Replace with your actual project path. Use forward slashes even on Windows.">"C:/Users/yourname/Documents/my_project"</span>)
+
+<span class="code-comment"># Or use Path for cross-platform compatibility</span>
+<span class="code-keyword">from</span> pathlib <span class="code-keyword">import</span> Path
+<span class="code-function">os.chdir</span>(<span class="code-function code-tooltip" data-tip="Path.home() returns your home folder. This works on Windows, Mac, and Linux.">Path.home</span>() / <span class="code-string">"Documents"</span> / <span class="code-string">"my_project"</span>)</code></pre>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Better Approach: Open the Folder in VS Code</div>
+          <p>
+            The best practice is to <strong>open your project folder</strong> in VS Code (<strong>File → Open Folder</strong>). When you run Python from VS Code's terminal, the working directory will automatically be your project folder. No need to change it in code!
+          </p>
+        </div>
+
+        <h3>Practice: Download Real Data</h3>
+
+        <p>
+          Let's practice by downloading real economic data. <strong>Our World in Data</strong> provides excellent, well-documented datasets perfect for economics research. We'll use this data source throughout the course.
+        </p>
+
+        <ol>
+          <li>Visit <a href="https://github.com/owid/owid-datasets" target="_blank"><strong>Our World in Data Datasets</strong></a> on GitHub</li>
+          <li>Or download directly: <a href="https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/GDP%20per%20capita%20(Maddison%20Project%20Database%202020)/GDP%20per%20capita%20(Maddison%20Project%20Database%202020).csv" target="_blank">GDP per capita (Maddison Project Database)</a></li>
+          <li>Save the file to your <code>data/raw/</code> folder</li>
+        </ol>
+
+        <p>
+          Alternatively, download it directly with Python:
+        </p>
+
+<pre><code><span class="code-keyword">import</span> urllib.request
+<span class="code-keyword">from</span> pathlib <span class="code-keyword">import</span> Path
+
+<span class="code-comment"># Download GDP per capita data from Our World in Data</span>
+<span class="code-tooltip" data-tip="The URL of the CSV file we want to download.">url</span> = <span class="code-string">"https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/GDP%20per%20capita%20(Maddison%20Project%20Database%202020)/GDP%20per%20capita%20(Maddison%20Project%20Database%202020).csv"</span>
+
+<span class="code-comment"># Create data/raw folder if it doesn't exist</span>
+Path(<span class="code-string">"data/raw"</span>).mkdir(parents=<span class="code-keyword">True</span>, exist_ok=<span class="code-keyword">True</span>)
+
+<span class="code-comment"># Download and save</span>
+<span class="code-function code-tooltip" data-tip="urllib.request.urlretrieve() downloads a file from a URL and saves it to a local path.">urllib.request.urlretrieve</span>(url, <span class="code-string">"data/raw/gdp_per_capita.csv"</span>)
+<span class="code-function">print</span>(<span class="code-string">"Downloaded successfully!"</span>)</code></pre>
+
+        <h3>Exploring Data in VS Code</h3>
+
+        <p>
+          Once you have data in your project, VS Code makes it easy to explore:
+        </p>
+
+        <ol>
+          <li><strong>Explorer Panel</strong>: Navigate to your <code>data/raw/</code> folder and click on the CSV file</li>
+          <li>With the <strong>Rainbow CSV</strong> or <strong>Excel Viewer</strong> extension, you'll see formatted, color-coded columns</li>
+          <li><strong>Load and View</strong>: Use Python code to load and inspect the data:</li>
+        </ol>
+
+<pre><code><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Load the data</span>
+<span class="code-tooltip" data-tip="pd.read_csv() reads a CSV file into a pandas DataFrame.">gdp_data</span> = pd.<span class="code-function">read_csv</span>(<span class="code-string">"data/raw/gdp_per_capita.csv"</span>)
+
+<span class="code-comment"># Quick look at the data</span>
+<span class="code-function">print</span>(gdp_data.<span class="code-function code-tooltip" data-tip=".head() shows the first 5 rows of your DataFrame. Use .head(10) to see more rows.">head</span>())
+
+<span class="code-comment"># Basic info about the data</span>
+<span class="code-function">print</span>(gdp_data.<span class="code-function code-tooltip" data-tip=".info() shows column names, data types, and non-null counts.">info</span>())
+
+<span class="code-comment"># Summary statistics</span>
+<span class="code-function">print</span>(gdp_data.<span class="code-function code-tooltip" data-tip=".describe() shows summary statistics: count, mean, std, min, max, and quartiles.">describe</span>())</code></pre>
+
+        <div class="info-box note">
+          <div class="info-box-title">Interactive Data Exploration in Jupyter</div>
+          <p>
+            For interactive data exploration, Jupyter notebooks are excellent. With the <strong>Jupyter extension</strong> installed, you can create <code>.ipynb</code> files in VS Code. Type a variable name on its own line and run the cell to see a nicely formatted table view of your DataFrame—no <code>print()</code> needed!
+          </p>
+        </div>
+
         <h2>Essential Keyboard Shortcuts</h2>
 
         <table>

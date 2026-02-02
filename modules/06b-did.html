@@ -130,6 +130,7 @@
             <li><a href="#event-study">Event Study Design</a></li>
             <li><a href="#staggered">Staggered Adoption: The Problem</a></li>
             <li><a href="#modern">Modern DiD Estimators</a></li>
+            <li><a href="#comparing">Comparing Estimators</a></li>
             <li><a href="#diagnostics">Parallel Trends Diagnostics</a></li>
           </ul>
         </div>
@@ -1019,6 +1020,282 @@ Aggregated ATT (average post-treatment effect):
 0.4736 0.0923 [0.2927, 0.6545] ***
 
 [iplot() shows Sun-Abraham event study with cohort-weighted estimates]</div>
+        </div>
+
+        <h3 id="comparing">Comparing All Estimators</h3>
+
+        <p>
+          A powerful robustness check is to plot multiple DiD estimators on the same figure, as in <a href="https://doi.org/10.1257/aer.20211218" target="_blank">Braghieri, Levy, and Makarin (2022)</a> on social media and mental health. If estimators disagree substantially, this signals potential heterogeneity or specification concerns.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Why Compare Estimators?</div>
+          <p>Different estimators make different assumptions:</p>
+          <ul style="margin-top: 0.5rem;">
+            <li><strong>TWFE</strong>: Assumes homogeneous treatment effects (can be biased with staggered adoption)</li>
+            <li><strong>Callaway-Sant'Anna</strong>: Uses never-treated or not-yet-treated as controls</li>
+            <li><strong>Sun-Abraham</strong>: Interaction-weighted approach with cohort-specific effects</li>
+            <li><strong>de Chaisemartin-D'Haultfoeuille</strong>: Robust to heterogeneous effects and switching treatments</li>
+          </ul>
+          <p style="margin-bottom: 0;">When all estimators agree, this strengthens your causal claims. When they diverge, investigate why.</p>
+        </div>
+
+        <div class="code-tabs" data-runnable="did-compare">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Multi-Estimator Comparison Plot (Braghieri et al. style)</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+<span class="code-keyword">from</span> matplotlib.lines <span class="code-keyword">import</span> Line2D
+
+<span class="code-comment"># After running each estimator, collect the event-study coefficients</span>
+<span class="code-comment"># Example structure: dict with estimator -> (rel_time, coef, ci_lower, ci_upper)</span>
+
+<span class="code-tooltip" data-tip="Store results from each estimator with relative time, coefficient, and confidence intervals">results = {
+    <span class="code-string">'TWFE'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: twfe_coefs, <span class="code-string">'ci_lo'</span>: twfe_ci_lo, <span class="code-string">'ci_hi'</span>: twfe_ci_hi},
+    <span class="code-string">'Callaway-Sant\'Anna'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: cs_coefs, <span class="code-string">'ci_lo'</span>: cs_ci_lo, <span class="code-string">'ci_hi'</span>: cs_ci_hi},
+    <span class="code-string">'Sun-Abraham'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: sa_coefs, <span class="code-string">'ci_lo'</span>: sa_ci_lo, <span class="code-string">'ci_hi'</span>: sa_ci_hi},
+    <span class="code-string">'de Chaisemartin-D\'H'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: dcdh_coefs, <span class="code-string">'ci_lo'</span>: dcdh_ci_lo, <span class="code-string">'ci_hi'</span>: dcdh_ci_hi},
+}</span>
+
+<span class="code-comment"># Create comparison plot</span>
+<span class="code-tooltip" data-tip="Use offsets so confidence intervals don't overlap visually">fig, ax = plt.subplots(figsize=(12, 7))
+
+colors = [<span class="code-string">'#1f77b4'</span>, <span class="code-string">'#ff7f0e'</span>, <span class="code-string">'#2ca02c'</span>, <span class="code-string">'#d62728'</span>]
+markers = [<span class="code-string">'o'</span>, <span class="code-string">'s'</span>, <span class="code-string">'^'</span>, <span class="code-string">'D'</span>]
+offsets = [-0.15, -0.05, 0.05, 0.15]  <span class="code-comment"># Horizontal jitter</span>
+
+<span class="code-keyword">for</span> i, (name, data) <span class="code-keyword">in</span> enumerate(results.items()):
+    x = np.array(data[<span class="code-string">'rel_time'</span>]) + offsets[i]
+    y = data[<span class="code-string">'coef'</span>]
+    yerr = [np.array(y) - np.array(data[<span class="code-string">'ci_lo'</span>]),
+            np.array(data[<span class="code-string">'ci_hi'</span>]) - np.array(y)]
+
+    ax.errorbar(x, y, yerr=yerr, fmt=markers[i], color=colors[i],
+                capsize=3, capthick=1.5, label=name, markersize=8, linewidth=1.5)</span>
+
+<span class="code-comment"># Add reference lines</span>
+ax.axhline(y=0, color=<span class="code-string">'black'</span>, linestyle=<span class="code-string">'-'</span>, linewidth=0.8)
+ax.axvline(x=-0.5, color=<span class="code-string">'gray'</span>, linestyle=<span class="code-string">'--'</span>, linewidth=1, alpha=0.7)
+
+<span class="code-comment"># Formatting</span>
+ax.set_xlabel(<span class="code-string">'Periods Relative to Treatment'</span>, fontsize=12)
+ax.set_ylabel(<span class="code-string">'Treatment Effect Estimate'</span>, fontsize=12)
+ax.set_title(<span class="code-string">'DiD Estimator Comparison'</span>, fontsize=14, fontweight=<span class="code-string">'bold'</span>)
+ax.legend(loc=<span class="code-string">'upper left'</span>, framealpha=0.9)
+ax.set_xticks(range(min(rel_times), max(rel_times)+1))
+
+plt.tight_layout()
+plt.savefig(<span class="code-string">'estimator_comparison.png'</span>, dpi=300, bbox_inches=<span class="code-string">'tight'</span>)
+plt.show()</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Multi-Estimator Comparison Plot (Braghieri et al. style)</span>
+<span class="code-comment">* Run each estimator and store results, then combine in one figure</span>
+
+<span class="code-comment">* 1. Run TWFE event study</span>
+reghdfe outcome ib-1.rel_time, absorb(unit_id year) cluster(unit_id)
+parmest, saving(twfe_results, replace)
+
+<span class="code-comment">* 2. Run Callaway-Sant'Anna</span>
+csdid outcome, ivar(unit_id) time(year) gvar(first_treat)
+csdid_stats event
+<span class="code-comment">* Export results manually or use csdid's stored matrices</span>
+
+<span class="code-comment">* 3. Run Sun-Abraham</span>
+eventstudyinteract outcome rel_time_*, cohort(cohort) ///
+    control_cohort(never_treat) absorb(unit_id year) cluster(unit_id)
+<span class="code-tooltip" data-tip="Store matrices e(b_iw) and e(V_iw) for Sun-Abraham coefficients">matrix sa_coef = e(b_iw)
+matrix sa_var = e(V_iw)</span>
+
+<span class="code-comment">* 4. Run de Chaisemartin-D'Haultfoeuille</span>
+did_multiplegt outcome unit_id year treatment, ///
+    robust_dynamic dynamic(5) placebo(3) cluster(unit_id)
+
+<span class="code-comment">* Combine results into one dataset for plotting</span>
+<span class="code-tooltip" data-tip="Create a combined dataset with estimator, rel_time, coef, ci_lo, ci_hi">clear
+input str30 estimator rel_time coef ci_lo ci_hi
+<span class="code-comment">* ... manually enter or append saved results ...</span>
+end</span>
+
+<span class="code-comment">* Create the comparison plot</span>
+<span class="code-tooltip" data-tip="Use separate() to create different markers/colors by estimator">twoway (rcap ci_lo ci_hi rel_time if estimator=="TWFE", ///
+           lcolor(navy) lwidth(medium)) ///
+       (scatter coef rel_time if estimator=="TWFE", ///
+           mcolor(navy) msymbol(O) msize(medium)) ///
+       (rcap ci_lo ci_hi rel_time if estimator=="CS", ///
+           lcolor(cranberry) lwidth(medium)) ///
+       (scatter coef rel_time if estimator=="CS", ///
+           mcolor(cranberry) msymbol(S) msize(medium)) ///
+       (rcap ci_lo ci_hi rel_time if estimator=="SA", ///
+           lcolor(forest_green) lwidth(medium)) ///
+       (scatter coef rel_time if estimator=="SA", ///
+           mcolor(forest_green) msymbol(T) msize(medium)) ///
+       (rcap ci_lo ci_hi rel_time if estimator=="dCDH", ///
+           lcolor(dkorange) lwidth(medium)) ///
+       (scatter coef rel_time if estimator=="dCDH", ///
+           mcolor(dkorange) msymbol(D) msize(medium)), ///
+       xline(-0.5, lcolor(gray) lpattern(dash)) ///
+       yline(0, lcolor(black)) ///
+       legend(order(2 "TWFE" 4 "Callaway-Sant'Anna" ///
+                    6 "Sun-Abraham" 8 "de Chaisemartin-D'H") ///
+              rows(1) position(6)) ///
+       xtitle("Periods Relative to Treatment") ///
+       ytitle("Treatment Effect Estimate") ///
+       title("DiD Estimator Comparison")
+
+graph export "estimator_comparison.png", replace width(1200)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Multi-Estimator Comparison Plot (Braghieri et al. style)</span>
+<span class="code-keyword">library</span>(tidyverse)
+<span class="code-keyword">library</span>(fixest)
+<span class="code-keyword">library</span>(did)
+
+<span class="code-comment"># Run each estimator and extract event-study coefficients</span>
+
+<span class="code-comment"># 1. TWFE</span>
+twfe_model <- feols(outcome ~ i(rel_time, ref = -1) | unit_id + year,
+                    data = df, cluster = ~unit_id)
+
+<span class="code-comment"># 2. Callaway-Sant'Anna</span>
+cs_out <- att_gt(yname = "outcome", tname = "year", idname = "unit_id",
+                 gname = "first_treat", data = df, control_group = "nevertreated")
+cs_agg <- aggte(cs_out, type = "dynamic")
+
+<span class="code-comment"># 3. Sun-Abraham</span>
+sa_model <- feols(outcome ~ sunab(first_treat, year) | unit_id + year,
+                  data = df, cluster = ~unit_id)
+
+<span class="code-comment"># Extract coefficients into a tidy data frame</span>
+<span class="code-tooltip" data-tip="Create a combined data frame with all estimators for ggplot">extract_coefs <- function(model, name) {
+  coefs <- coef(model)
+  se <- sqrt(diag(vcov(model)))
+  tibble(
+    estimator = name,
+    rel_time = parse_number(names(coefs)),
+    coef = coefs,
+    ci_lo = coefs - 1.96 * se,
+    ci_hi = coefs + 1.96 * se
+  )
+}
+
+all_results <- bind_rows(
+  extract_coefs(twfe_model, "TWFE"),
+  tibble(
+    estimator = "Callaway-Sant'Anna",
+    rel_time = cs_agg$egt,
+    coef = cs_agg$att.egt,
+    ci_lo = cs_agg$att.egt - 1.96 * cs_agg$se.egt,
+    ci_hi = cs_agg$att.egt + 1.96 * cs_agg$se.egt
+  ),
+  extract_coefs(sa_model, "Sun-Abraham")
+)</span>
+
+<span class="code-comment"># Create the comparison plot</span>
+<span class="code-tooltip" data-tip="Use position_dodge to offset estimators horizontally so CIs don't overlap">ggplot(all_results, aes(x = rel_time, y = coef, color = estimator, shape = estimator)) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.5) +
+  geom_vline(xintercept = -0.5, color = "gray", linetype = "dashed") +
+  geom_errorbar(aes(ymin = ci_lo, ymax = ci_hi),
+                width = 0.2, linewidth = 0.8,
+                position = position_dodge(width = 0.3)) +
+  geom_point(size = 3, position = position_dodge(width = 0.3)) +
+  scale_color_manual(values = c("TWFE" = "#1f77b4",
+                                "Callaway-Sant'Anna" = "#ff7f0e",
+                                "Sun-Abraham" = "#2ca02c",
+                                "de Chaisemartin-D'H" = "#d62728")) +
+  scale_shape_manual(values = c("TWFE" = 16,
+                                "Callaway-Sant'Anna" = 15,
+                                "Sun-Abraham" = 17,
+                                "de Chaisemartin-D'H" = 18)) +
+  labs(x = "Periods Relative to Treatment",
+       y = "Treatment Effect Estimate",
+       title = "DiD Estimator Comparison",
+       color = "Estimator", shape = "Estimator") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom",
+        panel.grid.minor = element_blank())
+
+ggsave("estimator_comparison.png", width = 10, height = 6, dpi = 300)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-compare" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">[Figure: DiD Estimator Comparison]
+
+A plot showing four different estimators (TWFE, Callaway-Sant'Anna,
+Sun-Abraham, de Chaisemartin-D'Haultfoeuille) with their point estimates
+and 95% confidence intervals across relative time periods.
+
+Key observations:
+- Pre-treatment coefficients (t < 0): All estimators show coefficients
+  near zero, supporting parallel trends assumption
+- Post-treatment coefficients (t ≥ 0):
+  * All estimators show positive, significant effects
+  * TWFE estimates may be slightly attenuated due to negative weights
+  * Modern estimators (CS, SA, dCDH) show consistent, similar magnitudes
+- The agreement across estimators strengthens the causal interpretation
+
+Saved as: estimator_comparison.png</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-compare" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">[Figure: DiD Estimator Comparison]
+
+Four estimators plotted with different colors and markers:
+- Navy circles: TWFE (traditional two-way fixed effects)
+- Cranberry squares: Callaway-Sant'Anna (2021)
+- Forest green triangles: Sun-Abraham (2021)
+- Orange diamonds: de Chaisemartin-D'Haultfoeuille (2020)
+
+Results:
+- Pre-period (t = -5 to -1): All estimators centered around zero
+  with overlapping confidence intervals
+- Treatment period (t = 0): Jump in estimates for all methods
+- Post-period (t = 1 to 5): Persistent effects, slight divergence
+  between TWFE and robust estimators
+
+Graph saved as: estimator_comparison.png</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-compare" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">[ggplot2 Figure: DiD Estimator Comparison]
+
+Event study plot comparing TWFE, Callaway-Sant'Anna, and Sun-Abraham estimators.
+
+Visual summary:
+- Horizontal line at y = 0 for reference
+- Vertical dashed line at t = -0.5 marks treatment onset
+- Position dodge prevents overlapping confidence intervals
+
+Interpretation:
+- Parallel pre-trends: Estimates at t = -5, -4, -3, -2 are
+  statistically indistinguishable from zero across all estimators
+- Treatment effect onset: Clear jump at t = 0
+- Effect persistence: Treatment effects remain elevated through t = 5
+- Estimator agreement: All three methods yield qualitatively similar
+  results, though TWFE is slightly smaller in post-periods (consistent
+  with attenuation bias from staggered adoption)
+
+Saved: estimator_comparison.png (10" x 6", 300 dpi)</div>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Reference</div>
+          <ul>
+            <li>Braghieri, L., Levy, R., & Makarin, A. (2022). Social Media and Mental Health. <em>American Economic Review</em>, 112(11), 3660-3693. <a href="https://doi.org/10.1257/aer.20211218" target="_blank">doi:10.1257/aer.20211218</a></li>
+          </ul>
         </div>
 
         <h2 id="diagnostics">Parallel Trends Diagnostics</h2>

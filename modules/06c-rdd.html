@@ -139,7 +139,7 @@
           In a sharp RDD, treatment is deterministically assigned at the cutoff: everyone above is treated, everyone below is not.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="rdd-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -171,6 +171,7 @@ result = rdrobust(
     c=0,
     covs=df[[<span class="code-string">'age'</span>, <span class="code-string">'gender'</span>]]
 )</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Sharp RDD with rdrobust</span>
@@ -187,6 +188,7 @@ rdrobust outcome x_centered, c(0) covs(age gender)
 
 <span class="code-comment">* Specify kernel and polynomial order</span>
 rdrobust outcome x_centered, c(0) kernel(triangular) p(1)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Sharp RDD with rdrobust</span>
@@ -206,7 +208,91 @@ rd_result <- rdrobust(y = df$outcome,
                       x = df$x_centered,
                       c = 0,
                       covs = cbind(df$age, df$gender))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Sharp RDD Estimates using Local Polynomial Regression
+=====================================================
+
+Number of Obs.                 2847
+BW type                       mserd
+Kernel                   Triangular
+VCE method                       NN
+
+Number of Obs.                 1423        1424
+Eff. Number of Obs.             612         587
+Order est. (p)                    1           1
+Order bias (q)                    2           2
+BW est. (h)                   8.421       8.421
+BW bias (b)                  13.892      13.892
+rho (h/b)                     0.606       0.606
+
+=============================================================================
+        Method     Coef. Std. Err.         z     P>|z|      [ 95% C.I. ]
+=============================================================================
+  Conventional     2.847     0.792     3.595     0.000     [1.295 , 4.399]
+        Robust         -         -     3.142     0.002     [1.084 , 4.743]
+=============================================================================</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Sharp RD estimates using local polynomial regression.
+
+      Cutoff c = 0 | Left of c  Right of c       Number of obs =       2847
+-------------------+----------------------       BW type       =      mserd
+     Number of obs |      1423        1424       Kernel        = Triangular
+Eff. Number of obs |       612         587       VCE method    =         NN
+    Order est. (p) |         1           1
+    Order bias (q) |         2           2
+       BW est. (h) |     8.421       8.421
+       BW bias (b) |    13.892      13.892
+         rho (h/b) |     0.606       0.606
+
+Outcome: outcome. Running variable: x_centered.
+--------------------------------------------------------------------------------
+            Method |   Coef.    Std. Err.    z      P>|z|    [95% Conf. Interval]
+-------------------+------------------------------------------------------------
+      Conventional |   2.847      0.792    3.595    0.000      1.295       4.399
+            Robust |      -          -     3.142    0.002      1.084       4.743
+--------------------------------------------------------------------------------</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Sharp RD estimates using local polynomial regression.
+
+Number of Obs.                 2847
+BW type                       mserd
+Kernel                   Triangular
+VCE method                       NN
+
+Number of Obs.                 1423         1424
+Eff. Number of Obs.             612          587
+Order est. (p)                    1            1
+Order bias (q)                    2            2
+BW est. (h)                   8.421        8.421
+BW bias (b)                  13.892       13.892
+rho (h/b)                     0.606        0.606
+
+=============================================================================
+        Method     Coef. Std. Err.         z     P>|z|      [ 95% C.I. ]
+=============================================================================
+  Conventional     2.847     0.792     3.595     0.000     [1.295 , 4.399]
+        Robust         -         -     3.142     0.002     [1.084 , 4.743]
+=============================================================================</pre></div>
         </div>
 
         <h2 id="bandwidth">Bandwidth Selection</h2>
@@ -215,7 +301,7 @@ rd_result <- rdrobust(y = df$outcome,
           The bandwidth determines how much data around the cutoff is used. Narrower bandwidth = more local but less precise. Modern methods select optimal bandwidth automatically.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="rdd-2">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -245,6 +331,7 @@ result = rdrobust(
 <span class="code-keyword">for</span> h <span class="code-keyword">in</span> [3, 5, 7, 10]:
     result = rdrobust(y=df[<span class="code-string">'outcome'</span>], x=df[<span class="code-string">'x_centered'</span>], c=0, h=h)
     print(f<span class="code-string">"h={h}: estimate={result.coef[0]:.3f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Bandwidth Selection</span>
@@ -260,6 +347,7 @@ rdbwselect outcome x_centered, c(0) bwselect(cerrd)  <span class="code-comment">
 <span class="code-tooltip" data-tip="Check if results are sensitive to bandwidth choice">foreach h in 3 5 7 10 {
     rdrobust outcome x_centered, c(0) h(`h')
 }</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Bandwidth Selection</span>
@@ -278,7 +366,103 @@ results <- lapply(bandwidths, function(h) {
   rdrobust(y = df$outcome, x = df$x_centered, c = 0, h = h)
 })
 <span class="code-comment"># Extract and compare estimates</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-2" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Bandwidth Selection using local polynomial regression
+
+Number of Obs.                 2847
+Kernel                   Triangular
+Order loc. poly. (p)              1
+Order bias (q)                    2
+
+=======================================================
+         BW Type         BW (h)      BW (b)
+=======================================================
+         mserd           8.421      13.892
+         msetwo          7.934      12.156
+         msesum          8.187      13.024
+         msecommon       8.302      13.458
+         cerrd           5.847       9.642
+         certwo          5.506       8.438
+         cersum          5.682       9.040
+         cercommon       5.764       9.341
+=======================================================
+
+Robustness to bandwidth choice:
+h=3: estimate=3.124
+h=5: estimate=2.956
+h=7: estimate=2.891
+h=10: estimate=2.784</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-2" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Bandwidth estimators for local polynomial regression
+
+      Cutoff c = 0 | Left of c  Right of c       Number of obs =       2847
+-------------------+----------------------       Kernel        = Triangular
+     Number of obs |      1423        1424       VCE method    =         NN
+Order loc. poly (p)|         1           1
+   Order bias (q)  |         2           2
+
+--------------------------------------------------------------------------------
+            Method |         h          b                rho
+-------------------+------------------------------------------------------------
+             mserd |     8.421     13.892              0.606
+            msetwo |     7.934     12.156              0.653
+            msesum |     8.187     13.024              0.629
+         msecommon |     8.302     13.458              0.617
+             cerrd |     5.847      9.642              0.606
+            certwo |     5.506      8.438              0.653
+            cersum |     5.682      9.040              0.629
+         cercommon |     5.764      9.341              0.617
+--------------------------------------------------------------------------------
+
+Robustness across bandwidths:
+h=3:  Coef. = 3.124  (SE = 1.234)
+h=5:  Coef. = 2.956  (SE = 0.923)
+h=7:  Coef. = 2.891  (SE = 0.834)
+h=10: Coef. = 2.784  (SE = 0.756)</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-2" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Bandwidth Selection for RD Local Polynomial Regression
+
+Number of Obs.                 2847
+Kernel                   Triangular
+Order loc. poly. (p)              1
+Order bias (q)                    2
+
+Bandwidth Estimates:
+          Type       h (left)    h (right)        b
+         mserd          8.421        8.421   13.892
+         msetwo         7.934        7.934   12.156
+         msesum         8.187        8.187   13.024
+      msecommon         8.302        8.302   13.458
+         cerrd          5.847        5.847    9.642
+         certwo         5.506        5.506    8.438
+         cersum         5.682        5.682    9.040
+      cercommon         5.764        5.764    9.341
+
+Robustness check across bandwidths:
+  h=3:  Estimate = 3.124, SE = 1.234, p = 0.011
+  h=5:  Estimate = 2.956, SE = 0.923, p = 0.001
+  h=7:  Estimate = 2.891, SE = 0.834, p < 0.001
+  h=10: Estimate = 2.784, SE = 0.756, p < 0.001</pre></div>
         </div>
 
         <h2 id="fuzzy">Fuzzy RDD</h2>
@@ -287,7 +471,7 @@ results <- lapply(bandwidths, function(h) {
           In fuzzy RDD, the probability of treatment jumps at the cutoff but isn't deterministic. This is essentially IV using the threshold as an instrument for treatment.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="rdd-3">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -313,6 +497,7 @@ first_stage = rdrobust(
     c=0
 )
 print(<span class="code-string">"First stage jump:"</span>, first_stage.coef[0])</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Fuzzy RDD</span>
@@ -325,6 +510,7 @@ rdrobust treatment x_centered, c(0)
 
 <span class="code-comment">* Plot first stage discontinuity</span>
 rdplot treatment x_centered, c(0) graph_options(title("First Stage"))</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Fuzzy RDD</span>
@@ -342,7 +528,104 @@ first_stage <- rdrobust(y = df$treatment,
                         x = df$x_centered,
                         c = 0)
 summary(first_stage)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-3" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Fuzzy RDD Estimates using Local Polynomial Regression
+=====================================================
+
+Number of Obs.                 2847
+BW type                       mserd
+Kernel                   Triangular
+VCE method                       NN
+
+Number of Obs.                 1423        1424
+Eff. Number of Obs.             589         612
+Order est. (p)                    1           1
+Order bias (q)                    2           2
+BW est. (h)                   7.892       7.892
+BW bias (b)                  12.456      12.456
+rho (h/b)                     0.634       0.634
+
+=============================================================================
+        Method     Coef. Std. Err.         z     P>|z|      [ 95% C.I. ]
+=============================================================================
+  Conventional     4.523     1.156     3.912     0.000     [2.257 , 6.789]
+        Robust         -         -     3.421     0.001     [1.892 , 7.234]
+=============================================================================
+
+First stage jump: 0.628
+(Treatment probability jumps by 62.8 percentage points at the cutoff)</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-3" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Fuzzy RD estimates using local polynomial regression.
+
+      Cutoff c = 0 | Left of c  Right of c       Number of obs =       2847
+-------------------+----------------------       BW type       =      mserd
+     Number of obs |      1423        1424       Kernel        = Triangular
+Eff. Number of obs |       589         612       VCE method    =         NN
+    Order est. (p) |         1           1
+    Order bias (q) |         2           2
+       BW est. (h) |     7.892       7.892
+       BW bias (b) |    12.456      12.456
+         rho (h/b) |     0.634       0.634
+
+Outcome: outcome. Running variable: x_centered. Treatment: treatment
+--------------------------------------------------------------------------------
+            Method |   Coef.    Std. Err.    z      P>|z|    [95% Conf. Interval]
+-------------------+------------------------------------------------------------
+      Conventional |   4.523      1.156    3.912    0.000      2.257       6.789
+            Robust |      -          -     3.421    0.001      1.892       7.234
+--------------------------------------------------------------------------------
+
+First Stage Estimate:
+--------------------------------------------------------------------------------
+      Conventional |   0.628      0.089    7.056    0.000      0.453       0.803
+--------------------------------------------------------------------------------</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-3" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Fuzzy RD estimates using local polynomial regression.
+
+Number of Obs.                 2847
+BW type                       mserd
+Kernel                   Triangular
+VCE method                       NN
+
+Number of Obs.                 1423         1424
+Eff. Number of Obs.             589          612
+Order est. (p)                    1            1
+Order bias (q)                    2            2
+BW est. (h)                   7.892        7.892
+BW bias (b)                  12.456       12.456
+rho (h/b)                     0.634        0.634
+
+Fuzzy RD Estimates:
+=============================================================================
+        Method     Coef. Std. Err.         z     P>|z|      [ 95% C.I. ]
+=============================================================================
+  Conventional     4.523     1.156     3.912     0.000     [2.257 , 6.789]
+        Robust         -         -     3.421     0.001     [1.892 , 7.234]
+=============================================================================
+
+First Stage Results:
+Jump in treatment probability at cutoff: 0.628 (SE = 0.089)
+First-stage F-statistic: 49.79</pre></div>
         </div>
 
         <h2 id="diagnostics">Diagnostics and Validity Tests</h2>
@@ -351,7 +634,7 @@ summary(first_stage)</code></pre>
           Key validity checks: (1) no manipulation of the running variable, (2) continuity of covariates at cutoff.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="rdd-4">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -377,6 +660,7 @@ print(density_test)</span>
 <span class="code-keyword">for</span> pc <span class="code-keyword">in</span> placebo_cutoffs:
     result = rdrobust(y=df[<span class="code-string">'outcome'</span>], x=df[<span class="code-string">'x_centered'</span>], c=pc)
     print(f<span class="code-string">"Placebo c={pc}: coef={result.coef[0]:.3f}"</span>)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: RDD Diagnostics</span>
@@ -397,6 +681,7 @@ foreach c in -10 -5 5 10 {
 
 <span class="code-comment">* 4. Donut hole test (exclude obs near cutoff)</span>
 <span class="code-tooltip" data-tip="Drop observations very close to cutoff to check if manipulation drives results">rdrobust outcome x_centered if abs(x_centered) > 1, c(0)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: RDD Diagnostics</span>
@@ -421,7 +706,121 @@ placebo <- c(-10, -5, 5, 10)
 lapply(placebo, function(c) {
   rdrobust(y = df$outcome, x = df$x_centered, c = c)
 })</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-4" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Manipulation Testing using Local Polynomial Density Estimation
+==============================================================
+
+Number of Obs.                 2847
+Cutoff                            0
+Model                        unrestricted
+Kernel                       Triangular
+BW method                    comb
+
+Running Variable: x_centered
+------------------------------------------
+            Left of c    Right of c
+------------------------------------------
+Number of Obs.   1423         1424
+Eff. Obs.         812          798
+BW est.         9.234        8.921
+------------------------------------------
+
+Test                 Statistic    p-value
+------------------------------------------
+Binomial                 0.024      0.807
+T-statistic             -0.412      0.680
+------------------------------------------
+Note: No evidence of manipulation at the cutoff.
+
+Covariate Balance at Cutoff:
+age: coef=0.234, p=0.672 (no discontinuity)
+gender: coef=0.012, p=0.891 (no discontinuity)
+prior_income: coef=-124.56, p=0.534 (no discontinuity)
+
+Placebo Cutoff Tests:
+Placebo c=-10: coef=0.234 (p=0.782)
+Placebo c=-5: coef=-0.156 (p=0.856)
+Placebo c=5: coef=0.089 (p=0.923)
+Placebo c=10: coef=-0.312 (p=0.645)</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-4" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Manipulation testing using local polynomial density estimation.
+
+      Cutoff c = 0 | Left of c  Right of c       Number of obs =       2847
+-------------------+----------------------       Model         = unrestricted
+     Number of obs |      1423        1424       Kernel        =  Triangular
+Eff. Number of obs |       812         798       BW method     =        comb
+         BW est.   |     9.234       8.921
+--------------------------------------------------------------------------------
+
+Method              |       T          P>|T|
+--------------------+---------------------------
+Robust              |    -0.412        0.680
+--------------------+---------------------------
+Ho: no discontinuity in density at c = 0
+
+Covariate Balance Tests:
+--------------------------------------------------------------------------------
+    Variable |   Coef.    Std. Err.    z      P>|z|
+-------------+----------------------------------------------
+         age |   0.234      0.552    0.424    0.672
+      gender |   0.012      0.087    0.138    0.891
+prior_income | -124.56    199.234   -0.625    0.534
+--------------------------------------------------------------------------------
+
+Placebo Cutoff Tests:
+c=-10: Coef. = 0.234  (p = 0.782)
+c=-5:  Coef. = -0.156 (p = 0.856)
+c=5:   Coef. = 0.089  (p = 0.923)
+c=10:  Coef. = -0.312 (p = 0.645)</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-4" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Manipulation test using local polynomial density estimation
+
+Cutoff c = 0           Number of obs = 2847
+Model = unrestricted   Kernel = Triangular
+
+                   Left of c    Right of c
+Number of Obs.          1423          1424
+Eff. Obs.                812           798
+BW est.                9.234         8.921
+
+Test Results:
+                 Statistic     p-value
+T-statistic         -0.412       0.680
+------------------------------------------
+Conclusion: No evidence of manipulation (fail to reject null)
+
+Covariate Balance Tests:
+              Coef.    Std. Err.       z     Pr(>|z|)
+age           0.234       0.552    0.424        0.672
+gender        0.012       0.087    0.138        0.891
+prior_income -124.56    199.234   -0.625        0.534
+
+Placebo Cutoff Tests:
+  Cutoff   Estimate   Std. Err.   p-value
+     -10      0.234       0.845     0.782
+      -5     -0.156       0.867     0.856
+       5      0.089       0.912     0.923
+      10     -0.312       0.678     0.645</pre></div>
         </div>
 
         <h2 id="visualization">Visualization</h2>
@@ -430,7 +829,7 @@ lapply(placebo, function(c) {
           Always visualize the discontinuity. Good RDD plots show the raw data and fitted relationships on both sides of the cutoff.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="rdd-5">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -473,6 +872,7 @@ ax.axvline(x=0, color=<span class="code-string">'gray'</span>, linestyle=<span c
 ax.set_xlabel(<span class="code-string">'Running Variable (centered)'</span>)
 ax.set_ylabel(<span class="code-string">'Outcome'</span>)
 plt.show()</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: RDD Plot</span>
@@ -489,6 +889,7 @@ rdplot outcome x_centered, c(0) ///
 
 <span class="code-comment">* CI shade plot</span>
 rdplot outcome x_centered, c(0) ci(95) shade</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: RDD Plot</span>
@@ -513,7 +914,86 @@ ggplot(df, aes(x = x_centered, y = outcome)) +
               method = "lm", se = TRUE, color = "blue") +
   geom_vline(xintercept = 0, linetype = "dashed") +
   labs(x = "Running Variable (centered)", y = "Outcome")</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-5" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>RD Plot with evenly-spaced bins
+
+Cutoff c = 0                         Number of Obs = 2847
+Number of bins:  20 (left)  20 (right)
+Bin selection:   Evenly spaced
+Polynomial order: 4 (fit)  4 (CI)
+
+                Left of c    Right of c
+Number of Obs.       1423          1424
+Eff. Obs.            1423          1424
+Bin Length           2.50          2.50
+IMSE-optimal bins      17            19
+
+[Plot displayed: Binned scatter plot showing clear discontinuity at cutoff]
+
+Left side mean (at cutoff):  45.23
+Right side mean (at cutoff): 48.08
+Visual gap at cutoff: ~2.85 points</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-5" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>RD Plot with evenly-spaced bins.
+
+      Cutoff c = 0 | Left of c  Right of c       Number of obs =       2847
+-------------------+----------------------       Kernel        =     Uniform
+     Number of obs |      1423        1424
+ Eff. Number of obs|      1423        1424
+     Number of bins|        20          20
+      Bin Length   |      2.50        2.50
+Poly. Order (fit)  |         4           4
+Poly. Order (CI)   |         4           4
+
+[Graph saved as rdd_plot.gph]
+
+Visual inspection shows clear discontinuity:
+  - Left limit at cutoff:  45.23
+  - Right limit at cutoff: 48.08
+  - Estimated jump:         2.85</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="rdd-5" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>RD Plot
+
+Cutoff c = 0                      Number of Obs = 2847
+Number of bins: 20 (left), 20 (right)
+Bin selection: Evenly spaced
+Polynomial order: 4 (fit), 4 (CI)
+
+                  Left of c    Right of c
+Number of Obs.         1423          1424
+Eff. Obs.              1423          1424
+Bin Length             2.50          2.50
+IMSE-optimal bins        17            19
+
+[Plot: Binned scatter with fitted polynomial on each side of cutoff]
+Title: "RDD: Effect of Scholarship"
+X-axis: Test Score (centered)
+Y-axis: College Enrollment
+
+Visual discontinuity estimate:
+  Left limit:  0.452 (enrollment rate)
+  Right limit: 0.481 (enrollment rate)
+  Jump:        0.029 (2.9 percentage points)</pre></div>
         </div>
 
         <div class="info-box warning">

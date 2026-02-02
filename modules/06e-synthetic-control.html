@@ -138,7 +138,7 @@
           Synthetic control constructs a weighted combination of control units that matches the treated unit's pre-treatment characteristics. The post-treatment difference between the treated unit and synthetic control is the estimated treatment effect.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="synth-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -174,6 +174,7 @@ sc.plot([<span class="code-string">"original"</span>, <span class="code-string">
 <span class="code-comment"># Get weights</span>
 print(<span class="code-string">"Donor weights:"</span>)
 print(sc.W)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Synthetic Control with synth</span>
@@ -200,6 +201,7 @@ synth gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
 <span class="code-comment">* Get weights and gaps</span>
 matrix list e(W_weights)  <span class="code-comment">// donor weights</span>
 matrix list e(V_matrix)   <span class="code-comment">// predictor weights</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Synthetic Control with Synth package</span>
@@ -234,7 +236,131 @@ path.plot(synth.res = synth.out,
           Ylab = "GDP",
           Xlab = "Year",
           tr.intake = 1990)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Synthetic Control Method Results
+=================================
+
+Treated Unit: West Germany
+Treatment Period: 1990
+Pre-treatment periods: 1985-1989
+Post-treatment periods: 1990-2000
+
+Donor Weights:
+--------------
+Austria          0.423
+Netherlands      0.312
+Switzerland      0.198
+Belgium          0.067
+France           0.000
+Italy            0.000
+...
+(remaining countries have weight = 0)
+
+Pre-treatment Fit (RMSPE): 234.56
+Post-treatment RMSPE: 1,456.78
+
+Predictor Balance:
+                    Treated    Synthetic
+GDP (1985)          21,456      21,389
+GDP (1986)          22,134      22,067
+GDP (1987)          23,012      22,945
+GDP (1988)          24,567      24,512
+GDP (1989)          25,890      25,823
+Population (mil)     61.2        58.9
+Trade Openness       0.456       0.448
+
+Average Treatment Effect (post-1990): -1,234.5</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Synthetic control method
+
+Treated unit: 7 (West Germany)
+Control units: 1-6, 8-20
+Treatment period: 1990
+
+Optimization method: Nested
+MSPE minimization period: 1985-1989
+
+Unit weights (W):
+--------------------------------------------------------------------------------
+         unit |     weight
+--------------+----------------------------------------------------------------
+      Austria |      0.423
+  Netherlands |      0.312
+  Switzerland |      0.198
+      Belgium |      0.067
+       France |      0.000
+        Italy |      0.000
+--------------------------------------------------------------------------------
+
+Predictor weights (V):
+--------------------------------------------------------------------------------
+    predictor |     weight
+--------------+----------------------------------------------------------------
+    gdp(1985) |      0.156
+    gdp(1986) |      0.178
+    gdp(1987) |      0.189
+    gdp(1988) |      0.201
+    gdp(1989) |      0.187
+   population |      0.056
+trade_openness|      0.033
+--------------------------------------------------------------------------------
+
+Pre-treatment RMSPE: 234.56
+[Graph saved: synth_germany.gph]</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Synthetic Control Method Results
+
+Treated Unit: West Germany (ID = 7)
+Treatment Period: 1990
+
+****************
+ UNIT WEIGHTS
+****************
+        unit.names w.weights
+1          Austria     0.423
+2      Netherlands     0.312
+3      Switzerland     0.198
+4          Belgium     0.067
+5           France     0.000
+6            Italy     0.000
+...
+
+****************
+ PREDICTOR BALANCE
+****************
+                 Treated Synthetic Sample Mean
+gdp(1985)          21456     21389       19234
+gdp(1986)          22134     22067       19876
+gdp(1987)          23012     22945       20456
+gdp(1988)          24567     24512       21234
+gdp(1989)          25890     25823       22012
+population          61.2      58.9        45.6
+trade_openness     0.456     0.448       0.412
+
+MSPE (pre-treatment): 55034.67
+Root MSPE: 234.56
+
+[Path plot displayed showing treated vs synthetic control trajectories]</pre></div>
         </div>
 
         <h2 id="inference">Inference: Placebo Tests</h2>
@@ -243,7 +369,7 @@ path.plot(synth.res = synth.out,
           Standard errors don't apply to synthetic control. Instead, use placebo tests: apply the method to each control unit as if it were treated and compare the treated unit's effect to the placebo distribution.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="synth-2">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -281,6 +407,7 @@ plt.show()
 placebo_mspe = [np.mean(gaps[1990:]**2) <span class="code-keyword">for</span> gaps <span class="code-keyword">in</span> placebo_effects.values()]
 pvalue = np.mean(placebo_mspe >= post_treatment_mspe)
 print(f<span class="code-string">"p-value: {pvalue:.3f}"</span>)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Placebo Tests with synth_runner</span>
@@ -300,6 +427,7 @@ pval_graphs
 
 <span class="code-comment">* RMSPE ratio (pre/post treatment fit)</span>
 <span class="code-tooltip" data-tip="RMSPE ratio: large ratio means effect is unusual compared to placebos">single_treatment_graphs</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Placebo Tests</span>
@@ -353,7 +481,115 @@ sc <- df %>%
 
 <span class="code-comment"># Plot with placebos</span>
 sc %>% plot_placebos()</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-2" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Running placebo tests for 19 control units...
+  Austria: RMSPE = 312.45
+  Belgium: RMSPE = 456.78
+  Denmark: RMSPE = 289.34
+  Finland: RMSPE = 523.12
+  France: RMSPE = 198.67
+  ...
+  Switzerland: RMSPE = 345.23
+
+Placebo Test Results
+====================
+
+Treated unit (West Germany):
+  Pre-treatment RMSPE:  234.56
+  Post-treatment RMSPE: 1456.78
+  RMSPE ratio:          6.21
+
+RMSPE Ratios (post/pre):
+  West Germany:   6.21  <-- TREATED
+  Austria:        2.34
+  Belgium:        1.89
+  Denmark:        2.12
+  Finland:        1.45
+  France:         3.12
+  ...
+
+Rank of treated unit: 1 out of 20
+p-value (based on RMSPE ratio): 0.050
+
+[Placebo plot displayed: Black line (West Germany) diverges
+ significantly from gray lines (placebos) after 1990]</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-2" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Synthetic control with placebo tests
+
+Running synth for 20 units...
+  Unit 1 (Austria): done
+  Unit 2 (Belgium): done
+  ...
+  Unit 7 (West Germany): TREATED UNIT
+  ...
+  Unit 20 (UK): done
+
+RMSPE Summary:
+--------------------------------------------------------------------------------
+        Unit |   Pre-RMSPE   Post-RMSPE      Ratio       Rank
+-------------+----------------------------------------------------------
+West Germany |     234.56      1456.78       6.21          1
+      France |     198.67       620.12       3.12          2
+     Austria |     312.45       731.34       2.34          3
+     Denmark |     289.34       614.56       2.12          4
+     Belgium |     456.78       863.45       1.89          5
+     ...
+--------------------------------------------------------------------------------
+
+Exact p-value (rank-based): 1/20 = 0.050
+
+[effect_graphs: Shows gaps for all units, treated in black]
+[pval_graphs: Shows running p-value over time]</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-2" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Running placebo tests...
+Processing unit 1 of 19: Austria
+Processing unit 2 of 19: Belgium
+...
+Processing unit 19 of 19: UK
+
+Placebo Test Summary
+====================
+
+RMSPE Comparison:
+             Unit Pre.RMSPE Post.RMSPE   Ratio Rank
+1    West Germany    234.56    1456.78    6.21    1
+2          France    198.67     620.12    3.12    2
+3         Austria    312.45     731.34    2.34    3
+4         Denmark    289.34     614.56    2.12    4
+5         Belgium    456.78     863.45    1.89    5
+...
+
+Inference:
+  Treated unit rank: 1 out of 20
+  Two-sided p-value: 2/20 = 0.100
+  One-sided p-value: 1/20 = 0.050
+
+Using tidysynth::plot_placebos():
+[Spaghetti plot showing:
+ - Black line: West Germany (treated)
+ - Gray lines: 19 placebo units
+ - Vertical line at 1990 (treatment)
+ - West Germany shows clear negative divergence post-treatment]</pre></div>
         </div>
 
         <h2 id="critiques">Critiques and Limitations</h2>
@@ -375,7 +611,7 @@ sc %>% plot_placebos()</code></pre>
 
         <h3>Diagnostic Checks</h3>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="synth-3">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -400,6 +636,7 @@ print((sc.W > 0.05).sum())</span>
 <span class="code-tooltip" data-tip="Ratio of post/pre RMSPE: how unusual is the effect relative to pre-fit quality?">post_rmspe = np.sqrt(np.mean((treated_post - synthetic_post)**2))
 rmspe_ratio = post_rmspe / pre_rmspe
 print(f<span class="code-string">"RMSPE ratio: {rmspe_ratio:.2f}"</span>)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: SC Diagnostics</span>
@@ -421,6 +658,7 @@ matrix list e(W_weights)
     synth gdp ..., trunit(7) trperiod(1990) ///
         counit(`=subinstr("$donor_list", "`donor'", "", .)')
 }</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: SC Diagnostics</span>
@@ -445,7 +683,127 @@ synth.tables$tab.w  <span class="code-comment"># donor weights</span>
 <span class="code-comment"># 5. Pre-treatment fit plot</span>
 path.plot(synth.res = synth.out, dataprep.res = dataprep.out)
 <span class="code-comment"># Visual check: do paths match well before treatment?</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-3" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>SC Diagnostics
+==============
+
+1. Pre-treatment RMSPE: 234.560
+   (Outcome mean: 23,456, so RMSPE is ~1% of mean - good fit)
+
+2. Predictor Balance:
+   Predictor        Treated    Synthetic    Difference
+   gdp(1985)         21,456      21,389          67  (0.3%)
+   gdp(1986)         22,134      22,067          67  (0.3%)
+   gdp(1987)         23,012      22,945          67  (0.3%)
+   gdp(1988)         24,567      24,512          55  (0.2%)
+   gdp(1989)         25,890      25,823          67  (0.3%)
+   population         61.2        58.9         2.3  (3.8%)
+   trade_openness    0.456       0.448       0.008  (1.8%)
+
+3. Donor Weight Sparsity:
+   Number of donors with weight > 0.05: 4
+   (Austria: 0.423, Netherlands: 0.312, Switzerland: 0.198, Belgium: 0.067)
+
+4. RMSPE Ratio:
+   Pre-treatment RMSPE:  234.56
+   Post-treatment RMSPE: 1456.78
+   RMSPE ratio: 6.21
+
+   Interpretation: Post-treatment divergence is 6.2x larger than
+   pre-treatment fit error - suggests meaningful treatment effect.</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-3" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Diagnostics for Synthetic Control
+==================================
+
+. ereturn list
+scalars:
+              e(RMSPE) =  55034.67136
+
+. display "Pre-treatment RMSPE: " sqrt(e(RMSPE))
+Pre-treatment RMSPE: 234.56
+
+. matrix list e(Y_balance)
+Y_balance[7,3]
+                     Treated    Synthetic    Sample Mean
+     gdp(1985)         21456        21389          19234
+     gdp(1986)         22134        22067          19876
+     gdp(1987)         23012        22945          20456
+     gdp(1988)         24567        24512          21234
+     gdp(1989)         25890        25823          22012
+     population         61.2         58.9           45.6
+trade_openness         0.456        0.448          0.412
+
+. matrix list e(W_weights)
+W_weights[19,1]
+           weight
+  Austria   0.423
+Netherlands 0.312
+Switzerland 0.198
+  Belgium   0.067
+   France   0.000
+    ...
+
+Leave-one-out robustness:
+  Without Austria:     Effect = -1,189 (vs -1,234 with Austria)
+  Without Netherlands: Effect = -1,298 (vs -1,234 with Netherlands)
+  Without Switzerland: Effect = -1,212 (vs -1,234 with Switzerland)
+Results are robust to excluding any single donor.</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-3" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Synthetic Control Diagnostics
+=============================
+
+1. Predictor Balance (synth.tables$tab.pred):
+                 Treated Synthetic Sample Mean
+gdp(1985)          21456     21389       19234
+gdp(1986)          22134     22067       19876
+gdp(1987)          23012     22945       20456
+gdp(1988)          24567     24512       21234
+gdp(1989)          25890     25823       22012
+population          61.2      58.9        45.6
+trade_openness     0.456     0.448       0.412
+
+2. Donor Weights (synth.tables$tab.w):
+        unit.names w.weights
+1          Austria     0.423
+2      Netherlands     0.312
+3      Switzerland     0.198
+4          Belgium     0.067
+5-19        Others     0.000
+
+3. Weight Sparsity Check:
+> sum(synth.out$solution.w > 0.05)
+[1] 4
+
+4. Leave-One-Out Results:
+  Excluded       Estimate   Change
+  Austria          -1189     +45
+  Netherlands      -1298     -64
+  Switzerland      -1212     +22
+  Belgium          -1241      -7
+  (Baseline: -1234)
+
+5. Pre-treatment fit: Visual inspection shows excellent match
+   [Path plot displayed]</pre></div>
         </div>
 
         <h2 id="extensions">Modern Extensions</h2>
@@ -456,7 +814,7 @@ path.plot(synth.res = synth.out, dataprep.res = dataprep.out)
           Combines synthetic control with outcome regression to correct for imperfect pre-treatment fit.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="synth-4">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="r">R</button>
           </div>
@@ -481,7 +839,46 @@ syn <- augsynth(outcome ~ treatment,
                 time = year,
                 data = df,
                 progfunc = "None")  <span class="code-comment"># standard SC</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-4" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Augmented Synthetic Control Results
+====================================
+
+Call:
+augsynth(outcome ~ treatment | covariate1 + covariate2,
+         unit = unit_id, time = year, data = df, progfunc = "Ridge")
+
+Average ATT Estimate (post-treatment):
+        Estimate  Std.Error   t value     p value
+ATT       -1,312      412.3    -3.182      0.0015 **
+
+Time-varying effects:
+  Year   Estimate   Std.Error     95% CI
+  1990      -234       189.2    [-605,  137]
+  1991      -567       234.5    [-1027,-107]
+  1992      -892       298.1    [-1476,-308]
+  1993     -1,234      356.7    [-1933,-535]
+  ...
+  2000     -2,156      489.2    [-3115,-1197]
+
+Pre-treatment fit:
+  L2 Imbalance (pre-treatment): 0.0234
+  Percent improvement from augmentation: 34.2%
+
+Comparison: Standard SC vs Augmented SC
+                    Standard    Augmented
+ATT Estimate          -1,234      -1,312
+Std. Error               N/A       412.3
+Pre-treatment RMSPE   234.56      154.23
+
+[Plot displayed showing point estimates with confidence bands]</pre></div>
         </div>
 
         <h3>Synthetic Difference-in-Differences (Arkhangelsky et al. 2021)</h3>
@@ -490,7 +887,7 @@ syn <- augsynth(outcome ~ treatment,
           Combines DiD and SC: uses SC weights on units AND time periods to construct the counterfactual.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="synth-5">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -509,6 +906,7 @@ print(f<span class="code-string">"SDID estimate: {estimate:.3f}"</span>)
 <span class="code-comment"># Get weights</span>
 print(<span class="code-string">"Unit weights:"</span>, sdid.omega)
 print(<span class="code-string">"Time weights:"</span>, sdid.lambda_)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Synthetic DiD</span>
@@ -519,6 +917,7 @@ print(<span class="code-string">"Time weights:"</span>, sdid.lambda_)</code></pr
 
 <span class="code-comment">* With graph</span>
 sdid outcome unit_id year treatment, vce(bootstrap) graph</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Synthetic DiD with synthdid</span>
@@ -544,7 +943,124 @@ sc_est <- sc_estimate(setup$Y, setup$N0, setup$T0)
 
 <span class="code-comment"># Plot</span>
 synthdid_plot(sdid_est)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-5" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Synthetic Difference-in-Differences (SDID)
+==========================================
+
+SDID estimate: -1,287.456
+
+Unit weights (omega):
+  Austria:      0.312
+  Netherlands:  0.267
+  Switzerland:  0.189
+  Belgium:      0.134
+  France:       0.098
+  (Remaining units have small weights)
+
+Time weights (lambda):
+  1985: 0.034
+  1986: 0.089
+  1987: 0.156
+  1988: 0.267
+  1989: 0.454
+  (More weight on periods closer to treatment)
+
+Comparison of Methods:
+                Estimate     SE
+DiD             -1,456    523.4
+SC              -1,234      N/A
+SDID            -1,287    398.2
+
+Note: SDID interpolates between DiD (equal unit weights)
+and SC (zero time weights for pre-treatment).</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-5" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Synthetic Difference-in-Differences
+
+Number of observations:        320 (20 units x 16 periods)
+Treated unit:                  West Germany
+Treatment period:              1990
+Control units:                 19
+Pre-treatment periods:         5
+Post-treatment periods:        11
+
+------------------------------------------------------------------------------
+             |      SDID    Bootstrap        [95% Conf. Interval]
+             |   Estimate    Std. Err.
+-------------+----------------------------------------------------------------
+   treatment |  -1287.456     398.234        -2067.98       -506.93
+------------------------------------------------------------------------------
+Bootstrap replications: 200
+
+Unit Weights:
+          Austria: 0.312
+      Netherlands: 0.267
+      Switzerland: 0.189
+          Belgium: 0.134
+           France: 0.098
+
+Time Weights:
+  1985: 0.034    1986: 0.089    1987: 0.156    1988: 0.267    1989: 0.454
+
+[Graph saved: sdid_plot.gph]</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="synth-5" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Synthetic Difference-in-Differences Estimate
+============================================
+
+> print(sdid_est)
+synthdid: -1287.456
+
+> se <- sqrt(vcov(sdid_est, method = "bootstrap"))
+> se
+[1] 398.234
+
+95% Confidence Interval: [-2067.98, -506.93]
+
+Comparison of Estimators:
+> did_est
+did: -1456.123
+
+> sc_est
+sc: -1234.567
+
+Summary Table:
+        Method  Estimate   Std.Err.     95% CI
+1          DiD   -1456.1     523.4  [-2482, -430]
+2           SC   -1234.6       N/A            N/A
+3         SDID   -1287.5     398.2  [-2068, -507]
+
+Unit weights (omega):
+         Austria      Netherlands      Switzerland
+           0.312            0.267            0.189
+
+Time weights (lambda):
+  1985   1986   1987   1988   1989
+ 0.034  0.089  0.156  0.267  0.454
+
+[synthdid_plot displayed showing:
+ - Treated unit path (solid black)
+ - Synthetic control path (dashed)
+ - Treatment time vertical line
+ - Confidence bands]</pre></div>
         </div>
 
         <div class="citation">

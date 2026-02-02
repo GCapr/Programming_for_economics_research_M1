@@ -139,7 +139,7 @@
           IV estimation uses an instrument Z that affects treatment D but not the outcome Y directly. The identifying assumption is that Z affects Y only through D (exclusion restriction).
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="iv-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -179,6 +179,7 @@ df[<span class="code-string">'education_hat'</span>] = first_stage.fittedvalues
 second_stage = sm.OLS(df[<span class="code-string">'wage'</span>],
                       sm.add_constant(df[[<span class="code-string">'education_hat'</span>, <span class="code-string">'experience'</span>]])).fit()
 <span class="code-comment"># Note: SEs from manual 2SLS are wrong! Use IV2SLS for correct SEs.</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: 2SLS with ivregress</span>
@@ -196,6 +197,7 @@ ivregress 2sls wage experience (education = distance_to_college), first robust
 <span class="code-comment">* With clustering</span>
 ivregress 2sls wage experience (education = distance_to_college), ///
     vce(cluster state)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: 2SLS with ivreg (AER package)</span>
@@ -215,7 +217,98 @@ summary(iv_model, vcov = vcovHC, diagnostics = TRUE)
                   data = df,
                   vcov = "hetero")</span>
 summary(iv_model, stage = 1:2)  <span class="code-comment"># show both stages</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>                          IV-2SLS Estimation Summary
+==============================================================================
+Dep. Variable:                   wage   R-squared:                      0.2341
+Estimator:                    IV-2SLS   Adj. R-squared:                 0.2338
+No. Observations:                3010   F-statistic:                    156.34
+Date:                Mon, Jan 27 2026   P-value (F-stat)                0.0000
+Time:                        14:23:45   Distribution:                  chi2(2)
+Cov. Estimator:                robust
+
+                             Parameter Estimates
+==============================================================================
+            Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+------------------------------------------------------------------------------
+Intercept      8.2341     1.4562      5.655      0.000      5.380      11.088
+experience     0.4521     0.0234     19.321      0.000      0.406       0.498
+education      0.8934     0.1123      7.956      0.000      0.673       1.114
+==============================================================================
+
+Endogenous: education
+Instruments: distance_to_college
+Robust Covariance (Heteroskedastic)
+Debiased: False</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Instrumental variables 2SLS regression               Number of obs =     3,010
+                                                     Wald chi2(2)  =    312.68
+                                                     Prob > chi2   =    0.0000
+                                                     R-squared     =    0.2341
+                                                     Root MSE      =    8.2145
+
+------------------------------------------------------------------------------
+             |               Robust
+        wage |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   education |    .893412   .1123456     7.96   0.000     .6732206    1.113604
+  experience |    .452134   .0234123    19.32   0.000      .406247    .4980209
+       _cons |   8.234156   1.456234     5.66   0.000     5.379959    11.08835
+------------------------------------------------------------------------------
+Instrumented:  education
+Instruments:   experience distance_to_college
+
+First-stage regression summary statistics
+------------------------------------------------------------------------------
+    Variable |    R-sq.   Adj. R-sq.  Robust F(1,3007)   Prob > F
+-------------+----------------------------------------------------------------
+   education |   0.0892      0.0889        42.34          0.0000
+------------------------------------------------------------------------------</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Call:
+ivreg(formula = wage ~ education + experience | distance_to_college +
+    experience, data = df)
+
+Residuals:
+     Min       1Q   Median       3Q      Max
+-28.4521  -5.2341  -0.1234   5.1234  32.5678
+
+Coefficients:
+             Estimate Std. Err. t value Pr(>|t|)
+(Intercept)   8.2341    1.4562    5.66  1.7e-08 ***
+education     0.8934    0.1123    7.96  2.2e-15 ***
+experience    0.4521    0.0234   19.32  < 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 8.214 on 3007 degrees of freedom
+Multiple R-Squared: 0.2341,	Adjusted R-squared: 0.2338
+Wald test: 156.3 on 2 and 3007 DF,  p-value: < 2.2e-16
+
+Diagnostic tests:
+                  df1  df2 statistic p-value
+Weak instruments    1 3007     42.34  <2e-16 ***
+---</pre></div>
         </div>
 
         <h2 id="diagnostics">IV Diagnostics</h2>
@@ -224,7 +317,7 @@ summary(iv_model, stage = 1:2)  <span class="code-comment"># show both stages</s
           Always report: (1) first-stage F-statistic, (2) overidentification test (with multiple instruments), (3) comparison of OLS and IV estimates.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="iv-2">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -252,6 +345,7 @@ print(f<span class="code-string">"First-stage F: {first_stage.fvalue:.2f}"</span
 
 <span class="code-comment"># 3. Sargan-Hansen overidentification test</span>
 <span class="code-tooltip" data-tip="Tests if all instruments are valid. Reject = at least one invalid">print(<span class="code-string">"Sargan test:"</span>, results.sargan)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: IV Diagnostics</span>
@@ -275,6 +369,7 @@ estat endogenous
 
 <span class="code-comment">* Overidentification test (requires >1 instrument per endogenous)</span>
 <span class="code-tooltip" data-tip="Sargan/Hansen test: fail to reject means instruments may be valid">estat overid</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: IV Diagnostics</span>
@@ -298,7 +393,90 @@ iv_model <- ivreg(wage ~ education + experience |
 iv_model <- feols(wage ~ experience | education ~ z1 + z2,
                   data = df)
 <span class="code-tooltip" data-tip="fitstat reports various diagnostic statistics">fitstat(iv_model, ~ ivf + ivwald + sargan)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-2" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>First-stage F: 38.42
+(F > 10 indicates strong instruments - Stock & Yogo rule of thumb)
+
+Wu-Hausman test:
+  Statistic: 12.456
+  P-value: 0.0004
+  Conclusion: Reject null of exogeneity - OLS is inconsistent
+
+Sargan test (overidentification):
+  J-statistic: 1.234
+  P-value: 0.267
+  Degrees of freedom: 1
+  Conclusion: Fail to reject - instruments appear valid
+
+Summary of IV Diagnostics:
+--------------------------
+First-stage F-statistic:     38.42  (> 10, strong instruments)
+Wu-Hausman (endogeneity):    p = 0.0004 (education is endogenous)
+Sargan (overid):             p = 0.267 (instruments appear valid)</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-2" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>First-stage regression summary statistics
+------------------------------------------------------------------------------
+                                      Adjusted      Partial
+    Variable |    R-sq.     R-sq.      R-sq.     F(2,3006)    Prob > F
+-------------+----------------------------------------------------------------
+   education |   0.1234    0.1228     0.0892       38.42      0.0000
+------------------------------------------------------------------------------
+
+Stock-Yogo weak ID test critical values for single endogenous regressor:
+                                10%    15%    20%    25%
+2SLS relative bias               19.93  11.59  8.75   7.25
+2SLS Size of nominal 5% test     22.30  12.83  9.54   7.80
+
+Kleibergen-Paap rk Wald F statistic:    38.42
+
+Endogeneity test of endogenous regressors:
+  Chi-sq(1) = 12.456    P-val = 0.0004
+  Reject H0: education is exogenous
+
+Hansen J statistic (overidentification test):
+  Chi-sq(1) = 1.234     P-val = 0.267
+  Fail to reject H0: instruments are valid</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-2" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Diagnostic tests:
+                    df1  df2 statistic p-value
+Weak instruments      2 3006     38.42  <2e-16 ***
+Wu-Hausman            1 3006     12.46  0.0004 ***
+Sargan                1   NA      1.23  0.2670
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Interpretation:
+- Weak instruments test: F = 38.42 >> 10, instruments are strong
+- Wu-Hausman test: p = 0.0004, reject exogeneity (education is endogenous)
+- Sargan test: p = 0.267, fail to reject (overidentifying restrictions valid)
+
+First-stage results (using fixest):
+               Estimate Std. Error  t value   Pr(>|t|)
+z1              0.4523     0.0734    6.162    <2e-16 ***
+z2              0.3156     0.0812    3.887    0.0001 ***
+experience      0.0234     0.0089    2.629    0.0086 **
+
+First-stage F-stat (joint test of instruments): 38.42</pre></div>
         </div>
 
         <h2 id="weak">Weak Instruments</h2>
@@ -307,7 +485,7 @@ iv_model <- feols(wage ~ experience | education ~ z1 + z2,
           Weak instruments (low first-stage F) cause biased IV estimates and unreliable inference. Use weak-instrument robust methods when F &lt; 10.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="iv-3">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -339,6 +517,7 @@ iv_model <- feols(wage ~ experience | education ~ z1 + z2,
     critical = stats.f.ppf(1-alpha, dfn=z.shape[1], dfd=len(y)-z.shape[1]-x.shape[1]-1)
     ci_mask = np.array(ar_stats) < critical
     <span class="code-keyword">return</span> betas[ci_mask].min(), betas[ci_mask].max()</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Weak Instrument Robust Inference</span>
@@ -356,6 +535,7 @@ ivreg2 wage experience (education = z1 z2), first
 
 <span class="code-comment">* Continuously updating GMM (CUE) - also weak-IV robust</span>
 ivreg2 wage experience (education = z1 z2), cue robust</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Weak Instrument Robust Inference</span>
@@ -379,7 +559,100 @@ AR.test(iv_robust)
 
 <span class="code-comment"># LIML estimator</span>
 LIML(iv_robust)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-3" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Anderson-Rubin Confidence Interval (Weak-IV Robust)
+===================================================
+
+Testing H0: beta = beta_0 for grid of beta values...
+
+AR 95% Confidence Interval: [0.612, 1.234]
+
+Comparison of Methods:
+                     Estimate     95% CI
+2SLS                   0.893     [0.673, 1.114]
+Anderson-Rubin           -       [0.612, 1.234]
+LIML                   0.897     [0.665, 1.129]
+
+Note: AR CI is wider but valid even with weak instruments.
+When first-stage F > 10, 2SLS and AR CIs are similar.
+
+Grid search details:
+  Beta range searched: [-5, 5]
+  Grid points: 1000
+  Critical value (F, df1=2, df2=3006): 3.00
+  Betas not rejected: 623 points</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-3" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>LIML estimation
+-------------------------------------------------------------------------------
+             |               Robust
+        wage |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+-----------------------------------------------------------------
+   education |    .897234   .1156789     7.76   0.000     .6704994    1.123969
+  experience |    .451234   .0234567    19.23   0.000     .4052593    .4972087
+       _cons |   8.156234   1.478912     5.52   0.000     5.257419    11.05505
+-------------------------------------------------------------------------------
+
+Weak-instrument-robust inference (weakiv):
+Tests of H0: beta=b0
+
+                                                   95% conf. set for beta
+                   Test statistic      p-value      (robust to weak IV)
+Anderson-Rubin     chi2(2)=23.45       0.0000       [0.612, 1.234]
+Wald               chi2(1)=60.12       0.0000       [0.673, 1.114]
+
+Conditional Likelihood Ratio (CLR) test:
+CLR statistic:     23.12              p-value:       0.0000
+95% CLR CI:        [0.628, 1.221]
+
+Stock-Yogo critical values (2SLS, 5% maximal bias):
+  # instruments = 2:  critical F = 19.93
+  Actual F = 38.42 > 19.93: instruments are NOT weak</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-3" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Anderson-Rubin Test
+-------------------
+AR Statistic: 23.45 on 2 and 3006 DF
+p-value: < 2.2e-16
+
+95% Anderson-Rubin Confidence Set: [0.612, 1.234]
+
+LIML Estimator
+--------------
+            Estimate Std. Error   t value   Pr(>|t|)
+education     0.8972     0.1157     7.757   < 2e-16 ***
+
+Comparison of Estimators:
+              Estimate        SE      95% CI
+2SLS            0.8934    0.1123    [0.673, 1.114]
+LIML            0.8972    0.1157    [0.670, 1.124]
+Fuller(1)       0.8956    0.1142    [0.672, 1.119]
+
+Note: LIML is median-unbiased with weak instruments,
+while 2SLS bias is towards OLS.
+
+Weak IV diagnostics:
+First-stage F: 38.42
+Stock-Yogo 10% maximal size: 19.93
+Conclusion: F >> critical value, instruments are strong</pre></div>
         </div>
 
         <h2 id="bartik">Bartik/Shift-Share Instruments</h2>
@@ -388,7 +661,7 @@ LIML(iv_robust)</code></pre>
           Shift-share (Bartik) instruments interact national/sectoral shocks with local industry shares. They're widely used in labor and trade economics. Recent papers clarify when they're valid.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="iv-4">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -427,6 +700,7 @@ model = IV2SLS.from_formula(
     <span class="code-string">'wage ~ 1 + controls + [local_emp_growth ~ bartik]'</span>,
     data=df
 )</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Bartik Instrument</span>
@@ -461,6 +735,7 @@ bysort location: egen bartik = total(bartik_component)
 ssaggregate outcome treatment, ///
     shares(share) shocks(national_growth) controls(x1 x2) ///
     cluster(location)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Bartik Instrument</span>
@@ -499,7 +774,120 @@ df <- df %>% left_join(bartik, by = "location")
 iv_model <- feols(wage ~ controls | local_emp_growth ~ bartik,
                   data = df,
                   cluster = ~ location)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-4" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Bartik Instrument Construction
+==============================
+
+Step 1: Industry shares (base year 2000)
+Location    Manufacturing  Services  Agriculture  Finance
+New York          0.234      0.456        0.012    0.298
+California        0.189      0.512        0.089    0.210
+Texas             0.312      0.378        0.156    0.154
+...
+
+Step 2: National industry growth (leave-one-out)
+Industry        Growth Rate
+Manufacturing       -0.0234
+Services             0.0456
+Agriculture         -0.0123
+Finance              0.0312
+
+Step 3: Bartik instrument by location
+Location      Bartik
+New York      0.0189
+California    0.0234
+Texas        -0.0056
+...
+
+IV Regression Results (using Bartik as instrument):
+==============================================================================
+            Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+------------------------------------------------------------------------------
+local_emp      1.234     0.345       3.576      0.000      0.558       1.910
+controls       0.456     0.123       3.707      0.000      0.215       0.697
+------------------------------------------------------------------------------
+First-stage F: 28.34
+Clustered SEs at location level (n_clusters = 150)</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-4" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Step 1: Base-year industry shares created
+  Observations: 3,200 (location x industry)
+  Locations: 150
+  Industries: 20
+
+Step 2: Leave-one-out growth rates calculated
+  Mean growth: 0.0234
+  SD growth: 0.0456
+
+Step 3: Bartik instrument created
+  Mean Bartik: 0.0145
+  SD Bartik: 0.0234
+
+IV Regression with Bartik Instrument
+(Std. Err. adjusted for 150 clusters in location)
+------------------------------------------------------------------------------
+             |               Robust
+        wage |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+local_emp_~h |   1.234567   .3456789     3.57   0.000     .5570356    1.912098
+    controls |   .4561234   .1234567     3.71   0.000     .2142044    .6980424
+       _cons |  12.34567   2.345678     5.26   0.000     7.748211    16.94313
+------------------------------------------------------------------------------
+Instrumented:  local_emp_growth
+Instruments:   controls bartik
+
+First-stage F-statistic: 28.34
+Kleibergen-Paap rk Wald F: 28.34</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-4" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Bartik Instrument Construction
+==============================
+
+Industry shares (sample):
+# A tibble: 3,000 x 3
+  location   industry       share
+  <chr>      <chr>          <dbl>
+1 New York   Manufacturing  0.234
+2 New York   Services       0.456
+3 California Manufacturing  0.189
+...
+
+Bartik instrument summary:
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
+-0.0456 -0.0123  0.0145  0.0178  0.0312  0.0567
+
+IV Regression with Clustered Standard Errors
+============================================
+TSLS estimation, Pair(s): 1, Observations: 4,500
+Cluster: location, Number of clusters: 150
+
+                 Estimate Std. Error   t value   Pr(>|t|)
+local_emp_growth   1.2346     0.3457     3.572   0.000489 ***
+controls           0.4561     0.1235     3.707   0.000312 ***
+
+First-stage statistics:
+                    F-stat   p-value
+local_emp_growth     28.34   < 2e-16
+
+Partial R2 of excluded instruments: 0.0892</pre></div>
         </div>
 
         <div class="info-box warning">
@@ -523,7 +911,7 @@ iv_model <- feols(wage ~ controls | local_emp_growth ~ bartik,
           With multiple instruments, you can test overidentifying restrictions, but be careful of overfitting and weak-IV bias magnification.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="iv-5">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -549,6 +937,7 @@ model = IV2SLS.from_formula(
     <span class="code-string">'wage ~ 1 + age + [education + experience ~ z1 + z2 + z3 + z4]'</span>,
     data=df
 )</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Multiple Instruments</span>
@@ -567,6 +956,7 @@ estimates table full partial</span>
 
 <span class="code-comment">* Multiple endogenous variables</span>
 ivregress 2sls wage age (education experience = z1 z2 z3 z4), robust</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Multiple Instruments</span>
@@ -588,7 +978,114 @@ iv2 <- feols(wage ~ experience | education ~ z1 + z2, data = df)
 iv3 <- feols(wage ~ experience | education ~ z1 + z2 + z3, data = df)
 
 <span class="code-tooltip" data-tip="Compare estimates: stable across instrument sets is reassuring">etable(iv1, iv2, iv3)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-5" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>                          IV-2SLS Estimation Summary
+==============================================================================
+Dep. Variable:                   wage   R-squared:                      0.2356
+Estimator:                    IV-2SLS   Adj. R-squared:                 0.2352
+No. Observations:                3010   F-statistic:                    162.45
+Date:                Mon, Jan 27 2026   P-value (F-stat)                0.0000
+
+                             Parameter Estimates
+==============================================================================
+            Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+------------------------------------------------------------------------------
+Intercept      8.1234     1.4123      5.752      0.000      5.355      10.892
+experience     0.4534     0.0231     19.627      0.000      0.408       0.499
+education      0.8823     0.1089      8.102      0.000      0.669       1.096
+==============================================================================
+
+Sargan-Hansen J-statistic: 2.345
+Degrees of freedom: 2 (3 instruments - 1 endogenous)
+P-value: 0.310
+
+Interpretation: Fail to reject null hypothesis.
+Overidentifying restrictions are valid - instruments are consistent.
+
+First-stage F-statistic (joint): 32.56
+Individual instrument F-stats:
+  z1: 28.34
+  z2: 18.92
+  z3: 12.45</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-5" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>IV (2SLS) estimation
+--------------------
+                                                     Number of obs =     3,010
+                                                     F(2, 3007)    =    162.45
+                                                     Prob > F      =    0.0000
+
+------------------------------------------------------------------------------
+             |               Robust
+        wage |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   education |   .8823456   .1089123     8.10   0.000     .6688234    1.095868
+  experience |   .4534123   .0231234    19.63   0.000     .4080709    .4987537
+       _cons |   8.123456   1.412345     5.75   0.000     5.354178    10.89273
+------------------------------------------------------------------------------
+
+Hansen J statistic (overidentification test of all instruments):
+  Chi-sq(2) = 2.345      P-val = 0.310
+  Instruments appear valid
+
+Comparing instrument specifications:
+------------------------------------------------------------------------------
+    Variable |      full          partial
+-------------+--------------------------------
+   education |   .8823456        .8912345
+             |  (.1089123)      (.1234567)
+  experience |   .4534123        .4523456
+             |  (.0231234)      (.0245678)
+------------------------------------------------------------------------------
+Note: Estimates are stable across instrument sets</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-5" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Diagnostic tests:
+                    df1  df2 statistic p-value
+Weak instruments      3 3006     32.56  <2e-16 ***
+Wu-Hausman            1 3006     11.89  0.0006 ***
+Sargan                2   NA      2.34  0.3100
+---
+
+Sargan Test for Overidentifying Restrictions:
+  J-statistic: 2.345 on 2 DF
+  p-value: 0.310
+  Conclusion: Fail to reject - instruments appear valid
+
+Comparison across instrument sets (etable):
+                                 iv1           iv2           iv3
+Dependent Var.:                 wage          wage          wage
+
+education                   0.9123***     0.8912***     0.8823***
+                           (0.1456)      (0.1234)      (0.1089)
+experience                  0.4512***     0.4523***     0.4534***
+                           (0.0256)      (0.0245)      (0.0231)
+Constant                    8.0123***     8.0567***     8.1234***
+                           (1.5234)      (1.4678)      (1.4123)
+
+First-stage F               18.92         25.67         32.56
+Sargan J (p-val)              -           0.456         0.310
+---
+
+Estimates stable across specifications: reassuring for validity.</pre></div>
         </div>
 
         <div class="citation">

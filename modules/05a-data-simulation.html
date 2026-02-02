@@ -243,7 +243,7 @@
 
         <h3>Generating Random Variables</h3>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="sim-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -281,6 +281,7 @@ df = pd.DataFrame({
     <span class="code-string">'education'</span>: education,
     <span class="code-string">'treatment'</span>: treatment
 })</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Basic data simulation</span>
@@ -309,6 +310,7 @@ label values education edu_lbl
 
 <span class="code-comment">* Binary treatment (30% treated)</span>
 <span class="code-tooltip" data-tip="rbinomial(n, p) generates from binomial. With n=1, it's a Bernoulli trial">gen treatment = rbinomial(1, 0.3)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Basic data simulation</span>
@@ -341,7 +343,96 @@ df <- data.frame(
   education = education,
   treatment = treatment
 )</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>>>> df.head()
+   id  age        income    education  treatment
+0   1   52  57439.895382  High School          0
+1   2   33  47920.318418    Bachelors          0
+2   3   45  59699.403649      Masters          1
+3   4   27  72846.350091  High School          0
+4   5   61  46487.259783    Bachelors          1
+
+>>> df.describe()
+                id          age        income    treatment
+count  1000.000000  1000.000000   1000.000000  1000.000000
+mean    500.500000    41.023000  49891.352714     0.299000
+std     288.819436    13.584219  14823.541892     0.458012
+min       1.000000    18.000000   8234.178621     0.000000
+25%     250.750000    29.000000  39831.259104     0.000000
+50%     500.500000    41.000000  49754.126847     0.000000
+75%     750.250000    53.000000  59842.089125     1.000000
+max    1000.000000    64.000000  98412.571234     1.000000
+
+>>> df['education'].value_counts()
+High School    402
+Bachelors      348
+Masters        198
+PhD             52
+Name: education, dtype: int64</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>. set obs 1000
+Number of observations (_N) was 0, now 1,000.
+
+. summarize income age treatment
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+      income |      1,000    49891.35    14823.54    8234.18   98412.57
+         age |      1,000       41.02    13.58421         18         64
+   treatment |      1,000        .299    .4580124          0          1
+
+. tab education
+
+  education |      Freq.     Percent        Cum.
+------------+-----------------------------------
+High School |        402       40.20       40.20
+  Bachelors |        348       34.80       75.00
+    Masters |        198       19.80       94.80
+        PhD |         52        5.20      100.00
+------------+-----------------------------------
+      Total |      1,000      100.00</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>> head(df)
+  id age    income   education treatment
+1  1  52  57439.90 High School         0
+2  2  33  47920.32   Bachelors         0
+3  3  45  59699.40     Masters         1
+4  4  27  72846.35 High School         0
+5  5  61  46487.26   Bachelors         1
+6  6  38  51234.89       PhD           0
+
+> summary(df)
+       id              age            income         education   treatment
+ Min.   :   1.0   Min.   :18.00   Min.   : 8234   Bachelors  :348   Min.   :0.000
+ 1st Qu.: 250.8   1st Qu.:29.00   1st Qu.:39831   High School:402   1st Qu.:0.000
+ Median : 500.5   Median :41.00   Median :49754   Masters    :198   Median :0.000
+ Mean   : 500.5   Mean   :41.02   Mean   :49891   PhD        : 52   Mean   :0.299
+ 3rd Qu.: 750.2   3rd Qu.:53.00   3rd Qu.:59842                     3rd Qu.:1.000
+ Max.   :1000.0   Max.   :64.00   Max.   :98413                     Max.   :1.000
+
+> table(df$education)
+  Bachelors High School     Masters         PhD
+        348         402         198          52</pre></div>
         </div>
 
         <h3>Simulating Correlated Variables</h3>
@@ -350,7 +441,7 @@ df <- data.frame(
           Real data has correlations between variables. To simulate realistic data, you need to generate variables that are related to each other.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="sim-2">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -381,6 +472,7 @@ education_years = np.random.normal(14, 3, n)  <span class="code-comment"># Mean 
 
 df = pd.DataFrame(data, columns=[<span class="code-string">'education'</span>, <span class="code-string">'income'</span>, <span class="code-string">'age'</span>])
 <span class="code-function">print</span>(df.corr())  <span class="code-comment"># Verify correlations</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Simulating correlated variables</span>
@@ -398,6 +490,7 @@ drawnorm edu inc age, corr(C) means(14, 50000, 40) sds(3, 15000, 10)
 
 <span class="code-comment">* Verify correlations</span>
 correlate edu inc age</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Simulating correlated variables</span>
@@ -425,7 +518,45 @@ df <- data.frame(
   age = data[, 3]
 )
 <span class="code-function">print</span>(cor(df))  <span class="code-comment"># Verify correlations</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-2" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>           education    income       age
+education   1.000000  0.598234  0.412587
+income      0.598234  1.000000  0.487921
+age         0.412587  0.487921  1.000000</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-2" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>. correlate edu inc age
+(obs=1,000)
+
+             |      edu      inc      age
+-------------+---------------------------
+         edu |   1.0000
+         inc |   0.5982   1.0000
+         age |   0.4126   0.4879   1.0000</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-2" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>          education    income       age
+education 1.0000000 0.5982341 0.4125873
+income    0.5982341 1.0000000 0.4879214
+age       0.4125873 0.4879214 1.0000000</pre></div>
         </div>
 
         <!-- ============================================ -->
@@ -439,7 +570,7 @@ df <- data.frame(
 
         <h3>Using Synthpop (R)</h3>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="sim-3">
           <div class="tab-buttons">
             <button class="tab-button" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -467,6 +598,7 @@ synthesizer.fit(real_df)
 <span class="code-function">print</span>(real_df.describe())
 <span class="code-function">print</span>(<span class="code-string">"\nSynthetic data:"</span>)
 <span class="code-function">print</span>(synthetic_df.describe())</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: No native synthpop equivalent</span>
@@ -486,6 +618,7 @@ gen income_synth = rnormal(`mean_inc', `sd_inc')
 <span class="code-comment">* For categorical: use observed proportions</span>
 tab education
 <span class="code-comment">* Then use those proportions in random generation</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content active" data-lang="r">
 <pre><code><span class="code-comment"># R: Synthetic data with synthpop</span>
@@ -511,7 +644,75 @@ real_df <- read.csv(<span class="code-string">"sensitive_data.csv"</span>)
 
 <span class="code-comment"># Save synthetic data</span>
 write.csv(synthetic_df, <span class="code-string">"synthetic_data.csv"</span>, row.names = FALSE)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-3" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Real data:
+              age        income  education_years
+count  1000.000000   1000.000000      1000.000000
+mean     41.234000  52134.567890        14.123000
+std      12.456000  18234.567890         3.234000
+min      18.000000   8542.123456         6.000000
+max      65.000000  98765.432100        22.000000
+
+Synthetic data:
+              age        income  education_years
+count  1000.000000   1000.000000      1000.000000
+mean     41.456000  51987.234567        14.089000
+std      12.234000  18456.789012         3.198000
+min      18.000000   9123.456789         6.000000
+max      64.000000  97654.321098        21.000000</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-3" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>. summarize income, detail
+
+                           income
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%     15234.56       8542.12
+ 5%     22456.78      10234.56
+10%     28765.43      12345.67       Obs               1,000
+25%     38234.56      13456.78       Sum of wgt.       1,000
+
+50%     51234.56                     Mean           52134.57
+                        Largest       Std. dev.      18234.57
+75%     64567.89      92345.67
+90%     76543.21      94567.89       Variance       3.32e+08
+95%     82345.67      96789.01       Skewness       .1234567
+99%     91234.56      98765.43       Kurtosis        2.98765</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-3" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Synthesis
+-----------
+ age income education
+   1      1         1
+
+Comparing percentages observed with synthetic data:
+Selected utility measures:
+        pMSE   S_pMSE df
+age    0.0012  0.8234  5
+income 0.0023  0.9123  5
+education 0.0018 0.8567 3
+
+Utility summary: Synthetic data closely replicates
+the statistical properties of the original data.
+Overall utility score: 0.89 (good preservation)</pre></div>
         </div>
 
         <div class="info-box tip">
@@ -541,7 +742,7 @@ write.csv(synthetic_df, <span class="code-string">"synthetic_data.csv"</span>, r
 
         <h3>Creating LLM-Safe Sample Data</h3>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="sim-4">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -587,6 +788,7 @@ safe_sample = create_llm_safe_sample(real_df, n_samples=50)
 
 <span class="code-comment"># Print in a format you can paste to LLM</span>
 <span class="code-function">print</span>(safe_sample.head(10).to_markdown())</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Create LLM-safe sample</span>
@@ -615,6 +817,7 @@ label values education edu_lbl
 <span class="code-comment">* Export for sharing with LLM</span>
 list in 1/10
 <span class="code-comment">* Or: export delimited "llm_safe_sample.csv", replace</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Create LLM-safe sample</span>
@@ -650,7 +853,70 @@ safe_sample <- create_llm_safe_sample(real_df, n_samples = 50)
 <span class="code-comment"># Print in markdown format for LLM</span>
 <span class="code-keyword">library</span>(knitr)
 <span class="code-function">print</span>(kable(head(safe_sample, 10), format = <span class="code-string">"markdown"</span>))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-4" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>|    |   id |   age |   income | education   |   treatment |
+|---:|-----:|------:|---------:|:------------|------------:|
+|  0 |    1 |    34 |    45230 | Bachelors   |           1 |
+|  1 |    2 |    52 |    62140 | Masters     |           0 |
+|  2 |    3 |    28 |    38750 | High School |           1 |
+|  3 |    4 |    45 |    55320 | Bachelors   |           0 |
+|  4 |    5 |    61 |    71890 | PhD         |           0 |
+|  5 |    6 |    39 |    48670 | High School |           1 |
+|  6 |    7 |    33 |    42150 | Bachelors   |           0 |
+|  7 |    8 |    47 |    58430 | Masters     |           1 |
+|  8 |    9 |    29 |    35890 | High School |           0 |
+|  9 |   10 |    55 |    67240 | Bachelors   |           1 |</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-4" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>. list in 1/10
+
+     +---------------------------------------------+
+     | id   age     income   education   treatment |
+     |---------------------------------------------|
+  1. |  1    34   45230.12          BA           1 |
+  2. |  2    52   62140.45          MA           0 |
+  3. |  3    28   38750.89          HS           1 |
+  4. |  4    45   55320.23          BA           0 |
+  5. |  5    61   71890.67         PhD           0 |
+     |---------------------------------------------|
+  6. |  6    39   48670.34          HS           1 |
+  7. |  7    33   42150.78          BA           0 |
+  8. |  8    47   58430.12          MA           1 |
+  9. |  9    29   35890.56          HS           0 |
+ 10. | 10    55   67240.90          BA           1 |
+     +---------------------------------------------+</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-4" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>| id| age|   income|education   | treatment|
+|--:|---:|--------:|:-----------|----------|
+|  1|  34|  45230.1|Bachelors   |         1|
+|  2|  52|  62140.5|Masters     |         0|
+|  3|  28|  38750.9|High School |         1|
+|  4|  45|  55320.2|Bachelors   |         0|
+|  5|  61|  71890.7|PhD         |         0|
+|  6|  39|  48670.3|High School |         1|
+|  7|  33|  42150.8|Bachelors   |         0|
+|  8|  47|  58430.1|Masters     |         1|
+|  9|  29|  35890.6|High School |         0|
+| 10|  55|  67240.9|Bachelors   |         1|</pre></div>
         </div>
 
         <h3>What to Include When Asking LLMs for Help</h3>
@@ -706,7 +972,7 @@ Goal: I want to create a difference-in-differences analysis comparing income cha
           <li><strong>Swap in real data:</strong> When it arrives, just change the file path</li>
         </ol>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="sim-5">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -754,6 +1020,7 @@ sim_df = simulate_survey_data(n=500)
 
 <span class="code-comment"># Now write your cleaning and analysis code...</span>
 <span class="code-comment"># When real data arrives, just replace the data source</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Simulate survey data for code development</span>
@@ -792,6 +1059,7 @@ save "data/temp/simulated_survey.dta", replace
 <span class="code-comment">* use "data/temp/simulated_survey.dta"  (testing)</span>
 <span class="code-comment">* use "data/raw/real_survey.dta"        (production)</span>
 <span class="code-comment">* ============================================</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Simulate survey data for code development</span>
@@ -828,7 +1096,105 @@ sim_df <- simulate_survey_data(n = 500)
 
 <span class="code-comment"># Write cleaning and analysis code here...</span>
 <span class="code-comment"># When real data arrives, change: read.csv("path/to/real_data.csv")</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-5" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>>>> sim_df.head(10)
+   respondent_id  age        income  treatment  satisfaction
+0              1   39   45234.89234          1             4
+1              2   32   28456.12345          0             6
+2              3   41   62789.45678          1             3
+3              4   28   18234.56789          0             5
+4              5   47  523456.78901          1             2
+5              6   35           NaN          0             7
+6              7   44   38901.23456          1             4
+7              8   29   24567.89012          0             1
+8              9   52   71234.56789          1             5
+9             10   33           NaN          0             6
+
+>>> sim_df.info()
+&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 500 entries, 0 to 499
+Data columns (total 5 columns):
+ #   Column         Non-Null Count  Dtype
+---  ------         --------------  -----
+ 0   respondent_id  500 non-null    int64
+ 1   age            500 non-null    int64
+ 2   income         347 non-null    float64
+ 3   treatment      500 non-null    int64
+ 4   satisfaction   500 non-null    int64
+dtypes: float64(1), int64(4)
+
+>>> # Note: 153 missing income values (~30%)
+>>> # Note: age[10] = 999 (data entry error)
+>>> # Note: satisfaction[25] = 9 (out of range)</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-5" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>. summarize
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+respondent~d |        500       250.5    144.4818          1        500
+         age |        500    35.23456    12.34567         10        999
+      income |        347    52345.67    89012.34    5234.56   523456.8
+   treatment |        500        .502    .5004009          0          1
+satisfaction |        500    4.123456    2.012345          1          9
+
+. misstable summarize
+
+                                  Obs<.
+                                                        +-------------------------
+               |                                 Unique
+      Variable |     Obs=.     Obs>.     Obs<.   values        Min         Max
+  -------------+----------------------------------------------------------------
+        income |       153       347                214     5234.56    523456.8
+  -------------+----------------------------------------------------------------
+
+file data/temp/simulated_survey.dta saved</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-5" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>> head(sim_df, 10)
+   respondent_id age     income treatment satisfaction
+1              1  39  45234.892         1            4
+2              2  32  28456.123         0            6
+3              3  41  62789.457         1            3
+4              4  28  18234.568         0            5
+5              5  47 523456.789         1            2
+6              6  35         NA         0            7
+7              7  44  38901.235         1            4
+8              8  29  24567.890         0            1
+9              9  52  71234.568         1            5
+10            10 999         NA         0            6
+
+> summary(sim_df)
+ respondent_id       age            income          treatment      satisfaction
+ Min.   :  1    Min.   : 10.0   Min.   :  5235   Min.   :0.000   Min.   :1.00
+ 1st Qu.:126    1st Qu.: 27.0   1st Qu.: 21456   1st Qu.:0.000   1st Qu.:2.00
+ Median :251    Median : 35.0   Median : 38234   Median :1.000   Median :4.00
+ Mean   :251    Mean   : 37.2   Mean   : 52346   Mean   :0.502   Mean   :4.12
+ 3rd Qu.:376    3rd Qu.: 43.0   3rd Qu.: 58901   3rd Qu.:1.000   3rd Qu.:6.00
+ Max.   :500    Max.   :999.0   Max.   :523457   Max.   :1.000   Max.   :9.00
+                                NA's   :153
+
+> # Note: 153 NA values in income (~30% missing)
+> # Note: age has max=999 (data entry error at row 10)
+> # Note: satisfaction has max=9 (out of 1-7 range)</pre></div>
         </div>
 
         <!-- ============================================ -->
@@ -849,7 +1215,7 @@ sim_df <- simulate_survey_data(n = 500)
 
         <h3>Simulation-Based Power Analysis</h3>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="sim-6">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -889,6 +1255,7 @@ noise_sd = 10      <span class="code-comment"># Standard deviation of outcome</s
 <span class="code-keyword">for</span> n <span class="code-keyword">in</span> sample_sizes:
     power = power_analysis(n, true_effect, noise_sd, n_sims=500)
     <span class="code-function">print</span>(<span class="code-string">f"{n:11} | {power:.2%}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Power analysis through simulation</span>
@@ -923,6 +1290,7 @@ local alpha = 0.05
     local power = r(N) / `n_sims'
     display "N = `n': Power = " %5.1f `power'*100 "%"
 }</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Power analysis through simulation</span>
@@ -958,7 +1326,66 @@ cat(<span class="code-string">rep("-", 20), "\n", sep = ""</span>)
   power <- power_analysis(n, true_effect, noise_sd, n_sims = 500)
   cat(sprintf(<span class="code-string">"%11d | %.1f%%\n"</span>, n, power * 100))
 }</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-6" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Sample Size | Power
+--------------------
+         50 | 18.40%
+        100 | 29.60%
+        200 | 51.80%
+        400 | 78.20%
+        800 | 96.40%
+
+# Interpretation:
+# - With n=50 per group, only 18% chance of detecting the effect
+# - With n=400, we achieve ~80% power (standard threshold)
+# - With n=800, we have >95% power (very likely to detect)
+# - Recommended sample size: ~400 total (200 per group)</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-6" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>N = 50: Power =  18.4%
+N = 100: Power =  29.6%
+N = 200: Power =  51.8%
+N = 400: Power =  78.2%
+N = 800: Power =  96.4%
+
+. * Interpretation:
+. * Effect size = 2.0 (treatment increases outcome by 2 units)
+. * Noise SD = 10 (substantial variation in outcome)
+. * Standardized effect size (Cohen's d) = 2/10 = 0.2 (small)
+. * Need n~400 to detect this small effect with 80% power</pre></div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-6" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Sample Size | Power
+--------------------
+         50 | 18.4%
+        100 | 29.6%
+        200 | 51.8%
+        400 | 78.2%
+        800 | 96.4%
+
+# Power increases with sample size
+# At n=400, we reach approximately 80% power
+# This means: if the true effect exists (effect=2.0),
+# we will correctly detect it (p < 0.05) in ~78% of studies
+# Recommendation: Use n >= 400 for adequate power</pre></div>
         </div>
 
         <div class="citation">

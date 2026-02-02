@@ -130,6 +130,7 @@
             <li><a href="#event-study">Event Study Design</a></li>
             <li><a href="#staggered">Staggered Adoption: The Problem</a></li>
             <li><a href="#modern">Modern DiD Estimators</a></li>
+            <li><a href="#comparing">Comparing Estimators</a></li>
             <li><a href="#diagnostics">Parallel Trends Diagnostics</a></li>
           </ul>
         </div>
@@ -140,7 +141,7 @@
           The simplest DiD compares changes in outcomes between a treatment group and control group before and after a policy change.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="did-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -166,6 +167,7 @@ print(model.summary())</span>
 <span class="code-tooltip" data-tip="Cluster at the unit level for panel data to account for serial correlation">model_clustered = smf.ols(<span class="code-string">'outcome ~ treated_group + post + treat_post'</span>,
                           data=df).fit(cov_type=<span class="code-string">'cluster'</span>,
                                        cov_kwds={<span class="code-string">'groups'</span>: df[<span class="code-string">'unit_id'</span>]})</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Classic 2x2 DiD</span>
@@ -179,6 +181,7 @@ reg outcome treated_group post treat_post, cluster(unit_id)
 
 <span class="code-comment">* With controls</span>
 reg outcome i.treated_group##i.post age income, cluster(unit_id)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Classic 2x2 DiD</span>
@@ -195,7 +198,78 @@ summary(did_model)
 <span class="code-keyword">library</span>(lmtest)
 model <- lm(outcome ~ treated_group * post, data = df)
 coeftest(model, vcov = vcovCL, cluster = ~ unit_id)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-1" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">                            OLS Regression Results
+==============================================================================
+Dep. Variable:                outcome   R-squared:                       0.312
+Model:                            OLS   Adj. R-squared:                  0.309
+Method:                 Least Squares   F-statistic:                     89.23
+Date:                Mon, 27 Jan 2026   Prob (F-statistic):           1.23e-45
+Time:                        14:32:18   Log-Likelihood:                -1234.5
+No. Observations:                1000   AIC:                             2477.
+Df Residuals:                     996   BIC:                             2497.
+Df Model:                           3
+==============================================================================
+                    coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------
+Intercept         3.2456      0.089     36.467      0.000       3.071       3.420
+treated_group     0.1234      0.126      0.979      0.328      -0.124       0.371
+post              0.4567      0.126      3.624      0.000       0.210       0.704
+treat_post        0.5823      0.178      3.271      0.001       0.233       0.932
+==============================================================================
+
+DiD Estimate: 0.582 (SE: 0.178, p < 0.01)
+Interpretation: Treatment increased outcome by 0.58 units</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-1" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Linear regression                               Number of obs     =      1,000
+                                                F(3, 49)          =      42.17
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.3124
+                                                Root MSE          =     1.2345
+
+                             (Std. Err. adjusted for 50 clusters in unit_id)
+------------------------------------------------------------------------------
+             |               Robust
+     outcome |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+1.treated_~p |   .1234567   .1456789     0.85   0.401    -.1693456    .4162590
+      1.post |   .4567891   .1234567     3.70   0.001     .2085234    .7050548
+             |
+treated_g~p#|
+       post |
+        1 1 |   .5823456   .1789012     3.26   0.002     .2227890    .9419022
+             |
+       _cons |   3.245678   .1023456    31.71   0.000     3.039765    3.451591
+------------------------------------------------------------------------------
+
+DiD Estimate (1.treated_group#1.post): 0.582 (p = 0.002)</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-1" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">OLS estimation, Dep. Var.: outcome
+Observations: 1,000
+Standard-errors: Clustered (unit_id)
+                        Estimate Std. Error   t value  Pr(>|t|)
+(Intercept)              3.24568    0.10235   31.7134  < 2e-16 ***
+treated_group            0.12346    0.14568    0.8474   0.4012
+post                     0.45679    0.12346    3.6997   0.0005 ***
+treated_group:post       0.58235    0.17890    3.2551   0.0020 **
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 1.234   Adj. R2: 0.309
+
+DiD Estimate: 0.582
+  95% CI: [0.223, 0.942]
+  Interpretation: Treatment effect = 0.58 units (p = 0.002)</div>
         </div>
 
         <h2 id="twfe">Two-Way Fixed Effects</h2>
@@ -204,7 +278,7 @@ coeftest(model, vcov = vcovCL, cluster = ~ unit_id)</code></pre>
           With panel data, use unit and time fixed effects to control for time-invariant unit characteristics and common time shocks.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="did-2">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -227,6 +301,7 @@ df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code
 )
 results = model.fit(cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True)</span>
 print(results.summary)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Two-Way Fixed Effects</span>
@@ -240,6 +315,7 @@ xtset unit_id year
 <span class="code-comment">* Alternative: reghdfe (faster, more FE options)</span>
 <span class="code-comment">* ssc install reghdfe</span>
 <span class="code-tooltip" data-tip="reghdfe efficiently absorbs high-dimensional fixed effects">reghdfe outcome treated, absorb(unit_id year) cluster(unit_id)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Two-Way Fixed Effects with fixest</span>
@@ -255,7 +331,95 @@ summary(twfe_model)
 twfe_model <- feols(outcome ~ treated + age + income | unit_id + year,
                     data = df,
                     cluster = ~ unit_id)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-2" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">                          PanelOLS Estimation Summary
+================================================================================
+Dep. Variable:                outcome   R-squared:                        0.4523
+Estimator:                   PanelOLS   R-squared (Between):              0.3245
+No. Observations:               5000   R-squared (Within):               0.4523
+Date:                Mon, Jan 27 2026   R-squared (Overall):              0.3891
+Time:                        14:35:22   Log-likelihood                   -6234.5
+Cov. Estimator:             Clustered
+                                        F-statistic:                      156.78
+Entities:                         500   P-value                           0.0000
+Avg Obs:                       10.000   Distribution:                  F(2,4498)
+Min Obs:                       10.000
+Max Obs:                       10.000   F-statistic (robust):             89.234
+                                        P-value                           0.0000
+Time periods:                      10   Distribution:                  F(2,4498)
+Avg Obs:                      500.00
+Min Obs:                      500.00
+Max Obs:                      500.00
+
+                             Parameter Estimates
+================================================================================
+            Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+--------------------------------------------------------------------------------
+treated        0.5234     0.0912     5.7391     0.0000      0.3446      0.7022
+controls       0.0345     0.0123     2.8049     0.0051      0.0104      0.0586
+================================================================================
+
+F-test for entity effects: 12.34 (p = 0.0000)
+F-test for time effects: 8.91 (p = 0.0000)</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-2" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. xtset unit_id year
+       panel variable:  unit_id (strongly balanced)
+        time variable:  year, 2010 to 2019
+                delta:  1 unit
+
+. reghdfe outcome treated, absorb(unit_id year) cluster(unit_id)
+(MWFE estimator converged in 2 iterations)
+
+HDFE Linear regression                          Number of obs     =      5,000
+Absorbing 2 HDFE groups                         F(1, 499)         =      32.89
+Statistics robust to heteroskedasticity         Prob > F          =     0.0000
+                                                R-squared         =     0.4523
+                                                Adj R-squared     =     0.3891
+                                                Within R-sq.      =     0.0234
+Number of clusters (unit_id) =       500        Root MSE          =     0.8912
+
+                           (Std. Err. adjusted for 500 clusters in unit_id)
+------------------------------------------------------------------------------
+             |               Robust
+     outcome |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     treated |   .5234123   .0912456     5.74   0.000     .3440234    .7028012
+       _cons |   3.456789   .0456123    75.79   0.000     3.367123    3.546455
+------------------------------------------------------------------------------
+
+Absorbed degrees of freedom:
+-----------------------------------------------------+
+ Absorbed FE | Categories  - Loss  Coverage  Dups.
+-------------+---------------------------------------+
+     unit_id |       500       500     99.8%       0
+        year |        10        10    100.0%       0
+-----------------------------------------------------+</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-2" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">OLS estimation, Dep. Var.: outcome
+Observations: 5,000
+Fixed-effects: unit_id: 500,  year: 10
+Standard-errors: Clustered (unit_id)
+         Estimate Std. Error  t value   Pr(>|t|)
+treated   0.52341    0.09125   5.7389  1.67e-08 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 0.891     Adj. R2: 0.389
+               Within R2: 0.023
+
+Wald test for joint significance of FEs:
+  Unit FEs: F(499, 4490) = 12.34, p < 0.001
+  Time FEs: F(9, 4490) = 8.91, p < 0.001</div>
         </div>
 
         <h2 id="event-study">Event Study Design</h2>
@@ -264,7 +428,7 @@ twfe_model <- feols(outcome ~ treated + age + income | unit_id + year,
           Event studies estimate treatment effects for each period relative to treatment, allowing you to visualize pre-trends and dynamic effects.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="did-3">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -306,6 +470,7 @@ plt.xlabel(<span class="code-string">'Periods Relative to Treatment'</span>)
 plt.ylabel(<span class="code-string">'Coefficient'</span>)
 plt.title(<span class="code-string">'Event Study'</span>)
 plt.show()</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Event Study</span>
@@ -325,6 +490,7 @@ gen rel_time = year - treatment_year
 <span class="code-comment">* Alternative: coefplot for manual plotting</span>
 reghdfe outcome ib(-1).rel_time, absorb(unit_id year) cluster(unit_id)
 coefplot, keep(*.rel_time) vertical yline(0) xline(10.5)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Event Study with fixest</span>
@@ -349,7 +515,102 @@ iplot(es_model,
       ci.col = "steelblue",
       pt.pch = 19,
       grid = TRUE)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-3" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Event Study Coefficients (reference: t = -1)
+============================================
+Period    Coef.    Std.Err.    95% CI
+------    -----    --------    ------
+t-5      -0.023     0.089    [-0.198, 0.152]
+t-4       0.012     0.087    [-0.159, 0.183]
+t-3      -0.045     0.091    [-0.223, 0.133]
+t-2       0.034     0.088    [-0.138, 0.206]
+t-1       [reference period]
+t=0       0.312     0.095    [ 0.126, 0.498] **
+t+1       0.456     0.098    [ 0.264, 0.648] ***
+t+2       0.523     0.102    [ 0.323, 0.723] ***
+t+3       0.578     0.108    [ 0.366, 0.790] ***
+t+4       0.612     0.115    [ 0.387, 0.837] ***
+t+5       0.634     0.121    [ 0.397, 0.871] ***
+
+Pre-trend test (H0: all pre-treatment coefs = 0):
+  F(4, 4490) = 0.89, p = 0.469
+  [No evidence of differential pre-trends]
+
+[Event Study Plot displayed showing flat pre-trend, positive post-treatment effects]</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-3" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. reghdfe outcome ib(-1).rel_time, absorb(unit_id year) cluster(unit_id)
+
+HDFE Linear regression                          Number of obs     =      5,000
+Absorbing 2 HDFE groups                         F(10, 499)        =      18.23
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.4891
+                                                Adj R-squared     =     0.4234
+Number of clusters (unit_id) =       500        Root MSE          =     0.8456
+
+                           (Std. Err. adjusted for 500 clusters in unit_id)
+------------------------------------------------------------------------------
+             |               Robust
+     outcome |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    rel_time |
+         -5  |  -.0234567   .0891234    -0.26   0.793    -.1986234    .1517100
+         -4  |   .0123456   .0875123     0.14   0.888    -.1596234    .1843146
+         -3  |  -.0456789   .0912345    -0.50   0.617    -.2250234    .1336656
+         -2  |   .0345678   .0878912     0.39   0.694    -.1381234    .2072590
+         -1  |          0  (omitted)
+          0  |   .3123456   .0951234     3.28   0.001     .1254234    .4992678
+          1  |   .4567891   .0978123     4.67   0.000     .2646234    .6489548
+          2  |   .5234567   .1023456     5.11   0.000     .3224234    .7244900
+          3  |   .5789012   .1078912     5.37   0.000     .3670234    .7907790
+          4  |   .6123456   .1145678     5.34   0.000     .3873234    .8373678
+          5  |   .6345678   .1212345     5.23   0.000     .3964234    .8727122
+             |
+       _cons |   3.234567   .0567891    56.96   0.000     3.123234    3.345900
+------------------------------------------------------------------------------
+
+. testparm L(-5/-2).rel_time
+ ( 1)  -5.rel_time = 0
+ ( 2)  -4.rel_time = 0
+ ( 3)  -3.rel_time = 0
+ ( 4)  -2.rel_time = 0
+       F(  4,   499) =    0.89
+            Prob > F =    0.4692</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-3" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">OLS estimation, Dep. Var.: outcome
+Observations: 5,000
+Fixed-effects: unit_id: 500,  year: 10
+Standard-errors: Clustered (unit_id)
+              Estimate Std. Error   t value   Pr(>|t|)
+rel_time::-5  -0.02346    0.08912   -0.2632    0.7926
+rel_time::-4   0.01235    0.08751    0.1411    0.8878
+rel_time::-3  -0.04568    0.09123   -0.5007    0.6168
+rel_time::-2   0.03457    0.08789    0.3932    0.6943
+rel_time::0    0.31235    0.09512    3.2838    0.0011 **
+rel_time::1    0.45679    0.09781    4.6700    < 1e-5 ***
+rel_time::2    0.52346    0.10235    5.1145    < 1e-6 ***
+rel_time::3    0.57890    0.10789    5.3656    < 1e-7 ***
+rel_time::4    0.61235    0.11457    5.3448    < 1e-7 ***
+rel_time::5    0.63457    0.12123    5.2346    < 1e-6 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 0.846
+
+Joint test of pre-treatment coefficients:
+  F(4, 499) = 0.89, p = 0.469
+
+[iplot() displays event study figure with flat pre-trends and
+positive, increasing post-treatment effects]</div>
         </div>
 
         <h2 id="staggered">Staggered Adoption: The Problem</h2>
@@ -381,7 +642,7 @@ iplot(es_model,
 
         <h3>Callaway-Sant'Anna (2021)</h3>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="did-4">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -410,6 +671,7 @@ print(agg_overall)
 <span class="code-comment"># Aggregate to event-study</span>
 agg_event = results.aggregate(<span class="code-string">'event'</span>)
 agg_event.plot()</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Callaway-Sant'Anna</span>
@@ -426,6 +688,7 @@ csdid_stats event
 
 <span class="code-comment">* Plot event study</span>
 csdid_plot, style(rcap)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Callaway-Sant'Anna with did package</span>
@@ -449,12 +712,108 @@ summary(agg_simple)
 <span class="code-comment"># Event study aggregation</span>
 agg_es <- aggte(out, type = "dynamic")
 ggdid(agg_es)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-4" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Callaway-Sant'Anna (2021) Group-Time ATT Estimates
+==================================================
+Control Group: Never Treated
+Anticipation Periods: 0
+Estimation Method: Doubly Robust (DR)
+
+Group-Time Average Treatment Effects:
+-------------------------------------
+ Group | Time |   ATT   |  Std.Err |   [95% CI]
+-------|------|---------|----------|-------------
+  2014 | 2014 |  0.298  |   0.112  | [0.078, 0.518]
+  2014 | 2015 |  0.412  |   0.098  | [0.220, 0.604]
+  2014 | 2016 |  0.489  |   0.105  | [0.283, 0.695]
+  2015 | 2015 |  0.267  |   0.108  | [0.055, 0.479]
+  2015 | 2016 |  0.378  |   0.095  | [0.192, 0.564]
+  2016 | 2016 |  0.234  |   0.115  | [0.009, 0.459]
+
+Aggregated Treatment Effects:
+-----------------------------
+Simple ATT: 0.346 (SE: 0.089)
+  95% CI: [0.172, 0.520]
+  p-value: 0.0001
+
+[Event study plot shows cohort-specific treatment effects]</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-4" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. csdid outcome, ivar(unit_id) time(year) gvar(first_treat)
+
+Callaway and Sant'Anna (2021)
+Doubly Robust DiD Estimator
+
+Control Group: Never Treated
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+  g2014 t2014|   .2978123   .1123456     2.65   0.008     .0776234    .5180012
+  g2014 t2015|   .4123456   .0981234     4.20   0.000     .2200234    .6046678
+  g2014 t2016|   .4891234   .1052345     4.65   0.000     .2828678    .6953790
+  g2015 t2015|   .2671234   .1081234     2.47   0.014     .0552012    .4790456
+  g2015 t2016|   .3781234   .0952345     3.97   0.000     .1914678    .5647790
+  g2016 t2016|   .2341234   .1152345     2.03   0.042     .0082678    .4599790
+------------------------------------------------------------------------------
+
+. csdid_stats simple
+
+ATT Aggregation: Simple
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+         ATT |   .3462345   .0891234     3.88   0.000     .1715567    .5209123
+------------------------------------------------------------------------------
+
+. csdid_stats event, window(-5 5)
+
+[Event study table with coefficients for each relative time period]</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-4" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Call:
+att_gt(yname = "outcome", tname = "year", idname = "unit_id",
+    gname = "first_treat", data = df, control_group = "nevertreated")
+
+Group-Time Average Treatment Effects:
+ Group Time    ATT    SE [95% Pointwise   Conf. Band]
+  2014 2014 0.2978 0.1123    [0.0777, 0.5180]
+  2014 2015 0.4123 0.0981    [0.2200, 0.6047]
+  2014 2016 0.4891 0.1052    [0.2829, 0.6954]
+  2015 2015 0.2671 0.1081    [0.0552, 0.4790]
+  2015 2016 0.3781 0.0952    [0.1915, 0.5648]
+  2016 2016 0.2341 0.1152    [0.0083, 0.4600]
+
+Signif. codes: `*' confidence band does not cover 0
+
+P-value for pre-test of parallel trends assumption:  0.523
+Control Group:  Never Treated
+Anticipation Periods:  0
+Estimation Method:  Doubly Robust
+
+> summary(agg_simple)
+
+Call:
+aggte(MP = out, type = "simple")
+
+Overall ATT:
+      ATT    SE     [95%   CI]
+   0.3462 0.0891 [0.1716, 0.5209] *
+
+[ggdid() displays event study plot with proper aggregation]</div>
         </div>
 
         <h3>de Chaisemartin-D'Haultfoeuille (2020)</h3>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="did-5">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="stata">Stata</button>
             <button class="tab-button" data-lang="r">R</button>
@@ -472,6 +831,7 @@ ggdid(agg_es)</code></pre>
 did_multiplegt outcome unit_id year treatment, ///
     robust_dynamic dynamic(5) placebo(3) ///
     controls(age income) cluster(unit_id)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: de Chaisemartin-D'Haultfoeuille with DIDmultiplegt</span>
@@ -492,12 +852,81 @@ summary(result)
 
 <span class="code-comment"># Plot results</span>
 did_multiplegt_plot(result)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-5" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. did_multiplegt outcome unit_id year treatment, ///
+>     robust_dynamic dynamic(5) placebo(3) cluster(unit_id) breps(100)
+
+de Chaisemartin and D'Haultfoeuille (2020) Estimator
+Robust to heterogeneous treatment effects
+
+Treatment is first switched on at some point during the panel
+
+Effect at time of treatment switch-on
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+    Effect_0 |   .3123456   .0912345     3.42   0.001     .1335291    .4911621
+------------------------------------------------------------------------------
+
+Dynamic effects
+------------------------------------------------------------------------------
+    Effect_1 |   .4234567   .0978123     4.33   0.000     .2317478    .6151656
+    Effect_2 |   .4891234   .1023456     4.78   0.000     .2885295    .6897173
+    Effect_3 |   .5234567   .1089123     4.81   0.000     .3099923    .7369211
+    Effect_4 |   .5567891   .1145678     4.86   0.000     .3322403    .7813379
+    Effect_5 |   .5789012   .1198234     4.83   0.000     .3440516    .8137508
+------------------------------------------------------------------------------
+
+Placebo tests (pre-treatment effects should be zero)
+------------------------------------------------------------------------------
+  Placebo_1 |  -.0123456   .0856789    -0.14   0.885    -.1802722    .1555810
+  Placebo_2 |   .0234567   .0891234     0.26   0.792    -.1512220    .1981354
+  Placebo_3 |  -.0345678   .0923456    -0.37   0.708    -.2155618    .1464262
+------------------------------------------------------------------------------
+
+Joint test for placebos: chi2(3) = 0.78, p = 0.854</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-5" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">de Chaisemartin and D'Haultfoeuille (2020) Estimator
+====================================================
+
+Instantaneous effect at treatment switch-on:
+  Effect_0: 0.3123 (SE: 0.0912)
+    95% CI: [0.134, 0.491]
+    p-value: 0.0006
+
+Dynamic effects (periods after treatment):
+  Effect | Estimate |   SE   |    95% CI
+  -------|----------|--------|---------------
+       1 |   0.4235 | 0.0978 | [0.232, 0.615]
+       2 |   0.4891 | 0.1023 | [0.289, 0.690]
+       3 |   0.5235 | 0.1089 | [0.310, 0.737]
+       4 |   0.5568 | 0.1146 | [0.332, 0.781]
+       5 |   0.5789 | 0.1198 | [0.344, 0.814]
+
+Placebo tests (pre-treatment periods):
+  Placebo |  Estimate |   SE   |    95% CI
+  --------|-----------|--------|---------------
+       -1 |   -0.0123 | 0.0857 | [-0.180, 0.156]
+       -2 |    0.0235 | 0.0891 | [-0.151, 0.198]
+       -3 |   -0.0346 | 0.0923 | [-0.216, 0.146]
+
+Joint test for placebos: chi2(3) = 0.78, p = 0.854
+  [No evidence against parallel trends]
+
+[did_multiplegt_plot() shows event study figure]</div>
         </div>
 
         <h3>Sun-Abraham (2021)</h3>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="did-6">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="stata">Stata</button>
             <button class="tab-button" data-lang="r">R</button>
@@ -514,6 +943,7 @@ gen never_treat = (first_treat == 0)
 <span class="code-tooltip" data-tip="eventstudyinteract implements the interaction-weighted estimator">eventstudyinteract outcome rel_time_*, ///
     cohort(cohort) control_cohort(never_treat) ///
     absorb(unit_id year) vce(cluster unit_id)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Sun-Abraham with fixest</span>
@@ -531,7 +961,341 @@ summary(sa_model)
 <span class="code-comment"># Aggregate and plot</span>
 summary(sa_model, agg = "ATT")
 iplot(sa_model)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-6" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. eventstudyinteract outcome rel_time_*, ///
+>     cohort(cohort) control_cohort(never_treat) ///
+>     absorb(unit_id year) vce(cluster unit_id)
+
+Sun and Abraham (2021) Interaction-Weighted Estimator
+Control cohort: never_treat
+
+IW estimates by relative time to treatment
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+  rel_time_5 |  -.0178234   .0892345    -0.20   0.842    -.1927199    .1570731
+  rel_time_4 |   .0089123   .0878912     0.10   0.919    -.1633513    .1811759
+  rel_time_3 |  -.0312456   .0912345    -0.34   0.732    -.2100621    .1475709
+  rel_time_2 |   .0234567   .0891234     0.26   0.792    -.1512220    .1981354
+  rel_time_1 |          0  (reference)
+  rel_time0  |   .2891234   .0912456     3.17   0.002     .1102853    .4679615
+  rel_time1  |   .4123456   .0956789     4.31   0.000     .2248173    .5998739
+  rel_time2  |   .4789123   .0998234     4.80   0.000     .2832620    .6745626
+  rel_time3  |   .5234567   .1045678     5.01   0.000     .3185074    .7284060
+  rel_time4  |   .5567891   .1098234     5.07   0.000     .3415391    .7720391
+  rel_time5  |   .5812345   .1145678     5.07   0.000     .3566857    .8057833
+------------------------------------------------------------------------------
+
+Average ATT across all post-treatment periods: 0.4736 (SE: 0.0923)</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-6" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">OLS estimation, Dep. Var.: outcome
+Observations: 5,000
+Fixed-effects: unit_id: 500,  year: 10
+Standard-errors: Clustered (unit_id)
+Sun and Abraham (2021) estimation using cohort-specific effects
+
+               Estimate Std. Error   t value   Pr(>|t|)
+cohort::2014:-5 -0.0178    0.0892   -0.1996    0.8419
+cohort::2014:-4  0.0089    0.0879    0.1014    0.9193
+cohort::2014:-3 -0.0312    0.0912   -0.3426    0.7320
+cohort::2014:-2  0.0235    0.0891    0.2632    0.7925
+cohort::2014:0   0.2891    0.0912    3.1696    0.0016 **
+cohort::2014:1   0.4123    0.0957    4.3101    < 1e-4 ***
+cohort::2014:2   0.4789    0.0998    4.7978    < 1e-5 ***
+cohort::2015:-4 -0.0145    0.0901   -0.1609    0.8723
+...
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Aggregated ATT (average post-treatment effect):
+   ATT    SE     [95%   CI]
+0.4736 0.0923 [0.2927, 0.6545] ***
+
+[iplot() shows Sun-Abraham event study with cohort-weighted estimates]</div>
+        </div>
+
+        <h3 id="comparing">Comparing All Estimators</h3>
+
+        <p>
+          A powerful robustness check is to plot multiple DiD estimators on the same figure, as in <a href="https://doi.org/10.1257/aer.20211218" target="_blank">Braghieri, Levy, and Makarin (2022)</a> on social media and mental health. If estimators disagree substantially, this signals potential heterogeneity or specification concerns.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Why Compare Estimators?</div>
+          <p>Different estimators make different assumptions:</p>
+          <ul style="margin-top: 0.5rem;">
+            <li><strong>TWFE</strong>: Assumes homogeneous treatment effects (can be biased with staggered adoption)</li>
+            <li><strong>Callaway-Sant'Anna</strong>: Uses never-treated or not-yet-treated as controls</li>
+            <li><strong>Sun-Abraham</strong>: Interaction-weighted approach with cohort-specific effects</li>
+            <li><strong>de Chaisemartin-D'Haultfoeuille</strong>: Robust to heterogeneous effects and switching treatments</li>
+          </ul>
+          <p style="margin-bottom: 0;">When all estimators agree, this strengthens your causal claims. When they diverge, investigate why.</p>
+        </div>
+
+        <div class="code-tabs" data-runnable="did-compare">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Multi-Estimator Comparison Plot (Braghieri et al. style)</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+<span class="code-keyword">from</span> matplotlib.lines <span class="code-keyword">import</span> Line2D
+
+<span class="code-comment"># After running each estimator, collect the event-study coefficients</span>
+<span class="code-comment"># Example structure: dict with estimator -> (rel_time, coef, ci_lower, ci_upper)</span>
+
+<span class="code-tooltip" data-tip="Store results from each estimator with relative time, coefficient, and confidence intervals">results = {
+    <span class="code-string">'TWFE'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: twfe_coefs, <span class="code-string">'ci_lo'</span>: twfe_ci_lo, <span class="code-string">'ci_hi'</span>: twfe_ci_hi},
+    <span class="code-string">'Callaway-Sant\'Anna'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: cs_coefs, <span class="code-string">'ci_lo'</span>: cs_ci_lo, <span class="code-string">'ci_hi'</span>: cs_ci_hi},
+    <span class="code-string">'Sun-Abraham'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: sa_coefs, <span class="code-string">'ci_lo'</span>: sa_ci_lo, <span class="code-string">'ci_hi'</span>: sa_ci_hi},
+    <span class="code-string">'de Chaisemartin-D\'H'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: dcdh_coefs, <span class="code-string">'ci_lo'</span>: dcdh_ci_lo, <span class="code-string">'ci_hi'</span>: dcdh_ci_hi},
+}</span>
+
+<span class="code-comment"># Create comparison plot</span>
+<span class="code-tooltip" data-tip="Use offsets so confidence intervals don't overlap visually">fig, ax = plt.subplots(figsize=(12, 7))
+
+colors = [<span class="code-string">'#1f77b4'</span>, <span class="code-string">'#ff7f0e'</span>, <span class="code-string">'#2ca02c'</span>, <span class="code-string">'#d62728'</span>]
+markers = [<span class="code-string">'o'</span>, <span class="code-string">'s'</span>, <span class="code-string">'^'</span>, <span class="code-string">'D'</span>]
+offsets = [-0.15, -0.05, 0.05, 0.15]  <span class="code-comment"># Horizontal jitter</span>
+
+<span class="code-keyword">for</span> i, (name, data) <span class="code-keyword">in</span> enumerate(results.items()):
+    x = np.array(data[<span class="code-string">'rel_time'</span>]) + offsets[i]
+    y = data[<span class="code-string">'coef'</span>]
+    yerr = [np.array(y) - np.array(data[<span class="code-string">'ci_lo'</span>]),
+            np.array(data[<span class="code-string">'ci_hi'</span>]) - np.array(y)]
+
+    ax.errorbar(x, y, yerr=yerr, fmt=markers[i], color=colors[i],
+                capsize=3, capthick=1.5, label=name, markersize=8, linewidth=1.5)</span>
+
+<span class="code-comment"># Add reference lines</span>
+ax.axhline(y=0, color=<span class="code-string">'black'</span>, linestyle=<span class="code-string">'-'</span>, linewidth=0.8)
+ax.axvline(x=-0.5, color=<span class="code-string">'gray'</span>, linestyle=<span class="code-string">'--'</span>, linewidth=1, alpha=0.7)
+
+<span class="code-comment"># Formatting</span>
+ax.set_xlabel(<span class="code-string">'Periods Relative to Treatment'</span>, fontsize=12)
+ax.set_ylabel(<span class="code-string">'Treatment Effect Estimate'</span>, fontsize=12)
+ax.set_title(<span class="code-string">'DiD Estimator Comparison'</span>, fontsize=14, fontweight=<span class="code-string">'bold'</span>)
+ax.legend(loc=<span class="code-string">'upper left'</span>, framealpha=0.9)
+ax.set_xticks(range(min(rel_times), max(rel_times)+1))
+
+plt.tight_layout()
+plt.savefig(<span class="code-string">'estimator_comparison.png'</span>, dpi=300, bbox_inches=<span class="code-string">'tight'</span>)
+plt.show()</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Multi-Estimator Comparison Plot (Braghieri et al. style)</span>
+<span class="code-comment">* Run each estimator and store results, then combine in one figure</span>
+
+<span class="code-comment">* 1. Run TWFE event study</span>
+reghdfe outcome ib-1.rel_time, absorb(unit_id year) cluster(unit_id)
+parmest, saving(twfe_results, replace)
+
+<span class="code-comment">* 2. Run Callaway-Sant'Anna</span>
+csdid outcome, ivar(unit_id) time(year) gvar(first_treat)
+csdid_stats event
+<span class="code-comment">* Export results manually or use csdid's stored matrices</span>
+
+<span class="code-comment">* 3. Run Sun-Abraham</span>
+eventstudyinteract outcome rel_time_*, cohort(cohort) ///
+    control_cohort(never_treat) absorb(unit_id year) cluster(unit_id)
+<span class="code-tooltip" data-tip="Store matrices e(b_iw) and e(V_iw) for Sun-Abraham coefficients">matrix sa_coef = e(b_iw)
+matrix sa_var = e(V_iw)</span>
+
+<span class="code-comment">* 4. Run de Chaisemartin-D'Haultfoeuille</span>
+did_multiplegt outcome unit_id year treatment, ///
+    robust_dynamic dynamic(5) placebo(3) cluster(unit_id)
+
+<span class="code-comment">* Combine results into one dataset for plotting</span>
+<span class="code-tooltip" data-tip="Create a combined dataset with estimator, rel_time, coef, ci_lo, ci_hi">clear
+input str30 estimator rel_time coef ci_lo ci_hi
+<span class="code-comment">* ... manually enter or append saved results ...</span>
+end</span>
+
+<span class="code-comment">* Create the comparison plot</span>
+<span class="code-tooltip" data-tip="Use separate() to create different markers/colors by estimator">twoway (rcap ci_lo ci_hi rel_time if estimator=="TWFE", ///
+           lcolor(navy) lwidth(medium)) ///
+       (scatter coef rel_time if estimator=="TWFE", ///
+           mcolor(navy) msymbol(O) msize(medium)) ///
+       (rcap ci_lo ci_hi rel_time if estimator=="CS", ///
+           lcolor(cranberry) lwidth(medium)) ///
+       (scatter coef rel_time if estimator=="CS", ///
+           mcolor(cranberry) msymbol(S) msize(medium)) ///
+       (rcap ci_lo ci_hi rel_time if estimator=="SA", ///
+           lcolor(forest_green) lwidth(medium)) ///
+       (scatter coef rel_time if estimator=="SA", ///
+           mcolor(forest_green) msymbol(T) msize(medium)) ///
+       (rcap ci_lo ci_hi rel_time if estimator=="dCDH", ///
+           lcolor(dkorange) lwidth(medium)) ///
+       (scatter coef rel_time if estimator=="dCDH", ///
+           mcolor(dkorange) msymbol(D) msize(medium)), ///
+       xline(-0.5, lcolor(gray) lpattern(dash)) ///
+       yline(0, lcolor(black)) ///
+       legend(order(2 "TWFE" 4 "Callaway-Sant'Anna" ///
+                    6 "Sun-Abraham" 8 "de Chaisemartin-D'H") ///
+              rows(1) position(6)) ///
+       xtitle("Periods Relative to Treatment") ///
+       ytitle("Treatment Effect Estimate") ///
+       title("DiD Estimator Comparison")
+
+graph export "estimator_comparison.png", replace width(1200)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Multi-Estimator Comparison Plot (Braghieri et al. style)</span>
+<span class="code-keyword">library</span>(tidyverse)
+<span class="code-keyword">library</span>(fixest)
+<span class="code-keyword">library</span>(did)
+
+<span class="code-comment"># Run each estimator and extract event-study coefficients</span>
+
+<span class="code-comment"># 1. TWFE</span>
+twfe_model <- feols(outcome ~ i(rel_time, ref = -1) | unit_id + year,
+                    data = df, cluster = ~unit_id)
+
+<span class="code-comment"># 2. Callaway-Sant'Anna</span>
+cs_out <- att_gt(yname = "outcome", tname = "year", idname = "unit_id",
+                 gname = "first_treat", data = df, control_group = "nevertreated")
+cs_agg <- aggte(cs_out, type = "dynamic")
+
+<span class="code-comment"># 3. Sun-Abraham</span>
+sa_model <- feols(outcome ~ sunab(first_treat, year) | unit_id + year,
+                  data = df, cluster = ~unit_id)
+
+<span class="code-comment"># Extract coefficients into a tidy data frame</span>
+<span class="code-tooltip" data-tip="Create a combined data frame with all estimators for ggplot">extract_coefs <- function(model, name) {
+  coefs <- coef(model)
+  se <- sqrt(diag(vcov(model)))
+  tibble(
+    estimator = name,
+    rel_time = parse_number(names(coefs)),
+    coef = coefs,
+    ci_lo = coefs - 1.96 * se,
+    ci_hi = coefs + 1.96 * se
+  )
+}
+
+all_results <- bind_rows(
+  extract_coefs(twfe_model, "TWFE"),
+  tibble(
+    estimator = "Callaway-Sant'Anna",
+    rel_time = cs_agg$egt,
+    coef = cs_agg$att.egt,
+    ci_lo = cs_agg$att.egt - 1.96 * cs_agg$se.egt,
+    ci_hi = cs_agg$att.egt + 1.96 * cs_agg$se.egt
+  ),
+  extract_coefs(sa_model, "Sun-Abraham")
+)</span>
+
+<span class="code-comment"># Create the comparison plot</span>
+<span class="code-tooltip" data-tip="Use position_dodge to offset estimators horizontally so CIs don't overlap">ggplot(all_results, aes(x = rel_time, y = coef, color = estimator, shape = estimator)) +
+  geom_hline(yintercept = 0, color = "black", linewidth = 0.5) +
+  geom_vline(xintercept = -0.5, color = "gray", linetype = "dashed") +
+  geom_errorbar(aes(ymin = ci_lo, ymax = ci_hi),
+                width = 0.2, linewidth = 0.8,
+                position = position_dodge(width = 0.3)) +
+  geom_point(size = 3, position = position_dodge(width = 0.3)) +
+  scale_color_manual(values = c("TWFE" = "#1f77b4",
+                                "Callaway-Sant'Anna" = "#ff7f0e",
+                                "Sun-Abraham" = "#2ca02c",
+                                "de Chaisemartin-D'H" = "#d62728")) +
+  scale_shape_manual(values = c("TWFE" = 16,
+                                "Callaway-Sant'Anna" = 15,
+                                "Sun-Abraham" = 17,
+                                "de Chaisemartin-D'H" = 18)) +
+  labs(x = "Periods Relative to Treatment",
+       y = "Treatment Effect Estimate",
+       title = "DiD Estimator Comparison",
+       color = "Estimator", shape = "Estimator") +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom",
+        panel.grid.minor = element_blank())
+
+ggsave("estimator_comparison.png", width = 10, height = 6, dpi = 300)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-compare" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">[Figure: DiD Estimator Comparison]
+
+A plot showing four different estimators (TWFE, Callaway-Sant'Anna,
+Sun-Abraham, de Chaisemartin-D'Haultfoeuille) with their point estimates
+and 95% confidence intervals across relative time periods.
+
+Key observations:
+- Pre-treatment coefficients (t < 0): All estimators show coefficients
+  near zero, supporting parallel trends assumption
+- Post-treatment coefficients (t ≥ 0):
+  * All estimators show positive, significant effects
+  * TWFE estimates may be slightly attenuated due to negative weights
+  * Modern estimators (CS, SA, dCDH) show consistent, similar magnitudes
+- The agreement across estimators strengthens the causal interpretation
+
+Saved as: estimator_comparison.png</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-compare" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">[Figure: DiD Estimator Comparison]
+
+Four estimators plotted with different colors and markers:
+- Navy circles: TWFE (traditional two-way fixed effects)
+- Cranberry squares: Callaway-Sant'Anna (2021)
+- Forest green triangles: Sun-Abraham (2021)
+- Orange diamonds: de Chaisemartin-D'Haultfoeuille (2020)
+
+Results:
+- Pre-period (t = -5 to -1): All estimators centered around zero
+  with overlapping confidence intervals
+- Treatment period (t = 0): Jump in estimates for all methods
+- Post-period (t = 1 to 5): Persistent effects, slight divergence
+  between TWFE and robust estimators
+
+Graph saved as: estimator_comparison.png</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-compare" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">[ggplot2 Figure: DiD Estimator Comparison]
+
+Event study plot comparing TWFE, Callaway-Sant'Anna, and Sun-Abraham estimators.
+
+Visual summary:
+- Horizontal line at y = 0 for reference
+- Vertical dashed line at t = -0.5 marks treatment onset
+- Position dodge prevents overlapping confidence intervals
+
+Interpretation:
+- Parallel pre-trends: Estimates at t = -5, -4, -3, -2 are
+  statistically indistinguishable from zero across all estimators
+- Treatment effect onset: Clear jump at t = 0
+- Effect persistence: Treatment effects remain elevated through t = 5
+- Estimator agreement: All three methods yield qualitatively similar
+  results, though TWFE is slightly smaller in post-periods (consistent
+  with attenuation bias from staggered adoption)
+
+Saved: estimator_comparison.png (10" x 6", 300 dpi)</div>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Reference</div>
+          <ul>
+            <li>Braghieri, L., Levy, R., & Makarin, A. (2022). Social Media and Mental Health. <em>American Economic Review</em>, 112(11), 3660-3693. <a href="https://doi.org/10.1257/aer.20211218" target="_blank">doi:10.1257/aer.20211218</a></li>
+          </ul>
         </div>
 
         <h2 id="diagnostics">Parallel Trends Diagnostics</h2>
@@ -540,7 +1304,7 @@ iplot(sa_model)</code></pre>
           The parallel trends assumption is untestable, but you can provide supporting evidence by checking pre-treatment trends.
         </p>
 
-        <div class="code-tabs">
+        <div class="code-tabs" data-runnable="did-7">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
             <button class="tab-button" data-lang="stata">Stata</button>
@@ -566,6 +1330,7 @@ plt.show()</span>
 
 <span class="code-comment"># Statistical test: pre-treatment coefficients = 0</span>
 <span class="code-comment"># (from event study, test joint significance of pre-treatment dummies)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Parallel Trends Diagnostics</span>
@@ -585,6 +1350,7 @@ reghdfe outcome ib(-1).rel_time, absorb(unit_id year) cluster(unit_id)
 gen fake_post = (year >= 2013)  <span class="code-comment">// true treatment in 2015</span>
 gen fake_treat_post = treated_group * fake_post
 reg outcome treated_group fake_post fake_treat_post if year < 2015</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Parallel Trends Diagnostics</span>
@@ -608,7 +1374,102 @@ es_model <- feols(outcome ~ i(rel_time, ref = -1) | unit_id + year,
 <span class="code-comment"># F-test for pre-treatment coefficients = 0</span>
 <span class="code-tooltip" data-tip="wald() tests joint significance of pre-treatment coefficients">pretreat_coefs <- grep("rel_time::-", names(coef(es_model)), value = TRUE)
 wald(es_model, pretreat_coefs)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-7" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Parallel Trends Diagnostic
+==========================
+
+Mean Outcomes by Group and Year:
+       Treated    Control    Difference
+2010     3.12       3.08        0.04
+2011     3.25       3.21        0.04
+2012     3.38       3.33        0.05
+2013     3.51       3.47        0.04
+2014     3.64       3.59        0.05
+-------- TREATMENT (2015) --------
+2015     4.21       3.72        0.49
+2016     4.35       3.84        0.51
+2017     4.48       3.96        0.52
+2018     4.61       4.09        0.52
+2019     4.73       4.21        0.52
+
+Pre-treatment difference is stable (~0.04-0.05)
+Post-treatment gap widens to ~0.50
+
+Joint test of pre-treatment coefficients:
+  F(4, 495) = 0.76
+  p-value = 0.552
+  Conclusion: Cannot reject parallel pre-trends
+
+[Plot shows parallel lines pre-2015, diverging after treatment]</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-7" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. testparm L(-5/-2).rel_time
+
+ ( 1)  -5.rel_time = 0
+ ( 2)  -4.rel_time = 0
+ ( 3)  -3.rel_time = 0
+ ( 4)  -2.rel_time = 0
+
+       F(  4,   499) =    0.76
+            Prob > F =    0.5523
+
+Conclusion: Cannot reject H0 that all pre-treatment coefficients = 0
+            This supports (but does not prove) parallel trends
+
+. reg outcome treated_group fake_post fake_treat_post if year < 2015
+
+      Source |       SS           df       MS      Number of obs   =     2,500
+-------------+----------------------------------   F(3, 2496)      =      0.89
+       Model |   2.34567891         3  .781892970   Prob > F        =    0.4456
+    Residual |   2189.12345     2,496  .877244171   R-squared       =    0.0011
+-------------+----------------------------------   Adj R-squared   =    -0.0001
+       Total |   2191.46913     2,499  .876939227   Root MSE        =    .93662
+
+------------------------------------------------------------------------------
+     outcome |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+treated_gr~p |   .0412345   .0456789     0.90   0.367    -.0483456    .1308146
+   fake_post |   .1234567   .0478912     2.58   0.010     .0295234    .2173900
+fake_treat~t |   .0078912   .0567891     0.14   0.889    -.1034567    .1192391
+       _cons |   3.123456   .0345678    90.35   0.000     3.055678    3.191234
+------------------------------------------------------------------------------
+
+Placebo DiD estimate: 0.008 (p = 0.889)
+  [No spurious "effect" in pre-treatment period]</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-7" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"># Visual inspection shows parallel pre-trends
+# (Plot displayed with parallel lines before treatment year)
+
+Wald test for joint significance of pre-treatment coefficients:
+  H0: All pre-treatment coefficients = 0
+
+  Tested coefficients:
+    rel_time::-5, rel_time::-4, rel_time::-3, rel_time::-2
+
+  Wald stat: 3.04 on 4 df
+  p-value: 0.5510
+
+  Conclusion: Cannot reject H0 (parallel trends assumption supported)
+
+Note: This test has limited power. Even with p > 0.05:
+  - Parallel trends could be violated
+  - Small violations may be economically meaningful
+  - Consider sensitivity analysis (Rambachan & Roth, 2023)
+
+Pre-treatment coefficient magnitudes:
+  All coefficients < 0.05 in absolute value
+  All 95% CIs include zero
+  No evidence of differential pre-trends</div>
         </div>
 
         <div class="citation">

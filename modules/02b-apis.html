@@ -190,8 +190,16 @@
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
           <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
-          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
-          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li class="has-subnav">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
           <li><a href="../resources.html">Resources</a></li>
           <li><a href="contact.html">Contact & Feedback</a></li>
         </ul>
@@ -219,12 +227,36 @@
           </ul>
         </div>
 
-        <div class="research-banner">
-          <h3>Research Project: Fetching Climate & Economic Data</h3>
-          <p style="margin-bottom: 0;">In this module, we'll use the World Bank API to programmatically download CO2 emissions, GDP, and climate indicators for our research on climate vulnerability and economic growth.</p>
+        <!-- ===================== THE RESEARCH SCENARIO ===================== -->
+        <h2>The Scenario: You Need GDP Data</h2>
+
+        <p>Imagine you are starting a research project on economic growth across countries. You need GDP data for the United States, France, China, and Brazil over the past decade. Where do you go?</p>
+
+        <p>A natural first stop is the <strong>World Bank Open Data</strong> portal at <a href="https://data.worldbank.org" target="_blank">data.worldbank.org</a>. It is one of the most comprehensive sources of development indicators in the world — covering over 200 countries and thousands of economic, social, and environmental variables. You visit the site, search for "GDP," and sure enough, the data is there.</p>
+
+        <div class="concept-box" style="background: #fffbeb; border-left-color: #f59e0b;">
+          <h4 style="color: #92400e;">The Manual Approach (What You'd Do Without an API)</h4>
+          <p>You could click through the World Bank website, select your countries one by one, choose the indicator, pick your date range, and download a CSV file. Then you'd open it in your code editor, clean up the formatting, and start working.</p>
+          <p>This works fine if you need data once. But what if you need to:</p>
+          <ul style="margin-bottom: 0;">
+            <li>Update your data every month with the latest figures?</li>
+            <li>Pull the same indicator for 50 countries instead of 4?</li>
+            <li>Fetch 10 different indicators and merge them automatically?</li>
+            <li>Make your entire pipeline reproducible for a co-author?</li>
+          </ul>
         </div>
 
-        <!-- What is an API? -->
+        <p>This is where <strong>APIs</strong> come in. Instead of clicking through a website, you write code that asks the World Bank's server directly for exactly the data you need. The server sends it back in a structured format, and your code processes it automatically. No manual downloads, no formatting headaches, and fully reproducible.</p>
+
+        <p>The World Bank actually <em>wants</em> you to use their API — they provide detailed <a href="https://datahelpdesk.worldbank.org/knowledgebase/articles/889392-about-the-indicators-api-documentation" target="_blank">API documentation</a> explaining exactly how to request data programmatically. Many major data providers do the same: FRED (Federal Reserve), Eurostat, the IMF, the OECD, and more. Learning to use one API teaches you the pattern for all of them.</p>
+
+        <div class="research-banner">
+          <h3>Research Project: Fetching Climate & Economic Data</h3>
+          <p style="margin-bottom: 0;">Throughout this module, we'll use the World Bank API to programmatically download CO2 emissions, GDP, and climate indicators for a research project on climate vulnerability and economic growth. You'll learn to build API calls from scratch — and once you can do it for the World Bank, you can do it for any API.</p>
+        </div>
+
+
+        <!-- ===================== WHAT IS AN API? ===================== -->
         <h2>What is an API?</h2>
 
         <div class="concept-box">
@@ -260,10 +292,24 @@
           </div>
         </div>
 
-        <!-- HTTP and URLs -->
-        <h2>Understanding API URLs</h2>
+        <!-- ===================== READING THE DOCUMENTATION ===================== -->
+        <h2>Reading the API Documentation</h2>
 
-        <p>API requests use URLs with specific structures:</p>
+        <p>Before you can call an API, you need to read its <strong>documentation</strong> — the instructions the data provider gives you. The World Bank's API docs tell you:</p>
+
+        <ol>
+          <li><strong>The base URL</strong> — where the API lives: <code>https://api.worldbank.org/v2/</code></li>
+          <li><strong>The URL pattern</strong> — how to ask for specific data: <code>/country/{country_code}/indicator/{indicator_code}</code></li>
+          <li><strong>Available parameters</strong> — filters you can add: <code>?format=json&date=2015:2022</code></li>
+          <li><strong>Indicator codes</strong> — what each code means (e.g., <code>NY.GDP.MKTP.CD</code> = GDP in current US dollars)</li>
+        </ol>
+
+        <p>Every API documentation follows this same general structure. Once you understand how to read one, you can navigate any API. Let's break down the World Bank URL piece by piece:</p>
+
+        <!-- HTTP and URLs -->
+        <h3>Anatomy of an API URL</h3>
+
+        <p>An API URL is just a web address with a specific structure. Each part tells the server exactly what you want:</p>
 
         <pre style="background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.85rem;">
 https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD?format=json
@@ -431,7 +477,7 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
   <span class="code-tooltip" data-tip="DOLLAR SIGN ACCESS: records$country$value navigates nested data. First get 'country' from records, then get 'value' from that. This extracts the actual country names from the nested structure.">country = records$country$value</span>,      <span class="code-comment"># Country name</span>
   <span class="code-tooltip" data-tip="TYPE CONVERSION: as.integer() converts text years ('2022') to numbers (2022). Important for calculations and proper sorting. The API returns years as character strings.">year = <span class="code-function">as.integer</span>(records$date)</span>,      <span class="code-comment"># Year as integer</span>
   gdp = records$value                    <span class="code-comment"># GDP value</span>
-) <span class="code-tooltip" data-tip="PIPE OPERATOR: The %>% takes the result from the left and passes it to the function on the right. Read as 'then': create tibble THEN filter it. Makes code read like a sentence.">%></span> <span class="code-tooltip" data-tip="FILTER: Keeps only rows that meet a condition. Here, !is.na(gdp) means 'NOT missing'. So we keep rows where GDP is NOT NA (missing). Removes incomplete data."><span class="code-function">filter</span>(!<span class="code-function">is.na</span>(gdp))</span>              <span class="code-comment"># Remove NAs</span>
+) <span class="code-tooltip" data-tip="PIPE OPERATOR: The %>% takes the result from the left and passes it to the function on the right. Read as 'then': create tibble THEN filter it. Makes code read like a sentence.">%>%</span> <span class="code-tooltip" data-tip="FILTER: Keeps only rows that meet a condition. Here, !is.na(gdp) means 'NOT missing'. So we keep rows where GDP is NOT NA (missing). Removes incomplete data."><span class="code-function">filter</span>(!<span class="code-function">is.na</span>(gdp))</span>              <span class="code-comment"># Remove NAs</span>
 
 <span class="code-function">print</span>(df)</code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>

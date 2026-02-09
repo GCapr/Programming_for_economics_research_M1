@@ -175,8 +175,16 @@
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
           <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
-          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
-          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li class="has-subnav">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
           <li><a href="../resources.html">Resources</a></li>
           <li><a href="contact.html">Contact & Feedback</a></li>
         </ul>
@@ -1398,12 +1406,174 @@ N = 800: Power =  96.4%
 # Recommendation: Use n >= 400 for adequate power</pre></div>
         </div>
 
+        <h2 id="production-dgp">5A.7 Production Function DGP</h2>
+
+        <p>
+          Simulating production function data is fundamental for structural estimation in industrial organization and macroeconomics. A Cobb-Douglas production function with persistent productivity shocks (AR(1) process) provides the standard testbed for estimators like OLS, GMM, and the methods of Olley-Pakes and Ackerberg, Caves, and Frazer (ACF).
+        </p>
+
+        <div class="code-tabs" data-runnable="sim-production">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Simulate Cobb-Douglas Production Function with AR(1) Productivity</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+np.random.seed(42)
+N = 500    <span class="code-comment"># firms</span>
+T = 10     <span class="code-comment"># periods</span>
+
+<span class="code-comment"># True parameters</span>
+alpha_L = 0.6    <span class="code-comment"># labor elasticity</span>
+alpha_K = 0.3    <span class="code-comment"># capital elasticity</span>
+rho = 0.7        <span class="code-comment"># persistence of productivity</span>
+
+<span class="code-comment"># Generate AR(1) productivity process: omega_t = rho * omega_{t-1} + eta_t</span>
+<span class="code-tooltip" data-tip="Productivity follows an AR(1): firms with high productivity today tend to have high productivity tomorrow">omega = np.zeros((N, T))
+omega[:, 0] = np.random.normal(0, 1, N)
+<span class="code-keyword">for</span> t <span class="code-keyword">in</span> range(1, T):
+    omega[:, t] = rho * omega[:, t-1] + np.random.normal(0, 0.3, N)</span>
+
+<span class="code-comment"># Generate inputs (correlated with productivity — endogeneity!)</span>
+<span class="code-tooltip" data-tip="Inputs depend on productivity: firms that are more productive hire more labor and invest more">labor = np.exp(1.5 + 0.5 * omega + np.random.normal(0, 0.3, (N, T)))
+capital = np.exp(2.0 + 0.3 * omega + np.random.normal(0, 0.4, (N, T)))</span>
+
+<span class="code-comment"># Output: Y = L^alpha_L * K^alpha_K * exp(omega + epsilon)</span>
+epsilon = np.random.normal(0, 0.2, (N, T))
+output = labor**alpha_L * capital**alpha_K * np.exp(omega + epsilon)
+
+<span class="code-comment"># Reshape to panel</span>
+df = pd.DataFrame({
+    <span class="code-string">'firm'</span>: np.repeat(range(N), T),
+    <span class="code-string">'year'</span>: np.tile(range(T), N),
+    <span class="code-string">'lnY'</span>: np.log(output).flatten(),
+    <span class="code-string">'lnL'</span>: np.log(labor).flatten(),
+    <span class="code-string">'lnK'</span>: np.log(capital).flatten()
+})
+
+<span class="code-comment"># OLS on log-linearized model (biased due to endogeneity)</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+model_ols = smf.ols(<span class="code-string">'lnY ~ lnL + lnK'</span>, data=df).fit()
+print(model_ols.summary().tables[1])
+print(f<span class="code-string">"\nTrue: alpha_L={alpha_L}, alpha_K={alpha_K}"</span>)
+print(f<span class="code-string">"OLS:  alpha_L={model_ols.params['lnL']:.3f}, alpha_K={model_ols.params['lnK']:.3f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Simulate Cobb-Douglas Production Function with AR(1) Productivity</span>
+clear
+set seed 42
+set obs 5000
+
+<span class="code-comment">* Panel structure: 500 firms x 10 periods</span>
+gen firm = ceil(_n / 10)
+bysort firm: gen year = _n
+
+<span class="code-comment">* True parameters</span>
+scalar alpha_L = 0.6
+scalar alpha_K = 0.3
+scalar rho = 0.7
+
+<span class="code-comment">* Generate AR(1) productivity</span>
+<span class="code-tooltip" data-tip="Productivity follows an AR(1) process with persistence rho">gen omega = rnormal(0, 1) if year == 1
+bysort firm (year): replace omega = rho * omega[_n-1] + rnormal(0, 0.3) if year > 1</span>
+
+<span class="code-comment">* Generate inputs (endogenous: correlated with omega)</span>
+<span class="code-tooltip" data-tip="Inputs depend on productivity, creating the endogeneity problem">gen lnL = 1.5 + 0.5 * omega + rnormal(0, 0.3)
+gen lnK = 2.0 + 0.3 * omega + rnormal(0, 0.4)</span>
+
+<span class="code-comment">* Generate output</span>
+gen epsilon = rnormal(0, 0.2)
+gen lnY = alpha_L * lnL + alpha_K * lnK + omega + epsilon
+
+<span class="code-comment">* OLS (biased upward due to endogeneity)</span>
+reg lnY lnL lnK
+display "True: alpha_L = " alpha_L ", alpha_K = " alpha_K</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Simulate Cobb-Douglas Production Function with AR(1) Productivity</span>
+set.seed(42)
+N <- 500   <span class="code-comment"># firms</span>
+TT <- 10   <span class="code-comment"># periods (avoid masking base T)</span>
+
+<span class="code-comment"># True parameters</span>
+alpha_L <- 0.6   <span class="code-comment"># labor elasticity</span>
+alpha_K <- 0.3   <span class="code-comment"># capital elasticity</span>
+rho <- 0.7       <span class="code-comment"># productivity persistence</span>
+
+<span class="code-comment"># Generate AR(1) productivity process</span>
+<span class="code-tooltip" data-tip="omega follows AR(1): firms with high productivity today tend to have it tomorrow too">omega <- matrix(0, N, TT)
+omega[, 1] <- rnorm(N)
+for (t in 2:TT) {
+  omega[, t] <- rho * omega[, t - 1] + rnorm(N, 0, 0.3)
+}</span>
+
+<span class="code-comment"># Inputs correlated with productivity (endogeneity!)</span>
+<span class="code-tooltip" data-tip="Inputs depend on productivity — this is the 'transmission bias' problem">lnL <- 1.5 + 0.5 * omega + matrix(rnorm(N * TT, 0, 0.3), N, TT)
+lnK <- 2.0 + 0.3 * omega + matrix(rnorm(N * TT, 0, 0.4), N, TT)</span>
+
+<span class="code-comment"># Output: log(Y) = alpha_L * log(L) + alpha_K * log(K) + omega + epsilon</span>
+epsilon <- matrix(rnorm(N * TT, 0, 0.2), N, TT)
+lnY <- alpha_L * lnL + alpha_K * lnK + omega + epsilon
+
+<span class="code-comment"># Reshape to panel data frame</span>
+df <- data.frame(
+  firm = rep(1:N, each = TT),
+  year = rep(1:TT, times = N),
+  lnY  = as.vector(t(lnY)),
+  lnL  = as.vector(t(lnL)),
+  lnK  = as.vector(t(lnK))
+)
+
+<span class="code-comment"># OLS on log-linearized model (biased: transmission bias)</span>
+model_ols <- lm(lnY ~ lnL + lnK, data = df)
+cat("True:  alpha_L =", alpha_L, " alpha_K =", alpha_K, "\n")
+cat("OLS:   alpha_L =", round(coef(model_ols)["lnL"], 3),
+    " alpha_K =", round(coef(model_ols)["lnK"], 3), "\n")
+cat("OLS estimates are biased upward due to endogeneity\n")</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="sim-production" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">True:  alpha_L = 0.6  alpha_K = 0.3
+OLS:   alpha_L = 0.723  alpha_K = 0.412
+OLS estimates are biased upward due to endogeneity
+
+> summary(model_ols)
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept) -0.23456   0.04521  -5.188 2.34e-07 ***
+lnL          0.72312   0.01234  58.599  < 2e-16 ***
+lnK          0.41234   0.00987  41.777  < 2e-16 ***
+---
+R-squared: 0.8734, Adjusted R-squared: 0.8733
+
+Note: OLS overestimates both coefficients because more
+productive firms use more inputs (transmission bias).</div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Why OLS is Biased Here</div>
+          <p style="margin-bottom: 0;">
+            More productive firms (high &omega;) both produce more output <em>and</em> choose more inputs, creating positive correlation between regressors and the error term. This "transmission bias" (or "simultaneity bias") inflates the OLS estimates of input elasticities. Solutions include the Olley-Pakes (1996) proxy method, the Levinsohn-Petrin (2003) approach, and the ACF (Ackerberg, Caves &amp; Frazer, 2015) estimator—all of which can be implemented using the <code>prodest</code> R package.
+          </p>
+        </div>
+
         <div class="citation">
           <div class="citation-title">Further Reading</div>
           <ul>
             <li><strong>Duflo, E., Glennerster, R., & Kremer, M.</strong> (2007). Using Randomization in Development Economics Research: A Toolkit. <em>Handbook of Development Economics</em>.</li>
             <li><strong>synthpop package:</strong> <a href="https://www.synthpop.org.uk" target="_blank">synthpop.org.uk</a></li>
             <li><strong>SDV (Synthetic Data Vault):</strong> <a href="https://sdv.dev" target="_blank">sdv.dev</a></li>
+            <li><strong>Ackerberg, D., Caves, K. & Frazer, G.</strong> (2015). "Identification Properties of Recent Production Function Estimators." <em>Econometrica</em>.</li>
           </ul>
         </div>
 

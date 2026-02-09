@@ -101,8 +101,16 @@
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
           <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
-          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
-          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li class="has-subnav">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
           <li><a href="../resources.html">Resources</a></li>
           <li><a href="contact.html">Contact & Feedback</a></li>
         </ul>
@@ -133,6 +141,11 @@
             <li><a href="#modern">Modern DiD Estimators</a></li>
             <li><a href="#comparing">Comparing Estimators</a></li>
             <li><a href="#diagnostics">Parallel Trends Diagnostics</a></li>
+            <li><a href="#goodman-bacon">Goodman-Bacon Decomposition</a></li>
+            <li><a href="#twfe-weights">TWFE Weight Diagnostics</a></li>
+            <li><a href="#borusyak">Borusyak et al. Imputation</a></li>
+            <li><a href="#fuzzy-did">Fuzzy DiD</a></li>
+            <li><a href="#honest-did">HonestDiD Sensitivity</a></li>
           </ul>
         </div>
 
@@ -1037,6 +1050,7 @@ Aggregated ATT (average post-treatment effect):
             <li><strong>Callaway-Sant'Anna</strong>: Uses never-treated or not-yet-treated as controls</li>
             <li><strong>Sun-Abraham</strong>: Interaction-weighted approach with cohort-specific effects</li>
             <li><strong>de Chaisemartin-D'Haultfoeuille</strong>: Robust to heterogeneous effects and switching treatments</li>
+            <li><strong>Borusyak et al.</strong>: Imputation approach using only untreated observations for counterfactuals</li>
           </ul>
           <p style="margin-bottom: 0;">When all estimators agree, this strengthens your causal claims. When they diverge, investigate why.</p>
         </div>
@@ -1197,7 +1211,14 @@ all_results <- bind_rows(
     ci_lo = cs_agg$att.egt - 1.96 * cs_agg$se.egt,
     ci_hi = cs_agg$att.egt + 1.96 * cs_agg$se.egt
   ),
-  extract_coefs(sa_model, "Sun-Abraham")
+  extract_coefs(sa_model, "Sun-Abraham"),
+  tibble(
+    estimator = "Borusyak et al.",
+    rel_time = did_imp_es$term,
+    coef = did_imp_es$estimate,
+    ci_lo = did_imp_es$conf.low,
+    ci_hi = did_imp_es$conf.high
+  )
 )</span>
 
 <span class="code-comment"># Create the comparison plot</span>
@@ -1211,11 +1232,13 @@ all_results <- bind_rows(
   scale_color_manual(values = c("TWFE" = "#1f77b4",
                                 "Callaway-Sant'Anna" = "#ff7f0e",
                                 "Sun-Abraham" = "#2ca02c",
-                                "de Chaisemartin-D'H" = "#d62728")) +
+                                "de Chaisemartin-D'H" = "#d62728",
+                                "Borusyak et al." = "#9467bd")) +
   scale_shape_manual(values = c("TWFE" = 16,
                                 "Callaway-Sant'Anna" = 15,
                                 "Sun-Abraham" = 17,
-                                "de Chaisemartin-D'H" = 18)) +
+                                "de Chaisemartin-D'H" = 18,
+                                "Borusyak et al." = 8)) +
   labs(x = "Periods Relative to Treatment",
        y = "Treatment Effect Estimate",
        title = "DiD Estimator Comparison",
@@ -1473,6 +1496,816 @@ Pre-treatment coefficient magnitudes:
   No evidence of differential pre-trends</div>
         </div>
 
+        <!-- ============================================================ -->
+        <!-- SECTION 1: Goodman-Bacon Decomposition                       -->
+        <!-- ============================================================ -->
+
+        <h2 id="goodman-bacon">Goodman-Bacon Decomposition</h2>
+
+        <p>
+          TWFE DiD with staggered adoption is a weighted average of all possible 2&times;2 DiD comparisons. Goodman-Bacon (2021) decomposes the TWFE estimate into three types of comparisons: (1) earlier-treated vs. later-treated, (2) later-treated vs. earlier-treated, and (3) treated vs. never-treated. The problematic comparisons are those that use already-treated units as controls. Visualizing the weights vs. estimates by comparison type reveals whether bias is likely.
+        </p>
+
+        <div class="code-tabs" data-runnable="did-bacon">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: No direct package, but can implement manually</span>
+<span class="code-comment"># or use R via rpy2. Conceptual implementation:</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+
+<span class="code-comment"># Get unique treatment cohorts</span>
+<span class="code-tooltip" data-tip="Identify the year each unit was first treated to define cohorts">cohorts = df[df[<span class="code-string">'treatment'</span>] == 1].groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'year'</span>].min().unique()</span>
+
+<span class="code-comment"># For each pair of cohorts, compute 2x2 DiD</span>
+<span class="code-comment"># (Simplified — full implementation requires careful timing)</span>
+<span class="code-comment"># In practice, use R's bacondecomp or Stata's bacondecomp</span>
+
+<span class="code-comment"># Visualization of results (after computing in R/Stata)</span>
+<span class="code-comment"># bacon_df = pd.read_csv('bacon_decomposition.csv')</span>
+<span class="code-comment"># plt.scatter(bacon_df['weight'], bacon_df['estimate'],</span>
+<span class="code-comment">#             c=bacon_df['type'].map(color_map))</span>
+<span class="code-comment"># plt.xlabel('Weight'); plt.ylabel('2x2 DiD Estimate')</span>
+<span class="code-comment"># plt.axhline(y=0, linestyle='--', color='gray')</span>
+<span class="code-comment"># plt.title('Goodman-Bacon Decomposition')</span>
+<span class="code-comment"># plt.show()</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Install: ssc install bacondecomp</span>
+<span class="code-comment">* Goodman-Bacon decomposition</span>
+<span class="code-tooltip" data-tip="Decomposes the TWFE DiD estimate into all 2x2 comparisons with weights">bacondecomp outcome treatment, id(unit_id) time(year)</span>
+
+<span class="code-comment">* The command automatically produces:</span>
+<span class="code-comment">* - Table with 2x2 estimates, weights, and comparison types</span>
+<span class="code-comment">* - Scatter plot of weight vs estimate</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-keyword">library</span>(bacondecomp)
+<span class="code-comment"># Goodman-Bacon decomposition of TWFE</span>
+<span class="code-tooltip" data-tip="Decomposes the overall TWFE estimate into weighted 2x2 DiD comparisons">bacon_out <- <span class="code-function">bacon</span>(outcome ~ treatment, data = df,
+                   id_var = <span class="code-string">"unit_id"</span>, time_var = <span class="code-string">"year"</span>)</span>
+<span class="code-comment"># View decomposition</span>
+print(bacon_out)
+
+<span class="code-comment"># Visualization: weight vs estimate by comparison type</span>
+<span class="code-keyword">library</span>(ggplot2)
+<span class="code-function">ggplot</span>(bacon_out, <span class="code-function">aes</span>(x = weight, y = estimate,
+                       shape = type, color = type)) +
+  <span class="code-function">geom_point</span>(size = 3) +
+  <span class="code-function">geom_hline</span>(yintercept = 0, linetype = <span class="code-string">"dashed"</span>) +
+  <span class="code-function">labs</span>(x = <span class="code-string">"Weight"</span>, y = <span class="code-string">"2x2 DiD Estimate"</span>,
+       title = <span class="code-string">"Goodman-Bacon Decomposition"</span>,
+       color = <span class="code-string">"Comparison Type"</span>, shape = <span class="code-string">"Comparison Type"</span>) +
+  <span class="code-function">theme_minimal</span>()
+
+<span class="code-comment"># Weighted average = TWFE coefficient</span>
+cat(<span class="code-string">"TWFE estimate:"</span>, <span class="code-function">sum</span>(bacon_out$estimate * bacon_out$weight), <span class="code-string">"\n"</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-bacon" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Goodman-Bacon Decomposition (conceptual output)
+=================================================
+
+Note: Use R's bacondecomp or Stata's bacondecomp for full results.
+Python implementation requires manual computation of all 2x2 DiD pairs.
+
+Treatment cohorts identified: [2012, 2014, 2016]
+Number of 2x2 comparisons: 6
+
+[Scatter plot: Weight (x-axis) vs. 2x2 DiD Estimate (y-axis)
+ - Blue triangles: Treated vs. Never-Treated (large weights, positive estimates)
+ - Red circles: Earlier vs. Later Treated (moderate weights, positive estimates)
+ - Orange squares: Later vs. Earlier Treated (small weights, negative estimates)
+ - Dashed horizontal line at y=0]</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-bacon" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. bacondecomp outcome treatment, id(unit_id) time(year)
+
+Bacon Decomposition
+====================
+
+Overall TWFE estimate:  0.4523
+
+----------------------------------------------------------------------
+                  Type         |   Estimate     Weight     Wt. Avg.
+-------------------------------+--------------------------------------
+ Treated vs Never Treated      |    0.5823      0.6120      0.3564
+ Earlier Treated vs Later (T)  |    0.3456      0.2340      0.0809
+ Later Treated vs Earlier (T)  |   -0.1234      0.1540     -0.0190
+-------------------------------+--------------------------------------
+                        Total  |                1.0000      0.4183
+
+Note: TWFE estimate (0.4523) is close to the weighted average (0.4183).
+      Later-vs-Earlier comparisons produce negative estimates,
+      indicating already-treated units are poor controls.
+
+[Scatter plot displayed: Weight vs 2x2 DiD Estimate by comparison type]</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-bacon" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">           type                   estimate     weight
+1  Treated vs Never Treated        0.58235    0.61200
+2  Earlier vs Later Treated        0.34561    0.23400
+3  Later vs Earlier Treated       -0.12340    0.15400
+
+TWFE estimate: 0.4523
+
+[ggplot scatter: Weight (x) vs 2x2 DiD Estimate (y)
+ Points colored by comparison type:
+ - "Treated vs Never Treated": blue, largest weights (~0.6), positive estimates
+ - "Earlier vs Later Treated": green, moderate weights (~0.2), positive estimates
+ - "Later vs Earlier Treated": red, small weights (~0.15), negative estimates
+ Dashed horizontal line at y = 0]
+
+Note: The negative estimate for "Later vs Earlier" comparisons
+reveals that already-treated units are contaminated controls.</div>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Reference</div>
+          <ul>
+            <li>Goodman-Bacon, A. (2021). "Difference-in-Differences with Variation in Treatment Timing." <em>Journal of Econometrics</em>, 225(2), 254-277.</li>
+          </ul>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION 2: TWFE Weight Diagnostics                           -->
+        <!-- ============================================================ -->
+
+        <h2 id="twfe-weights">TWFE Weight Diagnostics</h2>
+
+        <p>
+          de Chaisemartin &amp; D'Haultfoeuille (2020) show that TWFE weights can be negative. When weights are negative and treatment effects are heterogeneous, TWFE can be severely biased&mdash;even producing wrong signs. The <code>twowayfeweights</code> command computes and visualizes these weights. If many weights are negative, use robust estimators instead.
+        </p>
+
+        <div class="code-tabs" data-runnable="did-weights">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Use R via rpy2 or implement manually</span>
+<span class="code-comment"># The key insight is computing the regression weights</span>
+<span class="code-comment"># from the TWFE regression and checking for negatives</span>
+
+<span class="code-comment"># Conceptual check using fixest residualization</span>
+<span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
+
+<span class="code-comment"># Demean by unit and time (TWFE residualization)</span>
+<span class="code-tooltip" data-tip="TWFE is equivalent to OLS on demeaned data; the implicit weights on each observation can be negative">df[<span class="code-string">'outcome_dm'</span>] = df.groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'outcome'</span>].transform(<span class="code-string">'demean'</span>)
+df[<span class="code-string">'outcome_dm'</span>] -= df.groupby(<span class="code-string">'year'</span>)[<span class="code-string">'outcome_dm'</span>].transform(<span class="code-string">'mean'</span>)
+df[<span class="code-string">'treatment_dm'</span>] = df.groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'treatment'</span>].transform(<span class="code-string">'demean'</span>)
+df[<span class="code-string">'treatment_dm'</span>] -= df.groupby(<span class="code-string">'year'</span>)[<span class="code-string">'treatment_dm'</span>].transform(<span class="code-string">'mean'</span>)</span>
+
+<span class="code-comment"># The implicit weight on each observation is proportional to treatment_dm</span>
+<span class="code-comment"># Negative treatment_dm for treated observations → negative weights</span>
+print(<span class="code-string">"Observations with negative implicit weights:"</span>,
+      (df.loc[df[<span class="code-string">'treatment'</span>]==1, <span class="code-string">'treatment_dm'</span>] &lt; 0).sum())</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Install: ssc install twowayfeweights</span>
+<span class="code-comment">* Compute TWFE weights</span>
+<span class="code-tooltip" data-tip="Reports the number and sum of negative weights in the TWFE regression">twowayfeweights outcome unit_id year treatment, type(feTR)</span>
+
+<span class="code-comment">* The command reports:</span>
+<span class="code-comment">* - Number of positive and negative weights</span>
+<span class="code-comment">* - Sum of negative weights (measure of potential bias)</span>
+<span class="code-comment">* - Under what assumptions TWFE is valid</span>
+
+<span class="code-comment">* With sensitivity analysis</span>
+twowayfeweights outcome unit_id year treatment, type(feTR) ///
+    summary_measures</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-keyword">library</span>(TwoWayFEWeights)
+<span class="code-comment"># Compute TWFE weights</span>
+<span class="code-tooltip" data-tip="Computes the weights that TWFE implicitly assigns to each group-time cell">weights_out <- <span class="code-function">twowayfeweights</span>(df, <span class="code-string">"outcome"</span>, <span class="code-string">"unit_id"</span>, <span class="code-string">"year"</span>, <span class="code-string">"treatment"</span>,
+                                type = <span class="code-string">"feTR"</span>)</span>
+<span class="code-function">summary</span>(weights_out)
+
+<span class="code-comment"># Check for negative weights</span>
+neg_weights <- weights_out$weights[weights_out$weights &lt; 0]
+cat(<span class="code-string">"Number of negative weights:"</span>, <span class="code-function">length</span>(neg_weights), <span class="code-string">"\n"</span>)
+cat(<span class="code-string">"Sum of negative weights:"</span>, <span class="code-function">sum</span>(neg_weights), <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># Histogram of weights</span>
+<span class="code-function">hist</span>(weights_out$weights, breaks = 30, main = <span class="code-string">"TWFE Weights Distribution"</span>,
+     xlab = <span class="code-string">"Weight"</span>, col = <span class="code-function">ifelse</span>(weights_out$weights &lt; 0, <span class="code-string">"red"</span>, <span class="code-string">"steelblue"</span>))
+<span class="code-function">abline</span>(v = 0, lty = 2, lwd = 2)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-weights" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">TWFE Weight Diagnostics (conceptual implementation)
+=====================================================
+
+Demeaning outcome and treatment by unit and time fixed effects...
+
+Observations with negative implicit weights: 47
+
+Among 250 treated observations:
+  Positive implicit weights: 203 (81.2%)
+  Negative implicit weights:  47 (18.8%)
+
+Warning: 18.8% of treated observations receive negative weight.
+With heterogeneous treatment effects, TWFE may be biased.
+Consider using robust estimators (Callaway-Sant'Anna, Sun-Abraham, etc.)</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-weights" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. twowayfeweights outcome unit_id year treatment, type(feTR)
+
+Under the common trends assumption, beta estimates a weighted sum of
+250 ATTs.
+
+  Positive weights: 203 weights summing to 1.1834
+  Negative weights:  47 weights summing to -0.1834
+
+  Total weight:     1.0000
+
+  Minimal value of beta under common trends:     0.2345
+  Maximal value of beta under common trends:     0.7891
+
+The TWFE coefficient could be anywhere between [0.23, 0.79] depending
+on the pattern of treatment effect heterogeneity.
+
+Warning: Negative weights detected. If treatment effects are heterogeneous,
+the TWFE coefficient may not be a consistent estimate of any
+meaningful causal parameter.</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-weights" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Two-Way FE Weights Analysis
+============================
+
+Number of group-time cells: 60
+  Positive weights: 48 (sum = 1.1834)
+  Negative weights: 12 (sum = -0.1834)
+
+Number of negative weights: 12
+Sum of negative weights: -0.1834
+
+[Histogram: TWFE Weights Distribution
+ - Blue bars: positive weights (majority, right of zero)
+ - Red bars: negative weights (12 cells, left of zero)
+ - Dashed vertical line at weight = 0
+ - Most weights concentrated between 0 and 0.05
+ - Negative weights range from -0.04 to -0.01]
+
+Interpretation: 20% of group-time cells receive negative weight.
+TWFE may be biased with heterogeneous effects.</div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">When to Abandon TWFE</div>
+          <p style="margin-bottom: 0;">
+            If a substantial fraction of weights are negative, do NOT rely on TWFE. Use one of the robust estimators covered in this module instead.
+          </p>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION 3: Borusyak et al. Imputation                       -->
+        <!-- ============================================================ -->
+
+        <h2 id="borusyak">Borusyak et al. Imputation Estimator</h2>
+
+        <p>
+          Borusyak, Jaravel &amp; Spiess (2024) propose an imputation approach: (1) estimate the unit FE + time FE model using ONLY untreated observations, (2) impute counterfactual outcomes for treated observations, (3) the treatment effect is the difference between actual and imputed outcomes. This avoids the negative weighting problem entirely.
+        </p>
+
+        <div class="code-tabs" data-runnable="did-borusyak">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: No direct package yet</span>
+<span class="code-comment"># Conceptual implementation of the imputation approach:</span>
+<span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Step 1: Estimate FE model on untreated observations only</span>
+<span class="code-tooltip" data-tip="Only untreated obs are used to estimate the fixed effects model — this avoids contamination from treatment">untreated = df[df[<span class="code-string">'treatment'</span>] == 0]</span>
+<span class="code-comment"># Add unit and time dummies</span>
+untreated_dummies = pd.<span class="code-function">get_dummies</span>(untreated[[<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>]],
+                                     columns=[<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
+model_untreated = sm.<span class="code-function">OLS</span>(untreated[<span class="code-string">'outcome'</span>], untreated_dummies).<span class="code-function">fit</span>()
+
+<span class="code-comment"># Step 2: Predict counterfactual for treated observations</span>
+treated = df[df[<span class="code-string">'treatment'</span>] == 1]
+treated_dummies = pd.<span class="code-function">get_dummies</span>(treated[[<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>]],
+                                   columns=[<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
+<span class="code-comment"># Align columns</span>
+treated_dummies = treated_dummies.<span class="code-function">reindex</span>(columns=untreated_dummies.columns, fill_value=0)
+<span class="code-tooltip" data-tip="Impute Y(0) for treated units using the model estimated on untreated data">y0_hat = model_untreated.<span class="code-function">predict</span>(treated_dummies)</span>
+
+<span class="code-comment"># Step 3: ATT = mean(Y1 - Y0_hat)</span>
+att = (treated[<span class="code-string">'outcome'</span>].values - y0_hat).mean()
+print(<span class="code-keyword">f</span><span class="code-string">"Imputation ATT: {att:.4f}"</span>)
+
+<span class="code-comment"># In practice, use R's didimputation or Stata's did_imputation</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Install: ssc install did_imputation</span>
+<span class="code-comment">* Borusyak et al. imputation estimator</span>
+
+<span class="code-comment">* Static ATT</span>
+<span class="code-tooltip" data-tip="Imputes Y(0) for treated obs from a FE model on untreated obs only">did_imputation outcome unit_id year first_treated, allhorizons pretrends(5)</span>
+
+<span class="code-comment">* Event study</span>
+did_imputation outcome unit_id year first_treated, ///
+    horizons(0/5) pretrends(5)
+
+<span class="code-comment">* The command reports ATT by horizon (event time)</span>
+<span class="code-comment">* with standard errors clustered at unit level</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-keyword">library</span>(didimputation)
+<span class="code-comment"># Borusyak et al. imputation estimator</span>
+<span class="code-comment"># Static ATT</span>
+<span class="code-tooltip" data-tip="Estimates Y(0) from untreated data, then computes ATT as actual minus imputed">did_imp <- <span class="code-function">did_imputation</span>(data = df, yname = <span class="code-string">"outcome"</span>,
+                           gname = <span class="code-string">"first_treated"</span>,  <span class="code-comment"># cohort indicator</span>
+                           tname = <span class="code-string">"year"</span>, idname = <span class="code-string">"unit_id"</span>)</span>
+<span class="code-function">summary</span>(did_imp)
+
+<span class="code-comment"># Event study with pre-trends</span>
+did_imp_es <- <span class="code-function">did_imputation</span>(data = df, yname = <span class="code-string">"outcome"</span>,
+                              gname = <span class="code-string">"first_treated"</span>,
+                              tname = <span class="code-string">"year"</span>, idname = <span class="code-string">"unit_id"</span>,
+                              horizon = TRUE, pretrends = TRUE)
+<span class="code-function">summary</span>(did_imp_es)
+
+<span class="code-comment"># Plot event study</span>
+<span class="code-keyword">library</span>(ggplot2)
+<span class="code-function">plot</span>(did_imp_es)  <span class="code-comment"># built-in plotting method</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-borusyak" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Borusyak et al. Imputation Estimator (conceptual)
+===================================================
+
+Step 1: FE model estimated on 3,750 untreated observations
+  Unit FEs: 50 units
+  Time FEs: 10 periods
+  R-squared (within): 0.891
+
+Step 2: Counterfactual Y(0) imputed for 1,250 treated observations
+
+Step 3: Treatment effect = Actual - Imputed
+  Imputation ATT: 0.5734
+
+In practice, use R's didimputation or Stata's did_imputation
+for proper standard errors and event-study decomposition.</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-borusyak" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. did_imputation outcome unit_id year first_treated, allhorizons pretrends(5)
+
+did_imputation: Borusyak, Jaravel, and Spiess (2024)
+=====================================================
+
+ATT by horizon (event time):
+----------------------------------------------------------------------
+     Horizon |   Estimate    Std. Err.      t     P>|t|     [95% CI]
+-------------+--------------------------------------------------------
+          -5 |   -0.0123      0.0456    -0.27     0.787    -.102  .077
+          -4 |    0.0089      0.0423     0.21     0.834    -.074  .092
+          -3 |   -0.0234      0.0478    -0.49     0.625    -.117  .071
+          -2 |    0.0156      0.0412     0.38     0.705    -.065  .097
+          -1 |    0.0000      (ref)        .         .        .     .
+           0 |    0.4567      0.0789     5.79     0.000     .302  .612
+           1 |    0.5234      0.0823     6.36     0.000     .362  .685
+           2 |    0.5891      0.0891     6.61     0.000     .414  .764
+           3 |    0.6123      0.0934     6.56     0.000     .429  .796
+           4 |    0.5789      0.1012     5.72     0.000     .380  .778
+           5 |    0.6012      0.1089     5.52     0.000     .388  .815
+----------------------------------------------------------------------
+
+Overall ATT: 0.5603 (SE: 0.0678)
+
+Pre-trend test: F(4, 49) = 0.34, p = 0.849
+  [No evidence against parallel trends]</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-borusyak" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Borusyak et al. (2024) Imputation Estimator
+=============================================
+
+Static ATT:
+  Estimate: 0.5603
+  Std. Error: 0.0678
+  t-value: 8.264
+  p-value: < 2e-16 ***
+  95% CI: [0.427, 0.694]
+
+Event Study (with pre-trends):
+  horizon   estimate   std.error   p.value
+      -5    -0.0123      0.0456     0.787
+      -4     0.0089      0.0423     0.834
+      -3    -0.0234      0.0478     0.625
+      -2     0.0156      0.0412     0.705
+      -1     0.0000          ref       ref
+       0     0.4567      0.0789     0.000
+       1     0.5234      0.0823     0.000
+       2     0.5891      0.0891     0.000
+       3     0.6123      0.0934     0.000
+       4     0.5789      0.1012     0.000
+       5     0.6012      0.1089     0.000
+
+[Event study plot: pre-treatment coefficients near zero,
+ post-treatment coefficients positive and increasing,
+ 95% CIs shown as vertical bars, dashed line at y = 0]</div>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Reference</div>
+          <ul>
+            <li>Borusyak, K., Jaravel, X., &amp; Spiess, J. (2024). "Revisiting Event-Study Designs: Robust and Efficient Estimation." <em>Review of Economic Studies</em>, 91(6), 3253-3285.</li>
+          </ul>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION 4: Fuzzy DiD                                         -->
+        <!-- ============================================================ -->
+
+        <h2 id="fuzzy-did">Fuzzy Difference-in-Differences</h2>
+
+        <p>
+          Standard (sharp) DiD assumes perfect compliance&mdash;all units in the treatment group actually receive treatment. Fuzzy DiD handles imperfect compliance, analogous to fuzzy RDD. The idea: use the group&times;post interaction as an instrument for actual treatment. This yields a LATE for compliers, just as in IV estimation.
+        </p>
+
+        <div class="code-tabs" data-runnable="did-fuzzy">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> linearmodels.iv <span class="code-keyword">import</span> IV2SLS
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> PanelOLS
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Set up panel data</span>
+df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
+
+<span class="code-comment"># Sharp DiD</span>
+<span class="code-tooltip" data-tip="Standard DiD assumes all assigned units actually take up treatment">sharp = <span class="code-function">PanelOLS</span>(df[<span class="code-string">'outcome'</span>], df[[<span class="code-string">'treatment_actual'</span>]],
+                  entity_effects=True, time_effects=True).<span class="code-function">fit</span>(
+                  cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True)</span>
+
+<span class="code-comment"># Fuzzy DiD with IV</span>
+<span class="code-comment"># Use treatment_assigned as instrument for treatment_actual</span>
+<span class="code-tooltip" data-tip="Fuzzy DiD: the group x post assignment instruments for actual treatment uptake">fuzzy = <span class="code-function">IV2SLS</span>(df[<span class="code-string">'outcome'</span>],
+               exog=None,
+               endog=df[[<span class="code-string">'treatment_actual'</span>]],
+               instruments=df[[<span class="code-string">'treatment_assigned'</span>]]).<span class="code-function">fit</span>(
+               cov_type=<span class="code-string">'clustered'</span>, clusters=df.index.get_level_values(0))</span>
+print(fuzzy.summary)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Sharp DiD</span>
+reghdfe outcome treatment_actual, absorb(unit_id year) cluster(unit_id)
+
+<span class="code-comment">* Fuzzy DiD: IV within DiD framework</span>
+<span class="code-comment">* treatment_assigned = group x post interaction (intent to treat)</span>
+<span class="code-tooltip" data-tip="Instruments actual treatment with the DiD interaction (intent-to-treat)">ivreghdfe outcome (treatment_actual = treatment_assigned), ///
+    absorb(unit_id year) cluster(unit_id)</span>
+
+<span class="code-comment">* Or equivalently with xtivreg</span>
+xtivreg outcome (treatment_actual = treatment_assigned) i.year, ///
+    fe vce(cluster unit_id)
+
+<span class="code-comment">* Check first stage</span>
+estat firststage</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-keyword">library</span>(fixest)
+<span class="code-comment"># Sharp DiD (standard)</span>
+sharp <- <span class="code-function">feols</span>(outcome ~ treatment_actual | unit_id + year, data = df)
+
+<span class="code-comment"># Fuzzy DiD: instrument actual treatment with assignment</span>
+<span class="code-comment"># The DiD interaction (group x post) instruments for actual treatment</span>
+<span class="code-tooltip" data-tip="The | after FEs introduces IV: treatment_actual is instrumented by treatment_assigned">fuzzy <- <span class="code-function">feols</span>(outcome ~ 1 | unit_id + year |
+               treatment_actual ~ treatment_assigned, data = df)</span>
+<span class="code-function">summary</span>(fuzzy)
+
+<span class="code-comment"># The coefficient on treatment_actual is now the LATE</span>
+<span class="code-comment"># (Local Average Treatment Effect for compliers)</span>
+
+<span class="code-comment"># First-stage F-statistic</span>
+<span class="code-function">fitstat</span>(fuzzy, <span class="code-string">"ivf"</span>)  <span class="code-comment"># should be > 10</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-fuzzy" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Sharp DiD (PanelOLS):
+  treatment_actual: 0.4523 (SE: 0.0891, p < 0.001)
+
+Fuzzy DiD (IV2SLS):
+                          IV-2SLS Estimation Summary
+================================================================================
+Dep. Variable:                outcome   R-squared:                        0.3891
+Estimator:                    IV-2SLS   Adj. R-squared:                   0.3845
+No. Observations:               5000   F-statistic:                      45.23
+
+                             Parameter Estimates
+================================================================================
+                 Parameter  Std. Err.     T-stat    P-value    Lower CI  Upper CI
+--------------------------------------------------------------------------------
+treatment_actual    0.7234     0.1456      4.968     0.000      0.438     1.009
+================================================================================
+
+First-stage F-statistic: 34.56 (> 10, instrument is strong)
+
+Interpretation:
+  Sharp DiD (ITT):  0.452 — effect of being assigned to treatment
+  Fuzzy DiD (LATE): 0.723 — effect for compliers (those who actually took up)
+  Compliance rate:  ~62.5% (= ITT / LATE)</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-fuzzy" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. reghdfe outcome treatment_actual, absorb(unit_id year) cluster(unit_id)
+
+Sharp DiD:
+------------------------------------------------------------------------------
+             |               Robust
+     outcome |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+treatment_~l |   .4523456   .0891234     5.08   0.000     .2726789    .6320123
+------------------------------------------------------------------------------
+
+. ivreghdfe outcome (treatment_actual = treatment_assigned), ///
+>     absorb(unit_id year) cluster(unit_id)
+
+Fuzzy DiD (IV):
+                             (Std. Err. adjusted for 50 clusters in unit_id)
+------------------------------------------------------------------------------
+             |               Robust
+     outcome |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+treatment_~l |   .7234567   .1456789     4.97   0.000     .4306234    1.016290
+------------------------------------------------------------------------------
+
+Underidentification test (Kleibergen-Paap rk LM statistic): 34.56
+                                                   Chi-sq(1) P-val = 0.0000
+Weak identification test (Kleibergen-Paap rk Wald F statistic): 34.56
+                                        Stock-Yogo weak ID test critical values:
+                                        10% maximal IV size             16.38
+
+. estat firststage
+  First-stage regression summary statistics
+  -------------------------------------------------------
+                                     Adjusted   Partial
+  Variable     |   R-sq.    R-sq.      R-sq.     F(1,49)
+  -------------+-----------------------------------------
+  treatment_~l |  0.5234    0.5123     0.4123     34.56</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-fuzzy" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">TSLS estimation - Pair 1
+Dep. var.: outcome
+Observations: 5,000
+Standard-errors: Clustered (unit_id)
+
+                    Estimate Std. Error  t value  Pr(>|t|)
+treatment_actual     0.72346    0.14568    4.965   1.2e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+IV diagnostics:
+  First-stage F-stat (treatment_actual): 34.56 (p < 0.001)
+  Wu-Hausman test: 5.67 (p = 0.017)
+
+Comparison:
+  Sharp DiD (OLS):   0.452 — Intent-to-Treat (ITT) effect
+  Fuzzy DiD (IV):    0.723 — Local Average Treatment Effect (LATE)
+  Implied compliance: 62.5%</div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Interpreting Fuzzy DiD</div>
+          <p style="margin-bottom: 0;">
+            Fuzzy DiD estimates the LATE for compliers&mdash;units whose actual treatment status changes because of the policy. This is the same interpretation as in IV/2SLS. The identifying assumption combines parallel trends (for DiD) with an exclusion restriction (the instrument only affects outcomes through actual treatment).
+          </p>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">Reference</div>
+          <ul>
+            <li>de Chaisemartin, C. &amp; D'Haultfoeuille, X. (2018). "Fuzzy Differences-in-Differences." <em>Review of Economic Studies</em>, 85(2), 999-1028.</li>
+          </ul>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- SECTION 5: HonestDiD Sensitivity Analysis                    -->
+        <!-- ============================================================ -->
+
+        <h2 id="honest-did">HonestDiD Sensitivity Analysis</h2>
+
+        <p>
+          Standard parallel trends tests (pre-treatment coefficient = 0) have low power (Roth, 2022). HonestDiD (Rambachan &amp; Roth, 2023) asks: how robust are your results to violations of parallel trends? It computes confidence intervals that remain valid even if pre-trends are violated by up to a magnitude <em>M</em>. The key output is a sensitivity plot showing how CIs change as the allowed violation <em>M</em> increases.
+        </p>
+
+        <div class="code-tabs" data-runnable="did-honest">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: No direct package — use R via rpy2</span>
+<span class="code-comment"># Conceptual approach:</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># After running event study, extract coefficients and vcov</span>
+<span class="code-comment"># betahat = np.array([...])  # event study coefficients</span>
+<span class="code-comment"># sigma = np.array([[...]])   # variance-covariance matrix</span>
+
+<span class="code-comment"># The idea: for a given M (maximum violation of parallel trends),</span>
+<span class="code-comment"># compute the worst-case bias and adjust confidence intervals</span>
+<span class="code-tooltip" data-tip="M=0 assumes exact parallel trends; larger M allows for bigger violations, widening the CI"><span class="code-comment"># M = 0: standard CI (assumes exact parallel trends)</span>
+<span class="code-comment"># M > 0: wider CI (allows for some violation)</span></span>
+
+<span class="code-comment"># In practice, use R's HonestDiD package:</span>
+<span class="code-comment"># from rpy2.robjects.packages import importr</span>
+<span class="code-comment"># honestdid = importr('HonestDiD')</span>
+<span class="code-comment"># sensitivity = honestdid.createSensitivityResults_relativeMagnitudes(</span>
+<span class="code-comment">#     betahat=betahat, sigma=sigma,</span>
+<span class="code-comment">#     numPrePeriods=4, numPostPeriods=5)</span>
+print(<span class="code-string">"Use R's HonestDiD package for sensitivity analysis"</span>)
+print(<span class="code-string">"See: https://github.com/asheshrambachan/HonestDiD"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Install: ssc install honestdid</span>
+<span class="code-comment">* Step 1: Run event study</span>
+reghdfe outcome ib(-1).rel_time, absorb(unit_id year) cluster(unit_id)
+
+<span class="code-comment">* Step 2: HonestDiD sensitivity analysis</span>
+<span class="code-tooltip" data-tip="Computes CIs that remain valid even if parallel trends are violated by up to magnitude M">honestdid, pre(4) post(5) mvec(0 0.5 1 1.5 2)</span>
+
+<span class="code-comment">* The command produces a sensitivity plot showing</span>
+<span class="code-comment">* how confidence intervals widen as M increases.</span>
+<span class="code-comment">* If CIs still exclude zero at reasonable M values,</span>
+<span class="code-comment">* the result is robust to plausible parallel trends violations.</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-keyword">library</span>(HonestDiD)
+<span class="code-keyword">library</span>(fixest)
+
+<span class="code-comment"># Step 1: Run event study</span>
+es <- <span class="code-function">feols</span>(outcome ~ <span class="code-function">i</span>(rel_time, ref = <span class="code-function">c</span>(-1, -Inf)) | unit_id + year,
+            data = df, cluster = ~unit_id)
+
+<span class="code-comment"># Step 2: Extract coefficients and variance-covariance matrix</span>
+betahat <- <span class="code-function">coef</span>(es)
+sigma <- <span class="code-function">vcov</span>(es)
+
+<span class="code-comment"># Step 3: Sensitivity analysis — relative magnitudes approach</span>
+<span class="code-tooltip" data-tip="Asks: how large could post-treatment bias be relative to the max pre-trend?">sensitivity <- <span class="code-function">createSensitivityResults_relativeMagnitudes</span>(
+  betahat = betahat,
+  sigma = sigma,
+  numPrePeriods = 4,    <span class="code-comment"># number of pre-treatment periods</span>
+  numPostPeriods = 5,   <span class="code-comment"># number of post-treatment periods</span>
+  Mbarvec = <span class="code-function">seq</span>(0, 2, by = 0.5)  <span class="code-comment"># grid of M values</span>
+)</span>
+
+<span class="code-comment"># Step 4: Plot sensitivity</span>
+<span class="code-function">createSensitivityPlot_relativeMagnitudes</span>(sensitivity, rescaleFactor = 1)
+
+<span class="code-comment"># Original CI (M=0) vs robust CIs</span>
+print(sensitivity)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="did-honest" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">HonestDiD Sensitivity Analysis
+================================
+
+Note: Use R's HonestDiD package for this analysis.
+Python implementation not yet available.
+
+See: https://github.com/asheshrambachan/HonestDiD
+
+Conceptual output (from R):
+  M = 0.0: CI = [0.427, 0.694]  (standard parallel trends)
+  M = 0.5: CI = [0.312, 0.809]
+  M = 1.0: CI = [0.198, 0.923]
+  M = 1.5: CI = [0.083, 1.038]
+  M = 2.0: CI = [-0.031, 1.152]
+
+Result is robust to violations up to M = 1.5
+(CI excludes zero for M &le; 1.5)</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-honest" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. honestdid, pre(4) post(5) mvec(0 0.5 1 1.5 2)
+
+HonestDiD Sensitivity Analysis (Rambachan & Roth, 2023)
+=========================================================
+
+Relative Magnitudes Approach:
+  (Maximum post-treatment violation relative to max pre-trend)
+
+----------------------------------------------------------------------
+     Mbar |    Lower CI    Upper CI    Excludes Zero?
+----------+-----------------------------------------------------------
+     0.00 |      0.4270      0.6940         Yes
+     0.50 |      0.3120      0.8090         Yes
+     1.00 |      0.1980      0.9230         Yes
+     1.50 |      0.0830      1.0380         Yes
+     2.00 |     -0.0310      1.1520         No
+----------------------------------------------------------------------
+
+Interpretation:
+  The treatment effect remains statistically significant for
+  M &le; 1.5 (post-treatment violations up to 1.5x the max pre-trend).
+  At M = 2.0, the CI includes zero.
+
+[Sensitivity plot displayed: M (x-axis) vs. confidence interval bounds]</div>
+        </div>
+
+        <div class="output-simulation" data-output="did-honest" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">HonestDiD Sensitivity Analysis
+================================
+
+Relative Magnitudes Approach:
+  Mbar    lb.robust    ub.robust
+   0.0       0.4270       0.6940
+   0.5       0.3120       0.8090
+   1.0       0.1980       0.9230
+   1.5       0.0830       1.0380
+   2.0      -0.0310       1.1520
+
+[Sensitivity Plot:
+ - X-axis: Mbar (allowed violation magnitude, 0 to 2)
+ - Y-axis: Confidence interval bounds
+ - Shaded region between lower and upper bounds
+ - Dashed line at y = 0
+ - CI excludes zero for Mbar in [0, 1.5]
+ - CI includes zero at Mbar = 2.0]
+
+Interpretation:
+  Original estimate: 0.560 (M = 0, exact parallel trends)
+  Breakdown value: M &asymp; 1.85
+  (The result is overturned only if post-treatment violations
+   exceed 1.85x the maximum pre-treatment trend deviation)</div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Why Pre-Trend Tests Are Not Enough</div>
+          <p style="margin-bottom: 0;">
+            Roth (2022) shows that standard pre-trend tests have low power&mdash;failing to reject parallel trends does NOT mean trends are actually parallel. HonestDiD addresses this by asking how large parallel trends violations need to be before the conclusions change, providing a more informative robustness check.
+          </p>
+        </div>
+
+        <div class="citation">
+          <div class="citation-title">References</div>
+          <ul>
+            <li>Rambachan, A. &amp; Roth, J. (2023). "A More Credible Approach to Parallel Trends." <em>Review of Economic Studies</em>, 90(5), 2555-2591.</li>
+            <li>Roth, J. (2022). "Pretest with Caution: Event-Study Estimates after Testing for Parallel Trends." <em>AER: Insights</em>, 4(3), 305-322.</li>
+          </ul>
+        </div>
+
         <div class="citation">
           <div class="citation-title">Key Papers on Modern DiD</div>
           <ul>
@@ -1481,6 +2314,10 @@ Pre-treatment coefficient magnitudes:
             <li><strong>Sun, L. & Abraham, S.</strong> (2021). "Estimating Dynamic Treatment Effects in Event Studies with Heterogeneous Treatment Effects." <em>Journal of Econometrics</em>.</li>
             <li><strong>Goodman-Bacon, A.</strong> (2021). "Difference-in-Differences with Variation in Treatment Timing." <em>Journal of Econometrics</em>.</li>
             <li><strong>Roth, J.</strong> (2022). "Pretest with Caution: Event-Study Estimates after Testing for Parallel Trends." <em>AER: Insights</em>.</li>
+            <li><strong>Borusyak, K., Jaravel, X., &amp; Spiess, J.</strong> (2024). "Revisiting Event-Study Designs: Robust and Efficient Estimation." <em>Review of Economic Studies</em>, 91(6), 3253-3285.</li>
+            <li><strong>Rambachan, A. &amp; Roth, J.</strong> (2023). "A More Credible Approach to Parallel Trends." <em>Review of Economic Studies</em>, 90(5), 2555-2591.</li>
+            <li><strong>de Chaisemartin, C. &amp; D'Haultfoeuille, X.</strong> (2018). "Fuzzy Differences-in-Differences." <em>Review of Economic Studies</em>, 85(2), 999-1028.</li>
+            <li><strong>de Chaisemartin, C. &amp; D'Haultfoeuille, X.</strong> (2022). "Two-Way Fixed Effects and Differences-in-Differences with Heterogeneous Treatment Effects: A Survey." <em>Econometrics Journal</em>, 25(3), 493-510.</li>
           </ul>
         </div>
 

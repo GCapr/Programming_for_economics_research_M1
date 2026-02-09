@@ -212,8 +212,16 @@
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
           <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
-          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
-          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li class="has-subnav">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
           <li><a href="../resources.html">Resources</a></li>
           <li><a href="contact.html">Contact & Feedback</a></li>
         </ul>
@@ -1324,6 +1332,302 @@ Prob (F-statistic):           1.23e-89
         <p>
           However, statistical significance tells you nothing about <strong>practical significance</strong>. A coefficient can be statistically significant but economically tiny—or statistically insignificant but potentially meaningful with more data.
         </p>
+
+        <h3>Extracting OLS Components: SSR, ESS, TSS, R&sup2;</h3>
+
+        <p>
+          Understanding the decomposition of variance in regression is fundamental. The Total Sum of Squares (TSS) measures total variation in the outcome. OLS splits this into the Explained Sum of Squares (ESS)—variation captured by the model—and the Sum of Squared Residuals (SSR)—unexplained variation. The identity TSS = ESS + SSR always holds for OLS with an intercept.
+        </p>
+
+        <div class="code-tabs" data-runnable="analysis-ssr">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Extracting SSR, ESS, TSS, R-squared</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+model = smf.ols(<span class="code-string">'income ~ education + experience'</span>, data=df).fit()
+
+<span class="code-comment"># Direct access from model object</span>
+<span class="code-tooltip" data-tip="statsmodels stores these directly in the results object">print(f<span class="code-string">"SSR (Residual SS):  {model.ssr:.4f}"</span>)
+print(f<span class="code-string">"ESS (Model SS):     {model.ess:.4f}"</span>)
+print(f<span class="code-string">"TSS (Total SS):     {model.centered_tss:.4f}"</span>)
+print(f<span class="code-string">"R-squared:          {model.rsquared:.4f}"</span>)
+print(f<span class="code-string">"Adj. R-squared:     {model.rsquared_adj:.4f}"</span>)</span>
+
+<span class="code-comment"># Manual calculation (for understanding)</span>
+y = df[<span class="code-string">'income'</span>]
+y_hat = model.fittedvalues
+e = model.resid
+
+<span class="code-tooltip" data-tip="TSS = sum of (y - y_bar)^2, ESS = sum of (y_hat - y_bar)^2, SSR = sum of e^2">SSR = np.sum(e**2)
+TSS = np.sum((y - y.mean())**2)
+ESS = np.sum((y_hat - y.mean())**2)
+R2 = 1 - SSR / TSS</span>
+
+<span class="code-comment"># Verify the identity: TSS = ESS + SSR</span>
+print(f<span class="code-string">"TSS = {TSS:.4f}, ESS + SSR = {ESS + SSR:.4f}"</span>)
+
+<span class="code-comment"># Adjusted R-squared</span>
+n = len(y)
+k = model.df_model  <span class="code-comment"># number of regressors</span>
+adj_R2 = 1 - (1 - R2) * (n - 1) / (n - k - 1)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Extracting SSR, ESS, TSS, R-squared</span>
+
+reg income education experience
+
+<span class="code-comment">* All stored results accessible via ereturn list</span>
+<span class="code-tooltip" data-tip="After any estimation command, ereturn list shows all stored scalars">ereturn list</span>
+
+<span class="code-comment">* Key scalars:</span>
+<span class="code-tooltip" data-tip="e(rss) is residual SS, e(mss) is model SS (ESS), e(r2) is R-squared">display "SSR (Residual SS):  " e(rss)
+display "ESS (Model SS):     " e(mss)
+display "R-squared:          " e(r2)
+display "Adj R-squared:      " e(r2_a)
+display "N observations:     " e(N)
+display "Degrees of freedom: " e(df_r)</span>
+
+<span class="code-comment">* TSS = ESS + SSR</span>
+display "TSS = " e(mss) + e(rss)
+
+<span class="code-comment">* Manual calculation from residuals</span>
+predict residuals, residuals
+predict yhat, xb
+quietly summarize income
+<span class="code-tooltip" data-tip="gen computes new variables; sum() with quietly summarize gives totals">gen dev_sq = (income - r(mean))^2
+gen res_sq = residuals^2
+gen fit_sq = (yhat - r(mean))^2
+quietly summarize dev_sq
+display "TSS = " r(sum)
+quietly summarize res_sq
+display "SSR = " r(sum)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Extracting SSR, ESS, TSS, R-squared</span>
+model <- lm(income ~ education + experience, data = df)
+
+<span class="code-comment"># Extract key objects</span>
+<span class="code-tooltip" data-tip="residuals() and fitted() extract the vectors; deviance() gives SSR">e_hat  <- residuals(model)      <span class="code-comment"># residual vector</span>
+y_hat  <- fitted(model)          <span class="code-comment"># predicted values</span>
+y      <- df$income              <span class="code-comment"># actual outcome</span></span>
+
+<span class="code-comment"># Manual calculations</span>
+SSR <- sum(e_hat^2)                         <span class="code-comment"># Sum of Squared Residuals</span>
+TSS <- sum((y - mean(y))^2)                 <span class="code-comment"># Total Sum of Squares</span>
+ESS <- sum((y_hat - mean(y))^2)             <span class="code-comment"># Explained Sum of Squares</span>
+
+<span class="code-comment"># Verify: TSS = ESS + SSR</span>
+<span class="code-tooltip" data-tip="This identity always holds for OLS with an intercept">cat("TSS =", TSS, " ESS + SSR =", ESS + SSR, "\n")</span>
+
+<span class="code-comment"># R-squared and adjusted R-squared</span>
+R2 <- 1 - SSR / TSS
+n  <- nrow(df)
+k  <- length(coef(model)) - 1   <span class="code-comment"># number of regressors (excl. intercept)</span>
+adj_R2 <- 1 - (1 - R2) * (n - 1) / (n - k - 1)
+
+<span class="code-comment"># Compare with built-in</span>
+<span class="code-tooltip" data-tip="summary(model) stores R2 and adj-R2 as named elements you can extract">cat("Manual R2:", R2, " summary R2:", summary(model)$r.squared, "\n")
+cat("Manual adj-R2:", adj_R2, " summary adj-R2:", summary(model)$adj.r.squared, "\n")</span>
+
+<span class="code-comment"># Alternative: deviance() gives SSR directly</span>
+deviance(model)  <span class="code-comment"># same as SSR</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="analysis-ssr" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">SSR (Residual SS):  24531.2456
+ESS (Model SS):     12893.7544
+TSS (Total SS):     37425.0000
+R-squared:          0.3445
+Adj. R-squared:     0.3419
+
+TSS = 37425.0000, ESS + SSR = 37425.0000</div>
+        </div>
+
+        <div class="output-simulation" data-output="analysis-ssr" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. ereturn list
+
+scalars:
+              e(N) =  500
+           e(df_m) =  2
+           e(df_r) =  497
+            e(F_f) =  130.4512
+            e(r2) =  .34451234
+          e(r2_a) =  .34187654
+           e(rmse) =  7.0234567
+           e(mss) =  12893.754
+           e(rss) =  24531.246
+            e(ll) =  -1678.234
+
+SSR (Residual SS):  24531.246
+ESS (Model SS):     12893.754
+R-squared:          .34451234
+Adj R-squared:      .34187654
+TSS = 37425</div>
+        </div>
+
+        <div class="output-simulation" data-output="analysis-ssr" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">TSS = 37425  ESS + SSR = 37425
+Manual R2: 0.3445123  summary R2: 0.3445123
+Manual adj-R2: 0.3418765  summary adj-R2: 0.3418765
+
+> deviance(model)
+[1] 24531.25</div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Understanding the Variance Decomposition</div>
+          <p>
+            <strong>TSS = ESS + SSR</strong> (with an intercept). R&sup2; = ESS/TSS = 1 - SSR/TSS tells you the fraction of total variance explained by the model. Adjusted R&sup2; penalizes for adding regressors: it can decrease if a new variable adds more noise than explanatory power.
+          </p>
+          <p style="margin-bottom: 0;">
+            In practice, you rarely compute these manually—but understanding the decomposition helps you interpret regression output, compare models, and verify that your estimation code is correct.
+          </p>
+        </div>
+
+        <h3>F-Tests and Joint Significance</h3>
+
+        <p>
+          An F-test evaluates whether a <em>set</em> of coefficients are jointly significantly different from zero (or from each other). This goes beyond testing individual coefficients one at a time, which can miss cases where variables are jointly important even if individually insignificant.
+        </p>
+
+        <div class="code-tabs" data-runnable="analysis-ftest">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: F-tests and joint significance</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+model = smf.ols(<span class="code-string">'income ~ education + experience + age'</span>, data=df).fit()
+
+<span class="code-comment"># Joint test: education AND experience = 0</span>
+<span class="code-tooltip" data-tip="f_test takes a hypothesis string or matrix. 'education = 0, experience = 0' tests both jointly.">f_result = model.f_test(<span class="code-string">'education = 0, experience = 0'</span>)</span>
+print(f_result)
+
+<span class="code-comment"># Test a linear restriction: education = experience</span>
+<span class="code-tooltip" data-tip="Tests H0: beta_education = beta_experience (returns F-stat and p-value)">f_restrict = model.f_test(<span class="code-string">'education = experience'</span>)</span>
+print(f_restrict)
+
+<span class="code-comment"># Overall F-test (all regressors jointly = 0)</span>
+print(f<span class="code-string">"Overall F-statistic: {model.fvalue:.4f}"</span>)
+print(f<span class="code-string">"Overall F p-value:   {model.f_pvalue:.6f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: F-tests and joint significance</span>
+
+reg income education experience age
+
+<span class="code-comment">* Joint test: education AND experience = 0</span>
+<span class="code-tooltip" data-tip="test lists the hypotheses; Stata computes the joint F-statistic">test education experience</span>
+
+<span class="code-comment">* Test a linear restriction: education = experience</span>
+<span class="code-tooltip" data-tip="test can also handle equality restrictions between coefficients">test education = experience</span>
+
+<span class="code-comment">* Multiple restrictions at once</span>
+test (education = 0) (experience = 0) (age = 0)
+
+<span class="code-comment">* Wald test (equivalent for linear models)</span>
+<span class="code-tooltip" data-tip="testparm tests all coefficients matching a pattern">testparm education experience</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: F-tests and joint significance</span>
+<span class="code-keyword">library</span>(car)
+
+model <- lm(income ~ education + experience + age, data = df)
+
+<span class="code-comment"># Joint test: education AND experience = 0</span>
+<span class="code-tooltip" data-tip="linearHypothesis() tests linear restrictions on coefficients. Pass a character vector of hypotheses.">linearHypothesis(model, c("education = 0", "experience = 0"))</span>
+
+<span class="code-comment"># Test a linear restriction: education = experience</span>
+<span class="code-tooltip" data-tip="Tests H0: beta_education - beta_experience = 0">linearHypothesis(model, "education = experience")</span>
+
+<span class="code-comment"># With robust standard errors</span>
+<span class="code-keyword">library</span>(sandwich)
+<span class="code-tooltip" data-tip="Pass a vcov matrix for robust or clustered tests">linearHypothesis(model, c("education = 0", "experience = 0"),
+                 vcov = vcovHC(model, type = "HC1"))</span>
+
+<span class="code-comment"># Overall F-test (from summary)</span>
+<span class="code-tooltip" data-tip="summary() reports the overall F-test at the bottom of regression output">f_stat <- summary(model)$fstatistic
+pf(f_stat[1], f_stat[2], f_stat[3], lower.tail = FALSE)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="analysis-ftest" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Joint F-test: education = 0, experience = 0
+&lt;F test: F=array([[65.234]]), p=1.23e-26, df_denom=496, df_num=2&gt;
+
+Restriction test: education = experience
+&lt;F test: F=array([[8.912]]), p=0.00296, df_denom=496, df_num=1&gt;
+
+Overall F-statistic: 130.4512
+Overall F p-value:   0.000000</div>
+        </div>
+
+        <div class="output-simulation" data-output="analysis-ftest" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. test education experience
+
+ ( 1)  education = 0
+ ( 2)  experience = 0
+
+       F(  2,   496) =   65.23
+            Prob > F =    0.0000
+
+. test education = experience
+
+ ( 1)  education - experience = 0
+
+       F(  1,   496) =    8.91
+            Prob > F =    0.0030</div>
+        </div>
+
+        <div class="output-simulation" data-output="analysis-ftest" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Linear hypothesis test
+
+Hypothesis:
+education = 0
+experience = 0
+
+Model 1: restricted model
+Model 2: income ~ education + experience + age
+
+  Res.Df   RSS Df Sum of Sq      F    Pr(>F)
+1    498 37425
+2    496 24531  2     12894 65.234 1.23e-26 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Linear hypothesis test (with HC1 robust SEs):
+  Chisq = 118.45, Df = 2, Pr(>Chisq) = 2.34e-26</div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">When to Use F-Tests</div>
+          <p style="margin-bottom: 0;">
+            Use F-tests when you want to test whether a <em>group</em> of variables matters jointly, test restrictions like "does education have the same effect as experience?", or compare nested models. With heteroskedasticity or clustering, always use the robust version (pass a <code>vcov</code> matrix in R, or use <code>, robust</code> in Stata).
+          </p>
+        </div>
 
         <h3>Common Regression Specifications</h3>
 

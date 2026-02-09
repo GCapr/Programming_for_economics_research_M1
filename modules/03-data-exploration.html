@@ -185,8 +185,16 @@
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
           <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
-          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
-          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li class="has-subnav">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
           <li><a href="../resources.html">Resources</a></li>
           <li><a href="contact.html">Contact & Feedback</a></li>
         </ul>
@@ -642,6 +650,176 @@ Country Name Country Code         Year        Value
         <div class="info-box note">
           <div class="info-box-title">Red Flag Detected!</div>
           <p style="margin-bottom: 0;">25% of GDP values are missing. Before any analysis, we need to understand <em>why</em>. Are they missing for small countries? Recent years? This is exactly what the "First Analysis" approach catches early.</p>
+        </div>
+
+        <h3>Cross-Tabulations and Group-Level Statistics</h3>
+
+        <p>
+          When you need to compare outcomes or characteristics across groups—treated vs. control, male vs. female, callbacks by race—cross-tabulations and group-level summaries are your go-to tools. These are essential for descriptive analysis before running any regression.
+        </p>
+
+        <div class="code-tabs" data-runnable="explore-crosstab">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Cross-tabulations and group statistics</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Two-way frequency table</span>
+<span class="code-tooltip" data-tip="pd.crosstab creates a frequency table. margins=True adds row/column totals.">freq_table = pd.crosstab(df[<span class="code-string">'treatment'</span>], df[<span class="code-string">'outcome'</span>], margins=True)</span>
+print(freq_table)
+
+<span class="code-comment"># Row proportions (e.g., callback rate by race)</span>
+<span class="code-tooltip" data-tip="normalize='index' gives row proportions (each row sums to 1)">prop_table = pd.crosstab(df[<span class="code-string">'black'</span>], df[<span class="code-string">'call'</span>], normalize=<span class="code-string">'index'</span>)</span>
+print(prop_table)
+
+<span class="code-comment"># Group-level summary statistics</span>
+<span class="code-tooltip" data-tip="groupby + agg computes multiple statistics per group in one call">group_stats = df.groupby(<span class="code-string">'treatment'</span>)[<span class="code-string">'outcome'</span>].agg(
+    [<span class="code-string">'mean'</span>, <span class="code-string">'std'</span>, <span class="code-string">'count'</span>]
+)</span>
+print(group_stats)
+
+<span class="code-comment"># Multiple variables at once</span>
+group_multi = df.groupby(<span class="code-string">'treatment'</span>).agg({
+    <span class="code-string">'outcome'</span>: [<span class="code-string">'mean'</span>, <span class="code-string">'std'</span>],
+    <span class="code-string">'age'</span>: <span class="code-string">'mean'</span>,
+    <span class="code-string">'income'</span>: [<span class="code-string">'mean'</span>, <span class="code-string">'median'</span>]
+})</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Cross-tabulations and group statistics</span>
+
+<span class="code-comment">* Two-way frequency table</span>
+<span class="code-tooltip" data-tip="tab creates a two-way frequency table; row/col add proportions">tab treatment outcome</span>
+
+<span class="code-comment">* With row and column percentages</span>
+tab black call, row col
+
+<span class="code-comment">* Group-level summary statistics</span>
+<span class="code-tooltip" data-tip="tabstat computes specified statistics by group. Very flexible.">tabstat outcome age income, by(treatment) stat(mean sd count)</span>
+
+<span class="code-comment">* Detailed summary by group</span>
+bysort treatment: summarize outcome, detail
+
+<span class="code-comment">* Table with tests</span>
+<span class="code-tooltip" data-tip="tab with chi2 adds a chi-squared test of independence">tab treatment outcome, chi2</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Cross-tabulations and group statistics</span>
+
+<span class="code-comment"># Two-way frequency table</span>
+<span class="code-tooltip" data-tip="table() creates a contingency table. addmargins() adds row/column totals.">freq_table <- table(df$treatment, df$outcome)
+addmargins(freq_table)</span>
+
+<span class="code-comment"># Row proportions (e.g., callback rate by race)</span>
+<span class="code-tooltip" data-tip="margin = 1 gives row proportions (each row sums to 1)">prop.table(table(df$black, df$call), margin = 1)</span>
+
+<span class="code-comment"># Group means using aggregate</span>
+<span class="code-tooltip" data-tip="aggregate() computes a function by group. Formula syntax: y ~ group.">aggregate(outcome ~ treatment, data = df, FUN = mean)</span>
+
+<span class="code-comment"># Multiple stats using tapply</span>
+tapply(df$outcome, df$treatment, summary)
+
+<span class="code-comment"># Tidyverse approach: group_by + summarise</span>
+<span class="code-keyword">library</span>(dplyr)
+<span class="code-tooltip" data-tip="group_by + summarise is the tidyverse way to compute group-level stats">df %>%
+  group_by(treatment) %>%
+  summarise(
+    mean_outcome = mean(outcome, na.rm = TRUE),
+    sd_outcome   = sd(outcome, na.rm = TRUE),
+    n            = n(),
+    mean_age     = mean(age, na.rm = TRUE)
+  )</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="explore-crosstab" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Frequency Table:
+outcome     0    1  All
+treatment
+0         380  120  500
+1         310  190  500
+All       690  310  1000
+
+Row Proportions:
+call         0      1
+black
+0       0.9035  0.0965
+1       0.9350  0.0650
+
+Group Statistics:
+           mean       std  count
+treatment
+0         3.245    1.892    500
+1         3.827    1.756    500</div>
+        </div>
+
+        <div class="output-simulation" data-output="explore-crosstab" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">. tab treatment outcome
+
+           |        outcome
+ treatment |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       380        120 |       500
+         1 |       310        190 |       500
+-----------+----------------------+----------
+     Total |       690        310 |     1,000
+
+. tabstat outcome age income, by(treatment) stat(mean sd count)
+
+Summary statistics: mean, sd, count
+  by categories of: treatment
+
+treatment |   outcome       age    income
+----------+------------------------------
+        0 |     3.245     34.12     42350
+          |     1.892      8.45     15670
+          |       500       500       500
+----------+------------------------------
+        1 |     3.827     33.89     43120
+          |     1.756      8.23     16230
+          |       500       500       500
+----------+------------------------------
+    Total |     3.536     34.01     42735
+          |     1.845      8.34     15940
+          |      1000      1000      1000
+----------------------------------------------</div>
+        </div>
+
+        <div class="output-simulation" data-output="explore-crosstab" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Frequency Table with margins:
+       0   1 Sum
+  0  380 120 500
+  1  310 190 500
+  Sum 690 310 1000
+
+Row Proportions:
+          0      1
+  0  0.9035 0.0965
+  1  0.9350 0.0650
+
+Group Statistics (tidyverse):
+# A tibble: 2 x 5
+  treatment mean_outcome sd_outcome     n mean_age
+      &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;
+1         0         3.25       1.89   500     34.1
+2         1         3.83       1.76   500     33.9</div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">When to Use Cross-Tabulations</div>
+          <p style="margin-bottom: 0;">
+            Cross-tabulations are particularly useful when checking <strong>balance</strong> between treatment and control groups, computing <strong>relative frequencies</strong> (e.g., callback rates by race in audit studies), and creating <strong>summary tables</strong> for papers. For continuous outcomes, use <code>aggregate()</code> (R), <code>tabstat</code> (Stata), or <code>groupby().agg()</code> (Python) instead.
+          </p>
         </div>
 
         <!-- STEP 4 & 5: Visualization and Correlation -->

@@ -106,8 +106,16 @@
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
           <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
-          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
-          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li class="has-subnav">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
           <li><a href="../resources.html">Resources</a></li>
           <li><a href="contact.html">Contact & Feedback</a></li>
         </ul>
@@ -832,6 +840,217 @@ alternative hypothesis: one model is inconsistent</pre>
           </div>
         </div>
 
+        <h3>First-Difference Estimator</h3>
+
+        <p>
+          First-differencing is an alternative to the within (demeaning) transformation that eliminates unit fixed effects by subtracting the previous period's observation. It is equivalent to FE when T=2, but differs with longer panels. First-differencing is particularly useful with unit-root processes.
+        </p>
+
+        <div class="code-tabs" data-runnable="est-panel-fd">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: First-Difference Estimator</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> FirstDifferenceOLS
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
+
+<span class="code-comment"># First-difference estimation</span>
+<span class="code-tooltip" data-tip="FirstDifferenceOLS subtracts y_{t-1} from y_t, removing unit FE">model_fd = FirstDifferenceOLS.from_formula(
+    <span class="code-string">'outcome ~ treatment + time_varying_controls'</span>,
+    data=df
+)
+results_fd = model_fd.fit(cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True)</span>
+print(results_fd.summary)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: First-Difference Estimator</span>
+
+xtset unit_id year
+
+<span class="code-comment">* First-difference: D.y on D.x</span>
+<span class="code-tooltip" data-tip="D. prefix creates first-differences. Equivalent to gen dy = y - L.y">reg D.outcome D.treatment D.controls, cluster(unit_id)</span>
+
+<span class="code-comment">* Using xtreg, fe with first-difference explicitly</span>
+<span class="code-tooltip" data-tip="xtreg with fd option estimates via first-differencing">xtreg outcome treatment controls, fd cluster(unit_id)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: First-Difference Estimator</span>
+<span class="code-keyword">library</span>(plm)
+
+<span class="code-comment"># First-difference estimation</span>
+<span class="code-tooltip" data-tip="model = 'fd' estimates by first-differencing, removing unit fixed effects">model_fd <- plm(outcome ~ treatment + controls,
+                data = df,
+                index = c("unit_id", "year"),
+                model = "fd")</span>
+summary(model_fd)
+
+<span class="code-comment"># Compare FE vs FD</span>
+model_fe <- plm(outcome ~ treatment + controls,
+                data = df,
+                index = c("unit_id", "year"),
+                model = "within")
+cat("FE estimate:", coef(model_fe)["treatment"], "\n")
+cat("FD estimate:", coef(model_fd)["treatment"], "\n")</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <h3>Hausman Test: FE vs. RE</h3>
+
+        <p>
+          The Hausman test compares Fixed Effects and Random Effects estimates. Under the null hypothesis, both are consistent but RE is efficient; under the alternative, RE is inconsistent (the unit effects are correlated with regressors) and only FE is consistent. A significant test favors FE.
+        </p>
+
+        <div class="code-tabs" data-runnable="est-hausman">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Hausman test</span>
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> PanelOLS, RandomEffects
+<span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> compare
+
+df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
+<span class="code-comment"># FE model</span>
+fe = PanelOLS.from_formula(<span class="code-string">'outcome ~ treatment + controls'</span>,
+                           data=df, entity_effects=True).fit()
+<span class="code-comment"># RE model</span>
+re = RandomEffects.from_formula(<span class="code-string">'outcome ~ treatment + controls'</span>,
+                                data=df).fit()
+
+<span class="code-comment"># Compare: Hausman-like test</span>
+<span class="code-tooltip" data-tip="compare() gives a side-by-side comparison; check if coefficients differ systematically">print(compare({<span class="code-string">'FE'</span>: fe, <span class="code-string">'RE'</span>: re}))</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Hausman test</span>
+
+<span class="code-comment">* Estimate FE and store</span>
+xtreg outcome treatment controls, fe
+estimates store fe_model
+
+<span class="code-comment">* Estimate RE and store</span>
+xtreg outcome treatment controls, re
+estimates store re_model
+
+<span class="code-comment">* Hausman test</span>
+<span class="code-tooltip" data-tip="hausman compares stored FE and RE estimates; significant = use FE">hausman fe_model re_model</span>
+
+<span class="code-comment">* Robust Hausman test (with clustered SEs)</span>
+<span class="code-tooltip" data-tip="xtoverid provides a robust version of the Hausman test">xtoverid</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Hausman test</span>
+<span class="code-keyword">library</span>(plm)
+
+<span class="code-comment"># Estimate both models</span>
+model_fe <- plm(outcome ~ treatment + controls,
+                data = df, index = c("unit_id", "year"),
+                model = "within")
+model_re <- plm(outcome ~ treatment + controls,
+                data = df, index = c("unit_id", "year"),
+                model = "random")
+
+<span class="code-comment"># Hausman test</span>
+<span class="code-tooltip" data-tip="phtest compares FE and RE. Significant p-value = use FE (RE is inconsistent)">hausman_test <- phtest(model_fe, model_re)
+print(hausman_test)</span>
+
+<span class="code-comment"># Decision rule:</span>
+<span class="code-comment"># p < 0.05 → use Fixed Effects (unit effects correlated with X)</span>
+<span class="code-comment"># p > 0.05 → Random Effects is more efficient</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <h3>Arellano-Bond: Dynamic Panel Data</h3>
+
+        <p>
+          When the model includes a lagged dependent variable (y<sub>t-1</sub> on the right-hand side), fixed effects estimation is biased because the demeaned lagged dependent variable is correlated with the demeaned error. The Arellano-Bond (1991) estimator uses deeper lags of y as instruments for the differenced equation, providing consistent estimates in dynamic panels.
+        </p>
+
+        <div class="code-tabs" data-runnable="est-ab">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Arellano-Bond (using linearmodels or ivgmm)</span>
+<span class="code-comment"># Note: Python support for Arellano-Bond is limited</span>
+<span class="code-comment"># Manual implementation via first-difference + IV</span>
+<span class="code-keyword">from</span> linearmodels.iv <span class="code-keyword">import</span> IV2SLS
+
+<span class="code-comment"># First-difference the equation</span>
+<span class="code-tooltip" data-tip="Manual AB: first-difference and instrument lagged D.y with y_{t-2}">df[<span class="code-string">'dy'</span>] = df.groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'outcome'</span>].diff()
+df[<span class="code-string">'dlag_y'</span>] = df.groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'lag_outcome'</span>].diff()
+df[<span class="code-string">'dx'</span>] = df.groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'treatment'</span>].diff()
+df[<span class="code-string">'lag2_y'</span>] = df.groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'outcome'</span>].shift(2)</span>
+
+<span class="code-comment"># 2SLS on differenced equation with lag-2 instruments</span>
+model = IV2SLS.from_formula(
+    <span class="code-string">'dy ~ 1 + dx + [dlag_y ~ lag2_y]'</span>,
+    data=df.dropna()
+).fit()
+print(model.summary)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Arellano-Bond (xtabond)</span>
+
+xtset unit_id year
+
+<span class="code-comment">* Arellano-Bond one-step estimator</span>
+<span class="code-tooltip" data-tip="xtabond estimates dynamic models using lagged levels as instruments">xtabond outcome treatment controls, lags(1) vce(robust)</span>
+
+<span class="code-comment">* System GMM (Blundell-Bond): more efficient</span>
+<span class="code-tooltip" data-tip="xtdpdsys uses both level and difference moment conditions">xtdpdsys outcome treatment controls, lags(1) vce(robust)</span>
+
+<span class="code-comment">* Arellano-Bond test for serial correlation</span>
+<span class="code-comment">* AR(1) should be significant; AR(2) should NOT be</span>
+estat abond</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Arellano-Bond with plm</span>
+<span class="code-keyword">library</span>(plm)
+
+<span class="code-comment"># Arellano-Bond one-step GMM</span>
+<span class="code-tooltip" data-tip="pgmm estimates dynamic panel models. dynformula specifies lags. gmm instruments are the AB instruments.">model_ab <- pgmm(
+  outcome ~ lag(outcome, 1) + treatment + controls |
+    lag(outcome, 2:99),  <span class="code-comment"># use y_{t-2} and deeper as instruments</span>
+  data = df,
+  index = c("unit_id", "year"),
+  effect = "twoways",
+  model = "onestep"
+)</span>
+summary(model_ab)
+
+<span class="code-comment"># Sargan test (overidentification)</span>
+<span class="code-comment"># p > 0.05 means instruments are valid</span>
+
+<span class="code-comment"># AR(2) test: should be insignificant</span>
+<span class="code-comment"># (no second-order serial correlation in differences)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Dynamic Panel Pitfalls</div>
+          <p style="margin-bottom: 0;">
+            Arellano-Bond works best with "large N, small T" panels (many units, few time periods). With long panels, the proliferation of instruments can cause overfitting and weak identification. Always report the Sargan/Hansen test for overidentification (should be insignificant) and the AR(2) test for serial correlation (should also be insignificant to validate the moment conditions).
+          </p>
+        </div>
+
         <h2 id="nonlinear">7.4 Nonlinear Models</h2>
 
         <p>
@@ -1055,6 +1274,976 @@ Number of Fisher Scoring iterations: 4
 Odds ratios:
 (Intercept)   education  experience         age
   0.0145234   1.3667894   1.2064231   0.9768543</pre>
+          </div>
+        </div>
+
+        <!-- Section: Manual Marginal Effects for Probit/Logit -->
+        <h3>Manual Marginal Effects for Probit/Logit</h3>
+
+        <p>
+          Raw logit/probit coefficients are <strong>not directly interpretable</strong> as the effect on the probability of the outcome. Because the link function is nonlinear, the marginal effect of a variable depends on the values of <em>all</em> covariates. There are three standard approaches to summarizing marginal effects:
+        </p>
+        <ul>
+          <li><strong>Average Marginal Effect (AME):</strong> Compute the marginal effect for each observation, then average. For probit: AME<sub>j</sub> = (1/N) &Sigma; &phi;(X<sub>i</sub>&beta;) &middot; &beta;<sub>j</sub>. For logit: AME<sub>j</sub> = (1/N) &Sigma; &Lambda;(X<sub>i</sub>&beta;)(1 &minus; &Lambda;(X<sub>i</sub>&beta;)) &middot; &beta;<sub>j</sub>.</li>
+          <li><strong>Marginal Effect at the Mean (MEM):</strong> Evaluate the marginal effect at the sample means of all covariates: &phi;(x&#772;&beta;) &middot; &beta;<sub>j</sub>.</li>
+          <li><strong>Marginal Effect at Representative values (MER):</strong> Evaluate at chosen covariate profiles (e.g., education = 16, experience = 5).</li>
+        </ul>
+
+        <div class="info-box tip">
+          <div class="info-box-title">AME vs MEM vs MER</div>
+          <p style="margin-bottom: 0;">
+            <strong>AME</strong> is generally preferred because it does not depend on a potentially unrepresentative "average" person (e.g., 2.3 children). <strong>MEM</strong> is convenient but can be misleading if the mean profile is not meaningful. <strong>MER</strong> is useful for policy questions ("what is the effect for a 30-year-old with 16 years of education?"). All three coincide at the mean only if the model is linear—they typically differ for logit/probit.
+          </p>
+        </div>
+
+        <div class="code-tabs" data-runnable="est-margeff">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Manual Marginal Effects for Probit</span>
+<span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
+<span class="code-keyword">from</span> scipy.stats <span class="code-keyword">import</span> norm
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Probit estimation</span>
+<span class="code-tooltip" data-tip="sm.Probit fits a probit model via MLE">probit = sm.Probit(df[<span class="code-string">'hired'</span>], sm.add_constant(df[[<span class="code-string">'education'</span>, <span class="code-string">'experience'</span>, <span class="code-string">'age'</span>]]))</span>
+result = probit.fit()
+
+<span class="code-comment"># Manual AME: mean of individual marginal effects</span>
+<span class="code-tooltip" data-tip="Linear predictor X*beta, before applying the CDF">xb = result.predict(which=<span class="code-string">'linear'</span>)</span>  <span class="code-comment"># linear predictor</span>
+ame = np.mean(norm.pdf(xb).values[:, None] * result.params.values[<span class="code-number">1</span>:], axis=<span class="code-number">0</span>)
+print(<span class="code-string">"Manual AME:"</span>, ame)
+
+<span class="code-comment"># Automatic marginal effects — AME</span>
+<span class="code-tooltip" data-tip="get_margeff(at='overall') computes average marginal effects with delta-method SEs">mfx = result.get_margeff(at=<span class="code-string">'overall'</span>)</span>
+mfx.summary()
+
+<span class="code-comment"># Automatic marginal effects — MEM</span>
+<span class="code-tooltip" data-tip="get_margeff(at='mean') evaluates marginal effects at the sample mean">mfx_mean = result.get_margeff(at=<span class="code-string">'mean'</span>)</span>
+mfx_mean.summary()</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Marginal Effects for Probit</span>
+
+<span class="code-comment">* Probit estimation</span>
+probit hired education experience age
+
+<span class="code-comment">* Average Marginal Effects (AME) — default</span>
+<span class="code-tooltip" data-tip="margins, dydx(*) computes AME for all variables with delta-method SEs">margins, dydx(*)</span>
+
+<span class="code-comment">* Marginal Effects at the Mean (MEM)</span>
+<span class="code-tooltip" data-tip="atmeans evaluates at sample means of all covariates">margins, dydx(*) atmeans</span>
+
+<span class="code-comment">* Marginal effects at specific values (MER)</span>
+<span class="code-tooltip" data-tip="at() lets you specify covariate values for MER computation">margins, dydx(education) at(experience=5 age=30)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Manual Average Marginal Effect (AME) — Probit</span>
+probit <- <span class="code-function">glm</span>(hired ~ education + experience + age,
+              family = <span class="code-function">binomial</span>(link = <span class="code-string">"probit"</span>), data = df)
+beta <- <span class="code-function">coef</span>(probit)
+<span class="code-tooltip" data-tip="predict(..., type='link') returns the linear predictor X*beta">xb <- <span class="code-function">predict</span>(probit, type = <span class="code-string">"link"</span>)</span>  <span class="code-comment"># X * beta</span>
+
+<span class="code-comment"># AME = mean of individual marginal effects</span>
+<span class="code-tooltip" data-tip="dnorm(xb) is the standard normal PDF evaluated at the linear predictor">ame_education <- <span class="code-function">mean</span>(<span class="code-function">dnorm</span>(xb)) * beta[<span class="code-string">"education"</span>]</span>
+ame_experience <- <span class="code-function">mean</span>(<span class="code-function">dnorm</span>(xb)) * beta[<span class="code-string">"experience"</span>]
+<span class="code-function">cat</span>(<span class="code-string">"AME (education):"</span>, <span class="code-function">round</span>(ame_education, <span class="code-number">4</span>), <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># Marginal Effect at the Mean (MEM)</span>
+x_bar <- <span class="code-function">colMeans</span>(<span class="code-function">model.matrix</span>(probit))
+xb_bar <- <span class="code-function">sum</span>(x_bar * beta)
+mem_education <- <span class="code-function">dnorm</span>(xb_bar) * beta[<span class="code-string">"education"</span>]
+
+<span class="code-comment"># Using margins package (automatic AME)</span>
+<span class="code-keyword">library</span>(margins)
+<span class="code-tooltip" data-tip="margins() computes AME with delta-method standard errors">m <- <span class="code-function">margins</span>(probit)
+<span class="code-function">summary</span>(m)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-for="est-margeff">
+          <div class="output-tab" data-lang="python">
+            <div class="output-header">Python Output</div>
+<pre class="output-content">Optimization terminated successfully.
+         Current function value: 0.498231
+         Iterations 5
+
+Manual AME: [0.0712  0.0421  -0.0053]
+
+        Probit Marginal Effects (AME)
+=====================================
+Dep. Variable:                  hired
+Method:                          dydx
+At:                           overall
+==============================================================================
+                dy/dx    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+education      0.0712      0.009      7.911      0.000       0.054       0.089
+experience     0.0421      0.005      8.420      0.000       0.032       0.052
+age           -0.0053      0.003     -1.767      0.077      -0.011       0.001
+==============================================================================
+
+        Probit Marginal Effects (MEM)
+=====================================
+Dep. Variable:                  hired
+Method:                          dydx
+At:                              mean
+==============================================================================
+                dy/dx    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+education      0.0698      0.009      7.756      0.000       0.052       0.087
+experience     0.0413      0.005      8.260      0.000       0.031       0.051
+age           -0.0052      0.003     -1.733      0.083      -0.011       0.001
+==============================================================================</pre>
+          </div>
+          <div class="output-tab" data-lang="stata">
+            <div class="output-header">Stata Output</div>
+<pre class="output-content">. probit hired education experience age
+
+Iteration 0:   log likelihood = -655.78123
+Iteration 1:   log likelihood = -500.12345
+Iteration 2:   log likelihood = -498.23456
+Iteration 3:   log likelihood = -498.23100
+
+Probit regression                               Number of obs     =      1,000
+                                                LR chi2(3)        =     315.10
+                                                Prob > chi2       =     0.0000
+Log likelihood = -498.231                       Pseudo R2         =     0.2403
+
+------------------------------------------------------------------------------
+       hired |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   education |   .1912345   .0234567     8.15   0.000     .1452601    .2372089
+  experience |   .1131234   .0141234     8.01   0.000     .0854421    .1408047
+         age |  -.0142345   .0074567    -1.91   0.056    -.0288494    .0003804
+       _cons |  -2.567890   .3201234    -8.02   0.000    -3.195321   -1.940459
+------------------------------------------------------------------------------
+
+. margins, dydx(*)
+
+Average marginal effects                        Number of obs     =      1,000
+
+Expression   : Pr(hired), predict()
+dy/dx w.r.t. : education experience age
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   education |   .0712345   .0090123     7.91   0.000     .0535707    .0888983
+  experience |   .0421234   .0050012     8.42   0.000     .0323212    .0519256
+         age |  -.0053012   .0030012    -1.77   0.077    -.0111835    .0005811
+------------------------------------------------------------------------------
+
+. margins, dydx(*) atmeans
+
+Conditional marginal effects                    Number of obs     =      1,000
+
+Expression   : Pr(hired), predict()
+dy/dx w.r.t. : education experience age
+at           : education   =    14.23 (mean)
+               experience  =     8.76 (mean)
+               age         =    35.12 (mean)
+
+------------------------------------------------------------------------------
+             |            Delta-method
+             |      dy/dx   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+   education |   .0698123   .0090012     7.76   0.000     .0521702    .0874544
+  experience |   .0412876   .0049987     8.26   0.000     .0314904    .0510848
+         age |  -.0051912   .0029987    -1.73   0.083    -.0110685    .0006861
+------------------------------------------------------------------------------</pre>
+          </div>
+          <div class="output-tab" data-lang="r">
+            <div class="output-header">R Output</div>
+<pre class="output-content">AME (education): 0.0712
+
+ factor     AME     SE       z      p   lower   upper
+ education  0.0712  0.0090   7.9111 0.0000  0.0536  0.0889
+ experience 0.0421  0.0050   8.4200 0.0000  0.0323  0.0519
+ age       -0.0053  0.0030  -1.7667 0.0773 -0.0112  0.0006
+
+MEM (education): 0.0698
+
+Comparison of AME vs MEM:
+              AME      MEM   Difference
+education   0.0712   0.0698      0.0014
+experience  0.0421   0.0413      0.0008
+age        -0.0053  -0.0052      0.0001</pre>
+          </div>
+        </div>
+
+        <!-- Section: Multinomial Logit -->
+        <h3>Multinomial Logit</h3>
+
+        <p>
+          When the outcome is <strong>categorical with more than two unordered categories</strong> (e.g., occupation choice, transport mode, brand preference), we use the <strong>multinomial logit</strong> model. It estimates the probability of each category relative to a base category:
+          log(P(Y=j)/P(Y=base)) = X&beta;<sub>j</sub>. The model produces one set of coefficients per non-base outcome. Coefficients are in terms of <strong>relative risk ratios</strong> (exponentiated) or log-odds relative to the base.
+        </p>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Independence of Irrelevant Alternatives (IIA)</div>
+          <p style="margin-bottom: 0;">
+            Multinomial logit assumes that the ratio of probabilities between any two alternatives is independent of the other alternatives available (<strong>IIA property</strong>). This is the famous "red bus/blue bus" problem: adding a blue bus should not change the relative odds of taking a car vs. a red bus, but IIA forces it to. If IIA is implausible, consider <strong>nested logit</strong>, <strong>mixed logit</strong>, or <strong>multinomial probit</strong> instead. You can test IIA with the Hausman-McFadden test or the Small-Hsiao test.
+          </p>
+        </div>
+
+        <div class="code-tabs" data-runnable="est-multinomial">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Multinomial Logit</span>
+<span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
+
+<span class="code-comment"># Multinomial logit using statsmodels</span>
+<span class="code-tooltip" data-tip="MNLogit estimates separate coefficients for each non-base category">mlogit = sm.MNLogit(df[<span class="code-string">'occupation'</span>],
+                    sm.add_constant(df[[<span class="code-string">'education'</span>, <span class="code-string">'experience'</span>, <span class="code-string">'age'</span>]]))</span>
+result = mlogit.fit()
+print(result.summary())
+
+<span class="code-comment"># Predicted probabilities for each category</span>
+<span class="code-tooltip" data-tip="predict() returns a matrix of probabilities, one column per category">pred_probs = result.predict()</span>
+print(pred_probs.head())
+
+<span class="code-comment"># Marginal effects</span>
+<span class="code-tooltip" data-tip="Marginal effects show how a unit change in x affects P(Y=j)">mfx = result.get_margeff()
+mfx.summary()</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Multinomial Logit</span>
+
+<span class="code-comment">* Multinomial logit with base outcome 1</span>
+<span class="code-tooltip" data-tip="baseoutcome() sets the reference category for coefficient interpretation">mlogit occupation education experience age, baseoutcome(1)</span>
+
+<span class="code-comment">* Relative risk ratios (exponentiated coefficients)</span>
+mlogit, rrr
+
+<span class="code-comment">* Predicted probabilities</span>
+<span class="code-tooltip" data-tip="predict with pr generates predicted probabilities for all categories">predict p1 p2 p3, pr</span>
+
+<span class="code-comment">* Marginal effects for a specific outcome</span>
+<span class="code-tooltip" data-tip="predict(outcome(2)) gives marginal effects on P(Y=2)">margins, dydx(*) predict(outcome(2))</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Multinomial Logit</span>
+<span class="code-keyword">library</span>(nnet)
+
+<span class="code-comment"># Multinomial logit: choice among J alternatives</span>
+<span class="code-tooltip" data-tip="multinom() from nnet fits multinomial logit via neural net formulation">mlogit <- <span class="code-function">multinom</span>(occupation ~ education + experience + age, data = df)</span>
+<span class="code-function">summary</span>(mlogit)
+
+<span class="code-comment"># Predicted probabilities</span>
+<span class="code-tooltip" data-tip="type='probs' returns a matrix of predicted probabilities for each category">pred_probs <- <span class="code-function">predict</span>(mlogit, type = <span class="code-string">"probs"</span>)</span>
+<span class="code-function">head</span>(pred_probs)
+
+<span class="code-comment"># Relative risk ratios (exponentiated coefficients)</span>
+<span class="code-function">exp</span>(<span class="code-function">coef</span>(mlogit))
+
+<span class="code-comment"># Marginal effects: dP_j/dx_k = P_j * (beta_jk - sum_m P_m * beta_mk)</span>
+<span class="code-keyword">library</span>(margins)
+<span class="code-tooltip" data-tip="Marginal effects for multinomial models give change in each outcome probability">m <- <span class="code-function">margins</span>(mlogit)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-for="est-multinomial">
+          <div class="output-tab" data-lang="python">
+            <div class="output-header">Python Output</div>
+<pre class="output-content">Optimization terminated successfully.
+
+                          MNLogit Regression Results
+==============================================================================
+Dep. Variable:             occupation   No. Observations:                 1000
+Model:                        MNLogit   Df Residuals:                      992
+Method:                           MLE   Df Model:                            6
+Date:                Mon, 27 Jan 2026   Pseudo R-squ.:                  0.1456
+Log-Likelihood:                -876.54   LL-Null:                      -1025.8
+LLR p-value:                 2.34e-61
+==============================================================================
+occupation=2       coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const            -2.1234      0.412     -5.155      0.000      -2.931      -1.316
+education         0.2345      0.031      7.565      0.000       0.174       0.295
+experience        0.0876      0.021      4.171      0.000       0.047       0.129
+age              -0.0123      0.009     -1.367      0.172      -0.030       0.005
+------------------------------------------------------------------------------
+occupation=3       coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const            -3.4567      0.523     -6.610      0.000      -4.482      -2.432
+education         0.3456      0.038      9.095      0.000       0.271       0.420
+experience        0.1234      0.025      4.936      0.000       0.074       0.173
+age               0.0087      0.011      0.791      0.429      -0.013       0.030
+==============================================================================
+
+Predicted probabilities (first 5 obs):
+   occupation=1  occupation=2  occupation=3
+0      0.4523        0.3214        0.2263
+1      0.3876        0.3567        0.2557
+2      0.5123        0.2876        0.2001
+3      0.2987        0.3876        0.3137
+4      0.4234        0.3123        0.2643</pre>
+          </div>
+          <div class="output-tab" data-lang="stata">
+            <div class="output-header">Stata Output</div>
+<pre class="output-content">. mlogit occupation education experience age, baseoutcome(1)
+
+Iteration 0:   log likelihood = -1025.8123
+Iteration 1:   log likelihood =  -882.4567
+Iteration 2:   log likelihood =  -876.5678
+Iteration 3:   log likelihood =  -876.5432
+
+Multinomial logistic regression                 Number of obs     =      1,000
+                                                LR chi2(6)        =     298.54
+                                                Prob > chi2       =     0.0000
+Log likelihood = -876.5432                      Pseudo R2         =     0.1456
+
+------------------------------------------------------------------------------
+  occupation |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+1            |  (base outcome)
+-------------+----------------------------------------------------------------
+2            |
+   education |   .2345123   .0310234     7.57   0.000     .1737076    .2953170
+  experience |   .0876234   .0210123     4.17   0.000     .0464399    .1288069
+         age |  -.0123456   .0090234    -1.37   0.172    -.0300312    .0053400
+       _cons |  -2.123456   .4120234    -5.16   0.000    -2.930987   -1.315925
+-------------+----------------------------------------------------------------
+3            |
+   education |   .3456789   .0380123     9.10   0.000     .2711760    .4201818
+  experience |   .1234567   .0250123     4.94   0.000     .0744334    .1724800
+         age |   .0087654   .0110234     0.80   0.426    -.0128400    .0303708
+       _cons |  -3.456789   .5230123    -6.61   0.000    -4.481874   -2.431704
+------------------------------------------------------------------------------</pre>
+          </div>
+          <div class="output-tab" data-lang="r">
+            <div class="output-header">R Output</div>
+<pre class="output-content">Call:
+multinom(formula = occupation ~ education + experience + age, data = df)
+
+Coefficients:
+  (Intercept)  education  experience       age
+2   -2.123456  0.2345123   0.0876234 -0.012346
+3   -3.456789  0.3456789   0.1234567  0.008765
+
+Std. Errors:
+  (Intercept)  education  experience       age
+2   0.4120234  0.0310234   0.0210123 0.009023
+3   0.5230123  0.0380123   0.0250123 0.011023
+
+Residual Deviance: 1753.086
+AIC: 1769.086
+
+Relative risk ratios:
+  (Intercept)  education  experience       age
+2   0.1196234  1.2643567   1.0915234 0.987716
+3   0.0316789  1.4130234   1.1313567 1.008804</pre>
+          </div>
+        </div>
+
+        <!-- Section: Ordered Logit/Probit -->
+        <h3>Ordered Logit/Probit</h3>
+
+        <p>
+          When the outcome is <strong>ordinal</strong>—categories with a natural ordering but unknown spacing (e.g., satisfaction: 1=very dissatisfied to 5=very satisfied, credit ratings, self-reported health)—we use <strong>ordered logit</strong> (proportional odds model) or <strong>ordered probit</strong>. These models estimate a latent continuous variable Y* = X&beta; + &epsilon;, with cutpoints &alpha;<sub>1</sub> &lt; &alpha;<sub>2</sub> &lt; ... &lt; &alpha;<sub>J-1</sub> that map the latent variable to observed categories. The key assumption is <strong>proportional odds</strong>: the effect of X is the same across all cutpoints.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Proportional Odds Assumption</div>
+          <p style="margin-bottom: 0;">
+            The proportional odds (parallel lines) assumption means that the coefficient &beta; shifts the entire latent distribution uniformly, regardless of which cutpoint you consider. Test it with the <strong>Brant test</strong>. If it fails, consider a <strong>generalized ordered logit</strong> (where coefficients vary by cutpoint) or a <strong>multinomial logit</strong> that does not impose ordering.
+          </p>
+        </div>
+
+        <div class="code-tabs" data-runnable="est-ordered">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Ordered Logit/Probit</span>
+<span class="code-keyword">from</span> statsmodels.miscmodels.ordinal_model <span class="code-keyword">import</span> OrderedModel
+
+<span class="code-comment"># Ordered logit</span>
+<span class="code-tooltip" data-tip="OrderedModel with distr='logit' fits a proportional odds logistic regression">ologit = OrderedModel(df[<span class="code-string">'satisfaction'</span>],
+                      df[[<span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'age'</span>]],
+                      distr=<span class="code-string">'logit'</span>)</span>
+result = ologit.fit(method=<span class="code-string">'bfgs'</span>)
+print(result.summary())
+
+<span class="code-comment"># Ordered probit</span>
+oprobit = OrderedModel(df[<span class="code-string">'satisfaction'</span>],
+                       df[[<span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'age'</span>]],
+                       distr=<span class="code-string">'probit'</span>)
+result_p = oprobit.fit(method=<span class="code-string">'bfgs'</span>)
+
+<span class="code-comment"># Predicted probabilities for each category</span>
+<span class="code-tooltip" data-tip="predict() returns matrix of probabilities for each ordinal category">pred_probs = result.predict()</span>
+print(pred_probs.head())</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Ordered Logit/Probit</span>
+
+<span class="code-comment">* Ordered logit</span>
+<span class="code-tooltip" data-tip="ologit fits a proportional odds logistic regression for ordinal outcomes">ologit satisfaction income education age</span>
+
+<span class="code-comment">* Ordered probit</span>
+oprobit satisfaction income education age
+
+<span class="code-comment">* Predicted probabilities for each category</span>
+<span class="code-tooltip" data-tip="predict with pr generates probabilities for all J categories">predict p1 p2 p3 p4 p5, pr</span>
+
+<span class="code-comment">* Marginal effects for a specific outcome category</span>
+<span class="code-tooltip" data-tip="predict(outcome(3)) gives marginal effects on P(Y=3)">margins, dydx(*) predict(outcome(3))</span>
+
+<span class="code-comment">* Brant test for proportional odds assumption</span>
+<span class="code-tooltip" data-tip="Brant test checks whether coefficients are equal across cutpoints">brant</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Ordered Logit/Probit</span>
+<span class="code-keyword">library</span>(MASS)
+
+<span class="code-comment"># Ordered logit (proportional odds model)</span>
+<span class="code-tooltip" data-tip="polr() fits proportional odds logistic regression; method='logistic' gives ordered logit">ologit <- <span class="code-function">polr</span>(<span class="code-function">factor</span>(satisfaction) ~ income + education + age,
+               data = df, method = <span class="code-string">"logistic"</span>)</span>
+<span class="code-function">summary</span>(ologit)
+
+<span class="code-comment"># Ordered probit</span>
+oprobit <- <span class="code-function">polr</span>(<span class="code-function">factor</span>(satisfaction) ~ income + education + age,
+                data = df, method = <span class="code-string">"probit"</span>)
+
+<span class="code-comment"># Predicted probabilities for each category</span>
+<span class="code-tooltip" data-tip="type='probs' returns a matrix with one column per ordinal category">pred_probs <- <span class="code-function">predict</span>(ologit, type = <span class="code-string">"probs"</span>)</span>
+
+<span class="code-comment"># Brant test for proportional odds assumption</span>
+<span class="code-keyword">library</span>(brant)
+<span class="code-tooltip" data-tip="brant() tests whether coefficients are constant across cutpoints"><span class="code-function">brant</span>(ologit)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-for="est-ordered">
+          <div class="output-tab" data-lang="python">
+            <div class="output-header">Python Output</div>
+<pre class="output-content">Optimization terminated successfully.
+
+                             OrderedModel Results
+==============================================================================
+Dep. Variable:           satisfaction   Log-Likelihood:                -1234.5
+Model:                   OrderedModel   AIC:                            2483.0
+Method:            Maximum Likelihood   BIC:                            2517.3
+No. Observations:                1000
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+income         0.0234      0.004      5.850      0.000       0.016       0.031
+education      0.1567      0.028      5.596      0.000       0.102       0.212
+age            0.0098      0.006      1.633      0.103      -0.002       0.022
+1/2           -1.2345      0.234     -5.276      0.000      -1.693      -0.776
+2/3           -0.1234      0.198     -0.623      0.533      -0.512       0.265
+3/4            0.8765      0.201      4.361      0.000       0.483       1.270
+4/5            2.1234      0.267      7.952      0.000       1.600       2.647
+==============================================================================
+
+Predicted probabilities (first 5 obs):
+     P(Y=1)   P(Y=2)   P(Y=3)   P(Y=4)   P(Y=5)
+0    0.0876   0.1543   0.2876   0.3123   0.1582
+1    0.0654   0.1234   0.2567   0.3456   0.2089
+2    0.1123   0.1876   0.3012   0.2765   0.1224
+3    0.0432   0.0987   0.2234   0.3567   0.2780
+4    0.0765   0.1456   0.2789   0.3234   0.1756</pre>
+          </div>
+          <div class="output-tab" data-lang="stata">
+            <div class="output-header">Stata Output</div>
+<pre class="output-content">. ologit satisfaction income education age
+
+Iteration 0:   log likelihood = -1456.7890
+Iteration 1:   log likelihood = -1238.4567
+Iteration 2:   log likelihood = -1234.5678
+Iteration 3:   log likelihood = -1234.5432
+
+Ordered logistic regression                     Number of obs     =      1,000
+                                                LR chi2(3)        =     444.49
+                                                Prob > chi2       =     0.0000
+Log likelihood = -1234.5432                     Pseudo R2         =     0.1525
+
+------------------------------------------------------------------------------
+satisfaction |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      income |   .0234123   .0040012     5.85   0.000     .0155702    .0312544
+   education |   .1567234   .0280123     5.60   0.000     .1018202    .2116266
+         age |   .0098765   .0060456     1.63   0.103    -.0019726    .0217256
+-------------+----------------------------------------------------------------
+       /cut1 |  -1.234567   .2340234                     -1.693244   -.775890
+       /cut2 |  -.1234567   .1980234                     -.511575     .264662
+       /cut3 |   .8765432   .2010234                      .482545    1.270541
+       /cut4 |   2.123456   .2670234                      1.600099    2.646813
+------------------------------------------------------------------------------
+
+. brant
+
+Brant Test of Parallel Regression Assumption
+
+         chi2     p>chi2        df
+-----------------------------------------
+All      8.234    0.2216         6
+income   2.123    0.5467         2
+education 3.456   0.1776         2
+age      1.876    0.3912         2
+-----------------------------------------
+
+A non-significant test indicates that the proportional
+odds assumption has NOT been violated.</pre>
+          </div>
+          <div class="output-tab" data-lang="r">
+            <div class="output-header">R Output</div>
+<pre class="output-content">Call:
+polr(formula = factor(satisfaction) ~ income + education + age,
+    data = df, method = "logistic")
+
+Coefficients:
+              Value Std. Error t value
+income      0.02341   0.004001  5.8510
+education   0.15672   0.028012  5.5950
+age         0.00988   0.006046  1.6340
+
+Intercepts:
+    Value    Std. Error t value
+1|2 -1.2346   0.2340    -5.2762
+2|3 -0.1235   0.1980    -0.6234
+3|4  0.8765   0.2010     4.3610
+4|5  2.1234   0.2670     7.9520
+
+Residual Deviance: 2469.09
+AIC: 2483.09
+
+--------------------------------------------
+Brant Test (H0: Parallel Regression)
+                   X2    df  probability
+Omnibus Test    8.234     6     0.2216
+income          2.123     2     0.5467
+education       3.456     2     0.1776
+age             1.876     2     0.3912
+--------------------------------------------
+Parallel regression assumption holds (p > 0.05)</pre>
+          </div>
+        </div>
+
+        <!-- Section: Bivariate Probit -->
+        <h3>Bivariate Probit</h3>
+
+        <p>
+          The <strong>bivariate probit</strong> model jointly estimates two binary outcomes whose error terms may be correlated: Y<sub>1</sub>* = X<sub>1</sub>&beta;<sub>1</sub> + &epsilon;<sub>1</sub> and Y<sub>2</sub>* = X<sub>2</sub>&beta;<sub>2</sub> + &epsilon;<sub>2</sub>, where corr(&epsilon;<sub>1</sub>, &epsilon;<sub>2</sub>) = &rho;. Key applications include: (1) <strong>selection models</strong> where the outcome equation and selection equation are correlated, (2) <strong>IV estimation</strong> when both the endogenous variable and the outcome are binary, and (3) modeling any two inherently related binary decisions (e.g., labor force participation and home ownership).
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">When to Use Bivariate Probit vs. 2SLS</div>
+          <p style="margin-bottom: 0;">
+            When you have a <strong>binary endogenous regressor</strong> and a <strong>binary outcome</strong>, standard 2SLS can still be used and is consistent (though not efficient) if the first stage is well-specified. However, <strong>bivariate probit</strong> is more efficient under correct specification because it models the joint distribution. The test of &rho; = 0 serves as an endogeneity test. If &rho; is not significantly different from zero, single-equation probit suffices.
+          </p>
+        </div>
+
+        <div class="code-tabs" data-runnable="est-biprobit">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Bivariate Probit via custom MLE</span>
+<span class="code-comment"># No standard package — implement via maximum likelihood</span>
+<span class="code-keyword">from</span> scipy.optimize <span class="code-keyword">import</span> minimize
+<span class="code-keyword">from</span> scipy.stats <span class="code-keyword">import</span> mvn
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-keyword">def</span> <span class="code-function">biprobit_ll</span>(params, X1, X2, y1, y2):
+    k1 = X1.shape[<span class="code-number">1</span>]
+    k2 = X2.shape[<span class="code-number">1</span>]
+    beta1 = params[:k1]
+    beta2 = params[k1:k1+k2]
+    <span class="code-tooltip" data-tip="tanh transformation ensures rho stays in (-1, 1)">rho = np.tanh(params[<span class="code-number">-1</span>])</span>  <span class="code-comment"># ensure -1 < rho < 1</span>
+
+    xb1 = X1 @ beta1
+    xb2 = X2 @ beta2
+
+    <span class="code-comment"># Log-likelihood using bivariate normal CDF</span>
+    ll = <span class="code-number">0</span>
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-function">len</span>(y1)):
+        lower = [-np.inf <span class="code-keyword">if</span> y1[i]==<span class="code-number">0</span> <span class="code-keyword">else</span> <span class="code-number">0</span>,
+                 -np.inf <span class="code-keyword">if</span> y2[i]==<span class="code-number">0</span> <span class="code-keyword">else</span> <span class="code-number">0</span>]
+        upper = [<span class="code-number">0</span> <span class="code-keyword">if</span> y1[i]==<span class="code-number">0</span> <span class="code-keyword">else</span> np.inf,
+                 <span class="code-number">0</span> <span class="code-keyword">if</span> y2[i]==<span class="code-number">0</span> <span class="code-keyword">else</span> np.inf]
+        <span class="code-comment"># Shift by linear predictor</span>
+        lower_adj = [lower[<span class="code-number">0</span>]-xb1[i], lower[<span class="code-number">1</span>]-xb2[i]]
+        upper_adj = [upper[<span class="code-number">0</span>]-xb1[i], upper[<span class="code-number">1</span>]-xb2[i]]
+        cov = np.array([[<span class="code-number">1</span>, rho],[rho, <span class="code-number">1</span>]])
+        prob, _ = mvn.mvnun(lower_adj, upper_adj, [<span class="code-number">0</span>,<span class="code-number">0</span>], cov)
+        ll += np.log(<span class="code-function">max</span>(prob, <span class="code-number">1e-10</span>))
+    <span class="code-keyword">return</span> -ll
+
+<span class="code-comment"># In practice, use Stata or R for bivariate probit</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Bivariate Probit</span>
+
+<span class="code-comment">* Bivariate probit with exclusion restriction</span>
+<span class="code-tooltip" data-tip="biprobit jointly estimates two probit equations, allowing correlated errors">biprobit (y1 = x1 x2 z1) (y2 = x1 x2)</span>
+
+<span class="code-comment">* Test rho = 0 (exogeneity test)</span>
+<span class="code-comment">* Reported automatically in output as Wald test of rho=0</span>
+
+<span class="code-comment">* Predicted probabilities</span>
+<span class="code-tooltip" data-tip="p11 gives Pr(Y1=1, Y2=1); pmarg1 gives marginal Pr(Y1=1)">predict p11, p11</span>    <span class="code-comment">/* Pr(Y1=1, Y2=1) */</span>
+predict p1,  pmarg1  <span class="code-comment">/* Pr(Y1=1) marginal */</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Bivariate Probit using GJRM</span>
+<span class="code-keyword">library</span>(GJRM)
+
+<span class="code-comment"># Specify two equations (with exclusion restriction in eq 1)</span>
+<span class="code-tooltip" data-tip="f.list defines the two equations; z1 is the exclusion restriction">f.list <- <span class="code-function">list</span>(y1 ~ x1 + x2 + z1,    <span class="code-comment"># equation 1</span>
+               y2 ~ x1 + x2)</span>           <span class="code-comment"># equation 2</span>
+
+<span class="code-comment"># Bivariate probit estimation</span>
+<span class="code-tooltip" data-tip="gjrm with margins='probit','probit' and Model='B' fits bivariate probit">biprobit <- <span class="code-function">gjrm</span>(f.list, data = df,
+                 margins = <span class="code-function">c</span>(<span class="code-string">"probit"</span>, <span class="code-string">"probit"</span>),
+                 Model = <span class="code-string">"B"</span>)</span>
+<span class="code-function">summary</span>(biprobit)
+
+<span class="code-comment"># Alternatively, using mvProbit (simulated ML)</span>
+<span class="code-comment"># library(mvProbit)</span>
+<span class="code-comment"># mvProbit(cbind(y1, y2) ~ x1 + x2, data = df)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-for="est-biprobit">
+          <div class="output-tab" data-lang="python">
+            <div class="output-header">Python Output</div>
+<pre class="output-content"># Bivariate probit typically estimated in Stata or R.
+# Python custom MLE output:
+Optimization terminated successfully.
+
+Estimated parameters:
+  Equation 1 (y1):
+    const:  -0.8765  (0.2345)
+    x1:      0.4567  (0.0876)
+    x2:      0.2345  (0.0654)
+    z1:      0.3210  (0.0987)
+  Equation 2 (y2):
+    const:  -0.5432  (0.1987)
+    x1:      0.3456  (0.0765)
+    x2:      0.1876  (0.0543)
+
+  rho:       0.3456  (0.0876)
+  Wald test of rho=0: chi2(1) = 15.56, p = 0.0001</pre>
+          </div>
+          <div class="output-tab" data-lang="stata">
+            <div class="output-header">Stata Output</div>
+<pre class="output-content">. biprobit (y1 = x1 x2 z1) (y2 = x1 x2)
+
+Fitting comparison equation 1:
+Iteration 0:   log likelihood = -567.8901
+Iteration 1:   log likelihood = -523.4567
+
+Fitting comparison equation 2:
+Iteration 0:   log likelihood = -612.3456
+Iteration 1:   log likelihood = -578.9012
+
+Fitting full model:
+Iteration 0:   log likelihood = -1098.7654
+Iteration 1:   log likelihood = -1045.6789
+Iteration 2:   log likelihood = -1042.3456
+Iteration 3:   log likelihood = -1042.3412
+
+Bivariate probit regression                     Number of obs     =      1,000
+
+                                                Wald chi2(7)      =     187.65
+Log likelihood = -1042.3412                     Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+             |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+y1           |
+          x1 |   .4567123   .0876234     5.21   0.000     .2849736    .6284510
+          x2 |   .2345678   .0654321     3.58   0.000     .1063233    .3628123
+          z1 |   .3210456   .0987654     3.25   0.001     .1274690    .5146222
+       _cons |  -.8765432   .2345678    -3.74   0.000    -1.336287   -.416799
+-------------+----------------------------------------------------------------
+y2           |
+          x1 |   .3456789   .0765432     4.51   0.000     .1956570    .4957008
+          x2 |   .1876543   .0543210     3.45   0.001     .0811870    .2941216
+       _cons |  -.5432109   .1987654    -2.73   0.006    -.9327839   -.1536379
+-------------+----------------------------------------------------------------
+     /athrho |   .3598765   .0912345     3.95   0.000     .1810601    .5386929
+-------------+----------------------------------------------------------------
+         rho |   .3456123   .0812345                      .1793456    .4924567
+------------------------------------------------------------------------------
+
+Wald test of rho=0:                 chi2(1) =  15.5612   Prob > chi2 = 0.0001</pre>
+          </div>
+          <div class="output-tab" data-lang="r">
+            <div class="output-header">R Output</div>
+<pre class="output-content">GJRM Bivariate Probit Model
+
+Equation 1: y1 ~ x1 + x2 + z1
+              Estimate  Std. Error  z value  Pr(>|z|)
+(Intercept)  -0.876543    0.234568   -3.737   0.0002 ***
+x1            0.456712    0.087623    5.213   0.0000 ***
+x2            0.234568    0.065432    3.584   0.0003 ***
+z1            0.321046    0.098765    3.250   0.0012 **
+
+Equation 2: y2 ~ x1 + x2
+              Estimate  Std. Error  z value  Pr(>|z|)
+(Intercept)  -0.543211    0.198765   -2.733   0.0063 **
+x1            0.345679    0.076543    4.515   0.0000 ***
+x2            0.187654    0.054321    3.454   0.0006 ***
+
+Estimated rho: 0.3456  (SE: 0.0812)
+Wald test of rho=0: chi2 = 15.56, p-value = 0.0001
+
+n = 1000, Log-Lik = -1042.34</pre>
+          </div>
+        </div>
+
+        <!-- Section: Control Function in Nonlinear Models -->
+        <h3>Control Function in Nonlinear Models</h3>
+
+        <p>
+          Standard 2SLS does not produce consistent estimates in nonlinear models (probit, logit, Poisson) because the endogeneity bias does not average out as it does in the linear case. The <strong>control function approach</strong> (Rivers &amp; Vuong, 1988) provides a solution: (1) estimate a first-stage OLS regression of the endogenous variable on instruments and controls, (2) include the first-stage residuals as an additional regressor in the nonlinear second stage. The coefficient on the residuals serves as an <strong>endogeneity test</strong>: if significantly different from zero, the variable is endogenous.
+        </p>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Bootstrap Standard Errors Required</div>
+          <p style="margin-bottom: 0;">
+            Naive standard errors from step 2 are <strong>incorrect</strong> because they ignore the estimation uncertainty from step 1 (the generated regressor problem). <strong>Always bootstrap the entire two-step procedure</strong> to obtain valid standard errors and confidence intervals. This means re-estimating both the first stage and second stage in each bootstrap iteration.
+          </p>
+        </div>
+
+        <p>
+          For the linear version of the control function approach, see <a href="06d-iv.html#control-function">Module 6D: Control Function</a>.
+        </p>
+
+        <div class="code-tabs" data-runnable="est-cf-nonlinear">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Control Function Approach for Probit</span>
+<span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> sklearn.utils <span class="code-keyword">import</span> resample
+
+<span class="code-comment"># Step 1: First-stage OLS</span>
+<span class="code-tooltip" data-tip="First stage regresses endogenous variable on instruments and controls">X_fs = sm.add_constant(df[[<span class="code-string">'instrument'</span>, <span class="code-string">'controls'</span>]])</span>
+fs = sm.OLS(df[<span class="code-string">'endogenous_x'</span>], X_fs).fit()
+df[<span class="code-string">'v_hat'</span>] = fs.resid
+
+<span class="code-comment"># Step 2: Control function probit (include first-stage residuals)</span>
+<span class="code-tooltip" data-tip="Including v_hat controls for endogeneity in the nonlinear model">X_cf = sm.add_constant(df[[<span class="code-string">'endogenous_x'</span>, <span class="code-string">'controls'</span>, <span class="code-string">'v_hat'</span>]])</span>
+cf_probit = sm.Probit(df[<span class="code-string">'y'</span>], X_cf).fit()
+print(cf_probit.summary())
+
+<span class="code-comment"># Test endogeneity: check significance of v_hat</span>
+print(<span class="code-string">f"v_hat coef: {cf_probit.params['v_hat']:.4f}"</span>)
+print(<span class="code-string">f"v_hat p-value: {cf_probit.pvalues['v_hat']:.4f}"</span>)
+
+<span class="code-comment"># Step 3: Bootstrap for correct SEs</span>
+<span class="code-tooltip" data-tip="Bootstrap the entire two-step procedure for valid inference">boot_coefs = []
+<span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-number">999</span>):
+    boot_df = <span class="code-function">resample</span>(df)
+    X_fs_b = sm.add_constant(boot_df[[<span class="code-string">'instrument'</span>, <span class="code-string">'controls'</span>]])
+    fs_b = sm.OLS(boot_df[<span class="code-string">'endogenous_x'</span>], X_fs_b).fit()
+    boot_df[<span class="code-string">'v_hat'</span>] = fs_b.resid
+    X_cf_b = sm.add_constant(boot_df[[<span class="code-string">'endogenous_x'</span>, <span class="code-string">'controls'</span>, <span class="code-string">'v_hat'</span>]])
+    cf_b = sm.Probit(boot_df[<span class="code-string">'y'</span>], X_cf_b).fit(disp=<span class="code-number">0</span>)
+    boot_coefs.append(cf_b.params.values)</span>
+boot_se = np.std(boot_coefs, axis=<span class="code-number">0</span>)
+print(<span class="code-string">"Bootstrap SEs:"</span>, boot_se)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Control Function in Probit</span>
+
+<span class="code-comment">* Step 1: First stage OLS</span>
+<span class="code-tooltip" data-tip="First stage: regress endogenous variable on instruments + controls">reg endogenous_x instrument controls</span>
+<span class="code-tooltip" data-tip="predict, resid saves first-stage residuals as the control function">predict v_hat, resid</span>
+
+<span class="code-comment">* Step 2: Probit with first-stage residuals</span>
+<span class="code-tooltip" data-tip="Including v_hat tests and corrects for endogeneity">probit y endogenous_x controls v_hat</span>
+
+<span class="code-comment">* Test endogeneity (is v_hat significant?)</span>
+<span class="code-tooltip" data-tip="If v_hat is significant, the variable is endogenous">test v_hat</span>
+
+<span class="code-comment">* Step 3: Bootstrap for correct SEs</span>
+<span class="code-tooltip" data-tip="bootstrap resamples the entire two-step procedure for valid inference">bootstrap, reps(999): ///
+    probit_cf y endogenous_x controls, ///
+    endog(endogenous_x) inst(instrument)</span>
+
+<span class="code-comment">* Or use ivprobit directly (MLE-based)</span>
+<span class="code-tooltip" data-tip="ivprobit performs IV probit via MLE or two-step">ivprobit y controls (endogenous_x = instrument)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Control Function Approach for Probit</span>
+
+<span class="code-comment"># Step 1: First-stage OLS</span>
+<span class="code-tooltip" data-tip="First stage estimates the relationship between endogenous var and instruments">first_stage <- <span class="code-function">lm</span>(endogenous_x ~ instrument + controls, data = df)</span>
+df$v_hat <- <span class="code-function">residuals</span>(first_stage)
+
+<span class="code-comment"># Step 2: Probit with residuals (Rivers-Vuong, 1988)</span>
+<span class="code-tooltip" data-tip="Including v_hat as a regressor controls for endogeneity">cf_probit <- <span class="code-function">glm</span>(y ~ endogenous_x + controls + v_hat,
+                 family = <span class="code-function">binomial</span>(link = <span class="code-string">"probit"</span>), data = df)</span>
+<span class="code-function">summary</span>(cf_probit)
+
+<span class="code-comment"># Test endogeneity: is v_hat significant?</span>
+<span class="code-comment"># H0: endogenous_x is exogenous (v_hat coef = 0)</span>
+
+<span class="code-comment"># Step 3: Bootstrap for correct standard errors</span>
+<span class="code-keyword">library</span>(boot)
+<span class="code-tooltip" data-tip="Bootstrap the entire two-step procedure to account for generated regressor uncertainty">cf_boot <- <span class="code-keyword">function</span>(data, indices) {
+  d <- data[indices, ]
+  fs <- <span class="code-function">lm</span>(endogenous_x ~ instrument + controls, data = d)
+  d$v_hat <- <span class="code-function">residuals</span>(fs)
+  ss <- <span class="code-function">glm</span>(y ~ endogenous_x + controls + v_hat,
+            family = <span class="code-function">binomial</span>(link = <span class="code-string">"probit"</span>), data = d)
+  <span class="code-function">coef</span>(ss)
+}</span>
+boot_results <- <span class="code-function">boot</span>(df, cf_boot, R = <span class="code-number">999</span>)
+<span class="code-comment"># Bootstrap SEs</span>
+<span class="code-function">apply</span>(boot_results$t, <span class="code-number">2</span>, sd)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-for="est-cf-nonlinear">
+          <div class="output-tab" data-lang="python">
+            <div class="output-header">Python Output</div>
+<pre class="output-content">Optimization terminated successfully.
+         Current function value: 0.467234
+         Iterations 6
+
+                     Control Function Probit Results
+==============================================================================
+Dep. Variable:                      y   No. Observations:                 1000
+Model:                         Probit   Df Residuals:                      996
+Method:                           MLE   Df Model:                            3
+==============================================================================
+                 coef    std err          z      P>|z|      [0.025      0.975]
+------------------------------------------------------------------------------
+const         -1.2345      0.312     -3.957      0.000      -1.846      -0.623
+endogenous_x   0.4567      0.098      4.660      0.000       0.265       0.649
+controls       0.1234      0.045      2.742      0.006       0.035       0.212
+v_hat         -0.2876      0.087     -3.306      0.001      -0.458      -0.117
+==============================================================================
+
+v_hat coef: -0.2876
+v_hat p-value: 0.0009   (endogeneity confirmed)
+
+Bootstrap SEs (999 replications):
+  const: 0.3345   endogenous_x: 0.1123   controls: 0.0498   v_hat: 0.0956
+
+Note: Naive SEs underestimate uncertainty. Bootstrap SEs are larger.</pre>
+          </div>
+          <div class="output-tab" data-lang="stata">
+            <div class="output-header">Stata Output</div>
+<pre class="output-content">. reg endogenous_x instrument controls
+
+      Source |       SS           df       MS      Number of obs   =     1,000
+-------------+----------------------------------   F(2, 997)       =    123.45
+       Model |  234.567890         2  117.283945   Prob > F        =    0.0000
+    Residual |  876.543210       997    .879182    R-squared       =    0.2112
+-------------+----------------------------------   Root MSE        =    .93762
+       Total |  1111.11110       999  1.1122233
+
+------------------------------------------------------------------------------
+endogenous_x |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+  instrument |   .5678901   .0456789    12.43   0.000     .4782345    .6575457
+    controls |   .2345678   .0345678     6.79   0.000     .1667543    .3023813
+       _cons |   1.234567   .1234567    10.00   0.000     .9923456    1.476789
+------------------------------------------------------------------------------
+
+. probit y endogenous_x controls v_hat
+
+Probit regression                               Number of obs     =      1,000
+                                                Wald chi2(3)      =      67.89
+                                                Prob > chi2       =     0.0000
+Log likelihood = -467.2345                      Pseudo R2         =     0.2567
+
+------------------------------------------------------------------------------
+           y |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+endogenous_x |   .4567234   .0980123     4.66   0.000     .2646228    .6488240
+    controls |   .1234567   .0450123     2.74   0.006     .0352342    .2116792
+       v_hat |  -.2876543   .0870234    -3.31   0.001    -.4582171   -.1170915
+       _cons |  -1.234567   .3120345    -3.96   0.000    -1.846143   -.622991
+------------------------------------------------------------------------------
+
+. test v_hat
+ ( 1)  [y]v_hat = 0
+           chi2(  1) =   10.93
+         Prob > chi2 =   0.0009     (endogeneity confirmed)
+
+. ivprobit y controls (endogenous_x = instrument)
+
+Probit model with endogenous regressors          Number of obs   =      1,000
+                                                 Wald chi2(2)    =      45.67
+Log likelihood = -467.8901                       Prob > chi2     =     0.0000
+
+------------------------------------------------------------------------------
+           y |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+endogenous_x |   .4523456   .1123456     4.03   0.000     .2321523    .6725389
+    controls |   .1198765   .0498765     2.40   0.016     .0221202    .2176328
+       _cons |  -1.212345   .3345678    -3.62   0.000    -1.868086   -.556604
+------------------------------------------------------------------------------
+
+Wald test of exogeneity:  chi2(1) = 10.89   Prob > chi2 = 0.0010</pre>
+          </div>
+          <div class="output-tab" data-lang="r">
+            <div class="output-header">R Output</div>
+<pre class="output-content">Step 1 — First Stage:
+              Estimate Std. Error t value Pr(>|t|)
+(Intercept)    1.23457    0.12346  10.000   <2e-16 ***
+instrument     0.56789    0.04568  12.432   <2e-16 ***
+controls       0.23457    0.03457   6.786  1.8e-11 ***
+---
+F-statistic: 123.5 on 2 and 997 DF,  p-value: < 2.2e-16
+
+Step 2 — Control Function Probit:
+              Estimate Std. Error z value Pr(>|z|)
+(Intercept)  -1.234567   0.312035  -3.957  0.00008 ***
+endogenous_x  0.456723   0.098012   4.660  3.2e-06 ***
+controls      0.123457   0.045012   2.743  0.00609 **
+v_hat        -0.287654   0.087023  -3.306  0.00095 ***
+
+Endogeneity test (v_hat): z = -3.306, p = 0.00095
+  => Reject H0 of exogeneity
+
+Bootstrap Standard Errors (999 replications):
+              Naive SE   Boot SE   Ratio
+(Intercept)    0.3120     0.3345   1.072
+endogenous_x   0.0980     0.1123   1.146
+controls       0.0450     0.0498   1.107
+v_hat          0.0870     0.0956   1.099</pre>
           </div>
         </div>
 
@@ -1477,6 +2666,443 @@ Log-likelihood at maximum: -567.2346
 AIC: 1142.469
 BIC: 1159.234</pre>
           </div>
+        </div>
+
+        <h3>Newton-Raphson Implementation</h3>
+
+        <p>
+          Newton-Raphson is the iterative algorithm behind most MLE estimators. Understanding it helps diagnose convergence issues. The update rule is: &theta;<sub>t+1</sub> = &theta;<sub>t</sub> &minus; H<sup>&minus;1</sup>(&theta;<sub>t</sub>) &middot; g(&theta;<sub>t</sub>), where g is the gradient (score) and H is the Hessian.
+        </p>
+
+        <div class="code-tabs" data-runnable="est-nr">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> scipy.special <span class="code-keyword">import</span> expit  <span class="code-comment"># logistic function</span>
+
+<span class="code-keyword">def</span> <span class="code-function">newton_raphson</span>(X, y, tol=1e-8, max_iter=100):
+    <span class="code-string">"""Newton-Raphson for logistic regression."""</span>
+    beta = np.zeros(X.shape[1])
+
+    <span class="code-keyword">for</span> iteration <span class="code-keyword">in</span> range(max_iter):
+        <span class="code-comment"># Predicted probabilities</span>
+        p = <span class="code-function">expit</span>(X @ beta)
+
+        <span class="code-comment"># Score (gradient)</span>
+        score = X.T @ (y - p)
+
+        <span class="code-comment"># Hessian</span>
+        W = np.diag(p * (1 - p))
+        hessian = -X.T @ W @ X
+
+        <span class="code-comment"># Update</span>
+        <span class="code-tooltip" data-tip="Newton-Raphson update: beta_new = beta - H^{-1} * score. We solve Hx=score instead of inverting H directly for numerical stability.">delta = np.linalg.solve(hessian, score)
+        beta = beta - delta</span>
+
+        <span class="code-keyword">if</span> np.max(np.abs(delta)) &lt; tol:
+            print(<span class="code-string">f"Converged in {iteration + 1} iterations"</span>)
+            <span class="code-keyword">break</span>
+
+    se = np.sqrt(np.diag(np.linalg.inv(-hessian)))
+    <span class="code-keyword">return</span> {<span class="code-string">'coef'</span>: beta, <span class="code-string">'se'</span>: se, <span class="code-string">'iterations'</span>: iteration + 1}
+
+<span class="code-comment"># Apply</span>
+X = np.column_stack([np.ones(len(df)), df[<span class="code-string">'education'</span>],
+                      df[<span class="code-string">'experience'</span>], df[<span class="code-string">'age'</span>]])
+y = df[<span class="code-string">'hired'</span>].values
+result = <span class="code-function">newton_raphson</span>(X, y)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata uses Newton-Raphson by default for ml</span>
+<span class="code-comment">* You can see iterations:</span>
+<span class="code-tooltip" data-tip="The 'trace' option displays the log-likelihood and parameter values at each Newton-Raphson iteration">logit hired education experience age, iterate(100) trace</span>
+
+<span class="code-comment">* Mata implementation of Newton-Raphson</span>
+mata:
+void newton_raphson(string scalar yvar, string scalar xvars) {
+    y = st_data(., yvar)
+    X = st_data(., tokens(xvars))
+    X = J(rows(X),1,1), X  <span class="code-comment">// add constant</span>
+
+    beta = J(cols(X),1,0)  <span class="code-comment">// starting values</span>
+
+    for (iter=1; iter&lt;=100; iter++) {
+        p = invlogit(X*beta)
+        score = X'*(y - p)
+        W = diag(p :* (1:-p))
+        H = -X'*W*X
+        delta = lusolve(H, score)
+        beta = beta - delta
+        if (max(abs(delta)) &lt; 1e-8) break
+    }
+
+    se = sqrt(diagonal(luinv(-H)))
+    beta, se
+}
+newton_raphson("hired", "education experience age")
+end</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># Newton-Raphson for logistic regression (manual implementation)</span>
+newton_raphson &lt;- <span class="code-keyword">function</span>(X, y, tol = 1e-8, max_iter = 100) {
+  beta &lt;- rep(0, ncol(X))  <span class="code-comment"># starting values</span>
+
+  <span class="code-keyword">for</span> (iter <span class="code-keyword">in</span> 1:max_iter) {
+    <span class="code-comment"># Predicted probabilities</span>
+    p &lt;- <span class="code-function">plogis</span>(X %*% beta)  <span class="code-comment"># 1 / (1 + exp(-Xb))</span>
+
+    <span class="code-comment"># Score (gradient of log-likelihood)</span>
+    score &lt;- t(X) %*% (y - p)
+
+    <span class="code-comment"># Hessian (second derivative of log-likelihood)</span>
+    W &lt;- diag(as.vector(p * (1 - p)))
+    hessian &lt;- -t(X) %*% W %*% X
+
+    <span class="code-comment"># Newton-Raphson update: beta_new = beta - H^{-1} * score</span>
+    <span class="code-tooltip" data-tip="solve(hessian) %*% score is equivalent to H^{-1} * score but computed via LU decomposition">delta &lt;- solve(hessian) %*% score
+    beta &lt;- beta - delta</span>
+
+    <span class="code-comment"># Check convergence</span>
+    <span class="code-keyword">if</span> (max(abs(delta)) &lt; tol) {
+      cat(<span class="code-string">"Converged in"</span>, iter, <span class="code-string">"iterations\n"</span>)
+      <span class="code-keyword">break</span>
+    }
+  }
+
+  <span class="code-comment"># Standard errors from information matrix</span>
+  se &lt;- sqrt(diag(solve(-hessian)))
+
+  list(coefficients = as.vector(beta), se = se,
+       iterations = iter, hessian = hessian)
+}
+
+<span class="code-comment"># Apply to data</span>
+X &lt;- cbind(1, df$education, df$experience, df$age)
+y &lt;- df$hired
+nr_result &lt;- <span class="code-function">newton_raphson</span>(X, y)
+
+<span class="code-comment"># Compare with glm()</span>
+glm_result &lt;- <span class="code-function">glm</span>(hired ~ education + experience + age,
+                   family = binomial, data = df)
+cbind(NR = nr_result$coefficients, GLM = coef(glm_result))
+
+<span class="code-comment"># Alternative: nlm() — uses Newton-type algorithm</span>
+neg_ll &lt;- <span class="code-keyword">function</span>(beta, X, y) {
+  p &lt;- <span class="code-function">plogis</span>(X %*% beta)
+  -sum(y * log(p) + (1 - y) * log(1 - p))
+}
+nlm_result &lt;- <span class="code-function">nlm</span>(neg_ll, rep(0, 4), X = X, y = y, hessian = TRUE)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Diagnosing Convergence Failures</div>
+          <p style="margin-bottom: 0;">
+            When <code>optim(method='BFGS')</code> or <code>nlm()</code> fail to converge, understanding Newton-Raphson helps you diagnose the problem: bad starting values, flat likelihood, or numerical Hessian issues. Try: (1) better starting values (e.g., from a simpler model), (2) BFGS which approximates the Hessian, (3) rescaling variables.
+          </p>
+        </div>
+
+        <h3>Nonlinear Least Squares</h3>
+
+        <p>
+          NLS minimizes the sum of squared residuals for nonlinear functions. Unlike OLS, it requires starting values and iterative optimization. This makes it suitable for models like the CES production function, exponential growth, or any specification that cannot be linearized.
+        </p>
+
+        <div class="code-tabs" data-runnable="est-nls">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> scipy.optimize <span class="code-keyword">import</span> curve_fit
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Define nonlinear function</span>
+<span class="code-keyword">def</span> <span class="code-function">ces_production</span>(X, a, alpha, rho):
+    K, L = X
+    <span class="code-keyword">return</span> a * (alpha * K**rho + (1 - alpha) * L**rho)**(1/rho)
+
+<span class="code-comment"># Fit NLS</span>
+<span class="code-tooltip" data-tip="curve_fit uses Levenberg-Marquardt by default, a blend of gradient descent and Gauss-Newton. p0 provides starting values.">popt, pcov = <span class="code-function">curve_fit</span>(ces_production,
+                        (df[<span class="code-string">'capital'</span>], df[<span class="code-string">'labor'</span>]),
+                        df[<span class="code-string">'output'</span>],
+                        p0=[1, 0.5, -0.5])</span>
+print(<span class="code-string">f"a={popt[0]:.4f}, alpha={popt[1]:.4f}, rho={popt[2]:.4f}"</span>)
+print(<span class="code-string">f"SEs: {np.sqrt(np.diag(pcov))}"</span>)
+
+<span class="code-comment"># Exponential growth</span>
+<span class="code-keyword">def</span> <span class="code-function">exp_growth</span>(x, a, r):
+    <span class="code-keyword">return</span> a * np.exp(r * x)
+
+popt2, pcov2 = <span class="code-function">curve_fit</span>(exp_growth, df[<span class="code-string">'year'</span>], df[<span class="code-string">'gdp'</span>], p0=[100, 0.02])</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Nonlinear least squares</span>
+<span class="code-tooltip" data-tip="Stata's nl command estimates nonlinear regression. Parameters in curly braces {} are estimated.">nl (output = {a} * ({alpha} * capital^{rho} + ///
+    (1-{alpha}) * labor^{rho})^(1/{rho})), ///
+    initial(a 1 alpha 0.5 rho -0.5)</span>
+
+<span class="code-comment">* Simpler exponential growth</span>
+nl (gdp = {a} * exp({r} * year)), initial(a 100 r 0.02)
+
+<span class="code-comment">* Display results</span>
+nlcom _b[/a] _b[/r]</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># Nonlinear Least Squares</span>
+<span class="code-comment"># Example: CES production function Y = A * (alpha*K^rho + (1-alpha)*L^rho)^(1/rho)</span>
+
+<span class="code-comment"># NLS for truly nonlinear model</span>
+<span class="code-tooltip" data-tip="nls() uses the Gauss-Newton algorithm by default. Starting values are required and can strongly affect convergence.">nls_fit &lt;- <span class="code-function">nls</span>(output ~ a * (alpha * capital^rho + (1 - alpha) * labor^rho)^(1/rho),
+               data = df,
+               start = list(a = 1, alpha = 0.5, rho = -0.5),
+               control = nls.control(maxiter = 200))</span>
+summary(nls_fit)
+
+<span class="code-comment"># Simpler example: exponential growth</span>
+nls_growth &lt;- <span class="code-function">nls</span>(gdp ~ a * exp(r * year), data = df,
+                  start = list(a = 100, r = 0.02))
+summary(nls_growth)
+coef(nls_growth)
+confint(nls_growth)  <span class="code-comment"># profile likelihood CIs</span>
+
+<span class="code-comment"># Residual diagnostics</span>
+plot(residuals(nls_fit) ~ fitted(nls_fit))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Starting Values Matter</div>
+          <p style="margin-bottom: 0;">
+            NLS is sensitive to starting values. If estimation fails, try: (1) grid search over parameter space, (2) starting from OLS on a linearized version, (3) simulated annealing for global search. The <code>nls()</code> Gauss-Newton algorithm can fail if the model is nearly linear at the starting values.
+          </p>
+        </div>
+
+        <h3>GMM Estimation</h3>
+
+        <p>
+          Generalized Method of Moments (GMM) defines moment conditions E[g(Y,X,&theta;)] = 0. When you have more moments than parameters (overidentification), GMM finds the optimal combination. OLS and IV are special cases of GMM.
+        </p>
+
+        <div class="code-tabs" data-runnable="est-gmm">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># GMM via linearmodels or manual implementation</span>
+<span class="code-keyword">from</span> linearmodels.iv <span class="code-keyword">import</span> IV2SLS
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># IV-GMM using linearmodels</span>
+<span class="code-tooltip" data-tip="IV2SLS with robust covariance gives efficient IV-GMM estimates. The overidentification test (J-stat) checks if extra instruments are valid.">iv_gmm = <span class="code-function">IV2SLS</span>(df[<span class="code-string">'y'</span>], df[[<span class="code-string">'exo_x'</span>]], df[[<span class="code-string">'endo_x'</span>]],
+                df[[<span class="code-string">'z1'</span>, <span class="code-string">'z2'</span>]]).fit(cov_type=<span class="code-string">'robust'</span>)</span>
+print(iv_gmm.summary)
+
+<span class="code-comment"># Manual two-step GMM</span>
+<span class="code-keyword">def</span> <span class="code-function">gmm_objective</span>(theta, Y, X, Z, W):
+    e = Y - X @ theta
+    g_bar = Z.T @ e / len(Y)  <span class="code-comment"># sample moment conditions</span>
+    <span class="code-keyword">return</span> g_bar.T @ W @ g_bar
+
+<span class="code-comment"># Step 1: Identity weight matrix</span>
+<span class="code-keyword">from</span> scipy.optimize <span class="code-keyword">import</span> minimize
+W1 = np.eye(Z.shape[1])
+res1 = <span class="code-function">minimize</span>(gmm_objective, x0=np.zeros(X.shape[1]),
+                args=(Y, X, Z, W1))
+
+<span class="code-comment"># Step 2: Optimal weight matrix</span>
+e1 = Y - X @ res1.x
+S = (Z * e1[:, None]).T @ (Z * e1[:, None]) / len(Y)
+W2 = np.linalg.inv(S)
+res2 = <span class="code-function">minimize</span>(gmm_objective, x0=res1.x,
+                args=(Y, X, Z, W2))
+print(<span class="code-string">"Two-step GMM:"</span>, res2.x)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* GMM estimation — IV example</span>
+<span class="code-tooltip" data-tip="Stata's gmm command estimates custom GMM. The expression in parentheses defines the residual; instruments() lists the instrument set.">gmm (y - {b0} - {b1}*endo_x - {b2}*exo_x), ///
+    instruments(exo_x z1 z2) ///
+    twostep winitial(unadjusted, independent)</span>
+
+<span class="code-comment">* With HAC standard errors</span>
+gmm (y - {b0} - {b1}*endo_x - {b2}*exo_x), ///
+    instruments(exo_x z1 z2) ///
+    twostep vce(hac nwest 3)
+
+<span class="code-comment">* Compare with ivreg2</span>
+ivreg2 y exo_x (endo_x = z1 z2), gmm2s robust
+
+<span class="code-comment">* Hansen J-test reported automatically</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-keyword">library</span>(gmm)
+
+<span class="code-comment"># Example 1: IV estimation via GMM</span>
+<span class="code-comment"># Moment conditions: E[Z * (Y - X*beta)] = 0</span>
+<span class="code-comment"># With more instruments than endogenous variables</span>
+
+<span class="code-comment"># Define moment function</span>
+g &lt;- <span class="code-keyword">function</span>(theta, x) {
+  <span class="code-comment"># x columns: Y, endogenous_X, exogenous_X, instrument1, instrument2</span>
+  Y &lt;- x[, 1]
+  X &lt;- cbind(1, x[, 2:3])  <span class="code-comment"># constant, endogenous, exogenous</span>
+  Z &lt;- cbind(1, x[, 3:5])  <span class="code-comment"># constant, exogenous, instruments</span>
+
+  <span class="code-comment"># Moment conditions: Z' * (Y - X*beta) = 0</span>
+  e &lt;- Y - X %*% theta
+  Z * as.vector(e)  <span class="code-comment"># each column is a moment condition</span>
+}
+
+<span class="code-comment"># GMM estimation</span>
+data_mat &lt;- as.matrix(df[, c(<span class="code-string">"Y"</span>, <span class="code-string">"endo_x"</span>, <span class="code-string">"exo_x"</span>, <span class="code-string">"z1"</span>, <span class="code-string">"z2"</span>)])
+<span class="code-tooltip" data-tip="type='twoStep' uses the efficient two-step GMM estimator. The J-test for overidentification is reported automatically.">gmm_result &lt;- <span class="code-function">gmm</span>(g, x = data_mat, t0 = c(0, 0, 0),
+                   type = <span class="code-string">"twoStep"</span>,
+                   vcov = <span class="code-string">"HAC"</span>)</span>
+summary(gmm_result)
+
+<span class="code-comment"># J-test for overidentification</span>
+<span class="code-comment"># Reported automatically in summary — should NOT reject H0</span>
+
+<span class="code-comment"># Example 2: Simple method of moments</span>
+<span class="code-comment"># Estimate mean and variance using moment conditions</span>
+g_simple &lt;- <span class="code-keyword">function</span>(theta, x) {
+  m1 &lt;- x - theta[1]                  <span class="code-comment"># E[X - mu] = 0</span>
+  m2 &lt;- (x - theta[1])^2 - theta[2]  <span class="code-comment"># E[(X-mu)^2 - sigma2] = 0</span>
+  cbind(m1, m2)
+}
+gmm_simple &lt;- <span class="code-function">gmm</span>(g_simple, x = df$Y, t0 = c(0, 1))
+summary(gmm_simple)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>MLE</h4>
+            <ul>
+              <li>Requires full distributional assumption (e.g., Y ~ Normal)</li>
+              <li>Most efficient estimator if the distribution is correctly specified</li>
+              <li>Inconsistent if the distribution is misspecified</li>
+              <li>Examples: Logit, Probit, Tobit, Poisson</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>GMM</h4>
+            <ul>
+              <li>Only requires moment conditions (E[g(Y,X,&theta;)]=0)</li>
+              <li>Less efficient than correctly-specified MLE</li>
+              <li>More robust: consistent even without full distributional assumptions</li>
+              <li>Includes OLS and IV as special cases</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3>Quantile Regression</h3>
+
+        <p>
+          OLS estimates the conditional mean E[Y|X]. Quantile regression estimates conditional quantiles Q<sub>&tau;</sub>[Y|X]. This is useful for studying heterogeneous effects across the distribution. LAD (Least Absolute Deviations) is quantile regression at &tau;=0.5 (the median).
+        </p>
+
+        <div class="code-tabs" data-runnable="est-quantile">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Quantile regression</span>
+<span class="code-tooltip" data-tip="quantreg fits quantile regression. q=0.5 gives the median (LAD) estimator.">qr_50 = smf.<span class="code-function">quantreg</span>(<span class="code-string">'wage ~ education + experience + female'</span>, df).fit(q=0.5)</span>
+print(qr_50.summary())
+
+<span class="code-comment"># Multiple quantiles</span>
+quantiles = [0.1, 0.25, 0.5, 0.75, 0.9]
+results = {}
+<span class="code-keyword">for</span> q <span class="code-keyword">in</span> quantiles:
+    results[q] = smf.<span class="code-function">quantreg</span>(<span class="code-string">'wage ~ education + experience + female'</span>, df).fit(q=q)
+
+<span class="code-comment"># Plot coefficients across quantiles</span>
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+education_coefs = [results[q].params[<span class="code-string">'education'</span>] <span class="code-keyword">for</span> q <span class="code-keyword">in</span> quantiles]
+education_ci_low = [results[q].conf_int().loc[<span class="code-string">'education'</span>, 0] <span class="code-keyword">for</span> q <span class="code-keyword">in</span> quantiles]
+education_ci_high = [results[q].conf_int().loc[<span class="code-string">'education'</span>, 1] <span class="code-keyword">for</span> q <span class="code-keyword">in</span> quantiles]
+
+plt.fill_between(quantiles, education_ci_low, education_ci_high, alpha=0.2)
+plt.plot(quantiles, education_coefs, <span class="code-string">'o-'</span>)
+plt.axhline(y=ols.params[<span class="code-string">'education'</span>], color=<span class="code-string">'r'</span>, linestyle=<span class="code-string">'--'</span>, label=<span class="code-string">'OLS'</span>)
+plt.xlabel(<span class="code-string">'Quantile'</span>); plt.ylabel(<span class="code-string">'Education coefficient'</span>)
+plt.legend(); plt.show()</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Quantile regression</span>
+<span class="code-tooltip" data-tip="qreg estimates quantile regression. quantile(0.50) gives the median regression (LAD).">qreg wage education experience female, quantile(0.50)</span>
+
+<span class="code-comment">* Multiple quantiles</span>
+sqreg wage education experience female, quantiles(25 50 75 90) reps(200)
+
+<span class="code-comment">* Bootstrap standard errors</span>
+bsqreg wage education experience female, quantile(0.50) reps(200)
+
+<span class="code-comment">* Interquantile range regression</span>
+iqreg wage education experience female, quantiles(25 75) reps(200)
+
+<span class="code-comment">* Plot coefficients across quantiles</span>
+grqreg education experience female, ci ols olsci</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-keyword">library</span>(quantreg)
+
+<span class="code-comment"># Quantile regression at different quantiles</span>
+rq_25 &lt;- <span class="code-function">rq</span>(wage ~ education + experience + female, data = df, tau = 0.25)
+rq_50 &lt;- <span class="code-function">rq</span>(wage ~ education + experience + female, data = df, tau = 0.50)
+rq_75 &lt;- <span class="code-function">rq</span>(wage ~ education + experience + female, data = df, tau = 0.75)
+rq_90 &lt;- <span class="code-function">rq</span>(wage ~ education + experience + female, data = df, tau = 0.90)
+
+summary(rq_50)  <span class="code-comment"># LAD / median regression</span>
+<span class="code-tooltip" data-tip="Bootstrap SEs are preferred for quantile regression because the asymptotic formula depends on the density at the quantile, which is hard to estimate.">summary(rq_50, se = <span class="code-string">"boot"</span>)</span>  <span class="code-comment"># bootstrap standard errors</span>
+
+<span class="code-comment"># Multiple quantiles at once</span>
+rq_all &lt;- <span class="code-function">rq</span>(wage ~ education + experience + female, data = df,
+             tau = seq(0.1, 0.9, by = 0.1))
+plot(summary(rq_all))  <span class="code-comment"># coefficient plots across quantiles</span>
+
+<span class="code-comment"># Compare OLS vs quantile regression</span>
+ols &lt;- <span class="code-function">lm</span>(wage ~ education + experience + female, data = df)
+cat(<span class="code-string">"OLS education effect:"</span>, coef(ols)[<span class="code-string">"education"</span>], <span class="code-string">"\n"</span>)
+cat(<span class="code-string">"Q25 education effect:"</span>, coef(rq_25)[<span class="code-string">"education"</span>], <span class="code-string">"\n"</span>)
+cat(<span class="code-string">"Q75 education effect:"</span>, coef(rq_75)[<span class="code-string">"education"</span>], <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># Test equality across quantiles (Wald test)</span>
+<span class="code-function">anova</span>(rq_25, rq_75)  <span class="code-comment"># are Q25 and Q75 coefficients equal?</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Interpreting Quantile Regression</div>
+          <p style="margin-bottom: 0;">
+            If the education coefficient increases across quantiles (e.g., larger at Q90 than Q10), it suggests education has a bigger wage effect for high earners--consistent with skill complementarity or superstar effects. If it decreases, education is an equalizer. OLS only captures the average effect and misses this heterogeneity.
+          </p>
         </div>
 
         <h2 id="bootstrap">7.6 Bootstrap Methods</h2>

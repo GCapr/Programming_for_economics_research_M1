@@ -101,8 +101,16 @@
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
           <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
-          <li><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
-          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li class="has-subnav">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
           <li><a href="../resources.html">Resources</a></li>
           <li><a href="contact.html">Contact & Feedback</a></li>
         </ul>
@@ -131,6 +139,8 @@
             <li><a href="#weak">Weak Instruments</a></li>
             <li><a href="#bartik">Bartik/Shift-Share Instruments</a></li>
             <li><a href="#multiple">Multiple Instruments</a></li>
+            <li><a href="#wald">Wald Estimator</a></li>
+            <li><a href="#control-function">Control Function Approach</a></li>
           </ul>
         </div>
 
@@ -1089,13 +1099,285 @@ Sargan J (p-val)              -           0.456         0.310
 Estimates stable across specifications: reassuring for validity.</pre></div>
         </div>
 
+        <h2 id="wald">Wald Estimator</h2>
+
+        <p>
+          The Wald estimator is the simplest IV estimator, applicable when the instrument Z is binary. It equals the ratio of the reduced-form effect (Z on Y) to the first-stage effect (Z on D). With a binary instrument, this is numerically identical to 2SLS and identifies the Local Average Treatment Effect (LATE) for compliers.
+        </p>
+
+        <div class="code-tabs" data-runnable="iv-wald">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Wald Estimator</span>
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> linearmodels.iv <span class="code-keyword">import</span> IV2SLS
+
+<span class="code-comment"># Manual Wald estimator with binary instrument</span>
+<span class="code-comment"># Example: effect of veteran status on earnings, using draft eligibility as Z</span>
+
+<span class="code-comment"># Reduced form: E[Y|Z=1] - E[Y|Z=0]</span>
+<span class="code-tooltip" data-tip="The reduced form is the effect of the instrument on the outcome">reduced_form = (df.loc[df[<span class="code-string">'eligible'</span>]==1, <span class="code-string">'earnings'</span>].mean() -
+                df.loc[df[<span class="code-string">'eligible'</span>]==0, <span class="code-string">'earnings'</span>].mean())</span>
+
+<span class="code-comment"># First stage: E[D|Z=1] - E[D|Z=0]</span>
+<span class="code-tooltip" data-tip="The first stage is the effect of the instrument on the treatment">first_stage = (df.loc[df[<span class="code-string">'eligible'</span>]==1, <span class="code-string">'veteran'</span>].mean() -
+               df.loc[df[<span class="code-string">'eligible'</span>]==0, <span class="code-string">'veteran'</span>].mean())</span>
+
+<span class="code-comment"># Wald estimate = LATE</span>
+wald = reduced_form / first_stage
+print(f<span class="code-string">"Reduced form: {reduced_form:.4f}"</span>)
+print(f<span class="code-string">"First stage:  {first_stage:.4f}"</span>)
+print(f<span class="code-string">"Wald (LATE):  {wald:.4f}"</span>)
+
+<span class="code-comment"># Verify: matches 2SLS</span>
+iv_model = IV2SLS.from_formula(
+    <span class="code-string">'earnings ~ 1 + [veteran ~ eligible]'</span>, data=df
+).fit(cov_type=<span class="code-string">'robust'</span>)
+print(f<span class="code-string">"2SLS estimate: {iv_model.params['veteran']:.4f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Wald Estimator</span>
+
+<span class="code-comment">* Manual Wald estimator</span>
+<span class="code-tooltip" data-tip="Compute group means for the reduced form and first stage">quietly summarize earnings if eligible == 1
+local y1 = r(mean)
+quietly summarize earnings if eligible == 0
+local y0 = r(mean)
+quietly summarize veteran if eligible == 1
+local d1 = r(mean)
+quietly summarize veteran if eligible == 0
+local d0 = r(mean)</span>
+
+<span class="code-comment">* Wald = reduced form / first stage</span>
+local reduced_form = `y1' - `y0'
+local first_stage = `d1' - `d0'
+local wald = `reduced_form' / `first_stage'
+
+display "Reduced form: " `reduced_form'
+display "First stage:  " `first_stage'
+display "Wald (LATE):  " `wald'
+
+<span class="code-comment">* Verify: matches 2SLS</span>
+<span class="code-tooltip" data-tip="With a single binary instrument, 2SLS equals the Wald estimator">ivregress 2sls earnings (veteran = eligible), robust</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Wald Estimator</span>
+
+<span class="code-comment"># Manual Wald estimator with binary instrument</span>
+<span class="code-comment"># Example: Angrist (1990) — veteran status on earnings, draft eligibility as Z</span>
+
+<span class="code-comment"># Reduced form: E[Y|Z=1] - E[Y|Z=0]</span>
+<span class="code-tooltip" data-tip="The reduced form captures the total effect of the instrument on the outcome">reduced_form <- mean(df$earnings[df$eligible == 1]) -
+                mean(df$earnings[df$eligible == 0])</span>
+
+<span class="code-comment"># First stage: E[D|Z=1] - E[D|Z=0]</span>
+<span class="code-tooltip" data-tip="The first stage measures how strongly the instrument shifts treatment">first_stage <- mean(df$veteran[df$eligible == 1]) -
+               mean(df$veteran[df$eligible == 0])</span>
+
+<span class="code-comment"># Wald estimate = LATE for compliers</span>
+wald_estimate <- reduced_form / first_stage
+
+cat("Reduced form:", reduced_form, "\n")
+cat("First stage: ", first_stage, "\n")
+cat("Wald (LATE): ", wald_estimate, "\n")
+
+<span class="code-comment"># Verify: matches 2SLS</span>
+<span class="code-keyword">library</span>(AER)
+<span class="code-tooltip" data-tip="With a single binary instrument, ivreg() gives the same point estimate as the Wald ratio">iv_model <- ivreg(earnings ~ veteran | eligible, data = df)
+coef(iv_model)["veteran"]  <span class="code-comment"># should match wald_estimate</span></span>
+
+<span class="code-comment"># With robust standard errors</span>
+<span class="code-keyword">library</span>(sandwich)
+<span class="code-keyword">library</span>(lmtest)
+coeftest(iv_model, vcov = vcovHC(iv_model, type = "HC1"))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-wald" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Reduced form: -1523.45
+First stage:  0.1587
+Wald (LATE):  -9598.42
+
+> coef(iv_model)["veteran"]
+  veteran
+-9598.42
+
+> coeftest(iv_model, vcov = vcovHC(iv_model, type = "HC1"))
+
+t test of coefficients (Heteroskedasticity-consistent):
+
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept) 21456.23    234.56  91.481   <2e-16 ***
+veteran     -9598.42   4812.34  -1.995   0.0462 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</div>
+        </div>
+
+        <div class="info-box note">
+          <div class="info-box-title">The Wald Estimator Identifies LATE</div>
+          <p>
+            The Wald estimator identifies the <strong>Local Average Treatment Effect (LATE)</strong>—the causal effect for compliers, i.e., units whose treatment status changes because of the instrument. With draft eligibility as an instrument, the Wald estimate captures the effect of military service for those who served <em>because</em> they were drafted (compliers), not for volunteers or people who avoided service despite being eligible.
+          </p>
+          <p style="margin-bottom: 0;">
+            Reference: Angrist, J. (1990). "Lifetime Earnings and the Vietnam Era Draft Lottery." <em>American Economic Review</em>.
+          </p>
+        </div>
+
+        <h2 id="control-function">Control Function Approach</h2>
+
+        <p>
+          The control function (CF) approach is an alternative to 2SLS that works by including the first-stage residuals as an additional regressor in the outcome equation. This has two key advantages: (1) the coefficient on the residuals directly tests for endogeneity, and (2) it generalizes to nonlinear models (probit, logit) where standard 2SLS does not apply.
+        </p>
+
+        <div class="code-tabs" data-runnable="iv-cf">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Control Function Approach</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Step 1: First stage — regress endogenous variable on instruments + controls</span>
+<span class="code-tooltip" data-tip="The first stage produces residuals that capture the endogenous variation in D">first_stage = smf.ols(<span class="code-string">'education ~ distance + experience'</span>, data=df).fit()
+df[<span class="code-string">'v_hat'</span>] = first_stage.resid</span>
+
+<span class="code-comment"># Step 2: Include first-stage residuals in outcome equation</span>
+<span class="code-tooltip" data-tip="The coefficient on v_hat tests endogeneity; coefficient on education is the IV estimate">cf_model = smf.ols(<span class="code-string">'wage ~ education + experience + v_hat'</span>, data=df).fit()</span>
+print(cf_model.summary())
+
+<span class="code-comment"># Endogeneity test: is v_hat significant?</span>
+print(f<span class="code-string">"\nEndogeneity test (H0: education is exogenous):"</span>)
+print(f<span class="code-string">"  t-stat on v_hat: {cf_model.tvalues['v_hat']:.4f}"</span>)
+print(f<span class="code-string">"  p-value:         {cf_model.pvalues['v_hat']:.4f}"</span>)
+
+<span class="code-comment"># Note: Standard errors need bootstrap correction!</span>
+<span class="code-keyword">from</span> sklearn.utils <span class="code-keyword">import</span> resample
+
+<span class="code-tooltip" data-tip="Naive SEs from two-step are incorrect; bootstrap provides valid inference">boot_coefs = []
+<span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(999):
+    boot_df = resample(df)
+    fs = smf.ols(<span class="code-string">'education ~ distance + experience'</span>, data=boot_df).fit()
+    boot_df[<span class="code-string">'v_hat'</span>] = fs.resid
+    ss = smf.ols(<span class="code-string">'wage ~ education + experience + v_hat'</span>, data=boot_df).fit()
+    boot_coefs.append(ss.params[<span class="code-string">'education'</span>])
+print(f<span class="code-string">"Bootstrap SE for education: {np.std(boot_coefs):.4f}"</span>)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Control Function Approach</span>
+
+<span class="code-comment">* Step 1: First stage — get residuals</span>
+<span class="code-tooltip" data-tip="Estimate the first stage and predict residuals">reg education distance experience
+predict v_hat, residuals</span>
+
+<span class="code-comment">* Step 2: Include residuals in outcome equation</span>
+<span class="code-tooltip" data-tip="Coefficient on v_hat tests endogeneity; coefficient on education is the CF/IV estimate">reg wage education experience v_hat, robust</span>
+
+<span class="code-comment">* Test endogeneity: is v_hat significant?</span>
+<span class="code-comment">* If yes → education is endogenous → use IV</span>
+test v_hat
+
+<span class="code-comment">* Note: SEs above are incorrect (two-step problem)</span>
+<span class="code-comment">* Use bootstrap for correct inference:</span>
+<span class="code-tooltip" data-tip="bootstrap {} handles the two-step procedure correctly">bootstrap, reps(999) cluster(unit_id): ///
+    quietly reg education distance experience; ///
+    predict v_hat_b, residuals; ///
+    reg wage education experience v_hat_b</span>
+
+<span class="code-comment">* Equivalent Durbin-Wu-Hausman test via ivregress</span>
+ivregress 2sls wage experience (education = distance), robust
+estat endogenous</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Control Function Approach</span>
+
+<span class="code-comment"># Step 1: First stage — regress endogenous var on instrument + controls</span>
+<span class="code-tooltip" data-tip="The first-stage residuals capture the endogenous component of education">first_stage <- lm(education ~ distance + experience, data = df)
+df$v_hat <- residuals(first_stage)</span>
+
+<span class="code-comment"># Step 2: Include first-stage residuals in outcome equation</span>
+<span class="code-tooltip" data-tip="In the CF approach, education's coefficient is the IV estimate; v_hat tests endogeneity">cf_model <- lm(wage ~ education + experience + v_hat, data = df)
+summary(cf_model)</span>
+
+<span class="code-comment"># Endogeneity test: is v_hat significant?</span>
+<span class="code-comment"># If p-value on v_hat < 0.05 → education is endogenous</span>
+cat("Endogeneity test p-value:", summary(cf_model)$coefficients["v_hat", "Pr(>|t|)"], "\n")
+
+<span class="code-comment"># Important: naive SEs are wrong! Use bootstrap for correct inference</span>
+<span class="code-keyword">library</span>(boot)
+<span class="code-tooltip" data-tip="The boot function resamples data and re-estimates the full two-step procedure each time">cf_boot <- function(data, indices) {
+  d <- data[indices, ]
+  fs <- lm(education ~ distance + experience, data = d)
+  d$v_hat <- residuals(fs)
+  ss <- lm(wage ~ education + experience + v_hat, data = d)
+  coef(ss)["education"]
+}
+boot_result <- boot(df, cf_boot, R = 999)
+cat("CF estimate:", boot_result$t0, "\n")
+cat("Bootstrap SE:", sd(boot_result$t), "\n")
+boot.ci(boot_result, type = "perc")</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="output-simulation" data-output="iv-cf" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body">Call:
+lm(formula = wage ~ education + experience + v_hat, data = df)
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)
+(Intercept)   3.4567     1.2345   2.800   0.0053 **
+education     0.1234     0.0456   2.706   0.0070 **
+experience    0.0567     0.0123   4.610   <2e-16 ***
+v_hat        -0.0823     0.0389  -2.116   0.0349 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Endogeneity test p-value: 0.0349
+→ education appears endogenous (v_hat is significant at 5%)
+
+CF estimate: 0.1234
+Bootstrap SE: 0.0512
+BOOTSTRAP CONFIDENCE INTERVAL CALCULATIONS
+Based on 999 bootstrap replicates
+
+Intervals:
+Level  Percentile
+95%    ( 0.0234,  0.2234 )</div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Standard Errors in the Control Function Approach</div>
+          <p>
+            The naive standard errors from the two-step control function procedure are <strong>incorrect</strong> because they ignore the estimation uncertainty from the first stage. Always use <strong>bootstrap</strong> to get valid confidence intervals. The point estimate is correct, but inference without bootstrap can be misleading.
+          </p>
+          <p style="margin-bottom: 0;">
+            <strong>Key advantage:</strong> The CF approach generalizes to nonlinear models (probit, logit, Poisson) where standard 2SLS does not apply. In a probit model, you can include the first-stage residuals as an additional regressor to handle endogeneity—see <a href="07-estimation.html">Module 7: Estimation Methods</a> for details.
+          </p>
+        </div>
+
         <div class="citation">
           <div class="citation-title">Key IV References</div>
           <ul>
+            <li><strong>Angrist, J.</strong> (1990). "Lifetime Earnings and the Vietnam Era Draft Lottery." <em>AER</em>.</li>
             <li><strong>Angrist, J. & Krueger, A.</strong> (2001). "Instrumental Variables and the Search for Identification." <em>JEP</em>.</li>
             <li><strong>Stock, J. & Yogo, M.</strong> (2005). "Testing for Weak Instruments." In <em>Identification and Inference</em>.</li>
             <li><strong>Goldsmith-Pinkham, P., Sorkin, I., & Swift, H.</strong> (2020). "Bartik Instruments: What, When, Why, and How." <em>AER</em>.</li>
             <li><strong>Borusyak, K., Hull, P., & Jaravel, X.</strong> (2022). "Quasi-Experimental Shift-Share Research Designs." <em>ReStud</em>.</li>
+            <li><strong>Wooldridge, J.</strong> (2015). "Control Function Methods in Applied Econometrics." <em>Journal of Human Resources</em>.</li>
           </ul>
         </div>
 

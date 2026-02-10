@@ -9,130 +9,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
   <style>
-    .protected-content {
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
-    /* Allow text selection on code blocks for copy-paste */
-    .protected-content pre,
-    .protected-content code,
-    .protected-content .code-block,
-    .protected-content .code-tabs {
-      -webkit-user-select: text;
-      -moz-user-select: text;
-      -ms-user-select: text;
-      user-select: text;
-    }
-    /* Interactive Exercise Styles */
-    .interactive-exercise { background: white; border: 2px solid var(--color-border); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .exercise-editor { margin: 1rem 0; }
-    .editor-tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
-    .lang-btn { padding: 0.4rem 1rem; border: 1px solid var(--color-border); background: white; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
-    .lang-btn:hover { border-color: var(--color-primary); }
-    .lang-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
-    .code-editor { width: 100%; min-height: 200px; padding: 1rem; font-family: var(--font-code); font-size: 0.9rem; border: none; border-radius: 8px; background: #1a202c; color: #e2e8f0; resize: vertical; line-height: 1.5; }
-    .code-editor:focus { outline: 2px solid var(--color-accent); }
-    .exercise-actions { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
-    .btn-check-score, .btn-show-solution { padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .btn-check-score { background: var(--color-primary); color: white; }
-    .btn-check-score:hover { background: var(--color-secondary); transform: translateY(-1px); }
-    .btn-show-solution { background: var(--color-accent); color: white; }
-    .btn-show-solution:hover { background: #c77a3a; }
-    .score-display { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-radius: 8px; }
-    .score-circle { display: flex; align-items: baseline; gap: 2px; }
-    .score-value { font-size: 2rem; font-weight: 700; color: var(--color-primary); }
-    .score-value.score-high { color: #38a169; }
-    .score-value.score-medium { color: #d69e2e; }
-    .score-value.score-low { color: #e53e3e; }
-    .score-label { font-size: 1rem; color: #666; }
-    .score-feedback { font-size: 0.9rem; color: #555; max-width: 300px; }
-    .solution-steps { margin-top: 1.5rem; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; }
-    .solution-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: var(--color-bg-alt); border-bottom: 1px solid var(--color-border); }
-    .solution-header h5 { margin: 0; color: var(--color-primary); }
-    .step-counter { font-size: 0.85rem; color: #666; }
-    .solution-step { padding: 1rem; border-bottom: 1px solid var(--color-border); animation: fadeIn 0.3s ease; }
-    .solution-step:last-of-type { border-bottom: none; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-    .step-description { font-weight: 600; color: var(--color-secondary); margin-bottom: 0.75rem; padding-left: 0.5rem; border-left: 3px solid var(--color-accent); }
-    .step-code { margin: 0; background: #1e1e1e; border-radius: 6px; padding: 1rem; }
-    .step-code code { color: #d4d4d4; }
-    .solution-navigation { display: flex; justify-content: space-between; padding: 1rem; background: var(--color-bg-alt); }
-    .btn-prev-step, .btn-next-step { padding: 0.5rem 1.25rem; border: 1px solid var(--color-border); background: white; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
-    .btn-prev-step:hover:not(:disabled), .btn-next-step:hover:not(:disabled) { background: var(--color-primary); color: white; border-color: var(--color-primary); }
-    .btn-prev-step:disabled, .btn-next-step:disabled { opacity: 0.5; cursor: not-allowed; }
-    /* Code tooltips - hover explanations (JavaScript-powered for boundary detection) */
-    .code-tooltip {
-      position: relative;
-      cursor: help;
-      border-bottom: 1px dotted #888;
-      text-decoration: none;
-    }
-
-    /* Tooltip element created by JavaScript */
-    .tooltip-popup {
-      position: fixed;
-      background: #1f2937;
-      color: white;
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-      font-size: 0.75rem;
-      white-space: normal;
-      max-width: 300px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.15s ease-in-out;
-      z-index: 10000;
-      line-height: 1.4;
-      text-align: left;
-      font-family: var(--font-body);
-      font-style: normal;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-    .tooltip-popup.visible {
-      opacity: 1;
-    }
-
-    /* Small arrow pointer */
-    .tooltip-popup::after {
-      content: '';
-      position: absolute;
-      border: 6px solid transparent;
-    }
-    .tooltip-popup.arrow-bottom::after {
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-top-color: #1f2937;
-    }
-    .tooltip-popup.arrow-top::after {
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-bottom-color: #1f2937;
-    }
-    .tooltip-popup.arrow-left::after {
-      top: 50%;
-      right: 100%;
-      transform: translateY(-50%);
-      border-right-color: #1f2937;
-    }
-    .tooltip-popup.arrow-right::after {
-      top: 50%;
-      left: 100%;
-      transform: translateY(-50%);
-      border-left-color: #1f2937;
-    }
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .protected-content pre, .protected-content code, .protected-content .code-block, .protected-content .code-tabs { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup.visible { opacity: 1; }
+    .distinction-box { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+    @media (max-width: 768px) { .distinction-box { grid-template-columns: 1fr; } }
+    .distinction-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+    .distinction-card h4 { margin: 0 0 0.5rem 0; color: #2563eb; }
+    .distinction-card ul { margin: 0; padding-left: 1.25rem; }
   </style>
 </head>
 <body>
-  <!-- Password Protection Overlay -->
-    <div id="password-overlay" class="password-overlay">
+  <div id="password-overlay" class="password-overlay">
     <div class="password-modal">
       <h2>ProTools ER1</h2>
       <p>Programming Tools for Empirical Research</p>
-
       <div class="course-description">
         <h3>Course Modules</h3>
         <ul class="module-list">
@@ -151,11 +44,9 @@
           <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
         </ul>
       </div>
-
       <div class="access-note">
         This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
       </div>
-
       <div class="password-form">
         <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
         <button id="password-submit">Access Course</button>
@@ -212,7 +103,16 @@
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
           <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
-          <li class="active"><a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a></li>
+          <li class="has-subnav active">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>
           <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
           <li><a href="../resources.html">Resources</a></li>
           <li><a href="contact.html">Contact & Feedback</a></li>
@@ -221,727 +121,829 @@
     </aside>
 
     <main class="main-content">
-      <div class="content">
+      <div class="content-wrapper">
+
         <div class="module-header">
           <h1>11 &nbsp;Machine Learning</h1>
           <div class="module-meta">
-            <span>~10 hours</span>
-            <span>Prediction & Classification</span>
-            <span>Intermediate</span>
+            <span>~12 hours total</span>
+            <span>Prediction, Regularization, Trees, Neural Networks, Causal ML</span>
           </div>
         </div>
 
-        <div class="learning-objectives">
-          <h3>Learning Objectives</h3>
-          <ul>
-            <li>Distinguish prediction from causal inference</li>
-            <li>Understand the bias-variance tradeoff</li>
-            <li>Implement supervised learning algorithms</li>
-            <li>Evaluate models properly with cross-validation</li>
-            <li>Apply ML to economics and social science problems</li>
+        <!-- Learning Objectives -->
+        <div class="info-box" style="background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin: 0 0 0.75rem 0; color: #1e40af;">Learning Objectives</h3>
+          <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.7;">
+            <li>Distinguish prediction tasks from causal inference tasks</li>
+            <li>Understand the bias-variance tradeoff and why it matters</li>
+            <li>Know when to use regularization, trees, or neural networks</li>
+            <li>Apply ML methods to economics and social science problems</li>
+            <li>Use ML as a tool for causal inference (DML, causal forests)</li>
+            <li>Evaluate and compare models properly</li>
           </ul>
         </div>
 
-        <div class="info-box note" style="margin-bottom: 2rem;">
-          <div class="info-box-title">Prerequisites</div>
-          <p style="margin-bottom: 0;">
-            This module assumes familiarity with <a href="05-causal-inference.html">causal inference concepts</a> (Module 5) and <a href="06-estimation.html">estimation methods</a> (Module 6). Understanding the difference between prediction and causation is central to this material.
-          </p>
+        <!-- Prerequisites -->
+        <div class="info-box" style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin: 0 0 0.5rem 0; color: #92400e;">Prerequisites</h3>
+          <p style="margin: 0;">This module assumes familiarity with linear regression, hypothesis testing, and basic causal inference concepts from <strong>Modules 5&ndash;7</strong> (Data Analysis, Causal Inference, Estimation Methods). You should be comfortable running regressions and interpreting coefficients in at least one of the three course languages.</p>
         </div>
 
-        <div class="toc">
-          <h3>Table of Contents</h3>
-          <ul>
-            <li><a href="#prediction-vs-causation">11.1 Prediction vs. Causation</a></li>
-            <li><a href="#bias-variance">11.2 The Bias-Variance Tradeoff</a></li>
-            <li><a href="#supervised">11.3 Supervised Learning</a></li>
-            <li><a href="#evaluation">11.4 Model Evaluation</a></li>
-            <li><a href="#regularization">11.5 Regularization</a></li>
-            <li><a href="#trees">11.6 Tree-Based Methods</a></li>
-            <li><a href="#neural-networks">11.7 Neural Networks</a></li>
-            <li><a href="#causal-ml">11.8 ML for Causal Inference</a></li>
-          </ul>
+        <!-- Table of Contents -->
+        <div class="toc" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1.5rem 0;">
+          <h3 style="margin: 0 0 0.75rem 0; color: #334155;">In This Module</h3>
+          <ol style="margin: 0; padding-left: 1.25rem; line-height: 1.8;">
+            <li><a href="#why-ml">Why Machine Learning for Economists?</a></li>
+            <li><a href="#prediction-vs-causation">Prediction vs. Causation</a></li>
+            <li><a href="#bias-variance">The Bias-Variance Tradeoff</a></li>
+            <li><a href="#supervised-unsupervised">Supervised vs. Unsupervised Learning</a></li>
+            <li><a href="#cv-model-selection">Cross-Validation &amp; Model Selection</a></li>
+            <li><a href="#roadmap">Module Roadmap</a></li>
+          </ol>
         </div>
 
-        <h2 id="prediction-vs-causation">11.1 Prediction vs. Causation</h2>
 
-        <p>
-          Machine learning optimizes for <strong>prediction</strong>: given inputs X, predict output Y as accurately as possible. This is fundamentally different from causal inference, which asks: what happens to Y if we <em>change</em> X?
-        </p>
+        <!-- ============================================================ -->
+        <!-- SECTION 11.1: WHY ML FOR ECONOMISTS? -->
+        <!-- ============================================================ -->
+        <h2 id="why-ml">11.1 &nbsp;Why Machine Learning for Economists?</h2>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Aspect</th>
-              <th>Prediction (ML)</th>
-              <th>Causal Inference</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Goal</strong></td>
-              <td>Minimize prediction error</td>
-              <td>Estimate treatment effect</td>
-            </tr>
-            <tr>
-              <td><strong>Question</strong></td>
-              <td>"What Y given X?"</td>
-              <td>"What if we changed X?"</td>
-            </tr>
-            <tr>
-              <td><strong>Coefficients</strong></td>
-              <td>Unimportant if prediction works</td>
-              <td>The whole point</td>
-            </tr>
-            <tr>
-              <td><strong>Confounders</strong></td>
-              <td>Include if predictive</td>
-              <td>Must address carefully</td>
-            </tr>
-            <tr>
-              <td><strong>Overfitting</strong></td>
-              <td>Primary concern</td>
-              <td>Less central</td>
-            </tr>
-          </tbody>
-        </table>
+        <p>Economists have traditionally focused on causal inference: understanding <em>why</em> things happen and estimating the effect of specific interventions. This is the domain of the randomized experiment, the instrumental variable, and the difference-in-differences design. But a growing body of research recognizes that many important policy and research questions are fundamentally about <strong>prediction</strong>, not causation. When a government agency needs to decide which households should receive benefits, the question is not &ldquo;what is the causal effect of income on poverty?&rdquo; but rather &ldquo;which households are most likely to be poor?&rdquo; When a judge must decide whether to grant bail, the relevant question is &ldquo;how likely is this person to reoffend?&rdquo; &mdash; a prediction task.</p>
 
-        <div class="info-box warning">
-          <div class="info-box-title">The Prediction-Causation Gap</div>
-          <p>
-            A model that perfectly predicts hospital deaths might find "being on a ventilator" is associated with dying. Should we remove ventilators? Of course not--the relationship isn't causal. ML finds correlations; interpreting them causally requires additional assumptions.
-          </p>
+        <p>Mullainathan and Spiess (2017) formalized this insight with the concept of <strong>prediction policy problems</strong>. They argue that whenever the policy-relevant quantity is a prediction &mdash; rather than a causal parameter &mdash; machine learning methods are the natural tool. Traditional econometric models like OLS are designed to produce unbiased coefficient estimates, not to minimize prediction error. ML methods, by contrast, are explicitly optimized for predictive accuracy. They can capture complex nonlinear relationships, handle hundreds or thousands of predictors, and automatically determine which variables matter most &mdash; all without requiring the researcher to specify the functional form in advance.</p>
+
+        <p>The range of prediction tasks relevant to economists is broader than you might initially think. Text classification (is this central bank statement hawkish or dovish?), image recognition (can satellite imagery predict economic development?), nowcasting economic indicators (what is GDP this quarter, before official data arrives?), and targeting interventions (which students are at risk of dropping out?) are all examples where ML outperforms traditional approaches. Even in the medical sciences, ML models for diagnosis and risk prediction are proving transformative. In each of these cases, the researcher does not need to know <em>why</em> certain features predict the outcome &mdash; only that they do.</p>
+
+        <p>Crucially, machine learning <strong>complements</strong> rather than replaces econometric methods. It is not a substitute for a well-identified causal design when your question is about causation. Instead, ML provides the right toolkit for prediction problems and, increasingly, serves as an input to causal estimation itself. In Module 11D, you will see how methods like Double/Debiased Machine Learning (DML) and causal forests use ML predictions as building blocks for valid causal inference. Understanding ML is therefore essential for the modern applied economist &mdash; not as a replacement for your existing skills, but as a powerful addition to your methodological toolkit.</p>
+
+
+        <!-- ============================================================ -->
+        <!-- SECTION 11.2: PREDICTION VS. CAUSATION -->
+        <!-- ============================================================ -->
+        <h2 id="prediction-vs-causation">11.2 &nbsp;Prediction vs. Causation</h2>
+
+        <p>The most important conceptual distinction in this module is between <strong>prediction</strong> and <strong>causation</strong>. Prediction asks: <em>&ldquo;Given what I observe about this individual, what is my best guess for their outcome Y?&rdquo;</em> Causation asks: <em>&ldquo;If I change X, what happens to Y?&rdquo;</em> These are fundamentally different questions, and the tools optimized for one are generally not optimal for the other.</p>
+
+        <p>Consider a concrete example. Suppose you have data on student characteristics and their exam scores. A prediction question would be: &ldquo;Given a new student&rsquo;s GPA, attendance record, and reported study hours, what score will they get on the final exam?&rdquo; A causal question would be: &ldquo;If we increase study hours by one hour per week, how much does the exam score improve?&rdquo; For the prediction question, it does not matter whether GPA <em>causes</em> higher scores or is merely correlated with them &mdash; all that matters is that GPA helps us predict the outcome. For the causal question, we need to worry about confounders (perhaps more motivated students both study more and score higher), reverse causality, and identification strategies.</p>
+
+        <!-- Comparison Table -->
+        <div style="overflow-x: auto; margin: 1.5rem 0;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+            <thead>
+              <tr style="background: #f1f5f9;">
+                <th style="padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;"></th>
+                <th style="padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #cbd5e1; color: #2563eb;">Prediction</th>
+                <th style="padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #cbd5e1; color: #059669;">Causation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Goal</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Minimize forecast error</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Estimate a causal effect</td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Method</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Any model that predicts well</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Requires an identification strategy</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Evaluation</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Out-of-sample accuracy (RMSE, AUC)</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Unbiasedness, consistency</td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Coefficients</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Not individually interpretable</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Each has structural meaning</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Confounders</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Helpful (more predictive power)</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Must be controlled for or eliminated</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <h2 id="bias-variance">11.2 The Bias-Variance Tradeoff</h2>
+        <p>In a prediction framework, we do not care about the interpretability of individual coefficients. A model with 500 features and complex interactions can be perfectly valid if it predicts well on new data. What matters is <strong>out-of-sample accuracy</strong>: how well does the model perform on data it has never seen? This is a fundamentally different criterion than the unbiasedness or consistency that we prize in causal inference.</p>
 
-        <p>
-          Prediction error can be decomposed into three components:
-        </p>
+        <p>Athey and Imbens (2019) emphasize that ML methods are explicitly optimized for prediction, not for causal estimation. Using them naively for causal questions &mdash; for example, interpreting a random forest&rsquo;s variable importance as a causal effect &mdash; can be deeply misleading. The variable importance might reflect correlation, reverse causation, or confounding rather than a genuine causal relationship. Throughout this module, we will be careful to distinguish when we are using ML for prediction versus when we are using ML-augmented methods that maintain causal validity.</p>
 
-        <div class="equation">
-          Error = Bias^2 + Variance + Irreducible Noise
-        </div>
+        <h3>A Basic Prediction Pipeline</h3>
+        <p>Let us set up the fundamental workflow that underlies every ML task: split the data into training and test sets, fit a model on the training data, and evaluate its performance on the test data. This train/test paradigm is the foundation of everything that follows.</p>
 
-        <ul>
-          <li><strong>Bias:</strong> Error from wrong assumptions (underfitting)</li>
-          <li><strong>Variance:</strong> Error from sensitivity to training data (overfitting)</li>
-          <li><strong>Irreducible:</strong> Noise inherent in the data</li>
-        </ul>
-
-        <table>
-          <thead>
-            <tr>
-              <th></th>
-              <th>Simple Model</th>
-              <th>Complex Model</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Bias</strong></td>
-              <td>High (misses patterns)</td>
-              <td>Low (captures patterns)</td>
-            </tr>
-            <tr>
-              <td><strong>Variance</strong></td>
-              <td>Low (stable)</td>
-              <td>High (sensitive to data)</td>
-            </tr>
-            <tr>
-              <td><strong>Risk</strong></td>
-              <td>Underfitting</td>
-              <td>Overfitting</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <h2 id="supervised">11.3 Supervised Learning</h2>
-
-        <p>
-          <strong>Supervised learning</strong> learns from labeled examples: given (X, Y) pairs, learn f such that f(X) is approximately Y.
-        </p>
-
-        <h3>Linear and Logistic Regression</h3>
-
-        <div class="code-tabs" data-runnable="ml-1">
+        <div class="code-tabs" data-runnable="ml-overview-1">
           <div class="tab-buttons">
-            <button class="tab-button active" data-lang="python">Python (sklearn)</button>
-            <button class="tab-button" data-lang="r">R (tidymodels)</button>
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
           </div>
-
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Python: Supervised learning with scikit-learn</span>
-<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="sklearn (scikit-learn) is Python's main machine learning library. model_selection contains tools for splitting data and validating models.">sklearn.model_selection</span> <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Randomly divides your data into training (for learning) and test (for evaluation) sets. Essential for honest model evaluation.">train_test_split</span>
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Fits a line through your data to predict continuous numbers (like income, prices). The simplest ML model.">LinearRegression</span>, <span class="code-tooltip" data-tip="Despite its name, this is for classification (yes/no, categories). It predicts probabilities that an observation belongs to a class.">LogisticRegression</span>
-<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Measures prediction error for regression. Lower is better. RMSE tells you roughly how far off your predictions are on average.">mean_squared_error</span>, <span class="code-tooltip" data-tip="Percentage of correct predictions for classification. 0.85 means 85% of predictions were right.">accuracy_score</span>
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
 <span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Splits arrays into random train and test subsets. test_size=0.2 means 20% of data is held out for testing.">train_test_split</span>
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Standard OLS regression from scikit-learn. Fits a linear model by minimizing the sum of squared residuals.">LinearRegression</span>
+<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Computes the mean squared error between actual and predicted values. Take the square root to get RMSE.">mean_squared_error</span>
 
-<span class="code-comment"># Load and prepare data</span>
-df = pd.read_csv(<span class="code-string">"data.csv"</span>)
-<span class="code-tooltip" data-tip="X contains the features (inputs) - the information used to make predictions. Think of these as the 'questions' the model learns from.">X = df[[<span class="code-string">'age'</span>, <span class="code-string">'education'</span>, <span class="code-string">'experience'</span>]]</span>
-<span class="code-tooltip" data-tip="y is the target (output) - what we're trying to predict. The model learns the relationship between X and y.">y = df[<span class="code-string">'income'</span>]</span>
+<span class="code-comment"># Generate simulated data</span>
+<span class="code-function">np.random.seed</span>(<span class="code-number">42</span>)
+n = <span class="code-number">500</span>
+X = <span class="code-function">np.random.randn</span>(n, <span class="code-number">10</span>)  <span class="code-comment"># 10 features</span>
+<span class="code-comment"># True relationship: only first 3 features matter</span>
+y = <span class="code-number">2</span> * X[:, <span class="code-number">0</span>] + <span class="code-number">1.5</span> * X[:, <span class="code-number">1</span>] - <span class="code-number">1</span> * X[:, <span class="code-number">2</span>] + <span class="code-function">np.random.randn</span>(n) * <span class="code-number">0.5</span>
 
-<span class="code-comment"># Split into train and test sets</span>
-<span class="code-tooltip" data-tip="Splits data randomly: 80% for training, 20% for testing. random_state=42 ensures the same split every time for reproducibility.">X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=<span class="code-number">0.2</span>, random_state=<span class="code-number">42</span>
-)</span>
+<span class="code-comment"># Step 1: Split into training (80%) and test (20%) sets</span>
+X_train, X_test, y_train, y_test = <span class="code-tooltip" data-tip="Randomly assigns 80% of observations to training and 20% to testing. random_state ensures reproducibility across runs.">train_test_split</span>(X, y, test_size=<span class="code-number">0.2</span>, random_state=<span class="code-number">42</span>)
 
-<span class="code-comment"># Fit linear regression</span>
-<span class="code-tooltip" data-tip="Creates a blank linear regression model. No learning has happened yet - it's just an empty container.">model = LinearRegression()</span>
-<span class="code-tooltip" data-tip="The 'fit' method is where the model actually learns. It finds the best line through the training data.">model.fit(X_train, y_train)</span>
+<span class="code-comment"># Step 2: Fit model on training data only</span>
+model = <span class="code-function">LinearRegression</span>()
+model.<span class="code-tooltip" data-tip="Estimates the regression coefficients using only the training data. The test data is never used during fitting.">fit</span>(X_train, y_train)
 
-<span class="code-comment"># Predict and evaluate</span>
-<span class="code-tooltip" data-tip="Uses the trained model to make predictions on NEW data it hasn't seen. This tests how well it generalizes.">y_pred = model.predict(X_test)</span>
-<span class="code-tooltip" data-tip="Calculates RMSE: square root of average squared errors. squared=False gives RMSE instead of MSE.">rmse = mean_squared_error(y_test, y_pred, squared=<span class="code-keyword">False</span>)</span>
-<span class="code-function">print</span>(f<span class="code-string">"RMSE: {rmse:.2f}"</span>)
+<span class="code-comment"># Step 3: Predict on test data</span>
+y_pred = model.<span class="code-tooltip" data-tip="Uses the fitted model to generate predictions for new (unseen) data points.">predict</span>(X_test)
 
-<span class="code-comment"># For classification, use LogisticRegression</span>
-<span class="code-tooltip" data-tip="Create a binary target: 1 if income above median, 0 otherwise. This converts regression into a classification problem.">y_train_binary = (y_train > y_train.median()).astype(<span class="code-keyword">int</span>)
-y_test_binary = (y_test > y_train.median()).astype(<span class="code-keyword">int</span>)</span>
-<span class="code-tooltip" data-tip="Creates a logistic regression classifier. Use this when predicting categories (yes/no, A/B/C) instead of numbers.">clf = LogisticRegression()</span>
-clf.fit(X_train, y_train_binary)
-<span class="code-tooltip" data-tip="Compares predictions to actual values and returns the fraction that match. 1.0 = perfect, 0.0 = all wrong.">accuracy = accuracy_score(y_test_binary, clf.predict(X_test))</span></code></pre>
+<span class="code-comment"># Step 4: Evaluate out-of-sample performance</span>
+rmse = np.<span class="code-function">sqrt</span>(<span class="code-function">mean_squared_error</span>(y_test, y_pred))
+<span class="code-function">print</span>(<span class="code-string">f"Training observations: {len(X_train)}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"Test observations:     {len(X_test)}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"Test RMSE:             {rmse:.4f}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"R-squared (test):      {model.score(X_test, y_test):.4f}"</span>)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Generate simulated data</span>
+<span class="code-keyword">clear</span>
+<span class="code-keyword">set seed</span> 42
+<span class="code-keyword">set obs</span> 500
 
+<span class="code-comment">* Create 10 features</span>
+<span class="code-keyword">forvalues</span> i = 1/10 {
+    <span class="code-keyword">gen</span> x`i' = <span class="code-function">rnormal</span>()
+}
+
+<span class="code-comment">* True relationship: only first 3 features matter</span>
+<span class="code-keyword">gen</span> y = 2*x1 + 1.5*x2 - 1*x3 + <span class="code-function">rnormal</span>()*0.5
+
+<span class="code-comment">* Step 1: Create a train/test split indicator</span>
+<span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="Creates a uniform random variable, then flags the top 20% as test observations.">split</span> = <span class="code-function">runiform</span>()
+<span class="code-keyword">gen</span> test = (split > 0.8)
+
+<span class="code-comment">* Step 2: Fit model on training data only</span>
+<span class="code-keyword">regress</span> y x1-x10 <span class="code-keyword">if</span> test == 0
+
+<span class="code-comment">* Step 3: Predict on all data (including test)</span>
+<span class="code-keyword">predict</span> <span class="code-tooltip" data-tip="Generates fitted values from the regression for all observations, including the held-out test set.">yhat</span>
+
+<span class="code-comment">* Step 4: Evaluate on test set only</span>
+<span class="code-keyword">gen</span> resid_sq = (y - yhat)^2 <span class="code-keyword">if</span> test == 1
+<span class="code-keyword">summarize</span> resid_sq <span class="code-keyword">if</span> test == 1
+<span class="code-keyword">display</span> <span class="code-string">"Test RMSE: "</span> <span class="code-function">sqrt</span>(r(mean))
+<span class="code-keyword">count if</span> test == 0
+<span class="code-keyword">display</span> <span class="code-string">"Training obs: "</span> r(N)
+<span class="code-keyword">count if</span> test == 1
+<span class="code-keyword">display</span> <span class="code-string">"Test obs: "</span> r(N)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-comment"># R: Supervised learning with tidymodels</span>
-<span class="code-tooltip" data-tip="tidymodels is R's modern ML framework. It provides a consistent interface for many different algorithms, similar to sklearn in Python."><span class="code-function">library</span>(tidymodels)</span>
+<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Tidymodels package for data splitting. Provides initial_split(), training(), and testing() functions.">rsample</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Tidymodels package for performance metrics like rmse(), mae(), and rsq().">yardstick</span>)
 
-<span class="code-comment"># Load data</span>
-df <- <span class="code-function">read_csv</span>(<span class="code-string">"data.csv"</span>)
+<span class="code-comment"># Generate simulated data</span>
+<span class="code-function">set.seed</span>(<span class="code-number">42</span>)
+n &lt;- <span class="code-number">500</span>
+X &lt;- <span class="code-function">matrix</span>(<span class="code-function">rnorm</span>(n * <span class="code-number">10</span>), ncol = <span class="code-number">10</span>)
+<span class="code-function">colnames</span>(X) &lt;- <span class="code-function">paste0</span>(<span class="code-string">"x"</span>, <span class="code-number">1</span>:<span class="code-number">10</span>)
+y &lt;- <span class="code-number">2</span> * X[, <span class="code-number">1</span>] + <span class="code-number">1.5</span> * X[, <span class="code-number">2</span>] - <span class="code-number">1</span> * X[, <span class="code-number">3</span>] + <span class="code-function">rnorm</span>(n) * <span class="code-number">0.5</span>
+df &lt;- <span class="code-function">data.frame</span>(y = y, X)
 
-<span class="code-comment"># Split data</span>
-<span class="code-tooltip" data-tip="Sets the random seed to ensure reproducibility. Like random_state in Python - you'll get the same split every time.">set.seed(<span class="code-number">42</span>)</span>
-<span class="code-tooltip" data-tip="Creates a split object with 80% training, 20% testing. The data isn't actually split yet - this just defines how to split it.">split <- <span class="code-function">initial_split</span>(df, prop = <span class="code-number">0.8</span>)</span>
-<span class="code-tooltip" data-tip="Extracts the training portion from the split. This is the data the model will learn from.">train <- <span class="code-function">training</span>(split)</span>
-<span class="code-tooltip" data-tip="Extracts the test portion. This data is held out to evaluate how well the model performs on unseen data.">test <- <span class="code-function">testing</span>(split)</span>
+<span class="code-comment"># Step 1: Split into training (80%) and test (20%)</span>
+split &lt;- <span class="code-tooltip" data-tip="Splits the data frame into training and test sets. prop=0.8 means 80% goes to training.">initial_split</span>(df, prop = <span class="code-number">0.8</span>)
+train_data &lt;- <span class="code-function">training</span>(split)
+test_data  &lt;- <span class="code-function">testing</span>(split)
 
-<span class="code-comment"># Define model</span>
-<span class="code-tooltip" data-tip="Defines a linear regression model specification. The %>% pipe chains operations together for readability.">lm_spec <- <span class="code-function">linear_reg</span>() %>%
-  <span class="code-function">set_engine</span>(<span class="code-string">"lm"</span>)</span>
+<span class="code-comment"># Step 2: Fit model on training data</span>
+model &lt;- <span class="code-function">lm</span>(y ~ ., data = train_data)
 
-<span class="code-comment"># Fit model</span>
-<span class="code-tooltip" data-tip="Fits the model to data. The formula 'income ~ age + education + experience' means: predict income using these three variables.">lm_fit <- lm_spec %>%
-  <span class="code-function">fit</span>(income ~ age + education + experience, data = train)</span>
+<span class="code-comment"># Step 3: Predict on test data</span>
+y_pred &lt;- <span class="code-function">predict</span>(model, newdata = test_data)
 
-<span class="code-comment"># Predict and evaluate</span>
-<span class="code-tooltip" data-tip="Generates predictions for the test set. Returns a tibble with a .pred column containing predicted values.">predictions <- <span class="code-function">predict</span>(lm_fit, test)</span>
-<span class="code-tooltip" data-tip="Combines predictions with the original test data so we can compare predicted vs actual values.">results <- test %>% <span class="code-function">bind_cols</span>(predictions)</span>
-
-<span class="code-tooltip" data-tip="Calculates RMSE by comparing the true income values to the predictions (.pred). Lower RMSE means better predictions.">rmse <- results %>%
-  <span class="code-function">rmse</span>(truth = income, estimate = .pred)</span>
-<span class="code-function">print</span>(rmse)</code></pre>
+<span class="code-comment"># Step 4: Evaluate out-of-sample performance</span>
+rmse_val &lt;- <span class="code-function">sqrt</span>(<span class="code-function">mean</span>((test_data$y - y_pred)^2))
+<span class="code-function">cat</span>(<span class="code-string">"Training observations:"</span>, <span class="code-function">nrow</span>(train_data), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"Test observations:    "</span>, <span class="code-function">nrow</span>(test_data), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"Test RMSE:            "</span>, <span class="code-function">round</span>(rmse_val, <span class="code-number">4</span>), <span class="code-string">"\n"</span>)
+r2 &lt;- <span class="code-number">1</span> - <span class="code-function">sum</span>((test_data$y - y_pred)^2) / <span class="code-function">sum</span>((test_data$y - <span class="code-function">mean</span>(test_data$y))^2)
+<span class="code-function">cat</span>(<span class="code-string">"R-squared (test):     "</span>, <span class="code-function">round</span>(r2, <span class="code-number">4</span>), <span class="code-string">"\n"</span>)</code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
 
-        <!-- Output simulation for ml-1 -->
-        <div class="code-output-container" data-for="ml-1" style="display:none;">
-          <div class="code-output" data-lang="python">
-            <div class="output-header">Python Output</div>
-            <pre class="output-content">Training set: 8000 samples
-Test set: 2000 samples
-
-Fitting LinearRegression...
-
-Coefficients:
-  age:        456.23
-  education:  2834.17
-  experience: 1245.89
-  intercept:  -12453.67
-
-RMSE: 8234.56
-
-Accuracy (classification): 0.847</pre>
+        <!-- Output simulations for ml-overview-1 -->
+        <div class="output-simulation" data-output="ml-overview-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
           </div>
-          <div class="code-output" data-lang="r">
-            <div class="output-header">R Output</div>
-            <pre class="output-content"># A tibble: 1 x 3
-  .metric .estimator .estimate
-  <chr>   <chr>          <dbl>
-1 rmse    standard       8234.
+          <div class="output-body"><pre>Training observations: 400
+Test observations:     100
+Test RMSE:             0.5182
+R-squared (test):      0.9571</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-overview-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>      Source |       SS           df       MS
+-------------+----------------------------------
+       Model |  2348.12741        10  234.812741
+    Residual |   96.5488209      389  .248197483
+-------------+----------------------------------
+       Total |  2444.67623       399  6.12700810
 
-parsnip model object
+Test RMSE: .50943
+Training obs: 401
+Test obs: 99</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-overview-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Training observations: 400
+Test observations:     100
+Test RMSE:             0.5237
+R-squared (test):      0.9548</pre></div>
+        </div>
 
-Call:
-stats::lm(formula = income ~ age + education + experience, data = data)
 
-Coefficients:
-(Intercept)          age    education   experience
-  -12453.67       456.23      2834.17      1245.89</pre>
+        <!-- ============================================================ -->
+        <!-- SECTION 11.3: THE BIAS-VARIANCE TRADEOFF -->
+        <!-- ============================================================ -->
+        <h2 id="bias-variance">11.3 &nbsp;The Bias-Variance Tradeoff</h2>
+
+        <p>The bias-variance tradeoff is arguably the single most important concept in machine learning. It explains why simple models sometimes outperform complex ones, why fitting your training data perfectly is usually a mistake, and how to think about the fundamental tension between underfitting and overfitting. Every ML method you will learn in this module &mdash; from LASSO to random forests to neural networks &mdash; can be understood as a particular way of navigating this tradeoff.</p>
+
+        <p>The key insight is that the expected prediction error for any model can be decomposed into three components:</p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin: 1.5rem 0; text-align: center; font-size: 1.1rem;">
+          <strong>E[(Y &minus; f&#x302;(X))&sup2;] = Bias&sup2;(f&#x302;) + Var(f&#x302;) + &sigma;&sup2;</strong>
+        </div>
+
+        <p><strong>Bias</strong> measures how far off our model&rsquo;s average prediction is from the truth. A model with high bias makes systematically wrong predictions because it is too simple to capture the true relationship. For instance, fitting a straight line to data that follows a curve produces high bias &mdash; the model simply cannot represent the underlying pattern, no matter how much data we give it. This is <strong>underfitting</strong>.</p>
+
+        <p><strong>Variance</strong> measures how much our model&rsquo;s predictions fluctuate across different training samples. A model with high variance is highly sensitive to the particular data points it was trained on. If you were to re-train the model on a slightly different random sample, the predictions would change dramatically. A 20th-degree polynomial that wiggles through every training point has high variance &mdash; it has essentially memorized the noise in that particular sample. This is <strong>overfitting</strong>.</p>
+
+        <p>The third term, <strong>&sigma;&sup2;</strong>, is the <em>irreducible error</em> &mdash; the inherent randomness in the data that no model can eliminate. Even with a perfect model and infinite data, you cannot predict an outcome perfectly if there is genuine noise in the system. This term sets a floor on how well any model can perform.</p>
+
+        <p>The fundamental tradeoff is this: as model complexity increases, bias decreases (the model can capture more complex patterns) but variance increases (the model becomes more sensitive to the training data). The optimal model is the one that minimizes the <em>total</em> error &mdash; the sweet spot where the sum of bias-squared and variance is at its minimum. Every ML method has one or more tuning parameters (hyperparameters) that control this tradeoff: the penalty parameter &lambda; in LASSO, the maximum depth in decision trees, the number of hidden layers in a neural network.</p>
+
+        <!-- Bias-Variance Diagram -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
+          <h4 style="margin: 0 0 1.5rem 0; color: #1e293b;">The Bias-Variance Tradeoff</h4>
+          <div style="position: relative; height: 220px; max-width: 500px; margin: 0 auto;">
+            <!-- Y axis -->
+            <div style="position: absolute; left: 40px; top: 0; bottom: 30px; width: 2px; background: #334155;"></div>
+            <div style="position: absolute; left: 0; top: 50%; transform: rotate(-90deg) translateX(50%); font-size: 0.85rem; color: #475569; white-space: nowrap;">Prediction Error</div>
+            <!-- X axis -->
+            <div style="position: absolute; left: 40px; right: 0; bottom: 30px; height: 2px; background: #334155;"></div>
+            <div style="position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); font-size: 0.85rem; color: #475569;">Model Complexity &rarr;</div>
+            <!-- Bias curve (decreasing) -->
+            <div style="position: absolute; left: 60px; top: 40px; font-size: 0.75rem; color: #3b82f6; font-weight: 600;">Bias&sup2;</div>
+            <svg style="position: absolute; left: 40px; top: 0; right: 0; bottom: 30px;" viewBox="0 0 460 190" preserveAspectRatio="none">
+              <path d="M 20,20 Q 150,30 250,120 T 440,170" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="6,4"/>
+              <!-- Variance curve (increasing) -->
+              <path d="M 20,170 Q 150,160 250,100 T 440,20" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-dasharray="6,4"/>
+              <!-- Total error (U-shaped) -->
+              <path d="M 20,60 Q 100,30 200,25 Q 280,28 350,60 T 440,120" fill="none" stroke="#059669" stroke-width="3"/>
+              <!-- Optimal point -->
+              <circle cx="210" cy="24" r="6" fill="#059669"/>
+            </svg>
+            <div style="position: absolute; right: 20px; top: 15px; font-size: 0.75rem; color: #ef4444; font-weight: 600;">Variance</div>
+            <div style="position: absolute; left: 55%; top: 0; font-size: 0.75rem; color: #059669; font-weight: 600;">Total Error &darr; Sweet Spot</div>
+          </div>
+          <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; font-size: 0.8rem;">
+            <span>&larr; <strong>Underfitting</strong> (too simple)</span>
+            <span><strong>Overfitting</strong> (too complex) &rarr;</span>
           </div>
         </div>
 
-        <h2 id="evaluation">11.4 Model Evaluation</h2>
+        <h3>Demonstrating Overfitting with Polynomial Fits</h3>
+        <p>Let us make this concrete. We will generate data from a noisy sine curve, then fit polynomials of increasing degree (1, 5, and 15). You will see that the degree-1 polynomial underfits (too simple), the degree-15 polynomial overfits (wiggles through every point), and the degree-5 polynomial hits a reasonable middle ground.</p>
 
-        <h3>Train-Test Split</h3>
-        <p>
-          Never evaluate on training data! The model memorizes training examples, so training accuracy is misleading. Always hold out a <strong>test set</strong> that the model never sees during training.
-        </p>
-
-        <h3>Cross-Validation</h3>
-        <p>
-          <strong>K-fold cross-validation</strong> provides more robust estimates by training K models, each holding out a different fold.
-        </p>
-
-        <div class="code-tabs" data-runnable="ml-2">
+        <div class="code-tabs" data-runnable="ml-overview-2">
           <div class="tab-buttons">
-            <button class="tab-button active" data-lang="python">Cross-Validation</button>
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Python: K-fold cross-validation</span>
-<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Automates k-fold cross-validation: trains and evaluates your model k times, each time using a different portion as the test set.">cross_val_score</span>, <span class="code-tooltip" data-tip="Splits data into k equal parts (folds). The model trains on k-1 folds and tests on 1 fold, rotating through all combinations.">KFold</span>
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Generates polynomial features from the original variables. degree=5 creates x, x^2, x^3, x^4, x^5 and all interactions.">PolynomialFeatures</span>
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LinearRegression
+<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error
 
-<span class="code-comment"># 5-fold cross-validation</span>
-<span class="code-tooltip" data-tip="Creates a 5-fold splitter: data divided into 5 parts. shuffle=True randomizes before splitting. Each fold takes a turn being the test set.">cv = KFold(n_splits=<span class="code-number">5</span>, shuffle=<span class="code-keyword">True</span>, random_state=<span class="code-number">42</span>)</span>
-<span class="code-tooltip" data-tip="Runs the model 5 times with different train/test splits and returns 5 scores. More reliable than a single train-test split.">scores = cross_val_score(model, X, y, cv=cv, scoring=<span class="code-string">'neg_mean_squared_error'</span>)</span>
+<span class="code-function">np.random.seed</span>(<span class="code-number">42</span>)
 
-<span class="code-tooltip" data-tip="sklearn returns negative MSE (for technical reasons), so we negate it and take the square root to get RMSE. The +/- shows variability across folds."><span class="code-function">print</span>(f<span class="code-string">"CV RMSE: {(-scores.mean())**0.5:.2f} (+/- {scores.std()**0.5:.2f})"</span>)</span></code></pre>
+<span class="code-comment"># Generate noisy sine data</span>
+n_train, n_test = <span class="code-number">30</span>, <span class="code-number">200</span>
+X_train = np.<span class="code-function">sort</span>(np.random.<span class="code-function">uniform</span>(<span class="code-number">0</span>, <span class="code-number">2</span> * np.pi, n_train)).<span class="code-function">reshape</span>(-<span class="code-number">1</span>, <span class="code-number">1</span>)
+X_test  = np.<span class="code-function">linspace</span>(<span class="code-number">0</span>, <span class="code-number">2</span> * np.pi, n_test).<span class="code-function">reshape</span>(-<span class="code-number">1</span>, <span class="code-number">1</span>)
+y_train = np.<span class="code-function">sin</span>(X_train).ravel() + np.random.<span class="code-function">randn</span>(n_train) * <span class="code-number">0.3</span>
+y_test  = np.<span class="code-function">sin</span>(X_test).ravel() + np.random.<span class="code-function">randn</span>(n_test) * <span class="code-number">0.3</span>
+
+<span class="code-comment"># Fit polynomials of degree 1, 5, and 15</span>
+<span class="code-function">print</span>(<span class="code-string">f"{'Degree':<10} {'Train MSE':<15} {'Test MSE':<15}"</span>)
+<span class="code-function">print</span>(<span class="code-string">"-"</span> * <span class="code-number">40</span>)
+
+<span class="code-keyword">for</span> degree <span class="code-keyword">in</span> [<span class="code-number">1</span>, <span class="code-number">5</span>, <span class="code-number">15</span>]:
+    poly = <span class="code-tooltip" data-tip="Transforms the single feature x into [1, x, x^2, ..., x^degree]. This lets a linear model fit a polynomial curve.">PolynomialFeatures</span>(degree)
+    X_train_poly = poly.<span class="code-function">fit_transform</span>(X_train)
+    X_test_poly  = poly.<span class="code-function">transform</span>(X_test)
+
+    model = <span class="code-function">LinearRegression</span>()
+    model.<span class="code-function">fit</span>(X_train_poly, y_train)
+
+    train_mse = <span class="code-function">mean_squared_error</span>(y_train, model.<span class="code-function">predict</span>(X_train_poly))
+    test_mse  = <span class="code-function">mean_squared_error</span>(y_test,  model.<span class="code-function">predict</span>(X_test_poly))
+
+    <span class="code-function">print</span>(<span class="code-string">f"{degree:<10} {train_mse:<15.4f} {test_mse:<15.4f}"</span>)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
-        </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Generate noisy sine data</span>
+<span class="code-keyword">clear</span>
+<span class="code-keyword">set seed</span> 42
+<span class="code-keyword">set obs</span> 230
 
-        <!-- Output simulation for ml-2 -->
-        <div class="code-output-container" data-for="ml-2" style="display:none;">
-          <div class="code-output" data-lang="python">
-            <div class="output-header">Python Output</div>
-            <pre class="output-content">Performing 5-fold cross-validation...
+<span class="code-comment">* First 30 obs = training, rest = test</span>
+<span class="code-keyword">gen</span> id = _n
+<span class="code-keyword">gen</span> test = (id > 30)
+<span class="code-keyword">gen</span> x = <span class="code-function">runiform</span>() * 2 * _pi <span class="code-keyword">if</span> test == 0
+<span class="code-keyword">replace</span> x = (id - 30) / 200 * 2 * _pi <span class="code-keyword">if</span> test == 1
+<span class="code-keyword">gen</span> y = <span class="code-function">sin</span>(x) + <span class="code-function">rnormal</span>() * 0.3
 
-Fold 1: MSE = 67892345.23, RMSE = 8239.68
-Fold 2: MSE = 68234521.89, RMSE = 8260.42
-Fold 3: MSE = 67123456.12, RMSE = 8192.89
-Fold 4: MSE = 68567890.45, RMSE = 8280.57
-Fold 5: MSE = 67456789.34, RMSE = 8213.21
+<span class="code-comment">* Generate polynomial terms</span>
+<span class="code-keyword">forvalues</span> p = 2/15 {
+    <span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="Creates polynomial terms x^2, x^3, ... x^15 for fitting polynomial regression models of increasing complexity.">x`p'</span> = x^`p'
+}
 
-CV RMSE: 8237.35 (+/- 32.47)
+<span class="code-comment">* Fit polynomial regressions of increasing degree</span>
+<span class="code-keyword">display</span> <span class="code-string">"Degree     Train MSE      Test MSE"</span>
+<span class="code-keyword">display</span> <span class="code-string">"----------------------------------------"</span>
 
-Note: The low standard deviation indicates stable performance
-across different data splits.</pre>
+<span class="code-comment">* Degree 1</span>
+<span class="code-keyword">quietly regress</span> y x <span class="code-keyword">if</span> test == 0
+<span class="code-keyword">predict</span> yhat1
+<span class="code-keyword">gen</span> se1_train = (y - yhat1)^2 <span class="code-keyword">if</span> test == 0
+<span class="code-keyword">gen</span> se1_test  = (y - yhat1)^2 <span class="code-keyword">if</span> test == 1
+<span class="code-keyword">quietly summarize</span> se1_train
+<span class="code-keyword">local</span> tr1 = r(mean)
+<span class="code-keyword">quietly summarize</span> se1_test
+<span class="code-keyword">display</span> <span class="code-string">"1          "</span> %9.4f `tr1' <span class="code-string">"      "</span> %9.4f r(mean)
+
+<span class="code-comment">* Degree 5</span>
+<span class="code-keyword">quietly regress</span> y x x2-x5 <span class="code-keyword">if</span> test == 0
+<span class="code-keyword">predict</span> yhat5
+<span class="code-keyword">gen</span> se5_train = (y - yhat5)^2 <span class="code-keyword">if</span> test == 0
+<span class="code-keyword">gen</span> se5_test  = (y - yhat5)^2 <span class="code-keyword">if</span> test == 1
+<span class="code-keyword">quietly summarize</span> se5_train
+<span class="code-keyword">local</span> tr5 = r(mean)
+<span class="code-keyword">quietly summarize</span> se5_test
+<span class="code-keyword">display</span> <span class="code-string">"5          "</span> %9.4f `tr5' <span class="code-string">"      "</span> %9.4f r(mean)
+
+<span class="code-comment">* Degree 15</span>
+<span class="code-keyword">quietly regress</span> y x x2-x15 <span class="code-keyword">if</span> test == 0
+<span class="code-keyword">predict</span> yhat15
+<span class="code-keyword">gen</span> se15_train = (y - yhat15)^2 <span class="code-keyword">if</span> test == 0
+<span class="code-keyword">gen</span> se15_test  = (y - yhat15)^2 <span class="code-keyword">if</span> test == 1
+<span class="code-keyword">quietly summarize</span> se15_train
+<span class="code-keyword">local</span> tr15 = r(mean)
+<span class="code-keyword">quietly summarize</span> se15_test
+<span class="code-keyword">display</span> <span class="code-string">"15         "</span> %9.4f `tr15' <span class="code-string">"      "</span> %9.4f r(mean)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-function">set.seed</span>(<span class="code-number">42</span>)
+
+<span class="code-comment"># Generate noisy sine data</span>
+n_train &lt;- <span class="code-number">30</span>; n_test &lt;- <span class="code-number">200</span>
+x_train &lt;- <span class="code-function">sort</span>(<span class="code-function">runif</span>(n_train, <span class="code-number">0</span>, <span class="code-number">2</span> * pi))
+x_test  &lt;- <span class="code-function">seq</span>(<span class="code-number">0</span>, <span class="code-number">2</span> * pi, length.out = n_test)
+y_train &lt;- <span class="code-function">sin</span>(x_train) + <span class="code-function">rnorm</span>(n_train, sd = <span class="code-number">0.3</span>)
+y_test  &lt;- <span class="code-function">sin</span>(x_test) + <span class="code-function">rnorm</span>(n_test, sd = <span class="code-number">0.3</span>)
+
+<span class="code-comment"># Fit polynomials of degree 1, 5, and 15</span>
+degrees &lt;- <span class="code-function">c</span>(<span class="code-number">1</span>, <span class="code-number">5</span>, <span class="code-number">15</span>)
+results &lt;- <span class="code-function">data.frame</span>(Degree = <span class="code-function">integer</span>(), Train_MSE = <span class="code-function">numeric</span>(), Test_MSE = <span class="code-function">numeric</span>())
+
+<span class="code-keyword">for</span> (d <span class="code-keyword">in</span> degrees) {
+  <span class="code-comment"># Fit polynomial regression</span>
+  model &lt;- <span class="code-tooltip" data-tip="poly(x, d, raw=TRUE) generates polynomial basis up to degree d. raw=TRUE gives the raw x, x^2, ... rather than orthogonal polynomials.">lm</span>(y_train ~ <span class="code-function">poly</span>(x_train, d, raw = <span class="code-keyword">TRUE</span>))
+
+  <span class="code-comment"># Predict on train and test</span>
+  pred_train &lt;- <span class="code-function">predict</span>(model)
+  pred_test  &lt;- <span class="code-function">predict</span>(model, newdata = <span class="code-function">data.frame</span>(x_train = x_test))
+
+  <span class="code-comment"># Compute MSE</span>
+  train_mse &lt;- <span class="code-function">mean</span>((y_train - pred_train)^2)
+  test_mse  &lt;- <span class="code-function">mean</span>((y_test - pred_test)^2)
+
+  results &lt;- <span class="code-function">rbind</span>(results, <span class="code-function">data.frame</span>(Degree = d, Train_MSE = train_mse, Test_MSE = test_mse))
+}
+
+<span class="code-function">print</span>(results, row.names = <span class="code-keyword">FALSE</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
 
-        <h3>Metrics</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Task</th>
-              <th>Metric</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td rowspan="3">Regression</td>
-              <td>RMSE</td>
-              <td>Root Mean Squared Error</td>
-            </tr>
-            <tr>
-              <td>MAE</td>
-              <td>Mean Absolute Error</td>
-            </tr>
-            <tr>
-              <td>R^2</td>
-              <td>Variance explained</td>
-            </tr>
-            <tr>
-              <td rowspan="4">Classification</td>
-              <td>Accuracy</td>
-              <td>Percent correct</td>
-            </tr>
-            <tr>
-              <td>Precision</td>
-              <td>TP / (TP + FP)</td>
-            </tr>
-            <tr>
-              <td>Recall</td>
-              <td>TP / (TP + FN)</td>
-            </tr>
-            <tr>
-              <td>AUC-ROC</td>
-              <td>Area under ROC curve</td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Output simulations for ml-overview-2 -->
+        <div class="output-simulation" data-output="ml-overview-2" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Degree     Train MSE       Test MSE
+----------------------------------------
+1          0.2194          0.2487
+5          0.0621          0.0845
+15         0.0298          0.5731</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-overview-2" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>Degree     Train MSE      Test MSE
+----------------------------------------
+1             0.2237         0.2512
+5             0.0654         0.0891
+15            0.0312         0.5843</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-overview-2" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre> Degree  Train_MSE  Test_MSE
+      1    0.21506   0.24632
+      5    0.06348   0.08714
+     15    0.03012   0.56928</pre></div>
+        </div>
 
-        <h2 id="regularization">11.5 Regularization</h2>
+        <p>Notice the pattern: training MSE always decreases as the polynomial degree increases (the model fits the training data better and better). But test MSE first decreases (from degree 1 to degree 5) and then <em>increases sharply</em> (from degree 5 to degree 15). The degree-15 polynomial has essentially memorized the 30 training points, including their noise, and makes wild predictions on new data. This is overfitting in action, and it is precisely the bias-variance tradeoff at work.</p>
 
-        <p>
-          <strong>Regularization</strong> prevents overfitting by penalizing model complexity.
-        </p>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Penalty</th>
-              <th>Effect</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Ridge (L2)</strong></td>
-              <td>lambda * sum(beta^2)</td>
-              <td>Shrinks coefficients toward zero</td>
-            </tr>
-            <tr>
-              <td><strong>LASSO (L1)</strong></td>
-              <td>lambda * sum(|beta|)</td>
-              <td>Sets some coefficients exactly to zero (variable selection)</td>
-            </tr>
-            <tr>
-              <td><strong>Elastic Net</strong></td>
-              <td>alpha(L1) + (1-alpha)(L2)</td>
-              <td>Combines both</td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- ============================================================ -->
+        <!-- SECTION 11.4: SUPERVISED VS. UNSUPERVISED LEARNING -->
+        <!-- ============================================================ -->
+        <h2 id="supervised-unsupervised">11.4 &nbsp;Supervised vs. Unsupervised Learning</h2>
 
-        <div class="code-tabs" data-runnable="ml-3">
+        <p>Machine learning methods are broadly divided into two families: <strong>supervised learning</strong> and <strong>unsupervised learning</strong>. The distinction is straightforward: in supervised learning, we have a <em>labeled</em> outcome variable Y that we want to predict from features X. In unsupervised learning, there is no outcome variable &mdash; we are simply looking for patterns and structure in the data. The name &ldquo;supervised&rdquo; comes from the idea that the labels &ldquo;supervise&rdquo; the learning process by telling the algorithm what the right answer is.</p>
+
+        <p>Within supervised learning, there are two main subtypes. <strong>Regression</strong> problems have a continuous outcome (predicting house prices, GDP growth, or exam scores). <strong>Classification</strong> problems have a categorical outcome (classifying emails as spam or not, predicting whether a loan will default, or identifying the sentiment of a text). The same algorithms (like decision trees or neural networks) can often handle both types, though the loss function and evaluation metrics differ. For regression, we typically use RMSE or MAE; for classification, accuracy, precision, recall, or AUC.</p>
+
+        <p>Unsupervised learning is used when we want to discover structure without a specific prediction target. <strong>Clustering</strong> methods (like k-means) group similar observations together &mdash; for example, segmenting countries by economic characteristics or grouping consumers by purchasing behavior. <strong>Dimensionality reduction</strong> methods (like PCA) compress many variables into a smaller number of components that capture the most important variation. For economists, most ML applications in research are supervised &mdash; predicting outcomes, classifying text, or using ML predictions as inputs to causal estimation. However, unsupervised methods appear in text analysis (topic models), factor models, and exploratory data analysis.</p>
+
+        <!-- Comparison Table -->
+        <div style="overflow-x: auto; margin: 1.5rem 0;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+            <thead>
+              <tr style="background: #f1f5f9;">
+                <th style="padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #cbd5e1;"></th>
+                <th style="padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #cbd5e1; color: #2563eb;">Supervised</th>
+                <th style="padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #cbd5e1; color: #7c3aed;">Unsupervised</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Goal</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Predict Y from X</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Find structure in X</td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Data</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Labeled (X, Y)</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Unlabeled (X only)</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Examples</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">LASSO, Random Forest, Neural Nets</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">K-means, PCA, Topic Models</td>
+              </tr>
+              <tr style="background: #f8fafc;">
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Evaluation</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Compare predictions to known labels</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Internal metrics (silhouette, variance explained)</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0; font-weight: 600;">Economics use</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Prediction policy, causal ML</td>
+                <td style="padding: 0.6rem 1rem; border-bottom: 1px solid #e2e8f0;">Text clustering, factor models</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+
+        <!-- ============================================================ -->
+        <!-- SECTION 11.5: CROSS-VALIDATION & MODEL SELECTION -->
+        <!-- ============================================================ -->
+        <h2 id="cv-model-selection">11.5 &nbsp;Cross-Validation &amp; Model Selection</h2>
+
+        <p>We have established that out-of-sample performance is what matters for prediction. But a single train/test split has two problems. First, it wastes data &mdash; the observations in the test set are never used for training. Second, the results depend on the particular random split: you might get a favorable split where the test set happens to be easy, or an unfavorable one where it is unusually hard. <strong>K-fold cross-validation</strong> solves both problems by systematically rotating which data is used for training and testing.</p>
+
+        <p>The procedure works as follows. Divide your data into K equally sized &ldquo;folds&rdquo; (groups). For each fold k = 1, ..., K: train the model on all data <em>except</em> fold k, then evaluate it on fold k. After all K iterations, every observation has been used exactly once as a test point. The average of the K test errors gives you a robust estimate of out-of-sample performance. Typical choices are K = 5 or K = 10. The extreme case K = N (called leave-one-out cross-validation, or LOOCV) trains the model N times, each time leaving out a single observation. LOOCV has the lowest bias but can be computationally expensive and sometimes has higher variance than K = 10.</p>
+
+        <!-- K-Fold Diagram -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0;">
+          <h4 style="text-align: center; margin: 0 0 1.25rem 0; color: #1e293b;">5-Fold Cross-Validation</h4>
+          <div style="max-width: 500px; margin: 0 auto;">
+            <div style="display: flex; gap: 4px; margin-bottom: 6px; align-items: center;">
+              <span style="width: 60px; font-size: 0.8rem; color: #64748b; text-align: right; padding-right: 8px;">Iter 1</span>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #991b1b; font-weight: 600;">Test</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+            </div>
+            <div style="display: flex; gap: 4px; margin-bottom: 6px; align-items: center;">
+              <span style="width: 60px; font-size: 0.8rem; color: #64748b; text-align: right; padding-right: 8px;">Iter 2</span>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #991b1b; font-weight: 600;">Test</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+            </div>
+            <div style="display: flex; gap: 4px; margin-bottom: 6px; align-items: center;">
+              <span style="width: 60px; font-size: 0.8rem; color: #64748b; text-align: right; padding-right: 8px;">Iter 3</span>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #991b1b; font-weight: 600;">Test</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+            </div>
+            <div style="display: flex; gap: 4px; margin-bottom: 6px; align-items: center;">
+              <span style="width: 60px; font-size: 0.8rem; color: #64748b; text-align: right; padding-right: 8px;">Iter 4</span>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #991b1b; font-weight: 600;">Test</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+            </div>
+            <div style="display: flex; gap: 4px; margin-bottom: 6px; align-items: center;">
+              <span style="width: 60px; font-size: 0.8rem; color: #64748b; text-align: right; padding-right: 8px;">Iter 5</span>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 6px; text-align: center; font-size: 0.75rem; color: #991b1b; font-weight: 600;">Test</div>
+            </div>
+          </div>
+          <p style="text-align: center; margin: 1rem 0 0; font-size: 0.85rem; color: #475569;">Each observation is used as a test point exactly once. The final CV score is the average of all 5 test errors.</p>
+        </div>
+
+        <p>Cross-validation serves two critical purposes. First, it gives you a reliable estimate of how your model will perform on truly new data. Second, it allows you to choose <strong>hyperparameters</strong> &mdash; settings that control the model&rsquo;s complexity. For instance, in LASSO regression (Module 11A), the penalty parameter &lambda; controls how much regularization to apply. You can fit the LASSO for many different values of &lambda;, compute the CV error for each, and choose the &lambda; that minimizes the CV error. This data-driven approach to model selection is far more principled than eyeballing the results or relying on arbitrary rules of thumb.</p>
+
+        <p>An important practical point: always do your cross-validation <em>before</em> looking at the test set. The test set should be touched only once, at the very end, to report your model&rsquo;s final performance. If you repeatedly evaluate on the test set and adjust your model, you are effectively training on the test set, and your reported performance will be overly optimistic. Some practitioners advocate for a three-way split: training set (for fitting), validation set (for hyperparameter tuning), and test set (for final evaluation). Cross-validation on the training set replaces the need for a separate validation set.</p>
+
+        <div class="code-tabs" data-runnable="ml-overview-3">
           <div class="tab-buttons">
-            <button class="tab-button active" data-lang="python">Regularization</button>
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Python: LASSO with cross-validated lambda</span>
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="LASSO with built-in cross-validation. Automatically finds the best penalty strength (lambda/alpha) by trying many values.">LassoCV</span>
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Splits data into K consecutive folds. n_splits=5 means 5 folds. shuffle=True randomizes before splitting.">KFold</span>, <span class="code-tooltip" data-tip="Evaluates a model by running K-fold CV internally. Returns an array of K test scores (one per fold).">cross_val_score</span>
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LinearRegression
 
-<span class="code-comment"># LASSO with automatic lambda selection</span>
-<span class="code-tooltip" data-tip="Creates a LASSO model that uses 5-fold cross-validation to find the optimal regularization strength. cv=5 means 5 different train/test splits.">lasso = LassoCV(cv=<span class="code-number">5</span>, random_state=<span class="code-number">42</span>)</span>
-<span class="code-tooltip" data-tip="Fits the model and automatically selects the best lambda value based on cross-validation performance.">lasso.fit(X_train, y_train)</span>
+<span class="code-comment"># Use the same simulated data</span>
+<span class="code-function">np.random.seed</span>(<span class="code-number">42</span>)
+n = <span class="code-number">500</span>
+X = <span class="code-function">np.random.randn</span>(n, <span class="code-number">10</span>)
+y = <span class="code-number">2</span> * X[:, <span class="code-number">0</span>] + <span class="code-number">1.5</span> * X[:, <span class="code-number">1</span>] - <span class="code-number">1</span> * X[:, <span class="code-number">2</span>] + <span class="code-function">np.random.randn</span>(n) * <span class="code-number">0.5</span>
 
-<span class="code-tooltip" data-tip="alpha_ stores the best lambda value found. Higher alpha = stronger penalty = simpler model with more zeros."><span class="code-function">print</span>(f<span class="code-string">"Best lambda: {lasso.alpha_:.4f}"</span>)</span>
-<span class="code-tooltip" data-tip="Counts how many features have non-zero coefficients. LASSO sets unimportant features exactly to zero, performing automatic feature selection."><span class="code-function">print</span>(f<span class="code-string">"Non-zero coefficients: {(lasso.coef_ != 0).sum()}"</span>)</span></code></pre>
+<span class="code-comment"># Set up 5-fold cross-validation</span>
+kf = <span class="code-function">KFold</span>(n_splits=<span class="code-number">5</span>, shuffle=<span class="code-keyword">True</span>, random_state=<span class="code-number">42</span>)
+model = <span class="code-function">LinearRegression</span>()
+
+<span class="code-comment"># cross_val_score returns negative MSE (sklearn convention: higher = better)</span>
+scores = <span class="code-tooltip" data-tip="Runs 5-fold CV: trains on 4 folds, tests on 1, rotates. scoring='neg_mean_squared_error' returns negative MSE (sklearn convention).">cross_val_score</span>(model, X, y, cv=kf, scoring=<span class="code-string">'neg_mean_squared_error'</span>)
+
+<span class="code-comment"># Convert to positive RMSE</span>
+rmse_scores = np.<span class="code-function">sqrt</span>(-scores)
+
+<span class="code-function">print</span>(<span class="code-string">"RMSE for each fold:"</span>)
+<span class="code-keyword">for</span> i, score <span class="code-keyword">in</span> <span class="code-function">enumerate</span>(rmse_scores, <span class="code-number">1</span>):
+    <span class="code-function">print</span>(<span class="code-string">f"  Fold {i}: {score:.4f}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"\nMean RMSE:  {rmse_scores.mean():.4f}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"Std RMSE:   {rmse_scores.std():.4f}"</span>)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
-        </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Manual 5-fold cross-validation in Stata</span>
+<span class="code-keyword">clear</span>
+<span class="code-keyword">set seed</span> 42
+<span class="code-keyword">set obs</span> 500
 
-        <!-- Output simulation for ml-3 -->
-        <div class="code-output-container" data-for="ml-3" style="display:none;">
-          <div class="code-output" data-lang="python">
-            <div class="output-header">Python Output</div>
-            <pre class="output-content">Fitting LassoCV with 5-fold cross-validation...
-Testing 100 alpha values from 0.0001 to 10.0
+<span class="code-comment">* Generate data</span>
+<span class="code-keyword">forvalues</span> i = 1/10 {
+    <span class="code-keyword">gen</span> x`i' = <span class="code-function">rnormal</span>()
+}
+<span class="code-keyword">gen</span> y = 2*x1 + 1.5*x2 - 1*x3 + <span class="code-function">rnormal</span>()*0.5
 
-Best lambda: 0.0234
-Non-zero coefficients: 7 (out of 15 features)
+<span class="code-comment">* Assign observations to 5 folds randomly</span>
+<span class="code-keyword">gen</span> u = <span class="code-function">runiform</span>()
+<span class="code-keyword">sort</span> u
+<span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="Assigns each observation to a fold (1-5). Using the modulo of observation number ensures roughly equal fold sizes.">fold</span> = <span class="code-function">mod</span>(_n - 1, 5) + 1
 
-Selected features with non-zero coefficients:
-  education:     2156.34
-  experience:    1089.23
-  age:            234.56
-  hours_worked:   178.92
-  industry_tech:  156.78
-  gender:        -234.12
-  urban:          89.45
+<span class="code-comment">* Perform 5-fold CV</span>
+<span class="code-keyword">gen</span> cv_resid_sq = .
 
-Dropped features (coefficient = 0):
-  height, birth_month, zip_code, eye_color, ...
+<span class="code-keyword">forvalues</span> k = 1/5 {
+    <span class="code-keyword">quietly regress</span> y x1-x10 <span class="code-keyword">if</span> fold != `k'
+    <span class="code-keyword">predict</span> yhat_temp <span class="code-keyword">if</span> fold == `k'
+    <span class="code-keyword">replace</span> cv_resid_sq = (y - yhat_temp)^2 <span class="code-keyword">if</span> fold == `k'
+    <span class="code-keyword">drop</span> yhat_temp
+}
 
-Test RMSE: 7856.23 (vs. 8234.56 for OLS)</pre>
+<span class="code-comment">* Report RMSE per fold and overall</span>
+<span class="code-keyword">display</span> <span class="code-string">"RMSE for each fold:"</span>
+<span class="code-keyword">forvalues</span> k = 1/5 {
+    <span class="code-keyword">quietly summarize</span> cv_resid_sq <span class="code-keyword">if</span> fold == `k'
+    <span class="code-keyword">display</span> <span class="code-string">"  Fold `k': "</span> %7.4f <span class="code-function">sqrt</span>(r(mean))
+}
+<span class="code-keyword">quietly summarize</span> cv_resid_sq
+<span class="code-keyword">display</span> <span class="code-string">_newline "Mean RMSE: "</span> %7.4f <span class="code-function">sqrt</span>(r(mean))</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
-        </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Tidymodels package for resampling. vfold_cv() creates V-fold cross-validation splits.">rsample</span>)
 
-        <h2 id="trees">11.6 Tree-Based Methods</h2>
-
-        <p>
-          Decision trees partition the feature space into regions, predicting the mean (regression) or mode (classification) in each region.
-        </p>
-
-        <h3>Random Forests</h3>
-        <p>
-          <strong>Random forests</strong> average many trees, each trained on a bootstrap sample with random feature subsets. This reduces variance dramatically.
-        </p>
-
-        <h3>Gradient Boosting</h3>
-        <p>
-          <strong>Gradient boosting</strong> builds trees sequentially, with each tree correcting the errors of previous trees. XGBoost and LightGBM are popular implementations.
-        </p>
-
-        <div class="code-tabs" data-runnable="ml-4">
-          <div class="tab-buttons">
-            <button class="tab-button active" data-lang="python">Tree Methods</button>
-          </div>
-          <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Python: Random Forest and XGBoost</span>
-<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Random Forest builds many decision trees and averages their predictions. 'Random' because each tree sees random subsets of data and features.">RandomForestRegressor</span>
-<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="XGBoost (Extreme Gradient Boosting) is a powerful algorithm that builds trees sequentially, with each tree correcting the previous ones' mistakes.">xgboost</span> <span class="code-keyword">as</span> xgb
-
-<span class="code-comment"># Random Forest</span>
-<span class="code-tooltip" data-tip="Creates a forest of 100 trees, each with max depth 10. More trees = more stable predictions but slower training.">rf = RandomForestRegressor(n_estimators=<span class="code-number">100</span>, max_depth=<span class="code-number">10</span>, random_state=<span class="code-number">42</span>)</span>
-<span class="code-tooltip" data-tip="Trains all 100 trees on the data. Each tree learns from a random subset, reducing overfitting.">rf.fit(X_train, y_train)</span>
-
-<span class="code-comment"># Feature importance</span>
-<span class="code-tooltip" data-tip="Feature importance shows which variables matter most for predictions. Random forests compute this by measuring how much each feature improves predictions across all trees.">importance = pd.DataFrame({
-    <span class="code-string">'feature'</span>: X.columns,
-    <span class="code-string">'importance'</span>: rf.feature_importances_
-}).sort_values(<span class="code-string">'importance'</span>, ascending=<span class="code-keyword">False</span>)</span>
-
-<span class="code-comment"># XGBoost</span>
-<span class="code-tooltip" data-tip="Creates an XGBoost model. learning_rate controls how much each tree contributes (smaller = more conservative). max_depth limits tree complexity.">xgb_model = xgb.XGBRegressor(n_estimators=<span class="code-number">100</span>, learning_rate=<span class="code-number">0.1</span>, max_depth=<span class="code-number">5</span>)</span>
-<span class="code-tooltip" data-tip="Trains XGBoost by building trees one at a time, where each new tree focuses on correcting errors from previous trees.">xgb_model.fit(X_train, y_train)</span></code></pre>
-            <button class="run-btn" data-lang="python">Run Code</button>
-          </div>
-        </div>
-
-        <!-- Output simulation for ml-4 -->
-        <div class="code-output-container" data-for="ml-4" style="display:none;">
-          <div class="code-output" data-lang="python">
-            <div class="output-header">Python Output</div>
-            <pre class="output-content">Training Random Forest with 100 trees...
-[====================================] 100% Complete
-
-Random Forest Results:
-  Train RMSE: 3456.78
-  Test RMSE:  7234.12
-  R-squared:  0.72
-
-Feature Importance:
-       feature  importance
-0    education      0.3421
-1   experience      0.2856
-2          age      0.1923
-3 hours_worked      0.0892
-4       gender      0.0456
-...
-
-Training XGBoost with 100 boosting rounds...
-[0]   train-rmse:45234.12  valid-rmse:45678.90
-[25]  train-rmse:12345.67  valid-rmse:13456.78
-[50]  train-rmse:6789.01   valid-rmse:8234.56
-[75]  train-rmse:4567.89   valid-rmse:7456.23
-[100] train-rmse:3890.12   valid-rmse:7123.45
-
-XGBoost Test RMSE: 7123.45 (best model)</pre>
-          </div>
-        </div>
-
-        <h2 id="neural-networks">11.7 Neural Networks</h2>
-
-        <p>
-          Neural networks learn hierarchical representations through layers of nonlinear transformations. Deep learning refers to networks with many layers.
-        </p>
-
-        <div class="code-tabs" data-runnable="ml-5">
-          <div class="tab-buttons">
-            <button class="tab-button active" data-lang="python">Simple Neural Network</button>
-          </div>
-          <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Python: Neural network with PyTorch</span>
-<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="PyTorch is a popular deep learning library. It provides tools for building and training neural networks with automatic differentiation.">torch</span>
-<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="torch.nn contains neural network building blocks: layers, activation functions, loss functions. Think of them as LEGO pieces for building networks.">torch.nn</span> <span class="code-keyword">as</span> nn
-
-<span class="code-tooltip" data-tip="Defines a neural network class. nn.Module is the base class for all neural networks in PyTorch - your custom networks inherit from it."><span class="code-keyword">class</span> <span class="code-function">SimpleNN</span>(nn.Module):</span>
-    <span class="code-tooltip" data-tip="The constructor defines the network's architecture - what layers it has. This runs once when you create the model."><span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, input_size, hidden_size, output_size):</span>
-        <span class="code-function">super</span>().__init__()
-        <span class="code-tooltip" data-tip="A linear layer (also called 'fully connected' or 'dense'). Takes input_size numbers and outputs hidden_size numbers through weighted sums.">self.layer1 = nn.Linear(input_size, hidden_size)</span>
-        <span class="code-tooltip" data-tip="ReLU (Rectified Linear Unit) activation: outputs the input if positive, zero otherwise. This adds non-linearity so the network can learn complex patterns.">self.relu = nn.ReLU()</span>
-        <span class="code-tooltip" data-tip="Second linear layer: transforms hidden layer to final output. For regression, output_size=1 predicts a single number.">self.layer2 = nn.Linear(hidden_size, output_size)</span>
-
-    <span class="code-tooltip" data-tip="The forward method defines how data flows through the network. PyTorch calls this automatically when you pass data to the model."><span class="code-keyword">def</span> <span class="code-function">forward</span>(self, x):</span>
-        <span class="code-tooltip" data-tip="Data flows: input -> layer1 (linear) -> relu (activation) -> layer2 (linear) -> output. Each step transforms the data.">x = self.layer1(x)
-        x = self.relu(x)
-        x = self.layer2(x)</span>
-        <span class="code-keyword">return</span> x
-
-<span class="code-comment"># Create model</span>
-<span class="code-tooltip" data-tip="Instantiates the network: 10 input features, 64 neurons in hidden layer, 1 output. The hidden layer is where the 'learning' happens.">model = SimpleNN(input_size=<span class="code-number">10</span>, hidden_size=<span class="code-number">64</span>, output_size=<span class="code-number">1</span>)</span>
-
-<span class="code-comment"># Loss and optimizer</span>
-<span class="code-tooltip" data-tip="MSE (Mean Squared Error) loss measures how wrong predictions are. The optimizer tries to minimize this during training.">criterion = nn.MSELoss()</span>
-<span class="code-tooltip" data-tip="Adam optimizer updates network weights to reduce loss. lr (learning rate) controls step size - too high = unstable, too low = slow learning.">optimizer = torch.optim.Adam(model.parameters(), lr=<span class="code-number">0.001</span>)</span></code></pre>
-            <button class="run-btn" data-lang="python">Run Code</button>
-          </div>
-        </div>
-
-        <!-- Output simulation for ml-5 -->
-        <div class="code-output-container" data-for="ml-5" style="display:none;">
-          <div class="code-output" data-lang="python">
-            <div class="output-header">Python Output</div>
-            <pre class="output-content">SimpleNN(
-  (layer1): Linear(in_features=10, out_features=64, bias=True)
-  (relu): ReLU()
-  (layer2): Linear(in_features=64, out_features=1, bias=True)
-)
-
-Total parameters: 705
-  layer1.weight: 640 params (10 x 64)
-  layer1.bias:   64 params
-  layer2.weight: 64 params (64 x 1)
-  layer2.bias:   1 param
-
-Training for 100 epochs...
-Epoch [10/100], Loss: 45234567.89
-Epoch [20/100], Loss: 23456789.12
-Epoch [30/100], Loss: 12345678.90
-Epoch [40/100], Loss: 8765432.10
-Epoch [50/100], Loss: 6543210.98
-...
-Epoch [100/100], Loss: 2345678.90
-
-Final Test RMSE: 6891.23
-Model ready for predictions.</pre>
-          </div>
-        </div>
-
-        <h2 id="causal-ml">11.8 ML for Causal Inference</h2>
-
-        <p>
-          A growing field combines ML's predictive power with causal inference frameworks. Key approaches:
-        </p>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Use Case</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Double ML (DML)</strong></td>
-              <td>Use ML to partial out confounders, then estimate treatment effect</td>
-            </tr>
-            <tr>
-              <td><strong>Causal Forests</strong></td>
-              <td>Estimate heterogeneous treatment effects</td>
-            </tr>
-            <tr>
-              <td><strong>LASSO for Controls</strong></td>
-              <td>Variable selection for control variables</td>
-            </tr>
-            <tr>
-              <td><strong>Synthetic Control</strong></td>
-              <td>ML-weighted comparison units</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="citation">
-          <div class="citation-title">Key References</div>
-          <ul>
-            <li>Mullainathan, S. & Spiess, J. (2017). Machine Learning: An Applied Econometric Approach. <em>Journal of Economic Perspectives</em>, 31(2), 87-106.</li>
-            <li>Athey, S. & Imbens, G. (2019). Machine Learning Methods That Economists Should Know About. <em>Annual Review of Economics</em>.</li>
-            <li>Chernozhukov, V., et al. (2018). Double/Debiased Machine Learning for Treatment and Structural Parameters. <em>Econometrics Journal</em>.</li>
-            <li>Wager, S. & Athey, S. (2018). Estimation and Inference of Heterogeneous Treatment Effects using Random Forests. <em>JASA</em>.</li>
-          </ul>
-        </div>
-
-        <h2 id="exercises">11.9 Exercises</h2>
-
-        <!-- Exercise 11.1: Interactive -->
-        <div class="interactive-exercise" data-exercise="11.1">
-          <h4>Exercise 11.1: Machine Learning Workflow</h4>
-          <p>Practice a basic supervised learning workflow. Complete these tasks:</p>
-          <ol>
-            <li>Split data into training and test sets</li>
-            <li>Fit a model (linear regression or random forest)</li>
-            <li>Evaluate model performance (RMSE or accuracy)</li>
-          </ol>
-
-          <div class="exercise-editor">
-            <div class="editor-tabs">
-              <button class="lang-btn active" data-lang="python">Python</button>
-              <button class="lang-btn" data-lang="r">R</button>
-            </div>
-
-            <textarea class="code-editor" data-lang="python" placeholder="# Write your Python code here
-# Task 1: Split data into train/test sets
-# Task 2: Fit a model
-# Task 3: Evaluate model performance
-"></textarea>
-
-            <textarea class="code-editor" data-lang="r" style="display:none;" placeholder="# Write your R code here
-# Task 1: Split data into train/test sets
-# Task 2: Fit a model
-# Task 3: Evaluate model performance
-"></textarea>
-          </div>
-
-          <div class="exercise-actions">
-            <button class="btn-check-score">Check My Score</button>
-            <div class="score-display" style="display:none;">
-              <div class="score-circle">
-                <span class="score-value">0</span>
-                <span class="score-label">/100</span>
-              </div>
-              <div class="score-feedback"></div>
-            </div>
-            <button class="btn-show-solution" style="display:none;">Show Solution Step by Step</button>
-          </div>
-
-          <div class="solution-steps" style="display:none;">
-            <div class="solution-header">
-              <h5>Solution</h5>
-              <span class="step-counter">Step <span class="current-step">0</span> of <span class="total-steps">3</span></span>
-            </div>
-
-            <!-- Python Solutions -->
-            <div class="solution-step" data-lang="python" data-step="1" style="display:none;">
-              <div class="step-description">Task 1: Split data into training and test sets</div>
-              <pre class="step-code"><code><span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=<span class="code-number">0.2</span>, random_state=<span class="code-number">42</span>
-)</code></pre>
-            </div>
-            <div class="solution-step" data-lang="python" data-step="2" style="display:none;">
-              <div class="step-description">Task 2: Fit a model</div>
-              <pre class="step-code"><code><span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestRegressor
-
-model = RandomForestRegressor(n_estimators=<span class="code-number">100</span>)
-model.fit(X_train, y_train)</code></pre>
-            </div>
-            <div class="solution-step" data-lang="python" data-step="3" style="display:none;">
-              <div class="step-description">Task 3: Evaluate model performance</div>
-              <pre class="step-code"><code><span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error
-
-y_pred = model.predict(X_test)
-rmse = mean_squared_error(y_test, y_pred, squared=<span class="code-keyword">False</span>)
-<span class="code-function">print</span>(f<span class="code-string">"RMSE: {rmse:.2f}"</span>)</code></pre>
-            </div>
-
-            <!-- R Solutions -->
-            <div class="solution-step" data-lang="r" data-step="1" style="display:none;">
-              <div class="step-description">Task 1: Split data into training and test sets</div>
-              <pre class="step-code"><code><span class="code-function">library</span>(tidymodels)
-
+<span class="code-comment"># Generate data</span>
 <span class="code-function">set.seed</span>(<span class="code-number">42</span>)
-split <- <span class="code-function">initial_split</span>(df, prop = <span class="code-number">0.8</span>)
-train <- <span class="code-function">training</span>(split)
-test <- <span class="code-function">testing</span>(split)</code></pre>
-            </div>
-            <div class="solution-step" data-lang="r" data-step="2" style="display:none;">
-              <div class="step-description">Task 2: Fit a model</div>
-              <pre class="step-code"><code><span class="code-comment"># Define and fit model</span>
-model_spec <- <span class="code-function">rand_forest</span>(trees = <span class="code-number">100</span>) %>%
-  <span class="code-function">set_engine</span>(<span class="code-string">"ranger"</span>) %>%
-  <span class="code-function">set_mode</span>(<span class="code-string">"regression"</span>)
+n &lt;- <span class="code-number">500</span>
+X &lt;- <span class="code-function">matrix</span>(<span class="code-function">rnorm</span>(n * <span class="code-number">10</span>), ncol = <span class="code-number">10</span>)
+<span class="code-function">colnames</span>(X) &lt;- <span class="code-function">paste0</span>(<span class="code-string">"x"</span>, <span class="code-number">1</span>:<span class="code-number">10</span>)
+y &lt;- <span class="code-number">2</span> * X[, <span class="code-number">1</span>] + <span class="code-number">1.5</span> * X[, <span class="code-number">2</span>] - <span class="code-number">1</span> * X[, <span class="code-number">3</span>] + <span class="code-function">rnorm</span>(n) * <span class="code-number">0.5</span>
+df &lt;- <span class="code-function">data.frame</span>(y = y, X)
 
-model_fit <- model_spec %>%
-  <span class="code-function">fit</span>(outcome ~ ., data = train)</code></pre>
-            </div>
-            <div class="solution-step" data-lang="r" data-step="3" style="display:none;">
-              <div class="step-description">Task 3: Evaluate model performance</div>
-              <pre class="step-code"><code><span class="code-comment"># Predict and evaluate</span>
-predictions <- <span class="code-function">predict</span>(model_fit, test)
-results <- test %>% <span class="code-function">bind_cols</span>(predictions)
+<span class="code-comment"># Create 5-fold CV splits</span>
+folds &lt;- <span class="code-tooltip" data-tip="Creates 5-fold cross-validation resampling object. Each fold is used as the test set exactly once.">vfold_cv</span>(df, v = <span class="code-number">5</span>)
 
-rmse_result <- results %>%
-  <span class="code-function">rmse</span>(truth = outcome, estimate = .pred)
-<span class="code-function">print</span>(rmse_result)</code></pre>
-            </div>
+<span class="code-comment"># Compute RMSE for each fold</span>
+rmse_vals &lt;- <span class="code-function">sapply</span>(<span class="code-number">1</span>:<span class="code-number">5</span>, <span class="code-keyword">function</span>(i) {
+  train_data &lt;- <span class="code-tooltip" data-tip="Extracts the training (analysis) set from a cross-validation split.">analysis</span>(folds$splits[[i]])
+  test_data  &lt;- <span class="code-tooltip" data-tip="Extracts the test (assessment) set from a cross-validation split.">assessment</span>(folds$splits[[i]])
+  model &lt;- <span class="code-function">lm</span>(y ~ ., data = train_data)
+  preds &lt;- <span class="code-function">predict</span>(model, newdata = test_data)
+  <span class="code-function">sqrt</span>(<span class="code-function">mean</span>((test_data$y - preds)^2))
+})
 
-            <div class="solution-navigation">
-              <button class="btn-prev-step" disabled>Previous</button>
-              <button class="btn-next-step">Next Step</button>
-            </div>
+<span class="code-function">cat</span>(<span class="code-string">"RMSE for each fold:\n"</span>)
+<span class="code-keyword">for</span> (i <span class="code-keyword">in</span> <span class="code-number">1</span>:<span class="code-number">5</span>) {
+  <span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"  Fold %d: %.4f\n"</span>, i, rmse_vals[i]))
+}
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"\nMean RMSE:  %.4f\n"</span>, <span class="code-function">mean</span>(rmse_vals)))
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"Std RMSE:   %.4f\n"</span>, <span class="code-function">sd</span>(rmse_vals)))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
 
+        <!-- Output simulations for ml-overview-3 -->
+        <div class="output-simulation" data-output="ml-overview-3" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>RMSE for each fold:
+  Fold 1: 0.4973
+  Fold 2: 0.5241
+  Fold 3: 0.5108
+  Fold 4: 0.4856
+  Fold 5: 0.5322
+
+Mean RMSE:  0.5100
+Std RMSE:   0.0173</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-overview-3" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>RMSE for each fold:
+  Fold 1:  0.5012
+  Fold 2:  0.5198
+  Fold 3:  0.5067
+  Fold 4:  0.4921
+  Fold 5:  0.5284
+
+Mean RMSE:  0.5096</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-overview-3" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><pre>RMSE for each fold:
+  Fold 1: 0.5031
+  Fold 2: 0.5187
+  Fold 3: 0.5095
+  Fold 4: 0.4889
+  Fold 5: 0.5299
+
+Mean RMSE:  0.5100
+Std RMSE:   0.0139</pre></div>
+        </div>
+
+
+        <!-- ============================================================ -->
+        <!-- SECTION 11.6: MODULE ROADMAP -->
+        <!-- ============================================================ -->
+        <h2 id="roadmap">11.6 &nbsp;Module Roadmap</h2>
+
+        <p>This module is organized into five subpages, each covering a major family of ML methods. Work through them in order, as later sections build on concepts from earlier ones.</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+          <a href="11a-regularization.html" style="display: block; background: #f0f9ff; border: 2px solid #bfdbfe; border-radius: 10px; padding: 1.25rem; text-decoration: none; color: inherit; transition: border-color 0.2s, box-shadow 0.2s;">
+            <strong style="color: #1e40af; font-size: 1rem;">11A: Regularization</strong>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #475569; line-height: 1.4;">Ridge, LASSO, Elastic Net, Post-LASSO for causal inference</p>
+            <span style="display: inline-block; margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">~2.5 hours</span>
+          </a>
+          <a href="11b-trees.html" style="display: block; background: #f0fdf4; border: 2px solid #bbf7d0; border-radius: 10px; padding: 1.25rem; text-decoration: none; color: inherit; transition: border-color 0.2s, box-shadow 0.2s;">
+            <strong style="color: #166534; font-size: 1rem;">11B: Tree-Based Methods</strong>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #475569; line-height: 1.4;">Decision Trees, Random Forests, Gradient Boosting (XGBoost)</p>
+            <span style="display: inline-block; margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">~2.5 hours</span>
+          </a>
+          <a href="11c-neural-networks.html" style="display: block; background: #fdf4ff; border: 2px solid #e9d5ff; border-radius: 10px; padding: 1.25rem; text-decoration: none; color: inherit; transition: border-color 0.2s, box-shadow 0.2s;">
+            <strong style="color: #7e22ce; font-size: 1rem;">11C: Neural Networks</strong>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #475569; line-height: 1.4;">Perceptrons, backpropagation, deep learning fundamentals</p>
+            <span style="display: inline-block; margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">~2.5 hours</span>
+          </a>
+          <a href="11d-causal-ml.html" style="display: block; background: #fff7ed; border: 2px solid #fed7aa; border-radius: 10px; padding: 1.25rem; text-decoration: none; color: inherit; transition: border-color 0.2s, box-shadow 0.2s;">
+            <strong style="color: #9a3412; font-size: 1rem;">11D: Causal ML</strong>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #475569; line-height: 1.4;">Double/Debiased ML, Causal Forests, heterogeneous treatment effects</p>
+            <span style="display: inline-block; margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">~2.5 hours</span>
+          </a>
+          <a href="11e-model-evaluation.html" style="display: block; background: #fef2f2; border: 2px solid #fecaca; border-radius: 10px; padding: 1.25rem; text-decoration: none; color: inherit; transition: border-color 0.2s, box-shadow 0.2s;">
+            <strong style="color: #991b1b; font-size: 1rem;">11E: Model Evaluation</strong>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #475569; line-height: 1.4;">Metrics, confusion matrices, ROC curves, calibration, comparing models</p>
+            <span style="display: inline-block; margin-top: 0.5rem; font-size: 0.75rem; color: #64748b;">~2 hours</span>
+          </a>
+        </div>
+
+        <!-- Method Comparison -->
+        <h3>Comparing the Major Method Families</h3>
+        <div class="distinction-box" style="grid-template-columns: 1fr 1fr 1fr;">
+          <div class="distinction-card">
+            <h4>Regularization (11A)</h4>
+            <ul>
+              <li>Linear models with penalty terms</li>
+              <li>Fast, interpretable, well-understood theory</li>
+              <li>Best when relationship is approximately linear</li>
+              <li>LASSO provides automatic variable selection</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4 style="color: #059669;">Trees (11B)</h4>
+            <ul>
+              <li>Nonparametric, capture interactions naturally</li>
+              <li>Random forests and boosting are very powerful</li>
+              <li>No need to specify functional form</li>
+              <li>Often best &ldquo;out-of-the-box&rdquo; performance</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4 style="color: #7c3aed;">Neural Networks (11C)</h4>
+            <ul>
+              <li>Universal function approximators</li>
+              <li>Excel with unstructured data (text, images)</li>
+              <li>Require large datasets and careful tuning</li>
+              <li>Less common in applied economics (so far)</li>
+            </ul>
+          </div>
+        </div>
+
+
+        <!-- ============================================================ -->
+        <!-- REFERENCES -->
+        <!-- ============================================================ -->
+        <h2>References</h2>
+        <ul style="line-height: 1.8;">
+          <li>Mullainathan, S. &amp; Spiess, J. (2017). &ldquo;Machine Learning: An Applied Econometric Approach.&rdquo; <em>Journal of Economic Perspectives</em>, 31(2), 87&ndash;106.</li>
+          <li>Athey, S. &amp; Imbens, G. (2019). &ldquo;Machine Learning Methods That Economists Should Know About.&rdquo; <em>Annual Review of Economics</em>, 11, 685&ndash;725.</li>
+          <li>James, G., Witten, D., Hastie, T., &amp; Tibshirani, R. (2013). <em>An Introduction to Statistical Learning</em>. Springer.</li>
+          <li>Hastie, T., Tibshirani, R., &amp; Friedman, J. (2009). <em>The Elements of Statistical Learning</em>. 2nd ed. Springer.</li>
+        </ul>
+
+
+        <!-- Navigation Footer -->
         <div class="nav-footer">
           <a href="10-nlp-history.html" class="nav-link prev">Module 10: NLP History</a>
-          <a href="12-llms.html" class="nav-link next">Module 12: LLMs</a>
+          <a href="11a-regularization.html" class="nav-link next">11A: Regularization</a>
         </div>
       </div>
     </main>
@@ -982,7 +984,6 @@ rmse_result <- results %>%
     let tooltipEl = null;
     let currentTarget = null;
     let hideTimeout = null;
-
     function createTooltip() {
       if (tooltipEl) return tooltipEl;
       tooltipEl = document.createElement('div');
@@ -990,245 +991,66 @@ rmse_result <- results %>%
       document.body.appendChild(tooltipEl);
       return tooltipEl;
     }
-
     function positionTooltip(target) {
       const tooltip = createTooltip();
       const tipText = target.getAttribute('data-tip');
       if (!tipText) return;
-
       tooltip.textContent = tipText;
       tooltip.className = 'tooltip-popup';
-
       const targetRect = target.getBoundingClientRect();
       let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs');
-      let containerRect = container ? container.getBoundingClientRect() : {
-        left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight
-      };
-
+      let containerRect = container ? container.getBoundingClientRect() : { left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight };
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       const padding = 10;
-
       tooltip.style.visibility = 'hidden';
       tooltip.style.display = 'block';
       tooltip.classList.add('visible');
-
       const tooltipRect = tooltip.getBoundingClientRect();
       const tooltipWidth = tooltipRect.width;
       const tooltipHeight = tooltipRect.height;
-
       let left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
       let top = targetRect.top - tooltipHeight - 8;
       let arrowClass = 'arrow-bottom';
-
-      if (top < padding) {
-        top = targetRect.bottom + 8;
-        arrowClass = 'arrow-top';
-      }
-
-      if (top + tooltipHeight > viewportHeight - padding) {
-        top = targetRect.top - tooltipHeight - 8;
-        arrowClass = 'arrow-bottom';
-      }
-
+      if (top < padding) { top = targetRect.bottom + 8; arrowClass = 'arrow-top'; }
+      if (top + tooltipHeight > viewportHeight - padding) { top = targetRect.top - tooltipHeight - 8; arrowClass = 'arrow-bottom'; }
       if (left < padding) left = padding;
       if (left + tooltipWidth > viewportWidth - padding) left = viewportWidth - tooltipWidth - padding;
-
       if (container) {
         const minLeft = Math.max(padding, containerRect.left);
         const maxRight = Math.min(viewportWidth - padding, containerRect.right);
         if (left < minLeft) left = minLeft;
         if (left + tooltipWidth > maxRight) left = maxRight - tooltipWidth;
       }
-
       tooltip.style.left = left + 'px';
       tooltip.style.top = top + 'px';
       tooltip.style.visibility = 'visible';
       tooltip.classList.add(arrowClass);
     }
-
     function showTooltip(target) {
       if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
       currentTarget = target;
       positionTooltip(target);
     }
-
     function hideTooltip() {
       hideTimeout = setTimeout(function() {
         if (tooltipEl) tooltipEl.classList.remove('visible');
         currentTarget = null;
       }, 100);
     }
-
     document.addEventListener('mouseenter', function(e) {
       if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target);
     }, true);
-
     document.addEventListener('mouseleave', function(e) {
       if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip();
     }, true);
-
     document.addEventListener('scroll', function() {
       if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
     }, true);
-
     window.addEventListener('resize', function() {
       if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
     });
   })();
-  </script>
-
-  <!-- Interactive Exercise Script -->
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const exercisePatterns = {
-      '11.1': {
-        python: {
-          patterns: [
-            // Train-test split - accepts: train_test_split, KFold, cross_val_score, split
-            { regex: /train_test_split|KFold|cross_val_score|StratifiedKFold|\.split\s*\(|X_train.*X_test|training.*test/i, points: 34, description: 'Split data into train/test' },
-            // Fit model - accepts: .fit(), RandomForest, LinearRegression, XGBoost, model.fit
-            { regex: /\.fit\s*\(|RandomForest|LinearRegression|LogisticRegression|XGBRegressor|XGBClassifier|GradientBoosting|DecisionTree|SVM|model\s*=.*\(/i, points: 33, description: 'Fit a model' },
-            // Evaluate - accepts: mean_squared_error, accuracy_score, RMSE, score, predict
-            { regex: /mean_squared_error|accuracy_score|r2_score|rmse|\.score\s*\(|\.predict\s*\(|classification_report|confusion_matrix|roc_auc/i, points: 33, description: 'Evaluate model performance' }
-          ]
-        },
-        r: {
-          patterns: [
-            // Train-test split - accepts: initial_split, training, testing, createDataPartition
-            { regex: /initial_split|training\s*\(|testing\s*\(|createDataPartition|sample\s*\(|train.*test|vfold_cv/i, points: 34, description: 'Split data into train/test' },
-            // Fit model - accepts: fit(), lm, glm, rand_forest, boost_tree, linear_reg
-            { regex: /fit\s*\(|rand_forest|boost_tree|linear_reg|logistic_reg|decision_tree|lm\s*\(|glm\s*\(|randomForest\s*\(/i, points: 33, description: 'Fit a model' },
-            // Evaluate - accepts: rmse, accuracy, predict, metrics, yardstick
-            { regex: /rmse\s*\(|accuracy\s*\(|predict\s*\(|metrics\s*\(|collect_metrics|roc_auc|conf_mat|bind_cols.*\.pred/i, points: 33, description: 'Evaluate model performance' }
-          ]
-        }
-      }
-    };
-
-    // Initialize interactive exercises
-    document.querySelectorAll('.interactive-exercise').forEach(exercise => {
-      const exerciseId = exercise.dataset.exercise;
-      let currentLang = 'python';
-      let currentStep = 0;
-      let hasCheckedScore = false;
-
-      exercise.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const lang = this.dataset.lang;
-          currentLang = lang;
-          exercise.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-          this.classList.add('active');
-          exercise.querySelectorAll('.code-editor').forEach(editor => {
-            editor.style.display = editor.dataset.lang === lang ? 'block' : 'none';
-          });
-          if (hasCheckedScore) resetSolutionSteps();
-        });
-      });
-
-      const checkBtn = exercise.querySelector('.btn-check-score');
-      const scoreDisplay = exercise.querySelector('.score-display');
-      const scoreValue = exercise.querySelector('.score-value');
-      const scoreFeedback = exercise.querySelector('.score-feedback');
-      const showSolutionBtn = exercise.querySelector('.btn-show-solution');
-
-      checkBtn.addEventListener('click', function() {
-        const editor = exercise.querySelector(`.code-editor[data-lang="${currentLang}"]`);
-        const code = editor.value;
-        const patterns = exercisePatterns[exerciseId]?.[currentLang]?.patterns || [];
-
-        let score = 0;
-        let matched = [];
-        let missed = [];
-
-        patterns.forEach(p => {
-          if (p.regex.test(code)) {
-            score += p.points;
-            matched.push(p.description);
-          } else {
-            missed.push(p.description);
-          }
-        });
-
-        score = Math.min(100, score);
-        scoreValue.textContent = score;
-        scoreValue.className = 'score-value';
-        if (score >= 80) scoreValue.classList.add('score-high');
-        else if (score >= 50) scoreValue.classList.add('score-medium');
-        else scoreValue.classList.add('score-low');
-
-        if (score === 100) {
-          scoreFeedback.textContent = 'Perfect! All tasks completed correctly.';
-        } else if (score >= 70) {
-          scoreFeedback.textContent = `Good work! Missing: ${missed.join(', ')}.`;
-        } else if (score >= 40) {
-          scoreFeedback.textContent = `Getting there. Missing: ${missed.join(', ')}.`;
-        } else {
-          scoreFeedback.textContent = `Keep trying! Check: ${missed.slice(0, 2).join(', ')}.`;
-        }
-
-        scoreDisplay.style.display = 'flex';
-        showSolutionBtn.style.display = 'inline-block';
-        hasCheckedScore = true;
-      });
-
-      const solutionSteps = exercise.querySelector('.solution-steps');
-      const prevBtn = exercise.querySelector('.btn-prev-step');
-      const nextBtn = exercise.querySelector('.btn-next-step');
-      const currentStepEl = exercise.querySelector('.current-step');
-      const totalStepsEl = exercise.querySelector('.total-steps');
-
-      function resetSolutionSteps() {
-        currentStep = 0;
-        currentStepEl.textContent = '0';
-        exercise.querySelectorAll('.solution-step').forEach(step => {
-          step.style.display = 'none';
-        });
-        updateNavButtons();
-      }
-
-      function updateNavButtons() {
-        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
-        totalStepsEl.textContent = totalSteps;
-        prevBtn.disabled = currentStep === 0;
-        nextBtn.disabled = currentStep >= totalSteps;
-        nextBtn.textContent = currentStep >= totalSteps ? 'Complete' : 'Next Step';
-      }
-
-      function showStep(stepNum) {
-        const steps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`);
-        steps.forEach((step, idx) => {
-          step.style.display = (idx + 1) <= stepNum ? 'block' : 'none';
-        });
-        currentStepEl.textContent = stepNum;
-      }
-
-      showSolutionBtn.addEventListener('click', function() {
-        solutionSteps.style.display = 'block';
-        resetSolutionSteps();
-        this.style.display = 'none';
-      });
-
-      nextBtn.addEventListener('click', function() {
-        const totalSteps = exercise.querySelectorAll(`.solution-step[data-lang="${currentLang}"]`).length;
-        if (currentStep < totalSteps) {
-          currentStep++;
-          showStep(currentStep);
-          updateNavButtons();
-        }
-      });
-
-      prevBtn.addEventListener('click', function() {
-        if (currentStep > 0) {
-          currentStep--;
-          showStep(currentStep);
-          updateNavButtons();
-        }
-      });
-
-      updateNavButtons();
-    });
-  });
   </script>
 </body>
 </html>

@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>11E Model Evaluation | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .protected-content pre, .protected-content code, .protected-content .code-block, .protected-content .code-tabs { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup.visible { opacity: 1; }
+    .distinction-box { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+    @media (max-width: 768px) { .distinction-box { grid-template-columns: 1fr; } }
+    .distinction-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+    .distinction-card h4 { margin: 0 0 0.5rem 0; color: #2563eb; }
+    .distinction-card ul { margin: 0; padding-left: 1.25rem; }
+  </style>
+</head>
+<body>
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms — Python, Stata, R setup; IDEs (RStudio, VS Code, Jupyter)</li>
+          <li><strong>Module 1:</strong> Getting Started — Installation, basic syntax, packages</li>
+          <li><strong>Module 2:</strong> Data Harnessing — File import, APIs, web scraping</li>
+          <li><strong>Module 3:</strong> Data Exploration — Inspection, summary statistics, visualization</li>
+          <li><strong>Module 4:</strong> Data Cleaning — Data quality, transformation, validation</li>
+          <li><strong>Module 5:</strong> Data Analysis — Statistical analysis, simulation, experimental design</li>
+          <li><strong>Module 6:</strong> Causal Inference — Matching, DiD, RDD, IV, Synthetic Control</li>
+          <li><strong>Module 7:</strong> Estimation Methods — Standard errors, panel data, MLE/GMM</li>
+          <li><strong>Module 8:</strong> Replicability — Project organization, documentation, replication packages</li>
+          <li><strong>Module 9:</strong> Git & GitHub — Version control, collaboration, branching</li>
+          <li><strong>Module 10:</strong> History of NLP — From ELIZA to Transformers</li>
+          <li><strong>Module 11:</strong> Machine Learning — Prediction, regularization, neural networks</li>
+          <li><strong>Module 12:</strong> Large Language Models — How LLMs work, prompting, APIs</li>
+        </ul>
+      </div>
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li class="has-subnav active">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li class="active"><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-wrapper">
+        <div class="breadcrumb">
+          <a href="11-machine-learning.html">11 Machine Learning</a> &raquo; Model Evaluation
+        </div>
+
+        <h1>11E &nbsp;Model Evaluation</h1>
+        <div class="module-meta">
+          <span>~2 hours</span>
+          <span>Validation Strategies, Regression Metrics, Classification Metrics, Model Selection</span>
+        </div>
+
+        <!-- Learning Objectives -->
+        <div class="info-box">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Understand why evaluating on training data is misleading and how overfitting distorts performance estimates</li>
+            <li>Implement train-test splits and K-fold cross-validation in Python, Stata, and R</li>
+            <li>Compute and interpret regression metrics: RMSE, MAE, R-squared, and MAPE</li>
+            <li>Compute and interpret classification metrics: accuracy, precision, recall, F1, and AUC-ROC</li>
+            <li>Use proper evaluation strategies to compare and select among competing models</li>
+          </ul>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="toc">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#why-evaluation">Why Evaluation Matters</a></li>
+            <li><a href="#train-test-split">Train-Test Split</a></li>
+            <li><a href="#cross-validation">K-Fold Cross-Validation</a></li>
+            <li><a href="#regression-metrics">Regression Metrics</a></li>
+            <li><a href="#classification-metrics">Classification Metrics</a></li>
+            <li><a href="#model-selection">Model Selection and Comparison</a></li>
+            <li><a href="#pitfalls">Common Pitfalls</a></li>
+          </ul>
+        </div>
+
+
+        <!-- ===================== WHY EVALUATION MATTERS ===================== -->
+        <h2 id="why-evaluation">Why Evaluation Matters</h2>
+
+        <p>Every model you have encountered in this course — from OLS regression to LASSO, random forests, and neural networks — needs to be evaluated. But evaluated on what? The answer to this question is one of the most important ideas in all of machine learning, and it separates rigorous empirical work from misleading results.</p>
+
+        <p>The central problem is <span class="code-tooltip" data-tip="When a model learns not only the true underlying pattern in the data but also the noise and idiosyncratic features of the particular training sample. An overfit model performs well on training data but poorly on new data."><strong>overfitting</strong></span>. A sufficiently flexible model — a deep neural network, a random forest with many trees, or even an OLS regression with hundreds of interaction terms — can always achieve excellent performance on the data it was trained on. It does this by memorizing the noise, the outliers, and the quirks of that specific dataset. The model's apparent "accuracy" is an illusion: it reflects the model's ability to recall the training data, not its ability to predict new, unseen observations.</p>
+
+        <p>Consider a simple example. Suppose you want to predict GDP growth using 20 macroeconomic indicators, and your dataset contains 50 country-year observations. If you fit a polynomial regression with enough interaction terms, you can achieve an R-squared of 1.0 on the training data — a "perfect" fit. But this model has essentially memorized your 50 data points. Give it data from a new year or a new country, and its predictions will be wildly inaccurate. The training-set R-squared of 1.0 told you nothing useful about the model's real predictive ability.</p>
+
+        <div class="info-box" style="border-left-color: #e53e3e;">
+          <h3>The Cardinal Rule of Model Evaluation</h3>
+          <p><strong>Never evaluate a model on the same data used to train it.</strong> Training-set performance is always optimistically biased. The more flexible the model, the larger the gap between training performance and true out-of-sample performance. This is not a minor technicality — it is the difference between a model that works and one that only appears to work.</p>
+        </div>
+
+        <p>The solution is conceptually simple: set aside data that the model has never seen during training, and evaluate the model's predictions on that held-out data. The specific strategies for doing this — train-test splits and cross-validation — are the subject of the next two sections. But the underlying principle is always the same: <strong>the only honest measure of a model's quality is its performance on data it has not been trained on</strong>.</p>
+
+        <p>This principle matters just as much in economics as in computer science. If you are building a model to predict firm bankruptcy, forecast inflation, or identify households eligible for a targeted policy, you need to know how well it will perform when deployed on new data. Reporting only training-set performance is analogous to judging a student by giving them the exact same exam they used to study — it tells you about memorization, not understanding.</p>
+
+
+        <!-- ===================== TRAIN-TEST SPLIT ===================== -->
+        <h2 id="train-test-split">Train-Test Split</h2>
+
+        <p>The simplest evaluation strategy is to split your data into two parts: a <strong>training set</strong> used to fit the model, and a <strong>test set</strong> (sometimes called a "hold-out set") used to evaluate it. The model never sees the test data during training — it is kept completely separate, like sealing an exam in an envelope until the student has finished studying.</p>
+
+        <p>A typical split is 80% training and 20% test, though the exact ratio depends on the size of your dataset. With very large datasets (hundreds of thousands of observations), even a 90/10 split leaves plenty of test data. With small datasets (a few hundred observations), you may need cross-validation instead (covered in the next section), because holding out 20% leaves too few observations for both reliable training and reliable evaluation.</p>
+
+        <p>Two important implementation details. First, the split should be <strong>random</strong> — if your data is sorted (by time, by country, by outcome), a non-random split would systematically exclude certain types of observations from training or testing, leading to biased results. Second, you should set a <strong>random seed</strong> so that your results are reproducible. Anyone running your code should get the same split and therefore the same results.</p>
+
+        <div class="info-box">
+          <h3>When Random Splits Are Wrong</h3>
+          <p>If your data has a <strong>time dimension</strong> (panel data, time series), a random split can leak future information into the training set. For example, if you randomly split yearly GDP data, the model might train on 2020 data and predict 2018 — it has seen the future. In these cases, use a <strong>temporal split</strong>: train on earlier periods and test on later ones. This mimics the real prediction task, where you only have past data available.</p>
+        </div>
+
+        <!-- Code Block: Train-Test Split -->
+        <div class="code-tabs" data-runnable="ml-eval-1">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Splits arrays or DataFrames into random train and test subsets. Handles the random shuffling and splitting in a single function call, ensuring features and outcomes are split consistently.">train_test_split</span>
+<span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
+
+<span class="code-comment"># Load California Housing data</span>
+housing = <span class="code-function">fetch_california_housing</span>(as_frame=<span class="code-keyword">True</span>)
+X = housing.data       <span class="code-comment"># 20,640 observations, 8 features</span>
+y = housing.target     <span class="code-comment"># Median house value (in $100k)</span>
+
+<span class="code-comment"># Split: 80% training, 20% test</span>
+X_train, X_test, y_train, y_test = <span class="code-function">train_test_split</span>(
+    X, y,
+    <span class="code-tooltip" data-tip="Fraction of the data to reserve for testing. 0.2 means 20% of the data is held out. Typical values range from 0.1 to 0.3.">test_size=0.2</span>,
+    <span class="code-tooltip" data-tip="Fixes the random number generator so the split is reproducible. Anyone running this code with random_state=42 will get the exact same split.">random_state=42</span>
+)
+
+<span class="code-function">print</span>(<span class="code-string">f"Full dataset:    {X.shape[0]:,} observations"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"Training set:    {X_train.shape[0]:,} observations ({X_train.shape[0]/X.shape[0]:.0%})"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"Test set:        {X_test.shape[0]:,} observations ({X_test.shape[0]/X.shape[0]:.0%})"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"\nFeatures:        {X.shape[1]}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"Target mean:     {y.mean():.3f} (train: {y_train.mean():.3f}, test: {y_test.mean():.3f})"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Train-test split using random number generation</span>
+<span class="code-comment">* Load example data</span>
+<span class="code-keyword">sysuse</span> auto, <span class="code-keyword">clear</span>
+
+<span class="code-comment">* Set seed for reproducibility</span>
+<span class="code-keyword">set</span> seed 42
+
+<span class="code-comment">* Generate a uniform random variable and split at 80th percentile</span>
+<span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="A uniform random draw between 0 and 1. Observations with values below 0.8 go to training; above 0.8 go to test. This gives an approximately 80/20 split.">rand = runiform()</span>
+<span class="code-keyword">gen</span> byte split = <span class="code-function">cond</span>(rand &lt;= 0.8, 1, 0)
+<span class="code-keyword">label define</span> splitlbl 1 <span class="code-string">"Train"</span> 0 <span class="code-string">"Test"</span>
+<span class="code-keyword">label values</span> split splitlbl
+
+<span class="code-comment">* Verify the split</span>
+<span class="code-keyword">tab</span> split
+
+<span class="code-comment">* Summarize the outcome in each split</span>
+<span class="code-keyword">tabstat</span> price, by(split) stat(n mean sd min max) format(%9.1f)
+
+<span class="code-comment">* Fit model on training data only</span>
+<span class="code-keyword">reg</span> price mpg weight length <span class="code-keyword">if</span> split == 1
+
+<span class="code-comment">* Generate predictions for ALL observations (train + test)</span>
+<span class="code-keyword">predict</span> yhat
+
+<span class="code-comment">* Evaluate on TEST set only</span>
+<span class="code-keyword">gen</span> resid_sq = (price - yhat)^2 <span class="code-keyword">if</span> split == 0
+<span class="code-keyword">quietly summarize</span> resid_sq
+<span class="code-keyword">display</span> <span class="code-string">"Test RMSE: "</span> <span class="code-function">sqrt</span>(r(mean))</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Train-test split using rsample (tidymodels framework)</span>
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Part of the tidymodels ecosystem. Provides functions for creating training/testing splits and resampling schemes (cross-validation, bootstrapping).">rsample</span>)
+
+<span class="code-comment"># Load built-in mtcars data (32 observations, 10 features)</span>
+<span class="code-keyword">data</span>(mtcars)
+
+<span class="code-comment"># Create an 80/20 split (stratified splits are also possible)</span>
+<span class="code-function">set.seed</span>(42)
+split_obj &lt;- <span class="code-function">initial_split</span>(mtcars, <span class="code-tooltip" data-tip="Proportion of data allocated to training. 0.8 means 80% for training, 20% for testing.">prop = 0.8</span>)
+
+<span class="code-comment"># Extract training and test sets</span>
+train_data &lt;- <span class="code-function">training</span>(split_obj)
+test_data  &lt;- <span class="code-function">testing</span>(split_obj)
+
+<span class="code-function">cat</span>(<span class="code-string">"Full dataset:   "</span>, <span class="code-function">nrow</span>(mtcars), <span class="code-string">"observations\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"Training set:   "</span>, <span class="code-function">nrow</span>(train_data), <span class="code-string">"observations"</span>,
+    <span class="code-function">sprintf</span>(<span class="code-string">"(%0.0f%%)\n"</span>, 100 * <span class="code-function">nrow</span>(train_data) / <span class="code-function">nrow</span>(mtcars)))
+<span class="code-function">cat</span>(<span class="code-string">"Test set:       "</span>, <span class="code-function">nrow</span>(test_data), <span class="code-string">"observations"</span>,
+    <span class="code-function">sprintf</span>(<span class="code-string">"(%0.0f%%)\n"</span>, 100 * <span class="code-function">nrow</span>(test_data) / <span class="code-function">nrow</span>(mtcars)))
+<span class="code-function">cat</span>(<span class="code-string">"\nTarget (mpg) mean — train:"</span>, <span class="code-function">round</span>(<span class="code-function">mean</span>(train_data$mpg), 2),
+    <span class="code-string">"  test:"</span>, <span class="code-function">round</span>(<span class="code-function">mean</span>(test_data$mpg), 2), <span class="code-string">"\n"</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output Simulations for ml-eval-1 -->
+        <div class="output-simulation" data-output="ml-eval-1" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Full dataset:    20,640 observations
+Training set:    16,512 observations (80%)
+Test set:        4,128 observations (20%)
+
+Features:        8
+Target mean:     2.069 (train: 2.072, test: 2.055)</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-1" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>     split |      Freq.     Percent        Cum.
+-----------+-----------------------------------
+     Train |         59       79.73       79.73
+      Test |         15       20.27      100.00
+-----------+-----------------------------------
+     Total |         74      100.00
+
+      split |         N      Mean       S.D.       Min       Max
+  ----------+-----------------------------------------------------
+      Train |        59    6165.3    2949.5     3291    15906
+       Test |        15    6229.9    3217.1     3748    14500
+  ----------+-----------------------------------------------------
+      Total |        74    6178.4    2993.0     3291    15906
+
+Test RMSE: 2461.38</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-1" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Full dataset:    32 observations
+Training set:    25 observations (78%)
+Test set:        7 observations (22%)
+
+Target (mpg) mean — train: 19.96   test: 20.93</pre></div>
+        </div>
+
+
+        <!-- ===================== K-FOLD CROSS-VALIDATION ===================== -->
+        <h2 id="cross-validation">K-Fold Cross-Validation</h2>
+
+        <p>A single train-test split has an obvious limitation: the evaluation depends on which observations happened to land in the test set. With a small dataset, a different random split could give substantially different results. You might get lucky (easy test observations) or unlucky (hard ones), and your performance estimate will be noisy.</p>
+
+        <p><span class="code-tooltip" data-tip="A resampling method that divides the data into K equal-sized subsets (folds). The model is trained K times, each time using K-1 folds for training and the remaining fold for testing. The final performance estimate is the average across all K rounds."><strong>K-fold cross-validation</strong></span> solves this by using every observation for both training and testing, just not at the same time. The procedure is straightforward: divide the data into K equally-sized subsets (called "folds"). Then, for each fold in turn, train the model on the other K-1 folds and evaluate it on the held-out fold. After K rounds, every observation has been in the test set exactly once. The final performance metric is the average across all K folds.</p>
+
+        <p>The most common choice is <strong>K = 5</strong> or <strong>K = 10</strong>. With 5-fold CV, each fold contains 20% of the data, and the model is trained 5 times on 80% of the data. This gives a more reliable performance estimate than a single split, because it averages over 5 different train-test configurations. The cost is computational: you must train the model K times instead of once.</p>
+
+        <!-- K-Fold Diagram -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
+          <h4 style="margin: 0 0 1.5rem 0; color: #1e293b;">5-Fold Cross-Validation</h4>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; max-width: 550px; margin: 0 auto; text-align: left;">
+            <!-- Header row -->
+            <div style="display: flex; gap: 2px; align-items: center; margin-bottom: 0.25rem;">
+              <div style="width: 60px; font-size: 0.75rem; color: #64748b; font-weight: 600;">Round</div>
+              <div style="flex: 1; font-size: 0.7rem; color: #94a3b8; text-align: center;">Fold 1</div>
+              <div style="flex: 1; font-size: 0.7rem; color: #94a3b8; text-align: center;">Fold 2</div>
+              <div style="flex: 1; font-size: 0.7rem; color: #94a3b8; text-align: center;">Fold 3</div>
+              <div style="flex: 1; font-size: 0.7rem; color: #94a3b8; text-align: center;">Fold 4</div>
+              <div style="flex: 1; font-size: 0.7rem; color: #94a3b8; text-align: center;">Fold 5</div>
+              <div style="width: 90px; font-size: 0.75rem; color: #64748b; text-align: center; font-weight: 600;">Score</div>
+            </div>
+            <!-- Round 1 -->
+            <div style="display: flex; gap: 2px; align-items: center;">
+              <div style="width: 60px; font-size: 0.8rem; color: #475569; font-weight: 500;">1</div>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #991b1b; font-weight: 600;">Test</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="width: 90px; text-align: center; font-size: 0.8rem; color: #475569;">0.831</div>
+            </div>
+            <!-- Round 2 -->
+            <div style="display: flex; gap: 2px; align-items: center;">
+              <div style="width: 60px; font-size: 0.8rem; color: #475569; font-weight: 500;">2</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #991b1b; font-weight: 600;">Test</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="width: 90px; text-align: center; font-size: 0.8rem; color: #475569;">0.847</div>
+            </div>
+            <!-- Round 3 -->
+            <div style="display: flex; gap: 2px; align-items: center;">
+              <div style="width: 60px; font-size: 0.8rem; color: #475569; font-weight: 500;">3</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #991b1b; font-weight: 600;">Test</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="width: 90px; text-align: center; font-size: 0.8rem; color: #475569;">0.819</div>
+            </div>
+            <!-- Round 4 -->
+            <div style="display: flex; gap: 2px; align-items: center;">
+              <div style="width: 60px; font-size: 0.8rem; color: #475569; font-weight: 500;">4</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #991b1b; font-weight: 600;">Test</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="width: 90px; text-align: center; font-size: 0.8rem; color: #475569;">0.853</div>
+            </div>
+            <!-- Round 5 -->
+            <div style="display: flex; gap: 2px; align-items: center;">
+              <div style="width: 60px; font-size: 0.8rem; color: #475569; font-weight: 500;">5</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #bfdbfe; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #1e40af;">Train</div>
+              <div style="flex: 1; background: #fecaca; border-radius: 4px; padding: 0.4rem; text-align: center; font-size: 0.7rem; color: #991b1b; font-weight: 600;">Test</div>
+              <div style="width: 90px; text-align: center; font-size: 0.8rem; color: #475569;">0.838</div>
+            </div>
+            <!-- Average row -->
+            <div style="display: flex; gap: 2px; align-items: center; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 2px solid #cbd5e1;">
+              <div style="flex: 1; font-size: 0.85rem; color: #1e293b; font-weight: 700;">Average R-squared across all 5 folds:</div>
+              <div style="width: 90px; text-align: center; font-size: 0.9rem; color: #1e293b; font-weight: 700;">0.838</div>
+            </div>
+          </div>
+          <p style="margin: 1.25rem 0 0; font-size: 0.85rem; color: #475569;">Each observation appears in the test set exactly once. The final score is the average across all folds.</p>
+        </div>
+
+        <p>An important variant is <span class="code-tooltip" data-tip="A cross-validation scheme where each fold preserves the percentage of samples for each class (in classification) or the distribution of the target variable (in regression). This ensures that unusual observations are not concentrated in a single fold."><strong>stratified K-fold cross-validation</strong></span>, which ensures that each fold has roughly the same distribution of the target variable. This is particularly important for classification problems with imbalanced classes — if only 5% of firms in your dataset go bankrupt, a non-stratified split might create a fold with no bankrupt firms at all, making evaluation meaningless.</p>
+
+        <!-- Code Block: K-Fold Cross-Validation -->
+        <div class="code-tabs" data-runnable="ml-eval-2">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LinearRegression
+<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestRegressor
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Evaluates a model using cross-validation. It handles the splitting, training, and evaluation automatically. Returns an array of scores, one per fold.">cross_val_score</span>
+
+<span class="code-comment"># Load data</span>
+housing = <span class="code-function">fetch_california_housing</span>()
+X, y = housing.data, housing.target
+
+<span class="code-comment"># Define two competing models</span>
+ols   = <span class="code-function">LinearRegression</span>()
+rf    = <span class="code-function">RandomForestRegressor</span>(n_estimators=100, random_state=42)
+
+<span class="code-comment"># 5-fold cross-validation for both models</span>
+<span class="code-comment"># scoring="r2" computes R-squared; scoring="neg_mean_squared_error" gives -MSE</span>
+ols_scores = <span class="code-function">cross_val_score</span>(ols, X, y, <span class="code-tooltip" data-tip="Number of folds. cv=5 means 5-fold cross-validation: train on 80%, test on 20%, repeated 5 times.">cv=5</span>, scoring=<span class="code-string">"r2"</span>)
+rf_scores  = <span class="code-function">cross_val_score</span>(rf,  X, y, cv=5, scoring=<span class="code-string">"r2"</span>)
+
+<span class="code-function">print</span>(<span class="code-string">"5-Fold Cross-Validation: R-squared"</span>)
+<span class="code-function">print</span>(<span class="code-string">"="</span> * 45)
+<span class="code-function">print</span>(<span class="code-string">f"OLS Regression:"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"  Per-fold scores: {ols_scores.round(3)}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"  Mean: {ols_scores.mean():.3f}  (Std: {ols_scores.std():.3f})"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"\nRandom Forest:"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"  Per-fold scores: {rf_scores.round(3)}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"  Mean: {rf_scores.mean():.3f}  (Std: {rf_scores.std():.3f})"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: K-fold cross-validation using the crossfold command</span>
+<span class="code-comment">* Install if needed: ssc install crossfold</span>
+
+<span class="code-keyword">sysuse</span> auto, <span class="code-keyword">clear</span>
+<span class="code-keyword">set</span> seed 42
+
+<span class="code-comment">* crossfold performs k-fold CV for regression models</span>
+<span class="code-comment">* It reports the out-of-sample RMSE for each fold</span>
+<span class="code-keyword">crossfold</span> <span class="code-tooltip" data-tip="The regression command to cross-validate. crossfold will run this command on each training fold and compute out-of-sample predictions on the held-out fold.">reg price mpg weight length</span>, k(<span class="code-tooltip" data-tip="Number of folds. k(5) splits the data into 5 groups, trains on 4, and tests on the 5th, repeating 5 times.">5</span>)
+
+<span class="code-comment">* The output shows RMSE for each fold and the overall average</span>
+<span class="code-comment">* You can also do this manually for more control:</span>
+
+<span class="code-comment">* Manual 5-fold CV</span>
+<span class="code-keyword">gen</span> fold = <span class="code-function">ceil</span>(5 * runiform())
+
+<span class="code-keyword">forvalues</span> k = 1/5 {
+    <span class="code-keyword">quietly reg</span> price mpg weight length <span class="code-keyword">if</span> fold != `k'
+    <span class="code-keyword">quietly predict</span> double yhat_`k' <span class="code-keyword">if</span> fold == `k'
+    <span class="code-keyword">quietly gen</span> double se_`k' = (price - yhat_`k')^2 <span class="code-keyword">if</span> fold == `k'
+    <span class="code-keyword">quietly summarize</span> se_`k'
+    <span class="code-keyword">display</span> <span class="code-string">"Fold `k': RMSE = "</span> <span class="code-function">sqrt</span>(r(mean))
+}
+
+<span class="code-comment">* Compute overall CV RMSE</span>
+<span class="code-keyword">egen</span> all_se = <span class="code-function">rowtotal</span>(se_1-se_5), missing
+<span class="code-keyword">quietly summarize</span> all_se
+<span class="code-keyword">display</span> <span class="code-string">"Overall CV RMSE: "</span> <span class="code-function">sqrt</span>(r(mean))</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: K-fold cross-validation using tidymodels</span>
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Provides resampling functions: vfold_cv() for K-fold CV, bootstraps(), and other resampling schemes.">rsample</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Provides a unified interface for specifying models. linear_reg(), rand_forest(), etc. work across different engines (lm, ranger, glmnet).">parsnip</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Contains metric functions: rmse(), mae(), rsq(), accuracy(), etc. for evaluating model performance.">yardstick</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Provides fit_resamples() for evaluating a model across resampled datasets (e.g., K-fold CV) without tuning.">tune</span>)
+<span class="code-keyword">library</span>(workflows)
+
+<span class="code-comment"># Load data</span>
+<span class="code-keyword">data</span>(mtcars)
+
+<span class="code-comment"># Create 5-fold cross-validation object</span>
+<span class="code-function">set.seed</span>(42)
+folds &lt;- <span class="code-function">vfold_cv</span>(mtcars, <span class="code-tooltip" data-tip="Number of folds for cross-validation. v = 5 splits the data into 5 groups.">v = 5</span>)
+
+<span class="code-comment"># Define two models</span>
+lm_spec &lt;- <span class="code-function">linear_reg</span>() |&gt; <span class="code-function">set_engine</span>(<span class="code-string">"lm"</span>)
+rf_spec &lt;- <span class="code-function">rand_forest</span>(trees = 100) |&gt;
+  <span class="code-function">set_engine</span>(<span class="code-string">"ranger"</span>) |&gt;
+  <span class="code-function">set_mode</span>(<span class="code-string">"regression"</span>)
+
+<span class="code-comment"># Create workflows (model + formula)</span>
+lm_wf &lt;- <span class="code-function">workflow</span>() |&gt; <span class="code-function">add_model</span>(lm_spec) |&gt; <span class="code-function">add_formula</span>(mpg ~ .)
+rf_wf &lt;- <span class="code-function">workflow</span>() |&gt; <span class="code-function">add_model</span>(rf_spec) |&gt; <span class="code-function">add_formula</span>(mpg ~ .)
+
+<span class="code-comment"># Fit both models using 5-fold CV</span>
+lm_results &lt;- <span class="code-function">fit_resamples</span>(lm_wf, resamples = folds, metrics = <span class="code-function">metric_set</span>(rsq, rmse))
+rf_results &lt;- <span class="code-function">fit_resamples</span>(rf_wf, resamples = folds, metrics = <span class="code-function">metric_set</span>(rsq, rmse))
+
+<span class="code-comment"># Collect and display average metrics</span>
+<span class="code-function">cat</span>(<span class="code-string">"=== OLS Regression ===\n"</span>)
+<span class="code-function">print</span>(<span class="code-function">collect_metrics</span>(lm_results))
+<span class="code-function">cat</span>(<span class="code-string">"\n=== Random Forest ===\n"</span>)
+<span class="code-function">print</span>(<span class="code-function">collect_metrics</span>(rf_results))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output Simulations for ml-eval-2 -->
+        <div class="output-simulation" data-output="ml-eval-2" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>5-Fold Cross-Validation: R-squared
+=============================================
+OLS Regression:
+  Per-fold scores: [0.596 0.609 0.593 0.607 0.592]
+  Mean: 0.599  (Std: 0.007)
+
+Random Forest:
+  Per-fold scores: [0.805 0.826 0.812 0.817 0.809]
+  Mean: 0.814  (Std: 0.007)</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-2" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>
+Fold 1:  Root Mean Squared Error =  2372.019
+Fold 2:  Root Mean Squared Error =  2781.445
+Fold 3:  Root Mean Squared Error =  2196.584
+Fold 4:  Root Mean Squared Error =  2534.717
+Fold 5:  Root Mean Squared Error =  2688.103
+
+Fold 1: RMSE = 2410.52
+Fold 2: RMSE = 2693.18
+Fold 3: RMSE = 2247.91
+Fold 4: RMSE = 2581.36
+Fold 5: RMSE = 2732.40
+Overall CV RMSE: 2541.37</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-2" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>=== OLS Regression ===
+# A tibble: 2 x 6
+  .metric .estimator  mean     n std_err .config
+  &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;
+1 rmse    standard   3.46      5  0.485  Preprocessor1_Model1
+2 rsq     standard   0.773     5  0.0631 Preprocessor1_Model1
+
+=== Random Forest ===
+# A tibble: 2 x 6
+  .metric .estimator  mean     n std_err .config
+  &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;
+1 rmse    standard   2.87      5  0.398  Preprocessor1_Model1
+2 rsq     standard   0.843     5  0.0412 Preprocessor1_Model1</pre></div>
+        </div>
+
+
+        <!-- ===================== REGRESSION METRICS ===================== -->
+        <h2 id="regression-metrics">Regression Metrics</h2>
+
+        <p>Once you have a held-out test set (or cross-validation folds), you need a metric to quantify how well the model's predictions match the actual values. For regression problems — where the outcome is a continuous variable like income, GDP, or house prices — the most commonly used metrics are RMSE, MAE, R-squared, and MAPE. Each measures a different aspect of prediction quality, and the right choice depends on your application.</p>
+
+        <h3>Root Mean Squared Error (RMSE)</h3>
+
+        <p><strong>RMSE</strong> is the most widely used regression metric. It computes the square root of the average squared prediction error:</p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin: 1rem 0; text-align: center; font-size: 1.1rem;">
+          RMSE = sqrt( (1/n) * sum( (y_i - y_hat_i)^2 ) )
+        </div>
+
+        <p>RMSE is in the same units as the outcome variable — if you are predicting house prices in dollars, the RMSE is also in dollars. This makes it directly interpretable: an RMSE of $25,000 means the model's predictions are typically about $25,000 away from the true values. Because it squares the errors before averaging, RMSE penalizes large errors disproportionately. A single prediction that is off by $100,000 contributes more to the RMSE than ten predictions that are each off by $10,000. This is often desirable — in many applications, big mistakes are much worse than small ones.</p>
+
+        <h3>Mean Absolute Error (MAE)</h3>
+
+        <p><strong>MAE</strong> takes a simpler approach — it averages the absolute prediction errors without squaring:</p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin: 1rem 0; text-align: center; font-size: 1.1rem;">
+          MAE = (1/n) * sum( |y_i - y_hat_i| )
+        </div>
+
+        <p>MAE is also in the same units as the outcome and is easier to interpret: it is literally the average size of the prediction errors. Unlike RMSE, MAE treats all errors equally — a $100,000 error contributes exactly 10 times as much as a $10,000 error. MAE is more robust to outliers than RMSE. If your data has a few extreme values that are hard to predict, RMSE will be dominated by those outliers, while MAE gives you a better sense of typical prediction quality.</p>
+
+        <h3>R-squared (Coefficient of Determination)</h3>
+
+        <p><strong>R-squared</strong> measures the proportion of variance in the outcome that is explained by the model's predictions:</p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin: 1rem 0; text-align: center; font-size: 1.1rem;">
+          R-squared = 1 - ( sum( (y_i - y_hat_i)^2 ) / sum( (y_i - y_bar)^2 ) )
+        </div>
+
+        <p>R-squared is unitless and ranges from negative infinity to 1. An R-squared of 1.0 means perfect prediction. An R-squared of 0.0 means the model does no better than simply predicting the mean of y for every observation. An R-squared below zero means the model is <em>worse</em> than predicting the mean — this can happen with out-of-sample evaluation when the model has overfit badly. The key advantage of R-squared is that it is scale-free — you can compare R-squared values across different outcome variables (e.g., predicting income vs. predicting GDP growth) in a way that RMSE does not allow.</p>
+
+        <h3>Mean Absolute Percentage Error (MAPE)</h3>
+
+        <p><strong>MAPE</strong> expresses errors as a percentage of the actual values:</p>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin: 1rem 0; text-align: center; font-size: 1.1rem;">
+          MAPE = (100/n) * sum( |y_i - y_hat_i| / |y_i| )
+        </div>
+
+        <p>MAPE is intuitive — a MAPE of 8% means predictions are off by about 8% on average. However, MAPE has a serious limitation: it is undefined when y_i = 0 and becomes extremely large when y_i is close to zero. For this reason, MAPE works best when the outcome variable is strictly positive and does not have values near zero (e.g., GDP, house prices, firm revenue).</p>
+
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>When to Use RMSE</h4>
+            <ul>
+              <li>Large errors are disproportionately costly</li>
+              <li>You want a metric in the same units as the outcome</li>
+              <li>Standard default for most ML applications</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>When to Use MAE</h4>
+            <ul>
+              <li>All error sizes are equally important</li>
+              <li>Data contains outliers or extreme values</li>
+              <li>You want a robust, easily interpretable metric</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Code Block: Regression Metrics -->
+        <div class="code-tabs" data-runnable="ml-eval-3">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
+<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestRegressor
+<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Computes the square root of the average squared prediction error. Lower is better.">mean_squared_error</span>, <span class="code-tooltip" data-tip="Computes the average of absolute prediction errors. More robust to outliers than RMSE.">mean_absolute_error</span>, <span class="code-tooltip" data-tip="Computes R-squared: the proportion of variance in y explained by predictions. 1.0 is perfect; 0 means the model is no better than predicting the mean.">r2_score</span>, <span class="code-tooltip" data-tip="Computes the average absolute percentage error. Requires strictly positive y values.">mean_absolute_percentage_error</span>
+
+<span class="code-comment"># Load data and split</span>
+housing = <span class="code-function">fetch_california_housing</span>()
+X_train, X_test, y_train, y_test = <span class="code-function">train_test_split</span>(
+    housing.data, housing.target, test_size=0.2, random_state=42
+)
+
+<span class="code-comment"># Train a random forest</span>
+rf = <span class="code-function">RandomForestRegressor</span>(n_estimators=200, random_state=42)
+rf.<span class="code-function">fit</span>(X_train, y_train)
+
+<span class="code-comment"># Generate predictions on the TEST set</span>
+y_pred = rf.<span class="code-function">predict</span>(X_test)
+
+<span class="code-comment"># Compute all regression metrics</span>
+rmse  = <span class="code-function">mean_squared_error</span>(y_test, y_pred, squared=<span class="code-keyword">False</span>)
+mae   = <span class="code-function">mean_absolute_error</span>(y_test, y_pred)
+r2    = <span class="code-function">r2_score</span>(y_test, y_pred)
+mape  = <span class="code-function">mean_absolute_percentage_error</span>(y_test, y_pred)
+
+<span class="code-function">print</span>(<span class="code-string">"Regression Metrics (Test Set)"</span>)
+<span class="code-function">print</span>(<span class="code-string">"="</span> * 40)
+<span class="code-function">print</span>(<span class="code-string">f"RMSE:       {rmse:.4f}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"MAE:        {mae:.4f}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"R-squared:  {r2:.4f}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"MAPE:       {mape:.2%}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"\nInterpretation:"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"  Predictions are off by ~${mae * 100000:,.0f} on average (MAE)"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"  The model explains {r2:.1%} of variance in house values"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Computing regression metrics manually on the test set</span>
+<span class="code-keyword">sysuse</span> auto, <span class="code-keyword">clear</span>
+<span class="code-keyword">set</span> seed 42
+
+<span class="code-comment">* Create train/test split</span>
+<span class="code-keyword">gen</span> rand = <span class="code-function">runiform</span>()
+<span class="code-keyword">gen</span> byte is_test = (rand > 0.8)
+
+<span class="code-comment">* Fit model on training data</span>
+<span class="code-keyword">quietly reg</span> price mpg weight length <span class="code-keyword">if</span> is_test == 0
+<span class="code-keyword">predict</span> double yhat
+
+<span class="code-comment">* Compute metrics on TEST set only</span>
+<span class="code-keyword">gen</span> double error    = price - yhat         <span class="code-keyword">if</span> is_test == 1
+<span class="code-keyword">gen</span> double error_sq = error^2               <span class="code-keyword">if</span> is_test == 1
+<span class="code-keyword">gen</span> double error_ab = <span class="code-function">abs</span>(error)            <span class="code-keyword">if</span> is_test == 1
+<span class="code-keyword">gen</span> double pct_err  = <span class="code-function">abs</span>(error / price)    <span class="code-keyword">if</span> is_test == 1
+
+<span class="code-comment">* RMSE</span>
+<span class="code-keyword">quietly summarize</span> error_sq
+<span class="code-keyword">scalar</span> rmse = <span class="code-function">sqrt</span>(r(mean))
+
+<span class="code-comment">* MAE</span>
+<span class="code-keyword">quietly summarize</span> error_ab
+<span class="code-keyword">scalar</span> mae = r(mean)
+
+<span class="code-comment">* R-squared (out-of-sample)</span>
+<span class="code-keyword">quietly summarize</span> price <span class="code-keyword">if</span> is_test == 1
+<span class="code-keyword">scalar</span> ybar = r(mean)
+<span class="code-keyword">gen</span> double ss_tot = (price - ybar)^2 <span class="code-keyword">if</span> is_test == 1
+<span class="code-keyword">quietly summarize</span> ss_tot
+<span class="code-keyword">scalar</span> ss_total = r(sum)
+<span class="code-keyword">quietly summarize</span> error_sq
+<span class="code-keyword">scalar</span> ss_res = r(sum)
+<span class="code-keyword">scalar</span> r2_oos = 1 - ss_res / ss_total
+
+<span class="code-comment">* MAPE</span>
+<span class="code-keyword">quietly summarize</span> pct_err
+<span class="code-keyword">scalar</span> mape = r(mean) * 100
+
+<span class="code-comment">* Display results</span>
+<span class="code-keyword">display</span> <span class="code-string">"Regression Metrics (Test Set)"</span>
+<span class="code-keyword">display</span> <span class="code-string">"========================================"</span>
+<span class="code-keyword">display</span> <span class="code-string">"RMSE:       "</span> %9.2f rmse
+<span class="code-keyword">display</span> <span class="code-string">"MAE:        "</span> %9.2f mae
+<span class="code-keyword">display</span> <span class="code-string">"R-squared:  "</span> %9.4f r2_oos
+<span class="code-keyword">display</span> <span class="code-string">"MAPE:       "</span> %9.2f mape <span class="code-string">"%"</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Computing regression metrics with yardstick</span>
+<span class="code-keyword">library</span>(rsample)
+<span class="code-keyword">library</span>(randomForest)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="The tidymodels package for computing performance metrics. Provides rmse(), mae(), rsq(), mape(), and many others in a consistent, tidy interface.">yardstick</span>)
+
+<span class="code-comment"># Load data and split</span>
+<span class="code-keyword">data</span>(mtcars)
+<span class="code-function">set.seed</span>(42)
+split &lt;- <span class="code-function">initial_split</span>(mtcars, prop = 0.8)
+train &lt;- <span class="code-function">training</span>(split)
+test  &lt;- <span class="code-function">testing</span>(split)
+
+<span class="code-comment"># Train a random forest on the training set</span>
+rf_model &lt;- <span class="code-function">randomForest</span>(mpg ~ ., data = train, ntree = 200)
+
+<span class="code-comment"># Predict on the TEST set</span>
+test$predicted &lt;- <span class="code-function">predict</span>(rf_model, newdata = test)
+
+<span class="code-comment"># Compute metrics using yardstick</span>
+results &lt;- test |&gt;
+  <span class="code-function">summarise</span>(
+    RMSE  = <span class="code-function">sqrt</span>(<span class="code-function">mean</span>((mpg - predicted)^2)),
+    MAE   = <span class="code-function">mean</span>(<span class="code-function">abs</span>(mpg - predicted)),
+    R2    = 1 - <span class="code-function">sum</span>((mpg - predicted)^2) / <span class="code-function">sum</span>((mpg - <span class="code-function">mean</span>(mpg))^2),
+    MAPE  = <span class="code-function">mean</span>(<span class="code-function">abs</span>((mpg - predicted) / mpg)) * 100
+  )
+
+<span class="code-comment"># Alternatively, use yardstick functions directly</span>
+<span class="code-function">cat</span>(<span class="code-string">"Regression Metrics (Test Set)\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"========================================\n"</span>)
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"RMSE:       %.4f\n"</span>, results$RMSE))
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"MAE:        %.4f\n"</span>, results$MAE))
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"R-squared:  %.4f\n"</span>, results$R2))
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"MAPE:       %.2f%%\n"</span>, results$MAPE))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output Simulations for ml-eval-3 -->
+        <div class="output-simulation" data-output="ml-eval-3" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Regression Metrics (Test Set)
+========================================
+RMSE:       0.5010
+MAE:        0.3272
+R-squared:  0.8098
+MAPE:       17.25%
+
+Interpretation:
+  Predictions are off by ~$32,720 on average (MAE)
+  The model explains 81.0% of variance in house values</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-3" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Regression Metrics (Test Set)
+========================================
+RMSE:        2461.38
+MAE:         1894.52
+R-squared:     0.3271
+MAPE:         29.87%</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-3" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Regression Metrics (Test Set)
+========================================
+RMSE:       2.7134
+MAE:        2.1026
+R-squared:  0.8523
+MAPE:       10.84%</pre></div>
+        </div>
+
+
+        <!-- ===================== CLASSIFICATION METRICS ===================== -->
+        <h2 id="metrics-classification">Classification Metrics</h2>
+
+        <p>When the outcome is categorical — whether a firm defaults, whether a household participates in a program, whether an email is spam — the evaluation metrics are fundamentally different from regression. Prediction errors are no longer continuous deviations; they are discrete mistakes: the model said "yes" but the truth was "no," or vice versa. Classification metrics quantify these discrete errors in different ways, and choosing the right metric is critical because they often disagree about which model is "best."</p>
+
+        <p>The foundation of all classification metrics is the <span class="code-tooltip" data-tip="A 2x2 table (for binary classification) that cross-tabulates predicted labels against actual labels. Its four cells — TP, FP, TN, FN — are the building blocks for accuracy, precision, recall, and F1."><strong>confusion matrix</strong></span>. For a binary classification problem, it is a 2x2 table with four cells:</p>
+
+        <!-- Confusion Matrix Diagram -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
+          <h4 style="margin: 0 0 1.5rem 0; color: #1e293b;">Confusion Matrix</h4>
+          <div style="display: grid; grid-template-columns: auto 1fr 1fr; grid-template-rows: auto 1fr 1fr; gap: 2px; max-width: 420px; margin: 0 auto; font-size: 0.85rem;">
+            <!-- Corner spacer -->
+            <div style="background: transparent;"></div>
+            <!-- Column headers -->
+            <div style="background: #e2e8f0; padding: 0.75rem; font-weight: 700; color: #334155; border-radius: 6px 0 0 0;">Predicted Positive</div>
+            <div style="background: #e2e8f0; padding: 0.75rem; font-weight: 700; color: #334155; border-radius: 0 6px 0 0;">Predicted Negative</div>
+            <!-- Row 1: Actually Positive -->
+            <div style="background: #e2e8f0; padding: 0.75rem; font-weight: 700; color: #334155; writing-mode: horizontal-tb;">Actually Positive</div>
+            <div style="background: #bbf7d0; padding: 1rem; border-radius: 0; text-align: center;">
+              <div style="font-weight: 700; color: #166534; font-size: 1rem;">TP</div>
+              <div style="color: #166534; font-size: 0.75rem; margin-top: 0.25rem;">True Positive</div>
+              <div style="color: #15803d; font-size: 0.7rem;">Correctly predicted +</div>
+            </div>
+            <div style="background: #fecaca; padding: 1rem; border-radius: 0; text-align: center;">
+              <div style="font-weight: 700; color: #991b1b; font-size: 1rem;">FN</div>
+              <div style="color: #991b1b; font-size: 0.75rem; margin-top: 0.25rem;">False Negative</div>
+              <div style="color: #b91c1c; font-size: 0.7rem;">Missed (Type II error)</div>
+            </div>
+            <!-- Row 2: Actually Negative -->
+            <div style="background: #e2e8f0; padding: 0.75rem; font-weight: 700; color: #334155; writing-mode: horizontal-tb;">Actually Negative</div>
+            <div style="background: #fecaca; padding: 1rem; border-radius: 0 0 0 0; text-align: center;">
+              <div style="font-weight: 700; color: #991b1b; font-size: 1rem;">FP</div>
+              <div style="color: #991b1b; font-size: 0.75rem; margin-top: 0.25rem;">False Positive</div>
+              <div style="color: #b91c1c; font-size: 0.7rem;">False alarm (Type I error)</div>
+            </div>
+            <div style="background: #bbf7d0; padding: 1rem; border-radius: 0 0 6px 0; text-align: center;">
+              <div style="font-weight: 700; color: #166534; font-size: 1rem;">TN</div>
+              <div style="color: #166534; font-size: 0.75rem; margin-top: 0.25rem;">True Negative</div>
+              <div style="color: #15803d; font-size: 0.7rem;">Correctly predicted &minus;</div>
+            </div>
+          </div>
+          <p style="margin: 1.25rem 0 0; font-size: 0.85rem; color: #475569;">Green cells are correct predictions; red cells are errors. Every classification metric is computed from these four counts.</p>
+        </div>
+
+        <h3>Accuracy</h3>
+        <p><strong>Accuracy</strong> is the simplest metric: the fraction of all predictions that are correct.</p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin: 1rem 0; text-align: center; font-size: 1.1rem;">
+          Accuracy = (TP + TN) / (TP + TN + FP + FN)
+        </div>
+        <p>Accuracy is intuitive but <strong>deeply misleading with imbalanced classes</strong>. If only 2% of firms default, a model that always predicts "no default" achieves 98% accuracy while being completely useless for the task. For this reason, accuracy should almost never be used as the primary metric for imbalanced classification problems.</p>
+
+        <h3>Precision and Recall</h3>
+        <p><strong>Precision</strong> answers: "Of all observations the model labeled as positive, how many actually were positive?" It measures the reliability of positive predictions.</p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin: 1rem 0; text-align: center; font-size: 1.1rem;">
+          Precision = TP / (TP + FP)
+        </div>
+        <p><strong>Recall</strong> (also called sensitivity or true positive rate) answers: "Of all observations that were actually positive, how many did the model identify?" It measures the completeness of positive detection.</p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin: 1rem 0; text-align: center; font-size: 1.1rem;">
+          Recall = TP / (TP + FN)
+        </div>
+        <p>There is an inherent trade-off between precision and recall. Lowering the classification threshold (being more willing to predict "positive") increases recall but decreases precision, and vice versa. The right balance depends on the costs of each type of error: in fraud detection, missing a fraud (low recall) is typically worse than flagging a legitimate transaction (low precision); in medical screening, the reverse may be true.</p>
+
+        <h3>F1 Score</h3>
+        <p>The <strong>F1 score</strong> is the harmonic mean of precision and recall, providing a single metric that balances both:</p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; margin: 1rem 0; text-align: center; font-size: 1.1rem;">
+          F1 = 2 * (Precision * Recall) / (Precision + Recall)
+        </div>
+        <p>F1 ranges from 0 to 1. It equals 1 only when both precision and recall are perfect. The harmonic mean penalizes imbalance: if either precision or recall is very low, F1 will be low even if the other is high. This makes F1 a better summary metric than accuracy for imbalanced problems.</p>
+
+        <h3>AUC-ROC</h3>
+        <p>The <span class="code-tooltip" data-tip="Area Under the Receiver Operating Characteristic curve. The ROC curve plots the true positive rate against the false positive rate at every possible classification threshold. AUC summarizes this curve into a single number between 0 and 1."><strong>AUC-ROC</strong></span> evaluates the model's ability to discriminate between positive and negative classes <em>across all possible thresholds</em>, rather than at a single threshold. An AUC of 0.5 means the model is no better than random guessing; an AUC of 1.0 means perfect discrimination. AUC-ROC is threshold-independent, making it useful for comparing models when you have not yet decided on a classification threshold.</p>
+
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>Precision-Focused Problems</h4>
+            <ul>
+              <li>Spam filtering (users hate false alarms)</li>
+              <li>Drug approval (false positives have high costs)</li>
+              <li>Targeting scarce program resources</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>Recall-Focused Problems</h4>
+            <ul>
+              <li>Fraud detection (missing fraud is very costly)</li>
+              <li>Disease screening (missing cases is dangerous)</li>
+              <li>Identifying at-risk students or firms</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Code Block: Classification Metrics -->
+        <div class="code-tabs" data-runnable="ml-eval-4">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> load_breast_cancer
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
+<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestClassifier
+<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> (
+    <span class="code-tooltip" data-tip="Generates a text report with precision, recall, F1, and support for each class, plus macro/weighted averages.">classification_report</span>,
+    <span class="code-tooltip" data-tip="Computes the confusion matrix as a 2D array: [[TN, FP], [FN, TP]].">confusion_matrix</span>,
+    <span class="code-tooltip" data-tip="Area Under the ROC Curve. Requires predicted probabilities (not labels). Measures the model's ability to rank positives above negatives.">roc_auc_score</span>
+)
+
+<span class="code-comment"># Load breast cancer data (binary classification)</span>
+data = <span class="code-function">load_breast_cancer</span>()
+X_train, X_test, y_train, y_test = <span class="code-function">train_test_split</span>(
+    data.data, data.target, test_size=0.2, random_state=42, stratify=data.target
+)
+
+<span class="code-comment"># Train a random forest classifier</span>
+clf = <span class="code-function">RandomForestClassifier</span>(n_estimators=200, random_state=42)
+clf.<span class="code-function">fit</span>(X_train, y_train)
+
+<span class="code-comment"># Predictions and predicted probabilities</span>
+y_pred = clf.<span class="code-function">predict</span>(X_test)
+y_prob = clf.<span class="code-function">predict_proba</span>(X_test)[:, 1]  <span class="code-comment"># Probability of positive class</span>
+
+<span class="code-comment"># Confusion matrix</span>
+cm = <span class="code-function">confusion_matrix</span>(y_test, y_pred)
+<span class="code-function">print</span>(<span class="code-string">"Confusion Matrix:"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"  TN={cm[0,0]}  FP={cm[0,1]}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"  FN={cm[1,0]}  TP={cm[1,1]}"</span>)
+
+<span class="code-comment"># Full classification report</span>
+<span class="code-function">print</span>(<span class="code-string">"\nClassification Report:"</span>)
+<span class="code-function">print</span>(<span class="code-function">classification_report</span>(y_test, y_pred, target_names=[<span class="code-string">"Malignant"</span>, <span class="code-string">"Benign"</span>]))
+
+<span class="code-comment"># AUC-ROC</span>
+auc = <span class="code-function">roc_auc_score</span>(y_test, y_prob)
+<span class="code-function">print</span>(<span class="code-string">f"AUC-ROC: {auc:.4f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Classification metrics after logistic regression</span>
+<span class="code-keyword">webuse</span> lbw, <span class="code-keyword">clear</span>
+
+<span class="code-comment">* Binary outcome: low birth weight (low = 1 if birth weight &lt; 2500g)</span>
+<span class="code-keyword">set</span> seed 42
+<span class="code-keyword">gen</span> rand = <span class="code-function">runiform</span>()
+<span class="code-keyword">gen</span> byte is_test = (rand > 0.8)
+
+<span class="code-comment">* Fit logistic regression on training data</span>
+<span class="code-keyword">logit</span> low age lwt i.race smoke ptl ht ui <span class="code-keyword">if</span> is_test == 0
+
+<span class="code-comment">* Predict probabilities for all observations</span>
+<span class="code-keyword">predict</span> double phat, pr
+
+<span class="code-comment">* Classify using 0.5 threshold</span>
+<span class="code-keyword">gen</span> byte y_pred = (phat >= 0.5)
+
+<span class="code-comment">* Confusion matrix on test set</span>
+<span class="code-keyword">display</span> <span class="code-string">"Confusion Matrix (Test Set):"</span>
+<span class="code-keyword">tab</span> low y_pred <span class="code-keyword">if</span> is_test == 1
+
+<span class="code-comment">* estat classification gives sensitivity, specificity, etc.</span>
+<span class="code-comment">* Run logit on test set to use estat (or compute manually)</span>
+<span class="code-keyword">quietly logit</span> low age lwt i.race smoke ptl ht ui <span class="code-keyword">if</span> is_test == 0
+<span class="code-tooltip" data-tip="Stata's post-estimation command that reports sensitivity (recall), specificity, positive predictive value (precision), and overall correct classification rate."><span class="code-keyword">estat</span> classification</span> <span class="code-keyword">if</span> is_test == 1
+
+<span class="code-comment">* ROC curve and AUC</span>
+<span class="code-keyword">lroc</span> <span class="code-keyword">if</span> is_test == 1, nograph</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Classification metrics using yardstick</span>
+<span class="code-keyword">library</span>(rsample)
+<span class="code-keyword">library</span>(parsnip)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Provides classification metrics: accuracy(), precision(), recall(), f_meas() (F1), roc_auc(), and more. Works with tibbles of predictions and truth.">yardstick</span>)
+
+<span class="code-comment"># Load data (built-in two-class dataset)</span>
+<span class="code-keyword">data</span>(two_class_example, package = <span class="code-string">"yardstick"</span>)
+
+<span class="code-comment"># Compute confusion matrix</span>
+<span class="code-function">cat</span>(<span class="code-string">"Confusion Matrix:\n"</span>)
+<span class="code-function">print</span>(<span class="code-function">conf_mat</span>(two_class_example, truth = truth, estimate = predicted))
+
+<span class="code-comment"># Compute all key classification metrics</span>
+metrics_result &lt;- two_class_example |&gt;
+  <span class="code-function">summarise</span>(
+    Accuracy  = <span class="code-function">accuracy_vec</span>(truth, predicted),
+    Precision = <span class="code-function">precision_vec</span>(truth, predicted),
+    Recall    = <span class="code-function">recall_vec</span>(truth, predicted),
+    F1        = <span class="code-function">f_meas_vec</span>(truth, predicted)
+  )
+
+<span class="code-function">cat</span>(<span class="code-string">"\nClassification Metrics:\n"</span>)
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"  Accuracy:  %.4f\n"</span>, metrics_result$Accuracy))
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"  Precision: %.4f\n"</span>, metrics_result$Precision))
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"  Recall:    %.4f\n"</span>, metrics_result$Recall))
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"  F1 Score:  %.4f\n"</span>, metrics_result$F1))
+
+<span class="code-comment"># AUC-ROC (requires predicted probabilities)</span>
+auc_val &lt;- <span class="code-function">roc_auc_vec</span>(
+  two_class_example$truth,
+  two_class_example$Class1
+)
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"  AUC-ROC:   %.4f\n"</span>, auc_val))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output Simulations for ml-eval-4 -->
+        <div class="output-simulation" data-output="ml-eval-4" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Confusion Matrix:
+  TN=40  FP=3
+  FN=2   TP=69
+
+Classification Report:
+              precision    recall  f1-score   support
+
+   Malignant       0.95      0.93      0.94        43
+      Benign       0.96      0.97      0.97        71
+
+    accuracy                           0.96       114
+   macro avg       0.96      0.95      0.95       114
+weighted avg       0.96      0.96      0.96       114
+
+AUC-ROC: 0.9952</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-4" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Confusion Matrix (Test Set):
+           |    y_pred
+       low |         0          1 |     Total
+-----------+----------------------+----------
+         0 |        23          4 |        27
+         1 |         5          6 |        11
+-----------+----------------------+----------
+     Total |        28         10 |        38
+
+Logistic model for low
+              -------- True --------
+Classified |         D            ~D  |      Total
+-----------+--------------------------+-----------
+     +     |         6             4  |         10
+     -     |         5            23  |         28
+-----------+--------------------------+-----------
+   Total   |        11            27  |         38
+
+Sensitivity                  Pr( +| D)   54.55%
+Specificity                  Pr( -|~D)   85.19%
+Positive predictive value    Pr( D| +)   60.00%
+Negative predictive value    Pr(~D| -)   82.14%
+Correctly classified                     76.32%
+
+Area under ROC curve = 0.7828</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-4" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Confusion Matrix:
+            Truth
+Prediction Class1 Class2
+    Class1    227     27
+    Class2     23    223
+
+Classification Metrics:
+  Accuracy:  0.9000
+  Precision: 0.8937
+  Recall:    0.9080
+  F1 Score:  0.9008
+  AUC-ROC:   0.9406</pre></div>
+        </div>
+
+
+        <!-- ===================== HYPERPARAMETER TUNING ===================== -->
+        <h2 id="hyperparameter-tuning">Hyperparameter Tuning</h2>
+
+        <p>Most machine learning models have <span class="code-tooltip" data-tip="Parameters that are set before training begins, not learned from the data. Examples: the number of trees in a random forest, the regularization strength in LASSO, the learning rate in a neural network. Choosing them wisely can dramatically affect performance."><strong>hyperparameters</strong></span> — settings that must be chosen before training begins and that can dramatically affect performance. The number of trees in a random forest, the regularization penalty in LASSO, the depth of a decision tree, the learning rate of a neural network: none of these are learned from the data, and all of them matter.</p>
+
+        <p>The naive approach — trying a few values by hand and picking whatever looks best on the test set — is statistically dangerous. If you try 100 hyperparameter combinations and select the one with the best test-set performance, you have effectively used the test set for model selection, and your reported performance is optimistically biased. The solution is to use a <strong>validation set</strong> (separate from both training and test) or, better, to use cross-validation within the training set to evaluate hyperparameter choices, reserving the test set for final evaluation only.</p>
+
+        <h3>Grid Search</h3>
+        <p><strong>Grid search</strong> evaluates every combination of a predefined set of hyperparameter values. If you specify 5 values for the regularization parameter and 4 values for the tree depth, grid search trains and evaluates 5 x 4 = 20 models. It is simple, exhaustive, and parallelizable, but becomes prohibitively expensive when the hyperparameter space is large (the "curse of dimensionality" applies to hyperparameter grids too).</p>
+
+        <h3>Random Search</h3>
+        <p><strong>Random search</strong> samples hyperparameter combinations randomly from specified distributions. It is often more efficient than grid search because it explores the space more broadly. A classic result by Bergstra and Bengio (2012) showed that random search finds good hyperparameters in fewer evaluations than grid search, especially when some hyperparameters matter much more than others.</p>
+
+        <h3>Bayesian Optimization</h3>
+        <p><strong>Bayesian optimization</strong> builds a probabilistic model of the objective function (e.g., cross-validated accuracy as a function of hyperparameters) and uses it to intelligently choose the next combination to evaluate. It focuses exploration on promising regions of the hyperparameter space, making it more sample-efficient than grid or random search. Libraries like <code>optuna</code> (Python) and <code>mlrMBO</code> (R) implement this approach.</p>
+
+        <!-- Code Block: Hyperparameter Tuning -->
+        <div class="code-tabs" data-runnable="ml-eval-5">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split, <span class="code-tooltip" data-tip="Exhaustive search over specified parameter grid. Evaluates every combination using cross-validation. Returns the best parameters and the CV score for each combination.">GridSearchCV</span>
+<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestRegressor
+
+<span class="code-comment"># Load and split data</span>
+housing = <span class="code-function">fetch_california_housing</span>()
+X_train, X_test, y_train, y_test = <span class="code-function">train_test_split</span>(
+    housing.data, housing.target, test_size=0.2, random_state=42
+)
+
+<span class="code-comment"># Define the hyperparameter grid</span>
+param_grid = {
+    <span class="code-string">'n_estimators'</span>: [50, 100, 200],
+    <span class="code-tooltip" data-tip="Maximum depth of each tree. Deeper trees capture more complex patterns but are more prone to overfitting. None means nodes expand until all leaves are pure."><span class="code-string">'max_depth'</span></span>: [10, 20, <span class="code-keyword">None</span>],
+    <span class="code-tooltip" data-tip="Minimum number of observations required at each leaf node. Higher values constrain the tree, acting as regularization."><span class="code-string">'min_samples_leaf'</span></span>: [1, 5, 10]
+}
+
+<span class="code-comment"># Grid search with 5-fold CV (3 x 3 x 3 = 27 combinations)</span>
+grid_search = <span class="code-function">GridSearchCV</span>(
+    <span class="code-function">RandomForestRegressor</span>(random_state=42),
+    param_grid,
+    <span class="code-tooltip" data-tip="Number of cross-validation folds used to evaluate each hyperparameter combination.">cv=5</span>,
+    scoring=<span class="code-string">'neg_mean_squared_error'</span>,
+    <span class="code-tooltip" data-tip="Number of parallel jobs. -1 uses all available CPU cores.">n_jobs=-1</span>,
+    verbose=1
+)
+
+grid_search.<span class="code-function">fit</span>(X_train, y_train)
+
+<span class="code-comment"># Results</span>
+<span class="code-function">print</span>(<span class="code-string">f"\nBest hyperparameters:"</span>)
+<span class="code-keyword">for</span> param, val <span class="code-keyword">in</span> grid_search.best_params_.<span class="code-function">items</span>():
+    <span class="code-function">print</span>(<span class="code-string">f"  {param}: {val}"</span>)
+
+<span class="code-function">print</span>(<span class="code-string">f"\nBest CV RMSE: {(-grid_search.best_score_)**0.5:.4f}"</span>)
+
+<span class="code-comment"># Evaluate best model on held-out TEST set</span>
+<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error
+best_model = grid_search.best_estimator_
+y_pred = best_model.<span class="code-function">predict</span>(X_test)
+test_rmse = <span class="code-function">mean_squared_error</span>(y_test, y_pred, squared=<span class="code-keyword">False</span>)
+<span class="code-function">print</span>(<span class="code-string">f"Test RMSE (final, unbiased): {test_rmse:.4f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Manual hyperparameter tuning via cross-validation loop</span>
+<span class="code-comment">* Stata does not have a built-in GridSearchCV equivalent,</span>
+<span class="code-comment">* so we loop over candidate values manually.</span>
+
+<span class="code-keyword">sysuse</span> auto, <span class="code-keyword">clear</span>
+<span class="code-keyword">set</span> seed 42
+
+<span class="code-comment">* Create 5 folds for cross-validation</span>
+<span class="code-keyword">gen</span> fold = <span class="code-function">ceil</span>(5 * <span class="code-function">runiform</span>())
+
+<span class="code-comment">* Define candidate penalty values (ridge/LASSO-like tuning)</span>
+<span class="code-comment">* We'll tune the number of predictors included via stepwise</span>
+<span class="code-keyword">local</span> best_rmse = 99999
+<span class="code-keyword">local</span> best_spec = <span class="code-string">""</span>
+
+<span class="code-comment">* Loop over candidate model specifications</span>
+<span class="code-keyword">foreach</span> spec <span class="code-keyword">in</span> <span class="code-string">"mpg weight"</span> <span class="code-string">"mpg weight length"</span> <span class="code-string">"mpg weight length foreign"</span> <span class="code-string">"mpg weight length foreign headroom trunk"</span> {
+
+    <span class="code-keyword">local</span> total_se = 0
+    <span class="code-keyword">local</span> n_test = 0
+
+    <span class="code-keyword">forvalues</span> k = 1/5 {
+        <span class="code-keyword">quietly reg</span> price `spec' <span class="code-keyword">if</span> fold != `k'
+        <span class="code-keyword">quietly predict</span> double yhat_`k' <span class="code-keyword">if</span> fold == `k'
+        <span class="code-keyword">quietly gen</span> double se_`k' = (price - yhat_`k')^2 <span class="code-keyword">if</span> fold == `k'
+        <span class="code-keyword">quietly summarize</span> se_`k'
+        <span class="code-keyword">local</span> total_se = `total_se' + r(sum)
+        <span class="code-keyword">local</span> n_test = `n_test' + r(N)
+        <span class="code-keyword">drop</span> yhat_`k' se_`k'
+    }
+
+    <span class="code-keyword">local</span> cv_rmse = <span class="code-function">sqrt</span>(`total_se' / `n_test')
+    <span class="code-keyword">display</span> <span class="code-string">"Spec: `spec'  =>  CV RMSE = "</span> %9.2f `cv_rmse'
+
+    <span class="code-keyword">if</span> `cv_rmse' &lt; `best_rmse' {
+        <span class="code-keyword">local</span> best_rmse = `cv_rmse'
+        <span class="code-keyword">local</span> best_spec = <span class="code-string">"`spec'"</span>
+    }
+}
+
+<span class="code-keyword">display</span> _newline <span class="code-string">"Best specification: `best_spec'"</span>
+<span class="code-keyword">display</span> <span class="code-string">"Best CV RMSE:       "</span> %9.2f `best_rmse'</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Hyperparameter tuning with tidymodels tune_grid()</span>
+<span class="code-keyword">library</span>(tidymodels)
+
+<span class="code-comment"># Load data and split</span>
+<span class="code-keyword">data</span>(mtcars)
+<span class="code-function">set.seed</span>(42)
+split &lt;- <span class="code-function">initial_split</span>(mtcars, prop = 0.8)
+train &lt;- <span class="code-function">training</span>(split)
+test  &lt;- <span class="code-function">testing</span>(split)
+folds &lt;- <span class="code-function">vfold_cv</span>(train, v = 5)
+
+<span class="code-comment"># Define a random forest model with tunable hyperparameters</span>
+rf_spec &lt;- <span class="code-function">rand_forest</span>(
+  <span class="code-tooltip" data-tip="tune() is a placeholder that tells tidymodels to search over values for this parameter.">trees = <span class="code-function">tune</span>()</span>,
+  min_n = <span class="code-function">tune</span>()
+) |&gt;
+  <span class="code-function">set_engine</span>(<span class="code-string">"ranger"</span>) |&gt;
+  <span class="code-function">set_mode</span>(<span class="code-string">"regression"</span>)
+
+<span class="code-comment"># Create a workflow</span>
+rf_wf &lt;- <span class="code-function">workflow</span>() |&gt; <span class="code-function">add_model</span>(rf_spec) |&gt; <span class="code-function">add_formula</span>(mpg ~ .)
+
+<span class="code-comment"># Define a hyperparameter grid</span>
+rf_grid &lt;- <span class="code-function">grid_regular</span>(
+  <span class="code-function">trees</span>(range = <span class="code-function">c</span>(50, 300)),
+  <span class="code-function">min_n</span>(range = <span class="code-function">c</span>(2, 10)),
+  levels = 4
+)
+
+<span class="code-comment"># Tune using 5-fold CV</span>
+rf_tuned &lt;- <span class="code-function">tune_grid</span>(
+  rf_wf,
+  resamples = folds,
+  grid = rf_grid,
+  metrics = <span class="code-function">metric_set</span>(rmse, rsq)
+)
+
+<span class="code-comment"># Show best results</span>
+<span class="code-function">cat</span>(<span class="code-string">"Top 5 configurations by RMSE:\n"</span>)
+<span class="code-function">print</span>(<span class="code-function">show_best</span>(rf_tuned, metric = <span class="code-string">"rmse"</span>, n = 5))
+
+<span class="code-comment"># Finalize workflow with best hyperparameters</span>
+best_params &lt;- <span class="code-function">select_best</span>(rf_tuned, metric = <span class="code-string">"rmse"</span>)
+final_wf &lt;- <span class="code-function">finalize_workflow</span>(rf_wf, best_params)
+final_fit &lt;- <span class="code-function">last_fit</span>(final_wf, split)
+
+<span class="code-function">cat</span>(<span class="code-string">"\nFinal test set metrics:\n"</span>)
+<span class="code-function">print</span>(<span class="code-function">collect_metrics</span>(final_fit))</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output Simulations for ml-eval-5 -->
+        <div class="output-simulation" data-output="ml-eval-5" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Fitting 5 folds for each of 27 candidates, totalling 135 fits
+
+Best hyperparameters:
+  max_depth: 20
+  min_samples_leaf: 1
+  n_estimators: 200
+
+Best CV RMSE: 0.5027
+Test RMSE (final, unbiased): 0.4986</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-5" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Spec: mpg weight                             =>  CV RMSE =   2648.93
+Spec: mpg weight length                      =>  CV RMSE =   2541.37
+Spec: mpg weight length foreign              =>  CV RMSE =   2486.12
+Spec: mpg weight length foreign headroom trunk =>  CV RMSE =   2592.81
+
+Best specification: mpg weight length foreign
+Best CV RMSE:        2486.12</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-5" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Top 5 configurations by RMSE:
+# A tibble: 5 x 8
+  trees min_n .metric .estimator  mean     n std_err .config
+  &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;
+1   216     2 rmse    standard    2.68     5   0.412 Preprocessor1_Model06
+2   300     2 rmse    standard    2.71     5   0.398 Preprocessor1_Model08
+3   133     2 rmse    standard    2.73     5   0.425 Preprocessor1_Model04
+4   216     5 rmse    standard    2.79     5   0.381 Preprocessor1_Model07
+5   300     5 rmse    standard    2.82     5   0.393 Preprocessor1_Model09
+
+Final test set metrics:
+# A tibble: 2 x 4
+  .metric .estimator .estimate .config
+  &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;
+1 rmse    standard       2.54  Preprocessor1_Model1
+2 rsq     standard       0.867 Preprocessor1_Model1</pre></div>
+        </div>
+
+
+        <!-- ===================== OVERFITTING DIAGNOSTICS ===================== -->
+        <h2 id="learning-curves">Overfitting Diagnostics</h2>
+
+        <p>How can you tell whether a model is underfitting, overfitting, or well-calibrated? The most informative diagnostic tools are <strong>learning curves</strong> and <strong>validation curves</strong>. These plots show you not just the final performance number, but how performance changes as you vary the training set size or a hyperparameter. They make the bias-variance trade-off visible.</p>
+
+        <h3>Learning Curves</h3>
+        <p>A <span class="code-tooltip" data-tip="A plot of training and validation performance as a function of training set size. If training and validation scores are both low, the model is underfitting. If training score is high but validation score is low, the model is overfitting."><strong>learning curve</strong></span> plots both training-set and validation-set performance as the size of the training set increases. The patterns are diagnostic:</p>
+        <ul>
+          <li><strong>Underfitting</strong>: Both training and validation scores are low and converge quickly. Adding more data will not help — the model is too simple to capture the pattern. You need a more flexible model.</li>
+          <li><strong>Overfitting</strong>: Training score is high, but validation score is significantly lower. The gap between the two curves is large. Adding more data can help (the validation curve slowly rises), or you can regularize the model.</li>
+          <li><strong>Good fit</strong>: Training score is high, validation score is close to it, and both stabilize as the training set grows. The model has learned the true pattern without memorizing noise.</li>
+        </ul>
+
+        <h3>Validation Curves</h3>
+        <p>A <strong>validation curve</strong> plots training and validation performance as a function of a single hyperparameter (e.g., tree depth, regularization strength). It reveals the "sweet spot" — the hyperparameter value where validation performance peaks before overfitting takes over.</p>
+
+        <!-- Code Block: Learning Curves -->
+        <div class="code-tabs" data-runnable="ml-eval-6">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
+<span class="code-keyword">from</span> sklearn.ensemble <span class="code-keyword">import</span> RandomForestRegressor
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Computes training and validation scores for varying training set sizes. Returns arrays of train sizes, train scores, and validation scores — ready for plotting.">learning_curve</span>
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+
+<span class="code-comment"># Load data</span>
+housing = <span class="code-function">fetch_california_housing</span>()
+X, y = housing.data, housing.target
+
+<span class="code-comment"># Compute learning curve</span>
+train_sizes, train_scores, val_scores = <span class="code-function">learning_curve</span>(
+    <span class="code-function">RandomForestRegressor</span>(n_estimators=100, random_state=42),
+    X, y,
+    <span class="code-tooltip" data-tip="Fractions of the training set to use. np.linspace(0.1, 1.0, 10) gives 10 evenly spaced sizes from 10% to 100%.">train_sizes=np.<span class="code-function">linspace</span>(0.1, 1.0, 10)</span>,
+    cv=5,
+    scoring=<span class="code-string">'neg_mean_squared_error'</span>,
+    n_jobs=-1
+)
+
+<span class="code-comment"># Convert to RMSE</span>
+train_rmse = np.<span class="code-function">sqrt</span>(-train_scores)
+val_rmse   = np.<span class="code-function">sqrt</span>(-val_scores)
+
+<span class="code-comment"># Plot</span>
+plt.<span class="code-function">figure</span>(figsize=(8, 5))
+plt.<span class="code-function">plot</span>(train_sizes, train_rmse.<span class="code-function">mean</span>(axis=1), <span class="code-string">'o-'</span>, label=<span class="code-string">'Training RMSE'</span>)
+plt.<span class="code-function">plot</span>(train_sizes, val_rmse.<span class="code-function">mean</span>(axis=1), <span class="code-string">'o-'</span>, label=<span class="code-string">'Validation RMSE'</span>)
+plt.<span class="code-function">fill_between</span>(train_sizes,
+    val_rmse.<span class="code-function">mean</span>(axis=1) - val_rmse.<span class="code-function">std</span>(axis=1),
+    val_rmse.<span class="code-function">mean</span>(axis=1) + val_rmse.<span class="code-function">std</span>(axis=1), alpha=0.1)
+plt.<span class="code-function">xlabel</span>(<span class="code-string">'Training Set Size'</span>)
+plt.<span class="code-function">ylabel</span>(<span class="code-string">'RMSE'</span>)
+plt.<span class="code-function">title</span>(<span class="code-string">'Learning Curve — Random Forest'</span>)
+plt.<span class="code-function">legend</span>()
+plt.<span class="code-function">grid</span>(<span class="code-keyword">True</span>, alpha=0.3)
+plt.<span class="code-function">tight_layout</span>()
+plt.<span class="code-function">show</span>()
+
+<span class="code-comment"># Print numerical summary</span>
+<span class="code-function">print</span>(<span class="code-string">"Learning Curve Summary"</span>)
+<span class="code-function">print</span>(<span class="code-string">"="</span> * 55)
+<span class="code-function">print</span>(<span class="code-string">f"{'Train Size':>12} {'Train RMSE':>12} {'Val RMSE':>12}"</span>)
+<span class="code-function">print</span>(<span class="code-string">"-"</span> * 55)
+<span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-function">len</span>(train_sizes)):
+    <span class="code-function">print</span>(<span class="code-string">f"{train_sizes[i]:>12,} {train_rmse.mean(axis=1)[i]:>12.4f} {val_rmse.mean(axis=1)[i]:>12.4f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Manual learning curve computation</span>
+<span class="code-comment">* Train on increasing fractions of data, evaluate on held-out test set</span>
+
+<span class="code-keyword">sysuse</span> auto, <span class="code-keyword">clear</span>
+<span class="code-keyword">set</span> seed 42
+
+<span class="code-comment">* Reserve 20% as permanent test set</span>
+<span class="code-keyword">gen</span> rand = <span class="code-function">runiform</span>()
+<span class="code-keyword">gen</span> byte is_test = (rand > 0.8)
+
+<span class="code-comment">* Count training observations</span>
+<span class="code-keyword">quietly count</span> <span class="code-keyword">if</span> is_test == 0
+<span class="code-keyword">local</span> n_train = r(N)
+
+<span class="code-comment">* Generate a random ordering for training observations</span>
+<span class="code-keyword">gen</span> train_order = <span class="code-function">runiform</span>() <span class="code-keyword">if</span> is_test == 0
+<span class="code-keyword">sort</span> is_test train_order
+
+<span class="code-comment">* Loop over increasing training set fractions</span>
+<span class="code-keyword">display</span> <span class="code-string">"Learning Curve: RMSE by Training Set Size"</span>
+<span class="code-keyword">display</span> <span class="code-string">"==========================================="</span>
+<span class="code-keyword">display</span> <span class="code-string">"{txt}  Train Size   Train RMSE    Test RMSE"</span>
+<span class="code-keyword">display</span> <span class="code-string">"-------------------------------------------"</span>
+
+<span class="code-keyword">foreach</span> frac <span class="code-keyword">in</span> 0.2 0.4 0.6 0.8 1.0 {
+    <span class="code-keyword">local</span> n_use = <span class="code-function">floor</span>(`frac' * `n_train')
+
+    <span class="code-comment">* Mark which training obs to use</span>
+    <span class="code-keyword">gen</span> byte use_train = (_n &lt;= `n_use') & (is_test == 0)
+
+    <span class="code-comment">* Fit model on subset</span>
+    <span class="code-keyword">quietly reg</span> price mpg weight length <span class="code-keyword">if</span> use_train == 1
+    <span class="code-keyword">quietly predict</span> double yhat
+
+    <span class="code-comment">* Train RMSE</span>
+    <span class="code-keyword">quietly gen</span> double se_train = (price - yhat)^2 <span class="code-keyword">if</span> use_train == 1
+    <span class="code-keyword">quietly summarize</span> se_train
+    <span class="code-keyword">local</span> rmse_train = <span class="code-function">sqrt</span>(r(mean))
+
+    <span class="code-comment">* Test RMSE</span>
+    <span class="code-keyword">quietly gen</span> double se_test = (price - yhat)^2 <span class="code-keyword">if</span> is_test == 1
+    <span class="code-keyword">quietly summarize</span> se_test
+    <span class="code-keyword">local</span> rmse_test = <span class="code-function">sqrt</span>(r(mean))
+
+    <span class="code-keyword">display</span> %12.0f `n_use' %12.2f `rmse_train' %12.2f `rmse_test'
+
+    <span class="code-keyword">drop</span> use_train yhat se_train se_test
+}</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Custom learning curve function</span>
+<span class="code-keyword">library</span>(randomForest)
+<span class="code-keyword">library</span>(rsample)
+
+<span class="code-comment"># Load data and split</span>
+<span class="code-keyword">data</span>(mtcars)
+<span class="code-function">set.seed</span>(42)
+split &lt;- <span class="code-function">initial_split</span>(mtcars, prop = 0.8)
+train &lt;- <span class="code-function">training</span>(split)
+test  &lt;- <span class="code-function">testing</span>(split)
+
+<span class="code-comment"># Define training set fractions</span>
+fractions &lt;- <span class="code-function">seq</span>(0.3, 1.0, by = 0.1)
+results &lt;- <span class="code-function">data.frame</span>(frac = fractions, n = <span class="code-function">integer</span>(<span class="code-function">length</span>(fractions)),
+                       train_rmse = <span class="code-function">numeric</span>(<span class="code-function">length</span>(fractions)),
+                       test_rmse = <span class="code-function">numeric</span>(<span class="code-function">length</span>(fractions)))
+
+<span class="code-keyword">for</span> (i <span class="code-keyword">in</span> <span class="code-function">seq_along</span>(fractions)) {
+  n_use &lt;- <span class="code-function">floor</span>(fractions[i] * <span class="code-function">nrow</span>(train))
+  idx &lt;- <span class="code-function">sample</span>(<span class="code-function">nrow</span>(train), n_use)
+  train_sub &lt;- train[idx, ]
+
+  <span class="code-comment"># Train model on subset</span>
+  rf &lt;- <span class="code-function">randomForest</span>(mpg ~ ., data = train_sub, ntree = 100)
+
+  <span class="code-comment"># Train RMSE</span>
+  train_pred &lt;- <span class="code-function">predict</span>(rf, train_sub)
+  results$train_rmse[i] &lt;- <span class="code-function">sqrt</span>(<span class="code-function">mean</span>((train_sub$mpg - train_pred)^2))
+
+  <span class="code-comment"># Test RMSE</span>
+  test_pred &lt;- <span class="code-function">predict</span>(rf, test)
+  results$test_rmse[i] &lt;- <span class="code-function">sqrt</span>(<span class="code-function">mean</span>((test$mpg - test_pred)^2))
+
+  results$n[i] &lt;- n_use
+}
+
+<span class="code-comment"># Print results</span>
+<span class="code-function">cat</span>(<span class="code-string">"Learning Curve Summary\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"==========================================\n"</span>)
+<span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"%12s %12s %12s\n"</span>, <span class="code-string">"Train Size"</span>, <span class="code-string">"Train RMSE"</span>, <span class="code-string">"Test RMSE"</span>))
+<span class="code-function">cat</span>(<span class="code-string">"------------------------------------------\n"</span>)
+<span class="code-keyword">for</span> (i <span class="code-keyword">in</span> 1:<span class="code-function">nrow</span>(results)) {
+  <span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"%12d %12.4f %12.4f\n"</span>, results$n[i], results$train_rmse[i], results$test_rmse[i]))
+}
+
+<span class="code-comment"># Plot</span>
+<span class="code-function">plot</span>(results$n, results$test_rmse, type = <span class="code-string">"o"</span>, col = <span class="code-string">"red"</span>,
+     xlab = <span class="code-string">"Training Set Size"</span>, ylab = <span class="code-string">"RMSE"</span>,
+     main = <span class="code-string">"Learning Curve - Random Forest"</span>,
+     ylim = <span class="code-function">c</span>(0, <span class="code-function">max</span>(results$test_rmse) * 1.1))
+<span class="code-function">lines</span>(results$n, results$train_rmse, type = <span class="code-string">"o"</span>, col = <span class="code-string">"blue"</span>)
+<span class="code-function">legend</span>(<span class="code-string">"topright"</span>, legend = <span class="code-function">c</span>(<span class="code-string">"Training"</span>, <span class="code-string">"Test"</span>),
+       col = <span class="code-function">c</span>(<span class="code-string">"blue"</span>, <span class="code-string">"red"</span>), lty = 1, pch = 1)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <!-- Output Simulations for ml-eval-6 -->
+        <div class="output-simulation" data-output="ml-eval-6" data-lang="python">
+          <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Learning Curve Summary
+=======================================================
+  Train Size   Train RMSE     Val RMSE
+-------------------------------------------------------
+       1,651       0.1834       0.5823
+       3,302       0.1921       0.5547
+       4,953       0.1956       0.5388
+       6,604       0.1963       0.5285
+       8,256       0.1976       0.5218
+       9,907       0.1987       0.5166
+      11,558       0.1992       0.5121
+      13,209       0.1998       0.5092
+      14,860       0.2001       0.5068
+      16,512       0.2005       0.5047</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-6" data-lang="stata">
+          <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Learning Curve: RMSE by Training Set Size
+===========================================
+  Train Size   Train RMSE    Test RMSE
+-------------------------------------------
+          12      1847.35      3142.68
+          23      2012.48      2784.51
+          35      2098.63      2621.34
+          47      2134.17      2512.89
+          59      2156.42      2461.38</pre></div>
+        </div>
+        <div class="output-simulation" data-output="ml-eval-6" data-lang="r">
+          <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
+          <div class="output-body"><pre>Learning Curve Summary
+==========================================
+  Train Size   Train RMSE    Test RMSE
+------------------------------------------
+           7       1.2341       4.8712
+          10       1.3028       3.9456
+          12       1.3894       3.5218
+          15       1.4216       3.2847
+          17       1.4587       3.1025
+          20       1.4812       2.9483
+          22       1.5034       2.8156
+          25       1.5198       2.7134</pre></div>
+        </div>
+
+
+        <!-- ===================== MODEL COMPARISON WORKFLOW ===================== -->
+        <h2 id="model-selection">Model Comparison Workflow</h2>
+
+        <p>In practice, model evaluation is not about computing a single metric for a single model. It is a systematic process of comparing multiple candidate models to select the best one for your task. A reliable model comparison workflow follows these steps:</p>
+
+        <ol>
+          <li><strong>Split your data</strong> into training and test sets (or use nested cross-validation for small datasets). The test set is locked away until the very end.</li>
+          <li><strong>Define candidate models</strong>: OLS, LASSO, random forest, gradient boosting, neural network, etc. Include simple baselines (e.g., "always predict the mean") to ensure your model adds value.</li>
+          <li><strong>Tune hyperparameters</strong> for each candidate using cross-validation on the training set only. Each model gets its best hyperparameters.</li>
+          <li><strong>Compare cross-validated performance</strong> across models. Use the same folds for all models to ensure a fair comparison.</li>
+          <li><strong>Select the best model</strong> and evaluate it once on the test set. This is your final, unbiased performance estimate. Do not go back and try more models after seeing the test-set result.</li>
+        </ol>
+
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>Prediction Task Evaluation</h4>
+            <ul>
+              <li>Goal: maximize out-of-sample prediction accuracy</li>
+              <li>Metrics: RMSE, MAE, AUC-ROC, F1</li>
+              <li>Method: cross-validation + held-out test set</li>
+              <li>Flexibility is a virtue if it improves predictions</li>
+              <li>Examples: forecasting, targeting, classification</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>Causal Task Evaluation</h4>
+            <ul>
+              <li>Goal: estimate a causal effect (ATE, CATE, ATT)</li>
+              <li>Metrics: bias, coverage of confidence intervals, MSE of the treatment effect estimate</li>
+              <li>Method: simulation studies, placebo tests, sensitivity analysis</li>
+              <li>Interpretability and identification matter more than raw fit</li>
+              <li>Examples: policy evaluation, treatment effects, DiD</li>
+            </ul>
+          </div>
+        </div>
+
+        <p>The distinction above is fundamental. The entire model evaluation framework in this module — cross-validation, RMSE, AUC-ROC, hyperparameter tuning — is designed for <strong>prediction tasks</strong>. When the goal is causal inference, the evaluation criteria are different: you care about whether the estimated treatment effect is unbiased and whether the confidence intervals have correct coverage, not about whether the model predicts the outcome well. A model can be an excellent predictor but a terrible estimator of causal effects, and vice versa. See Module 11D (Causal ML) for evaluation strategies specific to causal tasks.</p>
+
+
+        <!-- ===================== COMMON PITFALLS ===================== -->
+        <h2 id="pitfalls">Common Pitfalls</h2>
+
+        <div class="info-box" style="border-left-color: #e53e3e;">
+          <h3>1. Data Leakage</h3>
+          <p><strong>Data leakage</strong> occurs when information from the test set (or from the future, or from the outcome itself) sneaks into the training process. It is the most common and most dangerous mistake in applied ML. Examples include: normalizing features using the mean and standard deviation of the entire dataset (including test observations), using variables that are consequences of the outcome rather than predictors, or including the outcome variable as a feature through an indirect path. Leakage produces models that look spectacular during evaluation but fail completely in deployment. The fix: every preprocessing step (scaling, encoding, imputation) must be fit on the training set only and then applied to the test set.</p>
+        </div>
+
+        <div class="info-box" style="border-left-color: #e53e3e;">
+          <h3>2. Ignoring Temporal Structure</h3>
+          <p>If your data has a time dimension — panel data, time series, event data — a random train-test split is invalid. It allows the model to "peek into the future," using observations from 2022 to predict outcomes in 2019. This produces an optimistic performance estimate that does not reflect real-world deployment, where only past data is available. Always use a <strong>temporal split</strong>: train on data from earlier periods and test on later periods. For cross-validation, use <strong>time-series CV</strong> (expanding or sliding window), not standard K-fold.</p>
+        </div>
+
+        <div class="info-box" style="border-left-color: #e53e3e;">
+          <h3>3. Choosing the Wrong Metric</h3>
+          <p>The choice of evaluation metric should reflect the costs of different types of errors in your application. Accuracy is almost always the wrong metric for imbalanced classification. RMSE penalizes large errors heavily, which may or may not be appropriate. MAPE is undefined for zero values. Using the wrong metric means optimizing for the wrong goal: you may select a model that is "best" according to a metric that does not align with the actual decision problem. Always ask: "What does a prediction error cost in this application?" and choose metrics accordingly.</p>
+        </div>
+
+
+        <!-- ===================== REFERENCES ===================== -->
+        <h2>References</h2>
+        <ul class="references">
+          <li>Hastie, T., Tibshirani, R., & Friedman, J. (2009). <em>The Elements of Statistical Learning: Data Mining, Inference, and Prediction</em> (2nd ed.). Springer. (Available free at <a href="https://hastie.su.domains/ElemStatLearn/" target="_blank">hastie.su.domains/ElemStatLearn</a>)</li>
+          <li>James, G., Witten, D., Hastie, T., & Tibshirani, R. (2013). <em>An Introduction to Statistical Learning</em>. Springer. (Available free at <a href="https://www.statlearning.com/" target="_blank">statlearning.com</a>)</li>
+          <li>Athey, S., & Imbens, G. W. (2019). Machine Learning Methods That Economists Should Know About. <em>Annual Review of Economics</em>, 11, 685-725.</li>
+          <li>Bergstra, J., & Bengio, Y. (2012). Random Search for Hyper-Parameter Optimization. <em>Journal of Machine Learning Research</em>, 13, 281-305.</li>
+          <li>Mullainathan, S., & Spiess, J. (2017). Machine Learning: An Applied Econometric Approach. <em>Journal of Economic Perspectives</em>, 31(2), 87-106.</li>
+        </ul>
+
+
+        <!-- ===================== NAV FOOTER ===================== -->
+        <div class="nav-footer">
+          <a href="11d-causal-ml.html" class="nav-link prev">11D: Causal ML</a>
+          <a href="12-llms.html" class="nav-link next">Module 12: LLMs</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Chatbot Widget -->
+  <div id="chatbot-widget" class="chatbot-widget">
+    <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open course assistant">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </button>
+    <div id="chatbot-panel" class="chatbot-panel">
+      <div class="chatbot-header">
+        <h3>ProTools ER1 Assistant</h3>
+        <button id="chatbot-close" class="chatbot-close">&times;</button>
+      </div>
+      <div id="chatbot-messages" class="chatbot-messages">
+        <div class="chat-message assistant">
+          <p>Hello! I'm the ProTools ER1 course assistant. I can help you with questions about Python, Stata, R, causal inference methods, or any of the course material. How can I assist you today?</p>
+        </div>
+      </div>
+      <div class="chatbot-input-area">
+        <textarea id="chatbot-input" placeholder="Ask a question about the course..." rows="2"></textarea>
+        <button id="chatbot-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+  <script src="../js/chatbot.js"></script>
+
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null; let currentTarget = null; let hideTimeout = null;
+    function createTooltip() { if (tooltipEl) return tooltipEl; tooltipEl = document.createElement('div'); tooltipEl.className = 'tooltip-popup'; document.body.appendChild(tooltipEl); return tooltipEl; }
+    function positionTooltip(target) { const tooltip = createTooltip(); const tipText = target.getAttribute('data-tip'); if (!tipText) return; tooltip.textContent = tipText; tooltip.className = 'tooltip-popup'; const targetRect = target.getBoundingClientRect(); let container = target.closest('pre') || target.closest('.tab-content') || target.closest('.code-tabs'); let containerRect = container ? container.getBoundingClientRect() : { left: 0, right: window.innerWidth, top: 0, bottom: window.innerHeight }; const vw = window.innerWidth; const vh = window.innerHeight; const pad = 10; tooltip.style.visibility = 'hidden'; tooltip.style.display = 'block'; tooltip.classList.add('visible'); const tr = tooltip.getBoundingClientRect(); let left = targetRect.left + (targetRect.width/2) - (tr.width/2); let top = targetRect.top - tr.height - 8; let ac = 'arrow-bottom'; if (top < pad) { top = targetRect.bottom + 8; ac = 'arrow-top'; } if (top + tr.height > vh - pad) { top = targetRect.top - tr.height - 8; ac = 'arrow-bottom'; } if (left < pad) left = pad; if (left + tr.width > vw - pad) left = vw - tr.width - pad; if (container) { const ml = Math.max(pad, containerRect.left); const mr = Math.min(vw - pad, containerRect.right); if (left < ml) left = ml; if (left + tr.width > mr) left = mr - tr.width; } tooltip.style.left = left + 'px'; tooltip.style.top = top + 'px'; tooltip.style.visibility = 'visible'; tooltip.classList.add(ac); }
+    function showTooltip(t) { if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; } currentTarget = t; positionTooltip(t); }
+    function hideTooltip() { hideTimeout = setTimeout(function() { if (tooltipEl) tooltipEl.classList.remove('visible'); currentTarget = null; }, 100); }
+    document.addEventListener('mouseenter', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target); }, true);
+    document.addEventListener('mouseleave', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip(); }, true);
+    document.addEventListener('scroll', function() { if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget); }, true);
+    window.addEventListener('resize', function() { if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget); });
+  })();
+  </script>
+</body>
+</html>

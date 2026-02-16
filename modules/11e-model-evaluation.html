@@ -149,6 +149,151 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Split data into training and test sets, reserving 20% for evaluation",
+                  "pattern": "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=N, random_state=N)",
+                  "structureNote": "The train-test split is the most fundamental concept in ML evaluation. You <strong>never</strong> evaluate a model on the same data it was trained on -- that would measure memorization, not generalization. <code>train_test_split</code> shuffles and splits the data into two non-overlapping subsets. The <code>random_state</code> parameter ensures everyone gets the same split for reproducibility.",
+                  "languages": {
+                    "python": [
+                      {"code": "X_train, X_test, y_train, y_test", "role": "Unpacking", "tip": "Four variables that receive the split data: training features, test features, training labels, test labels -- the order matters!", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the four outputs of train_test_split to the four variables", "color": "peach"},
+                      {"code": "train_test_split", "role": "Function", "tip": "From sklearn.model_selection -- randomly splits arrays into train and test subsets, keeping features and labels aligned", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list", "color": "overlay"},
+                      {"code": "X", "role": "Features", "tip": "The feature matrix (DataFrame or array) -- all predictor columns", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "y", "role": "Target", "tip": "The outcome variable -- must have the same number of rows as X", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "test_size", "role": "Keyword arg", "tip": "Fraction of data to reserve for the test set", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "0.2", "role": "Float", "tip": "20% of observations go to the test set, 80% to training -- typical values range from 0.1 to 0.3", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "random_state", "role": "Keyword arg", "tip": "Random seed for reproducibility", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "42", "role": "Integer", "tip": "Any fixed integer ensures the same split every time -- essential for reproducible research", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns four arrays in order: X_train, X_test, y_train, y_test", "color": "overlay"}
+                    ],
+                    "r": [
+                      {"code": "split_obj", "role": "Variable", "tip": "Stores the split object -- use training() and testing() to extract the two sets", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
+                      {"code": "initial_split", "role": "Function", "tip": "From the rsample package (tidymodels) -- creates a random train-test split", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins arguments", "color": "overlay"},
+                      {"code": "mtcars", "role": "Data frame", "tip": "The full dataset to split", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "prop", "role": "Parameter", "tip": "Proportion of data allocated to the training set", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "0.8", "role": "Float", "tip": "80% for training, 20% for testing", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the initial_split() call -- extract sets with training(split_obj) and testing(split_obj)", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Evaluate a model using 5-fold cross-validation and return the R-squared for each fold",
+                  "pattern": "scores = cross_val_score(model, X, y, cv=K, scoring=str)",
+                  "structureNote": "A single train-test split can be misleading -- you might get lucky or unlucky with which observations end up in each set. <code>cross_val_score</code> automates K-fold CV: it splits data into K folds, trains the model K times (each time holding out a different fold for evaluation), and returns K scores. The <strong>mean</strong> estimates true performance; the <strong>standard deviation</strong> shows how stable the estimate is.",
+                  "languages": {
+                    "python": [
+                      {"code": "ols_scores", "role": "Variable", "tip": "An array of K R-squared values, one per fold -- take .mean() and .std() to summarize", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the array of scores", "color": "peach"},
+                      {"code": "cross_val_score", "role": "Function", "tip": "From sklearn.model_selection -- automates K-fold CV: splits, trains, evaluates, returns scores", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins argument list", "color": "overlay"},
+                      {"code": "ols", "role": "Model", "tip": "An sklearn estimator to evaluate -- cross_val_score refits it on each training fold", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "X", "role": "Features", "tip": "The full feature matrix -- cross_val_score handles the splitting internally", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "y", "role": "Target", "tip": "The full outcome vector", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "cv", "role": "Keyword arg", "tip": "Number of folds for cross-validation", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "5", "role": "Integer", "tip": "5-fold CV: train on 80%, test on 20%, repeated 5 times with different held-out folds", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "scoring", "role": "Keyword arg", "tip": "Which metric to compute on each fold", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "\"r2\"", "role": "String", "tip": "R-squared (coefficient of determination) -- use 'neg_mean_squared_error' for MSE or 'neg_root_mean_squared_error' for RMSE", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns an array of 5 R-squared values", "color": "overlay"}
+                    ],
+                    "r": [
+                      {"code": "folds", "role": "Variable", "tip": "Stores the cross-validation fold specification -- used with fit_resamples() in tidymodels", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
+                      {"code": "vfold_cv", "role": "Function", "tip": "From the rsample package -- creates a V-fold (K-fold) cross-validation specification", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins arguments", "color": "overlay"},
+                      {"code": "mtcars", "role": "Data", "tip": "The data frame to split into folds", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "v", "role": "Parameter", "tip": "Number of folds (R uses 'v' where Python uses 'cv')", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "5", "role": "Integer", "tip": "5-fold cross-validation", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the vfold_cv() call -- pass this to fit_resamples() to run the CV", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Compute the confusion matrix to see how a classifier's predictions compare to true labels",
+                  "pattern": "cm = confusion_matrix(y_true, y_pred)",
+                  "structureNote": "The confusion matrix is a 2x2 table (for binary classification) showing four counts: <strong>TN</strong> (correctly predicted negative), <strong>FP</strong> (predicted positive but actually negative), <strong>FN</strong> (predicted negative but actually positive), and <strong>TP</strong> (correctly predicted positive). All classification metrics (precision, recall, F1, accuracy) are computed from these four numbers.",
+                  "languages": {
+                    "python": [
+                      {"code": "cm", "role": "Variable", "tip": "A 2x2 numpy array: [[TN, FP], [FN, TP]] -- the four cells of the confusion matrix", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the confusion matrix", "color": "peach"},
+                      {"code": "confusion_matrix", "role": "Function", "tip": "From sklearn.metrics -- computes the confusion matrix from true and predicted labels", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list", "color": "overlay"},
+                      {"code": "y_test", "role": "True labels", "tip": "The actual class labels from the test set (0 or 1)", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "y_pred", "role": "Predicted labels", "tip": "The model's predicted class labels (from model.predict(), not predict_proba())", "color": "pink"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns [[TN, FP], [FN, TP]]", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Compute the Area Under the ROC Curve to measure a classifier's ability to rank positives above negatives",
+                  "pattern": "auc = roc_auc_score(y_true, y_prob)",
+                  "structureNote": "AUC-ROC measures how well the model <strong>ranks</strong> observations: a perfect model assigns higher probabilities to all positive cases than to any negative case (AUC = 1.0). A random coin flip gives AUC = 0.5. Unlike accuracy, AUC evaluates the <strong>probability estimates</strong>, not just the final predicted labels, making it robust to the choice of classification threshold.",
+                  "languages": {
+                    "python": [
+                      {"code": "auc", "role": "Variable", "tip": "A float between 0 and 1 -- the area under the ROC curve. Higher is better.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the AUC score", "color": "peach"},
+                      {"code": "roc_auc_score", "role": "Function", "tip": "From sklearn.metrics -- computes the area under the Receiver Operating Characteristic curve", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list", "color": "overlay"},
+                      {"code": "y_test", "role": "True labels", "tip": "The actual binary labels (0 or 1)", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "y_prob", "role": "Probabilities", "tip": "The predicted PROBABILITIES of the positive class (from model.predict_proba()[:, 1]), NOT the predicted labels", "color": "pink"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns the AUC score between 0 and 1", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Compute RMSE to measure the typical size of prediction errors on the test set",
+                  "pattern": "rmse = mean_squared_error(y_true, y_pred, squared=False)",
+                  "structureNote": "RMSE (Root Mean Squared Error) is the most widely used regression metric. It answers: 'On average, how far off are the predictions?' Because it squares errors first, RMSE penalizes large errors more heavily than MAE. The <code>squared=False</code> argument takes the square root for you, giving RMSE directly instead of MSE. The units match the target variable (e.g., dollars, not squared dollars).",
+                  "languages": {
+                    "python": [
+                      {"code": "rmse", "role": "Variable", "tip": "The root mean squared error -- in the same units as the target variable", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the RMSE value", "color": "peach"},
+                      {"code": "mean_squared_error", "role": "Function", "tip": "From sklearn.metrics -- computes MSE or RMSE depending on the squared parameter", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list", "color": "overlay"},
+                      {"code": "y_test", "role": "True values", "tip": "The actual test set outcome values", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "y_pred", "role": "Predictions", "tip": "The model's predicted values (from model.predict())", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "squared", "role": "Keyword arg", "tip": "Whether to return MSE (True) or RMSE (False)", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "False", "role": "Boolean", "tip": "False means return the ROOT mean squared error (take the square root) -- much more interpretable than raw MSE", "color": "mauve"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns the RMSE as a single float", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <!-- Table of Contents -->
         <div class="toc">
           <h3>Contents</h3>
@@ -1606,6 +1751,7 @@ results &lt;- <span class="code-function">data.frame</span>(frac = fractions, n 
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
 

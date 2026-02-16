@@ -149,6 +149,183 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Create a decision tree regressor with pruning constraints to prevent overfitting",
+                  "pattern": "model = DecisionTreeRegressor(max_depth=N, min_samples_leaf=N, ccp_alpha=N)",
+                  "structureNote": "A decision tree splits data into regions by finding the best feature and threshold at each node. Without constraints, a tree will grow until every leaf is pure, perfectly memorizing the training data. The <code>max_depth</code>, <code>min_samples_leaf</code>, and <code>ccp_alpha</code> parameters are different forms of <strong>regularization</strong> that limit tree complexity.",
+                  "languages": {
+                    "python": [
+                      {"code": "tree", "role": "Variable", "tip": "Stores the DecisionTreeRegressor model object -- call .fit() to train it and .predict() to make predictions", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the configured model to the variable name", "color": "peach"},
+                      {"code": "DecisionTreeRegressor", "role": "Constructor", "tip": "Creates a CART regression tree from scikit-learn -- splits nodes to minimize MSE by default", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the hyperparameter arguments", "color": "overlay"},
+                      {"code": "max_depth", "role": "Keyword arg", "tip": "Maximum depth of the tree -- limits how many times the data can be split", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects the parameter name to its value", "color": "peach"},
+                      {"code": "5", "role": "Integer", "tip": "The tree can split at most 5 times from root to any leaf -- a form of pre-pruning", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates keyword arguments", "color": "overlay"},
+                      {"code": "min_samples_leaf", "role": "Keyword arg", "tip": "Minimum number of observations required in a leaf node -- higher values produce simpler trees", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "20", "role": "Integer", "tip": "Each terminal node must contain at least 20 observations -- prevents the tree from fitting noise in small subgroups", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "ccp_alpha", "role": "Keyword arg", "tip": "Cost-complexity pruning parameter -- higher values penalize complex trees more, like the penalty in LASSO", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "0.01", "role": "Float", "tip": "A moderate pruning penalty -- post-prunes branches that don't improve fit enough to justify their complexity", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the constructor -- the model is configured but not yet fitted to data", "color": "overlay"}
+                    ],
+                    "r": [
+                      {"code": "tree_model", "role": "Variable", "tip": "Stores the fitted rpart tree object", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
+                      {"code": "rpart", "role": "Function", "tip": "Fits a CART decision tree -- stands for Recursive Partitioning and Regression Trees", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list", "color": "overlay"},
+                      {"code": "medv ~ .", "role": "Formula", "tip": "R formula: predict medv using all other variables in the data frame (the dot means 'everything else')", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "data", "role": "Parameter", "tip": "Specifies the data frame containing the variables", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "train", "role": "Variable", "tip": "The training data frame", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "method", "role": "Parameter", "tip": "Specifies the type of tree to build", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "\"anova\"", "role": "String", "tip": "method = 'anova' builds a regression tree that minimizes MSE -- use 'class' for classification", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the rpart() call -- the tree is fitted immediately", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Fit a Random Forest with 500 trees, using out-of-bag evaluation",
+                  "pattern": "model = RandomForestRegressor(n_estimators=N, max_features=str, oob_score=True)",
+                  "structureNote": "A Random Forest grows many independent decision trees on bootstrapped samples and averages their predictions. Two sources of randomness reduce overfitting: (1) each tree sees a different bootstrap sample, and (2) each split considers only a random subset of features (<code>max_features</code>). The <code>oob_score</code> gives a free validation estimate using the observations each tree did NOT see during training.",
+                  "languages": {
+                    "python": [
+                      {"code": "rf", "role": "Variable", "tip": "Stores the fitted Random Forest model", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the model to the variable", "color": "peach"},
+                      {"code": "RandomForestRegressor", "role": "Constructor", "tip": "Scikit-learn's Random Forest for regression -- grows multiple trees and averages their predictions", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the hyperparameter arguments", "color": "overlay"},
+                      {"code": "n_estimators", "role": "Keyword arg", "tip": "The number of trees in the forest", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "500", "role": "Integer", "tip": "500 trees -- more trees generally improve performance but increase computation time", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "max_features", "role": "Keyword arg", "tip": "Number of features to consider at each split -- controls the randomness that decorrelates trees", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "'sqrt'", "role": "String", "tip": "Use sqrt(p) features at each split -- the standard default that balances diversity and individual tree accuracy", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "oob_score", "role": "Keyword arg", "tip": "Whether to compute the out-of-bag R-squared -- a free validation estimate", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "True", "role": "Boolean", "tip": "Enables OOB scoring -- each tree is evaluated on the ~37% of observations it did not see during training", "color": "mauve"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the constructor -- call .fit(X, y) next", "color": "overlay"}
+                    ],
+                    "r": [
+                      {"code": "rf_model", "role": "Variable", "tip": "Stores the fitted ranger model object", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
+                      {"code": "ranger", "role": "Function", "tip": "A fast Random Forest implementation in R -- faster than the classic randomForest package", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins arguments", "color": "overlay"},
+                      {"code": "medv ~ .", "role": "Formula", "tip": "Predict medv using all other variables", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "data", "role": "Parameter", "tip": "The data frame to use", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "train", "role": "Variable", "tip": "Training data frame", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "num.trees", "role": "Parameter", "tip": "Number of trees in the forest (R uses dots in parameter names)", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "500", "role": "Integer", "tip": "500 trees", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "importance", "role": "Parameter", "tip": "Which variable importance measure to compute", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "\"permutation\"", "role": "String", "tip": "Compute permutation importance -- measures how much each feature contributes by shuffling it and measuring the performance drop", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the ranger() call -- the model is fitted immediately (R does not separate construction from fitting)", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Create and fit an XGBoost gradient boosting model with regularization parameters",
+                  "pattern": "model = xgb.XGBRegressor(n_estimators=N, max_depth=N, learning_rate=N)",
+                  "structureNote": "XGBoost builds trees <strong>sequentially</strong> -- each new tree corrects the errors of the previous trees. The <code>learning_rate</code> (shrinkage) controls how much each tree contributes. Smaller learning rates require more trees but usually generalize better. Unlike Random Forests, XGBoost also includes L1/L2 regularization on leaf weights via <code>reg_alpha</code> and <code>reg_lambda</code>.",
+                  "languages": {
+                    "python": [
+                      {"code": "xgb_model", "role": "Variable", "tip": "Stores the XGBoost model object", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the model to the variable", "color": "peach"},
+                      {"code": "xgb", "role": "Library alias", "tip": "The xgboost library, imported as xgb for brevity", "color": "yellow"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the XGBRegressor class from the xgboost library", "color": "overlay"},
+                      {"code": "XGBRegressor", "role": "Constructor", "tip": "Creates an XGBoost regression model -- uses gradient boosting with tree base learners", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins hyperparameters", "color": "overlay"},
+                      {"code": "n_estimators", "role": "Keyword arg", "tip": "Number of boosting rounds (trees to add sequentially)", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "500", "role": "Integer", "tip": "500 boosting rounds -- use early_stopping_rounds to find the optimal number automatically", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "max_depth", "role": "Keyword arg", "tip": "Maximum depth of each individual tree -- shallow trees (3-8) work best for boosting since each is a weak learner", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "6", "role": "Integer", "tip": "Each tree can be at most 6 levels deep -- deeper trees capture more interactions but risk overfitting", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "learning_rate", "role": "Keyword arg", "tip": "Shrinkage parameter -- how much each tree contributes to the ensemble", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "0.1", "role": "Float", "tip": "Each tree contributes only 10% of its prediction -- smaller values require more trees but generalize better", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the constructor", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Compute permutation importance to measure how much each feature contributes to predictions",
+                  "pattern": "result = permutation_importance(model, X_test, y_test, n_repeats=N)",
+                  "structureNote": "Permutation importance answers the question: 'How much does the model's performance drop when I randomly shuffle this feature?' If shuffling a feature barely changes the prediction error, that feature is not important. This method is <strong>model-agnostic</strong> -- it works with any fitted model, not just trees.",
+                  "languages": {
+                    "python": [
+                      {"code": "result", "role": "Variable", "tip": "Stores the permutation importance results -- access .importances_mean for the average importance of each feature", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the result to the variable", "color": "peach"},
+                      {"code": "permutation_importance", "role": "Function", "tip": "From sklearn.inspection -- measures feature importance by shuffling each feature and measuring the drop in model performance", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list", "color": "overlay"},
+                      {"code": "rf", "role": "Model", "tip": "The fitted model to evaluate -- can be any sklearn-compatible model (RF, XGBoost, LASSO, etc.)", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "X_test", "role": "Features", "tip": "The test feature matrix -- importance is measured on held-out data to avoid overfitting bias", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "y_test", "role": "Target", "tip": "The true test outcomes -- needed to compute the performance metric", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "n_repeats", "role": "Keyword arg", "tip": "How many times to shuffle each feature -- more repeats give more stable importance estimates", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "10", "role": "Integer", "tip": "Shuffle each feature 10 times and average the performance drops for a stable estimate", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- the result contains .importances_mean, .importances_std, and .importances (per-repeat)", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Evaluate a model using K-fold cross-validation and return the score for each fold",
+                  "pattern": "scores = cross_val_score(model, X, y, cv=K, scoring=str)",
+                  "structureNote": "Cross-validation gives a more reliable estimate of model performance than a single train-test split. <code>cross_val_score</code> automates the entire process: it splits the data into K folds, trains the model K times (each time holding out a different fold), and returns K scores. The <strong>mean</strong> of the scores estimates the true performance; the <strong>standard deviation</strong> measures how stable the estimate is.",
+                  "languages": {
+                    "python": [
+                      {"code": "cv_scores", "role": "Variable", "tip": "An array of K scores, one per fold -- take .mean() and .std() to summarize", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the array of scores", "color": "peach"},
+                      {"code": "cross_val_score", "role": "Function", "tip": "From sklearn.model_selection -- automates K-fold CV: splits, trains, and evaluates in one call", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins argument list", "color": "overlay"},
+                      {"code": "tree", "role": "Model", "tip": "An unfitted or fitted sklearn estimator -- cross_val_score will refit it on each fold", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "X_train", "role": "Features", "tip": "The feature matrix to split into folds", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "y_train", "role": "Target", "tip": "The outcome vector", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "cv", "role": "Keyword arg", "tip": "Number of folds -- cv=5 means 5-fold cross-validation", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "5", "role": "Integer", "tip": "5 folds: train on 80%, test on 20%, repeated 5 times with different held-out folds", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "scoring", "role": "Keyword arg", "tip": "Which metric to compute on each fold", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "'r2'", "role": "String", "tip": "R-squared (coefficient of determination) -- use 'neg_mean_squared_error' for MSE", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns an array of 5 R-squared values", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <!-- Table of Contents -->
         <div class="toc">
           <h3>Contents</h3>
@@ -1296,6 +1473,7 @@ Population   -0.0054</pre></div>
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
 

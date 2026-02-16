@@ -149,6 +149,205 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Estimate OLS with robust (heteroskedasticity-consistent) standard errors",
+                  "pattern": "model = ols(formula, data).fit(cov_type='HC1')",
+                  "structureNote": "Robust standard errors remain valid under <strong>heteroskedasticity</strong> without requiring you to model its form. HC1 is the most common variant (matches Stata's <code>,robust</code>). Always use robust SEs unless you have a specific reason for classical SEs.",
+                  "languages": {
+                    "python": [
+                      {"code": "model_robust", "role": "Variable", "tip": "Stores the fitted model with robust SEs.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "smf.ols", "role": "OLS Function", "tip": "From statsmodels.formula.api. Creates an OLS model.", "color": "blue"},
+                      {"code": "('outcome ~ treatment + controls', data=df)", "role": "Specification", "tip": "R-style formula and data.", "color": "green"},
+                      {"code": ".fit(", "role": "Fit Method", "tip": "Estimates the model. Arguments to fit() control SE computation.", "color": "teal"},
+                      {"code": "cov_type='HC1'", "role": "Robust SEs", "tip": "HC1 = Huber-White sandwich estimator with small-sample correction. HC0, HC2, HC3 are alternatives.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends fit(). The resulting model has robust standard errors.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "reg", "role": "Command", "tip": "OLS regression.", "color": "mauve"},
+                      {"code": " outcome treatment controls", "role": "Variables", "tip": "Dependent variable followed by independent variables.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "robust", "role": "Option", "tip": "Heteroskedasticity-robust standard errors. Equivalent to vce(robust). HC1 by default.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "coeftest", "role": "Function", "tip": "From lmtest package. Re-tests coefficients with a different covariance matrix.", "color": "blue"},
+                      {"code": "(model", "role": "Model", "tip": "A fitted lm() object.", "color": "pink"},
+                      {"code": ", vcov = vcovHC(model, type = \"HC1\")", "role": "Robust Vcov", "tip": "vcovHC from sandwich package. Computes the heteroskedasticity-consistent covariance matrix.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call. Reports coefficients with robust SEs.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate OLS with clustered standard errors",
+                  "pattern": "model.fit(cov_type='cluster', groups=cluster_var)",
+                  "structureNote": "<strong>Clustered standard errors</strong> account for within-group correlation (e.g., students in the same school, workers in the same firm). They allow errors to be correlated within clusters but independent across clusters. You need 30-50+ clusters for reliable inference.",
+                  "languages": {
+                    "python": [
+                      {"code": "model", "role": "Variable", "tip": "The fitted model.", "color": "pink"},
+                      {"code": " = smf.ols('outcome ~ treatment', data=df).fit(", "role": "OLS + Fit", "tip": "Standard OLS specification.", "color": "blue"},
+                      {"code": "cov_type='cluster'", "role": "Cluster Type", "tip": "Specifies clustered standard errors.", "color": "lavender"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "cov_kwds={'groups': df['school_id']}", "role": "Cluster Variable", "tip": "A dictionary specifying the clustering variable. 'groups' key maps to the cluster identifier column.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends fit(). SEs now account for within-school correlation.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "reg", "role": "Command", "tip": "OLS regression.", "color": "mauve"},
+                      {"code": " outcome treatment", "role": "Variables", "tip": "Dependent and independent variables.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "cluster(school_id)", "role": "Clustering", "tip": "Clusters SEs at the school level. Also implies robust SEs.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "model", "role": "Variable", "tip": "The regression object.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "feols", "role": "Function", "tip": "From fixest. Handles clustering natively.", "color": "blue"},
+                      {"code": "(outcome ~ treatment", "role": "Formula", "tip": "The regression formula.", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "The data frame.", "color": "sky"},
+                      {"code": ", cluster = ~ school_id", "role": "Clustering", "tip": "~ before the variable name specifies the clustering level.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate a panel fixed effects model with unit and time effects",
+                  "pattern": "PanelOLS(formula, entity_effects=True, time_effects=True)",
+                  "structureNote": "<strong>Fixed effects</strong> control for all time-invariant differences between units (entity FE) and all common shocks across time (time FE). This is the <strong>within estimator</strong>: it uses only within-unit variation over time. Variables that don't change within units (gender, race) are absorbed and cannot be estimated.",
+                  "languages": {
+                    "python": [
+                      {"code": "model", "role": "Variable", "tip": "The panel model.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the model.", "color": "peach"},
+                      {"code": "PanelOLS.from_formula", "role": "Constructor", "tip": "From linearmodels.panel. Panel data regression with fixed effects.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "'outcome ~ treatment + time_varying_controls'", "role": "Formula", "tip": "Only include time-varying regressors. Fixed effects are specified separately.", "color": "green"},
+                      {"code": ", data=df", "role": "Data", "tip": "Panel data with MultiIndex (unit_id, year). Set with df.set_index(['unit_id','year']).", "color": "sky"},
+                      {"code": ", entity_effects=True", "role": "Unit FE", "tip": "Absorbs unit-level fixed effects. Controls for all time-invariant unit characteristics.", "color": "lavender"},
+                      {"code": ", time_effects=True", "role": "Time FE", "tip": "Absorbs time fixed effects. Controls for common shocks affecting all units.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends model specification. Call .fit() next.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "xtreg", "role": "Command", "tip": "Panel data regression. Requires prior xtset.", "color": "mauve"},
+                      {"code": " outcome treatment time_varying_controls", "role": "Variables", "tip": "Dependent and independent variables.", "color": "sky"},
+                      {"code": " i.year", "role": "Time FE", "tip": "i.year creates year dummies for time fixed effects.", "color": "green"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "fe", "role": "Entity FE", "tip": "The within (fixed effects) estimator. Absorbs unit FE.", "color": "yellow"},
+                      {"code": " cluster(unit_id)", "role": "Clustering", "tip": "Clusters SEs at the unit level.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "fe_model", "role": "Variable", "tip": "The fixed effects model.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "feols", "role": "Function", "tip": "From fixest. Fast fixed effects estimation.", "color": "blue"},
+                      {"code": "(outcome ~ treatment + controls", "role": "Formula", "tip": "Only time-varying regressors before the pipe.", "color": "green"},
+                      {"code": " | unit_id + year", "role": "Fixed Effects", "tip": "After |: fixed effects to absorb. unit_id = entity FE, year = time FE.", "color": "teal"},
+                      {"code": ", data = df", "role": "Data", "tip": "The panel data frame.", "color": "sky"},
+                      {"code": ", cluster = ~ unit_id)", "role": "Clustering", "tip": "Clusters SEs at the unit level.", "color": "lavender"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate a logistic regression (binary outcome model)",
+                  "pattern": "model = Logit(formula, data).fit()",
+                  "structureNote": "<strong>Logit</strong> models binary outcomes (0/1) as a function of covariates. Unlike OLS, which can predict probabilities outside [0,1], logit constrains predictions to valid probabilities. Coefficients are in <em>log-odds</em> — use marginal effects for interpretation.",
+                  "languages": {
+                    "python": [
+                      {"code": "model", "role": "Variable", "tip": "The logit model results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "smf.logit", "role": "Logit Function", "tip": "From statsmodels.formula.api. Estimates via Maximum Likelihood.", "color": "blue"},
+                      {"code": "('hired ~ education + experience + age'", "role": "Formula", "tip": "Binary outcome ~ predictors. 'hired' must be 0/1.", "color": "green"},
+                      {"code": ", data=df)", "role": "Data", "tip": "The DataFrame.", "color": "sky"},
+                      {"code": ".fit()", "role": "Fit", "tip": "Estimates via MLE. Iteratively finds coefficients that maximize the likelihood of observing the data.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "logit", "role": "Command", "tip": "Logistic regression. Reports log-odds coefficients by default.", "color": "mauve"},
+                      {"code": " hired education experience age", "role": "Variables", "tip": "Binary outcome followed by predictors.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "robust", "role": "Option", "tip": "Robust standard errors.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "logit_model", "role": "Variable", "tip": "The logit model.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "glm", "role": "Function", "tip": "Generalized Linear Model. glm with family=binomial fits logit.", "color": "blue"},
+                      {"code": "(hired ~ education + experience + age", "role": "Formula", "tip": "Same formula syntax as lm().", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "The data frame.", "color": "sky"},
+                      {"code": ", family = binomial(link = \"logit\")", "role": "Family", "tip": "Specifies the logit link function. binomial() alone defaults to logit.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Compute bootstrap standard errors by resampling",
+                  "pattern": "for each iteration: resample data, re-estimate, collect coefficients",
+                  "structureNote": "<strong>Bootstrap</strong> estimates the sampling distribution by repeatedly resampling with replacement from your data. Each resample has the same size as the original but with some observations duplicated and others omitted. The standard deviation of the bootstrap estimates IS the standard error.",
+                  "languages": {
+                    "python": [
+                      {"code": "coefs = []", "role": "Storage", "tip": "Empty list to collect coefficient estimates from each bootstrap iteration.", "color": "pink"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "for _ in range(1000):", "role": "Loop", "tip": "Repeat 1000 times. _ means we don't use the loop counter.", "color": "mauve"},
+                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
+                      {"code": "sample = df.sample(n, replace=True)", "role": "Resample", "tip": "Draw n observations with replacement. Some rows appear multiple times, others not at all.", "color": "blue"},
+                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
+                      {"code": "model = smf.ols(formula, data=sample).fit()", "role": "Re-estimate", "tip": "Fit the model on the bootstrap sample.", "color": "teal"},
+                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
+                      {"code": "coefs.append(model.params.values)", "role": "Collect", "tip": "Store this iteration's coefficients.", "color": "sky"},
+                      {"code": "\n", "role": "Newline", "tip": "After the loop.", "color": "text"},
+                      {"code": "se = np.std(coefs, axis=0)", "role": "Bootstrap SE", "tip": "Standard deviation of bootstrap estimates = bootstrap standard error.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "bootstrap", "role": "Prefix", "tip": "Stata's bootstrap prefix. Precedes any estimation command.", "color": "mauve"},
+                      {"code": " _b", "role": "Collect", "tip": "_b collects all coefficient estimates from each replication.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "reps(1000)", "role": "Repetitions", "tip": "Number of bootstrap replications.", "color": "yellow"},
+                      {"code": " seed(12345)", "role": "Seed", "tip": "For reproducibility.", "color": "yellow"},
+                      {"code": ": ", "role": "Colon", "tip": "Introduces the estimation command to bootstrap.", "color": "text"},
+                      {"code": "reg outcome treatment controls", "role": "Command", "tip": "The estimation command to run on each bootstrap sample.", "color": "blue"}
+                    ],
+                    "r": [
+                      {"code": "boot_results", "role": "Variable", "tip": "Stores bootstrap results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "boot", "role": "Function", "tip": "From the boot package. General-purpose bootstrap function.", "color": "blue"},
+                      {"code": "(data = df", "role": "Data", "tip": "The original data.", "color": "sky"},
+                      {"code": ", statistic = boot_fn", "role": "Function", "tip": "A user-defined function that takes (data, indices) and returns the statistic of interest.", "color": "teal"},
+                      {"code": ", R = 1000", "role": "Replications", "tip": "Number of bootstrap replications.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call. Use boot.ci(boot_results) for confidence intervals.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate average marginal effects from a logit model",
+                  "pattern": "marginal_effects = model.get_margeff()",
+                  "structureNote": "<strong>Marginal effects</strong> convert log-odds coefficients into probability changes: 'a one-unit increase in X changes the probability of Y=1 by p percentage points'. Average marginal effects (AME) average the marginal effect across all observations, accounting for the nonlinearity of the logit.",
+                  "languages": {
+                    "python": [
+                      {"code": "mfx", "role": "Variable", "tip": "Stores the marginal effects results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "model.get_margeff", "role": "Method", "tip": "Computes marginal effects from the fitted logit model.", "color": "teal"},
+                      {"code": "(at='overall')", "role": "Type", "tip": "'overall' = average marginal effects (AME). 'mean' = marginal effects at the mean (MEM).", "color": "lavender"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "print(mfx.summary())", "role": "Display", "tip": "Shows marginal effects with standard errors and p-values.", "color": "blue"}
+                    ],
+                    "stata": [
+                      {"code": "margins", "role": "Command", "tip": "Post-estimation command for marginal effects. Works after logit, probit, etc.", "color": "mauve"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "dydx(*)", "role": "Option", "tip": "Compute marginal effects (dy/dx) for all variables. * means all predictors.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "margins", "role": "Function", "tip": "From the margins package. Computes average marginal effects.", "color": "blue"},
+                      {"code": "(logit_model)", "role": "Model", "tip": "The fitted glm object. margins() automatically computes AME for all predictors.", "color": "pink"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <div class="toc">
           <h3>Table of Contents</h3>
           <ul>
@@ -3357,6 +3556,7 @@ Note: Wild cluster bootstrap is recommended when number of clusters < 50.</pre>
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
 </body>
 </html>

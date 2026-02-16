@@ -154,6 +154,184 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Run a classic 2x2 DiD regression with an interaction term",
+                  "pattern": "model = ols('outcome ~ group + time + group*time', data).fit()",
+                  "structureNote": "The DiD regression includes three terms: <strong>group</strong> (treated vs control), <strong>time</strong> (before vs after), and their <strong>interaction</strong>. The coefficient on the interaction term IS the DiD estimate: the differential change in outcomes for the treatment group after the policy.",
+                  "languages": {
+                    "python": [
+                      {"code": "model", "role": "Variable", "tip": "Stores the fitted regression model.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "smf.ols", "role": "Function", "tip": "OLS regression from statsmodels.formula.api. The formula interface lets you specify models with R-style syntax.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "'outcome ~ treated_group + post + treat_post'", "role": "Formula", "tip": "outcome = b0 + b1*group + b2*time + b3*interaction. b3 is the DiD estimate.", "color": "green"},
+                      {"code": ", data=df", "role": "Data", "tip": "The DataFrame containing all variables.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends ols().", "color": "overlay"},
+                      {"code": ".fit()", "role": "Fit Method", "tip": "Estimates the model. Returns a results object with coefficients, SEs, p-values.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "reg", "role": "Command", "tip": "OLS regression. Short for 'regress'.", "color": "mauve"},
+                      {"code": " outcome", "role": "Dependent Var", "tip": "The outcome variable.", "color": "sky"},
+                      {"code": " i.treated_group##i.post", "role": "Factor Interaction", "tip": "i. creates factor variables. ## includes main effects AND interaction. The interaction coefficient is the DiD estimate.", "color": "green"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "cluster(unit_id)", "role": "Clustering", "tip": "Clusters standard errors at the unit level. Essential for panel DiD.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "did_model", "role": "Variable", "tip": "Stores the fixest regression object.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "feols", "role": "Function", "tip": "From fixest. Fast OLS with fixed effects and clustered SEs.", "color": "blue"},
+                      {"code": "(outcome ~ treated_group * post", "role": "Formula", "tip": "* in R formulas includes both main effects AND the interaction. Equivalent to treated_group + post + treated_group:post.", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "The data frame.", "color": "sky"},
+                      {"code": ", cluster = ~ unit_id", "role": "Clustering", "tip": "~ before variable name specifies the clustering level. Uses CR1 correction by default.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate a two-way fixed effects (TWFE) DiD with unit and time fixed effects",
+                  "pattern": "panel_model with entity_effects + time_effects",
+                  "structureNote": "TWFE adds <strong>unit fixed effects</strong> (controlling for all time-invariant differences between units) and <strong>time fixed effects</strong> (controlling for common shocks). This is the standard panel DiD specification. The treatment coefficient captures the within-unit, within-period treatment effect.",
+                  "languages": {
+                    "python": [
+                      {"code": "model", "role": "Variable", "tip": "The panel regression model.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the model.", "color": "peach"},
+                      {"code": "PanelOLS.from_formula", "role": "Constructor", "tip": "From linearmodels.panel. Creates a panel OLS model from a formula string.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "'outcome ~ treated + controls'", "role": "Formula", "tip": "Only time-varying regressors. Fixed effects are specified separately.", "color": "green"},
+                      {"code": ", data=df", "role": "Data", "tip": "Panel data with MultiIndex (unit_id, year).", "color": "sky"},
+                      {"code": ", entity_effects=True", "role": "Unit FE", "tip": "Adds unit fixed effects. Absorbs all time-invariant differences between units.", "color": "lavender"},
+                      {"code": ", time_effects=True", "role": "Time FE", "tip": "Adds time fixed effects. Controls for common shocks (e.g., recessions) affecting all units.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the model specification.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "xtreg", "role": "Command", "tip": "Panel data regression. Requires prior xtset to declare panel structure.", "color": "mauve"},
+                      {"code": " outcome treated", "role": "Variables", "tip": "Dependent variable followed by regressors.", "color": "sky"},
+                      {"code": " i.year", "role": "Time FE", "tip": "i.year creates year dummies (time fixed effects). Unit FE are handled by the 'fe' option.", "color": "green"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "fe", "role": "Fixed Effects", "tip": "Specifies the within (fixed effects) estimator. Absorbs unit-level fixed effects.", "color": "yellow"},
+                      {"code": " cluster(unit_id)", "role": "Clustering", "tip": "Clusters standard errors at the unit level.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "twfe_model", "role": "Variable", "tip": "The TWFE model object.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "feols", "role": "Function", "tip": "fixest's workhorse function. Handles fixed effects absorption efficiently.", "color": "blue"},
+                      {"code": "(outcome ~ treated", "role": "Formula", "tip": "Only include time-varying regressors before the pipe.", "color": "green"},
+                      {"code": " | unit_id + year", "role": "Fixed Effects", "tip": "The | pipe separates regressors from absorbed fixed effects. unit_id = unit FE, year = time FE.", "color": "teal"},
+                      {"code": ", data = df", "role": "Data", "tip": "The panel data frame.", "color": "sky"},
+                      {"code": ", cluster = ~ unit_id", "role": "Clustering", "tip": "Clusters SEs at the unit level.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate an event study with leads and lags relative to treatment",
+                  "pattern": "regression with period dummies relative to treatment timing",
+                  "structureNote": "An event study estimates <strong>separate treatment effects for each period</strong> relative to treatment. Pre-treatment coefficients should be near zero (parallel trends test). Post-treatment coefficients show how the effect evolves over time. One period (usually t=-1) is omitted as the reference.",
+                  "languages": {
+                    "python": [
+                      {"code": "# Create relative time dummies", "role": "Comment", "tip": "First, create indicator variables for each period relative to treatment.", "color": "text"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "for k in range(-4, 5):", "role": "Loop", "tip": "Creates dummies for periods -4 to +4 relative to treatment.", "color": "mauve"},
+                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
+                      {"code": "df[f'rel_{k}'] = (df['rel_time'] == k).astype(int)", "role": "Dummy Creation", "tip": "Creates a 0/1 indicator for each relative time period. Drop one (k=-1) as reference.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "Then fit the model.", "color": "text"},
+                      {"code": "model = PanelOLS.from_formula('outcome ~ ' + ' + '.join(rel_cols), data=df, entity_effects=True, time_effects=True)", "role": "Event Study Model", "tip": "Include all relative time dummies (except reference period) with unit and time fixed effects.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "reghdfe", "role": "Command", "tip": "Regression with high-dimensional fixed effects. Faster than xtreg for multiple FE levels.", "color": "mauve"},
+                      {"code": " outcome", "role": "Dependent Var", "tip": "The outcome variable.", "color": "sky"},
+                      {"code": " ib(-1).rel_time", "role": "Event Study Dummies", "tip": "i. creates dummies for each value of rel_time. b(-1) sets period -1 as the omitted reference.", "color": "green"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "absorb(unit_id year)", "role": "Fixed Effects", "tip": "Absorbs unit and year fixed effects. More efficient than including as dummies.", "color": "yellow"},
+                      {"code": " cluster(unit_id)", "role": "Clustering", "tip": "Clusters standard errors at the unit level.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "es_model", "role": "Variable", "tip": "The event study model.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "feols", "role": "Function", "tip": "fixest handles event studies natively with i() syntax.", "color": "blue"},
+                      {"code": "(outcome ~ i(rel_time, ref = -1)", "role": "Formula", "tip": "i() creates treatment-time interactions. ref=-1 sets the reference period (omitted category).", "color": "green"},
+                      {"code": " | unit_id + year", "role": "Fixed Effects", "tip": "Unit and time fixed effects after the pipe.", "color": "teal"},
+                      {"code": ", data = df, cluster = ~ unit_id)", "role": "Data & Clustering", "tip": "Data and clustered SEs.", "color": "sky"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Create the interaction term for a DiD manually",
+                  "pattern": "interaction = group_indicator * time_indicator",
+                  "structureNote": "The <strong>interaction term</strong> is the product of the group indicator (1 if treated) and the time indicator (1 if post-treatment). It equals 1 only for treated units in the post period. The coefficient on this term is the DiD estimate: the causal effect under the parallel trends assumption.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "DataFrame", "tip": "Your panel dataset.", "color": "pink"},
+                      {"code": "[", "role": "Open Bracket", "tip": "Column selection/creation.", "color": "overlay"},
+                      {"code": "'treat_post'", "role": "New Column", "tip": "Name for the interaction term. Descriptive: treatment x post-period.", "color": "green"},
+                      {"code": "]", "role": "Close Bracket", "tip": "Ends column name.", "color": "overlay"},
+                      {"code": " = ", "role": "Assignment", "tip": "Creates the new column.", "color": "peach"},
+                      {"code": "df['treated_group']", "role": "Group Indicator", "tip": "1 for treatment group, 0 for control. Time-invariant.", "color": "sky"},
+                      {"code": " * ", "role": "Multiplication", "tip": "Element-wise multiplication. 1*1=1, 1*0=0, 0*1=0, 0*0=0.", "color": "overlay"},
+                      {"code": "df['post']", "role": "Time Indicator", "tip": "1 for post-treatment period, 0 for pre-treatment. The product is 1 only for treated-post observations.", "color": "sky"}
+                    ],
+                    "stata": [
+                      {"code": "gen", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
+                      {"code": " treat_post", "role": "Variable Name", "tip": "The interaction variable.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the computed value.", "color": "peach"},
+                      {"code": "treated_group * post", "role": "Interaction", "tip": "Product of group and time indicators. Or use ## in the regression formula to skip manual creation.", "color": "blue"}
+                    ],
+                    "r": [
+                      {"code": "df$treat_post", "role": "New Column", "tip": "$ accesses/creates a column in the data frame.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "df$treated_group", "role": "Group Indicator", "tip": "The treatment group indicator.", "color": "sky"},
+                      {"code": " * ", "role": "Multiplication", "tip": "Element-wise multiplication of the two indicators.", "color": "overlay"},
+                      {"code": "df$post", "role": "Time Indicator", "tip": "Post-treatment indicator. Or just use * in the formula (R creates the interaction automatically).", "color": "sky"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Visualize an event study plot with confidence intervals",
+                  "pattern": "plot coefficients with error bars by relative time",
+                  "structureNote": "The event study plot is the <strong>key diagnostic</strong> for DiD. Pre-treatment coefficients near zero support parallel trends. Post-treatment coefficients show the treatment effect dynamics. Error bars (95% CIs) that cross zero indicate insignificance.",
+                  "languages": {
+                    "python": [
+                      {"code": "coefs", "role": "Coefficients", "tip": "Extract the event study coefficients from the results object.", "color": "pink"},
+                      {"code": " = results.params[rel_cols]", "role": "Extraction", "tip": "Gets the estimated coefficients for each relative time period.", "color": "teal"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "ses", "role": "Std Errors", "tip": "Standard errors for constructing confidence intervals.", "color": "pink"},
+                      {"code": " = results.std_errors[rel_cols]", "role": "Extraction", "tip": "Gets SEs for the same coefficients.", "color": "teal"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "plt.errorbar(periods, coefs, yerr=1.96*ses, fmt='o-')", "role": "Error Bar Plot", "tip": "Plots point estimates with 95% confidence intervals. fmt='o-' = circle markers connected by lines.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "plt.axhline(y=0, color='red', linestyle='--')", "role": "Zero Line", "tip": "Horizontal line at zero. Coefficients crossing this line are statistically insignificant.", "color": "blue"}
+                    ],
+                    "stata": [
+                      {"code": "eventdd", "role": "Command", "tip": "Automates event study estimation and plotting. ssc install eventdd.", "color": "mauve"},
+                      {"code": " outcome", "role": "Dependent Var", "tip": "The outcome variable.", "color": "sky"},
+                      {"code": ", timevar(rel_time)", "role": "Time Variable", "tip": "The relative time variable (periods since treatment).", "color": "yellow"},
+                      {"code": " method(hdfe, absorb(unit_id year))", "role": "Method", "tip": "Uses reghdfe with unit and year fixed effects.", "color": "lavender"},
+                      {"code": " cluster(unit_id)", "role": "Clustering", "tip": "Clusters standard errors.", "color": "yellow"},
+                      {"code": " graph", "role": "Plot Option", "tip": "Produces the event study figure automatically.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "iplot", "role": "Function", "tip": "fixest's built-in event study plotting function. Creates publication-ready plots.", "color": "blue"},
+                      {"code": "(es_model", "role": "Model", "tip": "The event study model fitted with feols() and i() syntax.", "color": "pink"},
+                      {"code": ", xlab = \"Periods Relative to Treatment\"", "role": "X Label", "tip": "Label for the x-axis.", "color": "green"},
+                      {"code": ", main = \"Event Study\"", "role": "Title", "tip": "Plot title.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call. Automatically adds CIs and reference line at zero.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <h2 id="classic">Classic 2x2 DiD</h2>
 
         <p>
@@ -2336,6 +2514,7 @@ Interpretation:
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
 </body>
 </html>

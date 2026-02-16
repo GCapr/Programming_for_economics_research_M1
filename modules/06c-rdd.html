@@ -147,6 +147,178 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Center the running variable at the cutoff",
+                  "pattern": "new_variable = running_variable - cutoff",
+                  "structureNote": "RDD estimates effects at a <strong>cutoff</strong> in a running variable. Centering the running variable at the cutoff (subtracting the cutoff value) makes the cutoff equal to zero. This simplifies the estimation — the treatment effect is estimated at x=0.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "DataFrame", "tip": "Your dataset.", "color": "pink"},
+                      {"code": "[", "role": "Open Bracket", "tip": "Column access/creation.", "color": "overlay"},
+                      {"code": "'x_centered'", "role": "New Column", "tip": "The centered running variable. Values below 0 are untreated, above 0 are treated.", "color": "green"},
+                      {"code": "]", "role": "Close Bracket", "tip": "Ends column name.", "color": "overlay"},
+                      {"code": " = ", "role": "Assignment", "tip": "Creates the new column.", "color": "peach"},
+                      {"code": "df['running_var']", "role": "Running Variable", "tip": "The original score that determines treatment (e.g., test score, poverty index).", "color": "sky"},
+                      {"code": " - ", "role": "Subtraction", "tip": "Subtracts the cutoff from every observation.", "color": "overlay"},
+                      {"code": "cutoff", "role": "Cutoff Value", "tip": "The threshold value (e.g., 50 points). After centering, this becomes 0.", "color": "sky"}
+                    ],
+                    "stata": [
+                      {"code": "gen", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
+                      {"code": " x_centered", "role": "Variable Name", "tip": "The centered running variable.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the value.", "color": "peach"},
+                      {"code": "running_var - 50", "role": "Expression", "tip": "Subtracts the cutoff (50) from the running variable.", "color": "blue"}
+                    ],
+                    "r": [
+                      {"code": "df$x_centered", "role": "New Column", "tip": "Creates a new column using $ notation.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "df$running_var", "role": "Running Variable", "tip": "The original running variable.", "color": "sky"},
+                      {"code": " - ", "role": "Subtraction", "tip": "Elementwise subtraction.", "color": "overlay"},
+                      {"code": "50", "role": "Cutoff", "tip": "The cutoff value.", "color": "sky"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate a sharp RDD using the rdrobust package",
+                  "pattern": "result = rdrobust(y=outcome, x=running_var, c=cutoff)",
+                  "structureNote": "The <code>rdrobust</code> package implements the <strong>Calonico, Cattaneo, Titiunik (2014)</strong> optimal bandwidth procedure with bias-corrected confidence intervals. It automatically selects the bandwidth, fits local polynomials on each side of the cutoff, and reports robust inference.",
+                  "languages": {
+                    "python": [
+                      {"code": "result", "role": "Variable", "tip": "Stores the RDD estimation results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "rdrobust", "role": "Function", "tip": "From the rdrobust package. Implements local polynomial RDD with optimal bandwidth.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "y=df['outcome']", "role": "Outcome", "tip": "The dependent variable (outcome). Passed as a pandas Series.", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "x=df['x_centered']", "role": "Running Var", "tip": "The centered running variable. Treatment is assigned at x=0.", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "c=0", "role": "Cutoff", "tip": "The cutoff value. 0 because we centered the running variable.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the function call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "rdrobust", "role": "Command", "tip": "RDD estimation command. Install with: ssc install rdrobust.", "color": "mauve"},
+                      {"code": " outcome", "role": "Outcome", "tip": "The dependent variable.", "color": "sky"},
+                      {"code": " x_centered", "role": "Running Var", "tip": "The centered running variable.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "c(0)", "role": "Cutoff", "tip": "Specifies the cutoff. 0 because the variable is centered.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "rd_result", "role": "Variable", "tip": "Stores the RDD results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "rdrobust", "role": "Function", "tip": "From the rdrobust R package.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "y = df$outcome", "role": "Outcome", "tip": "The outcome variable. $ accesses the column.", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "x = df$x_centered", "role": "Running Var", "tip": "The centered running variable.", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "c = 0", "role": "Cutoff", "tip": "The cutoff value.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Select the optimal bandwidth for the RDD",
+                  "pattern": "bw_result = rdbwselect(y=outcome, x=running_var, c=cutoff)",
+                  "structureNote": "<strong>Bandwidth selection</strong> is crucial in RDD: too narrow wastes data, too wide introduces bias. The <code>rdbwselect</code> function computes the MSE-optimal bandwidth (minimizing mean squared error of the estimator) and the CER-optimal bandwidth (minimizing coverage error of confidence intervals).",
+                  "languages": {
+                    "python": [
+                      {"code": "bw_result", "role": "Variable", "tip": "Stores bandwidth selection results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "rdbwselect", "role": "Function", "tip": "Computes optimal bandwidths. Returns MSE-optimal and CER-optimal values.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "y=df['outcome']", "role": "Outcome", "tip": "The dependent variable.", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "x=df['x_centered']", "role": "Running Var", "tip": "The centered running variable.", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "c=0", "role": "Cutoff", "tip": "The cutoff value.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call. Print result to see bandwidth values.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "rdbwselect", "role": "Command", "tip": "Reports optimal bandwidths for RDD. Separate from estimation.", "color": "mauve"},
+                      {"code": " outcome x_centered", "role": "Variables", "tip": "Outcome and running variable.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "c(0)", "role": "Cutoff", "tip": "The cutoff value.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "bw", "role": "Variable", "tip": "Stores the bandwidth selection result.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "rdbwselect", "role": "Function", "tip": "From rdrobust package. Computes data-driven optimal bandwidths.", "color": "blue"},
+                      {"code": "(y = df$outcome, x = df$x_centered, c = 0)", "role": "Arguments", "tip": "Same arguments as rdrobust. Returns optimal bandwidth values for different criteria.", "color": "sky"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate RDD with a manually specified bandwidth",
+                  "pattern": "result = rdrobust(y, x, c, h=bandwidth)",
+                  "structureNote": "You can override the automatic bandwidth with <code>h=</code> to test robustness. A good practice is to show results across multiple bandwidths — if the estimate is stable, the results are more credible. If it swings wildly, the finding is fragile.",
+                  "languages": {
+                    "python": [
+                      {"code": "result", "role": "Variable", "tip": "RDD results with manual bandwidth.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores result.", "color": "peach"},
+                      {"code": "rdrobust", "role": "Function", "tip": "Same function, but with a manual bandwidth argument.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "y=df['outcome'], x=df['x_centered'], c=0", "role": "Standard Args", "tip": "Same outcome, running variable, and cutoff as before.", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "Before the bandwidth argument.", "color": "text"},
+                      {"code": "h=5", "role": "Bandwidth", "tip": "Manual bandwidth: use only observations within 5 units of the cutoff. Overrides automatic selection.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "rdrobust", "role": "Command", "tip": "RDD estimation with manual bandwidth.", "color": "mauve"},
+                      {"code": " outcome x_centered", "role": "Variables", "tip": "Outcome and running variable.", "color": "sky"},
+                      {"code": ", c(0)", "role": "Cutoff", "tip": "The cutoff.", "color": "yellow"},
+                      {"code": " h(5)", "role": "Bandwidth", "tip": "Manual bandwidth of 5 units around the cutoff.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "rd_result", "role": "Variable", "tip": "RDD results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "rdrobust(y = df$outcome, x = df$x_centered, c = 0", "role": "Standard Args", "tip": "Outcome, running variable, cutoff.", "color": "blue"},
+                      {"code": ", h = 5", "role": "Bandwidth", "tip": "Manual bandwidth. Use various values (3, 5, 7, 10) for robustness checks.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate RDD with covariates to improve precision",
+                  "pattern": "rdrobust(y, x, c, covs=covariate_matrix)",
+                  "structureNote": "Adding covariates to RDD doesn't change the identification (it's still based on the discontinuity), but it can <strong>improve precision</strong> by explaining residual variation. Covariates should NOT be affected by the treatment — otherwise you'd be controlling for a mediator.",
+                  "languages": {
+                    "python": [
+                      {"code": "result", "role": "Variable", "tip": "RDD results with covariates.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "rdrobust", "role": "Function", "tip": "The rdrobust function with additional covariates.", "color": "blue"},
+                      {"code": "(y=df['outcome'], x=df['x_centered'], c=0", "role": "Core Args", "tip": "Same core specification.", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "Before covariates.", "color": "text"},
+                      {"code": "covs=df[['age', 'gender']]", "role": "Covariates", "tip": "Pre-treatment covariates as a DataFrame. They improve precision but don't change identification.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "rdrobust", "role": "Command", "tip": "RDD estimation with covariates.", "color": "mauve"},
+                      {"code": " outcome x_centered", "role": "Variables", "tip": "Outcome and running variable.", "color": "sky"},
+                      {"code": ", c(0)", "role": "Cutoff", "tip": "The cutoff value.", "color": "yellow"},
+                      {"code": " covs(age gender)", "role": "Covariates", "tip": "Pre-treatment covariates to improve precision. Listed after covs() option.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "rd_result", "role": "Variable", "tip": "RDD results with covariates.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "rdrobust(y = df$outcome, x = df$x_centered, c = 0", "role": "Core Args", "tip": "Standard RDD arguments.", "color": "blue"},
+                      {"code": ", covs = cbind(df$age, df$gender)", "role": "Covariates", "tip": "cbind() binds columns together into a matrix. Pre-treatment covariates only.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <h2 id="sharp">Sharp RDD</h2>
 
         <p>
@@ -1036,6 +1208,7 @@ Visual discontinuity estimate:
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
 </body>
 </html>

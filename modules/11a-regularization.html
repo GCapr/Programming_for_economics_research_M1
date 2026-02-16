@@ -152,6 +152,195 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Import a cross-validated Ridge regression class from scikit-learn",
+                  "pattern": "from module import ClassName",
+                  "structureNote": "Python's <code>from ... import</code> syntax lets you grab specific classes from a module without importing the entire library. <code>sklearn.linear_model</code> is the submodule containing all linear regression estimators: OLS, Ridge, LASSO, Elastic Net.",
+                  "languages": {
+                    "python": [
+                      {"code": "from", "role": "Keyword", "tip": "Begins a selective import -- lets you grab specific classes from a module without importing the entire library", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Required separator between the keyword and the module path", "color": "text"},
+                      {"code": "sklearn.linear_model", "role": "Module path", "tip": "The submodule inside scikit-learn that contains all linear regression estimators: OLS, Ridge, LASSO, Elastic Net", "color": "yellow"},
+                      {"code": " ", "role": "Space", "tip": "Required separator", "color": "text"},
+                      {"code": "import", "role": "Keyword", "tip": "Specifies which names to bring into the current namespace from the module", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Required separator", "color": "text"},
+                      {"code": "RidgeCV", "role": "Class name", "tip": "Ridge regression with built-in cross-validation -- automatically selects the best alpha (penalty strength) from a grid of values", "color": "blue"}
+                    ],
+                    "r": [
+                      {"code": "library", "role": "Function", "tip": "Loads an R package into the current session, making all its functions available", "color": "mauve"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument to library()", "color": "overlay"},
+                      {"code": "glmnet", "role": "Package name", "tip": "The standard R package for regularized regression -- provides Ridge, LASSO, and Elastic Net via the alpha parameter", "color": "yellow"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the library() call -- the glmnet package is now loaded", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Create a Ridge model with cross-validated penalty selection and fit it to training data",
+                  "pattern": "model = ClassName(params).fit(X, y)",
+                  "structureNote": "The scikit-learn workflow has two steps: (1) <strong>instantiate</strong> the model with hyperparameters, and (2) <strong>fit</strong> it to data. <code>RidgeCV</code> combines model fitting and penalty selection in one step -- it tries every alpha in the grid using K-fold CV and picks the one with the lowest error.",
+                  "languages": {
+                    "python": [
+                      {"code": "ridge", "role": "Variable", "tip": "Stores the fitted RidgeCV model object -- you can later call .predict() or inspect .alpha_ and .coef_", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the fitted model to the variable name", "color": "peach"},
+                      {"code": "RidgeCV", "role": "Constructor", "tip": "Creates a Ridge regression estimator with built-in cross-validation for penalty selection", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the hyperparameter arguments", "color": "overlay"},
+                      {"code": "alphas", "role": "Keyword arg", "tip": "The name of the parameter that specifies which penalty strengths to try", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects the parameter name to its value", "color": "peach"},
+                      {"code": "alphas", "role": "Variable", "tip": "An array of alpha values to try, e.g., np.logspace(-4, 4, 50) -- 50 values from 0.0001 to 10000", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates keyword arguments", "color": "overlay"},
+                      {"code": "cv", "role": "Keyword arg", "tip": "Specifies the number of cross-validation folds", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects the parameter name to its value", "color": "peach"},
+                      {"code": "5", "role": "Integer", "tip": "5-fold cross-validation: train on 80%, validate on 20%, repeated 5 times", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the constructor call -- the model object is now configured but not yet fitted", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "cvlasso", "role": "Command", "tip": "Cross-validated LASSO/Ridge from the lassopack package -- selects the optimal lambda via K-fold CV", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separator between command and variable list", "color": "text"},
+                      {"code": "y", "role": "Dependent var", "tip": "The outcome variable to be predicted", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "Separator", "color": "text"},
+                      {"code": "x1-x50", "role": "Independent vars", "tip": "Stata's variable range notation -- includes all variables from x1 through x50 as predictors", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "In Stata, the comma separates the main command from its options", "color": "overlay"},
+                      {"code": "alpha(0)", "role": "Option", "tip": "Sets the elastic net mixing parameter: alpha(0) = pure Ridge (L2 penalty only), alpha(1) = LASSO (L1 only)", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "Separator between options", "color": "text"},
+                      {"code": "lopt", "role": "Option", "tip": "Tells cvlasso to select the lambda that minimizes the cross-validation error (the 'optimal' lambda)", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "cv_ridge", "role": "Variable", "tip": "Stores the fitted cv.glmnet object -- contains the optimal lambda, CV error curve, and fitted coefficients", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator -- stores the result on the right into the variable on the left", "color": "peach"},
+                      {"code": "cv.glmnet", "role": "Function", "tip": "Fits a regularized regression with K-fold cross-validation and returns the optimal penalty (lambda)", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list", "color": "overlay"},
+                      {"code": "X_train", "role": "Feature matrix", "tip": "The predictor matrix (must be a matrix, not a data frame)", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates positional arguments", "color": "overlay"},
+                      {"code": "y_train", "role": "Response vector", "tip": "The outcome variable as a numeric vector", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "alpha", "role": "Parameter", "tip": "The elastic net mixing parameter", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects the parameter name to its value", "color": "peach"},
+                      {"code": "0", "role": "Value", "tip": "alpha = 0 means pure Ridge (L2 penalty only); alpha = 1 means LASSO (L1 only)", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the cv.glmnet() call -- the model is fitted and CV is performed in one step", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Fit a cross-validated LASSO model that automatically selects the penalty strength",
+                  "pattern": "model = LassoCV(cv=K).fit(X, y)",
+                  "structureNote": "LASSO (Least Absolute Shrinkage and Selection Operator) adds an L1 penalty that can shrink coefficients to <strong>exactly zero</strong>, performing automatic variable selection. <code>LassoCV</code> tests many penalty values and picks the best via cross-validation. This is the key difference from Ridge, which shrinks but never eliminates variables.",
+                  "languages": {
+                    "python": [
+                      {"code": "lasso", "role": "Variable", "tip": "Stores the fitted LassoCV model -- will contain .alpha_ (best penalty) and .coef_ (with zeros for dropped features)", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the fitted model to the variable name", "color": "peach"},
+                      {"code": "LassoCV", "role": "Constructor", "tip": "Creates a LASSO estimator with built-in CV for penalty selection -- automatically tests many alpha values", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the hyperparameter arguments", "color": "overlay"},
+                      {"code": "cv", "role": "Keyword arg", "tip": "Number of cross-validation folds for selecting the best alpha", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter name to value", "color": "peach"},
+                      {"code": "5", "role": "Integer", "tip": "5-fold CV -- a common default that balances bias and variance in the CV estimate", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates keyword arguments", "color": "overlay"},
+                      {"code": "random_state", "role": "Keyword arg", "tip": "Sets the random seed for reproducibility of the CV fold assignments", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter name to value", "color": "peach"},
+                      {"code": "42", "role": "Integer", "tip": "Any fixed integer ensures the same folds every time you run the code", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the constructor -- model is configured but not yet fitted", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "cvlasso", "role": "Command", "tip": "Cross-validated LASSO from lassopack -- without alpha() option, defaults to alpha(1) which is LASSO", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separator between command and variable list", "color": "text"},
+                      {"code": "y", "role": "Dependent var", "tip": "The outcome variable", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "Separator", "color": "text"},
+                      {"code": "x1-x50", "role": "Independent vars", "tip": "All 50 predictor variables -- Stata's range notation x1-x50 expands to x1 x2 ... x50", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates the main command from options", "color": "overlay"},
+                      {"code": "lopt", "role": "Option", "tip": "Selects the lambda that minimizes cross-validation error -- the 'optimal' penalty strength", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "cv_lasso", "role": "Variable", "tip": "Stores the cv.glmnet object -- access $lambda.min for the optimal penalty", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
+                      {"code": "cv.glmnet", "role": "Function", "tip": "Fits regularized regression with cross-validation", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins argument list", "color": "overlay"},
+                      {"code": "X_train", "role": "Feature matrix", "tip": "Predictor matrix -- must be a matrix object in glmnet", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates positional arguments", "color": "overlay"},
+                      {"code": "y_train", "role": "Response", "tip": "The outcome vector", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "alpha", "role": "Parameter", "tip": "Elastic net mixing parameter", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "1", "role": "Value", "tip": "alpha = 1 means pure LASSO (L1 penalty only) -- coefficients can be shrunk to exactly zero", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- cross-validated LASSO is fitted", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Create an Elastic Net model that searches over multiple L1/L2 mixing ratios",
+                  "pattern": "model = ElasticNetCV(l1_ratio=[...], cv=K)",
+                  "structureNote": "Elastic Net combines L1 (LASSO) and L2 (Ridge) penalties. The <code>l1_ratio</code> parameter controls the mix: 0 = pure Ridge, 1 = pure LASSO. By providing a list of ratios, <code>ElasticNetCV</code> searches over both the mixing ratio and the penalty strength simultaneously via cross-validation.",
+                  "languages": {
+                    "python": [
+                      {"code": "enet", "role": "Variable", "tip": "Stores the fitted ElasticNetCV model -- check .l1_ratio_ and .alpha_ to see which mix and penalty won", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the model to the variable name", "color": "peach"},
+                      {"code": "ElasticNetCV", "role": "Constructor", "tip": "Elastic Net with built-in CV -- searches over both the L1/L2 mixing ratio and the penalty strength", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the hyperparameter arguments", "color": "overlay"},
+                      {"code": "l1_ratio", "role": "Keyword arg", "tip": "The mixing parameter between L1 and L2: 0 = Ridge, 1 = LASSO, values in between = Elastic Net", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter name to value", "color": "peach"},
+                      {"code": "[.1, .5, .7, .9, .95, 1]", "role": "List", "tip": "A list of mixing ratios to try -- CV will find the best combination of l1_ratio and alpha", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates keyword arguments", "color": "overlay"},
+                      {"code": "cv", "role": "Keyword arg", "tip": "Number of cross-validation folds", "color": "sky"},
+                      {"code": "=", "role": "Binding", "tip": "Connects parameter name to value", "color": "peach"},
+                      {"code": "5", "role": "Integer", "tip": "5-fold cross-validation", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the constructor -- call .fit(X, y) next to train the model", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "cvlasso", "role": "Command", "tip": "Cross-validated penalized regression from lassopack", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separator", "color": "text"},
+                      {"code": "y", "role": "Dependent var", "tip": "The outcome variable", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "Separator", "color": "text"},
+                      {"code": "x1-x50", "role": "Independent vars", "tip": "All predictor variables", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates the variable list from options", "color": "overlay"},
+                      {"code": "alpha(0.5)", "role": "Option", "tip": "alpha(0.5) = equal mix of L1 and L2 penalties -- Stata uses alpha where Python uses l1_ratio", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "Separator between options", "color": "text"},
+                      {"code": "lopt", "role": "Option", "tip": "Select the lambda that minimizes CV error", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "cv_enet", "role": "Variable", "tip": "Stores the cv.glmnet object for Elastic Net", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
+                      {"code": "cv.glmnet", "role": "Function", "tip": "Same function as Ridge/LASSO -- the alpha parameter controls the L1/L2 mix", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins argument list", "color": "overlay"},
+                      {"code": "X_train", "role": "Feature matrix", "tip": "Predictor matrix", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "y_train", "role": "Response", "tip": "Outcome vector", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "overlay"},
+                      {"code": "alpha", "role": "Parameter", "tip": "The L1/L2 mixing parameter in glmnet", "color": "sky"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
+                      {"code": "0.5", "role": "Value", "tip": "alpha = 0.5 gives equal weight to L1 and L2 penalties -- the standard Elastic Net", "color": "green"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- to search over multiple alpha values in R, loop over them manually", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Standardize features by fitting the scaler on training data, then transform both train and test",
+                  "pattern": "scaler = StandardScaler(); X_train = scaler.fit_transform(X_train); X_test = scaler.transform(X_test)",
+                  "structureNote": "Feature scaling is <strong>essential</strong> before regularization because the penalty treats all coefficients equally. Without scaling, a feature measured in thousands (income) would be penalized differently from one measured in fractions (percentage). The critical rule: <code>fit_transform</code> on training data only, then <code>transform</code> (not fit_transform!) on test data to prevent data leakage.",
+                  "languages": {
+                    "python": [
+                      {"code": "X_train_sc", "role": "Variable", "tip": "Will hold the standardized training features (mean=0, std=1)", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the transformed data", "color": "peach"},
+                      {"code": "scaler", "role": "Object", "tip": "A StandardScaler instance created earlier with StandardScaler() -- it remembers the training mean and std", "color": "pink"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the fit_transform method on the scaler object", "color": "overlay"},
+                      {"code": "fit_transform", "role": "Method", "tip": "Two steps in one: (1) computes mean and std from this data (fit), (2) applies the transformation (transform). Only use on training data!", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument", "color": "overlay"},
+                      {"code": "X_train", "role": "Argument", "tip": "The raw training feature matrix -- the scaler learns its mean and std from this data", "color": "pink"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns the standardized matrix", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <!-- Table of Contents -->
         <div class="toc" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem 1.5rem; margin: 1.5rem 0;">
           <h3 style="margin: 0 0 0.75rem 0; color: #334155;">In This Section</h3>
@@ -937,6 +1126,7 @@ Pr(>|t|): < 2e-16
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
 

@@ -227,6 +227,236 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Load a CSV file from a URL into a DataFrame",
+                  "pattern": "variable = alias.function(argument)",
+                  "structureNote": "This follows the <strong>object.method(argument)</strong> pattern. You call a function that belongs to a library, pass it input, and store the result. The <code>=</code> sign means 'store this', not 'equals'.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "Variable Name", "tip": "The name you choose for your DataFrame. 'df' is a convention but you could use any valid name.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result of the right side into the variable on the left. Not 'equals' — it means 'store this'.", "color": "peach"},
+                      {"code": "pd", "role": "Library Alias", "tip": "Short name for pandas, set up with 'import pandas as pd'. Almost every Python data scientist uses this alias.", "color": "yellow"},
+                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses a function that belongs to the library on its left. Read as 'pandas's read_csv'.", "color": "overlay"},
+                      {"code": "read_csv", "role": "Function Name", "tip": "A pandas function that reads CSV files and returns a DataFrame. Automatically detects column names and data types.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the list of inputs (arguments) passed to the function.", "color": "overlay"},
+                      {"code": "url", "role": "Argument", "tip": "The variable containing the file path or URL. Passed as input to the function.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the function call. Everything between ( and ) is input to the function.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "import delimited", "role": "Command", "tip": "Stata's command for loading CSV files. Two words that act as one command.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separates the command from its argument.", "color": "text"},
+                      {"code": "url", "role": "File Path", "tip": "The URL or file path to load. In Stata, this is a positional argument — no parameter name needed.", "color": "green"},
+                      {"code": ", ", "role": "Comma", "tip": "In Stata, commas separate the main arguments from options.", "color": "text"},
+                      {"code": "clear", "role": "Option", "tip": "Removes any existing data from memory before loading. Stata can only hold one dataset at a time.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "df", "role": "Variable Name", "tip": "Name for your data frame — you choose this.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator. Points from right to left: 'take the result and store it in df'.", "color": "peach"},
+                      {"code": "read_csv", "role": "Function Name", "tip": "From the readr package (part of tidyverse). Reads CSV files into a tibble (enhanced data frame).", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "url", "role": "Argument", "tip": "The file path or URL to read.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the function call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Print how many rows and columns are in the dataset using formatted text",
+                  "pattern": "print(formatted_string_with_expressions)",
+                  "structureNote": "This shows <strong>function nesting</strong>: functions inside functions. <code>len(df)</code> runs first, its result gets inserted into the f-string, and then <code>print()</code> displays the assembled text. The <code>:,</code> is a format specifier that adds thousand separators.",
+                  "languages": {
+                    "python": [
+                      {"code": "print", "role": "Function", "tip": "Displays output to the screen. Everything inside its parentheses gets shown.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins print's argument.", "color": "overlay"},
+                      {"code": "f\"", "role": "F-string Start", "tip": "The 'f' prefix creates a formatted string. Expressions inside {curly braces} get evaluated and inserted.", "color": "green"},
+                      {"code": "Loaded ", "role": "Literal Text", "tip": "Plain text that appears as-is in the output.", "color": "green"},
+                      {"code": "{len(df):,}", "role": "Expression", "tip": "len(df) counts rows. The :, adds thousand separators (14,112 instead of 14112). Curly braces mark code inside the string.", "color": "sky"},
+                      {"code": " rows and ", "role": "Literal Text", "tip": "Plain text between the two expressions.", "color": "green"},
+                      {"code": "{len(df.columns)}", "role": "Expression", "tip": "df.columns returns the column list; len() counts them. This tells you how many variables you have.", "color": "sky"},
+                      {"code": " columns\"", "role": "F-string End", "tip": "Closing quote ends the string.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the print() call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "describe", "role": "Command", "tip": "Shows comprehensive info about the dataset: variable names, types, labels, and observation count.", "color": "mauve"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates command from options.", "color": "text"},
+                      {"code": "short", "role": "Option", "tip": "Shows a compact summary: just observation count, variable count, and total size.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "cat", "role": "Function", "tip": "Concatenate and print. More flexible than print() for formatted output.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "sprintf", "role": "Function", "tip": "Creates formatted strings. %d inserts an integer, %s inserts text. Values fill placeholders in order.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins sprintf arguments.", "color": "overlay"},
+                      {"code": "\"Loaded %d rows and %d columns\\n\"", "role": "Format String", "tip": "Template with %d placeholders for integers. \\n adds a newline at the end.", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Between template and values.", "color": "text"},
+                      {"code": "nrow(df)", "role": "Row Count", "tip": "nrow() returns the number of rows in a data frame.", "color": "blue"},
+                      {"code": ", ", "role": "Separator", "tip": "Between the two values.", "color": "text"},
+                      {"code": "ncol(df)", "role": "Column Count", "tip": "ncol() returns the number of columns.", "color": "blue"},
+                      {"code": "))", "role": "Close Parens", "tip": "Closes both sprintf() and cat().", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Preview the first 5 rows of the dataset",
+                  "pattern": "dataframe.method()",
+                  "structureNote": "This is a <strong>method call</strong>: a function that belongs to an object. The dot connects the object (df) to its method (head). Empty parentheses mean 'use default settings' (5 rows). Methods know about the object they belong to — head() automatically knows which data to show.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "Object", "tip": "The DataFrame you want to preview. Methods are called ON this object.", "color": "pink"},
+                      {"code": ".", "role": "Dot Accessor", "tip": "Connects the object to its method. Read as 'df's head'.", "color": "overlay"},
+                      {"code": "head", "role": "Method Name", "tip": "Returns the first N rows. Default is 5. Use head(10) to see 10 rows instead.", "color": "teal"},
+                      {"code": "()", "role": "Empty Args", "tip": "Empty parentheses mean 'use default arguments'. Still required — without them, you'd reference the method itself, not call it.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "list", "role": "Command", "tip": "Displays observations and their values. Without options, shows all data.", "color": "mauve"},
+                      {"code": " in ", "role": "Qualifier", "tip": "The 'in' qualifier restricts which observations to show by their row numbers.", "color": "mauve"},
+                      {"code": "1/5", "role": "Range", "tip": "Row range: from observation 1 to observation 5. Stata indexes from 1, not 0.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "head", "role": "Function", "tip": "Returns the first N elements. Works on data frames, vectors, and other objects.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "df", "role": "Argument", "tip": "The data frame to preview. In R, the data is passed as an argument rather than using dot notation.", "color": "pink"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call. Default shows 6 rows (not 5 like Python).", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Get summary statistics for all numeric columns",
+                  "pattern": "dataframe.method()",
+                  "structureNote": "Another method call, same pattern as head(). The <strong>describe/summary</strong> family of functions is your first tool for understanding distributions. They show count, mean, std, min, quartiles, and max — the essential statistics for any variable.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "Object", "tip": "The DataFrame to summarize.", "color": "pink"},
+                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the method.", "color": "overlay"},
+                      {"code": "describe", "role": "Method Name", "tip": "Generates summary statistics: count, mean, std, min, 25%, 50%, 75%, max. Only works on numeric columns by default.", "color": "teal"},
+                      {"code": "()", "role": "Empty Args", "tip": "No arguments needed — summarizes all numeric columns with default statistics.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "summarize", "role": "Command", "tip": "Shows mean, std dev, min, and max for each variable. The workhorse command for descriptive statistics in Stata.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "summary", "role": "Function", "tip": "Provides a six-number summary: min, 1st quartile, median, mean, 3rd quartile, max. Also shows NA count.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins argument.", "color": "overlay"},
+                      {"code": "df", "role": "Argument", "tip": "The data frame to summarize.", "color": "pink"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Count how many times each unique value appears in a column",
+                  "pattern": "dataframe['column'].method()",
+                  "structureNote": "This introduces <strong>column selection + method chaining</strong>. First, <code>df['Country Name']</code> extracts a single column (a Series). Then <code>.value_counts()</code> is called on that column. This left-to-right chaining is fundamental — each step produces an object the next step works on.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "DataFrame", "tip": "The full dataset.", "color": "pink"},
+                      {"code": "[", "role": "Open Bracket", "tip": "Begins column selection. Square brackets select parts of a DataFrame.", "color": "overlay"},
+                      {"code": "'Country Name'", "role": "Column Name", "tip": "The name of the column to extract, as a string. Must match exactly (case-sensitive).", "color": "green"},
+                      {"code": "]", "role": "Close Bracket", "tip": "Ends column selection. This returns a Series (single column of data).", "color": "overlay"},
+                      {"code": ".", "role": "Dot Accessor", "tip": "Now calling a method on the extracted column (Series), not the full DataFrame.", "color": "overlay"},
+                      {"code": "value_counts", "role": "Method", "tip": "Counts occurrences of each unique value and sorts from most to least frequent. Essential for understanding categorical variables.", "color": "teal"},
+                      {"code": "()", "role": "Empty Args", "tip": "Uses defaults: counts all values, sorts descending.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "tab", "role": "Command", "tip": "Short for 'tabulate'. Creates a frequency table showing how many times each value appears.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separates command from variable name.", "color": "text"},
+                      {"code": "country_name", "role": "Variable", "tip": "The variable to tabulate. Stata doesn't use quotes for variable names.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "table", "role": "Function", "tip": "Creates a frequency table of unique values. R's equivalent of value_counts.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins argument.", "color": "overlay"},
+                      {"code": "df$country_name", "role": "Column", "tip": "The $ operator selects a column from a data frame. df$col is R's equivalent of Python's df['col'].", "color": "pink"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Calculate the average GDP per country using groupby aggregation",
+                  "pattern": "dataframe.groupby(key)[value].aggregation()",
+                  "structureNote": "This is <strong>split-apply-combine</strong>: the foundational pattern for data analysis. <code>groupby()</code> splits the data by country, <code>['Value']</code> selects which column to aggregate, and <code>.mean()</code> computes the average within each group. This three-step chain is used constantly in research.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "DataFrame", "tip": "The full dataset.", "color": "pink"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses the groupby method.", "color": "overlay"},
+                      {"code": "groupby", "role": "Method", "tip": "Splits the DataFrame into groups based on a column's unique values. Nothing visible happens yet — it prepares for aggregation.", "color": "teal"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the grouping key specification.", "color": "overlay"},
+                      {"code": "'Country Name'", "role": "Group Key", "tip": "The column to group by. Each unique country becomes its own group.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends groupby. Returns a GroupBy object (not yet computed).", "color": "overlay"},
+                      {"code": "[", "role": "Open Bracket", "tip": "Selects which column to aggregate from within each group.", "color": "overlay"},
+                      {"code": "'Value'", "role": "Value Column", "tip": "The column containing the numbers to average (GDP values).", "color": "green"},
+                      {"code": "]", "role": "Close Bracket", "tip": "Ends column selection.", "color": "overlay"},
+                      {"code": ".", "role": "Dot", "tip": "Chains to the aggregation function.", "color": "overlay"},
+                      {"code": "mean", "role": "Aggregation", "tip": "Calculates the average within each group. Other options: sum(), median(), count(), std().", "color": "teal"},
+                      {"code": "()", "role": "Empty Args", "tip": "Computes and returns the result — one mean per country.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "collapse", "role": "Command", "tip": "Aggregates data, replacing the dataset with one row per group. Destructive — saves the original first!", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separates command from statistics.", "color": "text"},
+                      {"code": "(mean)", "role": "Statistic", "tip": "The aggregation function to apply. Other options: (sum), (median), (count), (sd).", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "Space before variable.", "color": "text"},
+                      {"code": "value", "role": "Variable", "tip": "The variable to aggregate.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates main arguments from options.", "color": "text"},
+                      {"code": "by", "role": "Option", "tip": "Specifies the grouping variable.", "color": "yellow"},
+                      {"code": "(", "role": "Open Paren", "tip": "Opens the grouping specification.", "color": "overlay"},
+                      {"code": "country_name", "role": "Group Key", "tip": "Group by this variable — one row per unique country in the result.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Closes the by() option.", "color": "overlay"}
+                    ],
+                    "r": [
+                      {"code": "df", "role": "Data Frame", "tip": "The full dataset.", "color": "pink"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the data to the next function. Read as 'then'. The pipe makes code read left-to-right.", "color": "mauve"},
+                      {"code": "group_by", "role": "Function", "tip": "From dplyr. Groups the data by a column — subsequent operations work within each group.", "color": "blue"},
+                      {"code": "(country_name)", "role": "Group Key", "tip": "The column to group by. In dplyr, column names don't need quotes.", "color": "sky"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the grouped data to the summarize function.", "color": "mauve"},
+                      {"code": "summarize", "role": "Function", "tip": "Computes summary statistics within each group. Creates one row per group.", "color": "blue"},
+                      {"code": "(avg_gdp = mean(value, na.rm=TRUE))", "role": "Aggregation", "tip": "Creates a new column 'avg_gdp' with the mean of 'value'. na.rm=TRUE ignores missing values.", "color": "sky"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Compute the correlation matrix for all numeric columns",
+                  "pattern": "dataframe.method(keyword_argument=value)",
+                  "structureNote": "This introduces <strong>keyword arguments</strong> — named parameters that control how a function behaves. <code>numeric_only=True</code> tells corr() to skip non-numeric columns instead of raising an error. Keyword arguments make code self-documenting: you can see what each setting does.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "DataFrame", "tip": "The dataset to analyze.", "color": "pink"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses the method.", "color": "overlay"},
+                      {"code": "corr", "role": "Method", "tip": "Computes pairwise Pearson correlation between all numeric columns. Returns a square matrix.", "color": "teal"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "numeric_only", "role": "Parameter Name", "tip": "A keyword argument that filters to numeric columns only. Named arguments use the 'name=value' syntax.", "color": "lavender"},
+                      {"code": "=", "role": "Equals", "tip": "Assigns a value to the parameter. Different from assignment (=) — this is inside a function call.", "color": "peach"},
+                      {"code": "True", "role": "Boolean Value", "tip": "Python's boolean for 'yes'. Tells the function to include only numeric columns.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the function call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "pwcorr", "role": "Command", "tip": "Pairwise correlations. Shows the correlation matrix for specified variables.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separates command from variable list.", "color": "text"},
+                      {"code": "var1 var2 var3", "role": "Variable List", "tip": "List the numeric variables to correlate. Stata requires you to name them explicitly.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "sig", "role": "Option", "tip": "Displays significance levels (p-values) below each correlation coefficient.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "cor", "role": "Function", "tip": "Computes correlation matrix. R's base function for Pearson correlation.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "df_numeric", "role": "Data", "tip": "A data frame containing only numeric columns. Use select(where(is.numeric)) to filter first.", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "use", "role": "Parameter", "tip": "Controls handling of missing values.", "color": "lavender"},
+                      {"code": " = ", "role": "Equals", "tip": "Assigns value to the parameter.", "color": "peach"},
+                      {"code": "\"complete.obs\"", "role": "Value", "tip": "Only uses rows where all values are present. Avoids NA propagation in the correlation matrix.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the cor() call.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <!-- Research Project Introduction -->
         <div class="research-banner">
           <h3>Course Research Project: Climate Policy & Economic Development</h3>
@@ -1455,6 +1685,7 @@ p5 <- df_viz %>%
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
 

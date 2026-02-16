@@ -184,7 +184,12 @@
           <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
           <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
           <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
-          <li><a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a></li>
+          <li class="has-subnav">
+            <a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a>
+            <ul class="sub-nav">
+              <li><a href="10a-text-analysis-today.html">Text Analysis Today</a></li>
+            </ul>
+          </li>
           <li class="has-subnav">
             <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
             <ul class="sub-nav">
@@ -655,7 +660,7 @@ Country Name Country Code         Year        Value
         <h3>Cross-Tabulations and Group-Level Statistics</h3>
 
         <p>
-          When you need to compare outcomes or characteristics across groups—treated vs. control, male vs. female, callbacks by race—cross-tabulations and group-level summaries are your go-to tools. These are essential for descriptive analysis before running any regression.
+          We found 25% of GDP values are missing&mdash;but <em>where</em> are they concentrated? Cross-tabulations let us investigate patterns across groups (here, across decades) and compute group-level summaries. In other contexts, the same tools let you compare treated vs. control groups, callback rates by race, or outcomes across regions. These are essential for descriptive analysis before running any regression.
         </p>
 
         <div class="code-tabs" data-runnable="explore-crosstab">
@@ -666,74 +671,77 @@ Country Name Country Code         Year        Value
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Cross-tabulations and group statistics</span>
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-comment"># Continuing from above - df is our World Bank GDP data</span>
 
-<span class="code-comment"># Two-way frequency table</span>
-<span class="code-tooltip" data-tip="pd.crosstab creates a frequency table. margins=True adds row/column totals.">freq_table = pd.crosstab(df[<span class="code-string">'treatment'</span>], df[<span class="code-string">'outcome'</span>], margins=True)</span>
+<span class="code-comment"># Create useful grouping variables from existing data</span>
+<span class="code-tooltip" data-tip="Floor division (//) by 10, then multiply by 10. Turns 1993 into 1990, 2015 into 2010, etc. Creates natural grouping for time trends.">df[<span class="code-string">'Decade'</span>] = (df[<span class="code-string">'Year'</span>] // <span class="code-number">10</span>) * <span class="code-number">10</span></span>
+<span class="code-tooltip" data-tip="notna() returns True where Value exists, astype(int) converts True/False to 1/0. Lets us cross-tabulate data availability.">df[<span class="code-string">'has_gdp'</span>] = df[<span class="code-string">'Value'</span>].notna().astype(int)</span>
+
+<span class="code-comment"># Two-way frequency table: data availability by decade</span>
+<span class="code-tooltip" data-tip="pd.crosstab creates a frequency table. margins=True adds row/column totals.">freq_table = pd.crosstab(df[<span class="code-string">'Decade'</span>], df[<span class="code-string">'has_gdp'</span>], margins=<span class="code-keyword">True</span>)</span>
 print(freq_table)
 
-<span class="code-comment"># Row proportions (e.g., callback rate by race)</span>
-<span class="code-tooltip" data-tip="normalize='index' gives row proportions (each row sums to 1)">prop_table = pd.crosstab(df[<span class="code-string">'black'</span>], df[<span class="code-string">'call'</span>], normalize=<span class="code-string">'index'</span>)</span>
+<span class="code-comment"># Row proportions (share of countries with GDP data per decade)</span>
+<span class="code-tooltip" data-tip="normalize='index' gives row proportions (each row sums to 1). Shows what fraction of observations have data in each decade.">prop_table = pd.crosstab(df[<span class="code-string">'Decade'</span>], df[<span class="code-string">'has_gdp'</span>], normalize=<span class="code-string">'index'</span>)</span>
 print(prop_table)
 
-<span class="code-comment"># Group-level summary statistics</span>
-<span class="code-tooltip" data-tip="groupby + agg computes multiple statistics per group in one call">group_stats = df.groupby(<span class="code-string">'treatment'</span>)[<span class="code-string">'outcome'</span>].agg(
+<span class="code-comment"># Group-level summary statistics: GDP by decade</span>
+<span class="code-tooltip" data-tip="groupby + agg computes multiple statistics per group in one call">group_stats = df.groupby(<span class="code-string">'Decade'</span>)[<span class="code-string">'Value'</span>].agg(
     [<span class="code-string">'mean'</span>, <span class="code-string">'std'</span>, <span class="code-string">'count'</span>]
 )</span>
-print(group_stats)
-
-<span class="code-comment"># Multiple variables at once</span>
-group_multi = df.groupby(<span class="code-string">'treatment'</span>).agg({
-    <span class="code-string">'outcome'</span>: [<span class="code-string">'mean'</span>, <span class="code-string">'std'</span>],
-    <span class="code-string">'age'</span>: <span class="code-string">'mean'</span>,
-    <span class="code-string">'income'</span>: [<span class="code-string">'mean'</span>, <span class="code-string">'median'</span>]
-})</code></pre>
+print(group_stats)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Cross-tabulations and group statistics</span>
+<span class="code-comment">* Continuing from above - GDP data is already loaded</span>
 
-<span class="code-comment">* Two-way frequency table</span>
-<span class="code-tooltip" data-tip="tab creates a two-way frequency table; row/col add proportions">tab treatment outcome</span>
+<span class="code-comment">* Create useful grouping variables</span>
+<span class="code-tooltip" data-tip="int() truncates to integer. year/10 gives decade prefix (e.g., 199), multiply by 10 to get 1990."><span class="code-keyword">gen</span> decade = int(year/10)*10</span>
+<span class="code-tooltip" data-tip="!missing() returns 1 if value exists, 0 if missing. Creates a binary indicator for data availability."><span class="code-keyword">gen</span> has_gdp = !missing(value)</span>
+
+<span class="code-comment">* Two-way frequency table: data availability by decade</span>
+<span class="code-tooltip" data-tip="tab creates a two-way frequency table showing counts in each cell">tab decade has_gdp</span>
 
 <span class="code-comment">* With row and column percentages</span>
-tab black call, row col
+<span class="code-tooltip" data-tip="row/col options add row and column percentages to the table">tab decade has_gdp, row col</span>
 
-<span class="code-comment">* Group-level summary statistics</span>
-<span class="code-tooltip" data-tip="tabstat computes specified statistics by group. Very flexible.">tabstat outcome age income, by(treatment) stat(mean sd count)</span>
+<span class="code-comment">* Group-level summary statistics: GDP by decade</span>
+<span class="code-tooltip" data-tip="tabstat computes specified statistics by group. Very flexible.">tabstat value, by(decade) stat(mean sd count)</span>
 
 <span class="code-comment">* Detailed summary by group</span>
-bysort treatment: summarize outcome, detail
+bysort decade: summarize value, detail
 
-<span class="code-comment">* Table with tests</span>
-<span class="code-tooltip" data-tip="tab with chi2 adds a chi-squared test of independence">tab treatment outcome, chi2</span></code></pre>
+<span class="code-comment">* Table with chi-squared test</span>
+<span class="code-tooltip" data-tip="tab with chi2 adds a chi-squared test of independence">tab decade has_gdp, chi2</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Cross-tabulations and group statistics</span>
+<span class="code-comment"># Continuing from above - df is our World Bank GDP data</span>
 
-<span class="code-comment"># Two-way frequency table</span>
-<span class="code-tooltip" data-tip="table() creates a contingency table. addmargins() adds row/column totals.">freq_table <- table(df$treatment, df$outcome)
+<span class="code-comment"># Create useful grouping variables</span>
+<span class="code-tooltip" data-tip="%/% is integer division in R. Year %/% 10 gives the decade prefix, multiply by 10 to get the decade (e.g., 1993 becomes 1990).">df$Decade  <- (df$Year %/% 10) * 10</span>
+<span class="code-tooltip" data-tip="as.integer(!is.na()) converts TRUE/FALSE to 1/0. Creates a binary indicator for whether GDP data is available.">df$has_gdp <- as.integer(!is.na(df$Value))</span>
+
+<span class="code-comment"># Two-way frequency table: data availability by decade</span>
+<span class="code-tooltip" data-tip="table() creates a contingency table. addmargins() adds row/column totals.">freq_table <- table(df$Decade, df$has_gdp)
 addmargins(freq_table)</span>
 
-<span class="code-comment"># Row proportions (e.g., callback rate by race)</span>
-<span class="code-tooltip" data-tip="margin = 1 gives row proportions (each row sums to 1)">prop.table(table(df$black, df$call), margin = 1)</span>
+<span class="code-comment"># Row proportions (share with GDP data per decade)</span>
+<span class="code-tooltip" data-tip="margin = 1 gives row proportions (each row sums to 1)">prop.table(table(df$Decade, df$has_gdp), margin = 1)</span>
 
 <span class="code-comment"># Group means using aggregate</span>
-<span class="code-tooltip" data-tip="aggregate() computes a function by group. Formula syntax: y ~ group.">aggregate(outcome ~ treatment, data = df, FUN = mean)</span>
-
-<span class="code-comment"># Multiple stats using tapply</span>
-tapply(df$outcome, df$treatment, summary)
+<span class="code-tooltip" data-tip="aggregate() computes a function by group. Formula syntax: y ~ group.">aggregate(Value ~ Decade, data = df, FUN = mean)</span>
 
 <span class="code-comment"># Tidyverse approach: group_by + summarise</span>
-<span class="code-keyword">library</span>(dplyr)
 <span class="code-tooltip" data-tip="group_by + summarise is the tidyverse way to compute group-level stats">df %>%
-  group_by(treatment) %>%
+  group_by(Decade) %>%
   summarise(
-    mean_outcome = mean(outcome, na.rm = TRUE),
-    sd_outcome   = sd(outcome, na.rm = TRUE),
-    n            = n(),
-    mean_age     = mean(age, na.rm = TRUE)
+    mean_gdp      = mean(Value, na.rm = TRUE),
+    sd_gdp        = sd(Value, na.rm = TRUE),
+    n             = n(),
+    pct_available = mean(!is.na(Value)) * 100
   )</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
@@ -741,84 +749,127 @@ tapply(df$outcome, df$treatment, summary)
 
         <div class="output-simulation" data-output="explore-crosstab" data-lang="python">
           <div class="output-header"><span>Python Output</span><button class="close-output">&times;</button></div>
-          <div class="output-body">Frequency Table:
-outcome     0    1  All
-treatment
-0         380  120  500
-1         310  190  500
-All       690  310  1000
+          <div class="output-body">Frequency Table (data availability by decade):
+has_gdp      0      1    All
+Decade
+1960       312    158    470
+1970       580   1770   2350
+1980       442   1908   2350
+1990       378   1972   2350
+2000       340   2010   2350
+2010       295   2055   2350
+2020      1180    712   1892
+All       3527  10585  14112
 
 Row Proportions:
-call         0      1
-black
-0       0.9035  0.0965
-1       0.9350  0.0650
+has_gdp        0        1
+Decade
+1960      <span class="out-yellow">0.6638</span>   0.3362
+1970      0.2468   0.7532
+1980      0.1881   0.8119
+1990      0.1609   0.8391
+2000      0.1447   0.8553
+2010      0.1255   <span class="out-green">0.8745</span>
+2020      <span class="out-yellow">0.6237</span>   0.3763
 
-Group Statistics:
-           mean       std  count
-treatment
-0         3.245    1.892    500
-1         3.827    1.756    500</div>
+Group Statistics (GDP by decade):
+                   mean           std  count
+Decade
+1960       <span class="out-num">7.81e+09</span>  <span class="out-num">1.82e+10</span>    158
+1970       <span class="out-num">3.45e+10</span>  <span class="out-num">9.12e+10</span>   1770
+1980       <span class="out-num">8.67e+10</span>  <span class="out-num">2.34e+11</span>   1908
+1990       <span class="out-num">1.54e+11</span>  <span class="out-num">4.21e+11</span>   1972
+2000       <span class="out-num">2.89e+11</span>  <span class="out-num">9.45e+11</span>   2010
+2010       <span class="out-num">4.12e+11</span>  <span class="out-num">1.38e+12</span>   2055
+2020       <span class="out-num">5.67e+11</span>  <span class="out-num">1.89e+12</span>    712</div>
         </div>
 
         <div class="output-simulation" data-output="explore-crosstab" data-lang="stata">
           <div class="output-header"><span>Stata Output</span><button class="close-output">&times;</button></div>
-          <div class="output-body">. tab treatment outcome
+          <div class="output-body">. tab decade has_gdp
 
-           |        outcome
- treatment |         0          1 |     Total
+           |       has_gdp
+    decade |         0          1 |     Total
 -----------+----------------------+----------
-         0 |       380        120 |       500
-         1 |       310        190 |       500
+      1960 |       312        158 |       470
+      1970 |       580      1,770 |     2,350
+      1980 |       442      1,908 |     2,350
+      1990 |       378      1,972 |     2,350
+      2000 |       340      2,010 |     2,350
+      2010 |       295      2,055 |     2,350
+      2020 |     1,180        712 |     1,892
 -----------+----------------------+----------
-     Total |       690        310 |     1,000
+     Total |     3,527     10,585 |    14,112
 
-. tabstat outcome age income, by(treatment) stat(mean sd count)
+. tabstat value, by(decade) stat(mean sd count)
 
 Summary statistics: mean, sd, count
-  by categories of: treatment
+  by categories of: decade
 
-treatment |   outcome       age    income
+    decade |     value
 ----------+------------------------------
-        0 |     3.245     34.12     42350
-          |     1.892      8.45     15670
-          |       500       500       500
+      1960 |  <span class="out-num">7.81e+09</span>
+           |  <span class="out-num">1.82e+10</span>
+           |       158
 ----------+------------------------------
-        1 |     3.827     33.89     43120
-          |     1.756      8.23     16230
-          |       500       500       500
+      1970 |  <span class="out-num">3.45e+10</span>
+           |  <span class="out-num">9.12e+10</span>
+           |     1,770
 ----------+------------------------------
-    Total |     3.536     34.01     42735
-          |     1.845      8.34     15940
-          |      1000      1000      1000
+      1980 |  <span class="out-num">8.67e+10</span>
+           |  <span class="out-num">2.34e+11</span>
+           |     1,908
+----------+------------------------------
+      2000 |  <span class="out-num">2.89e+11</span>
+           |  <span class="out-num">9.45e+11</span>
+           |     2,010
+----------+------------------------------
+     Total |  <span class="out-num">3.21e+11</span>
+           |  <span class="out-num">1.42e+12</span>
+           |    10,585
 ----------------------------------------------</div>
         </div>
 
         <div class="output-simulation" data-output="explore-crosstab" data-lang="r">
           <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
           <div class="output-body">Frequency Table with margins:
-       0   1 Sum
-  0  380 120 500
-  1  310 190 500
-  Sum 690 310 1000
+           0     1   Sum
+  1960   312   158   470
+  1970   580  1770  2350
+  1980   442  1908  2350
+  1990   378  1972  2350
+  2000   340  2010  2350
+  2010   295  2055  2350
+  2020  1180   712  1892
+  Sum   3527 10585 14112
 
 Row Proportions:
-          0      1
-  0  0.9035 0.0965
-  1  0.9350 0.0650
+              0        1
+  1960  <span class="out-yellow">0.6638</span>   0.3362
+  1970   0.2468   0.7532
+  1980   0.1881   0.8119
+  1990   0.1609   0.8391
+  2000   0.1447   0.8553
+  2010   0.1255   <span class="out-green">0.8745</span>
+  2020   <span class="out-yellow">0.6237</span>   0.3763
 
 Group Statistics (tidyverse):
-# A tibble: 2 x 5
-  treatment mean_outcome sd_outcome     n mean_age
-      &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;
-1         0         3.25       1.89   500     34.1
-2         1         3.83       1.76   500     33.9</div>
+<span class="out-green"># A tibble: 7 x 5</span>
+  Decade    mean_gdp      sd_gdp     n pct_available
+  <span class="out-blue">&lt;dbl&gt;</span>       <span class="out-blue">&lt;dbl&gt;</span>       <span class="out-blue">&lt;dbl&gt;</span> <span class="out-blue">&lt;int&gt;</span>         <span class="out-blue">&lt;dbl&gt;</span>
+<span class="out-num">1</span>  1960  7810000000. 18200000000.   470          33.6
+<span class="out-num">2</span>  1970 34500000000. 91200000000.  2350          75.3
+<span class="out-num">3</span>  1980 86700000000. 2.34e+11      2350          81.2
+<span class="out-num">4</span>  1990 1.54e+11     4.21e+11      2350          83.9
+<span class="out-num">5</span>  2000 2.89e+11     9.45e+11      2350          85.5
+<span class="out-num">6</span>  2010 4.12e+11     1.38e+12      2350          87.4
+<span class="out-num">7</span>  2020 5.67e+11     1.89e+12      1892          37.6</div>
         </div>
 
         <div class="info-box tip">
           <div class="info-box-title">When to Use Cross-Tabulations</div>
           <p style="margin-bottom: 0;">
-            Cross-tabulations are particularly useful when checking <strong>balance</strong> between treatment and control groups, computing <strong>relative frequencies</strong> (e.g., callback rates by race in audit studies), and creating <strong>summary tables</strong> for papers. For continuous outcomes, use <code>aggregate()</code> (R), <code>tabstat</code> (Stata), or <code>groupby().agg()</code> (Python) instead.
+            Cross-tabulations are particularly useful for spotting <strong>patterns in data availability</strong> (as we did here with missing GDP values), checking <strong>balance</strong> between treatment and control groups, computing <strong>relative frequencies</strong> (e.g., callback rates by race in audit studies), and creating <strong>summary tables</strong> for papers. For continuous outcomes, use <code>aggregate()</code> (R), <code>tabstat</code> (Stata), or <code>groupby().agg()</code> (Python).
           </p>
         </div>
 
@@ -1238,7 +1289,7 @@ p5 <- df_viz %>%
 
         <!-- Complete First Analysis Script -->
         <h2>Complete "First Analysis" Script</h2>
-        <p>Use this script as guideline to propduce one you can run on <strong>every new dataset</strong> before any analysis:</p>
+        <p>Use this script as a guideline to produce one you can run on <strong>every new dataset</strong> before any analysis:</p>
 
         <details>
           <summary style="cursor: pointer; font-weight: 600; color: #2563eb; padding: 1rem; background: #f0f9ff; border-radius: 8px;">Click to expand complete Python script</summary>

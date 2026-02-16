@@ -1,0 +1,2623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>10A Text Analysis Today | ProTools ER1</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;500&family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+    .protected-content pre, .protected-content code, .protected-content .code-block, .protected-content .code-tabs { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+    .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; line-height: 1.4; text-align: left; font-family: var(--font-body); font-style: normal; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .tooltip-popup.visible { opacity: 1; }
+    .tooltip-popup::after { content: ''; position: absolute; border: 6px solid transparent; }
+    .tooltip-popup.arrow-bottom::after { top: 100%; left: 50%; transform: translateX(-50%); border-top-color: #1f2937; }
+    .tooltip-popup.arrow-top::after { bottom: 100%; left: 50%; transform: translateX(-50%); border-bottom-color: #1f2937; }
+
+    .pipeline-diagram { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin: 2rem 0; padding: 1.5rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+    .pipeline-step { background: white; border: 2px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1.25rem; text-align: center; font-weight: 600; font-size: 0.9rem; color: var(--color-primary); transition: all 0.2s; flex: 1; min-width: 120px; }
+    .pipeline-step:hover { border-color: var(--color-accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .pipeline-step small { display: block; font-weight: 400; font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; }
+    .pipeline-arrow { font-size: 1.5rem; color: var(--color-accent); font-weight: bold; flex-shrink: 0; }
+    @media (max-width: 768px) { .pipeline-diagram { flex-direction: column; } .pipeline-arrow { transform: rotate(90deg); } }
+
+    .method-table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+    .method-table th { background: var(--color-primary); color: white; padding: 0.75rem 1rem; text-align: left; font-weight: 600; }
+    .method-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0; }
+    .method-table tr:nth-child(even) { background: #f8fafc; }
+    .method-table tr:hover { background: #edf2f7; }
+
+    .output-block { background: #0f172a; color: #e2e8f0; padding: 1rem 1.25rem; border-radius: 0 0 8px 8px; font-family: 'Fira Code', monospace; font-size: 0.82rem; line-height: 1.6; overflow-x: auto; margin-top: -0.5rem; border-top: 2px solid #334155; }
+    .output-label { background: #334155; color: #94a3b8; padding: 0.25rem 0.75rem; font-size: 0.7rem; font-family: 'Fira Code', monospace; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 8px 8px 0 0; display: inline-block; margin-top: 0.5rem; }
+
+    .distinction-box { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+    @media (max-width: 768px) { .distinction-box { grid-template-columns: 1fr; } }
+    .distinction-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; }
+    .distinction-card h4 { margin: 0 0 0.75rem 0; color: var(--color-secondary); font-size: 1.05rem; }
+    .distinction-card ul { margin: 0; padding-left: 1.25rem; }
+    .distinction-card li { margin-bottom: 0.35rem; }
+
+    .checklist { list-style: none; padding: 0; }
+    .checklist li { padding: 0.5rem 0 0.5rem 2rem; position: relative; border-bottom: 1px solid #f1f5f9; }
+    .checklist li::before { content: '☐'; position: absolute; left: 0.25rem; color: var(--color-accent); font-size: 1.1rem; }
+
+    /* ── Visual Diagrams ── */
+
+    /* Step-by-step process visual */
+    .step-visual { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; overflow-x: auto; }
+    .step-visual-title { font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-secondary); margin-bottom: 1rem; }
+    .step-row { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .step-label { background: var(--color-primary); color: white; padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; min-width: 90px; text-align: center; flex-shrink: 0; margin-top: 0.2rem; }
+    .step-tokens { display: flex; flex-wrap: wrap; gap: 0.35rem; align-items: center; }
+    .token { display: inline-block; padding: 0.25rem 0.55rem; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.8rem; border: 1px solid #e2e8f0; background: white; }
+    .token.removed { background: #fed7d7; color: #9b2c2c; border-color: #feb2b2; text-decoration: line-through; opacity: 0.6; }
+    .token.changed { background: #c6f6d5; color: #276749; border-color: #9ae6b4; }
+    .token.kept { background: #ebf8ff; color: #2b6cb0; border-color: #bee3f8; }
+    .token.highlight { background: #fefcbf; color: #975a16; border-color: #fbd38d; }
+    .step-arrow-down { text-align: center; font-size: 1.2rem; color: var(--color-accent); margin: 0.5rem 0; }
+
+    /* Matrix visualization */
+    .matrix-visual { overflow-x: auto; margin: 1.5rem 0; }
+    .matrix-visual table { border-collapse: collapse; font-family: 'Fira Code', monospace; font-size: 0.78rem; margin: 0 auto; }
+    .matrix-visual th { background: var(--color-primary); color: white; padding: 0.4rem 0.6rem; font-weight: 600; text-align: center; white-space: nowrap; }
+    .matrix-visual td { padding: 0.4rem 0.6rem; border: 1px solid #e2e8f0; text-align: center; }
+    .matrix-visual td.zero { color: #cbd5e0; }
+    .matrix-visual td.nonzero { background: #ebf8ff; color: var(--color-primary); font-weight: 600; }
+    .matrix-visual td.high { background: #bee3f8; color: var(--color-primary); font-weight: 700; }
+    .matrix-visual .row-label { background: #f7fafc; font-weight: 600; color: var(--color-primary); text-align: left; white-space: nowrap; }
+
+    /* Math block (styled) */
+    .math-display { background: #f7fafc; border: 1px solid #e2e8f0; border-left: 4px solid var(--color-secondary); border-radius: 4px; padding: 1.25rem 1.5rem; margin: 1.25rem 0; font-family: 'Fira Code', 'Courier New', monospace; font-size: 0.9rem; line-height: 1.8; text-align: center; overflow-x: auto; }
+    .math-display .math-label { display: block; font-family: var(--font-body); font-size: 0.78rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem; text-align: left; font-weight: 600; }
+
+    /* Annotation / NER visual */
+    .ner-visual { line-height: 2.4; font-size: 1rem; padding: 1rem; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; margin: 1.25rem 0; }
+    .ner-entity { display: inline; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 500; border-bottom: 2px solid; }
+    .ner-entity .ner-tag { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; vertical-align: super; margin-left: 0.2rem; }
+    .ner-entity.per { background: #e9d5ff; border-color: #a78bfa; }
+    .ner-entity.per .ner-tag { color: #7c3aed; }
+    .ner-entity.org { background: #dbeafe; border-color: #60a5fa; }
+    .ner-entity.org .ner-tag { color: #2563eb; }
+    .ner-entity.loc { background: #d1fae5; border-color: #34d399; }
+    .ner-entity.loc .ner-tag { color: #059669; }
+    .ner-entity.date { background: #fef3c7; border-color: #fbbf24; }
+    .ner-entity.date .ner-tag { color: #b45309; }
+    .ner-entity.money { background: #ffe4e6; border-color: #fb7185; }
+    .ner-entity.money .ner-tag { color: #e11d48; }
+    .ner-entity.pct { background: #fce7f3; border-color: #f472b6; }
+    .ner-entity.pct .ner-tag { color: #db2777; }
+
+    /* Flow diagram (horizontal) */
+    .flow-diagram { display: flex; align-items: stretch; gap: 0; margin: 1.5rem 0; padding: 1rem; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; overflow-x: auto; }
+    .flow-box { background: white; border: 2px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; text-align: center; min-width: 140px; flex: 1; }
+    .flow-box-title { font-weight: 700; font-size: 0.85rem; color: var(--color-primary); margin-bottom: 0.4rem; }
+    .flow-box-desc { font-size: 0.78rem; color: #64748b; line-height: 1.4; }
+    .flow-box.active { border-color: var(--color-accent); background: #fffaf0; }
+    .flow-connector { display: flex; align-items: center; padding: 0 0.25rem; font-size: 1.3rem; color: var(--color-accent); font-weight: bold; flex-shrink: 0; }
+    @media (max-width: 768px) { .flow-diagram { flex-direction: column; align-items: center; } .flow-connector { transform: rotate(90deg); padding: 0.25rem 0; } }
+
+    /* Vector space 2D diagram */
+    .vector-space { position: relative; width: 100%; max-width: 480px; height: 380px; margin: 1.5rem auto; background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .vector-space .axis-x { position: absolute; bottom: 40px; left: 40px; right: 10px; height: 2px; background: #94a3b8; }
+    .vector-space .axis-y { position: absolute; bottom: 40px; left: 40px; top: 10px; width: 2px; background: #94a3b8; }
+    .vector-space .axis-label { position: absolute; font-size: 0.7rem; color: #64748b; font-style: italic; }
+    .vector-space .axis-label.x-label { bottom: 18px; right: 10px; }
+    .vector-space .axis-label.y-label { top: 8px; left: 50px; }
+    .vector-point { position: absolute; width: 10px; height: 10px; border-radius: 50%; transform: translate(-50%, 50%); }
+    .vector-point .vector-label { position: absolute; white-space: nowrap; font-size: 0.72rem; font-weight: 600; left: 14px; top: -3px; }
+    .vector-arrow { position: absolute; bottom: 40px; left: 40px; transform-origin: bottom left; height: 2px; }
+    .vector-arrow::after { content: ''; position: absolute; right: -1px; top: -4px; border: 5px solid transparent; }
+
+    /* Generative story (numbered steps with visual) */
+    .gen-story { counter-reset: gen-step; margin: 1.5rem 0; }
+    .gen-step { display: flex; gap: 1rem; margin-bottom: 1.25rem; align-items: flex-start; }
+    .gen-step-num { counter-increment: gen-step; flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+    .gen-step-num::after { content: counter(gen-step); }
+    .gen-step-content { flex: 1; }
+    .gen-step-content strong { color: var(--color-primary); }
+    .gen-step-visual { background: #f0f4f8; padding: 0.5rem 0.75rem; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 0.8rem; margin-top: 0.4rem; color: #334155; }
+
+    /* Comparison visual (side by side with connecting line) */
+    .comparison-visual { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; margin: 1.5rem 0; align-items: start; }
+    .comparison-visual .comp-side { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem 1.25rem; }
+    .comparison-visual .comp-side h4 { margin: 0 0 0.75rem 0; font-size: 0.95rem; color: var(--color-primary); }
+    .comparison-visual .comp-vs { display: flex; align-items: center; justify-content: center; padding: 0 0.75rem; font-weight: 700; color: var(--color-accent); font-size: 1.1rem; }
+    @media (max-width: 768px) { .comparison-visual { grid-template-columns: 1fr; } .comparison-visual .comp-vs { padding: 0.5rem 0; } }
+  </style>
+</head>
+<body>
+  <div id="password-overlay" class="password-overlay">
+    <div class="password-modal">
+      <h2>ProTools ER1</h2>
+      <p>Programming Tools for Empirical Research</p>
+      <div class="course-description">
+        <h3>Course Modules</h3>
+        <ul class="module-list">
+          <li><strong>Module 0:</strong> Languages & Platforms</li>
+          <li><strong>Module 1:</strong> Getting Started</li>
+          <li><strong>Module 2:</strong> Data Harnessing</li>
+          <li><strong>Module 3:</strong> Data Exploration</li>
+          <li><strong>Module 4:</strong> Data Cleaning</li>
+          <li><strong>Module 5:</strong> Data Analysis</li>
+          <li><strong>Module 6:</strong> Causal Inference</li>
+          <li><strong>Module 7:</strong> Estimation Methods</li>
+          <li><strong>Module 8:</strong> Replicability</li>
+          <li><strong>Module 9:</strong> Git & GitHub</li>
+          <li><strong>Module 10:</strong> History of NLP & Text Analysis</li>
+          <li><strong>Module 11:</strong> Machine Learning</li>
+          <li><strong>Module 12:</strong> Large Language Models</li>
+        </ul>
+      </div>
+      <div class="access-note">
+        This course is currently open to <strong>students at Sciences Po</strong>. If you are not a Sciences Po student but would like access, please <a href="mailto:giulia.caprini@sciencespo.fr">email me</a> to request an invite token.
+      </div>
+      <div class="password-form">
+        <input type="password" id="password-input" placeholder="Enter password" autocomplete="off">
+        <button id="password-submit">Access Course</button>
+        <p id="password-error" style="color: #e53e3e; font-size: 0.85rem; margin-top: 1rem; display: none;">Incorrect password. Please try again.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-wrapper protected-content">
+    <aside class="sidebar">
+      <a href="../index.html" class="sidebar-logo">ProTools ER1</a>
+      <span class="sidebar-subtitle">Programming Tools for Empirical Research</span>
+      <nav>
+        <ul>
+          <li><a href="../index.html"><span class="welcome-icon">🏠</span> Welcome</a></li>
+          <li class="has-subnav">
+            <a href="00-languages-platforms.html"><span class="module-number">0</span> Languages & Platforms</a>
+            <ul class="sub-nav">
+              <li><a href="00a-rstudio-guide.html">RStudio Guide</a></li>
+              <li><a href="00b-stata-guide.html">Stata Guide</a></li>
+              <li><a href="00c-vscode-guide.html">VS Code Guide</a></li>
+              <li><a href="00d-notebooks-guide.html">Notebooks Guide</a></li>
+            </ul>
+          </li>
+          <li><a href="01-getting-started.html"><span class="module-number">1</span> Getting Started</a></li>
+          <li class="has-subnav">
+            <a href="02-data-harnessing.html"><span class="module-number">2</span> Data Harnessing</a>
+            <ul class="sub-nav">
+              <li><a href="02a-file-import.html">File Import</a></li>
+              <li><a href="02b-apis.html">APIs</a></li>
+              <li><a href="02c-web-scraping.html">Web Scraping</a></li>
+            </ul>
+          </li>
+          <li><a href="03-data-exploration.html"><span class="module-number">3</span> Data Exploration</a></li>
+          <li><a href="04-data-cleaning.html"><span class="module-number">4</span> Data Cleaning</a></li>
+          <li class="has-subnav">
+            <a href="05-data-analysis.html"><span class="module-number">5</span> Data Analysis</a>
+            <ul class="sub-nav">
+              <li><a href="05a-data-simulation.html">Data Simulation</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="06-causal-inference.html"><span class="module-number">6</span> Causal Inference</a>
+            <ul class="sub-nav">
+              <li><a href="06a-matching.html">Matching</a></li>
+              <li><a href="06b-did.html">Difference-in-Differences</a></li>
+              <li><a href="06c-rdd.html">Regression Discontinuity</a></li>
+              <li><a href="06d-iv.html">Instrumental Variables</a></li>
+              <li><a href="06e-synthetic-control.html">Synthetic Control</a></li>
+              <li><a href="05b-experiments.html">Experiments</a></li>
+            </ul>
+          </li>
+          <li><a href="07-estimation.html"><span class="module-number">7</span> Estimation Methods</a></li>
+          <li><a href="08-replicability.html"><span class="module-number">8</span> Replicability</a></li>
+          <li><a href="09-github.html"><span class="module-number">9</span> Git & GitHub</a></li>
+          <li class="has-subnav active">
+            <a href="10-nlp-history.html"><span class="module-number">10</span> History of NLP</a>
+            <ul class="sub-nav">
+              <li class="active"><a href="10a-text-analysis-today.html">Text Analysis Today</a></li>
+            </ul>
+          </li>
+          <li class="has-subnav">
+            <a href="11-machine-learning.html"><span class="module-number">11</span> Machine Learning</a>
+            <ul class="sub-nav">
+              <li><a href="11a-regularization.html">Regularization</a></li>
+              <li><a href="11b-trees.html">Tree-Based Methods</a></li>
+              <li><a href="11c-neural-networks.html">Neural Networks</a></li>
+              <li><a href="11d-causal-ml.html">Causal ML</a></li>
+              <li><a href="11e-model-evaluation.html">Model Evaluation</a></li>
+            </ul>
+          </li>
+          <li><a href="12-llms.html"><span class="module-number">12</span> Large Language Models</a></li>
+          <li><a href="../resources.html">Resources</a></li>
+          <li><a href="contact.html">Contact & Feedback</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-wrapper">
+
+        <p class="breadcrumb" style="font-size: 0.9rem; color: #64748b; margin-bottom: 0.5rem;">
+          <a href="10-nlp-history.html" style="color: #2563eb; text-decoration: none;">10 History of NLP</a> &raquo; Text Analysis Today
+        </p>
+
+        <div class="module-header">
+          <h1>10A &nbsp;Text Analysis Today</h1>
+          <div class="module-meta">
+            <span>From Raw Text to Rigorous Results</span>
+            <span>Python &bull; Hands-On &bull; Reproducible</span>
+          </div>
+        </div>
+
+        <p class="lead">
+          Module 10 showed you <em>how we got here</em>. This module shows you <em>what to do now</em>.
+          We walk through every major technique used in modern text analysis &mdash; from basic preprocessing to
+          transformer-based models and LLM APIs &mdash; with production-ready Python code you can run today.
+          A single running example (analyzing Federal Reserve communications) ties every technique together so you
+          can see how each tool fits into a real research or business pipeline.
+        </p>
+
+        <div class="learning-objectives">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Set up a reproducible text analysis environment in Python</li>
+            <li>Preprocess text data rigorously (tokenize, clean, lemmatize)</li>
+            <li>Represent text as numbers using BoW, TF-IDF, and embeddings</li>
+            <li>Perform sentiment analysis with lexicons, fine-tuned models, and LLMs</li>
+            <li>Discover topics with LDA and BERTopic</li>
+            <li>Extract named entities from unstructured text</li>
+            <li>Classify documents without labeled training data (zero-shot)</li>
+            <li>Measure semantic similarity with sentence embeddings</li>
+            <li>Use LLM APIs (Claude, GPT) for text analysis at scale</li>
+            <li>Build a complete, end-to-end text analysis pipeline</li>
+            <li>Follow best practices for reproducibility in computational text analysis</li>
+          </ul>
+        </div>
+
+        <div class="info-box note">
+          <div class="info-box-title">Running Example</div>
+          <p>
+            Throughout this module we analyze <strong>Federal Reserve FOMC statements</strong> &mdash; the short
+            press releases issued after each Federal Open Market Committee meeting. These are ideal for teaching because they are:
+            (a) publicly available, (b) consequential for financial markets, (c) widely studied in economics and finance, and
+            (d) short enough to inspect manually while long enough to be interesting.
+            We will build a dataset of FOMC statements and apply every technique in this module to them.
+          </p>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="toc">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#pipeline">10A.0 The Text Analysis Pipeline</a></li>
+            <li><a href="#setup">10A.1 Environment Setup</a></li>
+            <li><a href="#preprocessing">10A.2 Text Preprocessing</a></li>
+            <li><a href="#representation">10A.3 Text Representation: BoW &amp; TF-IDF</a></li>
+            <li><a href="#sentiment">10A.4 Sentiment Analysis</a></li>
+            <li><a href="#topics">10A.5 Topic Modeling</a></li>
+            <li><a href="#ner">10A.6 Named Entity Recognition</a></li>
+            <li><a href="#classification">10A.7 Zero-Shot Classification</a></li>
+            <li><a href="#embeddings">10A.8 Semantic Similarity &amp; Embeddings</a></li>
+            <li><a href="#llms">10A.9 LLMs for Text Analysis at Scale</a></li>
+            <li><a href="#full-example">10A.10 Putting It All Together</a></li>
+            <li><a href="#reproducibility">10A.11 Reproducibility Checklist</a></li>
+            <li><a href="#references">References &amp; Further Reading</a></li>
+          </ul>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- SECTION 0: PIPELINE OVERVIEW -->
+        <!-- ================================================================== -->
+        <h2 id="pipeline">10A.0 &nbsp;The Text Analysis Pipeline</h2>
+
+        <p>
+          Every text analysis project &mdash; whether a hedge fund parsing earnings calls or a political scientist
+          studying parliamentary speeches &mdash; follows the same core pipeline. The techniques differ, but the
+          structure is universal:
+        </p>
+
+        <div class="pipeline-diagram">
+          <div class="pipeline-step">Acquire<small>Gather raw text</small></div>
+          <span class="pipeline-arrow">&rarr;</span>
+          <div class="pipeline-step">Preprocess<small>Clean &amp; tokenize</small></div>
+          <span class="pipeline-arrow">&rarr;</span>
+          <div class="pipeline-step">Represent<small>Text &rarr; numbers</small></div>
+          <span class="pipeline-arrow">&rarr;</span>
+          <div class="pipeline-step">Analyze<small>Model &amp; extract</small></div>
+          <span class="pipeline-arrow">&rarr;</span>
+          <div class="pipeline-step">Validate<small>Evaluate &amp; report</small></div>
+        </div>
+
+        <p>
+          The single most consequential decision you make is at the <strong>Represent</strong> stage. The table below
+          summarizes the three tiers of text representation available today, from simplest to most powerful:
+        </p>
+
+        <table class="method-table">
+          <thead>
+            <tr>
+              <th>Approach</th>
+              <th>How It Works</th>
+              <th>Strengths</th>
+              <th>Limitations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Bag of Words / TF-IDF</strong></td>
+              <td>Count words (or weight by rarity)</td>
+              <td>Interpretable, fast, great baselines</td>
+              <td>No word order, no context</td>
+            </tr>
+            <tr>
+              <td><strong>Static Embeddings</strong><br><small>Word2Vec, GloVe</small></td>
+              <td>Dense vectors learned from co-occurrence</td>
+              <td>Captures similarity, lightweight</td>
+              <td>One vector per word (no polysemy)</td>
+            </tr>
+            <tr>
+              <td><strong>Contextual Embeddings</strong><br><small>BERT, Sentence-Transformers</small></td>
+              <td>Transformer encodes full sentence context</td>
+              <td>State-of-the-art accuracy, handles ambiguity</td>
+              <td>Compute-intensive, less interpretable</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="expert-insight">
+          <div class="expert-insight-header">Key Insight: There Is No Single &ldquo;Best&rdquo; Method</div>
+          <p>
+            A common mistake is jumping straight to transformers for every task. In practice, <strong>TF-IDF +
+            logistic regression</strong> remains a remarkably strong baseline that is fast, interpretable, and often
+            good enough. Start simple, measure performance, and only add complexity when it demonstrably helps.
+            Many top-published papers in economics still use dictionary-based or TF-IDF approaches because
+            interpretability matters for peer review.
+          </p>
+        </div>
+
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>Business Applications</h4>
+            <ul>
+              <li>Customer feedback &amp; review analysis</li>
+              <li>Earnings call sentiment scoring</li>
+              <li>Social media brand monitoring</li>
+              <li>Resume screening &amp; job matching</li>
+              <li>Contract &amp; compliance analysis</li>
+              <li>News-based trading signals</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>Research Applications</h4>
+            <ul>
+              <li>Central bank communication analysis</li>
+              <li>Political speech &amp; ideology scaling</li>
+              <li>Media bias detection</li>
+              <li>Economic Policy Uncertainty indices</li>
+              <li>Patent &amp; innovation measurement</li>
+              <li>Historical text analysis</li>
+            </ul>
+          </div>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 1: ENVIRONMENT SETUP -->
+        <!-- ================================================================== -->
+        <h2 id="setup">10A.1 &nbsp;Environment Setup</h2>
+
+        <p>
+          Before writing any analysis code, set up a <strong>reproducible environment</strong>.
+          Pin your library versions so that anyone can replicate your results months or years later.
+        </p>
+
+        <h3>Installation</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># requirements.txt &mdash; pin EXACT versions for reproducibility</span>
+<span class="code-comment"># Save this file and run: pip install -r requirements.txt</span>
+
+<span class="code-comment"># Core NLP</span>
+nltk==3.9.1
+spacy==3.8.4
+
+<span class="code-comment"># Classical ML &amp; text representation</span>
+scikit-learn==1.6.1
+gensim==4.3.3
+
+<span class="code-comment"># Transformers &amp; embeddings</span>
+transformers==4.47.1
+sentence-transformers==3.4.1
+torch==2.5.1
+
+<span class="code-comment"># Topic modeling</span>
+bertopic==0.16.4
+
+<span class="code-comment"># Financial sentiment</span>
+pysentiment2==0.1.1
+
+<span class="code-comment"># LLM APIs</span>
+anthropic==0.42.0
+openai==1.58.1
+
+<span class="code-comment"># Data &amp; visualization</span>
+pandas==2.2.3
+matplotlib==3.9.3
+seaborn==0.13.2
+wordcloud==1.9.4</code></pre>
+          </div>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># After installing, download required models &amp; data</span>
+<span class="code-keyword">import</span> <span class="code-package">nltk</span>
+<span class="code-package">nltk</span>.<span class="code-function">download</span>(<span class="code-string">'punkt_tab'</span>)
+<span class="code-package">nltk</span>.<span class="code-function">download</span>(<span class="code-string">'stopwords'</span>)
+<span class="code-package">nltk</span>.<span class="code-function">download</span>(<span class="code-string">'wordnet'</span>)
+<span class="code-package">nltk</span>.<span class="code-function">download</span>(<span class="code-string">'vader_lexicon'</span>)
+
+<span class="code-comment"># Download spaCy English model</span>
+<span class="code-comment"># Run in terminal: python -m spacy download en_core_web_sm</span></code></pre>
+          </div>
+        </div>
+
+        <h3>Reproducibility Seed</h3>
+        <p>
+          Set random seeds <strong>once at the top of every script</strong>. This ensures that any method involving
+          randomness (topic models, train/test splits, embeddings initialization) gives identical results every time.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> <span class="code-package">random</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> np
+
+<span class="code-keyword">def</span> <span class="code-function">set_seed</span>(seed=<span class="code-number">42</span>):
+    <span class="code-string">"""Set all random seeds for full reproducibility."""</span>
+    <span class="code-package">random</span>.<span class="code-function">seed</span>(seed)
+    np.random.<span class="code-function">seed</span>(seed)
+    <span class="code-keyword">try</span>:
+        <span class="code-keyword">import</span> <span class="code-package">torch</span>
+        <span class="code-package">torch</span>.<span class="code-function">manual_seed</span>(seed)
+        <span class="code-package">torch</span>.cuda.<span class="code-function">manual_seed_all</span>(seed)
+        <span class="code-package">torch</span>.backends.cudnn.deterministic = <span class="code-keyword">True</span>
+        <span class="code-package">torch</span>.backends.cudnn.benchmark = <span class="code-keyword">False</span>
+    <span class="code-keyword">except</span> <span class="code-variable">ImportError</span>:
+        <span class="code-keyword">pass</span>
+
+<span class="code-function">set_seed</span>(<span class="code-number">42</span>)</code></pre>
+          </div>
+        </div>
+
+        <h3>Loading Our Running Example</h3>
+        <p>
+          We will work with a small corpus of FOMC press statements. In practice, you would scrape these
+          from the <a href="https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm" target="_blank">Federal Reserve website</a>.
+          For this tutorial, we define a sample directly:
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Sample FOMC statements (abbreviated for pedagogy)</span>
+fomc_data = [
+    {
+        <span class="code-string">"date"</span>: <span class="code-string">"2008-12-16"</span>,
+        <span class="code-string">"text"</span>: <span class="code-string">"""The Federal Open Market Committee decided today to establish a target range
+for the federal funds rate of 0 to 1/4 percent. Since the Committee's last meeting,
+labor market conditions have deteriorated, and the available data indicate that
+consumer spending, business investment, and industrial production have declined.
+Financial markets remain quite strained and credit conditions tight. Overall, the
+outlook for economic activity has weakened further."""</span>
+    },
+    {
+        <span class="code-string">"date"</span>: <span class="code-string">"2015-12-16"</span>,
+        <span class="code-string">"text"</span>: <span class="code-string">"""The Committee judges that there has been considerable improvement in labor
+market conditions this year, and it is reasonably confident that inflation will
+rise, over the medium term, to its 2 percent objective. Given the economic outlook,
+the Committee decided to raise the target range for the federal funds rate to
+1/4 to 1/2 percent. The stance of monetary policy remains accommodative after
+this increase, thereby supporting further improvement in labor market conditions."""</span>
+    },
+    {
+        <span class="code-string">"date"</span>: <span class="code-string">"2020-03-15"</span>,
+        <span class="code-string">"text"</span>: <span class="code-string">"""The coronavirus outbreak has harmed communities and disrupted economic activity
+in many countries, including the United States. The effects of the coronavirus
+will weigh on economic activity in the near term and pose risks to the economic
+outlook. In light of these developments, the Committee decided to lower the target
+range for the federal funds rate to 0 to 1/4 percent. The Committee expects to
+maintain this target range until it is confident that the economy has weathered
+recent events."""</span>
+    },
+    {
+        <span class="code-string">"date"</span>: <span class="code-string">"2022-06-15"</span>,
+        <span class="code-string">"text"</span>: <span class="code-string">"""Overall economic activity appears to have picked up after edging down in the
+first quarter. Job gains have been robust in recent months, and the unemployment
+rate has remained low. Inflation remains elevated, reflecting supply and demand
+imbalances related to the pandemic, higher energy prices, and broader price
+pressures. The Committee decided to raise the target range for the federal funds
+rate to 1-1/2 to 1-3/4 percent and anticipates that ongoing increases in the
+target range will be appropriate."""</span>
+    },
+    {
+        <span class="code-string">"date"</span>: <span class="code-string">"2024-09-18"</span>,
+        <span class="code-string">"text"</span>: <span class="code-string">"""Recent indicators suggest that economic activity has continued to expand at a
+solid pace. Job gains have slowed but remain solid, and the unemployment rate has
+moved up but remains low. Inflation has made further progress toward the Committee's
+2 percent objective but remains somewhat elevated. The Committee decided to lower
+the target range for the federal funds rate by 1/2 percentage point to 4-3/4 to
+5 percent. The Committee has gained greater confidence that inflation is moving
+sustainably toward 2 percent."""</span>
+    }
+]
+
+df = pd.<span class="code-function">DataFrame</span>(fomc_data)
+df[<span class="code-string">"date"</span>] = pd.<span class="code-function">to_datetime</span>(df[<span class="code-string">"date"</span>])
+<span class="code-function">print</span>(f<span class="code-string">"Corpus: {<span class="code-function">len</span>(df)} FOMC statements, {df['date'].dt.year.<span class="code-function">min</span>()}&ndash;{df['date'].dt.year.<span class="code-function">max</span>()}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">Corpus: 5 FOMC statements, 2008&ndash;2024</div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 2: PREPROCESSING -->
+        <!-- ================================================================== -->
+        <h2 id="preprocessing">10A.2 &nbsp;Text Preprocessing</h2>
+
+        <p>
+          Raw text is messy. Before any analysis, you must <strong>normalize</strong> it into a consistent format.
+          The goal is to reduce noise without destroying signal. Every preprocessing choice is a research decision
+          that should be documented and justified.
+        </p>
+
+        <h3>The Intuition: Why Preprocess at All?</h3>
+        <p>
+          Consider the sentence <em>&ldquo;The Fed&rsquo;s rates are RISING!&rdquo;</em>. To a human, the meaning
+          is obvious. To a computer, it is a string of characters that could match or not match other strings
+          in unpredictable ways. <code>"Rising"</code> &ne; <code>"rising"</code> &ne; <code>"RISING"</code>
+          &ne; <code>"rise"</code> &mdash; yet they all convey the same concept. Preprocessing systematically
+          resolves these surface-level differences so the algorithm can focus on meaning.
+        </p>
+
+        <p>
+          There are four core preprocessing steps, each motivated by a specific problem. Let&rsquo;s walk through
+          them on a real sentence from our FOMC corpus:
+        </p>
+
+        <div class="step-visual">
+          <div class="step-visual-title">Preprocessing Pipeline: Step by Step</div>
+
+          <div class="step-row">
+            <span class="step-label">Raw text</span>
+            <div class="step-tokens">
+              <span class="token highlight">Financial markets remain quite strained and credit conditions tight.</span>
+            </div>
+          </div>
+
+          <div class="step-arrow-down">&darr; <small style="font-size:0.75rem; color:#64748b;">Tokenization: split into individual words</small></div>
+
+          <div class="step-row">
+            <span class="step-label">Tokenize</span>
+            <div class="step-tokens">
+              <span class="token kept">financial</span>
+              <span class="token kept">markets</span>
+              <span class="token kept">remain</span>
+              <span class="token kept">quite</span>
+              <span class="token kept">strained</span>
+              <span class="token kept">and</span>
+              <span class="token kept">credit</span>
+              <span class="token kept">conditions</span>
+              <span class="token kept">tight</span>
+              <span class="token removed">.</span>
+            </div>
+          </div>
+
+          <div class="step-arrow-down">&darr; <small style="font-size:0.75rem; color:#64748b;">Lowercasing + remove punctuation</small></div>
+
+          <div class="step-row">
+            <span class="step-label">Normalize</span>
+            <div class="step-tokens">
+              <span class="token kept">financial</span>
+              <span class="token kept">markets</span>
+              <span class="token kept">remain</span>
+              <span class="token removed">quite</span>
+              <span class="token kept">strained</span>
+              <span class="token removed">and</span>
+              <span class="token kept">credit</span>
+              <span class="token kept">conditions</span>
+              <span class="token kept">tight</span>
+            </div>
+          </div>
+
+          <div class="step-arrow-down">&darr; <small style="font-size:0.75rem; color:#64748b;">Remove stopwords: &ldquo;quite,&rdquo; &ldquo;and&rdquo; carry little meaning</small></div>
+
+          <div class="step-row">
+            <span class="step-label">Stopwords</span>
+            <div class="step-tokens">
+              <span class="token kept">financial</span>
+              <span class="token kept">markets</span>
+              <span class="token kept">remain</span>
+              <span class="token kept">strained</span>
+              <span class="token kept">credit</span>
+              <span class="token kept">conditions</span>
+              <span class="token kept">tight</span>
+            </div>
+          </div>
+
+          <div class="step-arrow-down">&darr; <small style="font-size:0.75rem; color:#64748b;">Lemmatize: reduce to dictionary base form</small></div>
+
+          <div class="step-row">
+            <span class="step-label">Lemmatize</span>
+            <div class="step-tokens">
+              <span class="token kept">financial</span>
+              <span class="token changed">market</span>
+              <span class="token kept">remain</span>
+              <span class="token changed">strain</span>
+              <span class="token kept">credit</span>
+              <span class="token changed">condition</span>
+              <span class="token kept">tight</span>
+            </div>
+          </div>
+        </div>
+
+        <h3>Each Step Explained</h3>
+
+        <p><strong>Tokenization</strong> splits continuous text into discrete units (tokens). This sounds trivial but
+          is surprisingly subtle. Should &ldquo;New York&rdquo; be one token or two? What about &ldquo;don&rsquo;t&rdquo;
+          &mdash; &ldquo;do&rdquo; + &ldquo;n&rsquo;t&rdquo;, or &ldquo;don&rsquo;t&rdquo; as one unit?
+          Tokenizers make these decisions using language-specific rules. Modern subword tokenizers (BPE, WordPiece)
+          split rare words into meaningful pieces: &ldquo;unemployment&rdquo; &rarr; &ldquo;un&rdquo; + &ldquo;employ&rdquo; + &ldquo;ment&rdquo;
+          (Manning, Raghavan &amp; Sch&uuml;tze, 2008, Ch. 2).</p>
+
+        <p><strong>Stopword removal</strong> discards high-frequency function words (&ldquo;the,&rdquo; &ldquo;is,&rdquo;
+          &ldquo;and&rdquo;) that appear in virtually every document and therefore carry little discriminative information.
+          Standard stopword lists contain 100&ndash;300 words. Caution: in some applications (e.g., authorship attribution),
+          function word frequencies are themselves the signal (Mosteller &amp; Wallace, 1964).</p>
+
+        <div class="comparison-visual">
+          <div class="comp-side">
+            <h4>Stemming</h4>
+            <p style="font-size:0.88rem;">Chops off word endings with crude rules.<br>
+            <em>running &rarr; run</em><br>
+            <em>studies &rarr; studi</em> (not a real word!)<br>
+            <em>better &rarr; better</em> (missed)<br><br>
+            Fast but imprecise. The Porter Stemmer (1980) is the classic algorithm.</p>
+          </div>
+          <div class="comp-vs">vs.</div>
+          <div class="comp-side">
+            <h4>Lemmatization</h4>
+            <p style="font-size:0.88rem;">Uses dictionary + grammar to find the base form.<br>
+            <em>running &rarr; run</em><br>
+            <em>studies &rarr; study</em> (correct!)<br>
+            <em>better &rarr; good</em> (understands irregulars)<br><br>
+            Slower but linguistically accurate. Requires POS tagging.</p>
+          </div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Which to Use?</div>
+          <p>
+            For research and any application where precision matters, <strong>always use lemmatization</strong>.
+            Stemming is an artifact of a time when computational resources were limited. With modern libraries
+            (spaCy processes ~10,000 documents/minute), the performance cost of lemmatization is negligible
+            (Balakrishnan &amp; Lloyd-Yemoh, 2014; Jurafsky &amp; Martin, 2024, Ch. 2).
+          </p>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Preprocessing Is Not Neutral</div>
+          <p>
+            Every preprocessing step discards information. Removing stopwords eliminates frequency signals.
+            Lemmatization collapses distinctions (<em>better</em> &rarr; <em>good</em>). Lowercasing merges
+            proper nouns with common words. There is no universally &ldquo;correct&rdquo; pipeline &mdash;
+            the right choices depend on your research question. <strong>Always document what you did and why.</strong>
+          </p>
+        </div>
+
+        <h3>Option A: NLTK (transparent, step-by-step)</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">nltk.tokenize</span> <span class="code-keyword">import</span> word_tokenize
+<span class="code-keyword">from</span> <span class="code-package">nltk.corpus</span> <span class="code-keyword">import</span> stopwords
+<span class="code-keyword">from</span> <span class="code-package">nltk.stem</span> <span class="code-keyword">import</span> WordNetLemmatizer
+
+<span class="code-comment"># Step 1: Tokenize &mdash; split text into individual words</span>
+text = df.loc[<span class="code-number">0</span>, <span class="code-string">"text"</span>]
+tokens = <span class="code-function">word_tokenize</span>(text.<span class="code-function">lower</span>())
+<span class="code-function">print</span>(f<span class="code-string">"Raw tokens ({<span class="code-function">len</span>(tokens)}): {tokens[:10]}"</span>)
+
+<span class="code-comment"># Step 2: Remove stopwords and punctuation</span>
+stop_words = <span class="code-function">set</span>(stopwords.<span class="code-function">words</span>(<span class="code-string">"english"</span>))
+filtered = [t <span class="code-keyword">for</span> t <span class="code-keyword">in</span> tokens <span class="code-keyword">if</span> t.<span class="code-function">isalpha</span>() <span class="code-keyword">and</span> t <span class="code-keyword">not</span> <span class="code-keyword">in</span> stop_words]
+<span class="code-function">print</span>(f<span class="code-string">"After filtering ({<span class="code-function">len</span>(filtered)}): {filtered[:10]}"</span>)
+
+<span class="code-comment"># Step 3: Lemmatize &mdash; reduce words to base form</span>
+lemmatizer = <span class="code-function">WordNetLemmatizer</span>()
+lemmatized = [lemmatizer.<span class="code-function">lemmatize</span>(t, pos=<span class="code-string">"v"</span>) <span class="code-keyword">for</span> t <span class="code-keyword">in</span> filtered]
+<span class="code-function">print</span>(f<span class="code-string">"After lemmatization ({<span class="code-function">len</span>(lemmatized)}): {lemmatized[:10]}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">Raw tokens (68): ['the', 'federal', 'open', 'market', 'committee', 'decided', 'today', 'to', 'establish', 'a']
+After filtering (34): ['federal', 'open', 'market', 'committee', 'decided', 'today', 'establish', 'target', 'range', 'federal']
+After lemmatization (34): ['federal', 'open', 'market', 'committee', 'decide', 'today', 'establish', 'target', 'range', 'federal']</div>
+
+        <h3>Option B: spaCy (production-grade, faster)</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> <span class="code-package">spacy</span>
+
+<span class="code-comment"># Load the English pipeline (tokenizer + POS tagger + lemmatizer + NER)</span>
+nlp = spacy.<span class="code-function">load</span>(<span class="code-string">"en_core_web_sm"</span>)
+
+<span class="code-keyword">def</span> <span class="code-function">preprocess_spacy</span>(text):
+    <span class="code-string">"""Preprocess a single document using spaCy.
+
+    spaCy handles tokenization, POS tagging, and lemmatization
+    in a single pass &mdash; faster and more linguistically accurate
+    than doing each step separately.
+    """</span>
+    doc = <span class="code-function">nlp</span>(text)
+    <span class="code-keyword">return</span> [
+        token.lemma_.<span class="code-function">lower</span>()
+        <span class="code-keyword">for</span> token <span class="code-keyword">in</span> doc
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> token.is_stop       <span class="code-comment"># remove stopwords</span>
+        <span class="code-keyword">and</span> <span class="code-keyword">not</span> token.is_punct     <span class="code-comment"># remove punctuation</span>
+        <span class="code-keyword">and</span> token.is_alpha         <span class="code-comment"># keep only alphabetic tokens</span>
+        <span class="code-keyword">and</span> <span class="code-function">len</span>(token) > <span class="code-number">1</span>        <span class="code-comment"># drop single characters</span>
+    ]
+
+<span class="code-comment"># Apply to entire corpus</span>
+df[<span class="code-string">"tokens"</span>] = df[<span class="code-string">"text"</span>].<span class="code-function">apply</span>(preprocess_spacy)
+df[<span class="code-string">"clean_text"</span>] = df[<span class="code-string">"tokens"</span>].<span class="code-function">apply</span>(<span class="code-keyword">lambda</span> t: <span class="code-string">" "</span>.<span class="code-function">join</span>(t))
+
+<span class="code-comment"># Inspect</span>
+<span class="code-keyword">for</span> _, row <span class="code-keyword">in</span> df.<span class="code-function">iterrows</span>():
+    <span class="code-function">print</span>(f<span class="code-string">"{row['date'].strftime('%Y-%m')}: {row['tokens'][:8]}..."</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">2008-12: ['federal', 'open', 'market', 'committee', 'decide', 'today', 'establish', 'target']...
+2015-12: ['committee', 'judge', 'considerable', 'improvement', 'labor', 'market', 'condition', 'year']...
+2020-03: ['coronavirus', 'outbreak', 'harm', 'community', 'disrupt', 'economic', 'activity', 'country']...
+2022-06: ['overall', 'economic', 'activity', 'appear', 'pick', 'edge', 'quarter', 'job']...
+2024-09: ['recent', 'indicator', 'suggest', 'economic', 'activity', 'continue', 'expand', 'solid']...</div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">NLTK vs. spaCy: When to Use Which</div>
+          <p>
+            <strong>Use NLTK</strong> when teaching, prototyping, or when you need access to specific lexical resources
+            (WordNet, VADER, specialized corpora). <strong>Use spaCy</strong> for production pipelines, large corpora,
+            or when you need NER/POS tagging integrated into preprocessing. spaCy is typically 5&ndash;10x faster.
+          </p>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 3: TEXT REPRESENTATION -->
+        <!-- ================================================================== -->
+        <h2 id="representation">10A.3 &nbsp;Text Representation: BoW &amp; TF-IDF</h2>
+
+        <p>
+          Machine learning algorithms operate on numbers, not words. <strong>Text representation</strong> converts
+          documents into numerical vectors. This is the foundational challenge of all computational text analysis:
+          how do you turn language &mdash; something inherently symbolic and contextual &mdash; into a mathematical
+          object you can compute with?
+        </p>
+
+        <h3>The Core Problem</h3>
+        <p>
+          Think of it this way: if you have a spreadsheet where each row is an observation and each column is a
+          variable, you can immediately run a regression. But with text, your &ldquo;data&rdquo; is a column of
+          paragraphs. You need to transform those paragraphs into rows of numbers &mdash; but which numbers?
+          The answer to this question has driven 30 years of NLP research. We start with the simplest answer.
+        </p>
+
+        <h3>Bag of Words (BoW)</h3>
+        <p>
+          The simplest representation: <strong>count how many times each word appears in each document</strong>.
+          Ignore word order entirely. Treat the document as a &ldquo;bag&rdquo; of words thrown together &mdash;
+          as if you shook all the words out of their sentences and just counted them.
+        </p>
+
+        <p>Here is a tiny worked example with three documents:</p>
+
+        <div class="step-visual">
+          <div class="step-visual-title">Building a Document-Term Matrix by Hand</div>
+          <div class="step-row">
+            <span class="step-label">Doc 1</span>
+            <div class="step-tokens"><span class="token">&ldquo;the economy is growing&rdquo;</span></div>
+          </div>
+          <div class="step-row">
+            <span class="step-label">Doc 2</span>
+            <div class="step-tokens"><span class="token">&ldquo;inflation is rising&rdquo;</span></div>
+          </div>
+          <div class="step-row">
+            <span class="step-label">Doc 3</span>
+            <div class="step-tokens"><span class="token">&ldquo;the economy is slowing and inflation is rising&rdquo;</span></div>
+          </div>
+        </div>
+
+        <p>After removing stopwords (&ldquo;the,&rdquo; &ldquo;is,&rdquo; &ldquo;and&rdquo;), we count each remaining word per document:</p>
+
+        <div class="matrix-visual">
+          <table>
+            <tr>
+              <th></th>
+              <th>economy</th>
+              <th>growing</th>
+              <th>inflation</th>
+              <th>rising</th>
+              <th>slowing</th>
+            </tr>
+            <tr>
+              <td class="row-label">Doc 1</td>
+              <td class="nonzero">1</td>
+              <td class="nonzero">1</td>
+              <td class="zero">0</td>
+              <td class="zero">0</td>
+              <td class="zero">0</td>
+            </tr>
+            <tr>
+              <td class="row-label">Doc 2</td>
+              <td class="zero">0</td>
+              <td class="zero">0</td>
+              <td class="nonzero">1</td>
+              <td class="nonzero">1</td>
+              <td class="zero">0</td>
+            </tr>
+            <tr>
+              <td class="row-label">Doc 3</td>
+              <td class="nonzero">1</td>
+              <td class="zero">0</td>
+              <td class="nonzero">1</td>
+              <td class="nonzero">1</td>
+              <td class="nonzero">1</td>
+            </tr>
+          </table>
+        </div>
+
+        <p>
+          Each document is now a vector of numbers: Doc 1 = [1, 1, 0, 0, 0], Doc 2 = [0, 0, 1, 1, 0].
+          You can now measure similarity between documents (using cosine similarity), cluster them, or feed
+          them into a classifier. This is the <strong>document-term matrix</strong> &mdash; the foundational
+          data structure of computational text analysis (Turney &amp; Pantel, 2010).
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">The &ldquo;Bag&rdquo; Assumption</div>
+          <p>
+            BoW deliberately ignores word order: &ldquo;dog bites man&rdquo; and &ldquo;man bites dog&rdquo;
+            produce the <em>same</em> vector. This seems like a fatal flaw, yet BoW works remarkably well for
+            many tasks because topic and sentiment are largely determined by which words are <em>present</em>,
+            not their exact order. As Harris (1954) observed: &ldquo;Words that occur in similar contexts tend
+            to have similar meanings&rdquo; &mdash; and BoW captures precisely which words co-occur in a document.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">sklearn.feature_extraction.text</span> <span class="code-keyword">import</span> CountVectorizer
+
+<span class="code-comment"># Build a Bag of Words matrix from our preprocessed texts</span>
+bow_vectorizer = <span class="code-function">CountVectorizer</span>(
+    max_features=<span class="code-number">100</span>,       <span class="code-comment"># keep top 100 words</span>
+    min_df=<span class="code-number">1</span>,               <span class="code-comment"># word must appear in at least 1 doc</span>
+    max_df=<span class="code-number">0.95</span>             <span class="code-comment"># ignore words in &gt;95% of docs</span>
+)
+bow_matrix = bow_vectorizer.<span class="code-function">fit_transform</span>(df[<span class="code-string">"clean_text"</span>])
+
+<span class="code-function">print</span>(f<span class="code-string">"Document-term matrix shape: {bow_matrix.shape}"</span>)
+<span class="code-function">print</span>(f<span class="code-string">"Vocabulary size: {<span class="code-function">len</span>(bow_vectorizer.<span class="code-function">get_feature_names_out</span>())}"</span>)
+<span class="code-function">print</span>(f<span class="code-string">"Sample words: {bow_vectorizer.<span class="code-function">get_feature_names_out</span>()[:15].tolist()}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">Document-term matrix shape: (5, 88)
+Vocabulary size: 88
+Sample words: ['accommodative', 'activity', 'anticipate', 'appear', 'appropriate', 'available', 'broader', 'business', 'committee', 'community']</div>
+
+        <h3>TF-IDF: Weighting by Importance</h3>
+        <p>
+          Raw word counts treat every word equally. But a word like &ldquo;committee&rdquo; that appears in <em>every</em>
+          FOMC statement is less informative than &ldquo;coronavirus&rdquo; which appears in only one.
+          <strong>TF-IDF</strong> (Term Frequency &ndash; Inverse Document Frequency) solves this by asking a
+          deceptively simple question: <em>how distinctive is this word for this document?</em>
+        </p>
+
+        <p>The intuition has two parts:</p>
+        <ul>
+          <li><strong>Term Frequency (TF)</strong>: How often does this word appear <em>in this document</em>? More occurrences &rarr; higher score.</li>
+          <li><strong>Inverse Document Frequency (IDF)</strong>: How rare is this word <em>across all documents</em>? Rarer words &rarr; higher score.</li>
+        </ul>
+        <p>The product TF &times; IDF rewards words that are <em>frequent locally but rare globally</em> &mdash; exactly the words that characterize a document&rsquo;s distinctive content.</p>
+
+        <div class="math-display">
+          <span class="math-label">TF-IDF Formula</span>
+          TF-IDF(t, d) = TF(t, d) &times; IDF(t)<br><br>
+          where &ensp; TF(t, d) = count of term <em>t</em> in document <em>d</em><br>
+          &ensp;&ensp;&ensp;&ensp;&ensp;&ensp; IDF(t) = log( N / DF(t) )<br>
+          &ensp;&ensp;&ensp;&ensp;&ensp;&ensp; N = total number of documents<br>
+          &ensp;&ensp;&ensp;&ensp;&ensp;&ensp; DF(t) = number of documents containing term <em>t</em>
+        </div>
+
+        <h4>Worked Example: Computing TF-IDF by Hand</h4>
+        <p>Using our three mini-documents from above (N = 3 documents):</p>
+
+        <div class="matrix-visual">
+          <table>
+            <tr>
+              <th>Word</th>
+              <th>DF (docs containing it)</th>
+              <th>IDF = log(3 / DF)</th>
+              <th>Interpretation</th>
+            </tr>
+            <tr>
+              <td class="row-label">economy</td>
+              <td class="nonzero">2</td>
+              <td class="nonzero">0.41</td>
+              <td>Appears in 2/3 docs &mdash; somewhat common</td>
+            </tr>
+            <tr>
+              <td class="row-label">growing</td>
+              <td class="nonzero">1</td>
+              <td class="high">1.10</td>
+              <td>Appears in only 1 doc &mdash; distinctive!</td>
+            </tr>
+            <tr>
+              <td class="row-label">inflation</td>
+              <td class="nonzero">2</td>
+              <td class="nonzero">0.41</td>
+              <td>Appears in 2/3 docs &mdash; somewhat common</td>
+            </tr>
+            <tr>
+              <td class="row-label">rising</td>
+              <td class="nonzero">2</td>
+              <td class="nonzero">0.41</td>
+              <td>Appears in 2/3 docs &mdash; somewhat common</td>
+            </tr>
+            <tr>
+              <td class="row-label">slowing</td>
+              <td class="nonzero">1</td>
+              <td class="high">1.10</td>
+              <td>Appears in only 1 doc &mdash; distinctive!</td>
+            </tr>
+          </table>
+        </div>
+
+        <p>
+          For Doc 3, the word &ldquo;slowing&rdquo; gets TF-IDF = 1 &times; 1.10 = <strong>1.10</strong>,
+          while &ldquo;economy&rdquo; gets only 1 &times; 0.41 = <strong>0.41</strong>.
+          TF-IDF automatically identifies &ldquo;slowing&rdquo; as the most informative word in Doc 3 &mdash;
+          exactly what a human reader would conclude. This is why TF-IDF is often called a
+          &ldquo;statistical summary of what makes a document special&rdquo;
+          (Sp&auml;rck Jones, 1972; Salton &amp; Buckley, 1988).
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">sklearn.feature_extraction.text</span> <span class="code-keyword">import</span> TfidfVectorizer
+
+tfidf_vectorizer = <span class="code-function">TfidfVectorizer</span>(
+    max_features=<span class="code-number">100</span>,
+    ngram_range=(<span class="code-number">1</span>, <span class="code-number">2</span>),    <span class="code-comment"># unigrams AND bigrams</span>
+    min_df=<span class="code-number">1</span>,
+    max_df=<span class="code-number">0.95</span>
+)
+tfidf_matrix = tfidf_vectorizer.<span class="code-function">fit_transform</span>(df[<span class="code-string">"clean_text"</span>])
+
+<span class="code-comment"># Show the most distinctive words for each statement</span>
+feature_names = tfidf_vectorizer.<span class="code-function">get_feature_names_out</span>()
+
+<span class="code-keyword">for</span> i, row <span class="code-keyword">in</span> df.<span class="code-function">iterrows</span>():
+    <span class="code-comment"># Get TF-IDF scores for this document</span>
+    scores = tfidf_matrix[i].<span class="code-function">toarray</span>().<span class="code-function">flatten</span>()
+    <span class="code-comment"># Sort by score, take top 5</span>
+    top_idx = scores.<span class="code-function">argsort</span>()[<span class="code-number">-5</span>:][::<span class="code-number">-1</span>]
+    top_words = [(feature_names[j], <span class="code-function">round</span>(scores[j], <span class="code-number">3</span>)) <span class="code-keyword">for</span> j <span class="code-keyword">in</span> top_idx]
+    <span class="code-function">print</span>(f<span class="code-string">"{row['date'].strftime('%Y-%m')}: {top_words}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">2008-12: [('decline', 0.312), ('strained', 0.312), ('credit', 0.312), ('tight', 0.312), ('weaken', 0.312)]
+2015-12: [('improvement', 0.339), ('accommodative', 0.267), ('confident', 0.267), ('considerable', 0.267), ('rise', 0.267)]
+2020-03: [('coronavirus', 0.407), ('outbreak', 0.321), ('weather', 0.321), ('disrupt', 0.253), ('harm', 0.253)]
+2022-06: [('inflation', 0.293), ('price', 0.280), ('energy', 0.231), ('imbalance', 0.231), ('pandemic', 0.231)]
+2024-09: [('solid', 0.367), ('progress', 0.289), ('sustainably', 0.289), ('confidence', 0.228), ('expand', 0.228)]</div>
+
+        <div class="expert-insight">
+          <div class="expert-insight-header">Reading the Output</div>
+          <p>
+            Notice how TF-IDF immediately surfaces the <em>distinctive</em> content of each statement:
+            the 2008 crisis (&ldquo;decline,&rdquo; &ldquo;strained,&rdquo; &ldquo;tight&rdquo;),
+            the 2020 pandemic (&ldquo;coronavirus,&rdquo; &ldquo;outbreak&rdquo;),
+            the 2022 inflation spike (&ldquo;inflation,&rdquo; &ldquo;price,&rdquo; &ldquo;energy&rdquo;).
+            This is precisely why TF-IDF remains a powerful first step: it tells you, at a glance,
+            what makes each document unique.
+          </p>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 4: SENTIMENT ANALYSIS -->
+        <!-- ================================================================== -->
+        <h2 id="sentiment">10A.4 &nbsp;Sentiment Analysis</h2>
+
+        <p>
+          Sentiment analysis assigns a polarity score (positive, negative, neutral) to text.
+          This is arguably the most widely used text analysis technique in both business and research &mdash;
+          from hedge funds scoring earnings calls in real time (Loughran &amp; McDonald, 2016)
+          to political scientists measuring the tone of legislative debate
+          (Gentzkow, Shapiro &amp; Taddy, 2019).
+        </p>
+
+        <h3>The Fundamental Idea</h3>
+        <p>
+          At its core, sentiment analysis rests on a simple premise: <strong>certain words carry emotional valence</strong>.
+          &ldquo;Excellent&rdquo; is positive. &ldquo;Terrible&rdquo; is negative. &ldquo;Quarterly&rdquo; is neutral.
+          If you count the positive and negative words in a document, you get a rough measure of its overall tone.
+          This is the <em>lexicon-based</em> approach &mdash; and it is where the field began.
+        </p>
+
+        <p>But language is not that simple. Consider these three sentences:</p>
+
+        <div class="step-visual">
+          <div class="step-visual-title">Why Sentiment Is Hard: Context Matters</div>
+          <div class="step-row">
+            <span class="step-label" style="background:#e53e3e;">Negative?</span>
+            <div class="step-tokens">
+              <span class="token">&ldquo;Unemployment has <strong>declined</strong> significantly.&rdquo;</span>
+              <span class="token changed" style="font-size:0.75rem;">&larr; Actually positive! Decline in a bad thing = good</span>
+            </div>
+          </div>
+          <div class="step-row">
+            <span class="step-label" style="background:#38a169;">Positive?</span>
+            <div class="step-tokens">
+              <span class="token">&ldquo;Inflation <strong>rose</strong> to its highest level.&rdquo;</span>
+              <span class="token" style="background:#fed7d7; font-size:0.75rem; border-color:#feb2b2;">&larr; Actually negative! Rise in a bad thing = bad</span>
+            </div>
+          </div>
+          <div class="step-row">
+            <span class="step-label" style="background:#718096;">Neutral?</span>
+            <div class="step-tokens">
+              <span class="token">&ldquo;The company reported <strong>liability</strong> of $2B.&rdquo;</span>
+              <span class="token changed" style="font-size:0.75rem;">&larr; Neutral in finance! Not negative despite everyday connotation</span>
+            </div>
+          </div>
+        </div>
+
+        <p>
+          These examples illustrate the three generations of sentiment analysis: (1) generic lexicons that miss domain context,
+          (2) domain-specific dictionaries that handle financial vocabulary, and (3) contextual models (transformers) that
+          understand how words interact in sentences.
+        </p>
+
+        <div class="flow-diagram">
+          <div class="flow-box">
+            <div class="flow-box-title">Generation 1</div>
+            <div class="flow-box-desc">Generic lexicons<br>(VADER, TextBlob)<br><small>Look up each word in a dictionary</small></div>
+          </div>
+          <div class="flow-connector">&rarr;</div>
+          <div class="flow-box">
+            <div class="flow-box-title">Generation 2</div>
+            <div class="flow-box-desc">Domain dictionaries<br>(Loughran-McDonald)<br><small>Finance-specific word lists</small></div>
+          </div>
+          <div class="flow-connector">&rarr;</div>
+          <div class="flow-box active">
+            <div class="flow-box-title">Generation 3</div>
+            <div class="flow-box-desc">Contextual models<br>(FinBERT, LLMs)<br><small>Understand full sentence meaning</small></div>
+          </div>
+        </div>
+
+        <h3>Approach 1: Lexicon-Based (VADER)</h3>
+
+        <p>
+          VADER (Valence Aware Dictionary and sEntiment Reasoner; Hutto &amp; Gilbert, 2014) works by maintaining
+          a dictionary of ~7,500 words, each hand-rated on a scale from &minus;4 (most negative) to +4 (most positive)
+          by human annotators. When you pass a sentence to VADER, it:
+        </p>
+        <ol>
+          <li>Looks up each word in the dictionary</li>
+          <li>Applies heuristic rules for intensifiers (&ldquo;very good&rdquo; &gt; &ldquo;good&rdquo;), negations (&ldquo;not good&rdquo; flips sign), and capitalization (&ldquo;GREAT&rdquo; &gt; &ldquo;great&rdquo;)</li>
+          <li>Normalizes the aggregate score to a &minus;1 to +1 range (the &ldquo;compound&rdquo; score)</li>
+        </ol>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">nltk.sentiment</span> <span class="code-keyword">import</span> SentimentIntensityAnalyzer
+
+sia = <span class="code-function">SentimentIntensityAnalyzer</span>()
+
+<span class="code-function">print</span>(<span class="code-string">"VADER Sentiment Scores (compound: -1 = most negative, +1 = most positive)\n"</span>)
+<span class="code-keyword">for</span> _, row <span class="code-keyword">in</span> df.<span class="code-function">iterrows</span>():
+    scores = sia.<span class="code-function">polarity_scores</span>(row[<span class="code-string">"text"</span>])
+    <span class="code-function">print</span>(f<span class="code-string">"{row['date'].strftime('%Y-%m')}  compound={scores['compound']:+.3f}  "</span>
+          f<span class="code-string">"pos={scores['pos']:.2f}  neg={scores['neg']:.2f}  neu={scores['neu']:.2f}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">VADER Sentiment Scores (compound: -1 = most negative, +1 = most positive)
+
+2008-12  compound=-0.784  pos=0.04  neg=0.17  neu=0.79
+2015-12  compound=+0.936  pos=0.18  neg=0.02  neu=0.80
+2020-03  compound=-0.654  pos=0.05  neg=0.13  neu=0.82
+2022-06  compound=+0.126  pos=0.08  neg=0.06  neu=0.86
+2024-09  compound=+0.784  pos=0.14  neg=0.03  neu=0.83</div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">VADER&rsquo;s Limitation for Financial Text</div>
+          <p>
+            VADER was designed for informal social media text. For financial and economic text, words have
+            domain-specific meanings: &ldquo;liability&rdquo; is neutral in a balance sheet context, not negative;
+            &ldquo;decline&rdquo; in earnings is negative, but &ldquo;decline in unemployment&rdquo; is positive.
+            VADER does not capture these nuances. For finance, use domain-specific tools.
+          </p>
+        </div>
+
+        <h3>Approach 2: Loughran-McDonald Dictionary (Finance-Specific)</h3>
+        <p>
+          The breakthrough paper by Loughran &amp; McDonald (2011, <em>Journal of Finance</em>) showed that
+          <strong>nearly three-quarters of &ldquo;negative&rdquo; words in the Harvard General Inquirer dictionary
+          are not negative in financial contexts</strong>. Words like &ldquo;tax,&rdquo; &ldquo;cost,&rdquo;
+          &ldquo;capital,&rdquo; &ldquo;liability,&rdquo; and &ldquo;risk&rdquo; are classified as negative by general-purpose
+          dictionaries but are routine, neutral vocabulary in financial texts.
+        </p>
+        <p>
+          To fix this, they manually classified &gt;4,000 words from 10-K filings into six categories:
+          Negative, Positive, Uncertainty, Litigious, Constraining, and Superfluous. Their dictionary is now
+          the <em>de facto</em> standard for sentiment analysis in finance and accounting research, cited
+          in over 8,000 papers.
+        </p>
+
+        <div class="step-visual">
+          <div class="step-visual-title">Why Domain Dictionaries Matter: &ldquo;Negative&rdquo; Words That Aren&rsquo;t</div>
+          <div class="step-row">
+            <span class="step-label" style="background:#e53e3e;">Harvard GI</span>
+            <div class="step-tokens">
+              <span class="token removed">tax</span>
+              <span class="token removed">liability</span>
+              <span class="token removed">cost</span>
+              <span class="token removed">risk</span>
+              <span class="token removed">capital</span>
+              <span class="token removed">foreign</span>
+              <span class="token" style="font-size:0.75rem; background:white;">&larr; All &ldquo;negative&rdquo; in GI; <strong>all neutral in finance</strong></span>
+            </div>
+          </div>
+          <div class="step-row">
+            <span class="step-label" style="background:#38a169;">Loughran-McD</span>
+            <div class="step-tokens">
+              <span class="token removed">decline</span>
+              <span class="token removed">loss</span>
+              <span class="token removed">impairment</span>
+              <span class="token removed">adverse</span>
+              <span class="token removed">default</span>
+              <span class="token removed">litigation</span>
+              <span class="token" style="font-size:0.75rem; background:white;">&larr; Truly negative in financial context</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> <span class="code-package">pysentiment2</span> <span class="code-keyword">as</span> ps
+
+<span class="code-comment"># Load the Loughran-McDonald financial dictionary</span>
+lm = ps.<span class="code-function">LM</span>()
+
+<span class="code-function">print</span>(<span class="code-string">"Loughran-McDonald Financial Sentiment\n"</span>)
+<span class="code-keyword">for</span> _, row <span class="code-keyword">in</span> df.<span class="code-function">iterrows</span>():
+    tokens = lm.<span class="code-function">tokenize</span>(row[<span class="code-string">"text"</span>])
+    score = lm.<span class="code-function">get_score</span>(tokens)
+    <span class="code-function">print</span>(f<span class="code-string">"{row['date'].strftime('%Y-%m')}  Polarity={score['Polarity']:.3f}  "</span>
+          f<span class="code-string">"Positive={score['Positive']}  Negative={score['Negative']}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">Loughran-McDonald Financial Sentiment
+
+2008-12  Polarity=-0.667  Positive=1  Negative=5
+2015-12  Polarity=+0.500  Positive=3  Negative=1
+2020-03  Polarity=-0.600  Positive=1  Negative=4
+2022-06  Polarity=-0.200  Positive=2  Negative=3
+2024-09  Polarity=+0.500  Positive=3  Negative=1</div>
+
+        <h3>Approach 3: FinBERT (Transformer-Based, State of the Art)</h3>
+        <p>
+          FinBERT (Araci, 2019) is a BERT model further pre-trained on 46,000 sentences from financial news
+          and then fine-tuned on 4,845 manually labeled sentences. Unlike dictionaries, it does <em>not</em> look up
+          individual words. Instead, it reads the <strong>entire sentence at once</strong> through 12 layers of
+          self-attention (see Module 10, Section 10.6), building a rich representation of how all the words
+          relate to each other. Only then does it output a classification.
+        </p>
+
+        <div class="comparison-visual">
+          <div class="comp-side">
+            <h4>Dictionary Approach</h4>
+            <p style="font-size:0.85rem;">
+              &ldquo;Unemployment <strong style="color:#e53e3e;">declined</strong>&rdquo;<br>
+              &darr; Look up &ldquo;declined&rdquo; &rarr; score = &minus;2<br>
+              &darr; Result: <strong style="color:#e53e3e;">NEGATIVE</strong><br><br>
+              <em>Wrong!</em> It ignores that &ldquo;declined&rdquo; modifies &ldquo;unemployment&rdquo;.
+            </p>
+          </div>
+          <div class="comp-vs">vs.</div>
+          <div class="comp-side">
+            <h4>FinBERT Approach</h4>
+            <p style="font-size:0.85rem;">
+              &ldquo;Unemployment declined&rdquo;<br>
+              &darr; Attention: &ldquo;declined&rdquo; attends to &ldquo;unemployment&rdquo;<br>
+              &darr; Learns: decline of bad thing = good<br>
+              &darr; Result: <strong style="color:#38a169;">POSITIVE</strong><br><br>
+              <em>Correct!</em> Context changes the meaning.
+            </p>
+          </div>
+        </div>
+
+        <p>
+          This contextual understanding is what makes transformer-based models fundamentally more capable
+          than dictionary lookup, at the cost of being less interpretable and more computationally expensive
+          (Huang, Wang &amp; Yang, 2023).
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">transformers</span> <span class="code-keyword">import</span> pipeline
+
+<span class="code-comment"># Load FinBERT &mdash; first run downloads the model (~420 MB)</span>
+finbert = <span class="code-function">pipeline</span>(
+    <span class="code-string">"sentiment-analysis"</span>,
+    model=<span class="code-string">"ProsusAI/finbert"</span>,
+    tokenizer=<span class="code-string">"ProsusAI/finbert"</span>
+)
+
+<span class="code-function">print</span>(<span class="code-string">"FinBERT Financial Sentiment\n"</span>)
+<span class="code-keyword">for</span> _, row <span class="code-keyword">in</span> df.<span class="code-function">iterrows</span>():
+    <span class="code-comment"># FinBERT has a 512-token limit; truncate if needed</span>
+    result = finbert(row[<span class="code-string">"text"</span>][:<span class="code-number">512</span>])
+    <span class="code-function">print</span>(f<span class="code-string">"{row['date'].strftime('%Y-%m')}  {result[0]['label']:&lt;10s}  "</span>
+          f<span class="code-string">"confidence={result[0]['score']:.3f}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">FinBERT Financial Sentiment
+
+2008-12  negative    confidence=0.962
+2015-12  positive    confidence=0.891
+2020-03  negative    confidence=0.943
+2022-06  neutral     confidence=0.674
+2024-09  positive    confidence=0.856</div>
+
+        <div class="expert-insight">
+          <div class="expert-insight-header">Comparing the Three Approaches</div>
+          <p>
+            All three methods correctly identify the 2008 and 2020 crises as negative and the 2015 and 2024 statements as positive.
+            But notice the 2022 statement about inflation: VADER rates it slightly positive (it doesn&rsquo;t understand
+            that &ldquo;inflation remains elevated&rdquo; is concerning), Loughran-McDonald rates it mildly negative
+            (it counts negative words), and FinBERT rates it neutral with lower confidence (it understands the
+            mixed signals). <strong>For research, use at least two methods and compare.</strong> For financial applications, FinBERT is the current standard.
+          </p>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 5: TOPIC MODELING -->
+        <!-- ================================================================== -->
+        <h2 id="topics">10A.5 &nbsp;Topic Modeling</h2>
+
+        <p>
+          Topic modeling discovers the latent themes in a collection of documents <strong>without any prior labeling</strong>.
+          It answers the question: &ldquo;What is this corpus about?&rdquo; This is <em>unsupervised</em> learning &mdash;
+          the algorithm has no labels, no categories, no guidance. It must discover the themes on its own by
+          finding patterns in which words tend to co-occur.
+        </p>
+
+        <h3>LDA (Latent Dirichlet Allocation)</h3>
+
+        <p>
+          LDA (Blei, Ng &amp; Jordan, 2003) is one of the most influential models in machine learning.
+          To understand it, think of a <strong>generative story</strong> &mdash; a fictional process by which
+          documents could have been written. LDA doesn&rsquo;t claim authors actually follow this process;
+          it uses it as a mathematical model to reverse-engineer the topics.
+        </p>
+
+        <div class="gen-story">
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>Choose how many topics to mix.</strong> For each document, draw a distribution over topics
+              from a Dirichlet distribution. For example, an FOMC statement might be 60% about &ldquo;inflation&rdquo;
+              and 40% about &ldquo;employment.&rdquo;
+              <div class="gen-step-visual">Document &ldquo;2022-06&rdquo;: &theta; = [0.60 inflation, 0.33 employment, 0.07 crisis]</div>
+            </div>
+          </div>
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>For each word in the document:</strong> first, randomly pick one of the topics according
+              to the document&rsquo;s topic mixture.
+              <div class="gen-step-visual">Roll dice &rarr; topic = &ldquo;inflation&rdquo; (with probability 0.60)</div>
+            </div>
+          </div>
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>Then, randomly pick a word</strong> from that topic&rsquo;s word distribution.
+              Each topic is a probability distribution over the entire vocabulary.
+              <div class="gen-step-visual">Topic &ldquo;inflation&rdquo; &rarr; P(price)=0.08, P(inflation)=0.07, P(elevated)=0.05, &hellip; &rarr; word = &ldquo;price&rdquo;</div>
+            </div>
+          </div>
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>Repeat for every word in every document.</strong> The actual algorithm works <em>backwards</em>:
+              given the observed words, it infers the most likely topic mixtures (&theta;) and word distributions (&beta;)
+              that could have generated them. This is done via variational inference or Gibbs sampling
+              (Griffiths &amp; Steyvers, 2004).
+            </div>
+          </div>
+        </div>
+
+        <div class="expert-insight">
+          <div class="expert-insight-header">Why the Generative Story Matters</div>
+          <p>
+            The generative story is not just a metaphor &mdash; it <em>is</em> the model. Every assumption (topics are
+            Dirichlet-distributed, words are drawn independently given a topic) has mathematical consequences.
+            The Dirichlet prior encourages <strong>sparse</strong> mixtures: most documents are about a small number of topics,
+            and most topics use a small number of words. This sparsity is what makes the discovered topics interpretable.
+            If a document were equally about all topics, or a topic used all words equally, neither would be informative
+            (Blei, 2012).
+          </p>
+        </div>
+
+        <h4>The Key Hyperparameter: How Many Topics?</h4>
+        <p>
+          LDA requires you to specify <em>K</em>, the number of topics, <em>before</em> fitting the model.
+          This is both its strength (you have control) and its weakness (you might choose poorly).
+          Common approaches: (1) try several values of K and compare coherence scores, (2) use domain knowledge
+          (&ldquo;I expect ~5 major policy themes&rdquo;), or (3) use hierarchical models that learn K automatically.
+          In practice, researchers often run K = 5, 10, 15, 20 and inspect the topics qualitatively
+          (Chang et al., 2009).
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">sklearn.decomposition</span> <span class="code-keyword">import</span> LatentDirichletAllocation
+<span class="code-keyword">from</span> <span class="code-package">sklearn.feature_extraction.text</span> <span class="code-keyword">import</span> CountVectorizer
+
+<span class="code-comment"># LDA requires a raw count matrix (not TF-IDF)</span>
+count_vec = <span class="code-function">CountVectorizer</span>(max_features=<span class="code-number">200</span>, min_df=<span class="code-number">1</span>, max_df=<span class="code-number">0.95</span>)
+dtm = count_vec.<span class="code-function">fit_transform</span>(df[<span class="code-string">"clean_text"</span>])
+
+<span class="code-comment"># Fit LDA with 3 topics</span>
+lda = <span class="code-function">LatentDirichletAllocation</span>(
+    n_components=<span class="code-number">3</span>,            <span class="code-comment"># number of topics to discover</span>
+    random_state=<span class="code-number">42</span>,           <span class="code-comment"># reproducibility!</span>
+    max_iter=<span class="code-number">50</span>,               <span class="code-comment"># training iterations</span>
+    learning_method=<span class="code-string">"online"</span>   <span class="code-comment"># faster for small corpora</span>
+)
+lda.<span class="code-function">fit</span>(dtm)
+
+<span class="code-comment"># Display the top words per topic</span>
+feature_names = count_vec.<span class="code-function">get_feature_names_out</span>()
+<span class="code-keyword">for</span> topic_idx, topic <span class="code-keyword">in</span> <span class="code-function">enumerate</span>(lda.components_):
+    top_words = [feature_names[i] <span class="code-keyword">for</span> i <span class="code-keyword">in</span> topic.<span class="code-function">argsort</span>()[<span class="code-number">-8</span>:][::<span class="code-number">-1</span>]]
+    <span class="code-function">print</span>(f<span class="code-string">"Topic {topic_idx}: {', '.join(top_words)}"</span>)
+
+<span class="code-comment"># Show topic distribution for each document</span>
+<span class="code-function">print</span>(<span class="code-string">"\nDocument-topic distributions:"</span>)
+doc_topics = lda.<span class="code-function">transform</span>(dtm)
+<span class="code-keyword">for</span> i, row <span class="code-keyword">in</span> df.<span class="code-function">iterrows</span>():
+    dist = [<span class="code-function">round</span>(x, <span class="code-number">2</span>) <span class="code-keyword">for</span> x <span class="code-keyword">in</span> doc_topics[i]]
+    <span class="code-function">print</span>(f<span class="code-string">"  {row['date'].strftime('%Y-%m')}: {dist}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">Topic 0: inflation, price, rate, range, target, economic, activity, fund
+Topic 1: economic, labor, market, condition, committee, rate, fund, target
+Topic 2: coronavirus, economy, committee, range, target, rate, fund, event
+
+Document-topic distributions:
+  2008-12: [0.07, 0.86, 0.07]
+  2015-12: [0.08, 0.84, 0.08]
+  2020-03: [0.07, 0.07, 0.86]
+  2022-06: [0.86, 0.07, 0.07]
+  2024-09: [0.56, 0.38, 0.06]</div>
+
+        <h3>BERTopic (Neural Topic Modeling)</h3>
+        <p>
+          BERTopic (Grootendorst, 2022) takes a fundamentally different approach from LDA. Instead of modeling
+          the generative process of documents, it uses a four-stage pipeline that leverages modern
+          neural embeddings:
+        </p>
+
+        <div class="flow-diagram">
+          <div class="flow-box">
+            <div class="flow-box-title">1. Embed</div>
+            <div class="flow-box-desc">Convert each document to a dense vector using sentence-transformers</div>
+          </div>
+          <div class="flow-connector">&rarr;</div>
+          <div class="flow-box">
+            <div class="flow-box-title">2. Reduce</div>
+            <div class="flow-box-desc">Project high-dimensional vectors to 2D/5D using UMAP</div>
+          </div>
+          <div class="flow-connector">&rarr;</div>
+          <div class="flow-box">
+            <div class="flow-box-title">3. Cluster</div>
+            <div class="flow-box-desc">Group similar documents using HDBSCAN (auto-detects # clusters)</div>
+          </div>
+          <div class="flow-connector">&rarr;</div>
+          <div class="flow-box active">
+            <div class="flow-box-title">4. Represent</div>
+            <div class="flow-box-desc">Extract topic words using c-TF-IDF (class-based TF-IDF)</div>
+          </div>
+        </div>
+
+        <p>
+          The key innovation is <strong>c-TF-IDF</strong>: after clustering, BERTopic treats all documents
+          in a cluster as one big &ldquo;class document&rdquo; and computes TF-IDF at the cluster level.
+          This gives each cluster a ranked list of the words that are most distinctive to it &mdash; which
+          become the topic labels. Because it uses neural embeddings for clustering, BERTopic captures
+          <em>semantic</em> similarity (not just word co-occurrence), making it superior for short texts
+          where word overlap is sparse.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">bertopic</span> <span class="code-keyword">import</span> BERTopic
+<span class="code-keyword">from</span> <span class="code-package">sentence_transformers</span> <span class="code-keyword">import</span> SentenceTransformer
+
+<span class="code-comment"># BERTopic pipeline: Embed &rarr; Reduce dimensions &rarr; Cluster &rarr; c-TF-IDF</span>
+<span class="code-comment"># For a small corpus, we lower min_topic_size</span>
+embedding_model = <span class="code-function">SentenceTransformer</span>(<span class="code-string">"all-MiniLM-L6-v2"</span>)
+
+topic_model = <span class="code-function">BERTopic</span>(
+    embedding_model=embedding_model,
+    min_topic_size=<span class="code-number">2</span>,          <span class="code-comment"># allow small topics (for demo)</span>
+    nr_topics=<span class="code-string">"auto"</span>,          <span class="code-comment"># let the model decide how many</span>
+    verbose=<span class="code-keyword">False</span>
+)
+
+topics, probs = topic_model.<span class="code-function">fit_transform</span>(df[<span class="code-string">"text"</span>].<span class="code-function">tolist</span>())
+
+<span class="code-comment"># Display discovered topics</span>
+topic_info = topic_model.<span class="code-function">get_topic_info</span>()
+<span class="code-function">print</span>(topic_info[[<span class="code-string">"Topic"</span>, <span class="code-string">"Count"</span>, <span class="code-string">"Name"</span>]])
+
+<span class="code-comment"># For larger corpora, BERTopic also supports interactive visualizations:</span>
+<span class="code-comment"># topic_model.visualize_topics()        # Inter-topic distance map</span>
+<span class="code-comment"># topic_model.visualize_barchart()       # Top words per topic</span>
+<span class="code-comment"># topic_model.visualize_over_time(...)   # Topic evolution</span></code></pre>
+          </div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">LDA vs. BERTopic: Decision Guide</div>
+          <p>
+            <strong>Use LDA</strong> when you need a well-established method that reviewers trust, when you want
+            to set the number of topics yourself, or when interpretability and simplicity matter most. LDA is standard
+            in economics (Gentzkow, Kelly &amp; Taddy, 2019).<br>
+            <strong>Use BERTopic</strong> when you have short texts (tweets, headlines), when you want the model to
+            discover the number of topics, or when you need state-of-the-art coherence. BERTopic is increasingly accepted
+            in top venues.
+          </p>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 6: NAMED ENTITY RECOGNITION -->
+        <!-- ================================================================== -->
+        <h2 id="ner">10A.6 &nbsp;Named Entity Recognition</h2>
+
+        <p>
+          Named Entity Recognition (NER) identifies and classifies proper nouns and specific references in text &mdash;
+          people, organizations, dates, monetary values, locations. Think of NER as
+          <strong>converting unstructured text into a structured database</strong>: from a paragraph of prose,
+          you extract a table of who, what, where, and when (Nadeau &amp; Sekine, 2007).
+        </p>
+
+        <h3>What NER Sees</h3>
+        <p>Here is how a NER model annotates a sentence. Each colored span is a detected entity:</p>
+
+        <div class="ner-visual">
+          <span class="ner-entity org">Federal Reserve<span class="ner-tag">ORG</span></span> Chair
+          <span class="ner-entity per">Jerome Powell<span class="ner-tag">PERSON</span></span> announced on
+          <span class="ner-entity date">Tuesday<span class="ner-tag">DATE</span></span> that the central bank
+          would maintain interest rates.
+          <span class="ner-entity org">Goldman Sachs<span class="ner-tag">ORG</span></span> analysts expect GDP growth of
+          <span class="ner-entity pct">2.3%<span class="ner-tag">PERCENT</span></span> in the
+          <span class="ner-entity loc">United States<span class="ner-tag">LOC</span></span> for
+          <span class="ner-entity date">2025<span class="ner-tag">DATE</span></span>.
+        </div>
+
+        <h3>How NER Works: The BIO Tagging Scheme</h3>
+        <p>
+          Under the hood, NER models classify each individual token (word) using the <strong>BIO tagging scheme</strong>.
+          Each token gets one of three labels: <strong>B</strong>eginning of an entity,
+          <strong>I</strong>nside an entity (continuation), or <strong>O</strong>utside any entity (not part of one).
+          This allows multi-word entities like &ldquo;Federal Reserve&rdquo; to be captured as a single unit:
+        </p>
+
+        <div class="matrix-visual">
+          <table>
+            <tr>
+              <th>Token</th>
+              <th>Federal</th><th>Reserve</th><th>Chair</th>
+              <th>Jerome</th><th>Powell</th><th>announced</th>
+            </tr>
+            <tr>
+              <td class="row-label">BIO tag</td>
+              <td class="high">B-ORG</td><td class="nonzero">I-ORG</td><td class="zero">O</td>
+              <td class="high">B-PER</td><td class="nonzero">I-PER</td><td class="zero">O</td>
+            </tr>
+          </table>
+        </div>
+
+        <p>
+          Modern NER models (spaCy, HuggingFace) are typically fine-tuned BERT models that predict BIO tags
+          for each token simultaneously. The model sees the full sentence context, so it can distinguish
+          &ldquo;Apple&rdquo; (the company) from &ldquo;apple&rdquo; (the fruit) based on surrounding words
+          (Li et al., 2020).
+        </p>
+
+        <h3>Entity Types: What Can NER Extract?</h3>
+        <table class="method-table">
+          <thead>
+            <tr><th>Type</th><th>Code</th><th>Examples</th><th>Research use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Person</td><td>PER</td><td>Jerome Powell, Christine Lagarde</td><td>Who is driving policy?</td></tr>
+            <tr><td>Organization</td><td>ORG</td><td>Federal Reserve, Goldman Sachs, IMF</td><td>Institutional networks</td></tr>
+            <tr><td>Location</td><td>LOC/GPE</td><td>United States, Europe, China</td><td>Geographic focus of policy</td></tr>
+            <tr><td>Date</td><td>DATE</td><td>Tuesday, Q3 2024, March</td><td>Temporal analysis</td></tr>
+            <tr><td>Money</td><td>MONEY</td><td>$2.5 billion, &euro;500 million</td><td>Financial quantities</td></tr>
+            <tr><td>Percent</td><td>PERCENT</td><td>2.3%, 5 percent</td><td>Rate tracking</td></tr>
+          </tbody>
+        </table>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> <span class="code-package">spacy</span>
+
+<span class="code-comment"># Use the small model for speed; for best accuracy use en_core_web_trf</span>
+nlp = spacy.<span class="code-function">load</span>(<span class="code-string">"en_core_web_sm"</span>)
+
+<span class="code-comment"># Analyze the 2024 FOMC statement</span>
+text = df.loc[<span class="code-number">4</span>, <span class="code-string">"text"</span>]
+doc = <span class="code-function">nlp</span>(text)
+
+<span class="code-function">print</span>(<span class="code-string">"Named Entities Found:\n"</span>)
+<span class="code-function">print</span>(f<span class="code-string">"{'Entity':<span class="code-number">30</span>s} {'Type':<span class="code-number">12</span>s} Explanation"</span>)
+<span class="code-function">print</span>(<span class="code-string">"-"</span> * <span class="code-number">65</span>)
+<span class="code-keyword">for</span> ent <span class="code-keyword">in</span> doc.ents:
+    <span class="code-function">print</span>(f<span class="code-string">"{ent.text:<span class="code-number">30</span>s} {ent.label_:<span class="code-number">12</span>s} {spacy.<span class="code-function">explain</span>(ent.label_)}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">Named Entities Found:
+
+Entity                         Type         Explanation
+-----------------------------------------------------------------
+2 percent                      PERCENT      Percentage, including "%"
+1/2                            CARDINAL     Numerals that do not fall under another type
+4-3/4                          CARDINAL     Numerals that do not fall under another type
+5 percent                      PERCENT      Percentage, including "%"
+2 percent                      PERCENT      Percentage, including "%"</div>
+
+        <p>
+          For more complex NER (extracting organization names, people, geopolitical entities from news or research
+          texts), use the transformer-based spaCy model or a HuggingFace NER pipeline:
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">transformers</span> <span class="code-keyword">import</span> pipeline
+
+<span class="code-comment"># HuggingFace NER pipeline (BERT-based)</span>
+ner_pipeline = <span class="code-function">pipeline</span>(
+    <span class="code-string">"ner"</span>,
+    model=<span class="code-string">"dslim/bert-base-NER"</span>,
+    aggregation_strategy=<span class="code-string">"simple"</span>   <span class="code-comment"># merge sub-word tokens</span>
+)
+
+<span class="code-comment"># A richer example text</span>
+rich_text = <span class="code-string">"""Federal Reserve Chair Jerome Powell announced on Tuesday that
+the central bank would maintain interest rates. Goldman Sachs analysts
+expect GDP growth of 2.3% in the United States for 2025."""</span>
+
+results = ner_pipeline(rich_text)
+<span class="code-keyword">for</span> entity <span class="code-keyword">in</span> results:
+    <span class="code-function">print</span>(f<span class="code-string">"{entity['word']:<span class="code-number">25</span>s} {entity['entity_group']:<span class="code-number">8</span>s} score={entity['score']:.3f}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">Federal Reserve           ORG      score=0.987
+Jerome Powell             PER      score=0.996
+Goldman Sachs             ORG      score=0.994
+United States             LOC      score=0.998</div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 7: ZERO-SHOT CLASSIFICATION -->
+        <!-- ================================================================== -->
+        <h2 id="classification">10A.7 &nbsp;Zero-Shot Classification</h2>
+
+        <p>
+          Traditional text classification requires labeled training data &mdash; hundreds or thousands of examples
+          per category. <strong>Zero-shot classification</strong> lets you classify text into categories you define
+          <em>at inference time</em>, with no training examples at all. This is a game-changer for research,
+          where creating labeled datasets is expensive and time-consuming
+          (Yin, Hay &amp; Roth, 2019).
+        </p>
+
+        <h3>The Core Trick: Reframing Classification as Textual Entailment</h3>
+        <p>
+          The insight behind zero-shot classification is a clever reframing of the problem.
+          Instead of training a model to classify text into categories, we use a model already trained
+          on <strong>Natural Language Inference (NLI)</strong> &mdash; the task of deciding whether one
+          sentence logically follows from another.
+        </p>
+        <p>
+          An NLI model takes two inputs: a <em>premise</em> (a statement of fact) and a <em>hypothesis</em>
+          (a claim), and outputs one of three judgments: <strong>entailment</strong> (the hypothesis follows
+          from the premise), <strong>contradiction</strong> (they conflict), or <strong>neutral</strong>
+          (can&rsquo;t tell).
+        </p>
+
+        <div class="step-visual">
+          <div class="step-visual-title">Zero-Shot Classification: Step-by-Step Intuition</div>
+
+          <div class="step-row">
+            <span class="step-label">Your text</span>
+            <div class="step-tokens">
+              <span class="token highlight">&ldquo;The Committee decided to raise the target range for the federal funds rate.&rdquo;</span>
+            </div>
+          </div>
+
+          <div class="step-arrow-down">&darr; <small>For each candidate label, construct a hypothesis</small></div>
+
+          <div class="step-row">
+            <span class="step-label">Label 1</span>
+            <div class="step-tokens">
+              <span class="token">Premise: [your text]</span>
+              <span class="token kept">Hypothesis: &ldquo;This text is about <strong>monetary policy tightening</strong>.&rdquo;</span>
+              <span class="token changed" style="font-size:0.75rem;">P(entailment) = <strong>0.94</strong></span>
+            </div>
+          </div>
+
+          <div class="step-row">
+            <span class="step-label">Label 2</span>
+            <div class="step-tokens">
+              <span class="token">Premise: [your text]</span>
+              <span class="token kept">Hypothesis: &ldquo;This text is about <strong>labor market</strong>.&rdquo;</span>
+              <span class="token" style="font-size:0.75rem; background:#fed7d7; border-color:#feb2b2;">P(entailment) = <strong>0.12</strong></span>
+            </div>
+          </div>
+
+          <div class="step-row">
+            <span class="step-label">Label 3</span>
+            <div class="step-tokens">
+              <span class="token">Premise: [your text]</span>
+              <span class="token kept">Hypothesis: &ldquo;This text is about <strong>technology</strong>.&rdquo;</span>
+              <span class="token" style="font-size:0.75rem; background:#fed7d7; border-color:#feb2b2;">P(entailment) = <strong>0.02</strong></span>
+            </div>
+          </div>
+
+          <div class="step-arrow-down">&darr; <small>Rank by entailment probability &rarr; predicted label = highest score</small></div>
+
+          <div class="step-row">
+            <span class="step-label" style="background:#38a169;">Result</span>
+            <div class="step-tokens">
+              <span class="token changed"><strong>monetary policy tightening</strong> (score: 0.94)</span>
+            </div>
+          </div>
+        </div>
+
+        <p>
+          The beauty of this approach is that the NLI model (typically BART or RoBERTa trained on the
+          MultiNLI dataset of 433,000 sentence pairs; Williams, Nangia &amp; Bowman, 2018) has never seen
+          any of your specific labels during training. It generalizes because it has learned the deep
+          semantic relationship between premises and hypotheses &mdash; essentially, it has learned
+          what it means for one statement to &ldquo;be about&rdquo; something.
+        </p>
+
+        <div class="info-box note">
+          <div class="info-box-title">Multi-Label vs. Single-Label Classification</div>
+          <p>
+            Setting <code>multi_label=True</code> means each label is scored independently (a document can be
+            about both &ldquo;inflation&rdquo; and &ldquo;labor market&rdquo; simultaneously). With
+            <code>multi_label=False</code>, the scores across labels must sum to 1, forcing a single best
+            classification. For exploratory research, <code>multi_label=True</code> is usually more informative.
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">transformers</span> <span class="code-keyword">import</span> pipeline
+
+<span class="code-comment"># Load zero-shot classifier</span>
+classifier = <span class="code-function">pipeline</span>(
+    <span class="code-string">"zero-shot-classification"</span>,
+    model=<span class="code-string">"facebook/bart-large-mnli"</span>
+)
+
+<span class="code-comment"># Define policy categories (no training data needed!)</span>
+policy_labels = [
+    <span class="code-string">"monetary policy tightening"</span>,
+    <span class="code-string">"monetary policy easing"</span>,
+    <span class="code-string">"economic growth"</span>,
+    <span class="code-string">"labor market"</span>,
+    <span class="code-string">"inflation concerns"</span>,
+    <span class="code-string">"financial stability"</span>
+]
+
+<span class="code-function">print</span>(<span class="code-string">"Zero-Shot Policy Classification\n"</span>)
+<span class="code-keyword">for</span> _, row <span class="code-keyword">in</span> df.<span class="code-function">iterrows</span>():
+    result = classifier(
+        row[<span class="code-string">"text"</span>],
+        candidate_labels=policy_labels,
+        multi_label=<span class="code-keyword">True</span>   <span class="code-comment"># a statement can be about multiple topics</span>
+    )
+    <span class="code-comment"># Show top 3 labels</span>
+    top3 = [(l, f<span class="code-string">"{s:.2f}"</span>) <span class="code-keyword">for</span> l, s <span class="code-keyword">in</span> <span class="code-function">zip</span>(result[<span class="code-string">"labels"</span>][:<span class="code-number">3</span>], result[<span class="code-string">"scores"</span>][:<span class="code-number">3</span>])]
+    <span class="code-function">print</span>(f<span class="code-string">"{row['date'].strftime('%Y-%m')}: {top3}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">Zero-Shot Policy Classification
+
+2008-12: [('monetary policy easing', '0.94'), ('financial stability', '0.87'), ('labor market', '0.72')]
+2015-12: [('monetary policy tightening', '0.91'), ('labor market', '0.88'), ('economic growth', '0.65')]
+2020-03: [('monetary policy easing', '0.96'), ('financial stability', '0.71'), ('economic growth', '0.54')]
+2022-06: [('inflation concerns', '0.95'), ('monetary policy tightening', '0.92'), ('economic growth', '0.58')]
+2024-09: [('monetary policy easing', '0.89'), ('inflation concerns', '0.73'), ('economic growth', '0.71')]</div>
+
+        <div class="expert-insight">
+          <div class="expert-insight-header">Why This Matters for Research</div>
+          <p>
+            Notice how accurately the model classifies each statement &mdash; without seeing a single labeled example.
+            The 2008 and 2020 crises are correctly identified as &ldquo;monetary policy easing,&rdquo; the 2022
+            inflation period as &ldquo;inflation concerns&rdquo; + &ldquo;tightening,&rdquo; and the 2024 pivot as
+            &ldquo;easing.&rdquo; In a research setting, this means you can classify thousands of documents into
+            categories of your own design without any hand-labeling. Always validate a random sample against
+            human labels to assess accuracy.
+          </p>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 8: SEMANTIC SIMILARITY & EMBEDDINGS -->
+        <!-- ================================================================== -->
+        <h2 id="embeddings">10A.8 &nbsp;Semantic Similarity &amp; Embeddings</h2>
+
+        <p>
+          Embeddings are arguably the most important conceptual breakthrough in modern NLP.
+          The idea is deceptively simple: <strong>represent each word (or sentence) as a point in
+          a high-dimensional space, such that words with similar meanings are near each other</strong>.
+        </p>
+
+        <h3>The Core Intuition: Meaning as Geometry</h3>
+        <p>
+          Consider a 2D space where the x-axis represents &ldquo;economic sentiment&rdquo; and the
+          y-axis represents &ldquo;policy action.&rdquo; In this space:
+        </p>
+
+        <div class="vector-space" role="img" aria-label="2D embedding space showing words as points: 'recession' and 'crisis' are close together in the negative-sentiment region; 'growth' and 'expansion' are close in the positive-sentiment region; 'tighten' and 'ease' are in opposite policy directions.">
+          <div class="axis-x"></div>
+          <div class="axis-y"></div>
+          <span class="axis-label x-label">Economic sentiment &rarr;</span>
+          <span class="axis-label y-label">&uarr; Policy action</span>
+
+          <!-- Negative cluster -->
+          <div class="vector-point" style="left: 100px; bottom: 120px; background: #e53e3e;">
+            <span class="vector-label" style="color: #e53e3e;">recession</span>
+          </div>
+          <div class="vector-point" style="left: 120px; bottom: 145px; background: #e53e3e;">
+            <span class="vector-label" style="color: #e53e3e;">crisis</span>
+          </div>
+          <div class="vector-point" style="left: 85px; bottom: 95px; background: #e53e3e;">
+            <span class="vector-label" style="color: #e53e3e;">decline</span>
+          </div>
+
+          <!-- Positive cluster -->
+          <div class="vector-point" style="left: 350px; bottom: 130px; background: #38a169;">
+            <span class="vector-label" style="color: #38a169;">growth</span>
+          </div>
+          <div class="vector-point" style="left: 370px; bottom: 155px; background: #38a169;">
+            <span class="vector-label" style="color: #38a169;">expansion</span>
+          </div>
+          <div class="vector-point" style="left: 330px; bottom: 105px; background: #38a169;">
+            <span class="vector-label" style="color: #38a169;">recovery</span>
+          </div>
+
+          <!-- Policy cluster top -->
+          <div class="vector-point" style="left: 220px; bottom: 300px; background: #2563eb;">
+            <span class="vector-label" style="color: #2563eb;">tighten</span>
+          </div>
+          <div class="vector-point" style="left: 260px; bottom: 280px; background: #2563eb;">
+            <span class="vector-label" style="color: #2563eb;">raise rates</span>
+          </div>
+
+          <!-- Policy cluster bottom -->
+          <div class="vector-point" style="left: 200px; bottom: 80px; background: #7c3aed;">
+            <span class="vector-label" style="color: #7c3aed;">ease</span>
+          </div>
+          <div class="vector-point" style="left: 240px; bottom: 60px; background: #7c3aed;">
+            <span class="vector-label" style="color: #7c3aed;">cut rates</span>
+          </div>
+        </div>
+
+        <p>
+          In this space, &ldquo;recession&rdquo; and &ldquo;crisis&rdquo; are near each other (similar meaning),
+          while &ldquo;recession&rdquo; and &ldquo;growth&rdquo; are far apart (opposite meanings). Crucially,
+          the <em>direction</em> from &ldquo;recession&rdquo; to &ldquo;growth&rdquo; is similar to the direction
+          from &ldquo;decline&rdquo; to &ldquo;recovery&rdquo; &mdash; they capture the same semantic relationship.
+          This is the famous &ldquo;vector arithmetic&rdquo; property: <strong>king &minus; man + woman &asymp; queen</strong>
+          (Mikolov et al., 2013).
+        </p>
+
+        <p>
+          Real embeddings live in 100&ndash;768 dimensions (not 2), but the geometric intuition holds.
+          The distance between two points tells you how semantically similar the corresponding words are.
+          This is measured using <strong>cosine similarity</strong>:
+        </p>
+
+        <div class="math-display">
+          <span class="math-label">Cosine Similarity</span>
+          cos(&theta;) = (A &middot; B) / (||A|| &times; ||B||)<br><br>
+          = 1.0 when vectors point in the same direction (identical meaning)<br>
+          = 0.0 when vectors are perpendicular (unrelated)<br>
+          = &minus;1.0 when vectors point in opposite directions (opposite meaning)
+        </div>
+
+        <h3>How Are Embeddings Learned? The Skip-Gram Intuition</h3>
+        <p>
+          Word2Vec&rsquo;s Skip-gram model (Mikolov et al., 2013) learns embeddings by training a simple
+          neural network on a single task: <strong>given a word, predict the words that tend to appear near it</strong>.
+        </p>
+
+        <div class="gen-story">
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>Slide a window across the text.</strong> For each word (the &ldquo;center&rdquo;),
+              note the surrounding words (the &ldquo;context&rdquo;, typically 5 words on each side).
+              <div class="gen-step-visual">
+                &ldquo;The <u>committee</u> decided to <strong>[raise]</strong> the <u>target</u> range&rdquo;
+                &nbsp;&nbsp;center = &ldquo;raise&rdquo;, context = {committee, decided, to, the, target}
+              </div>
+            </div>
+          </div>
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>Train the model to predict context from center.</strong> The model has a single hidden
+              layer (the embedding layer). Its weights become the word vectors. Words that predict similar
+              contexts get pushed to similar positions in the vector space.
+            </div>
+          </div>
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>The key insight:</strong> &ldquo;raise&rdquo; and &ldquo;increase&rdquo; appear in
+              similar contexts (both preceded by &ldquo;decided to&rdquo;, both followed by &ldquo;the target
+              range&rdquo;). So the model learns similar vectors for them &mdash; even though they never
+              appear in the same sentence. This is the distributional hypothesis at work: &ldquo;You shall
+              know a word by the company it keeps&rdquo; (Firth, 1957).
+            </div>
+          </div>
+        </div>
+
+        <h3>Static vs. Contextual Embeddings</h3>
+
+        <div class="comparison-visual">
+          <div class="comp-side">
+            <h4>Static (Word2Vec, GloVe)</h4>
+            <p style="font-size:0.85rem;">
+              One vector per word, regardless of context.<br><br>
+              &ldquo;bank&rdquo; = [0.2, 0.8, &hellip;]<br>
+              Same vector whether &ldquo;river <strong>bank</strong>&rdquo; or &ldquo;central <strong>bank</strong>&rdquo;.<br><br>
+              <em>Pro:</em> Fast, small models (&lt;1 GB)<br>
+              <em>Con:</em> Cannot handle polysemy
+            </p>
+          </div>
+          <div class="comp-vs">vs.</div>
+          <div class="comp-side">
+            <h4>Contextual (BERT, Sentence-Transformers)</h4>
+            <p style="font-size:0.85rem;">
+              Different vector depending on context.<br><br>
+              &ldquo;river <strong>bank</strong>&rdquo; = [0.1, 0.9, &hellip;]<br>
+              &ldquo;central <strong>bank</strong>&rdquo; = [0.8, 0.3, &hellip;]<br><br>
+              <em>Pro:</em> Handles ambiguity, state-of-the-art<br>
+              <em>Con:</em> Slower, larger models (1&ndash;4 GB)
+            </p>
+          </div>
+        </div>
+
+        <p>
+          For most tasks in 2025, <strong>sentence-transformers</strong> (Reimers &amp; Gurevych, 2019)
+          are the recommended approach. They encode entire sentences or paragraphs into a single dense vector,
+          making them ideal for document similarity, semantic search, and clustering.
+        </p>
+
+        <h3>Static Embeddings (Word2Vec)</h3>
+        <p>
+          Although superseded by contextual models for most tasks, Word2Vec remains important: it is
+          computationally cheap, its geometric properties are well-understood, and it is widely used
+          in published economics research (e.g., measuring changes in the meaning of &ldquo;inflation&rdquo;
+          across decades of Fed communications; Ash &amp; Hansen, 2023).
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">gensim.models</span> <span class="code-keyword">import</span> Word2Vec
+
+<span class="code-comment"># Train Word2Vec on our (small) corpus</span>
+<span class="code-comment"># In practice, you'd use a much larger corpus or pre-trained vectors</span>
+sentences = df[<span class="code-string">"tokens"</span>].<span class="code-function">tolist</span>()
+
+model = <span class="code-function">Word2Vec</span>(
+    sentences,
+    vector_size=<span class="code-number">50</span>,      <span class="code-comment"># embedding dimensions</span>
+    window=<span class="code-number">5</span>,             <span class="code-comment"># context window size</span>
+    min_count=<span class="code-number">1</span>,          <span class="code-comment"># include all words (small corpus)</span>
+    workers=<span class="code-number">4</span>,            <span class="code-comment"># parallel training threads</span>
+    sg=<span class="code-number">1</span>,                 <span class="code-comment"># 1 = Skip-gram (better for small data)</span>
+    seed=<span class="code-number">42</span>,              <span class="code-comment"># reproducibility</span>
+    epochs=<span class="code-number">100</span>            <span class="code-comment"># more passes for small corpus</span>
+)
+
+<span class="code-comment"># Find words similar to "inflation"</span>
+<span class="code-keyword">try</span>:
+    similar = model.wv.<span class="code-function">most_similar</span>(<span class="code-string">"inflation"</span>, topn=<span class="code-number">5</span>)
+    <span class="code-function">print</span>(<span class="code-string">"Words most similar to 'inflation':"</span>)
+    <span class="code-keyword">for</span> word, score <span class="code-keyword">in</span> similar:
+        <span class="code-function">print</span>(f<span class="code-string">"  {word:<span class="code-number">20</span>s} cosine_similarity={score:.3f}"</span>)
+<span class="code-keyword">except</span> <span class="code-variable">KeyError</span>:
+    <span class="code-function">print</span>(<span class="code-string">"'inflation' not in vocabulary (corpus too small)"</span>)</code></pre>
+          </div>
+        </div>
+
+        <h3>Sentence Embeddings (Sentence-Transformers)</h3>
+        <p>
+          Sentence-transformers encode <em>entire sentences or paragraphs</em> into dense vectors.
+          Unlike Word2Vec, the same word gets a <em>different</em> vector depending on its context.
+          This is the recommended approach for measuring document similarity in 2025.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> <span class="code-package">sentence_transformers</span> <span class="code-keyword">import</span> SentenceTransformer
+<span class="code-keyword">from</span> <span class="code-package">sklearn.metrics.pairwise</span> <span class="code-keyword">import</span> cosine_similarity
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> np
+
+<span class="code-comment"># Load a fast, high-quality embedding model</span>
+model = <span class="code-function">SentenceTransformer</span>(<span class="code-string">"all-MiniLM-L6-v2"</span>)
+
+<span class="code-comment"># Encode all FOMC statements into 384-dimensional vectors</span>
+embeddings = model.<span class="code-function">encode</span>(df[<span class="code-string">"text"</span>].<span class="code-function">tolist</span>())
+<span class="code-function">print</span>(f<span class="code-string">"Embedding shape: {embeddings.shape}"</span>)  <span class="code-comment"># (5, 384)</span>
+
+<span class="code-comment"># Compute pairwise similarity</span>
+sim_matrix = <span class="code-function">cosine_similarity</span>(embeddings)
+
+<span class="code-comment"># Display as a labeled matrix</span>
+labels = [d.<span class="code-function">strftime</span>(<span class="code-string">"%Y-%m"</span>) <span class="code-keyword">for</span> d <span class="code-keyword">in</span> df[<span class="code-string">"date"</span>]]
+<span class="code-function">print</span>(f<span class="code-string">"\n{'':&lt;10s}"</span> + <span class="code-string">"  "</span>.<span class="code-function">join</span>(f<span class="code-string">"{l:&gt;8s}"</span> <span class="code-keyword">for</span> l <span class="code-keyword">in</span> labels))
+<span class="code-keyword">for</span> i, label <span class="code-keyword">in</span> <span class="code-function">enumerate</span>(labels):
+    row_str = <span class="code-string">"  "</span>.<span class="code-function">join</span>(f<span class="code-string">"{sim_matrix[i][j]:8.3f}"</span> <span class="code-keyword">for</span> j <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-function">len</span>(labels)))
+    <span class="code-function">print</span>(f<span class="code-string">"{label:&lt;10s}{row_str}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Output</div>
+        <div class="output-block">Embedding shape: (5, 384)
+
+             2008-12   2015-12   2020-03   2022-06   2024-09
+2008-12      1.000     0.673     0.741     0.640     0.667
+2015-12      0.673     1.000     0.634     0.718     0.799
+2020-03      0.741     0.634     1.000     0.625     0.651
+2022-06      0.640     0.718     0.625     1.000     0.812
+2024-09      0.667     0.799     0.651     0.812     1.000</div>
+
+        <div class="expert-insight">
+          <div class="expert-insight-header">Reading the Similarity Matrix</div>
+          <p>
+            The highest similarity (0.812) is between the 2022 and 2024 statements &mdash; both discuss inflation
+            dynamics and rate adjustments. The 2008 crisis statement is most similar to the 2020 pandemic statement
+            (0.741) &mdash; both describe economic deterioration and emergency easing. These semantic similarities
+            are exactly what a domain expert would expect, but they were computed automatically in milliseconds.
+            This technique scales to millions of documents.
+          </p>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 9: LLMs FOR TEXT ANALYSIS -->
+        <!-- ================================================================== -->
+        <h2 id="llms">10A.9 &nbsp;LLMs for Text Analysis at Scale</h2>
+
+        <p>
+          Large Language Models (Claude, GPT-4) represent a paradigm shift in text analysis.
+          Unlike all previous methods, LLMs can perform <strong>complex, multi-dimensional analysis
+          in a single pass</strong> &mdash; extracting sentiment, topics, entities, causal claims,
+          and nuanced reasoning simultaneously. They do this through natural language instructions
+          (prompts) rather than specialized training.
+        </p>
+
+        <h3>When to Use LLMs vs. Traditional Methods</h3>
+
+        <table class="method-table">
+          <thead>
+            <tr><th>Criterion</th><th>Traditional NLP</th><th>LLM APIs</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Cost per document</strong></td>
+              <td>Near-zero (local compute)</td>
+              <td>$0.001&ndash;$0.05 per document</td>
+            </tr>
+            <tr>
+              <td><strong>Speed</strong></td>
+              <td>1,000&ndash;100,000 docs/minute</td>
+              <td>1&ndash;30 docs/minute (API-limited)</td>
+            </tr>
+            <tr>
+              <td><strong>Task complexity</strong></td>
+              <td>One task at a time</td>
+              <td>Multiple tasks in one pass</td>
+            </tr>
+            <tr>
+              <td><strong>Setup effort</strong></td>
+              <td>Install libraries, train/fine-tune</td>
+              <td>Write a prompt (minutes)</td>
+            </tr>
+            <tr>
+              <td><strong>Reproducibility</strong></td>
+              <td>Fully reproducible (deterministic)</td>
+              <td>Approximately reproducible (temp=0)</td>
+            </tr>
+            <tr>
+              <td><strong>Interpretability</strong></td>
+              <td>Method-dependent (high for TF-IDF)</td>
+              <td>Can ask for explanations, but black-box</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="expert-insight">
+          <div class="expert-insight-header">The Practical Decision Rule</div>
+          <p>
+            Use <strong>traditional NLP</strong> when you have &gt;10,000 documents, need perfect reproducibility,
+            or need a single well-defined task (sentiment, topic assignment).
+            Use <strong>LLMs</strong> when you have &lt;5,000 documents, need complex multi-dimensional coding,
+            or need to prototype quickly before investing in a custom pipeline.
+            For many research projects, the optimal strategy is to <strong>prototype with LLMs, then validate
+            and scale with traditional methods</strong>.
+          </p>
+        </div>
+
+        <h3>Prompt Engineering for Text Analysis</h3>
+        <p>
+          The quality of LLM-based text analysis depends almost entirely on the quality of the prompt.
+          Three principles matter most (Ziems et al., 2024):
+        </p>
+
+        <div class="gen-story">
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>Be explicit about output format.</strong> Always request structured output (JSON) with
+              defined fields. This makes results parseable and consistent across documents. Never ask for
+              free-text analysis when you need quantitative data.
+              <div class="gen-step-visual">"Return ONLY valid JSON with these fields: {&quot;sentiment&quot;: &quot;positive/negative/neutral&quot;, &quot;confidence&quot;: 0.0-1.0}"</div>
+            </div>
+          </div>
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>Provide a clear coding scheme.</strong> Define every category precisely, as you would
+              in a codebook for human research assistants. Ambiguous categories produce noisy results.
+              Include edge cases and how to handle them.
+              <div class="gen-step-visual">"Classify as 'hawkish' if the statement signals rate increases or inflation concern. Classify as 'dovish' if it signals rate cuts or economic support. Classify as 'neutral' if the policy stance is unchanged."</div>
+            </div>
+          </div>
+          <div class="gen-step">
+            <div class="gen-step-num"></div>
+            <div class="gen-step-content">
+              <strong>Set temperature to 0 and pin the model version.</strong> Temperature controls randomness;
+              0 makes the output as deterministic as possible. Model versions change over time, so always record
+              the exact model ID (e.g., <code>claude-sonnet-4-20250514</code>, not just <code>claude</code>).
+            </div>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">LLMs in Research: Proceed with Care</div>
+          <p>
+            LLMs are powerful but introduce <strong>reproducibility challenges</strong>: model updates can change
+            outputs silently, results may not be fully deterministic, and the &ldquo;reasoning&rdquo; is not
+            inspectable. For published research, always: (1) pin the exact model version, (2) set temperature=0,
+            (3) validate LLM outputs against human labels on a random sample, (4) report the prompt template
+            in full in your appendix (Gilardi, Alizadeh &amp; Kubli, 2023).
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> <span class="code-package">anthropic</span>
+<span class="code-keyword">import</span> <span class="code-package">json</span>
+
+<span class="code-comment"># Initialize the Claude client</span>
+client = anthropic.<span class="code-function">Anthropic</span>(api_key=<span class="code-string">"your-api-key"</span>)  <span class="code-comment"># use env variable in practice</span>
+
+<span class="code-keyword">def</span> <span class="code-function">analyze_fomc_statement</span>(text):
+    <span class="code-string">"""Analyze an FOMC statement using Claude with structured output."""</span>
+
+    prompt = <span class="code-string">f"""Analyze this FOMC statement. Return ONLY valid JSON with these fields:
+
+{{
+  "overall_sentiment": "hawkish" | "dovish" | "neutral",
+  "confidence": 0.0 to 1.0,
+  "rate_decision": "raise" | "lower" | "hold",
+  "key_concerns": ["concern1", "concern2", ...],
+  "forward_guidance": "brief summary of what the Fed signals about future policy",
+  "economic_conditions": {{
+    "growth": "expanding" | "contracting" | "mixed",
+    "labor_market": "strong" | "weak" | "mixed",
+    "inflation": "above_target" | "at_target" | "below_target"
+  }}
+}}
+
+FOMC Statement:
+{text}"""</span>
+
+    response = client.messages.<span class="code-function">create</span>(
+        model=<span class="code-string">"claude-sonnet-4-20250514"</span>,   <span class="code-comment"># pin exact version</span>
+        max_tokens=<span class="code-number">1024</span>,
+        temperature=<span class="code-number">0</span>,                     <span class="code-comment"># deterministic output</span>
+        messages=[{<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: prompt}]
+    )
+    <span class="code-keyword">return</span> json.<span class="code-function">loads</span>(response.content[<span class="code-number">0</span>].text)
+
+<span class="code-comment"># Analyze each statement</span>
+<span class="code-keyword">for</span> _, row <span class="code-keyword">in</span> df.<span class="code-function">iterrows</span>():
+    result = <span class="code-function">analyze_fomc_statement</span>(row[<span class="code-string">"text"</span>])
+    <span class="code-function">print</span>(f<span class="code-string">"\n{row['date'].strftime('%Y-%m')}:"</span>)
+    <span class="code-function">print</span>(f<span class="code-string">"  Sentiment: {result['overall_sentiment']} (conf={result['confidence']})"</span>)
+    <span class="code-function">print</span>(f<span class="code-string">"  Rate decision: {result['rate_decision']}"</span>)
+    <span class="code-function">print</span>(f<span class="code-string">"  Key concerns: {result['key_concerns']}"</span>)
+    <span class="code-function">print</span>(f<span class="code-string">"  Forward guidance: {result['forward_guidance']}"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="output-label">Expected Output</div>
+        <div class="output-block">2008-12:
+  Sentiment: dovish (conf=0.95)
+  Rate decision: lower
+  Key concerns: ['labor market deterioration', 'declining consumer spending', 'strained financial markets']
+  Forward guidance: Emergency rate cut to near-zero; focus on stabilizing the financial system
+
+2015-12:
+  Sentiment: hawkish (conf=0.80)
+  Rate decision: raise
+  Key concerns: ['inflation below target', 'medium-term inflation expectations']
+  Forward guidance: First rate hike in nearly a decade; policy remains accommodative
+
+2020-03:
+  Sentiment: dovish (conf=0.95)
+  Rate decision: lower
+  Key concerns: ['coronavirus disruption', 'risks to economic outlook']
+  Forward guidance: Emergency cut to zero; will maintain until economy weathers the crisis
+
+2022-06:
+  Sentiment: hawkish (conf=0.90)
+  Rate decision: raise
+  Key concerns: ['elevated inflation', 'supply-demand imbalances', 'energy prices']
+  Forward guidance: Signals ongoing rate increases are coming
+
+2024-09:
+  Sentiment: dovish (conf=0.75)
+  Rate decision: lower
+  Key concerns: ['inflation still somewhat elevated', 'slowing job gains']
+  Forward guidance: Gained confidence inflation is moving sustainably toward 2%</div>
+
+        <h3>Batch Processing with Rate Limiting</h3>
+        <p>
+          When analyzing thousands of documents, you need to handle rate limits gracefully:
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> <span class="code-package">time</span>
+<span class="code-keyword">import</span> <span class="code-package">json</span>
+<span class="code-keyword">from</span> <span class="code-package">pathlib</span> <span class="code-keyword">import</span> Path
+
+<span class="code-keyword">def</span> <span class="code-function">batch_analyze</span>(texts, labels, output_path, delay=<span class="code-number">0.5</span>):
+    <span class="code-string">"""Process a corpus with checkpointing and rate limiting.
+
+    Saves results incrementally so you don't lose progress if
+    the script is interrupted.
+    """</span>
+    results = []
+    output_file = Path(output_path)
+
+    <span class="code-comment"># Resume from checkpoint if exists</span>
+    <span class="code-keyword">if</span> output_file.<span class="code-function">exists</span>():
+        <span class="code-keyword">with</span> <span class="code-function">open</span>(output_file) <span class="code-keyword">as</span> f:
+            results = json.<span class="code-function">load</span>(f)
+        <span class="code-function">print</span>(f<span class="code-string">"Resuming from checkpoint: {<span class="code-function">len</span>(results)} already done"</span>)
+
+    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-function">len</span>(results), <span class="code-function">len</span>(texts)):
+        <span class="code-keyword">try</span>:
+            result = <span class="code-function">analyze_fomc_statement</span>(texts[i])
+            result[<span class="code-string">"label"</span>] = labels[i]
+            results.<span class="code-function">append</span>(result)
+        <span class="code-keyword">except</span> <span class="code-variable">Exception</span> <span class="code-keyword">as</span> e:
+            results.<span class="code-function">append</span>({<span class="code-string">"label"</span>: labels[i], <span class="code-string">"error"</span>: <span class="code-function">str</span>(e)})
+
+        <span class="code-comment"># Save checkpoint every 10 documents</span>
+        <span class="code-keyword">if</span> (i + <span class="code-number">1</span>) % <span class="code-number">10</span> == <span class="code-number">0</span>:
+            <span class="code-keyword">with</span> <span class="code-function">open</span>(output_file, <span class="code-string">"w"</span>) <span class="code-keyword">as</span> f:
+                json.<span class="code-function">dump</span>(results, f, indent=<span class="code-number">2</span>)
+            <span class="code-function">print</span>(f<span class="code-string">"  Checkpoint: {i+1}/{<span class="code-function">len</span>(texts)} processed"</span>)
+
+        time.<span class="code-function">sleep</span>(delay)  <span class="code-comment"># respect API rate limits</span>
+
+    <span class="code-comment"># Final save</span>
+    <span class="code-keyword">with</span> <span class="code-function">open</span>(output_file, <span class="code-string">"w"</span>) <span class="code-keyword">as</span> f:
+        json.<span class="code-function">dump</span>(results, f, indent=<span class="code-number">2</span>)
+
+    <span class="code-keyword">return</span> results</code></pre>
+          </div>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 10: PUTTING IT ALL TOGETHER -->
+        <!-- ================================================================== -->
+        <h2 id="full-example">10A.10 &nbsp;Putting It All Together</h2>
+
+        <p>
+          Let&rsquo;s combine every technique into a single, end-to-end analysis pipeline.
+          This is the kind of script you would use for a research paper or business report.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-string">"""
+Complete Text Analysis Pipeline: FOMC Statements
+=================================================
+This script demonstrates a full, reproducible text analysis workflow.
+It can serve as a template for any corpus-level text analysis project.
+"""</span>
+
+<span class="code-comment"># === 0. SETUP ===</span>
+<span class="code-keyword">import</span> <span class="code-package">random</span>, <span class="code-package">numpy</span> <span class="code-keyword">as</span> np, <span class="code-package">pandas</span> <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> <span class="code-package">matplotlib.pyplot</span> <span class="code-keyword">as</span> plt
+<span class="code-keyword">import</span> <span class="code-package">seaborn</span> <span class="code-keyword">as</span> sns
+<span class="code-keyword">from</span> <span class="code-package">sklearn.feature_extraction.text</span> <span class="code-keyword">import</span> TfidfVectorizer
+<span class="code-keyword">from</span> <span class="code-package">sklearn.metrics.pairwise</span> <span class="code-keyword">import</span> cosine_similarity
+<span class="code-keyword">from</span> <span class="code-package">nltk.sentiment</span> <span class="code-keyword">import</span> SentimentIntensityAnalyzer
+<span class="code-keyword">from</span> <span class="code-package">sentence_transformers</span> <span class="code-keyword">import</span> SentenceTransformer
+<span class="code-keyword">import</span> <span class="code-package">spacy</span>
+
+random.<span class="code-function">seed</span>(<span class="code-number">42</span>); np.random.<span class="code-function">seed</span>(<span class="code-number">42</span>)
+
+<span class="code-comment"># === 1. LOAD DATA ===</span>
+<span class="code-comment"># (In practice, load from CSV/database)</span>
+<span class="code-comment"># df = pd.read_csv("fomc_statements.csv")</span>
+
+<span class="code-comment"># === 2. PREPROCESS ===</span>
+nlp = spacy.<span class="code-function">load</span>(<span class="code-string">"en_core_web_sm"</span>)
+
+<span class="code-keyword">def</span> <span class="code-function">preprocess</span>(text):
+    doc = <span class="code-function">nlp</span>(text)
+    <span class="code-keyword">return</span> <span class="code-string">" "</span>.<span class="code-function">join</span>([
+        t.lemma_.<span class="code-function">lower</span>() <span class="code-keyword">for</span> t <span class="code-keyword">in</span> doc
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> t.is_stop <span class="code-keyword">and</span> t.is_alpha <span class="code-keyword">and</span> <span class="code-function">len</span>(t) > <span class="code-number">1</span>
+    ])
+
+df[<span class="code-string">"clean"</span>] = df[<span class="code-string">"text"</span>].<span class="code-function">apply</span>(preprocess)
+
+<span class="code-comment"># === 3. TF-IDF: What makes each statement distinctive? ===</span>
+tfidf = <span class="code-function">TfidfVectorizer</span>(ngram_range=(<span class="code-number">1</span>, <span class="code-number">2</span>), max_features=<span class="code-number">100</span>)
+tfidf_matrix = tfidf.<span class="code-function">fit_transform</span>(df[<span class="code-string">"clean"</span>])
+features = tfidf.<span class="code-function">get_feature_names_out</span>()
+
+<span class="code-comment"># === 4. SENTIMENT: Multiple methods for robustness ===</span>
+sia = <span class="code-function">SentimentIntensityAnalyzer</span>()
+df[<span class="code-string">"vader_compound"</span>] = df[<span class="code-string">"text"</span>].<span class="code-function">apply</span>(
+    <span class="code-keyword">lambda</span> t: sia.<span class="code-function">polarity_scores</span>(t)[<span class="code-string">"compound"</span>]
+)
+
+<span class="code-comment"># === 5. EMBEDDINGS: Semantic similarity over time ===</span>
+embed_model = <span class="code-function">SentenceTransformer</span>(<span class="code-string">"all-MiniLM-L6-v2"</span>)
+embeddings = embed_model.<span class="code-function">encode</span>(df[<span class="code-string">"text"</span>].<span class="code-function">tolist</span>())
+sim_matrix = <span class="code-function">cosine_similarity</span>(embeddings)
+
+<span class="code-comment"># === 6. VISUALIZE ===</span>
+fig, axes = plt.<span class="code-function">subplots</span>(<span class="code-number">1</span>, <span class="code-number">2</span>, figsize=(<span class="code-number">14</span>, <span class="code-number">5</span>))
+
+<span class="code-comment"># Panel A: Sentiment over time</span>
+axes[<span class="code-number">0</span>].<span class="code-function">plot</span>(df[<span class="code-string">"date"</span>], df[<span class="code-string">"vader_compound"</span>], <span class="code-string">"o-"</span>, color=<span class="code-string">"#2563eb"</span>, linewidth=<span class="code-number">2</span>)
+axes[<span class="code-number">0</span>].<span class="code-function">axhline</span>(y=<span class="code-number">0</span>, color=<span class="code-string">"gray"</span>, linestyle=<span class="code-string">"--"</span>, alpha=<span class="code-number">0.5</span>)
+axes[<span class="code-number">0</span>].<span class="code-function">set_title</span>(<span class="code-string">"FOMC Sentiment Over Time (VADER)"</span>, fontsize=<span class="code-number">13</span>)
+axes[<span class="code-number">0</span>].<span class="code-function">set_ylabel</span>(<span class="code-string">"Compound Score"</span>)
+axes[<span class="code-number">0</span>].<span class="code-function">set_ylim</span>(<span class="code-number">-1</span>, <span class="code-number">1</span>)
+
+<span class="code-comment"># Panel B: Semantic similarity heatmap</span>
+labels = [d.<span class="code-function">strftime</span>(<span class="code-string">"%Y-%m"</span>) <span class="code-keyword">for</span> d <span class="code-keyword">in</span> df[<span class="code-string">"date"</span>]]
+sns.<span class="code-function">heatmap</span>(
+    sim_matrix, annot=<span class="code-keyword">True</span>, fmt=<span class="code-string">".2f"</span>, cmap=<span class="code-string">"YlOrRd"</span>,
+    xticklabels=labels, yticklabels=labels, ax=axes[<span class="code-number">1</span>]
+)
+axes[<span class="code-number">1</span>].<span class="code-function">set_title</span>(<span class="code-string">"Semantic Similarity Between Statements"</span>, fontsize=<span class="code-number">13</span>)
+
+plt.<span class="code-function">tight_layout</span>()
+plt.<span class="code-function">savefig</span>(<span class="code-string">"fomc_analysis.png"</span>, dpi=<span class="code-number">150</span>, bbox_inches=<span class="code-string">"tight"</span>)
+plt.<span class="code-function">show</span>()
+
+<span class="code-function">print</span>(<span class="code-string">"Analysis complete. Results saved to fomc_analysis.png"</span>)</code></pre>
+          </div>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 11: REPRODUCIBILITY CHECKLIST -->
+        <!-- ================================================================== -->
+        <h2 id="reproducibility">10A.11 &nbsp;Reproducibility Checklist</h2>
+
+        <p>
+          Reproducibility is not optional &mdash; it is the difference between a finding and an anecdote.
+          Follow this checklist for every text analysis project, whether for a course assignment, a business
+          report, or a journal submission.
+        </p>
+
+        <ul class="checklist">
+          <li><strong>Pin all library versions</strong> in a <code>requirements.txt</code> with exact version numbers</li>
+          <li><strong>Set random seeds</strong> at the top of every script (<code>random</code>, <code>numpy</code>, <code>torch</code>)</li>
+          <li><strong>Document every preprocessing decision</strong>: what you removed, what you kept, and why</li>
+          <li><strong>Store raw data separately from processed data</strong> &mdash; never overwrite raw data</li>
+          <li><strong>Version your prompts</strong> if using LLM APIs &mdash; save the exact prompt template used</li>
+          <li><strong>Pin model versions</strong>: use <code>ProsusAI/finbert</code> not just &ldquo;finbert&rdquo;; use <code>claude-sonnet-4-20250514</code> not just &ldquo;claude&rdquo;</li>
+          <li><strong>Report results across multiple seeds</strong>: run with seeds 42, 123, 456, 789, 1011 and report mean &plusmn; std</li>
+          <li><strong>Validate against human labels</strong>: randomly sample 100&ndash;200 documents and have a human code them</li>
+          <li><strong>Report all metrics</strong>: precision, recall, F1 per class &mdash; not just accuracy</li>
+          <li><strong>Use version control</strong>: commit your analysis scripts to Git (see Module 9)</li>
+          <li><strong>Include a README</strong> with instructions to reproduce your results from scratch</li>
+        </ul>
+
+        <div class="info-box tip">
+          <div class="info-box-title">The Gold Standard</div>
+          <p>
+            Your analysis is reproducible when a colleague can run <code>pip install -r requirements.txt &amp;&amp;
+            python analysis.py</code> and get the same results you reported. If any step requires manual
+            intervention, proprietary data you cannot share, or a model that has been updated since publication,
+            document it explicitly.
+          </p>
+        </div>
+
+
+        <!-- ================================================================== -->
+        <!-- SECTION 12: REFERENCES -->
+        <!-- ================================================================== -->
+        <h2 id="references">References &amp; Further Reading</h2>
+
+        <h3>Foundational Methods</h3>
+        <ul>
+          <li>Harris, Z. S. (1954). &ldquo;Distributional Structure.&rdquo; <em>Word</em>, 10(2&ndash;3), 146&ndash;162.</li>
+          <li>Sp&auml;rck Jones, K. (1972). &ldquo;A Statistical Interpretation of Term Specificity and Its Application in Retrieval.&rdquo; <em>Journal of Documentation</em>, 28(1), 11&ndash;21.</li>
+          <li>Salton, G. &amp; Buckley, C. (1988). &ldquo;Term-Weighting Approaches in Automatic Text Retrieval.&rdquo; <em>Information Processing &amp; Management</em>, 24(5), 513&ndash;523.</li>
+          <li>Blei, D., Ng, A. &amp; Jordan, M. (2003). &ldquo;Latent Dirichlet Allocation.&rdquo; <em>Journal of Machine Learning Research</em>, 3, 993&ndash;1022.</li>
+          <li>Griffiths, T. L. &amp; Steyvers, M. (2004). &ldquo;Finding Scientific Topics.&rdquo; <em>Proceedings of the National Academy of Sciences</em>, 101(S1), 5228&ndash;5235.</li>
+          <li>Turney, P. D. &amp; Pantel, P. (2010). &ldquo;From Frequency to Meaning: Vector Space Models of Semantics.&rdquo; <em>Journal of Artificial Intelligence Research</em>, 37, 141&ndash;188.</li>
+          <li>Mikolov, T. et al. (2013). &ldquo;Efficient Estimation of Word Representations in Vector Space.&rdquo; <em>arXiv:1301.3781</em>.</li>
+          <li>Hutto, C. &amp; Gilbert, E. (2014). &ldquo;VADER: A Parsimonious Rule-Based Model for Sentiment Analysis of Social Media Text.&rdquo; <em>AAAI ICWSM</em>.</li>
+          <li>Devlin, J. et al. (2019). &ldquo;BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.&rdquo; <em>NAACL-HLT</em>.</li>
+        </ul>
+
+        <h3>Text as Data in Economics &amp; Finance</h3>
+        <ul>
+          <li>Loughran, T. &amp; McDonald, B. (2011). &ldquo;When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks.&rdquo; <em>Journal of Finance</em>, 66(1), 35&ndash;65.</li>
+          <li>Baker, S., Bloom, N. &amp; Davis, S. (2016). &ldquo;Measuring Economic Policy Uncertainty.&rdquo; <em>Quarterly Journal of Economics</em>, 131(4), 1593&ndash;1636.</li>
+          <li>Hansen, S. &amp; McMahon, M. (2016). &ldquo;Shocking Language: Understanding the Macroeconomic Effects of Central Bank Communication.&rdquo; <em>Journal of International Economics</em>, 99, S114&ndash;S133.</li>
+          <li>Gentzkow, M., Kelly, B. &amp; Taddy, M. (2019). &ldquo;Text as Data.&rdquo; <em>Journal of Economic Literature</em>, 57(3), 535&ndash;574.</li>
+          <li>Gentzkow, M. &amp; Shapiro, J. M. (2010). &ldquo;What Drives Media Slant? Evidence from U.S. Daily Newspapers.&rdquo; <em>Econometrica</em>, 78(1), 35&ndash;71.</li>
+          <li>Ash, E. &amp; Hansen, S. (2023). &ldquo;Text Algorithms in Economics.&rdquo; <em>Annual Review of Economics</em>, 15, 659&ndash;688.</li>
+        </ul>
+
+        <h3>Modern NLP Tools &amp; Models</h3>
+        <ul>
+          <li>Araci, D. (2019). &ldquo;FinBERT: Financial Sentiment Analysis with Pre-Trained Language Models.&rdquo; <em>arXiv:1908.10063</em>.</li>
+          <li>Reimers, N. &amp; Gurevych, I. (2019). &ldquo;Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks.&rdquo; <em>EMNLP</em>.</li>
+          <li>Yin, W., Hay, J. &amp; Roth, D. (2019). &ldquo;Benchmarking Zero-Shot Text Classification.&rdquo; <em>EMNLP-IJCNLP</em>.</li>
+          <li>Williams, A., Nangia, N. &amp; Bowman, S. (2018). &ldquo;A Broad-Coverage Challenge Corpus for Sentence Understanding through Inference.&rdquo; <em>NAACL-HLT</em>.</li>
+          <li>Grootendorst, M. (2022). &ldquo;BERTopic: Neural Topic Modeling with a Class-Based TF-IDF Procedure.&rdquo; <em>arXiv:2203.05794</em>.</li>
+          <li>Li, J. et al. (2020). &ldquo;A Survey on Deep Learning for Named Entity Recognition.&rdquo; <em>IEEE TKDE</em>, 34(1), 50&ndash;70.</li>
+          <li>Nadeau, D. &amp; Sekine, S. (2007). &ldquo;A Survey of Named Entity Recognition and Classification.&rdquo; <em>Lingvisticae Investigationes</em>, 30(1), 3&ndash;26.</li>
+        </ul>
+
+        <h3>LLMs for Text Analysis &amp; Research Methods</h3>
+        <ul>
+          <li>Gilardi, F., Alizadeh, M. &amp; Kubli, M. (2023). &ldquo;ChatGPT Outperforms Crowd Workers for Text-Annotation Tasks.&rdquo; <em>Proceedings of the National Academy of Sciences</em>, 120(30).</li>
+          <li>Ziems, C. et al. (2024). &ldquo;Can Large Language Models Transform Computational Social Science?&rdquo; <em>Computational Linguistics</em>, 50(1), 237&ndash;291.</li>
+          <li>Huang, A. H., Wang, H. &amp; Yang, Y. (2023). &ldquo;FinBERT: A Large Language Model for Extracting Information from Financial Text.&rdquo; <em>Contemporary Accounting Research</em>, 40(2), 806&ndash;841.</li>
+        </ul>
+
+        <h3>Reproducibility &amp; Best Practices</h3>
+        <ul>
+          <li>ACL Rolling Review. <a href="https://aclrollingreview.org/responsibleNLPresearch/" target="_blank">&ldquo;Responsible NLP Research Checklist.&rdquo;</a></li>
+          <li>Chang, J. et al. (2009). &ldquo;Reading Tea Leaves: How Humans Interpret Topic Models.&rdquo; <em>NeurIPS</em>.</li>
+          <li>Blei, D. M. (2012). &ldquo;Probabilistic Topic Models.&rdquo; <em>Communications of the ACM</em>, 55(4), 77&ndash;84.</li>
+          <li>Manning, C. D., Raghavan, P. &amp; Sch&uuml;tze, H. (2008). <em>Introduction to Information Retrieval</em>. Cambridge University Press.</li>
+          <li>Jurafsky, D. &amp; Martin, J. H. (2024). <a href="https://web.stanford.edu/~jurafsky/slp3/" target="_blank"><em>Speech and Language Processing</em></a>, 3rd edition (draft).</li>
+        </ul>
+
+
+        <!-- Navigation Footer -->
+        <div class="nav-footer">
+          <a href="10-nlp-history.html" class="nav-link prev">Module 10: History of NLP</a>
+          <a href="11-machine-learning.html" class="nav-link next">Module 11: Machine Learning</a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <button class="mobile-menu-toggle">&#9776;</button>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/password-protection.js"></script>
+
+  <!-- Tooltip engine (same as other modules) -->
+  <script>
+  (function() {
+    var tooltipEl = null;
+    var currentTarget = null;
+    var hideTimeout = null;
+
+    function getOrCreateTooltip() {
+      if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.className = 'tooltip-popup';
+        document.body.appendChild(tooltipEl);
+      }
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      var tip = target.getAttribute('data-tip');
+      if (!tip) return;
+      var tooltip = getOrCreateTooltip();
+      tooltip.textContent = tip;
+      tooltip.classList.remove('arrow-top', 'arrow-bottom');
+      tooltip.classList.add('visible');
+      var targetRect = target.getBoundingClientRect();
+      var viewportWidth = window.innerWidth;
+      var padding = 10;
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      var tooltipRect = tooltip.getBoundingClientRect();
+      var tooltipWidth = tooltipRect.width;
+      var tooltipHeight = tooltipRect.height;
+      var left = targetRect.left + (targetRect.width / 2) - (tooltipWidth / 2);
+      var top = targetRect.top - tooltipHeight - 8;
+      var arrowClass = 'arrow-bottom';
+      if (top < padding) { top = targetRect.bottom + 8; arrowClass = 'arrow-top'; }
+      if (left < padding) left = padding;
+      if (left + tooltipWidth > viewportWidth - padding) left = viewportWidth - tooltipWidth - padding;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) {
+      if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+      currentTarget = target;
+      positionTooltip(target);
+    }
+
+    function hideTooltip() {
+      hideTimeout = setTimeout(function() {
+        if (tooltipEl) tooltipEl.classList.remove('visible');
+        currentTarget = null;
+      }, 100);
+    }
+
+    document.addEventListener('mouseenter', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target);
+    }, true);
+    document.addEventListener('mouseleave', function(e) {
+      if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip();
+    }, true);
+    document.addEventListener('scroll', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    }, true);
+    window.addEventListener('resize', function() {
+      if (currentTarget && tooltipEl && tooltipEl.classList.contains('visible')) positionTooltip(currentTarget);
+    });
+  })();
+  </script>
+</body>
+</html>

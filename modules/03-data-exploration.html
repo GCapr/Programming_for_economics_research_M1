@@ -1292,9 +1292,14 @@ p5 <- df_viz %>%
         <p>Use this script as a guideline to produce one you can run on <strong>every new dataset</strong> before any analysis:</p>
 
         <details>
-          <summary style="cursor: pointer; font-weight: 600; color: #2563eb; padding: 1rem; background: #f0f9ff; border-radius: 8px;">Click to expand complete Python script</summary>
+          <summary style="cursor: pointer; font-weight: 600; color: #2563eb; padding: 1rem; background: #f0f9ff; border-radius: 8px;">Click to expand complete script</summary>
           <div class="code-tabs" style="margin-top: 1rem;">
-            <div class="tab-content active" data-lang="python" style="display: block;">
+            <div class="tab-buttons">
+              <button class="tab-button active" data-lang="python">Python</button>
+              <button class="tab-button" data-lang="stata">Stata</button>
+              <button class="tab-button" data-lang="r">R</button>
+            </div>
+            <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># ============================================</span>
 <span class="code-comment"># FIRST ANALYSIS SCRIPT - You can run something like this on every new dataset!</span>
 <span class="code-comment"># ============================================</span>
@@ -1331,6 +1336,88 @@ p5 <- df_viz %>%
 <span class="code-keyword">print</span>(<span class="code-string">"\n"</span> + <span class="code-string">"="</span>*<span class="code-number">50</span>)
 <span class="code-keyword">print</span>(<span class="code-string">"ANALYSIS COMPLETE"</span>)
 <span class="code-keyword">print</span>(<span class="code-string">"="</span>*<span class="code-number">50</span>)</code></pre>
+            </div>
+            <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* ============================================</span>
+<span class="code-comment">* FIRST ANALYSIS SCRIPT - You can run something like this on every new dataset!</span>
+<span class="code-comment">* ============================================</span>
+
+<span class="code-comment">* 1. LOAD DATA - Replace URL with your data source</span>
+<span class="code-tooltip" data-tip="CLEAR ALL: Wipes everything from Stata's memory - all data, variables, and stored results. Always use this before loading new data to avoid mixing datasets."><span class="code-keyword">clear</span> all</span>
+<span class="code-tooltip" data-tip="IMPORT DELIMITED: Reads CSV files (comma-separated values) into Stata. Can read from web URLs or local files. The 'clear' option ensures any existing data is removed first."><span class="code-keyword">import</span> delimited</span> <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span><span class="code-tooltip" data-tip="CLEAR OPTION: This option tells Stata to remove any existing data before loading the new file. Options in Stata come after a comma.">, clear</span>
+
+<span class="code-tooltip" data-tip="DISPLAY SEPARATOR: di creates a display line. The multiplier *50 repeats the '=' character 50 times to create a visual separator in the output."><span class="code-keyword">display</span> <span class="code-string">"=================================================="</span></span>
+<span class="code-keyword">display</span> <span class="code-string">"FIRST ANALYSIS REPORT"</span>
+<span class="code-keyword">display</span> <span class="code-string">"=================================================="</span>
+
+<span class="code-comment">* 2. STRUCTURE - Understand dimensions and types</span>
+<span class="code-tooltip" data-tip="DESCRIBE, SHORT: Shows the number of observations (rows) and variables (columns) in a compact format. Essential for understanding the size of your dataset."><span class="code-keyword">describe</span>, short</span>
+<span class="code-tooltip" data-tip="DESCRIBE: Without 'short', shows each variable's name, type, format, and label. Critical for identifying if numbers were loaded as strings or if dates need formatting."><span class="code-keyword">describe</span></span>
+
+<span class="code-comment">* 3. MISSING VALUES - Critical for research quality</span>
+<span class="code-keyword">display</span> <span class="code-string">"--- MISSING VALUES ---"</span>
+<span class="code-tooltip" data-tip="MISSTABLE SUMMARIZE: Creates a table showing which variables have missing values and how many. Only shows variables with at least one missing observation - focuses your attention on problems."><span class="code-keyword">misstable</span> summarize</span>
+
+<span class="code-comment">* 4. SUMMARY STATISTICS - Understand distributions</span>
+<span class="code-keyword">display</span> <span class="code-string">"--- SUMMARY STATISTICS ---"</span>
+<span class="code-tooltip" data-tip="SUMMARIZE: Shows count, mean, standard deviation, min, and max for all numeric variables. The foundation of exploratory analysis - reveals outliers, unexpected ranges, and data quality issues."><span class="code-keyword">summarize</span></span>
+
+<span class="code-comment">* 5. HISTOGRAMS - Visual inspection of numeric columns</span>
+<span class="code-comment">* Stata creates one histogram at a time; loop over numeric variables</span>
+<span class="code-tooltip" data-tip="DS, HAS(TYPE NUMERIC): Lists all numeric variables in the dataset. 'ds' means 'describe short' and 'has(type numeric)' filters to only numeric types. The result is stored in r(varlist)."><span class="code-keyword">ds</span>, has(type numeric)</span>
+<span class="code-tooltip" data-tip="FOREACH LOOP: Iterates over each variable in the list. r(varlist) contains the numeric variable names found by 'ds'. The local macro `var' takes each name in turn."><span class="code-keyword">foreach</span> var <span class="code-keyword">in</span> `r(varlist)' {</span>
+    <span class="code-tooltip" data-tip="HISTOGRAM: Creates a histogram for the variable. 'freq' shows frequency counts on the y-axis. 'title()' adds a label above the chart."><span class="code-keyword">histogram</span> `var', freq title(<span class="code-string">"Distribution of `var'"</span>)</span>
+    <span class="code-tooltip" data-tip="GRAPH EXPORT: Saves the current graph as a PNG image file. 'replace' overwrites any existing file with the same name."><span class="code-keyword">graph</span> export <span class="code-string">"first_analysis_`var'.png"</span>, replace</span>
+}
+
+<span class="code-keyword">display</span> <span class="code-string">"=================================================="</span>
+<span class="code-keyword">display</span> <span class="code-string">"ANALYSIS COMPLETE"</span>
+<span class="code-keyword">display</span> <span class="code-string">"=================================================="</span></code></pre>
+            </div>
+            <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># ============================================</span>
+<span class="code-comment"># FIRST ANALYSIS SCRIPT - You can run something like this on every new dataset!</span>
+<span class="code-comment"># ============================================</span>
+<span class="code-tooltip" data-tip="LIBRARY(TIDYVERSE): Loads the tidyverse collection of packages, including readr (data loading), dplyr (manipulation), and ggplot2 (visualization). One import gives you all the tools you need."><span class="code-function">library</span>(tidyverse)</span>
+
+<span class="code-comment"># 1. LOAD DATA - Replace URL with your data source</span>
+<span class="code-tooltip" data-tip="DATA SOURCE: Change this URL to point to your own data file. Can be a web URL like this, or a local file path like 'data/myfile.csv'.">url</span> <- <span class="code-string">"https://raw.githubusercontent.com/datasets/gdp/master/data/gdp.csv"</span>
+<span class="code-tooltip" data-tip="READ_CSV(): Reads a CSV file and returns a tibble (modern data frame). Part of the readr package. Faster and smarter than base R's read.csv() - automatically detects column types.">df</span> <- <span class="code-function">read_csv</span>(url)
+
+<span class="code-tooltip" data-tip="CAT(): Prints text to the console. strrep() repeats a string a given number of times, here creating 50 '=' characters as a visual separator."><span class="code-function">cat</span>(<span class="code-function">strrep</span>(<span class="code-string">"="</span>, <span class="code-number">50</span>), <span class="code-string">"\n"</span>)</span>
+<span class="code-function">cat</span>(<span class="code-string">"FIRST ANALYSIS REPORT\n"</span>)
+<span class="code-function">cat</span>(<span class="code-function">strrep</span>(<span class="code-string">"="</span>, <span class="code-number">50</span>), <span class="code-string">"\n"</span>)
+
+<span class="code-comment"># 2. STRUCTURE - Understand dimensions and types</span>
+<span class="code-tooltip" data-tip="SPRINTF(): Creates formatted text by inserting values into placeholders. %s = string, %d = integer. format() adds thousand separators for readability."><span class="code-function">cat</span>(<span class="code-function">sprintf</span>(<span class="code-string">"\nRows: %s | Columns: %d\n"</span>, <span class="code-function">format</span>(<span class="code-function">nrow</span>(df), big.mark=<span class="code-string">","</span>), <span class="code-function">ncol</span>(df)))</span>
+<span class="code-tooltip" data-tip="STR(): Shows the structure of your data - each column's type and first few values. Critical for identifying if numbers were loaded as characters or if dates need parsing."><span class="code-function">cat</span>(<span class="code-string">"\nColumn types:\n"</span>)</span>
+<span class="code-function">str</span>(df)
+
+<span class="code-comment"># 3. MISSING VALUES - Critical for research quality</span>
+<span class="code-function">cat</span>(<span class="code-string">"\n--- MISSING VALUES ---\n"</span>)
+<span class="code-tooltip" data-tip="COLSUMS(IS.NA()): Counts missing values per column. is.na() marks each cell as TRUE/FALSE, colSums() counts the TRUE values. Dividing by nrow() and multiplying by 100 gives percentages.">missing_pct</span> <- <span class="code-function">round</span>(<span class="code-function">colSums</span>(<span class="code-function">is.na</span>(df)) / <span class="code-function">nrow</span>(df) * <span class="code-number">100</span>, <span class="code-number">1</span>)
+<span class="code-tooltip" data-tip="FILTER MISSING: Shows only columns that HAVE missing values. No point showing columns with 0% missing - this focuses attention on problems."><span class="code-function">print</span>(missing_pct[missing_pct > <span class="code-number">0</span>])</span>
+
+<span class="code-comment"># 4. SUMMARY STATISTICS - Understand distributions</span>
+<span class="code-function">cat</span>(<span class="code-string">"\n--- SUMMARY STATISTICS ---\n"</span>)
+<span class="code-tooltip" data-tip="SUMMARY(): Shows min, 1st quartile, median, mean, 3rd quartile, max, and NA count for all columns. Quick way to spot outliers and data quality issues."><span class="code-function">summary</span>(df)</span>
+
+<span class="code-comment"># 5. HISTOGRAMS - Visual inspection of all numeric columns</span>
+<span class="code-tooltip" data-tip="SELECT_IF(IS.NUMERIC): Selects only numeric columns from the data frame. Similar to Python's select_dtypes(). Prepares data for numeric-only operations like histograms.">numeric_df</span> <- df %>% <span class="code-function">select_if</span>(is.numeric)
+<span class="code-tooltip" data-tip="PIVOT_LONGER: Reshapes data from wide to long format. This converts all numeric columns into two columns: 'variable' (the column name) and 'value' (the data). Required for faceted ggplot histograms.">numeric_long</span> <- numeric_df %>% <span class="code-function">pivot_longer</span>(cols = <span class="code-function">everything</span>(), names_to = <span class="code-string">"variable"</span>, values_to = <span class="code-string">"value"</span>)
+
+<span class="code-tooltip" data-tip="GGPLOT + FACET_WRAP: Creates one histogram per numeric variable. facet_wrap(~variable) splits the plot into panels, scales='free' lets each panel have its own axes. A powerful way to visualize your entire dataset at once.">p</span> <- <span class="code-function">ggplot</span>(numeric_long, <span class="code-function">aes</span>(x = value)) +
+  <span class="code-function">geom_histogram</span>(bins = <span class="code-number">30</span>, fill = <span class="code-string">"steelblue"</span>, color = <span class="code-string">"white"</span>) +
+  <span class="code-function">facet_wrap</span>(~variable, scales = <span class="code-string">"free"</span>) +
+  <span class="code-function">theme_minimal</span>() +
+  <span class="code-function">labs</span>(title = <span class="code-string">"Distribution of Numeric Variables"</span>)
+
+<span class="code-tooltip" data-tip="GGSAVE(): Saves the ggplot to a file. Supports PNG, PDF, SVG, etc. width and height control the dimensions in inches."><span class="code-function">ggsave</span>(<span class="code-string">"first_analysis_histograms.png"</span>, p, width = <span class="code-number">12</span>, height = <span class="code-number">6</span>)</span>
+<span class="code-function">print</span>(p)
+
+<span class="code-function">cat</span>(<span class="code-string">"\n"</span>, <span class="code-function">strrep</span>(<span class="code-string">"="</span>, <span class="code-number">50</span>), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"ANALYSIS COMPLETE\n"</span>)
+<span class="code-function">cat</span>(<span class="code-function">strrep</span>(<span class="code-string">"="</span>, <span class="code-number">50</span>), <span class="code-string">"\n"</span>)</code></pre>
             </div>
           </div>
         </details>

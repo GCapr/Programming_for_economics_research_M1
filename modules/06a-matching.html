@@ -148,6 +148,179 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Estimate propensity scores using logistic regression",
+                  "pattern": "model = Classifier().fit(covariates, treatment)",
+                  "structureNote": "This follows the <strong>scikit-learn estimator</strong> pattern: create a model object, then call <code>.fit(X, y)</code> to train it. The propensity score is the predicted probability of treatment given covariates. It reduces a multi-dimensional matching problem to a single dimension.",
+                  "languages": {
+                    "python": [
+                      {"code": "model", "role": "Variable", "tip": "Stores the fitted logistic regression model object.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the model.", "color": "peach"},
+                      {"code": "LogisticRegression", "role": "Class", "tip": "From sklearn.linear_model. Fits a logistic regression model that predicts P(treatment=1|X).", "color": "blue"},
+                      {"code": "(max_iter=1000)", "role": "Config", "tip": "Maximum iterations for the solver. Default (100) sometimes fails to converge with real data.", "color": "lavender"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "model.fit", "role": "Method", "tip": "Trains the model on your data. After fitting, model stores the learned coefficients.", "color": "teal"},
+                      {"code": "(X, y)", "role": "Arguments", "tip": "X = covariate matrix (age, income, etc.), y = treatment indicator (0/1). Fit learns P(y=1|X).", "color": "sky"}
+                    ],
+                    "stata": [
+                      {"code": "teffects psmatch", "role": "Command", "tip": "Stata's built-in propensity score matching. Estimates propensity scores and matches in one step.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separates command from arguments.", "color": "text"},
+                      {"code": "(outcome)", "role": "Outcome", "tip": "The dependent variable in parentheses.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "Between outcome and treatment specifications.", "color": "text"},
+                      {"code": "(treatment age income education)", "role": "Treatment Model", "tip": "First variable is treatment indicator; rest are covariates for propensity score.", "color": "green"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "atet nn(1)", "role": "Options", "tip": "atet = Average Treatment on Treated. nn(1) = 1 nearest neighbor match.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "m.out", "role": "Variable", "tip": "Stores the MatchIt result object. Convention is m.out for matching output.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator.", "color": "peach"},
+                      {"code": "matchit", "role": "Function", "tip": "From MatchIt package. Performs matching in one step: estimates propensity scores and matches.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "treatment ~ age + income + education", "role": "Formula", "tip": "R formula: treatment ~ covariates. The ~ means 'predicted by'. MatchIt uses this to estimate propensity scores.", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "data = df", "role": "Data", "tip": "The data frame containing all variables.", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "Between arguments.", "color": "text"},
+                      {"code": "method = \"nearest\"", "role": "Method", "tip": "Nearest neighbor matching on propensity scores. Other options: 'exact', 'cem', 'optimal'.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the function call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Find the nearest control unit for each treated unit using propensity scores",
+                  "pattern": "nn_model.fit(control_scores).kneighbors(treated_scores)",
+                  "structureNote": "This is the <strong>nearest neighbor matching</strong> step. After estimating propensity scores, you find the control unit with the closest score for each treated unit. The <code>fit()</code>/<code>kneighbors()</code> two-step pattern is typical of scikit-learn: first index the data, then query it.",
+                  "languages": {
+                    "python": [
+                      {"code": "nn", "role": "Variable", "tip": "The nearest neighbors model object.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the model.", "color": "peach"},
+                      {"code": "NearestNeighbors", "role": "Class", "tip": "From sklearn.neighbors. Builds a data structure for fast nearest-neighbor queries.", "color": "blue"},
+                      {"code": "(n_neighbors=1, metric='euclidean')", "role": "Config", "tip": "n_neighbors=1 means match each treated to exactly 1 control. Euclidean distance on the propensity score.", "color": "lavender"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "nn.fit", "role": "Index", "tip": "Indexes the control group's propensity scores for fast lookup.", "color": "teal"},
+                      {"code": "(control[['pscore']])", "role": "Control Scores", "tip": "The propensity scores of the control group. Double brackets return a DataFrame (required by sklearn).", "color": "sky"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "distances, indices", "role": "Outputs", "tip": "Two arrays: distances to nearest match, and row indices of the matched controls.", "color": "pink"},
+                      {"code": " = nn.kneighbors", "role": "Query", "tip": "Finds the nearest control unit for each treated unit.", "color": "teal"},
+                      {"code": "(treated[['pscore']])", "role": "Treated Scores", "tip": "The propensity scores of treated units to find matches for.", "color": "sky"}
+                    ],
+                    "stata": [
+                      {"code": "teffects psmatch", "role": "Command", "tip": "In Stata, propensity score estimation AND matching happen in a single command — no separate nearest neighbor step.", "color": "mauve"},
+                      {"code": " (outcome) (treatment age income education)", "role": "Specification", "tip": "Outcome in first parens, treatment model in second. Stata handles matching internally.", "color": "sky"},
+                      {"code": ", atet nn(1)", "role": "Options", "tip": "nn(1) specifies 1:1 nearest neighbor matching. Stata does this automatically.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "m.out", "role": "Variable", "tip": "The MatchIt object already contains the matching results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "matchit(treatment ~ age + income + education, data = df, method = \"nearest\")", "role": "One-Step Matching", "tip": "MatchIt handles propensity estimation AND matching in one call. No separate nearest neighbor step needed.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "matched_df <- match.data(m.out)", "role": "Extract Data", "tip": "Extracts the matched dataset with weights. Only matched units are included.", "color": "teal"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Compute the Average Treatment Effect on the Treated (ATT)",
+                  "pattern": "ATT = mean(treated_outcomes) - mean(matched_control_outcomes)",
+                  "structureNote": "The <strong>ATT</strong> is the simplest estimand in matching: the difference in average outcomes between treated units and their matched controls. It answers: 'Among those who received treatment, what was the average effect?' This is a simple mean difference — the matching step is what makes it causal.",
+                  "languages": {
+                    "python": [
+                      {"code": "att", "role": "Variable", "tip": "The Average Treatment Effect on the Treated.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "treated['outcome'].mean()", "role": "Treated Mean", "tip": "Average outcome among treated units. .mean() computes the average of the Series.", "color": "teal"},
+                      {"code": " - ", "role": "Subtraction", "tip": "The ATT is a simple difference in means.", "color": "overlay"},
+                      {"code": "matched_control['outcome'].mean()", "role": "Control Mean", "tip": "Average outcome among matched control units. These are the nearest neighbors found in the matching step.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "teffects psmatch", "role": "Command", "tip": "In Stata, the ATT is computed automatically by teffects. The coefficient reported IS the ATT.", "color": "mauve"},
+                      {"code": " (outcome) (treatment age income education)", "role": "Specification", "tip": "Stata reports the ATT directly in the output table.", "color": "sky"},
+                      {"code": ", atet", "role": "Estimand", "tip": "Specifies ATT (average treatment on treated). Without 'atet', Stata reports ATE (average over all units).", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "att_model", "role": "Variable", "tip": "Stores the regression model on matched data.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "lm", "role": "Function", "tip": "Linear model. On matched data, the treatment coefficient IS the ATT.", "color": "blue"},
+                      {"code": "(outcome ~ treatment", "role": "Formula", "tip": "Regress outcome on treatment indicator. With matched data, the coefficient equals the ATT.", "color": "green"},
+                      {"code": ", data = matched_df", "role": "Data", "tip": "Uses the matched dataset from match.data().", "color": "sky"},
+                      {"code": ", weights = weights", "role": "Weights", "tip": "MatchIt assigns weights to account for multiple matches. Always use them in the outcome regression.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the lm() call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Perform Coarsened Exact Matching (CEM)",
+                  "pattern": "match_object = matchit(formula, method='cem')",
+                  "structureNote": "CEM temporarily coarsens continuous variables into bins, performs exact matching within bins, then analyzes the original data. Unlike PSM, it <strong>guarantees a maximum imbalance bound</strong>: you know the worst-case covariate imbalance before seeing the data.",
+                  "languages": {
+                    "python": [
+                      {"code": "import", "role": "Keyword", "tip": "Imports the CEM implementation.", "color": "mauve"},
+                      {"code": " cem", "role": "Package", "tip": "Python's cem package for Coarsened Exact Matching.", "color": "yellow"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "result", "role": "Variable", "tip": "Stores the CEM matching result.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "cem.match", "role": "Function", "tip": "Performs CEM. Coarsens variables, matches exactly within bins.", "color": "blue"},
+                      {"code": "(df, 'treatment', ", "role": "Data & Treatment", "tip": "The DataFrame and the name of the treatment variable.", "color": "sky"},
+                      {"code": "['age', 'income', 'education']", "role": "Covariates", "tip": "Variables to coarsen and match on.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the function call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "cem", "role": "Command", "tip": "Stata's CEM command. ssc install cem to get it.", "color": "mauve"},
+                      {"code": " age income education", "role": "Covariates", "tip": "Variables to coarsen and match on.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "treatment(treatment)", "role": "Treatment Var", "tip": "Specifies which variable is the treatment indicator.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "m.cem", "role": "Variable", "tip": "Stores the CEM result.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "matchit", "role": "Function", "tip": "MatchIt supports CEM through the method argument.", "color": "blue"},
+                      {"code": "(treatment ~ age + income + education", "role": "Formula", "tip": "Same formula syntax as PSM — MatchIt handles both.", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "The data frame.", "color": "sky"},
+                      {"code": ", method = \"cem\"", "role": "Method", "tip": "Specifies Coarsened Exact Matching instead of propensity score matching.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate a doubly robust (AIPW) treatment effect",
+                  "pattern": "AIPW combines propensity weighting with outcome regression",
+                  "structureNote": "Doubly robust estimation gives you <strong>two chances to get it right</strong>: the estimator is consistent if either the propensity score model OR the outcome model is correctly specified. The AIPW formula augments the IPW estimator with a regression adjustment term.",
+                  "languages": {
+                    "python": [
+                      {"code": "aipw_1", "role": "Treated Potential Outcome", "tip": "Estimated E[Y(1)] using AIPW formula.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the computation.", "color": "peach"},
+                      {"code": "mu1", "role": "Outcome Prediction", "tip": "Predicted Y(1) from the outcome regression model. The 'regression adjustment' part.", "color": "teal"},
+                      {"code": " + ", "role": "Addition", "tip": "Adds the IPW correction term.", "color": "overlay"},
+                      {"code": "D * (Y - mu1) / pscore", "role": "IPW Correction", "tip": "Corrects the regression for misspecification using propensity score weighting. D=treatment, Y=observed outcome, pscore=P(D=1|X).", "color": "blue"}
+                    ],
+                    "stata": [
+                      {"code": "teffects aipw", "role": "Command", "tip": "Augmented IPW: Stata's doubly robust estimator.", "color": "mauve"},
+                      {"code": " (outcome age income education)", "role": "Outcome Model", "tip": "First parentheses: outcome variable and its covariates.", "color": "sky"},
+                      {"code": " ///\n    ", "role": "Line Break", "tip": "/// continues the command on the next line.", "color": "text"},
+                      {"code": "(treatment age income education)", "role": "Treatment Model", "tip": "Second parentheses: treatment variable and propensity score covariates.", "color": "green"},
+                      {"code": ", atet", "role": "Estimand", "tip": "Requests the ATT. Consistent if either model is correct.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "tmle_result", "role": "Variable", "tip": "Stores the TMLE (Targeted MLE) result — a doubly robust method.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "tmle", "role": "Function", "tip": "From the tmle package. Targeted Maximum Likelihood Estimation — doubly robust.", "color": "blue"},
+                      {"code": "(Y = df$outcome, A = df$treatment, W = df[, covs]", "role": "Data Inputs", "tip": "Y=outcome, A=treatment, W=covariates. Each is passed separately.", "color": "sky"},
+                      {"code": ", Q.SL.library = \"SL.glm\", g.SL.library = \"SL.glm\"", "role": "Model Libraries", "tip": "Q = outcome model, g = propensity model. SL.glm uses generalized linear models. Can use machine learning (random forests, etc.).", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <!-- Theory Introduction Section -->
         <h2 id="theory">The Logic of Matching</h2>
 
@@ -1104,6 +1277,7 @@ Cross-validated risks:
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
 </body>
 </html>

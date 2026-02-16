@@ -626,6 +626,237 @@ response = requests.get(url, params=params)</code></pre>
           <li>Create derived variables for analysis</li>
         </ul>
 
+        <!-- ═══ MODULE 02b GRAMMAR PRIMER ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Send an HTTP GET request to a URL and store the server's response",
+                  "pattern": "variable = library.get(url, params=dict)",
+                  "structureNote": "The <code>requests.get()</code> call is the core of every API interaction. It combines the URL and parameters into a single HTTP request, sends it to the server, and returns a Response object containing the status code, headers, and body. The <code>params</code> dictionary is automatically appended to the URL as <code>?key=value&key=value</code>.",
+                  "languages": {
+                    "python": [
+                      {"code": "response", "role": "Variable", "tip": "Stores the Response object returned by the server -- contains status code, headers, and the data body", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the server's response to the variable name so you can inspect and parse it", "color": "operator"},
+                      {"code": "requests", "role": "Library", "tip": "Python's HTTP library for making web requests -- must be imported first with 'import requests'", "color": "library"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the get() function that belongs to the requests library", "color": "syntax"},
+                      {"code": "get", "role": "Method", "tip": "Sends an HTTP GET request -- the standard way to retrieve (not modify) data from a server", "color": "method"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list for the get() function call", "color": "syntax"},
+                      {"code": "url", "role": "URL argument", "tip": "The API endpoint address to send the request to -- a string like 'https://api.worldbank.org/v2/...'", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates the positional URL argument from the keyword argument that follows", "color": "syntax"},
+                      {"code": "params", "role": "Keyword arg", "tip": "Named parameter that passes a dictionary of query parameters -- requests appends them to the URL as ?key=value", "color": "argument"},
+                      {"code": "=", "role": "Keyword binding", "tip": "Connects the parameter name 'params' to the dictionary value you provide", "color": "operator"},
+                      {"code": "params", "role": "Dict variable", "tip": "A dictionary like {'format': 'json', 'date': '2015:2022'} containing your API query filters", "color": "variable"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the argument list -- the request is now sent to the server", "color": "syntax"}
+                    ],
+                    "stata": [
+                      {"code": "wbopendata", "role": "Command", "tip": "A user-written Stata command that wraps the World Bank API -- handles URL construction, HTTP requests, and JSON parsing automatically", "color": "keyword"},
+                      {"code": ", ", "role": "Comma", "tip": "In Stata, the comma separates the main command from its options", "color": "syntax"},
+                      {"code": "indicator", "role": "Option", "tip": "Specifies which World Bank data series to fetch (e.g., NY.GDP.MKTP.CD for GDP)", "color": "argument"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the option value", "color": "syntax"},
+                      {"code": "`indicator'", "role": "Local macro", "tip": "Stata's variable substitution syntax -- backtick and apostrophe expand the local macro named 'indicator' to its stored value", "color": "special"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the option value", "color": "syntax"},
+                      {"code": " country(", "role": "Option", "tip": "Specifies which country (ISO code) to fetch data for", "color": "argument"},
+                      {"code": "`country'", "role": "Local macro", "tip": "Expands to the ISO country code stored earlier with 'local country \"USA\"'", "color": "special"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the country option", "color": "syntax"},
+                      {"code": " clear", "role": "Option", "tip": "Tells Stata to clear existing data from memory before loading the new API data", "color": "keyword"}
+                    ],
+                    "r": [
+                      {"code": "response", "role": "Variable", "tip": "Stores the HTTP response object returned by the server -- contains status, headers, and body", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator -- the arrow points from the value to the variable name", "color": "operator"},
+                      {"code": "GET", "role": "Function", "tip": "From the httr package -- sends an HTTP GET request to retrieve data from a server", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list for GET()", "color": "syntax"},
+                      {"code": "url", "role": "URL argument", "tip": "The API endpoint address as a string -- built earlier with paste0()", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates the URL from the query parameter", "color": "syntax"},
+                      {"code": "query", "role": "Parameter name", "tip": "Named argument that passes query parameters -- httr appends them to the URL as ?key=value", "color": "argument"},
+                      {"code": " = ", "role": "Binding", "tip": "Connects the parameter name 'query' to the list of values", "color": "operator"},
+                      {"code": "list(...)", "role": "Named list", "tip": "An R list like list(format = 'json', date = '2015:2022') containing your API query filters", "color": "function"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the GET() call -- the request is now sent", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Build an API URL by assembling base, country, and indicator into an f-string",
+                  "pattern": "variable = f\"{base}/path/{variable}/path/{variable}\"",
+                  "structureNote": "API URLs are built piece by piece: a <strong>base URL</strong> (the server address), an <strong>endpoint path</strong> (what resource you want), and <strong>parameters</strong> (filters). Using variables for each piece makes it easy to swap countries or indicators without rewriting the entire URL.",
+                  "languages": {
+                    "python": [
+                      {"code": "url", "role": "Variable", "tip": "Will hold the complete API URL string, ready to be passed to requests.get()", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the constructed URL string to the variable", "color": "operator"},
+                      {"code": "f\"", "role": "F-string start", "tip": "The f prefix creates a 'formatted string literal' -- Python evaluates any {expressions} inside the quotes and inserts their values", "color": "string"},
+                      {"code": "{base}", "role": "Variable insert", "tip": "Inserts the value of 'base' (e.g., 'https://api.worldbank.org/v2') into the string at this position", "color": "variable"},
+                      {"code": "/country/", "role": "Path segment", "tip": "A literal path component in the API URL -- tells the server you want country-level data", "color": "string"},
+                      {"code": "{country}", "role": "Variable insert", "tip": "Inserts the country code variable (e.g., 'USA') -- swapping this variable changes which country you query", "color": "variable"},
+                      {"code": "/indicator/", "role": "Path segment", "tip": "Another literal path component -- tells the server you want a specific indicator", "color": "string"},
+                      {"code": "{indicator}", "role": "Variable insert", "tip": "Inserts the indicator code variable (e.g., 'NY.GDP.MKTP.CD') -- the World Bank code for the data series", "color": "variable"},
+                      {"code": "\"", "role": "String end", "tip": "Closes the f-string -- the final URL is now a single string like 'https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD'", "color": "string"}
+                    ],
+                    "r": [
+                      {"code": "url", "role": "Variable", "tip": "Will hold the complete API URL string", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow -- stores the result of paste0() in 'url'", "color": "operator"},
+                      {"code": "paste0", "role": "Function", "tip": "Concatenates strings with no separator (paste0 = paste with zero gap) -- R's equivalent of Python f-strings for building URLs", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the list of strings to concatenate", "color": "syntax"},
+                      {"code": "base", "role": "Variable", "tip": "The base URL string, e.g., 'https://api.worldbank.org/v2'", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments -- each argument is a piece of the URL to glue together", "color": "syntax"},
+                      {"code": "\"/country/\"", "role": "Literal string", "tip": "A fixed path segment in the URL", "color": "string"},
+                      {"code": ", country, ", "role": "Variable + separator", "tip": "The country code variable (e.g., 'USA') inserted between the literal path segments", "color": "variable"},
+                      {"code": "\"/indicator/\"", "role": "Literal string", "tip": "Another fixed path segment", "color": "string"},
+                      {"code": ", indicator", "role": "Variable", "tip": "The indicator code variable (e.g., 'NY.GDP.MKTP.CD')", "color": "variable"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends paste0() -- all pieces are now joined into one URL string", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Parse the JSON body of an HTTP response into a native data structure",
+                  "pattern": "variable = response.json()",
+                  "structureNote": "APIs return data as <strong>JSON text</strong> (a string). Before you can work with it, you must <strong>parse</strong> it into your language's native data structures (Python dicts/lists, R lists). This is the bridge between raw server output and usable data objects.",
+                  "languages": {
+                    "python": [
+                      {"code": "data", "role": "Variable", "tip": "Will hold the parsed JSON -- typically a Python dictionary or list of dictionaries", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the parsed result so you can index into it", "color": "operator"},
+                      {"code": "response", "role": "Response object", "tip": "The object returned by requests.get() -- contains the raw server response", "color": "variable"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the json() method that belongs to the response object", "color": "syntax"},
+                      {"code": "json", "role": "Method", "tip": "Parses the response body from JSON text into Python dicts and lists -- equivalent to json.loads(response.text)", "color": "method"},
+                      {"code": "()", "role": "Call parens", "tip": "Executes the json() method with no arguments -- it reads the response body automatically", "color": "syntax"}
+                    ],
+                    "r": [
+                      {"code": "data", "role": "Variable", "tip": "Will hold the parsed JSON as an R list structure", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "Stores the parsed result", "color": "operator"},
+                      {"code": "content", "role": "Function", "tip": "From httr -- extracts the body content from the response object", "color": "function"},
+                      {"code": "(response, ", "role": "Arguments", "tip": "First argument is the response object; the comma precedes the format specifier", "color": "variable"},
+                      {"code": "\"text\"", "role": "Format", "tip": "Tells content() to return the body as a plain text string (which we then parse as JSON)", "color": "string"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the content() call", "color": "syntax"},
+                      {"code": " %>% ", "role": "Pipe operator", "tip": "Passes the text output from content() as the first argument to the next function -- read as 'then'", "color": "operator"},
+                      {"code": "fromJSON", "role": "Function", "tip": "From jsonlite -- parses a JSON string into R native objects (lists, data frames, vectors)", "color": "function"},
+                      {"code": "()", "role": "Call parens", "tip": "The input comes from the pipe, so no explicit argument is needed here", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Extract the data records from the World Bank API response (skipping metadata at index 0)",
+                  "pattern": "variable = data[index]",
+                  "structureNote": "The World Bank API returns a two-element list: <code>[metadata, records]</code>. Index 0 is pagination metadata (total pages, etc.) and index 1 is the actual data. This two-part structure is common in APIs that support pagination -- you must know which part to grab.",
+                  "languages": {
+                    "python": [
+                      {"code": "records", "role": "Variable", "tip": "Will hold just the data records (list of dictionaries), one per country-year observation", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the extracted records for further processing", "color": "operator"},
+                      {"code": "data", "role": "Parsed JSON", "tip": "The full API response parsed by .json() -- a list with two elements: [metadata, records]", "color": "variable"},
+                      {"code": "[", "role": "Index start", "tip": "Begins bracket indexing into the list -- Python uses square brackets to access list elements", "color": "syntax"},
+                      {"code": "1", "role": "Index", "tip": "Gets the second element (Python counts from 0). Index 0 = metadata, index 1 = the actual data records", "color": "special"},
+                      {"code": "]", "role": "Index end", "tip": "Closes the index expression -- the result is the list of data records", "color": "syntax"}
+                    ],
+                    "r": [
+                      {"code": "records", "role": "Variable", "tip": "Will hold the data records (a data frame or list), one per country-year", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "Stores the extracted records", "color": "operator"},
+                      {"code": "data", "role": "Parsed JSON", "tip": "The full API response parsed by fromJSON() -- an R list with two elements", "color": "variable"},
+                      {"code": "[[", "role": "Double bracket", "tip": "Extracts a SINGLE element from the list as a standalone object -- single brackets [2] would keep it wrapped in a list", "color": "syntax"},
+                      {"code": "2", "role": "Index", "tip": "Gets the second element (R counts from 1). Element 1 = metadata, element 2 = data records", "color": "special"},
+                      {"code": "]]", "role": "Close brackets", "tip": "Closes the extraction -- the result is the data records directly, not wrapped in a list", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Define a dictionary of API query parameters (format, date range, and page size)",
+                  "pattern": "variable = {\"key\": \"value\", ...}",
+                  "structureNote": "Query parameters control what the API returns. They become <code>?format=json&date=2015:2022&per_page=100</code> at the end of the URL. Using a dictionary keeps them organized and lets requests.get() handle the URL encoding automatically.",
+                  "languages": {
+                    "python": [
+                      {"code": "params", "role": "Variable", "tip": "Stores the parameter dictionary -- this will be passed to requests.get(url, params=params)", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the dictionary to the variable", "color": "operator"},
+                      {"code": "{", "role": "Dict open", "tip": "Opens a Python dictionary literal -- stores key-value pairs", "color": "syntax"},
+                      {"code": "\"format\"", "role": "Key", "tip": "The parameter name -- tells the API what response format you want", "color": "string"},
+                      {"code": ": ", "role": "Key-value separator", "tip": "In dictionaries, colon separates each key from its value", "color": "syntax"},
+                      {"code": "\"json\"", "role": "Value", "tip": "Requests JSON format (instead of XML) -- JSON is easier to parse in code", "color": "string"},
+                      {"code": ", ", "role": "Item separator", "tip": "Commas separate key-value pairs within the dictionary", "color": "syntax"},
+                      {"code": "\"date\"", "role": "Key", "tip": "The date range parameter -- specifies which years of data to return", "color": "string"},
+                      {"code": ": ", "role": "Key-value separator", "tip": "Separates the key from its value", "color": "syntax"},
+                      {"code": "\"2015:2022\"", "role": "Value", "tip": "A year range in World Bank format -- colon separates start and end years", "color": "string"},
+                      {"code": ", ", "role": "Item separator", "tip": "Another comma before the next pair", "color": "syntax"},
+                      {"code": "\"per_page\"", "role": "Key", "tip": "Controls pagination -- how many records per API response page", "color": "string"},
+                      {"code": ": ", "role": "Key-value separator", "tip": "Separates key from value", "color": "syntax"},
+                      {"code": "100", "role": "Value (integer)", "tip": "Maximum records per page -- ensures you get all data in one request for small datasets", "color": "special"},
+                      {"code": "}", "role": "Dict close", "tip": "Closes the dictionary -- three parameters are now ready to pass to the API", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Create a DataFrame from API records using a list comprehension with nested key access and a filter",
+                  "pattern": "df = pd.DataFrame([{...} for item in list if condition])",
+                  "structureNote": "This single line does three things at once: (1) <strong>loops</strong> through each record, (2) <strong>extracts and reshapes</strong> nested fields into a flat dictionary, and (3) <strong>filters out</strong> records with missing values. The result is a clean, analysis-ready DataFrame. This pattern is extremely common when converting API responses to tabular data.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "Variable", "tip": "Short for 'DataFrame' -- the standard name for your tabular data object in pandas", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the newly created DataFrame", "color": "operator"},
+                      {"code": "pd.DataFrame", "role": "Constructor", "tip": "pd is the pandas alias (from 'import pandas as pd'). DataFrame() creates a table with rows and columns from the data you pass in", "color": "function"},
+                      {"code": "([{", "role": "Open list comp", "tip": "Opens the list comprehension -- we build a list of dictionaries, where each dict becomes one row", "color": "syntax"},
+                      {"code": "'country': r['country']['value']", "role": "Nested access", "tip": "Creates a 'country' column. The API nests the name: r['country'] returns {'id': 'USA', 'value': 'United States'}, so ['value'] extracts the name", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates column definitions within the dictionary", "color": "syntax"},
+                      {"code": "'year': int(r['date'])", "role": "Type conversion", "tip": "Creates a 'year' column. int() converts the string '2022' to the integer 2022 -- needed for sorting and math", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates the next column definition", "color": "syntax"},
+                      {"code": "'gdp': r['value']", "role": "Direct access", "tip": "Creates a 'gdp' column by directly extracting the numeric value from each record", "color": "variable"},
+                      {"code": "} for r in records", "role": "Loop", "tip": "The list comprehension loop -- 'for each record r in records, create a dictionary with the columns above'", "color": "keyword"},
+                      {"code": " if r['value'] is not None", "role": "Filter", "tip": "Only includes records where the value exists -- skips years with missing data (None = missing in Python)", "color": "keyword"},
+                      {"code": "])", "role": "Close", "tip": "Closes the list comprehension and the DataFrame() call -- the table is now created", "color": "syntax"}
+                    ],
+                    "r": [
+                      {"code": "df", "role": "Variable", "tip": "Stores the resulting tibble (tidyverse data frame)", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "Assigns the tibble to df", "color": "operator"},
+                      {"code": "tibble", "role": "Constructor", "tip": "From tidyverse -- creates a modern data frame (tibble) with named columns", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the column definitions", "color": "syntax"},
+                      {"code": "country = records$country$value", "role": "Nested access", "tip": "Creates a 'country' column. The $ operator navigates nested structures: records -> country -> value extracts country names", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates column definitions", "color": "syntax"},
+                      {"code": "year = as.integer(records$date)", "role": "Type conversion", "tip": "Creates a 'year' column. as.integer() converts text years to numbers for proper sorting and calculation", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates the next column", "color": "syntax"},
+                      {"code": "gdp = records$value", "role": "Direct access", "tip": "Creates a 'gdp' column with the numeric values", "color": "variable"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the tibble definition", "color": "syntax"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Takes the tibble and passes it to the next function -- read as 'then'", "color": "operator"},
+                      {"code": "filter(!is.na(gdp))", "role": "Filter", "tip": "Keeps only rows where gdp is NOT missing. !is.na() means 'is not NA' -- equivalent to Python's 'is not None'", "color": "function"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Store a World Bank indicator code in a local macro (Stata's variable system)",
+                  "pattern": "local macroname \"value\"",
+                  "structureNote": "Stata uses <strong>local macros</strong> instead of variables to store text values. You define them with <code>local name \"value\"</code> and reference them with the backtick-apostrophe syntax <code>`name'</code>. This is Stata's way of parameterizing your code -- change the macro once, and every reference updates automatically.",
+                  "languages": {
+                    "stata": [
+                      {"code": "local", "role": "Command", "tip": "Stata keyword that creates a local macro -- a temporary named value that exists only in the current session or do-file", "color": "keyword"},
+                      {"code": " ", "role": "Space", "tip": "Separates the command from the macro name", "color": "syntax"},
+                      {"code": "indicator", "role": "Macro name", "tip": "The name you choose for this macro -- you will reference it later as `indicator' (backtick + apostrophe)", "color": "variable"},
+                      {"code": " ", "role": "Space", "tip": "Separates the macro name from its value", "color": "syntax"},
+                      {"code": "\"NY.GDP.MKTP.CD\"", "role": "Macro value", "tip": "The World Bank indicator code for GDP in current US dollars. This text will replace `indicator' wherever it appears", "color": "string"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Securely retrieve an API key from an environment variable instead of hardcoding it",
+                  "pattern": "variable = os.environ.get('KEY_NAME')",
+                  "structureNote": "API keys are secrets -- like passwords. <strong>Never write them directly in your code</strong> because they could end up in Git, in shared files, or on GitHub. Environment variables keep secrets outside your code: you set them in your terminal, and your code reads them at runtime.",
+                  "languages": {
+                    "python": [
+                      {"code": "api_key", "role": "Variable", "tip": "Will hold the API key string retrieved from the environment -- or None if not set", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the retrieved key", "color": "operator"},
+                      {"code": "os", "role": "Module", "tip": "Python's operating system module -- provides access to environment variables, file paths, and system info", "color": "library"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the 'environ' attribute of the os module", "color": "syntax"},
+                      {"code": "environ", "role": "Dict-like object", "tip": "A dictionary-like object containing all environment variables set in your system/terminal session", "color": "property"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the get() method on the environ object", "color": "syntax"},
+                      {"code": "get", "role": "Method", "tip": "Safely retrieves a value by key -- returns None instead of crashing if the variable is not set", "color": "method"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument to get()", "color": "syntax"},
+                      {"code": "'FRED_API_KEY'", "role": "Key name", "tip": "The name of the environment variable to look up -- you set this in your terminal with 'export FRED_API_KEY=your_key_here'", "color": "string"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the get() call -- returns the key value or None", "color": "syntax"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <div class="nav-footer">
           <a href="02a-file-import.html" class="nav-link prev">Importing from Files (02a)</a>
           <a href="02c-web-scraping.html" class="nav-link next">Web Scraping (02c)</a>
@@ -659,6 +890,7 @@ response = requests.get(url, params=params)</code></pre>
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
 

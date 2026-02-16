@@ -255,6 +255,214 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Count missing values in each column of a DataFrame",
+                  "pattern": "dataframe.method().method()",
+                  "structureNote": "This demonstrates <strong>method chaining</strong>: calling one method on the result of another. <code>isnull()</code> returns a True/False table, then <code>.sum()</code> counts the Trues in each column. Chaining reads left to right, each step producing an object the next step works on.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "DataFrame", "tip": "The dataset to check for missing values.", "color": "pink"},
+                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the isnull method on the DataFrame.", "color": "overlay"},
+                      {"code": "isnull", "role": "Method", "tip": "Returns a DataFrame of True/False values. True means the cell is missing (NaN). Works on every cell in the entire table.", "color": "teal"},
+                      {"code": "()", "role": "Empty Args", "tip": "No arguments needed. Checks every cell.", "color": "overlay"},
+                      {"code": ".", "role": "Dot Accessor", "tip": "Now calling sum() on the True/False table that isnull() returned.", "color": "overlay"},
+                      {"code": "sum", "role": "Method", "tip": "Adds up values in each column. Since True=1 and False=0, this counts the number of missing values per column.", "color": "teal"},
+                      {"code": "()", "role": "Empty Args", "tip": "Sums each column by default. Returns one count per column.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "misstable", "role": "Command", "tip": "Stata's built-in command for analyzing missing data patterns.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separates main command from subcommand.", "color": "text"},
+                      {"code": "summarize", "role": "Subcommand", "tip": "Shows a summary table of missing values: which variables have them and how many.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "colSums", "role": "Function", "tip": "Sums each column of a matrix or data frame. Applied to a True/False matrix, it counts the Trues.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins argument.", "color": "overlay"},
+                      {"code": "is.na", "role": "Function", "tip": "Tests each cell for missing values (NA). Returns TRUE if missing, FALSE if present.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins is.na argument.", "color": "overlay"},
+                      {"code": "df", "role": "Data Frame", "tip": "The dataset to check.", "color": "pink"},
+                      {"code": "))", "role": "Close Parens", "tip": "Closes both is.na() and colSums().", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Drop rows where a specific column has missing values",
+                  "pattern": "result = dataframe.dropna(subset=[column])",
+                  "structureNote": "The <code>dropna(subset=)</code> pattern is <strong>targeted deletion</strong>: instead of dropping any row with ANY missing value (which could lose lots of data), you only drop rows where a specific column is missing. Always compare row counts before and after to understand how much data you lost.",
+                  "languages": {
+                    "python": [
+                      {"code": "df_clean", "role": "Variable Name", "tip": "Stores the result with missing rows removed. Using a new name preserves the original data.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the filtered data.", "color": "peach"},
+                      {"code": "df", "role": "DataFrame", "tip": "The original dataset.", "color": "pink"},
+                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the dropna method.", "color": "overlay"},
+                      {"code": "dropna", "role": "Method", "tip": "Removes rows with missing values. Without subset=, it drops any row with any missing value.", "color": "teal"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "subset=", "role": "Parameter", "tip": "Specifies WHICH columns to check. Only drops rows where these specific columns are missing.", "color": "lavender"},
+                      {"code": "['income']", "role": "Column List", "tip": "Only drop rows where 'income' is missing. Other columns can have NaN and the row is still kept.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "drop", "role": "Command", "tip": "Permanently removes observations from the dataset. Irreversible -- save a backup first!", "color": "mauve"},
+                      {"code": " if ", "role": "Condition", "tip": "Only drops rows meeting the condition.", "color": "mauve"},
+                      {"code": "missing(income)", "role": "Test", "tip": "missing() returns true when a variable has no value. So this drops rows where income is blank.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "df_clean", "role": "Variable Name", "tip": "Stores the filtered result.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
+                      {"code": "df", "role": "Data Frame", "tip": "The original dataset.", "color": "pink"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes df into the next function.", "color": "mauve"},
+                      {"code": "drop_na", "role": "Function", "tip": "From tidyr. Removes rows with missing values in specified columns.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins argument.", "color": "overlay"},
+                      {"code": "income", "role": "Column", "tip": "Only drop rows where income is NA. In dplyr, column names don't need quotes.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Fill missing values with the column mean",
+                  "pattern": "dataframe['col'].fillna(dataframe['col'].mean())",
+                  "structureNote": "Mean imputation replaces missing values with the average of existing values. This is a <strong>nested function call</strong>: the inner <code>.mean()</code> computes the average, and the outer <code>.fillna()</code> uses that value to fill gaps. Caution: this reduces variance and can bias results.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "DataFrame", "tip": "The dataset.", "color": "pink"},
+                      {"code": "[", "role": "Open Bracket", "tip": "Begins column selection.", "color": "overlay"},
+                      {"code": "'income'", "role": "Column Name", "tip": "The column with missing values to fill.", "color": "green"},
+                      {"code": "]", "role": "Close Bracket", "tip": "Ends column selection. Returns a Series.", "color": "overlay"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses fillna method on the column.", "color": "overlay"},
+                      {"code": "fillna", "role": "Method", "tip": "Replaces NaN (missing) values with the specified value.", "color": "teal"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins fillna arguments.", "color": "overlay"},
+                      {"code": "df['income'].mean()", "role": "Fill Value", "tip": "Computes the mean of existing (non-missing) income values. This value replaces every NaN.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends fillna.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "summarize", "role": "Command", "tip": "Calculates statistics including the mean.", "color": "mauve"},
+                      {"code": " income", "role": "Variable", "tip": "The variable to summarize.", "color": "sky"},
+                      {"code": "\n", "role": "Newline", "tip": "Next command on new line.", "color": "text"},
+                      {"code": "replace", "role": "Command", "tip": "Modifies values of an existing variable.", "color": "mauve"},
+                      {"code": " income = r(mean)", "role": "New Value", "tip": "r(mean) retrieves the mean calculated by the previous summarize command.", "color": "sky"},
+                      {"code": " if missing(income)", "role": "Condition", "tip": "Only replace where income is currently missing.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "df", "role": "Data Frame", "tip": "The dataset.", "color": "pink"},
+                      {"code": " <- df %>%\n  ", "role": "Pipe Chain", "tip": "Passes df through a transformation and stores the result back.", "color": "mauve"},
+                      {"code": "mutate", "role": "Function", "tip": "From dplyr. Creates or modifies columns. Takes the column name and its new definition.", "color": "blue"},
+                      {"code": "(income = ", "role": "Column", "tip": "Redefines the income column.", "color": "sky"},
+                      {"code": "replace_na", "role": "Function", "tip": "Replaces NA values with a specified value.", "color": "blue"},
+                      {"code": "(income, mean(income, na.rm=TRUE))", "role": "Arguments", "tip": "First arg is the column, second is the fill value. na.rm=TRUE tells mean() to ignore NAs when computing.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends mutate.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Rename columns in a DataFrame",
+                  "pattern": "dataframe.rename(columns={old: new})",
+                  "structureNote": "Renaming columns improves readability and consistency. The <code>columns=</code> parameter takes a <strong>dictionary</strong> mapping old names to new names. You can rename one or many columns at once. This is essential when merging datasets with inconsistent naming.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "DataFrame", "tip": "The dataset with columns to rename.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the renamed result (or use inplace=True).", "color": "peach"},
+                      {"code": "df", "role": "DataFrame", "tip": "The original DataFrame.", "color": "pink"},
+                      {"code": ".rename", "role": "Method", "tip": "Returns a new DataFrame with renamed columns.", "color": "teal"},
+                      {"code": "(columns=", "role": "Parameter", "tip": "Takes a dictionary mapping old names to new names.", "color": "lavender"},
+                      {"code": "{'wage': 'income'}", "role": "Name Mapping", "tip": "A dictionary: old name 'wage' becomes new name 'income'. Can include multiple mappings separated by commas.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the rename call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "rename", "role": "Command", "tip": "Changes a variable's name. The old name comes first, then the new name.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separates command from arguments.", "color": "text"},
+                      {"code": "wage", "role": "Old Name", "tip": "The current variable name.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "Separates old from new.", "color": "text"},
+                      {"code": "income", "role": "New Name", "tip": "The desired new name. Must follow Stata naming rules (no spaces, no special characters).", "color": "teal"}
+                    ],
+                    "r": [
+                      {"code": "df", "role": "Data Frame", "tip": "The dataset.", "color": "pink"},
+                      {"code": " <- df %>% ", "role": "Pipe Chain", "tip": "Transform and store back.", "color": "mauve"},
+                      {"code": "rename", "role": "Function", "tip": "From dplyr. Renames columns. Syntax: new_name = old_name.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "income = wage", "role": "Name Mapping", "tip": "New name on the left, old name on the right. Note: this is the OPPOSITE order from Python!", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Filter rows based on a boolean condition",
+                  "pattern": "result = dataframe[condition]",
+                  "structureNote": "Boolean filtering is the <strong>most common way to subset data</strong>. The condition inside the brackets produces True/False for each row, and only True rows are kept. This is how you select subsamples, remove outliers, or focus on specific groups.",
+                  "languages": {
+                    "python": [
+                      {"code": "high_earners", "role": "Variable Name", "tip": "Stores the filtered subset.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "df", "role": "DataFrame", "tip": "The full dataset.", "color": "pink"},
+                      {"code": "[", "role": "Open Bracket", "tip": "Begins boolean indexing. The condition inside produces True/False for each row.", "color": "overlay"},
+                      {"code": "df['income']", "role": "Column", "tip": "Selects the income column for comparison.", "color": "sky"},
+                      {"code": " > ", "role": "Comparison", "tip": "Greater than operator. Returns True where income exceeds 50000, False elsewhere.", "color": "peach"},
+                      {"code": "50000", "role": "Threshold", "tip": "The value to compare against. Only rows where income > 50000 are kept.", "color": "sky"},
+                      {"code": "]", "role": "Close Bracket", "tip": "Ends the filter. Only rows with True are included in the result.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "keep", "role": "Command", "tip": "Keeps only observations meeting the condition. Permanently removes all others.", "color": "mauve"},
+                      {"code": " if ", "role": "Condition", "tip": "Specifies which rows to keep.", "color": "mauve"},
+                      {"code": "income > 50000", "role": "Expression", "tip": "The boolean test. Rows where income exceeds 50000 are kept; all others are dropped.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "high_earners", "role": "Variable Name", "tip": "Stores the filtered result.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
+                      {"code": "df", "role": "Data Frame", "tip": "The full dataset.", "color": "pink"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes df into filter.", "color": "mauve"},
+                      {"code": "filter", "role": "Function", "tip": "From dplyr. Keeps rows that satisfy a condition.", "color": "blue"},
+                      {"code": "(income > 50000)", "role": "Condition", "tip": "The boolean test. In dplyr, column names don't need quotes or df$ prefix.", "color": "sky"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Convert a column's data type from string to numeric",
+                  "pattern": "dataframe['col'] = dataframe['col'].astype(type)",
+                  "structureNote": "Data type conversion is critical when columns are loaded as the wrong type (e.g., numbers stored as text). The <code>astype()</code> method converts data types. Common issue: IDs loaded as numbers lose leading zeros, or year columns stored as text can't be used in calculations.",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "DataFrame", "tip": "The dataset.", "color": "pink"},
+                      {"code": "[", "role": "Open Bracket", "tip": "Begins column selection.", "color": "overlay"},
+                      {"code": "'income'", "role": "Column Name", "tip": "The column to convert.", "color": "green"},
+                      {"code": "]", "role": "Close Bracket", "tip": "Ends selection.", "color": "overlay"},
+                      {"code": " = ", "role": "Assignment", "tip": "Overwrites the column with the converted version.", "color": "peach"},
+                      {"code": "pd.to_numeric", "role": "Function", "tip": "Pandas function that converts strings to numbers. More flexible than astype() -- can handle errors gracefully.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "df['income']", "role": "Column", "tip": "The column to convert.", "color": "pink"},
+                      {"code": ", errors='coerce'", "role": "Error Handling", "tip": "Values that can't be converted become NaN instead of causing an error. Essential for messy real-world data.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "destring", "role": "Command", "tip": "Converts string variables to numeric. The opposite of 'tostring'.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "Separates command from variable.", "color": "text"},
+                      {"code": "income", "role": "Variable", "tip": "The string variable to convert to numeric.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "replace", "role": "Option", "tip": "Overwrites the variable in place. Without this, Stata creates a new variable.", "color": "yellow"},
+                      {"code": " force", "role": "Option", "tip": "Non-numeric values become missing (.) instead of causing an error.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "df", "role": "Data Frame", "tip": "The dataset.", "color": "pink"},
+                      {"code": " <- df %>% ", "role": "Pipe Chain", "tip": "Transform and store back.", "color": "mauve"},
+                      {"code": "mutate", "role": "Function", "tip": "Creates or modifies columns.", "color": "blue"},
+                      {"code": "(income = ", "role": "Column", "tip": "Redefines the income column.", "color": "sky"},
+                      {"code": "as.numeric", "role": "Function", "tip": "Converts values to numeric type. Non-numeric values become NA with a warning.", "color": "blue"},
+                      {"code": "(income)", "role": "Argument", "tip": "The column to convert.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends mutate.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <div class="toc">
           <h3>Table of Contents</h3>
           <ul>
@@ -2247,6 +2455,7 @@ invalid <- df %>%
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
 

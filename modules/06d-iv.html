@@ -149,6 +149,153 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Estimate a 2SLS instrumental variable regression",
+                  "pattern": "model = IV2SLS.from_formula('y ~ controls + [endogenous ~ instruments]', data)",
+                  "structureNote": "2SLS uses an <strong>instrument</strong> Z that affects the endogenous variable D but not the outcome Y directly. The formula separates exogenous controls from the endogenous variable and its instruments. The <code>[endogenous ~ instruments]</code> syntax in Python or <code>(endogenous = instruments)</code> in Stata specifies this relationship.",
+                  "languages": {
+                    "python": [
+                      {"code": "model", "role": "Variable", "tip": "Stores the IV model object.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the model.", "color": "peach"},
+                      {"code": "IV2SLS.from_formula", "role": "Constructor", "tip": "From linearmodels.iv. Creates a 2SLS model from a formula string.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "'wage ~ 1 + experience + [education ~ distance_to_college]'", "role": "Formula", "tip": "wage = outcome, experience = exogenous control, education = endogenous var, distance_to_college = instrument. [endog ~ instruments] inside brackets.", "color": "green"},
+                      {"code": ", data=df", "role": "Data", "tip": "The DataFrame.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends model specification.", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "results = model.fit(cov_type='robust')", "role": "Fit", "tip": "Estimates the model with robust standard errors.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "ivregress 2sls", "role": "Command", "tip": "Stata's IV estimation command. '2sls' specifies the estimator.", "color": "mauve"},
+                      {"code": " wage experience", "role": "Outcome & Controls", "tip": "Dependent variable followed by exogenous controls.", "color": "sky"},
+                      {"code": " (education = distance_to_college)", "role": "Endogenous Spec", "tip": "Parentheses: endogenous var = instruments. This is the key IV syntax.", "color": "green"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "robust", "role": "Option", "tip": "Heteroskedasticity-robust standard errors.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "iv_model", "role": "Variable", "tip": "Stores the IV model.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "ivreg", "role": "Function", "tip": "From the AER package. Estimates IV/2SLS models.", "color": "blue"},
+                      {"code": "(wage ~ education + experience", "role": "Structural Eq", "tip": "The structural equation: outcome ~ endogenous + controls.", "color": "green"},
+                      {"code": " | ", "role": "Pipe Separator", "tip": "Separates the structural equation from the instrument list.", "color": "overlay"},
+                      {"code": "distance_to_college + experience", "role": "Instruments", "tip": "All exogenous variables: instruments + controls. Experience appears on both sides because it's exogenous.", "color": "teal"},
+                      {"code": ", data = df)", "role": "Data", "tip": "The data frame.", "color": "sky"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Run the first stage regression manually (regress endogenous on instruments)",
+                  "pattern": "first_stage = OLS(endogenous, instruments_and_controls).fit()",
+                  "structureNote": "The <strong>first stage</strong> predicts the endogenous variable using the instrument. A strong first stage (F > 10) is necessary for 2SLS to work. This step isolates the exogenous variation in education that comes from the instrument (e.g., distance to college).",
+                  "languages": {
+                    "python": [
+                      {"code": "first_stage", "role": "Variable", "tip": "Stores the first-stage regression results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "sm.OLS", "role": "OLS Constructor", "tip": "From statsmodels. Standard OLS regression.", "color": "blue"},
+                      {"code": "(df['education']", "role": "Dependent Var", "tip": "The endogenous variable. In the first stage, this is the outcome.", "color": "sky"},
+                      {"code": ", sm.add_constant(df[['distance_to_college', 'experience']])", "role": "Regressors", "tip": "Instruments + controls + constant. add_constant() adds the intercept column.", "color": "green"},
+                      {"code": ").fit()", "role": "Fit", "tip": "Estimates the OLS model. Check first_stage.fvalue for the F-statistic.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "ivregress 2sls", "role": "Command", "tip": "Stata can show the first stage automatically.", "color": "mauve"},
+                      {"code": " wage experience (education = distance_to_college)", "role": "Specification", "tip": "Standard IV specification.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "first", "role": "Option", "tip": "The 'first' option displays the first-stage regression alongside the 2SLS results.", "color": "yellow"},
+                      {"code": " robust", "role": "Option", "tip": "Robust standard errors.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "summary(iv_model", "role": "Summary", "tip": "The summary function for ivreg objects.", "color": "blue"},
+                      {"code": ", vcov = vcovHC", "role": "Robust SEs", "tip": "Heteroskedasticity-consistent variance-covariance matrix.", "color": "lavender"},
+                      {"code": ", diagnostics = TRUE", "role": "Diagnostics", "tip": "Requests diagnostic tests including the first-stage F-statistic, Wu-Hausman, and Sargan tests.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Check the first-stage F-statistic for weak instruments",
+                  "pattern": "print(first_stage.fvalue)",
+                  "structureNote": "The <strong>first-stage F-statistic</strong> tests whether the instrument actually predicts the endogenous variable. The Stock-Yogo rule of thumb: F > 10 suggests the instrument is strong enough. With weak instruments, 2SLS is biased toward OLS and confidence intervals have poor coverage.",
+                  "languages": {
+                    "python": [
+                      {"code": "print", "role": "Function", "tip": "Displays the F-statistic.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins argument.", "color": "overlay"},
+                      {"code": "f\"First-stage F: {first_stage.fvalue:.2f}\"", "role": "F-string", "tip": "Formatted string. first_stage.fvalue is the F-statistic from the first-stage OLS. :.2f shows 2 decimal places.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends print.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "estat firststage", "role": "Post-estimation", "tip": "After ivregress, this command displays first-stage diagnostics including the F-statistic.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "summary(iv_model, diagnostics = TRUE)", "role": "Diagnostics", "tip": "The diagnostics=TRUE option in ivreg's summary reports weak instrument tests and the first-stage F.", "color": "blue"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Run the Sargan-Hansen overidentification test (with multiple instruments)",
+                  "pattern": "results.sargan or estat overid",
+                  "structureNote": "When you have <strong>more instruments than endogenous variables</strong>, the Sargan-Hansen test checks whether all instruments are valid. Rejecting the null means at least one instrument is correlated with the error term (i.e., invalid). This test only works with 2+ instruments for 1 endogenous variable.",
+                  "languages": {
+                    "python": [
+                      {"code": "print", "role": "Function", "tip": "Displays the test result.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins argument.", "color": "overlay"},
+                      {"code": "\"Sargan test:\"", "role": "Label", "tip": "Descriptive label.", "color": "green"},
+                      {"code": ", ", "role": "Separator", "tip": "Print can take multiple arguments.", "color": "text"},
+                      {"code": "results.sargan", "role": "Test Result", "tip": "The Sargan-Hansen J-statistic and p-value. Available after fitting IV2SLS with multiple instruments. Null: all instruments are valid.", "color": "teal"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends print.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "estat overid", "role": "Post-estimation", "tip": "After ivregress, tests the overidentifying restrictions. Reports Sargan (homoskedastic) or Hansen J (robust) statistic.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "summary(iv_model, diagnostics = TRUE)", "role": "Diagnostics", "tip": "The Sargan test is included in the diagnostic output. Look for 'Sargan' in the output table.", "color": "blue"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Estimate IV using fixest with the feols formula syntax",
+                  "pattern": "feols(outcome ~ controls | endogenous ~ instrument, data)",
+                  "structureNote": "The <strong>fixest</strong> package in R provides a clean formula syntax for IV: after the pipe <code>|</code>, specify the endogenous variable and its instrument separated by <code>~</code>. This is often faster than AER's ivreg and integrates with fixest's fixed effects and clustering capabilities.",
+                  "languages": {
+                    "python": [
+                      {"code": "model", "role": "Variable", "tip": "The IV model.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores model.", "color": "peach"},
+                      {"code": "IV2SLS.from_formula", "role": "Constructor", "tip": "linearmodels uses bracket syntax: [endogenous ~ instruments] in the formula.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "'wage ~ 1 + experience + age + [education ~ distance_to_college]'", "role": "Formula", "tip": "Multiple controls (experience, age) with one endogenous var and one instrument.", "color": "green"},
+                      {"code": ", data=df)", "role": "Data", "tip": "The DataFrame.", "color": "sky"}
+                    ],
+                    "stata": [
+                      {"code": "ivreg2", "role": "Command", "tip": "Community-contributed IV command with richer diagnostics than ivregress. ssc install ivreg2.", "color": "mauve"},
+                      {"code": " wage experience", "role": "Outcome & Controls", "tip": "Dependent variable and exogenous controls.", "color": "sky"},
+                      {"code": " (education = distance_to_college)", "role": "Endogenous Spec", "tip": "Same parenthetical syntax as ivregress.", "color": "green"},
+                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
+                      {"code": "robust first", "role": "Options", "tip": "robust = HC SEs, first = show first-stage. ivreg2 also auto-reports weak ID and overid tests.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "iv_model", "role": "Variable", "tip": "The IV model estimated with fixest.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "feols", "role": "Function", "tip": "fixest's main function. Handles IV with a clean formula syntax.", "color": "blue"},
+                      {"code": "(wage ~ experience", "role": "Outcome & Controls", "tip": "Outcome and exogenous controls before the pipe.", "color": "green"},
+                      {"code": " | ", "role": "Pipe", "tip": "Separates exogenous regressors from the IV specification.", "color": "overlay"},
+                      {"code": "education ~ distance_to_college", "role": "IV Spec", "tip": "After the pipe: endogenous_var ~ instrument. fixest handles the 2SLS mechanics.", "color": "teal"},
+                      {"code": ", data = df, vcov = \"hetero\")", "role": "Data & SEs", "tip": "Data and robust standard errors.", "color": "sky"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <h2 id="2sls">Two-Stage Least Squares</h2>
 
         <p>
@@ -1396,6 +1543,7 @@ Level  Percentile
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
 </body>
 </html>

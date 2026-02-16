@@ -1454,6 +1454,224 @@ Scraping page 10...
           <p style="margin-top: 1rem; margin-bottom: 0; font-size: 0.95rem; opacity: 0.9;"><strong>Next steps:</strong> In <a href="03-data-exploration.html" style="color: #fbd38d;">Module 3: Data Exploration</a>, we'll continue with our Climate Vulnerability project, exploring the combined World Bank and scraped datasets. Try extending this scraper to also grab <a href="https://en.wikipedia.org/wiki/List_of_countries_by_greenhouse_gas_emissions" style="color: #fbd38d;" target="_blank">greenhouse gas emissions</a> data!</p>
         </div>
 
+        <!-- ═══ MODULE 02c GRAMMAR PRIMER ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Import BeautifulSoup from the bs4 package to parse HTML",
+                  "pattern": "from package import ClassName",
+                  "structureNote": "Python's <code>from...import</code> syntax loads a specific class from a larger package. We import only <code>BeautifulSoup</code> from <code>bs4</code> rather than the entire package -- this is more efficient and makes your code clearer about what tools it uses.",
+                  "languages": {
+                    "python": [
+                      {"code": "from", "role": "Keyword", "tip": "Tells Python you want to import a specific item from within a package, rather than the whole package", "color": "keyword"},
+                      {"code": " ", "role": "Space", "tip": "Separates the keyword from the package name", "color": "syntax"},
+                      {"code": "bs4", "role": "Package", "tip": "Short for BeautifulSoup4 -- the package that contains HTML/XML parsing tools. The name 'beautiful soup' refers to the messy HTML you find on web pages", "color": "library"},
+                      {"code": " ", "role": "Space", "tip": "Separates the package from the import keyword", "color": "syntax"},
+                      {"code": "import", "role": "Keyword", "tip": "Specifies which specific item to load from the package", "color": "keyword"},
+                      {"code": " ", "role": "Space", "tip": "Separates import from the class name", "color": "syntax"},
+                      {"code": "BeautifulSoup", "role": "Class name", "tip": "The main class that turns raw HTML text into a searchable tree structure. You'll use this to create 'soup' objects that let you find and extract data", "color": "function"}
+                    ],
+                    "r": [
+                      {"code": "library", "role": "Function", "tip": "R's function to load a package -- makes all its functions available in your session", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument to library()", "color": "syntax"},
+                      {"code": "rvest", "role": "Package", "tip": "R's main web scraping package (a play on 'harvest'). Created by Hadley Wickham as part of the tidyverse. Provides html_element(), html_elements(), html_text(), and html_attr()", "color": "library"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the library() call -- rvest functions are now available", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Fetch a web page and parse its HTML into a searchable object",
+                  "pattern": "soup = BeautifulSoup(response.text, 'parser')",
+                  "structureNote": "This is the two-step pattern at the heart of web scraping: first <strong>fetch</strong> the raw HTML (with requests.get), then <strong>parse</strong> it into a searchable tree (with BeautifulSoup). The parser converts messy text into a structured object you can query with find() and find_all().",
+                  "languages": {
+                    "python": [
+                      {"code": "soup", "role": "Variable", "tip": "The conventional name for a BeautifulSoup object -- stores the parsed HTML tree that you can search through", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the parsed HTML object so you can search it with find() and find_all()", "color": "operator"},
+                      {"code": "BeautifulSoup", "role": "Constructor", "tip": "Creates a new BeautifulSoup object that parses HTML text into a searchable tree of elements, tags, and attributes", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the arguments -- two are required: the HTML text and the parser name", "color": "syntax"},
+                      {"code": "response.text", "role": "HTML content", "tip": "The raw HTML string from the server response. The .text property extracts just the page content from the Response object", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates the HTML content from the parser argument", "color": "syntax"},
+                      {"code": "'html.parser'", "role": "Parser name", "tip": "Python's built-in HTML parser -- reliable and requires no extra installation. Alternatives: 'lxml' (faster) or 'html5lib' (more tolerant of broken HTML)", "color": "string"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the constructor call -- soup is now a searchable HTML tree", "color": "syntax"}
+                    ],
+                    "r": [
+                      {"code": "page", "role": "Variable", "tip": "Stores the parsed HTML document -- the conventional name in R for a scraped page object", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow -- stores the result of read_html()", "color": "operator"},
+                      {"code": "read_html", "role": "Function", "tip": "From rvest -- does both steps in one call: fetches the URL AND parses the HTML into a searchable document", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument", "color": "syntax"},
+                      {"code": "url", "role": "URL argument", "tip": "The web address to fetch and parse -- a string like 'https://quotes.toscrape.com/'", "color": "variable"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the read_html() call -- page is now a searchable HTML document", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Find the first HTML element matching a tag name and CSS class",
+                  "pattern": "variable = soup.find('tag', class_='classname')",
+                  "structureNote": "The <code>find()</code> method returns the <strong>first</strong> element matching your criteria. It searches the entire parsed HTML tree. The <code>class_</code> parameter has an underscore because <code>class</code> is a reserved word in Python. This is your surgical tool for extracting a single specific element.",
+                  "languages": {
+                    "python": [
+                      {"code": "first_quote", "role": "Variable", "tip": "Will hold a single BeautifulSoup Tag object -- the first element matching both the tag type and class name", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the found element for further extraction (e.g., .text to get its content)", "color": "operator"},
+                      {"code": "soup", "role": "Parsed HTML", "tip": "The BeautifulSoup object containing the entire parsed HTML document tree", "color": "variable"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the find() method on the soup object", "color": "syntax"},
+                      {"code": "find", "role": "Method", "tip": "Searches the HTML tree and returns the FIRST element matching all specified criteria. Returns None if nothing found", "color": "method"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the search criteria arguments", "color": "syntax"},
+                      {"code": "'span'", "role": "Tag name", "tip": "The HTML tag type to search for -- 'span' is a generic inline container often used to wrap text content", "color": "string"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates the tag argument from the class filter", "color": "syntax"},
+                      {"code": "class_", "role": "Class filter", "tip": "Filters by CSS class attribute. The trailing underscore avoids conflicting with Python's reserved 'class' keyword", "color": "argument"},
+                      {"code": "=", "role": "Binding", "tip": "Connects the parameter name to its value", "color": "operator"},
+                      {"code": "'text'", "role": "Class value", "tip": "The CSS class to match -- only elements with class='text' will be found. You discover these classes using browser Inspect/DevTools", "color": "string"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the find() call -- returns the first matching element or None", "color": "syntax"}
+                    ],
+                    "r": [
+                      {"code": "first_quote", "role": "Variable", "tip": "Will hold a single HTML element node", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "Stores the found element", "color": "operator"},
+                      {"code": "page", "role": "Parsed HTML", "tip": "The HTML document object created by read_html()", "color": "variable"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the page to the next function -- read as 'then search for'", "color": "operator"},
+                      {"code": "html_element", "role": "Function", "tip": "From rvest -- finds the FIRST element matching a CSS selector. Note: singular 'element' for one result, plural 'elements' for all matches", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the CSS selector argument", "color": "syntax"},
+                      {"code": "\"span.text\"", "role": "CSS selector", "tip": "A CSS selector combining tag and class: 'span.text' means 'a span element with class text'. The dot is CSS syntax for class matching", "color": "string"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the html_element() call", "color": "syntax"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the found element to html_text() to extract its content", "color": "operator"},
+                      {"code": "html_text", "role": "Function", "tip": "Extracts the text content from an HTML element, stripping all tags", "color": "function"},
+                      {"code": "()", "role": "Call parens", "tip": "Calls html_text() with no extra arguments -- returns the plain text content", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Find ALL elements matching a tag and class, returning a list of results",
+                  "pattern": "results = soup.find_all('tag', class_='classname')",
+                  "structureNote": "While <code>find()</code> returns one element, <code>find_all()</code> returns a <strong>list</strong> of ALL matching elements. This is your workhorse for scraping multiple items (all quotes, all rows, all prices). You then loop through the list to extract data from each element.",
+                  "languages": {
+                    "python": [
+                      {"code": "all_quotes", "role": "Variable", "tip": "Will hold a list (ResultSet) of all matching elements -- you can loop through it or check its length with len()", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the list of found elements", "color": "operator"},
+                      {"code": "soup", "role": "Parsed HTML", "tip": "The BeautifulSoup object containing the parsed page", "color": "variable"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the find_all() method", "color": "syntax"},
+                      {"code": "find_all", "role": "Method", "tip": "Returns a LIST of ALL elements matching the criteria -- unlike find() which returns only the first. Returns an empty list [] if no matches", "color": "method"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the search criteria", "color": "syntax"},
+                      {"code": "'div'", "role": "Tag name", "tip": "The HTML tag to search for -- 'div' is a container element. On this page, each quote is wrapped in its own div", "color": "string"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates the tag from the class filter", "color": "syntax"},
+                      {"code": "class_", "role": "Class filter", "tip": "Filters by CSS class -- the underscore avoids Python's reserved 'class' keyword", "color": "argument"},
+                      {"code": "=", "role": "Binding", "tip": "Connects the parameter to its value", "color": "operator"},
+                      {"code": "'quote'", "role": "Class value", "tip": "Match elements with class='quote'. Each quote div contains nested elements (text, author, tags) that you can extract", "color": "string"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the search -- returns a list of all matching div.quote elements", "color": "syntax"}
+                    ],
+                    "r": [
+                      {"code": "quotes", "role": "Variable", "tip": "Will hold a node set (list) of all matching elements", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "Stores the list of elements", "color": "operator"},
+                      {"code": "page", "role": "Parsed HTML", "tip": "The parsed HTML document", "color": "variable"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the page to the search function", "color": "operator"},
+                      {"code": "html_elements", "role": "Function", "tip": "Note the plural 's' -- html_elements() returns ALL matches (a node set), while html_element() returns only the first", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the CSS selector argument", "color": "syntax"},
+                      {"code": "\"div.quote\"", "role": "CSS selector", "tip": "Selects all div elements with class='quote'. The dot syntax (tag.class) is standard CSS selector notation", "color": "string"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns all matching elements as a list you can iterate over", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Extract the href attribute from a link element (get the URL a link points to)",
+                  "pattern": "url = element.get('attribute_name')",
+                  "structureNote": "HTML elements have two kinds of data: <strong>text content</strong> (between tags) and <strong>attributes</strong> (inside the opening tag). To get text, use <code>.text</code>. To get attributes like <code>href</code>, <code>src</code>, or <code>class</code>, use <code>.get('attr')</code>. This is essential for extracting URLs from links and image sources.",
+                  "languages": {
+                    "python": [
+                      {"code": "href", "role": "Variable", "tip": "Will hold the URL string that the link points to (e.g., '/tag/change/page/1/')", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the extracted attribute value", "color": "operator"},
+                      {"code": "tag", "role": "Element", "tip": "A BeautifulSoup Tag object representing one HTML element (e.g., an <a> link found with find() or in a loop)", "color": "variable"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the get() method on the Tag object", "color": "syntax"},
+                      {"code": "get", "role": "Method", "tip": "Safely retrieves an attribute value from an HTML element. Returns None if the attribute doesn't exist (instead of crashing)", "color": "method"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the attribute name argument", "color": "syntax"},
+                      {"code": "'href'", "role": "Attribute name", "tip": "The HTML attribute to extract. 'href' contains the URL in <a> links. Other common attributes: 'src' (images), 'class', 'id', 'data-*'", "color": "string"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the get() call -- returns the attribute value as a string, or None if not found", "color": "syntax"}
+                    ],
+                    "r": [
+                      {"code": "tag_links", "role": "Variable", "tip": "Will hold a character vector of extracted attribute values", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "Stores the extracted values", "color": "operator"},
+                      {"code": "page", "role": "Parsed HTML", "tip": "The HTML document or a subset of elements", "color": "variable"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes to the search function", "color": "operator"},
+                      {"code": "html_elements", "role": "Function", "tip": "Finds all matching elements (plural form for multiple results)", "color": "function"},
+                      {"code": "(\"a.tag\")", "role": "CSS selector", "tip": "Selects all anchor (link) elements with class 'tag'", "color": "string"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the found elements to the attribute extractor", "color": "operator"},
+                      {"code": "html_attr", "role": "Function", "tip": "Extracts the value of a specified attribute from each element -- like Python's .get() but vectorized over all elements", "color": "function"},
+                      {"code": "(\"href\")", "role": "Attribute name", "tip": "The attribute to extract from each element -- returns a vector of URL strings", "color": "string"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Loop through scraped elements, extract nested data, and append each item to a list",
+                  "pattern": "for item in elements: list.append({...})",
+                  "structureNote": "This is the data collection loop -- the heart of most scrapers. For each container element (like a quote div), you search <strong>within</strong> that element for nested sub-elements (text, author). Each iteration extracts one complete record and adds it to your growing collection. This nested find pattern is how you go from raw HTML to structured data.",
+                  "languages": {
+                    "python": [
+                      {"code": "for", "role": "Loop keyword", "tip": "Begins a for loop that will execute the indented block once for each element in the collection", "color": "keyword"},
+                      {"code": " ", "role": "Space", "tip": "Separates the keyword from the loop variable", "color": "syntax"},
+                      {"code": "quote", "role": "Loop variable", "tip": "On each iteration, holds one BeautifulSoup element from all_quotes. You can call find() on it to search WITHIN this element only", "color": "variable"},
+                      {"code": " in ", "role": "In keyword", "tip": "Connects the loop variable to the collection -- 'for each quote in the list of all quotes'", "color": "keyword"},
+                      {"code": "all_quotes", "role": "Collection", "tip": "The list of elements returned by find_all() -- the loop processes each one in order", "color": "variable"},
+                      {"code": ":", "role": "Colon", "tip": "Marks the end of the for statement -- the indented lines below form the loop body", "color": "syntax"},
+                      {"code": "\n    all_data.append({", "role": "Append dict", "tip": "all_data is a list we created earlier. .append() adds one new item to the end. The { opens a dictionary that will become one row of data", "color": "method"},
+                      {"code": "\n        'text': quote.find('span', class_='text').text", "role": "Nested extract", "tip": "Searches WITHIN this specific quote element (not the whole page) for a span with class 'text', then extracts its text content", "color": "variable"},
+                      {"code": ",", "role": "Separator", "tip": "Separates dictionary entries", "color": "syntax"},
+                      {"code": "\n        'author': quote.find('small', class_='author').text", "role": "Nested extract", "tip": "Finds the author name within this quote element -- the 'small' tag with class 'author' contains the name text", "color": "variable"},
+                      {"code": "\n    })", "role": "Close", "tip": "Closes the dictionary and the append() call -- one complete record is now added to all_data", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Add a polite delay between web requests to avoid overwhelming the server",
+                  "pattern": "time.sleep(seconds)",
+                  "structureNote": "Rate limiting is not optional -- it's a <strong>core responsibility</strong> of any scraper. Without delays, your code can send hundreds of requests per second, overwhelming the server and getting your IP blocked. The <code>time.sleep()</code> call pauses your script, mimicking human browsing speed. A 2-3 second delay is standard for research scraping.",
+                  "languages": {
+                    "python": [
+                      {"code": "time", "role": "Module", "tip": "Python's built-in time module -- provides functions for delays, timestamps, and time measurement", "color": "library"},
+                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the sleep() function from the time module", "color": "syntax"},
+                      {"code": "sleep", "role": "Function", "tip": "Pauses your script for the specified number of seconds. The program does nothing during this time -- it just waits", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument", "color": "syntax"},
+                      {"code": "2", "role": "Seconds", "tip": "Wait 2 seconds before continuing. For research scraping, 2-5 seconds is polite. Some sites specify a Crawl-delay in robots.txt -- always respect it", "color": "special"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the sleep() call -- execution resumes after the delay", "color": "syntax"}
+                    ],
+                    "r": [
+                      {"code": "Sys.sleep", "role": "Function", "tip": "R's built-in function to pause execution -- equivalent to Python's time.sleep(). 'Sys' refers to system-level operations", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the argument", "color": "syntax"},
+                      {"code": "2", "role": "Seconds", "tip": "Pause for 2 seconds. Adjust based on the site's robots.txt Crawl-delay directive if one exists", "color": "special"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- R waits 2 seconds then continues", "color": "syntax"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Fetch a web page with a custom User-Agent header and a timeout for safety",
+                  "pattern": "response = requests.get(url, headers=dict, timeout=N)",
+                  "structureNote": "The <code>headers</code> parameter identifies your scraper to the website. A clear User-Agent with contact information is professional and transparent -- it tells website owners who is visiting and how to reach you if there is a problem. The <code>timeout</code> prevents your script from hanging forever if a server does not respond.",
+                  "languages": {
+                    "python": [
+                      {"code": "response", "role": "Variable", "tip": "Stores the server's response including the HTML content, status code, and headers", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the response for inspection and parsing", "color": "operator"},
+                      {"code": "requests.get", "role": "Function", "tip": "Sends an HTTP GET request to fetch the page at the specified URL", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the arguments", "color": "syntax"},
+                      {"code": "url", "role": "URL", "tip": "The web address to fetch -- a string variable containing the target page URL", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments", "color": "syntax"},
+                      {"code": "headers", "role": "Keyword arg", "tip": "Named parameter that passes a dictionary of HTTP headers -- metadata about your request sent to the server", "color": "argument"},
+                      {"code": "=", "role": "Binding", "tip": "Connects the parameter name to its value", "color": "operator"},
+                      {"code": "headers", "role": "Dict variable", "tip": "A dictionary like {'User-Agent': 'Research scraper; contact@university.edu'} that identifies your scraper", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates the headers argument from the timeout", "color": "syntax"},
+                      {"code": "timeout", "role": "Keyword arg", "tip": "Named parameter that sets the maximum seconds to wait for a response", "color": "argument"},
+                      {"code": "=", "role": "Binding", "tip": "Connects the parameter name to the timeout value", "color": "operator"},
+                      {"code": "30", "role": "Seconds", "tip": "Wait at most 30 seconds for the server to respond. Without this, a dead server could freeze your script indefinitely", "color": "special"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends the request -- the page is now fetched with proper identification and a safety timeout", "color": "syntax"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <div class="nav-footer">
           <a href="02b-apis.html" class="nav-link prev">Working with APIs (02b)</a>
           <a href="03-data-exploration.html" class="nav-link next">Module 3: Data Exploration</a>
@@ -1487,6 +1705,7 @@ Scraping page 10...
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
   <script src="../js/chatbot.js"></script>
 

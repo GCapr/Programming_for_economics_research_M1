@@ -146,6 +146,163 @@
           </ul>
         </div>
 
+        <!-- ═══ Code Grammar Primer ═══ -->
+        <section class="grammar-primer-section">
+          <h2 id="code-grammar">Code Grammar</h2>
+          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
+          <div class="grammar-primer">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Set up and fit a synthetic control model",
+                  "pattern": "sc = Synth(data, outcome, id, time, treated_unit, treatment_period)",
+                  "structureNote": "Synthetic control constructs a <strong>weighted combination of control units</strong> that matches the treated unit's pre-treatment trajectory. The algorithm finds weights that minimize the pre-treatment discrepancy between the treated unit and the synthetic version. Post-treatment gaps are the estimated treatment effect.",
+                  "languages": {
+                    "python": [
+                      {"code": "sc", "role": "Variable", "tip": "Stores the synthetic control object.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the object.", "color": "peach"},
+                      {"code": "Synth", "role": "Constructor", "tip": "From SyntheticControlMethods package. Creates a synthetic control estimator.", "color": "blue"},
+                      {"code": "(df", "role": "Data", "tip": "Panel data in long format: unit, time, outcome, covariates.", "color": "sky"},
+                      {"code": ", outcome_var=\"gdp\"", "role": "Outcome", "tip": "The outcome variable name as a string.", "color": "green"},
+                      {"code": ", id_var=\"country\"", "role": "Unit ID", "tip": "The unit identifier variable.", "color": "green"},
+                      {"code": ", time_var=\"year\"", "role": "Time Var", "tip": "The time variable.", "color": "green"},
+                      {"code": ", treatment_period=1990", "role": "Treatment Time", "tip": "When the treatment/policy occurs. Pre-treatment data is used for fitting.", "color": "lavender"},
+                      {"code": ", treated_unit=\"West Germany\"", "role": "Treated Unit", "tip": "The name/ID of the treated unit.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the constructor. Call sc.fit() next to estimate.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "tsset country_id year", "role": "Set Panel", "tip": "Declares the panel structure. Required before using synth.", "color": "mauve"},
+                      {"code": "\n", "role": "Newline", "tip": "Next command.", "color": "text"},
+                      {"code": "synth", "role": "Command", "tip": "Stata's synthetic control command. ssc install synth.", "color": "mauve"},
+                      {"code": " gdp", "role": "Outcome", "tip": "The outcome variable.", "color": "sky"},
+                      {"code": " gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989)", "role": "Predictors", "tip": "Pre-treatment outcome values to match on. Each year is a separate predictor.", "color": "green"},
+                      {"code": " population trade_openness", "role": "Covariates", "tip": "Additional pre-treatment characteristics to match on.", "color": "green"},
+                      {"code": ", ///\n    trunit(7) trperiod(1990)", "role": "Treatment Spec", "tip": "trunit = treated unit ID number. trperiod = year of treatment.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "dataprep.out", "role": "Variable", "tip": "Stores the prepared data for Synth.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "dataprep", "role": "Function", "tip": "From the Synth package. Formats data for the synthetic control algorithm.", "color": "blue"},
+                      {"code": "(foo = df", "role": "Data", "tip": "The panel data frame.", "color": "sky"},
+                      {"code": ", predictors = c(\"gdp\", \"population\", \"trade_openness\")", "role": "Predictors", "tip": "Variables to match on in the pre-treatment period.", "color": "green"},
+                      {"code": ", dependent = \"gdp\"", "role": "Outcome", "tip": "The outcome variable to track.", "color": "green"},
+                      {"code": ", treatment.identifier = 7", "role": "Treated Unit", "tip": "Numeric ID of the treated unit.", "color": "lavender"},
+                      {"code": ", controls.identifier = c(1:6, 8:20)", "role": "Donor Pool", "tip": "IDs of potential control units (the donor pool).", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends dataprep. Then call synth(dataprep.out) to estimate.", "color": "overlay"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Extract donor weights from the synthetic control",
+                  "pattern": "weights = sc.W or matrix list e(W_weights)",
+                  "structureNote": "The <strong>donor weights</strong> show how much each control unit contributes to the synthetic version. Most weights are zero (sparse solution). A few key donors with positive weights form the synthetic control. Examining which donors matter provides intuition about the comparison.",
+                  "languages": {
+                    "python": [
+                      {"code": "print", "role": "Function", "tip": "Displays the weights.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins argument.", "color": "overlay"},
+                      {"code": "\"Donor weights:\"", "role": "Label", "tip": "Descriptive label.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends print.", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "print(sc.W)", "role": "Weights", "tip": "sc.W contains the donor weights. Each row is a control unit, value is its weight (sums to 1).", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "matrix list", "role": "Command", "tip": "Displays a Stata matrix.", "color": "mauve"},
+                      {"code": " e(W_weights)", "role": "Matrix", "tip": "After running synth, e(W_weights) contains the donor unit weights. e() accesses stored estimation results.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "synth.tables", "role": "Variable", "tip": "Stores formatted tables from synth results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "synth.tab(dataprep.res = dataprep.out, synth.res = synth.out)", "role": "Table Function", "tip": "Creates summary tables from the synth results.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "print(synth.tables$tab.w)", "role": "Print Weights", "tip": "$tab.w contains the donor weights table. Shows each unit's contribution.", "color": "teal"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Run placebo tests (in-space) for inference",
+                  "pattern": "for each control unit: fit synth as if it were treated",
+                  "structureNote": "<strong>Placebo tests</strong> are the primary inference method for synthetic control. You re-run the analysis treating each control unit as if it were the treated unit. If the treated unit's effect is unusually large compared to the placebo distribution, the effect is statistically significant. This is a permutation-based approach.",
+                  "languages": {
+                    "python": [
+                      {"code": "placebo_effects", "role": "Storage", "tip": "Dictionary to store gaps (treated - synthetic) for each placebo unit.", "color": "pink"},
+                      {"code": " = {}", "role": "Empty Dict", "tip": "Will hold unit_name: gap_series pairs.", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "for unit in control_units:", "role": "Loop", "tip": "Iterate over each control unit, treating it as the 'treated' unit.", "color": "mauve"},
+                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
+                      {"code": "sc = Synth(df, ..., treated_unit=unit)", "role": "Fit Placebo", "tip": "Run synth treating this control unit as treated. Other controls form the donor pool.", "color": "blue"},
+                      {"code": "\n    ", "role": "Indent", "tip": "Still in loop.", "color": "text"},
+                      {"code": "sc.fit()", "role": "Estimate", "tip": "Fit the synthetic control for this placebo unit.", "color": "teal"},
+                      {"code": "\n    ", "role": "Indent", "tip": "Still in loop.", "color": "text"},
+                      {"code": "placebo_effects[unit] = sc.gaps", "role": "Store Gaps", "tip": "sc.gaps = treated - synthetic over time. Store for comparison with the real treated unit.", "color": "sky"}
+                    ],
+                    "stata": [
+                      {"code": "synth_runner", "role": "Command", "tip": "Automates placebo tests. ssc install synth_runner.", "color": "mauve"},
+                      {"code": " gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) population trade_openness", "role": "Specification", "tip": "Same specification as the main synth command.", "color": "sky"},
+                      {"code": ", ///\n    trunit(7) trperiod(1990)", "role": "Treatment Spec", "tip": "Treated unit and period.", "color": "yellow"},
+                      {"code": " gen_vars", "role": "Option", "tip": "Generates variables for placebo effects and p-values.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "placebo.out", "role": "Variable", "tip": "Stores placebo test results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
+                      {"code": "generate.placebos(dataprep.out, synth.out, Sigf.ipop = 5)", "role": "Function", "tip": "From SCtools. Runs the synth algorithm for each control unit as a placebo.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "plot_placebos(placebo.out)", "role": "Plot", "tip": "Plots the treated unit gap against all placebo gaps. The treated line should stand out.", "color": "teal"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Calculate the placebo p-value from MSPE ratios",
+                  "pattern": "pvalue = fraction of placebos with effects >= treated effect",
+                  "structureNote": "The <strong>p-value</strong> is the fraction of placebo units with post-treatment effects as large as (or larger than) the treated unit's effect. A common metric is the ratio of post-treatment MSPE to pre-treatment MSPE — a large ratio means the post-treatment gap is unusual relative to the pre-treatment fit.",
+                  "languages": {
+                    "python": [
+                      {"code": "post_mspe", "role": "Treated MSPE", "tip": "Mean squared prediction error for the treated unit after treatment.", "color": "pink"},
+                      {"code": " = np.mean(treated_gaps[1990:]**2)", "role": "Computation", "tip": "Square the gaps and average them. Larger MSPE = bigger treatment effect.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "placebo_mspe", "role": "Placebo MSPEs", "tip": "Same computation for each placebo unit.", "color": "pink"},
+                      {"code": " = [np.mean(g[1990:]**2) for g in placebo_effects.values()]", "role": "List Comprehension", "tip": "Computes post-MSPE for every placebo in one line.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": "pvalue = np.mean(placebo_mspe >= post_mspe)", "role": "P-value", "tip": "Fraction of placebos with effects as large as or larger than the treated unit. Small p-value = significant effect.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "pval_graphs", "role": "Command", "tip": "After synth_runner, this command displays the p-value graph showing where the treated unit ranks.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "mspe.test(placebo.out)", "role": "Function", "tip": "From SCtools. Computes the MSPE ratio test and reports the p-value based on the permutation distribution.", "color": "blue"}
+                    ]
+                  }
+                },
+                {
+                  "instruction": "Plot the treated vs synthetic control trajectories",
+                  "pattern": "plot actual and synthetic outcomes over time",
+                  "structureNote": "The <strong>path plot</strong> is the signature visualization for synthetic control. It shows the treated unit and its synthetic counterpart over time. Pre-treatment fit should be tight (the lines overlap). Post-treatment divergence is the estimated treatment effect. A vertical line marks the treatment date.",
+                  "languages": {
+                    "python": [
+                      {"code": "sc.plot", "role": "Method", "tip": "The Synth object's built-in plotting method.", "color": "teal"},
+                      {"code": "([\"original\", \"pointwise\"])", "role": "Plot Types", "tip": "\"original\" shows treated vs synthetic. \"pointwise\" shows the gap over time with confidence bands.", "color": "green"}
+                    ],
+                    "stata": [
+                      {"code": "synth", "role": "Command", "tip": "The synth command with the figure option.", "color": "mauve"},
+                      {"code": " gdp gdp(1985) ... population trade_openness, ///\n    trunit(7) trperiod(1990)", "role": "Specification", "tip": "Same synth specification.", "color": "sky"},
+                      {"code": " ///\n    figure", "role": "Figure Option", "tip": "Produces the path plot showing treated vs synthetic control trajectories.", "color": "yellow"}
+                    ],
+                    "r": [
+                      {"code": "path.plot", "role": "Function", "tip": "From the Synth package. Creates the treated vs synthetic control path plot.", "color": "blue"},
+                      {"code": "(synth.res = synth.out", "role": "Results", "tip": "The synth estimation results.", "color": "sky"},
+                      {"code": ", dataprep.res = dataprep.out", "role": "Data", "tip": "The prepared data from dataprep().", "color": "sky"},
+                      {"code": ", Ylab = \"GDP\", Xlab = \"Year\"", "role": "Labels", "tip": "Axis labels for the plot.", "color": "green"},
+                      {"code": ", tr.intake = 1990", "role": "Treatment Line", "tip": "Draws a vertical line at the treatment date.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </section>
+
         <h2 id="basic">Basic Synthetic Control</h2>
 
         <p>
@@ -1098,6 +1255,7 @@ Time weights (lambda):
 
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
+  <script src="../js/grammar-primer.js"></script>
   <script src="../js/password-protection.js"></script>
 </body>
 </html>

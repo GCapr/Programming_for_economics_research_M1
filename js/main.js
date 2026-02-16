@@ -57,13 +57,20 @@ function initCodeTabs() {
             content.classList.add('active');
           }
           // Reset novel mode when switching tabs
-          var novelPanel = content.querySelector('.novel-panel');
-          if (novelPanel) {
-            var pre = content.querySelector('pre');
-            if (pre) pre.style.display = '';
-            novelPanel.remove();
-            content.classList.remove('novel-active');
-          }
+          content.querySelectorAll('pre.novel-annotated').forEach(function(annotatedPre) {
+            var codeEl = annotatedPre.querySelector('code');
+            if (codeEl && codeEl._originalHTML) {
+              codeEl.innerHTML = codeEl._originalHTML;
+              delete codeEl._originalHTML;
+            }
+            annotatedPre.classList.remove('novel-annotated');
+            var novelBtn = annotatedPre.querySelector('.read-novel-btn');
+            if (novelBtn) {
+              novelBtn.textContent = 'Read Like a Novel';
+              novelBtn.classList.remove('active');
+            }
+          });
+          content.classList.remove('novel-active');
         });
 
         // Store preference
@@ -215,11 +222,11 @@ function initCopyCode() {
 
 /**
  * Initialize "Read Like a Novel" functionality
- * Adds a button to each code block that generates a prose narrative
- * from the semantic markup and tooltip annotations
+ * Adds a button to each code block that shows inline orange annotations
+ * next to the code, extracted from tooltip data and semantic markup.
+ * The code block becomes horizontally scrollable to accommodate the annotations.
  */
 function initReadLikeNovel() {
-  var narrativeCache = new WeakMap();
 
   // Only target <pre> elements inside .tab-content (the actual code blocks)
   document.querySelectorAll('.tab-content pre').forEach(function(pre) {
@@ -229,21 +236,20 @@ function initReadLikeNovel() {
     var btn = document.createElement('button');
     btn.className = 'read-novel-btn';
     btn.textContent = 'Read Like a Novel';
-    btn.setAttribute('aria-label', 'Read this code as a narrative explanation');
+    btn.setAttribute('aria-label', 'Show inline annotations for this code');
     btn.setAttribute('title', 'Read Like a Novel');
 
     btn.addEventListener('click', function() {
       var tabContent = pre.closest('.tab-content');
       if (!tabContent) return;
 
-      // Toggle: if already in novel mode, go back to code
-      var existingPanel = tabContent.querySelector('.novel-panel');
-      if (existingPanel) {
-        exitNovelMode(tabContent, pre, existingPanel);
+      // Toggle: if already annotated, remove annotations
+      if (pre.classList.contains('novel-annotated')) {
+        exitNovelMode(tabContent, pre, codeEl, btn);
         return;
       }
 
-      enterNovelMode(tabContent, pre, codeEl);
+      enterNovelMode(tabContent, pre, codeEl, btn);
     });
 
     pre.appendChild(btn);
@@ -251,78 +257,131 @@ function initReadLikeNovel() {
 
   // --- Mode switching ---
 
-  function enterNovelMode(tabContent, pre, codeEl) {
-    var narrativeHtml = getOrGenerate(codeEl);
+  function enterNovelMode(tabContent, pre, codeEl, btn) {
+    codeEl._originalHTML = codeEl.innerHTML;
 
-    var panel = document.createElement('div');
-    panel.className = 'novel-panel';
-    panel.innerHTML =
-      '<div class="novel-header">' +
-        '<span class="novel-title">Reading: Code as Prose</span>' +
-        '<button class="novel-back-btn">\u2190 Back to Code</button>' +
-      '</div>' +
-      '<div class="novel-body">' + narrativeHtml + '</div>';
-
-    panel.querySelector('.novel-back-btn').addEventListener('click', function() {
-      exitNovelMode(tabContent, pre, panel);
-    });
-
-    pre.style.display = 'none';
-    tabContent.classList.add('novel-active');
-
-    var runBtn = tabContent.querySelector('.run-btn');
-    if (runBtn) {
-      tabContent.insertBefore(panel, runBtn);
-    } else {
-      tabContent.appendChild(panel);
-    }
-
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  function exitNovelMode(tabContent, pre, panel) {
-    panel.remove();
-    pre.style.display = '';
-    tabContent.classList.remove('novel-active');
-  }
-
-  function getOrGenerate(codeEl) {
-    if (narrativeCache.has(codeEl)) return narrativeCache.get(codeEl);
-    var html = generateNarrative(codeEl);
-    narrativeCache.set(codeEl, html);
-    return html;
-  }
-
-  // --- Narrative generation ---
-
-  function generateNarrative(codeEl) {
     var lines = parseCodeLines(codeEl);
 
-    if (lines.length === 0) {
-      return '<p class="novel-no-annotations">This code block is empty.</p>';
-    }
+    // First pass: compute annotations and find max code-line width
+    var lineData = [];
+    var maxLen = 0;
 
-    var html = '';
     for (var i = 0; i < lines.length; i++) {
+      var textLen = lines[i].dom.textContent.length;
       var type = classifyLine(lines[i].dom);
+      var annotation = '';
+
       switch (type) {
-        case 'blank':
-          html += '<div class="novel-break"></div>';
-          break;
         case 'comment':
-          html += narrateComment(lines[i].dom);
+        case 'blank':
           break;
         case 'code-with-tooltips':
-          html += narrateCodeWithTooltips(lines[i].dom);
+          annotation = getTooltipAnnotation(lines[i].dom);
           break;
         case 'code-plain':
-          html += narratePlainCode(lines[i].dom);
+          annotation = getPlainAnnotation(lines[i].dom);
           break;
+      }
+
+      lineData.push({ html: lines[i].html, textLen: textLen, annotation: annotation });
+      if (annotation && textLen > maxLen) maxLen = textLen;
+    }
+
+    // Second pass: build annotated HTML with column-aligned annotations
+    var annotatedLines = [];
+    var padCol = maxLen + 4;
+
+    for (var i = 0; i < lineData.length; i++) {
+      if (lineData[i].annotation) {
+        var padding = padCol - lineData[i].textLen;
+        if (padding < 2) padding = 2;
+        var spaces = new Array(padding + 1).join(' ');
+        annotatedLines.push(
+          lineData[i].html +
+          '<span class="novel-annotation">' + spaces + '\u2190 ' +
+          escapeHtmlText(lineData[i].annotation) + '</span>'
+        );
+      } else {
+        annotatedLines.push(lineData[i].html);
       }
     }
 
-    return html;
+    codeEl.innerHTML = annotatedLines.join('\n');
+
+    // Stagger the fade-in animation for each annotation
+    var annotations = codeEl.querySelectorAll('.novel-annotation');
+    annotations.forEach(function(ann, idx) {
+      ann.style.setProperty('--annotation-delay', (idx * 0.04) + 's');
+    });
+
+    pre.classList.add('novel-annotated');
+    tabContent.classList.add('novel-active');
+    btn.textContent = 'Hide Annotations';
+    btn.classList.add('active');
   }
+
+  function exitNovelMode(tabContent, pre, codeEl, btn) {
+    if (codeEl._originalHTML) {
+      codeEl.innerHTML = codeEl._originalHTML;
+      delete codeEl._originalHTML;
+    }
+    pre.classList.remove('novel-annotated');
+    tabContent.classList.remove('novel-active');
+    btn.textContent = 'Read Like a Novel';
+    btn.classList.remove('active');
+  }
+
+  // --- Annotation extraction ---
+
+  function getTooltipAnnotation(dom) {
+    var allTooltips = dom.querySelectorAll('.code-tooltip[data-tip]');
+    var topLevel = [];
+
+    allTooltips.forEach(function(tt) {
+      var parent = tt.parentElement ? tt.parentElement.closest('.code-tooltip[data-tip]') : null;
+      if (!parent || !dom.contains(parent)) {
+        topLevel.push(tt);
+      }
+    });
+
+    if (topLevel.length === 0) return '';
+
+    var parts = topLevel.map(function(tt) {
+      return extractProse(tt.getAttribute('data-tip'));
+    });
+
+    return parts.join(' ');
+  }
+
+  function getPlainAnnotation(dom) {
+    // If there's a trailing comment visible in the code, skip extra annotation
+    var commentInLine = dom.querySelector('.code-comment');
+    if (commentInLine) return '';
+
+    // Build description from semantic markup classes
+    var parts = [];
+    var kws = dom.querySelectorAll('.code-keyword');
+    var fns = dom.querySelectorAll('.code-function');
+    var pkgs = dom.querySelectorAll('.code-package');
+
+    if (kws.length > 0) {
+      var kwTexts = Array.from(kws).map(function(k) { return k.textContent.trim(); }).filter(Boolean);
+      if (kwTexts.length) parts.push('uses ' + kwTexts.join(', '));
+    }
+    if (fns.length > 0) {
+      var fnTexts = Array.from(fns).map(function(f) { return f.textContent.trim(); }).filter(Boolean);
+      if (fnTexts.length) parts.push('calls ' + fnTexts.join(', '));
+    }
+    if (pkgs.length > 0) {
+      var pkgTexts = Array.from(pkgs).map(function(p) { return p.textContent.trim(); }).filter(Boolean);
+      if (pkgTexts.length) parts.push('from ' + pkgTexts.join(', '));
+    }
+
+    if (parts.length === 0) return '';
+    return 'This line ' + parts.join(', ') + '.';
+  }
+
+  // --- Helpers ---
 
   function parseCodeLines(codeEl) {
     var rawHTML = codeEl.innerHTML;
@@ -338,7 +397,6 @@ function initReadLikeNovel() {
     var text = dom.textContent.trim();
     if (text === '') return 'blank';
 
-    // Check if line is comment-only
     var comments = dom.querySelectorAll('.code-comment');
     if (comments.length > 0) {
       var clone = dom.cloneNode(true);
@@ -351,142 +409,8 @@ function initReadLikeNovel() {
     return 'code-plain';
   }
 
-  function narrateComment(dom) {
-    var commentEl = dom.querySelector('.code-comment');
-    var text = commentEl.textContent;
-    // Strip comment markers: # * // ---
-    text = text.replace(/^[\s]*[#*]+\s?/, '').replace(/^[\s]*\/\/\s?/, '').trim();
-    if (text === '') return '';
-    return '<p class="novel-context"><em>' + escapeHtmlText(text) + '</em></p>';
-  }
-
-  function narrateCodeWithTooltips(dom) {
-    var codeText = dom.textContent.trim();
-
-    // Check for trailing inline comment
-    var trailingComment = '';
-    var commentInLine = dom.querySelector('.code-comment');
-    if (commentInLine) {
-      var clone = dom.cloneNode(true);
-      clone.querySelectorAll('.code-comment').forEach(function(c) { c.remove(); });
-      var pureCodeText = clone.textContent.trim();
-      if (pureCodeText !== '') {
-        trailingComment = commentInLine.textContent
-          .replace(/^[\s]*[#*]+\s?/, '')
-          .replace(/^[\s]*\/\/\s?/, '')
-          .trim();
-      }
-    }
-
-    // Collect top-level vs nested tooltips
-    var allTooltips = dom.querySelectorAll('.code-tooltip[data-tip]');
-    var topLevel = [];
-    var nested = [];
-
-    allTooltips.forEach(function(tt) {
-      var parent = tt.parentElement ? tt.parentElement.closest('.code-tooltip[data-tip]') : null;
-      if (parent && dom.contains(parent)) {
-        nested.push(tt);
-      } else {
-        topLevel.push(tt);
-      }
-    });
-
-    var html = '<p class="novel-code-line">';
-    html += '<code class="novel-inline-code">' + escapeHtmlText(codeText) + '</code>';
-    html += '</p>';
-
-    if (trailingComment) {
-      html += '<p class="novel-context"><em>' + escapeHtmlText(trailingComment) + '</em></p>';
-    }
-
-    if (topLevel.length > 0) {
-      html += '<p class="novel-explanation">';
-      var explanations = topLevel.map(function(tt) {
-        return extractProse(tt.getAttribute('data-tip'));
-      });
-      html += explanations.join(' ');
-
-      if (nested.length > 0) {
-        var nestedExplanations = nested.map(function(tt) {
-          return extractProse(tt.getAttribute('data-tip'));
-        });
-        html += ' ' + nestedExplanations.join(' ');
-      }
-
-      html += '</p>';
-    }
-
-    return html;
-  }
-
-  function narratePlainCode(dom) {
-    var codeText = dom.textContent.trim();
-
-    // Check for inline comment
-    var trailingComment = '';
-    var commentInLine = dom.querySelector('.code-comment');
-    if (commentInLine) {
-      trailingComment = commentInLine.textContent
-        .replace(/^[\s]*[#*]+\s?/, '')
-        .replace(/^[\s]*\/\/\s?/, '')
-        .trim();
-    }
-
-    var html = '<p class="novel-code-line">';
-    html += '<code class="novel-inline-code">' + escapeHtmlText(codeText) + '</code>';
-    html += '</p>';
-
-    if (trailingComment) {
-      html += '<p class="novel-explanation-plain">' + escapeHtmlText(trailingComment) + '</p>';
-    } else {
-      var desc = buildSemanticDescription(dom);
-      if (desc) {
-        html += '<p class="novel-explanation-plain">' + desc + '</p>';
-      }
-    }
-
-    return html;
-  }
-
-  function buildSemanticDescription(dom) {
-    var parts = [];
-    var kws = dom.querySelectorAll('.code-keyword');
-    var fns = dom.querySelectorAll('.code-function');
-    var pkgs = dom.querySelectorAll('.code-package');
-
-    if (kws.length > 0) {
-      var kwTexts = Array.from(kws).map(function(k) { return k.textContent.trim(); }).filter(Boolean);
-      if (kwTexts.length) {
-        parts.push('uses ' + kwTexts.map(function(k) {
-          return '<code>' + escapeHtmlText(k) + '</code>';
-        }).join(', '));
-      }
-    }
-    if (fns.length > 0) {
-      var fnTexts = Array.from(fns).map(function(f) { return f.textContent.trim(); }).filter(Boolean);
-      if (fnTexts.length) {
-        parts.push('calls ' + fnTexts.map(function(f) {
-          return '<code>' + escapeHtmlText(f) + '</code>';
-        }).join(', '));
-      }
-    }
-    if (pkgs.length > 0) {
-      var pkgTexts = Array.from(pkgs).map(function(p) { return p.textContent.trim(); }).filter(Boolean);
-      if (pkgTexts.length) {
-        parts.push('from ' + pkgTexts.map(function(p) {
-          return '<code>' + escapeHtmlText(p) + '</code>';
-        }).join(', '));
-      }
-    }
-
-    if (parts.length === 0) return '';
-    return 'This line ' + parts.join(', ') + '.';
-  }
-
   function extractProse(tipText) {
     var text = tipText;
-    // Strip leading ALL-CAPS labels like "IMPORT:", "VARIABLE ASSIGNMENT:", etc.
     var match = text.match(/^[A-Z_().\s]{2,40}:\s*/);
     if (match) {
       text = text.substring(match[0].length);

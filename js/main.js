@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Copy code functionality
   initCopyCode();
 
+  // Read Like a Novel - prose view for code blocks
+  initReadLikeNovel();
+
   // Hotspot tooltip positioning
   initHotspotTooltips();
 
@@ -47,14 +50,22 @@ function initCodeTabs() {
         buttons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
         
-        // Update content visibility
+        // Update content visibility and exit any active novel mode
         contents.forEach(content => {
           content.classList.remove('active');
           if (content.dataset.lang === lang) {
             content.classList.add('active');
           }
+          // Reset novel mode when switching tabs
+          var novelPanel = content.querySelector('.novel-panel');
+          if (novelPanel) {
+            var pre = content.querySelector('pre');
+            if (pre) pre.style.display = '';
+            novelPanel.remove();
+            content.classList.remove('novel-active');
+          }
         });
-        
+
         // Store preference
         localStorage.setItem('preferredLang', lang);
       });
@@ -200,6 +211,298 @@ function initCopyCode() {
     }
   `;
   document.head.appendChild(style);
+}
+
+/**
+ * Initialize "Read Like a Novel" functionality
+ * Adds a button to each code block that generates a prose narrative
+ * from the semantic markup and tooltip annotations
+ */
+function initReadLikeNovel() {
+  var narrativeCache = new WeakMap();
+
+  // Only target <pre> elements inside .tab-content (the actual code blocks)
+  document.querySelectorAll('.tab-content pre').forEach(function(pre) {
+    var codeEl = pre.querySelector('code');
+    if (!codeEl) return;
+
+    var btn = document.createElement('button');
+    btn.className = 'read-novel-btn';
+    btn.textContent = 'Read Like a Novel';
+    btn.setAttribute('aria-label', 'Read this code as a narrative explanation');
+    btn.setAttribute('title', 'Read Like a Novel');
+
+    btn.addEventListener('click', function() {
+      var tabContent = pre.closest('.tab-content');
+      if (!tabContent) return;
+
+      // Toggle: if already in novel mode, go back to code
+      var existingPanel = tabContent.querySelector('.novel-panel');
+      if (existingPanel) {
+        exitNovelMode(tabContent, pre, existingPanel);
+        return;
+      }
+
+      enterNovelMode(tabContent, pre, codeEl);
+    });
+
+    pre.appendChild(btn);
+  });
+
+  // --- Mode switching ---
+
+  function enterNovelMode(tabContent, pre, codeEl) {
+    var narrativeHtml = getOrGenerate(codeEl);
+
+    var panel = document.createElement('div');
+    panel.className = 'novel-panel';
+    panel.innerHTML =
+      '<div class="novel-header">' +
+        '<span class="novel-title">Reading: Code as Prose</span>' +
+        '<button class="novel-back-btn">\u2190 Back to Code</button>' +
+      '</div>' +
+      '<div class="novel-body">' + narrativeHtml + '</div>';
+
+    panel.querySelector('.novel-back-btn').addEventListener('click', function() {
+      exitNovelMode(tabContent, pre, panel);
+    });
+
+    pre.style.display = 'none';
+    tabContent.classList.add('novel-active');
+
+    var runBtn = tabContent.querySelector('.run-btn');
+    if (runBtn) {
+      tabContent.insertBefore(panel, runBtn);
+    } else {
+      tabContent.appendChild(panel);
+    }
+
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function exitNovelMode(tabContent, pre, panel) {
+    panel.remove();
+    pre.style.display = '';
+    tabContent.classList.remove('novel-active');
+  }
+
+  function getOrGenerate(codeEl) {
+    if (narrativeCache.has(codeEl)) return narrativeCache.get(codeEl);
+    var html = generateNarrative(codeEl);
+    narrativeCache.set(codeEl, html);
+    return html;
+  }
+
+  // --- Narrative generation ---
+
+  function generateNarrative(codeEl) {
+    var lines = parseCodeLines(codeEl);
+
+    if (lines.length === 0) {
+      return '<p class="novel-no-annotations">This code block is empty.</p>';
+    }
+
+    var html = '';
+    for (var i = 0; i < lines.length; i++) {
+      var type = classifyLine(lines[i].dom);
+      switch (type) {
+        case 'blank':
+          html += '<div class="novel-break"></div>';
+          break;
+        case 'comment':
+          html += narrateComment(lines[i].dom);
+          break;
+        case 'code-with-tooltips':
+          html += narrateCodeWithTooltips(lines[i].dom);
+          break;
+        case 'code-plain':
+          html += narratePlainCode(lines[i].dom);
+          break;
+      }
+    }
+
+    return html;
+  }
+
+  function parseCodeLines(codeEl) {
+    var rawHTML = codeEl.innerHTML;
+    var htmlLines = rawHTML.split('\n');
+    return htmlLines.map(function(lineHtml) {
+      var container = document.createElement('span');
+      container.innerHTML = lineHtml;
+      return { html: lineHtml, dom: container };
+    });
+  }
+
+  function classifyLine(dom) {
+    var text = dom.textContent.trim();
+    if (text === '') return 'blank';
+
+    // Check if line is comment-only
+    var comments = dom.querySelectorAll('.code-comment');
+    if (comments.length > 0) {
+      var clone = dom.cloneNode(true);
+      clone.querySelectorAll('.code-comment').forEach(function(c) { c.remove(); });
+      if (clone.textContent.trim() === '') return 'comment';
+    }
+
+    if (dom.querySelector('.code-tooltip[data-tip]')) return 'code-with-tooltips';
+
+    return 'code-plain';
+  }
+
+  function narrateComment(dom) {
+    var commentEl = dom.querySelector('.code-comment');
+    var text = commentEl.textContent;
+    // Strip comment markers: # * // ---
+    text = text.replace(/^[\s]*[#*]+\s?/, '').replace(/^[\s]*\/\/\s?/, '').trim();
+    if (text === '') return '';
+    return '<p class="novel-context"><em>' + escapeHtmlText(text) + '</em></p>';
+  }
+
+  function narrateCodeWithTooltips(dom) {
+    var codeText = dom.textContent.trim();
+
+    // Check for trailing inline comment
+    var trailingComment = '';
+    var commentInLine = dom.querySelector('.code-comment');
+    if (commentInLine) {
+      var clone = dom.cloneNode(true);
+      clone.querySelectorAll('.code-comment').forEach(function(c) { c.remove(); });
+      var pureCodeText = clone.textContent.trim();
+      if (pureCodeText !== '') {
+        trailingComment = commentInLine.textContent
+          .replace(/^[\s]*[#*]+\s?/, '')
+          .replace(/^[\s]*\/\/\s?/, '')
+          .trim();
+      }
+    }
+
+    // Collect top-level vs nested tooltips
+    var allTooltips = dom.querySelectorAll('.code-tooltip[data-tip]');
+    var topLevel = [];
+    var nested = [];
+
+    allTooltips.forEach(function(tt) {
+      var parent = tt.parentElement ? tt.parentElement.closest('.code-tooltip[data-tip]') : null;
+      if (parent && dom.contains(parent)) {
+        nested.push(tt);
+      } else {
+        topLevel.push(tt);
+      }
+    });
+
+    var html = '<p class="novel-code-line">';
+    html += '<code class="novel-inline-code">' + escapeHtmlText(codeText) + '</code>';
+    html += '</p>';
+
+    if (trailingComment) {
+      html += '<p class="novel-context"><em>' + escapeHtmlText(trailingComment) + '</em></p>';
+    }
+
+    if (topLevel.length > 0) {
+      html += '<p class="novel-explanation">';
+      var explanations = topLevel.map(function(tt) {
+        return extractProse(tt.getAttribute('data-tip'));
+      });
+      html += explanations.join(' ');
+
+      if (nested.length > 0) {
+        var nestedExplanations = nested.map(function(tt) {
+          return extractProse(tt.getAttribute('data-tip'));
+        });
+        html += ' ' + nestedExplanations.join(' ');
+      }
+
+      html += '</p>';
+    }
+
+    return html;
+  }
+
+  function narratePlainCode(dom) {
+    var codeText = dom.textContent.trim();
+
+    // Check for inline comment
+    var trailingComment = '';
+    var commentInLine = dom.querySelector('.code-comment');
+    if (commentInLine) {
+      trailingComment = commentInLine.textContent
+        .replace(/^[\s]*[#*]+\s?/, '')
+        .replace(/^[\s]*\/\/\s?/, '')
+        .trim();
+    }
+
+    var html = '<p class="novel-code-line">';
+    html += '<code class="novel-inline-code">' + escapeHtmlText(codeText) + '</code>';
+    html += '</p>';
+
+    if (trailingComment) {
+      html += '<p class="novel-explanation-plain">' + escapeHtmlText(trailingComment) + '</p>';
+    } else {
+      var desc = buildSemanticDescription(dom);
+      if (desc) {
+        html += '<p class="novel-explanation-plain">' + desc + '</p>';
+      }
+    }
+
+    return html;
+  }
+
+  function buildSemanticDescription(dom) {
+    var parts = [];
+    var kws = dom.querySelectorAll('.code-keyword');
+    var fns = dom.querySelectorAll('.code-function');
+    var pkgs = dom.querySelectorAll('.code-package');
+
+    if (kws.length > 0) {
+      var kwTexts = Array.from(kws).map(function(k) { return k.textContent.trim(); }).filter(Boolean);
+      if (kwTexts.length) {
+        parts.push('uses ' + kwTexts.map(function(k) {
+          return '<code>' + escapeHtmlText(k) + '</code>';
+        }).join(', '));
+      }
+    }
+    if (fns.length > 0) {
+      var fnTexts = Array.from(fns).map(function(f) { return f.textContent.trim(); }).filter(Boolean);
+      if (fnTexts.length) {
+        parts.push('calls ' + fnTexts.map(function(f) {
+          return '<code>' + escapeHtmlText(f) + '</code>';
+        }).join(', '));
+      }
+    }
+    if (pkgs.length > 0) {
+      var pkgTexts = Array.from(pkgs).map(function(p) { return p.textContent.trim(); }).filter(Boolean);
+      if (pkgTexts.length) {
+        parts.push('from ' + pkgTexts.map(function(p) {
+          return '<code>' + escapeHtmlText(p) + '</code>';
+        }).join(', '));
+      }
+    }
+
+    if (parts.length === 0) return '';
+    return 'This line ' + parts.join(', ') + '.';
+  }
+
+  function extractProse(tipText) {
+    var text = tipText;
+    // Strip leading ALL-CAPS labels like "IMPORT:", "VARIABLE ASSIGNMENT:", etc.
+    var match = text.match(/^[A-Z_().\s]{2,40}:\s*/);
+    if (match) {
+      text = text.substring(match[0].length);
+    }
+    text = text.trim();
+    if (text && !text.endsWith('.') && !text.endsWith('!') && !text.endsWith('?')) {
+      text += '.';
+    }
+    return text;
+  }
+
+  function escapeHtmlText(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
 }
 
 /**

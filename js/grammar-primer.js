@@ -97,7 +97,7 @@
     titleRow.appendChild(toggle);
     header.appendChild(titleRow);
 
-    // Exercise navigation (dots + arrows)
+    // Exercise navigation (arrows + counter + dots)
     if (exercises.length > 1) {
       var nav = ce('div', 'gp-nav');
 
@@ -109,6 +109,9 @@
         state.revealed = new Set();
         render(state);
       });
+
+      var counter = ce('span', 'gp-nav-counter');
+      counter.textContent = (idx + 1) + ' / ' + exercises.length;
 
       var dots = ce('div', 'gp-dots');
       exercises.forEach(function (_, i) {
@@ -131,6 +134,7 @@
       });
 
       nav.appendChild(prevBtn);
+      nav.appendChild(counter);
       nav.appendChild(dots);
       nav.appendChild(nextBtn);
       header.appendChild(nav);

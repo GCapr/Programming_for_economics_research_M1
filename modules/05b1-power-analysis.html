@@ -266,7 +266,7 @@ Where:
 analysis = TTestIndPower()
 
 <span class="code-comment"># Calculate required sample size</span>
-<span class="code-tooltip" data-tip="effect_size is Cohen's d = (mean1 - mean2) / pooled_sd. A 'small' effect is 0.2, 'medium' is 0.5, 'large' is 0.8">n = analysis.solve_power(
+<span class="code-tooltip" data-tip="SAMPLE SIZE: Calculates how many participants you need per group. With a small effect (d=0.3) and 80% power, you need ~176 per group — leaving out nobs1 tells the function to solve for sample size.">n = analysis.solve_power(
     effect_size=0.3,     <span class="code-comment"># Cohen's d</span>
     power=0.8,           <span class="code-comment"># Target power</span>
     alpha=0.05,          <span class="code-comment"># Significance level</span>
@@ -276,7 +276,7 @@ analysis = TTestIndPower()
 <span class="code-function">print</span>(<span class="code-string">f"Required n per group: {n:.0f}"</span>)
 
 <span class="code-comment"># Calculate power given sample size</span>
-<span class="code-tooltip" data-tip="If you already know your sample size, calculate what power you'll have">power = analysis.solve_power(
+<span class="code-tooltip" data-tip="POWER CALC: With 100 people per group and a small effect (d=0.3), you only have ~56% power — well below the 80% standard, meaning you'd miss the effect nearly half the time.">power = analysis.solve_power(
     effect_size=0.3,
     nobs1=100,           <span class="code-comment"># Sample size group 1</span>
     alpha=0.05,
@@ -286,7 +286,7 @@ analysis = TTestIndPower()
 <span class="code-function">print</span>(<span class="code-string">f"Power: {power:.1%}"</span>)
 
 <span class="code-comment"># Calculate MDE given sample size and power</span>
-<span class="code-tooltip" data-tip="Find the minimum effect size you can detect with your sample">mde = analysis.solve_power(
+<span class="code-tooltip" data-tip="MDE: With 200 participants per group at 80% power, the smallest effect you can reliably detect is d=0.28 — anything smaller would likely go unnoticed.">mde = analysis.solve_power(
     power=0.8,
     nobs1=200,
     alpha=0.05,
@@ -300,20 +300,20 @@ analysis = TTestIndPower()
 <pre><code><span class="code-comment">* Stata: Built-in power commands</span>
 
 <span class="code-comment">* Calculate required sample size for two-sample t-test</span>
-<span class="code-tooltip" data-tip="power twomeans calculates sample size for comparing two means. Specify the means and standard deviation.">power twomeans 50 55, sd(15) power(0.8)</span>
+<span class="code-tooltip" data-tip="SAMPLE SIZE: Finds how many people you need to detect a 5-point difference (50 vs 55) given sd=15 and 80% power — Stata returns 142 per group (284 total).">power twomeans 50 55, sd(15) power(0.8)</span>
 <span class="code-comment">* Output: n per group needed to detect difference of 5 (50 vs 55)</span>
 
 <span class="code-comment">* Calculate power given sample size</span>
-<span class="code-tooltip" data-tip="n(100) specifies 100 per group. Stata returns the power you'll achieve.">power twomeans 50 55, sd(15) n(100)</span>
+<span class="code-tooltip" data-tip="POWER CALC: With only 100 per group, you'd have ~65% power to detect a 5-point difference — below the 80% standard, meaning a real effect would often go undetected.">power twomeans 50 55, sd(15) n(100)</span>
 
 <span class="code-comment">* Calculate MDE given sample size and power</span>
-<span class="code-tooltip" data-tip="Omit the second mean, specify n and power. Stata finds the detectable difference.">power twomeans 50, sd(15) n(200) power(0.8)</span>
+<span class="code-tooltip" data-tip="MDE: With 200 participants total at 80% power, the smallest detectable difference from the control mean of 50 is about 3.33 — anything smaller would likely be missed.">power twomeans 50, sd(15) n(200) power(0.8)</span>
 
 <span class="code-comment">* Two-sample proportions</span>
-<span class="code-tooltip" data-tip="For binary outcomes, use power twoproportions">power twoproportions 0.3 0.4, power(0.8)</span>
+<span class="code-tooltip" data-tip="PROPORTIONS: For binary outcomes (e.g., 'did they enroll?'), use twoproportions — here it finds the sample needed to detect a jump from 30% to 40% enrollment.">power twoproportions 0.3 0.4, power(0.8)</span>
 
 <span class="code-comment">* Create power curve table</span>
-<span class="code-tooltip" data-tip="n(50(50)300) tests sample sizes from 50 to 300 in steps of 50">power twomeans 50 55, sd(15) n(50(50)300) table</span>
+<span class="code-tooltip" data-tip="POWER CURVE: Tests sample sizes 50, 100, 150, 200, 250, 300 and shows the power at each — helps you see exactly where you cross the 80% threshold.">power twomeans 50 55, sd(15) n(50(50)300) table</span>
 
 <span class="code-comment">* Create power curve graph</span>
 power twomeans 50 55, sd(15) n(50(50)300) graph</code></pre>
@@ -324,7 +324,7 @@ power twomeans 50 55, sd(15) n(50(50)300) graph</code></pre>
 <span class="code-keyword">library</span>(pwr)
 
 <span class="code-comment"># Calculate required sample size</span>
-<span class="code-tooltip" data-tip="d is Cohen's d = effect/sd. Leave n as NULL to solve for it.">result <- pwr.t.test(
+<span class="code-tooltip" data-tip="SAMPLE SIZE: With a small effect (d=0.3) and 80% power target, the function solves for n — you need ~175 per group. Leaving n out tells R 'find this for me'.">result <- pwr.t.test(
   d = 0.3,              <span class="code-comment"># Cohen's d effect size</span>
   sig.level = 0.05,     <span class="code-comment"># Alpha</span>
   power = 0.8,          <span class="code-comment"># Target power</span>
@@ -335,7 +335,7 @@ power twomeans 50 55, sd(15) n(50(50)300) graph</code></pre>
 <span class="code-comment"># n is per group</span>
 
 <span class="code-comment"># Calculate power given sample size</span>
-<span class="code-tooltip" data-tip="Specify n (per group) to find power">result <- pwr.t.test(
+<span class="code-tooltip" data-tip="POWER CALC: With 100 per group and a small effect (d=0.3), you'd only have ~56% power — not enough to reliably detect the effect if it exists.">result <- pwr.t.test(
   d = 0.3,
   n = 100,
   sig.level = 0.05,
@@ -344,7 +344,7 @@ power twomeans 50 55, sd(15) n(50(50)300) graph</code></pre>
 <span class="code-function">print</span>(result$power)
 
 <span class="code-comment"># Calculate MDE given sample size</span>
-<span class="code-tooltip" data-tip="Leave d as NULL to find the minimum detectable effect">result <- pwr.t.test(
+<span class="code-tooltip" data-tip="MDE: With 200 per group at 80% power, the smallest effect you can reliably detect is d=0.28 — anything smaller would likely go unnoticed in your study.">result <- pwr.t.test(
   n = 200,
   sig.level = 0.05,
   power = 0.8,
@@ -353,7 +353,7 @@ power twomeans 50 55, sd(15) n(50(50)300) graph</code></pre>
 <span class="code-function">print</span>(result$d)
 
 <span class="code-comment"># Power curve plot</span>
-<span class="code-tooltip" data-tip="plot() on a pwr object creates a nice power curve">plot(result)</span></code></pre>
+<span class="code-tooltip" data-tip="POWER CURVE: Automatically plots power vs. sample size, showing exactly where you cross the 80% threshold — great for reports and grant applications.">plot(result)</span></code></pre>
 <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -472,7 +472,7 @@ NOTE: n is number in *each* group
     <span class="code-comment"># Generate data</span>
     data = []
     <span class="code-keyword">for</span> c <span class="code-keyword">in</span> range(n_clusters):
-        <span class="code-tooltip" data-tip="Cluster-level treatment assignment and random effect">treated = np.random.binomial(1, 0.5)
+        <span class="code-tooltip" data-tip="CLUSTER DESIGN: Each cluster (school/village) is randomly assigned to treatment or control, and gets its own random productivity shock — individuals within the same cluster share this effect.">treated = np.random.binomial(1, 0.5)
         cluster_effect = np.random.normal(0, np.sqrt(cluster_var))</span>
 
         <span class="code-keyword">for</span> i <span class="code-keyword">in</span> range(cluster_size):
@@ -495,7 +495,7 @@ effect_size = 0.3
 n_clusters = 30
 cluster_size = 20
 
-<span class="code-tooltip" data-tip="Count significant results across many simulations">significant = 0
+<span class="code-tooltip" data-tip="POWER LOOP: Runs 1000 simulated cluster RCTs. Each time, generates new data, runs the analysis with cluster-robust SEs, and checks if p &lt; 0.05. The fraction of rejections is the estimated power.">significant = 0
 <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> tqdm(range(n_sims)):
     df = simulate_cluster_rct(n_clusters, cluster_size, effect_size)
     pval = run_analysis(df)
@@ -529,14 +529,14 @@ program define sim_cluster, rclass
     local clust_sd = sqrt(`icc')
     local ind_sd = sqrt(1 - `icc')
 
-    <span class="code-tooltip" data-tip="Generate cluster random effect once per cluster">bysort cluster: gen cluster_fe = rnormal(0, `clust_sd') if _n == 1
+    <span class="code-tooltip" data-tip="CLUSTER EFFECT: Creates one shared random shock per cluster (school/village) — all individuals in the same cluster get the same value, mimicking how outcomes within groups tend to be correlated (ICC).">bysort cluster: gen cluster_fe = rnormal(0, `clust_sd') if _n == 1
     bysort cluster: replace cluster_fe = cluster_fe[1]</span>
 
     gen y = `effect' * treated + cluster_fe + rnormal(0, `ind_sd')
 
     <span class="code-comment">* Run analysis with clustered SEs</span>
     quietly reg y treated, cluster(cluster)
-    <span class="code-tooltip" data-tip="Return p-value for treatment coefficient">return scalar pval = 2*ttail(e(df_r), abs(_b[treated]/_se[treated]))</span>
+    <span class="code-tooltip" data-tip="P-VALUE: Computes the two-sided p-value for the treatment effect from the cluster-robust regression, which we'll compare to 0.05 across simulations to estimate power.">return scalar pval = 2*ttail(e(df_r), abs(_b[treated]/_se[treated]))</span>
 end
 
 <span class="code-comment">* Run simulations</span>
@@ -558,7 +558,7 @@ simulate_cluster_rct <- <span class="code-keyword">function</span>(n_clusters, c
   indiv_var <- 1 - icc
 
   data <- do.call(rbind, lapply(1:n_clusters, <span class="code-keyword">function</span>(c) {
-    <span class="code-tooltip" data-tip="Treatment assigned at cluster level">treated <- rbinom(1, 1, 0.5)
+    <span class="code-tooltip" data-tip="CLUSTER DESIGN: Treatment is assigned to the entire cluster (school/village), not individual students — all people in the same cluster get the same treatment status.">treated <- rbinom(1, 1, 0.5)
     cluster_effect <- rnorm(1, 0, sqrt(cluster_var))</span>
 
     data.frame(
@@ -573,7 +573,7 @@ simulate_cluster_rct <- <span class="code-keyword">function</span>(n_clusters, c
 
 run_analysis <- <span class="code-keyword">function</span>(df) {
   <span class="code-comment"># Cluster-robust SEs via mixed model</span>
-  <span class="code-tooltip" data-tip="Using random intercept for clusters accounts for clustering">model <- lmer(y ~ treated + (1|cluster), data = df)</span>
+  <span class="code-tooltip" data-tip="MIXED MODEL: The (1|cluster) term adds a random intercept per cluster, properly accounting for the fact that individuals within the same cluster have correlated outcomes.">model <- lmer(y ~ treated + (1|cluster), data = df)</span>
   p_value <- summary(model)$coefficients[<span class="code-string">"treated"</span>, <span class="code-string">"Pr(>|t|)"</span>]
   <span class="code-keyword">return</span>(p_value)
 }
@@ -583,7 +583,7 @@ set.seed(42)
 n_sims <- 1000
 effect_size <- 0.3
 
-<span class="code-tooltip" data-tip="replicate() runs the simulation n_sims times">p_values <- replicate(n_sims, {
+<span class="code-tooltip" data-tip="MONTE CARLO: Runs 1000 simulated cluster RCTs and collects the p-value from each — the fraction with p &lt; 0.05 gives the estimated power for this design.">p_values <- replicate(n_sims, {
   df <- simulate_cluster_rct(30, 20, effect_size)
   run_analysis(df)
 })</span>

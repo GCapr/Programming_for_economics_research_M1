@@ -326,7 +326,7 @@
 <span class="code-comment"># treatment_time: when treatment occurs</span>
 
 <span class="code-comment"># Initialize and fit</span>
-<span class="code-tooltip" data-tip="Synth finds weights that minimize pre-treatment discrepancy">sc = Synth(df,
+<span class="code-tooltip" data-tip="SC: Creates a weighted combination of control countries that closely matches West Germany's GDP trend before reunification — the post-1990 gap between actual and synthetic Germany is the estimated treatment effect">sc = Synth(df,
            outcome_var=<span class="code-string">"gdp"</span>,
            id_var=<span class="code-string">"country"</span>,
            time_var=<span class="code-string">"year"</span>,
@@ -355,7 +355,7 @@ print(sc.W)</code></pre>
 tsset country_id year
 
 <span class="code-comment">* Basic synthetic control</span>
-<span class="code-tooltip" data-tip="synth matches on outcome lags and covariates to find optimal weights">synth gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
+<span class="code-tooltip" data-tip="STATA: Specifies GDP in years 1985-1989 and covariates as predictors — synth finds donor country weights that best reproduce West Germany's pre-treatment trajectory">synth gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
     population trade_openness, ///
     trunit(7) trperiod(1990) ///
     figure</span>
@@ -379,7 +379,7 @@ matrix list e(V_matrix)   <span class="code-comment">// predictor weights</span>
 <span class="code-keyword">library</span>(Synth)
 
 <span class="code-comment"># Prepare data for Synth</span>
-<span class="code-tooltip" data-tip="dataprep() formats data for the Synth algorithm">dataprep.out <- dataprep(
+<span class="code-tooltip" data-tip="R: Prepares the data by specifying predictors, the pre-treatment optimization period, and which unit is treated vs. which are potential donors for the synthetic control">dataprep.out <- dataprep(
   foo = df,
   predictors = c("gdp", "population", "trade_openness"),
   predictors.op = "mean",
@@ -394,7 +394,7 @@ matrix list e(V_matrix)   <span class="code-comment">// predictor weights</span>
 )</span>
 
 <span class="code-comment"># Run synthetic control</span>
-<span class="code-tooltip" data-tip="synth() finds optimal weights to minimize pre-treatment MSPE">synth.out <- synth(dataprep.out)</span>
+<span class="code-tooltip" data-tip="R: Solves for the donor weights that minimize the pre-treatment mean squared prediction error — producing a synthetic control that best mimics the treated unit before the intervention">synth.out <- synth(dataprep.out)</span>
 
 <span class="code-comment"># Results</span>
 synth.tables <- synth.tab(dataprep.res = dataprep.out,
@@ -449,6 +449,7 @@ Population (mil)     61.2        58.9
 Trade Openness       0.456       0.448
 
 Average Treatment Effect (post-1990): -1,234.5</pre></div>
+          <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 460 300" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="460" height="300" fill="white"/><text x="230" y="20" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">Synthetic Control: West Germany vs Synthetic</text><line x1="60" y1="30" x2="60" y2="250" stroke="#333"/><line x1="60" y1="250" x2="440" y2="250" stroke="#333"/><line x1="250" y1="30" x2="250" y2="250" stroke="#e74c3c" stroke-dasharray="5,3"/><text x="252" y="42" font-size="8" fill="#e74c3c">1990</text><text x="15" y="140" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,15,140)">GDP</text><text x="250" y="285" font-size="10" fill="#333" text-anchor="middle">Year</text><text x="55" y="245" font-size="8" fill="#666" text-anchor="end">20k</text><text x="55" y="175" font-size="8" fill="#666" text-anchor="end">25k</text><text x="55" y="105" font-size="8" fill="#666" text-anchor="end">30k</text><text x="55" y="50" font-size="8" fill="#666" text-anchor="end">35k</text><text x="80" y="264" font-size="8" fill="#666">1985</text><text x="250" y="264" font-size="8" fill="#666">1990</text><text x="420" y="264" font-size="8" fill="#666">2000</text><polyline points="80,230 118,205 156,180 194,150 232,120 270,95 308,78 346,62 384,50 422,42" fill="none" stroke="#1f77b4" stroke-width="2.5"/><polyline points="80,232 118,207 156,182 194,152 232,122 270,108 308,100 346,95 384,90 422,88" fill="none" stroke="#ff7f0e" stroke-width="2" stroke-dasharray="6,3"/><line x1="100" y1="270" x2="120" y2="270" stroke="#1f77b4" stroke-width="2.5"/><text x="125" y="274" font-size="9" fill="#333">West Germany</text><line x1="230" y1="270" x2="250" y2="270" stroke="#ff7f0e" stroke-width="2" stroke-dasharray="4,2"/><text x="255" y="274" font-size="9" fill="#333">Synthetic Control</text></svg></div></div>
         </div>
 
         <div class="output-simulation" data-output="synth-1" data-lang="stata">
@@ -553,7 +554,7 @@ Root MSPE: 234.56
 <span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
 
 <span class="code-comment"># Run placebo tests (in-space placebos)</span>
-<span class="code-tooltip" data-tip="Treat each control unit as if it were treated and estimate the 'effect'">all_units = df[<span class="code-string">'country'</span>].unique()
+<span class="code-tooltip" data-tip="PLACEBO: Runs the synthetic control method on every control country as if each were treated — if the true treated unit's effect is unusually large compared to these placebos, the effect is statistically significant">all_units = df[<span class="code-string">'country'</span>].unique()
 control_units = [u <span class="code-keyword">for</span> u <span class="code-keyword">in</span> all_units <span class="code-keyword">if</span> u != <span class="code-string">'West Germany'</span>]
 
 placebo_effects = {}
@@ -574,7 +575,7 @@ ax.axhline(y=0, linestyle=<span class="code-string">'-'</span>, color=<span clas
 plt.show()
 
 <span class="code-comment"># Calculate p-value</span>
-<span class="code-tooltip" data-tip="P-value = fraction of placebos with effects as large as the treated unit">post_treatment_mspe = np.mean(treated_gaps[1990:]**2)
+<span class="code-tooltip" data-tip="P-VALUE: Computes a permutation-based p-value — the fraction of placebo units whose post-treatment MSPE is at least as large as the treated unit's, providing an exact test of significance">post_treatment_mspe = np.mean(treated_gaps[1990:]**2)
 placebo_mspe = [np.mean(gaps[1990:]**2) <span class="code-keyword">for</span> gaps <span class="code-keyword">in</span> placebo_effects.values()]
 pvalue = np.mean(placebo_mspe >= post_treatment_mspe)
 print(f<span class="code-string">"p-value: {pvalue:.3f}"</span>)</span></code></pre>
@@ -585,7 +586,7 @@ print(f<span class="code-string">"p-value: {pvalue:.3f}"</span>)</span></code></
 <span class="code-comment">* ssc install synth_runner</span>
 
 <span class="code-comment">* Run placebo tests for all control units</span>
-<span class="code-tooltip" data-tip="synth_runner automates placebo tests and inference">synth_runner gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
+<span class="code-tooltip" data-tip="STATA: Automates placebo tests by running SC for every control unit, then comparing their post-treatment gaps to the treated unit's gap for inference">synth_runner gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
     population trade_openness, ///
     trunit(7) trperiod(1990) ///
     gen_vars</span>
@@ -597,7 +598,7 @@ effect_graphs
 pval_graphs
 
 <span class="code-comment">* RMSPE ratio (pre/post treatment fit)</span>
-<span class="code-tooltip" data-tip="RMSPE ratio: large ratio means effect is unusual compared to placebos">single_treatment_graphs</span></code></pre>
+<span class="code-tooltip" data-tip="STATA: Plots the RMSPE ratio (post/pre treatment fit) — a large ratio for the treated unit relative to placebos indicates a genuine treatment effect rather than poor pre-fit">single_treatment_graphs</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
@@ -623,7 +624,7 @@ run_sc <- function(treated_id, donor_ids) {
 }
 
 <span class="code-comment"># Run placebo for each control unit</span>
-<span class="code-tooltip" data-tip="Apply SC to each control unit as if it were treated">all_ids <- unique(df$country_id)
+<span class="code-tooltip" data-tip="R: Runs SC for every control country pretending each was treated in 1990 — if the true treated unit's gap stands out from the cloud of placebo gaps, the effect is credible">all_ids <- unique(df$country_id)
 treated_id <- 7
 control_ids <- setdiff(all_ids, treated_id)
 
@@ -692,6 +693,7 @@ p-value (based on RMSPE ratio): 0.050
 
 [Placebo plot displayed: Black line (West Germany) diverges
  significantly from gray lines (placebos) after 1990]</pre></div>
+          <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 460 300" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="460" height="300" fill="white"/><text x="230" y="20" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">Placebo Tests: Gaps in GDP</text><line x1="60" y1="30" x2="60" y2="250" stroke="#333"/><line x1="60" y1="250" x2="440" y2="250" stroke="#333"/><line x1="250" y1="30" x2="250" y2="250" stroke="#e74c3c" stroke-dasharray="5,3"/><line x1="60" y1="150" x2="440" y2="150" stroke="#999" stroke-width="0.5"/><text x="15" y="140" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,15,140)">Gap (Treated - Synthetic)</text><text x="250" y="285" font-size="10" fill="#333" text-anchor="middle">Year</text><text x="55" y="55" font-size="8" fill="#666" text-anchor="end">3000</text><text x="55" y="150" font-size="8" fill="#666" text-anchor="end">0</text><text x="55" y="240" font-size="8" fill="#666" text-anchor="end">-3000</text><text x="80" y="264" font-size="8" fill="#666">1985</text><text x="250" y="264" font-size="8" fill="#666">1990</text><text x="420" y="264" font-size="8" fill="#666">2000</text><polyline points="80,148 118,152 156,147 194,153 232,149 270,142 308,135 346,125 384,110 422,95" fill="none" stroke="gray" stroke-width="0.8" opacity="0.4"/><polyline points="80,155 118,149 156,153 194,148 232,155 270,148 308,152 346,146 384,150 422,148" fill="none" stroke="gray" stroke-width="0.8" opacity="0.4"/><polyline points="80,147 118,145 156,150 194,152 232,148 270,155 308,158 346,152 384,148 422,145" fill="none" stroke="gray" stroke-width="0.8" opacity="0.4"/><polyline points="80,152 118,155 156,148 194,146 232,150 270,145 308,148 346,155 384,153 422,150" fill="none" stroke="gray" stroke-width="0.8" opacity="0.4"/><polyline points="80,150 118,148 156,155 194,150 232,147 270,152 308,155 346,150 384,145 422,148" fill="none" stroke="gray" stroke-width="0.8" opacity="0.4"/><polyline points="80,148 118,152 156,150 194,147 232,152 270,140 308,132 346,142 384,135 422,138" fill="none" stroke="gray" stroke-width="0.8" opacity="0.4"/><polyline points="80,153 118,150 156,148 194,155 232,150 270,155 308,160 346,158 384,155 422,152" fill="none" stroke="gray" stroke-width="0.8" opacity="0.4"/><polyline points="80,150 118,147 156,152 194,148 232,150 270,148 308,145 346,148 384,152 422,155" fill="none" stroke="gray" stroke-width="0.8" opacity="0.4"/><polyline points="80,151 118,148 156,150 194,152 232,150 270,120 308,100 346,80 384,65 422,50" fill="none" stroke="black" stroke-width="2.5"/><line x1="320" y1="270" x2="340" y2="270" stroke="black" stroke-width="2.5"/><text x="345" y="274" font-size="9" fill="#333">West Germany</text><line x1="120" y1="270" x2="140" y2="270" stroke="gray" stroke-width="1" opacity="0.5"/><text x="145" y="274" font-size="9" fill="#666">Placebos</text></svg></div></div>
         </div>
 
         <div class="output-simulation" data-output="synth-2" data-lang="stata">
@@ -792,7 +794,7 @@ Using tidysynth::plot_placebos():
 <pre><code><span class="code-comment"># Python: SC Diagnostics</span>
 
 <span class="code-comment"># 1. Check pre-treatment fit (RMSPE)</span>
-<span class="code-tooltip" data-tip="Pre-treatment RMSPE should be small relative to outcome variation">pre_rmspe = np.sqrt(np.mean((treated_pre - synthetic_pre)**2))
+<span class="code-tooltip" data-tip="FIT: A small pre-treatment RMSPE means the synthetic control closely tracks the treated unit before treatment — a poor fit undermines the credibility of the post-treatment gap as a causal effect">pre_rmspe = np.sqrt(np.mean((treated_pre - synthetic_pre)**2))
 print(f<span class="code-string">"Pre-treatment RMSPE: {pre_rmspe:.3f}"</span>)</span>
 
 <span class="code-comment"># 2. Check covariate balance</span>
@@ -800,11 +802,11 @@ print(<span class="code-string">"Predictor balance:"</span>)
 print(sc.comparison)  <span class="code-comment"># treated vs synthetic on predictors</span>
 
 <span class="code-comment"># 3. Check weights (few large weights is concerning)</span>
-<span class="code-tooltip" data-tip="Weights concentrated on few donors may indicate poor match">print(<span class="code-string">"Number of donors with weight > 0.05:"</span>)
+<span class="code-tooltip" data-tip="WEIGHTS: Checks how many donor countries have meaningful weight — if only 1-2 donors dominate, the synthetic control is essentially a single country comparison rather than a true weighted average">print(<span class="code-string">"Number of donors with weight > 0.05:"</span>)
 print((sc.W > 0.05).sum())</span>
 
 <span class="code-comment"># 4. RMSPE ratio (for inference)</span>
-<span class="code-tooltip" data-tip="Ratio of post/pre RMSPE: how unusual is the effect relative to pre-fit quality?">post_rmspe = np.sqrt(np.mean((treated_post - synthetic_post)**2))
+<span class="code-tooltip" data-tip="RMSPE RATIO: Divides post-treatment prediction error by pre-treatment error — a high ratio means the gap after treatment is large relative to the pre-treatment fit quality, supporting a real effect">post_rmspe = np.sqrt(np.mean((treated_post - synthetic_post)**2))
 rmspe_ratio = post_rmspe / pre_rmspe
 print(f<span class="code-string">"RMSPE ratio: {rmspe_ratio:.2f}"</span>)</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
@@ -815,17 +817,17 @@ print(f<span class="code-string">"RMSPE ratio: {rmspe_ratio:.2f}"</span>)</span>
 <span class="code-comment">* After running synth:</span>
 
 <span class="code-comment">* 1. Pre-treatment RMSPE</span>
-<span class="code-tooltip" data-tip="Small pre-treatment RMSPE indicates good fit">ereturn list
+<span class="code-tooltip" data-tip="STATA: Displays the pre-treatment RMSPE from stored estimation results — a small value relative to outcome variation confirms the synthetic control closely matches the treated unit before treatment">ereturn list
 display <span class="code-string">"Pre-treatment RMSPE: "</span> sqrt(e(RMSPE))</span>
 
 <span class="code-comment">* 2. Predictor balance</span>
-<span class="code-tooltip" data-tip="Compare treated vs synthetic on predictors">matrix list e(Y_balance)</span>
+<span class="code-tooltip" data-tip="STATA: Displays how well the synthetic control matches the treated unit on GDP, population, and trade openness — close values indicate a credible counterfactual">matrix list e(Y_balance)</span>
 
 <span class="code-comment">* 3. Donor weights</span>
 matrix list e(W_weights)
 
 <span class="code-comment">* 4. Leave-one-out robustness</span>
-<span class="code-tooltip" data-tip="Check if results depend heavily on any single donor">foreach donor in $donor_list {
+<span class="code-tooltip" data-tip="STATA: Leave-one-out robustness — drops each donor country one at a time and re-estimates; stable results mean the effect isn't driven by any single comparison country">foreach donor in $donor_list {
     synth gdp ..., trunit(7) trperiod(1990) ///
         counit(`=subinstr("$donor_list", "`donor'", "", .)')
 }</span></code></pre>
@@ -836,16 +838,16 @@ matrix list e(W_weights)
 <span class="code-keyword">library</span>(Synth)
 
 <span class="code-comment"># 1. Pre-treatment RMSPE</span>
-<span class="code-tooltip" data-tip="synth.tables shows predictor balance and RMSPE">synth.tables$tab.pred  <span class="code-comment"># predictor comparison</span></span>
+<span class="code-tooltip" data-tip="R: Shows a table comparing the treated unit and synthetic control on each predictor — close match on these variables supports the synthetic control as a valid counterfactual">synth.tables$tab.pred  <span class="code-comment"># predictor comparison</span></span>
 
 <span class="code-comment"># 2. Weights</span>
 synth.tables$tab.w  <span class="code-comment"># donor weights</span>
 
 <span class="code-comment"># 3. Check sparsity of weights</span>
-<span class="code-tooltip" data-tip="Ideally, several donors contribute meaningfully">sum(synth.out$solution.w > 0.05)</span>
+<span class="code-tooltip" data-tip="R: Counts how many donors have weight above 5% — more donors contributing means the synthetic control is a genuine blend of comparison units, not just one country">sum(synth.out$solution.w > 0.05)</span>
 
 <span class="code-comment"># 4. Leave-one-out</span>
-<span class="code-tooltip" data-tip="Remove each major donor and re-estimate">loo_results <- lapply(major_donors, function(d) {
+<span class="code-tooltip" data-tip="R: Leave-one-out test — removes each major donor and re-estimates the synthetic control; if the estimated effect barely changes, it is not driven by any single country">loo_results <- lapply(major_donors, function(d) {
   new_donors <- setdiff(control_ids, d)
   <span class="code-comment"># Re-run synth without donor d</span>
   ...
@@ -994,7 +996,7 @@ trade_openness     0.456     0.448       0.412
 <span class="code-keyword">library</span>(augsynth)
 
 <span class="code-comment"># Augmented SC with ridge regression</span>
-<span class="code-tooltip" data-tip="augsynth adds bias correction for imperfect pre-treatment fit">asyn <- augsynth(outcome ~ treatment | covariate1 + covariate2,
+<span class="code-tooltip" data-tip="AUGMENTED SC: Combines standard synthetic control with ridge regression to correct for any remaining pre-treatment imbalance — more robust than basic SC when the pre-fit is imperfect">asyn <- augsynth(outcome ~ treatment | covariate1 + covariate2,
                  unit = unit_id,
                  time = year,
                  data = df,
@@ -1050,6 +1052,7 @@ Std. Error               N/A       412.3
 Pre-treatment RMSPE   234.56      154.23
 
 [Plot displayed showing point estimates with confidence bands]</pre></div>
+          <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 460 300" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="460" height="300" fill="white"/><text x="230" y="20" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">Augmented Synthetic Control: Treatment Effects</text><line x1="60" y1="30" x2="60" y2="250" stroke="#333"/><line x1="60" y1="250" x2="440" y2="250" stroke="#333"/><line x1="60" y1="130" x2="440" y2="130" stroke="#999" stroke-width="0.5" stroke-dasharray="3,3"/><line x1="170" y1="30" x2="170" y2="250" stroke="#e74c3c" stroke-dasharray="5,3"/><text x="172" y="42" font-size="8" fill="#e74c3c">1990</text><text x="15" y="140" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,15,140)">ATT</text><text x="250" y="285" font-size="10" fill="#333" text-anchor="middle">Year</text><text x="55" y="50" font-size="8" fill="#666" text-anchor="end">1000</text><text x="55" y="133" font-size="8" fill="#666" text-anchor="end">0</text><text x="55" y="210" font-size="8" fill="#666" text-anchor="end">-2000</text><text x="55" y="245" font-size="8" fill="#666" text-anchor="end">-3000</text><text x="95" y="264" font-size="7" fill="#666">1986</text><text x="170" y="264" font-size="7" fill="#666">1990</text><text x="300" y="264" font-size="7" fill="#666">1995</text><text x="420" y="264" font-size="7" fill="#666">2000</text><polygon points="170,128 195,125 220,120 245,116 270,108 295,95 320,88 345,75 370,68 395,58 420,50 420,78 395,88 370,100 345,108 320,118 295,125 270,135 245,142 220,148 195,152 170,150" fill="#1f77b4" opacity="0.15"/><polyline points="170,138 195,140 220,135 245,130 270,122 295,110 320,103 345,92 370,84 395,73 420,64" fill="none" stroke="#1f77b4" stroke-width="2"/><polyline points="80,132 95,128 110,135 125,130 140,133 155,128" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="3,2"/><circle cx="195" cy="140" r="3" fill="#1f77b4"/><circle cx="245" cy="130" r="3" fill="#1f77b4"/><circle cx="295" cy="110" r="3" fill="#1f77b4"/><circle cx="345" cy="92" r="3" fill="#1f77b4"/><circle cx="395" cy="73" r="3" fill="#1f77b4"/><circle cx="420" cy="64" r="3" fill="#1f77b4"/><rect x="280" y="270" width="12" height="3" fill="#1f77b4"/><text x="296" y="275" font-size="8" fill="#333">ATT with 95% CI</text></svg></div></div>
         </div>
 
         <h3>Synthetic Difference-in-Differences (Arkhangelsky et al. 2021)</h3>
@@ -1070,7 +1073,7 @@ Pre-treatment RMSPE   234.56      154.23
 <span class="code-keyword">from</span> synthdid.synthdid <span class="code-keyword">import</span> SynthDID
 
 <span class="code-comment"># Prepare data: Y matrix (units x time), treatment indicator</span>
-<span class="code-tooltip" data-tip="SDID weights both units (like SC) and time periods">sdid = SynthDID(Y, treatment_matrix)</span>
+<span class="code-tooltip" data-tip="SDID: Combines SC and DiD — weights control units to match the treated (like SC) AND weights pre-treatment periods to focus on those most relevant for predicting post-treatment outcomes">sdid = SynthDID(Y, treatment_matrix)</span>
 estimate = sdid.fit()
 print(f<span class="code-string">"SDID estimate: {estimate:.3f}"</span>)
 
@@ -1084,7 +1087,7 @@ print(<span class="code-string">"Time weights:"</span>, sdid.lambda_)</code></pr
 <span class="code-comment">* ssc install sdid</span>
 
 <span class="code-comment">* Basic SDID</span>
-<span class="code-tooltip" data-tip="sdid combines SC unit weights with DiD time structure">sdid outcome unit_id year treatment, vce(bootstrap) seed(1234)</span>
+<span class="code-tooltip" data-tip="STATA: Estimates the synthetic DiD treatment effect with bootstrap standard errors — combines the best of SC (unit weighting) and DiD (differencing out time trends)">sdid outcome unit_id year treatment, vce(bootstrap) seed(1234)</span>
 
 <span class="code-comment">* With graph</span>
 sdid outcome unit_id year treatment, vce(bootstrap) graph</code></pre>
@@ -1095,7 +1098,7 @@ sdid outcome unit_id year treatment, vce(bootstrap) graph</code></pre>
 <span class="code-keyword">library</span>(synthdid)
 
 <span class="code-comment"># Prepare panel data</span>
-<span class="code-tooltip" data-tip="panel.matrices converts data to required format">setup <- panel.matrices(df,
+<span class="code-tooltip" data-tip="R: Converts panel data into the outcome matrix format required by synthdid — separates treated and control units and identifies the pre/post treatment cutoff">setup <- panel.matrices(df,
                         unit = unit_id,
                         time = year,
                         outcome = outcome,

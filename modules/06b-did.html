@@ -357,11 +357,11 @@
 df[<span class="code-string">'treat_post'</span>] = df[<span class="code-string">'treated_group'</span>] * df[<span class="code-string">'post'</span>]
 
 <span class="code-comment"># DiD regression</span>
-<span class="code-tooltip" data-tip="The coefficient on treat_post is the DiD estimate: the treatment effect">model = smf.ols(<span class="code-string">'outcome ~ treated_group + post + treat_post'</span>, data=df).fit()
+<span class="code-tooltip" data-tip="DID: Regresses outcome on group, time, and their interaction — the coefficient on treat_post captures the causal effect by differencing out group and time trends">model = smf.ols(<span class="code-string">'outcome ~ treated_group + post + treat_post'</span>, data=df).fit()
 print(model.summary())</span>
 
 <span class="code-comment"># With clustered standard errors</span>
-<span class="code-tooltip" data-tip="Cluster at the unit level for panel data to account for serial correlation">model_clustered = smf.ols(<span class="code-string">'outcome ~ treated_group + post + treat_post'</span>,
+<span class="code-tooltip" data-tip="CLUSTER: Uses clustered standard errors at the unit level because outcomes for the same unit over time are correlated, making naive SEs too small">model_clustered = smf.ols(<span class="code-string">'outcome ~ treated_group + post + treat_post'</span>,
                           data=df).fit(cov_type=<span class="code-string">'cluster'</span>,
                                        cov_kwds={<span class="code-string">'groups'</span>: df[<span class="code-string">'unit_id'</span>]})</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
@@ -370,7 +370,7 @@ print(model.summary())</span>
 <pre><code><span class="code-comment">* Stata: Classic 2x2 DiD</span>
 
 <span class="code-comment">* Basic DiD regression</span>
-<span class="code-tooltip" data-tip="The coefficient on the interaction term (c.treated#c.post) is the DiD estimate">reg outcome i.treated_group##i.post, cluster(unit_id)</span>
+<span class="code-tooltip" data-tip="STATA: The ## operator creates the interaction between treated_group and post — its coefficient is the DiD estimate, with standard errors clustered by unit">reg outcome i.treated_group##i.post, cluster(unit_id)</span>
 
 <span class="code-comment">* Equivalent with manually created interaction</span>
 gen treat_post = treated_group * post
@@ -385,7 +385,7 @@ reg outcome i.treated_group##i.post age income, cluster(unit_id)</code></pre>
 <span class="code-keyword">library</span>(fixest)
 
 <span class="code-comment"># Basic DiD</span>
-<span class="code-tooltip" data-tip="The interaction treated_group:post gives the DiD estimate">did_model <- feols(outcome ~ treated_group * post,
+<span class="code-tooltip" data-tip="R: The * operator includes both main effects and their interaction — the interaction coefficient is the DiD treatment effect, estimated with unit-clustered SEs via fixest">did_model <- feols(outcome ~ treated_group * post,
                    data = df,
                    cluster = ~ unit_id)</span>
 summary(did_model)
@@ -490,7 +490,7 @@ DiD Estimate: 0.582
 df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
 
 <span class="code-comment"># TWFE regression</span>
-<span class="code-tooltip" data-tip="entity_effects=True adds unit FE, time_effects=True adds year FE">model = PanelOLS.from_formula(
+<span class="code-tooltip" data-tip="TWFE: Adds unit fixed effects (controlling for time-invariant differences between units) and year fixed effects (controlling for common shocks), so the treated coefficient captures within-unit variation">model = PanelOLS.from_formula(
     <span class="code-string">'outcome ~ treated + controls'</span>,
     data=df,
     entity_effects=True,
@@ -507,11 +507,11 @@ print(results.summary)</code></pre>
 xtset unit_id year
 
 <span class="code-comment">* TWFE with xtreg</span>
-<span class="code-tooltip" data-tip="xtreg fe adds unit fixed effects. i.year adds time fixed effects.">xtreg outcome treated i.year, fe cluster(unit_id)</span>
+<span class="code-tooltip" data-tip="STATA: The fe option absorbs unit fixed effects; i.year adds year dummies — together they implement the standard two-way fixed effects DiD regression">xtreg outcome treated i.year, fe cluster(unit_id)</span>
 
 <span class="code-comment">* Alternative: reghdfe (faster, more FE options)</span>
 <span class="code-comment">* ssc install reghdfe</span>
-<span class="code-tooltip" data-tip="reghdfe efficiently absorbs high-dimensional fixed effects">reghdfe outcome treated, absorb(unit_id year) cluster(unit_id)</span></code></pre>
+<span class="code-tooltip" data-tip="STATA: reghdfe is faster than xtreg for large panels and can absorb multiple sets of fixed effects — here unit and year FEs are absorbed while clustering SEs by unit">reghdfe outcome treated, absorb(unit_id year) cluster(unit_id)</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
@@ -519,7 +519,7 @@ xtset unit_id year
 <span class="code-keyword">library</span>(fixest)
 
 <span class="code-comment"># TWFE regression</span>
-<span class="code-tooltip" data-tip="| unit_id + year adds unit and time fixed effects">twfe_model <- feols(outcome ~ treated | unit_id + year,
+<span class="code-tooltip" data-tip="R: In fixest, the | operator separates fixed effects from regressors — unit_id + year absorbs both unit and time fixed effects efficiently">twfe_model <- feols(outcome ~ treated | unit_id + year,
                     data = df,
                     cluster = ~ unit_id)</span>
 summary(twfe_model)
@@ -639,7 +639,7 @@ Wald test for joint significance of FEs:
 <span class="code-keyword">from</span> linearmodels.panel <span class="code-keyword">import</span> PanelOLS
 
 <span class="code-comment"># Create relative time variable</span>
-<span class="code-tooltip" data-tip="rel_time = current year - year of treatment. Negative = before, positive = after.">df[<span class="code-string">'rel_time'</span>] = df[<span class="code-string">'year'</span>] - df[<span class="code-string">'treatment_year'</span>]</span>
+<span class="code-tooltip" data-tip="EVENT TIME: Calculates how many years each observation is from its treatment date — negative values are pre-treatment periods, positive are post-treatment, enabling an event study plot">df[<span class="code-string">'rel_time'</span>] = df[<span class="code-string">'year'</span>] - df[<span class="code-string">'treatment_year'</span>]</span>
 
 <span class="code-comment"># Create dummies for each relative time (excluding -1 as reference)</span>
 rel_time_dummies = pd.get_dummies(df[<span class="code-string">'rel_time'</span>], prefix=<span class="code-string">'rel'</span>)
@@ -656,7 +656,7 @@ model = PanelOLS.from_formula(formula, data=df_panel,
 results = model.fit(cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True)
 
 <span class="code-comment"># Plot event study coefficients</span>
-<span class="code-tooltip" data-tip="Plot coefficients with 95% CIs. Pre-treatment coefficients should be near zero.">coefs = results.params[rel_cols]
+<span class="code-tooltip" data-tip="PLOT: Visualizes treatment effects over event time with 95% confidence intervals — pre-treatment coefficients near zero support parallel trends, while post-treatment coefficients show how the effect evolves">coefs = results.params[rel_cols]
 ses = results.std_errors[rel_cols]
 
 plt.figure(figsize=(10, 6))
@@ -676,11 +676,11 @@ plt.show()</span></code></pre>
 gen rel_time = year - treatment_year
 
 <span class="code-comment">* Event study with factor variables</span>
-<span class="code-tooltip" data-tip="ib(-1) sets -1 as the reference period (omitted category)">reghdfe outcome ib(-1).rel_time, absorb(unit_id year) cluster(unit_id)</span>
+<span class="code-tooltip" data-tip="STATA: ib(-1) omits the period just before treatment as the reference, so all coefficients measure effects relative to that baseline — key for testing pre-trends and estimating dynamic effects">reghdfe outcome ib(-1).rel_time, absorb(unit_id year) cluster(unit_id)</span>
 
 <span class="code-comment">* Using eventdd (event study visualization)</span>
 <span class="code-comment">* ssc install eventdd</span>
-<span class="code-tooltip" data-tip="eventdd automates event study estimation and produces publication-ready plots">eventdd outcome, timevar(rel_time) ///
+<span class="code-tooltip" data-tip="STATA: eventdd runs the event study regression and automatically generates a coefficient plot with confidence intervals, saving you the manual plotting step">eventdd outcome, timevar(rel_time) ///
     method(hdfe, absorb(unit_id year)) ///
     cluster(unit_id) graph</span>
 
@@ -697,13 +697,13 @@ coefplot, keep(*.rel_time) vertical yline(0) xline(10.5)</code></pre>
 df$rel_time <- df$year - df$treatment_year
 
 <span class="code-comment"># Event study with i() syntax</span>
-<span class="code-tooltip" data-tip="i(rel_time, ref = -1) creates dummies with -1 as reference">es_model <- feols(outcome ~ i(rel_time, ref = -1) | unit_id + year,
+<span class="code-tooltip" data-tip="R: i() creates event-time dummies with period -1 omitted as the reference, so coefficients show treatment effects relative to the last pre-treatment period">es_model <- feols(outcome ~ i(rel_time, ref = -1) | unit_id + year,
                   data = df,
                   cluster = ~ unit_id)</span>
 summary(es_model)
 
 <span class="code-comment"># Built-in event study plot</span>
-<span class="code-tooltip" data-tip="iplot() creates publication-ready event study plots">iplot(es_model,
+<span class="code-tooltip" data-tip="R: fixest's built-in plotting function that draws the event study coefficients with confidence intervals, ready for publication">iplot(es_model,
       xlab = "Periods Relative to Treatment",
       main = "Event Study")</span>
 
@@ -739,6 +739,7 @@ Pre-trend test (H0: all pre-treatment coefs = 0):
   [No evidence of differential pre-trends]
 
 [Event Study Plot displayed showing flat pre-trend, positive post-treatment effects]</div>
+          <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 460 300" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="460" height="300" fill="white"/><text x="230" y="22" font-size="13" fill="#333" text-anchor="middle" font-weight="bold">Event Study</text><line x1="60" y1="40" x2="60" y2="250" stroke="#333"/><line x1="60" y1="250" x2="440" y2="250" stroke="#333"/><line x1="60" y1="165" x2="440" y2="165" stroke="#e74c3c" stroke-dasharray="6,3"/><line x1="243" y1="40" x2="243" y2="250" stroke="#999" stroke-dasharray="4,3"/><text x="15" y="145" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,15,145)">Coefficient</text><text x="250" y="290" font-size="10" fill="#333" text-anchor="middle">Periods Relative to Treatment</text><text x="55" y="168" font-size="8" fill="#666" text-anchor="end">0</text><text x="55" y="112" font-size="8" fill="#666" text-anchor="end">0.4</text><text x="55" y="58" font-size="8" fill="#666" text-anchor="end">0.8</text><text x="95" y="262" font-size="8" fill="#666" text-anchor="middle">-5</text><text x="200" y="262" font-size="8" fill="#666" text-anchor="middle">-2</text><text x="270" y="262" font-size="8" fill="#666" text-anchor="middle">0</text><text x="340" y="262" font-size="8" fill="#666" text-anchor="middle">2</text><text x="410" y="262" font-size="8" fill="#666" text-anchor="middle">4</text><line x1="95" y1="139" x2="95" y2="185" stroke="#1f77b4" stroke-width="1.5"/><circle cx="95" cy="168" r="4" fill="#1f77b4"/><line x1="130" y1="141" x2="130" y2="186" stroke="#1f77b4" stroke-width="1.5"/><circle cx="130" cy="163" r="4" fill="#1f77b4"/><line x1="165" y1="137" x2="165" y2="190" stroke="#1f77b4" stroke-width="1.5"/><circle cx="165" cy="171" r="4" fill="#1f77b4"/><line x1="200" y1="138" x2="200" y2="183" stroke="#1f77b4" stroke-width="1.5"/><circle cx="200" cy="160" r="4" fill="#1f77b4"/><line x1="270" y1="100" x2="270" y2="148" stroke="#1f77b4" stroke-width="1.5"/><circle cx="270" cy="124" r="4" fill="#1f77b4"/><line x1="305" y1="80" x2="305" y2="130" stroke="#1f77b4" stroke-width="1.5"/><circle cx="305" cy="105" r="4" fill="#1f77b4"/><line x1="340" y1="70" x2="340" y2="122" stroke="#1f77b4" stroke-width="1.5"/><circle cx="340" cy="96" r="4" fill="#1f77b4"/><line x1="375" y1="60" x2="375" y2="117" stroke="#1f77b4" stroke-width="1.5"/><circle cx="375" cy="89" r="4" fill="#1f77b4"/><line x1="410" y1="55" x2="410" y2="113" stroke="#1f77b4" stroke-width="1.5"/><circle cx="410" cy="84" r="4" fill="#1f77b4"/></svg></div></div>
         </div>
 
         <div class="output-simulation" data-output="did-3" data-lang="stata">
@@ -851,7 +852,7 @@ positive, increasing post-treatment effects]</div>
 <span class="code-keyword">from</span> csdid <span class="code-keyword">import</span> ATTgt
 
 <span class="code-comment"># Estimate group-time ATTs</span>
-<span class="code-tooltip" data-tip="ATTgt estimates treatment effects for each cohort-time combination">att_gt = ATTgt(
+<span class="code-tooltip" data-tip="CS: Estimates a separate treatment effect for each cohort (defined by when they were first treated) at each time period, avoiding the contamination problem of standard TWFE">att_gt = ATTgt(
     data=df,
     yname=<span class="code-string">'outcome'</span>,
     tname=<span class="code-string">'year'</span>,
@@ -875,7 +876,7 @@ agg_event.plot()</code></pre>
 <span class="code-comment">* ssc install csdid</span>
 
 <span class="code-comment">* Basic estimation</span>
-<span class="code-tooltip" data-tip="ivar() is unit ID, time() is time, gvar() is first treatment period">csdid outcome, ivar(unit_id) time(year) gvar(first_treat)</span>
+<span class="code-tooltip" data-tip="STATA: Callaway-Sant'Anna estimator — uses never-treated units as controls to estimate cohort-specific ATTs, robust to heterogeneous treatment effects across cohorts">csdid outcome, ivar(unit_id) time(year) gvar(first_treat)</span>
 
 <span class="code-comment">* Aggregate to overall ATT</span>
 csdid_stats simple
@@ -892,7 +893,7 @@ csdid_plot, style(rcap)</code></pre>
 <span class="code-keyword">library</span>(did)
 
 <span class="code-comment"># Estimate group-time ATTs</span>
-<span class="code-tooltip" data-tip="att_gt() estimates ATT(g,t) for each group g in period t">out <- att_gt(
+<span class="code-tooltip" data-tip="R: Estimates group-time average treatment effects ATT(g,t), where g is the treatment cohort and t is the calendar period, using never-treated units as the comparison group">out <- att_gt(
   yname = "outcome",
   tname = "year",
   idname = "unit_id",
@@ -939,6 +940,7 @@ Simple ATT: 0.346 (SE: 0.089)
   p-value: 0.0001
 
 [Event study plot shows cohort-specific treatment effects]</div>
+          <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 460 300" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="460" height="300" fill="white"/><text x="230" y="20" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">Callaway-Sant'Anna Event Study</text><line x1="60" y1="35" x2="60" y2="250" stroke="#333"/><line x1="60" y1="250" x2="440" y2="250" stroke="#333"/><line x1="60" y1="165" x2="440" y2="165" stroke="#e74c3c" stroke-dasharray="6,3"/><line x1="220" y1="35" x2="220" y2="250" stroke="#999" stroke-dasharray="4,3"/><text x="15" y="145" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,15,145)">ATT</text><text x="250" y="290" font-size="10" fill="#333" text-anchor="middle">Periods Relative to Treatment</text><text x="55" y="168" font-size="8" fill="#666" text-anchor="end">0</text><text x="55" y="110" font-size="8" fill="#666" text-anchor="end">0.3</text><text x="55" y="55" font-size="8" fill="#666" text-anchor="end">0.6</text><text x="120" y="262" font-size="8" fill="#666" text-anchor="middle">-3</text><text x="170" y="262" font-size="8" fill="#666" text-anchor="middle">-2</text><text x="270" y="262" font-size="8" fill="#666" text-anchor="middle">0</text><text x="320" y="262" font-size="8" fill="#666" text-anchor="middle">1</text><text x="370" y="262" font-size="8" fill="#666" text-anchor="middle">2</text><text x="420" y="262" font-size="8" fill="#666" text-anchor="middle">3</text><line x1="120" y1="140" x2="120" y2="190" stroke="#ff7f0e" stroke-width="1.5"/><circle cx="120" cy="167" r="4" fill="#ff7f0e"/><line x1="170" y1="143" x2="170" y2="187" stroke="#ff7f0e" stroke-width="1.5"/><circle cx="170" cy="162" r="4" fill="#ff7f0e"/><line x1="270" y1="86" x2="270" y2="140" stroke="#ff7f0e" stroke-width="1.5"/><circle cx="270" cy="113" r="4" fill="#ff7f0e"/><line x1="320" y1="68" x2="320" y2="125" stroke="#ff7f0e" stroke-width="1.5"/><circle cx="320" cy="96" r="4" fill="#ff7f0e"/><line x1="370" y1="55" x2="370" y2="115" stroke="#ff7f0e" stroke-width="1.5"/><circle cx="370" cy="85" r="4" fill="#ff7f0e"/><line x1="420" y1="48" x2="420" y2="108" stroke="#ff7f0e" stroke-width="1.5"/><circle cx="420" cy="78" r="4" fill="#ff7f0e"/></svg></div></div>
         </div>
 
         <div class="output-simulation" data-output="did-4" data-lang="stata">
@@ -1020,7 +1022,7 @@ Overall ATT:
 <span class="code-comment">* ssc install did_multiplegt</span>
 
 <span class="code-comment">* Basic estimation</span>
-<span class="code-tooltip" data-tip="did_multiplegt handles binary and continuous treatments, and switching treatments">did_multiplegt outcome unit_id year treatment, ///
+<span class="code-tooltip" data-tip="STATA: Estimates treatment effects robust to heterogeneity, including units that switch treatment on and off — reports dynamic effects for 5 post-treatment and 3 placebo periods">did_multiplegt outcome unit_id year treatment, ///
     robust_dynamic dynamic(5) placebo(3) ///
     cluster(unit_id) breps(100)</span>
 
@@ -1035,7 +1037,7 @@ did_multiplegt outcome unit_id year treatment, ///
 <span class="code-keyword">library</span>(DIDmultiplegt)
 
 <span class="code-comment"># Basic estimation</span>
-<span class="code-tooltip" data-tip="did_multiplegt handles heterogeneous effects and staggered adoption">result <- did_multiplegt(
+<span class="code-tooltip" data-tip="R: de Chaisemartin-D'Haultfoeuille estimator — properly handles staggered treatment timing and heterogeneous effects, with bootstrap inference clustered by unit">result <- did_multiplegt(
   df = df,
   Y = "outcome",
   G = "unit_id",
@@ -1137,7 +1139,7 @@ gen cohort = first_treat
 gen never_treat = (first_treat == 0)
 
 <span class="code-comment">* Sun-Abraham estimator</span>
-<span class="code-tooltip" data-tip="eventstudyinteract implements the interaction-weighted estimator">eventstudyinteract outcome rel_time_*, ///
+<span class="code-tooltip" data-tip="STATA: Sun-Abraham estimator — re-weights cohort-specific effects to produce unbiased event study coefficients, unlike TWFE which can mix up effects from different cohorts">eventstudyinteract outcome rel_time_*, ///
     cohort(cohort) control_cohort(never_treat) ///
     absorb(unit_id year) vce(cluster unit_id)</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
@@ -1150,7 +1152,7 @@ gen never_treat = (first_treat == 0)
 df$cohort <- df$first_treat
 
 <span class="code-comment"># Sun-Abraham estimator using sunab()</span>
-<span class="code-tooltip" data-tip="sunab() implements Sun-Abraham within fixest's efficient framework">sa_model <- feols(outcome ~ sunab(cohort, year) | unit_id + year,
+<span class="code-tooltip" data-tip="R: sunab() in fixest implements the Sun-Abraham interaction-weighted estimator, correctly averaging cohort-specific treatment effects to avoid TWFE bias from staggered timing">sa_model <- feols(outcome ~ sunab(cohort, year) | unit_id + year,
                   data = df,
                   cluster = ~ unit_id)</span>
 summary(sa_model)
@@ -1254,7 +1256,7 @@ Aggregated ATT (average post-treatment effect):
 <span class="code-comment"># After running each estimator, collect the event-study coefficients</span>
 <span class="code-comment"># Example structure: dict with estimator -> (rel_time, coef, ci_lower, ci_upper)</span>
 
-<span class="code-tooltip" data-tip="Store results from each estimator with relative time, coefficient, and confidence intervals">results = {
+<span class="code-tooltip" data-tip="COLLECT: Gathers event study coefficients from TWFE, Callaway-Sant'Anna, Sun-Abraham, and de Chaisemartin into one dictionary so they can be plotted side-by-side for comparison">results = {
     <span class="code-string">'TWFE'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: twfe_coefs, <span class="code-string">'ci_lo'</span>: twfe_ci_lo, <span class="code-string">'ci_hi'</span>: twfe_ci_hi},
     <span class="code-string">'Callaway-Sant\'Anna'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: cs_coefs, <span class="code-string">'ci_lo'</span>: cs_ci_lo, <span class="code-string">'ci_hi'</span>: cs_ci_hi},
     <span class="code-string">'Sun-Abraham'</span>: {<span class="code-string">'rel_time'</span>: rel_times, <span class="code-string">'coef'</span>: sa_coefs, <span class="code-string">'ci_lo'</span>: sa_ci_lo, <span class="code-string">'ci_hi'</span>: sa_ci_hi},
@@ -1262,7 +1264,7 @@ Aggregated ATT (average post-treatment effect):
 }</span>
 
 <span class="code-comment"># Create comparison plot</span>
-<span class="code-tooltip" data-tip="Use offsets so confidence intervals don't overlap visually">fig, ax = plt.subplots(figsize=(12, 7))
+<span class="code-tooltip" data-tip="PLOT: Draws each estimator's event study on the same axes with slight horizontal offsets, letting you visually compare whether different estimators agree on the treatment effect trajectory">fig, ax = plt.subplots(figsize=(12, 7))
 
 colors = [<span class="code-string">'#1f77b4'</span>, <span class="code-string">'#ff7f0e'</span>, <span class="code-string">'#2ca02c'</span>, <span class="code-string">'#d62728'</span>]
 markers = [<span class="code-string">'o'</span>, <span class="code-string">'s'</span>, <span class="code-string">'^'</span>, <span class="code-string">'D'</span>]
@@ -1309,7 +1311,7 @@ csdid_stats event
 <span class="code-comment">* 3. Run Sun-Abraham</span>
 eventstudyinteract outcome rel_time_*, cohort(cohort) ///
     control_cohort(never_treat) absorb(unit_id year) cluster(unit_id)
-<span class="code-tooltip" data-tip="Store matrices e(b_iw) and e(V_iw) for Sun-Abraham coefficients">matrix sa_coef = e(b_iw)
+<span class="code-tooltip" data-tip="STATA: Saves the Sun-Abraham coefficient vector and variance matrix from Stata's memory so they can be combined with results from other estimators in the comparison plot">matrix sa_coef = e(b_iw)
 matrix sa_var = e(V_iw)</span>
 
 <span class="code-comment">* 4. Run de Chaisemartin-D'Haultfoeuille</span>
@@ -1317,13 +1319,13 @@ did_multiplegt outcome unit_id year treatment, ///
     robust_dynamic dynamic(5) placebo(3) cluster(unit_id)
 
 <span class="code-comment">* Combine results into one dataset for plotting</span>
-<span class="code-tooltip" data-tip="Create a combined dataset with estimator, rel_time, coef, ci_lo, ci_hi">clear
+<span class="code-tooltip" data-tip="STATA: Builds a single dataset stacking all estimators' coefficients and CIs so they can be plotted together with twoway">clear
 input str30 estimator rel_time coef ci_lo ci_hi
 <span class="code-comment">* ... manually enter or append saved results ...</span>
 end</span>
 
 <span class="code-comment">* Create the comparison plot</span>
-<span class="code-tooltip" data-tip="Use separate() to create different markers/colors by estimator">twoway (rcap ci_lo ci_hi rel_time if estimator=="TWFE", ///
+<span class="code-tooltip" data-tip="STATA: Overlays four event study plots with distinct colors and markers for each estimator — rcap draws confidence interval bars, scatter draws the point estimates">twoway (rcap ci_lo ci_hi rel_time if estimator=="TWFE", ///
            lcolor(navy) lwidth(medium)) ///
        (scatter coef rel_time if estimator=="TWFE", ///
            mcolor(navy) msymbol(O) msize(medium)) ///
@@ -1373,7 +1375,7 @@ sa_model <- feols(outcome ~ sunab(first_treat, year) | unit_id + year,
                   data = df, cluster = ~unit_id)
 
 <span class="code-comment"># Extract coefficients into a tidy data frame</span>
-<span class="code-tooltip" data-tip="Create a combined data frame with all estimators for ggplot">extract_coefs <- function(model, name) {
+<span class="code-tooltip" data-tip="R: Helper function that extracts coefficients and CIs from each model into a tidy data frame, then row-binds all estimators together for a unified ggplot comparison">extract_coefs <- function(model, name) {
   coefs <- coef(model)
   se <- sqrt(diag(vcov(model)))
   tibble(
@@ -1405,7 +1407,7 @@ all_results <- bind_rows(
 )</span>
 
 <span class="code-comment"># Create the comparison plot</span>
-<span class="code-tooltip" data-tip="Use position_dodge to offset estimators horizontally so CIs don't overlap">ggplot(all_results, aes(x = rel_time, y = coef, color = estimator, shape = estimator)) +
+<span class="code-tooltip" data-tip="R: Plots all estimators on one figure — position_dodge shifts them horizontally so their error bars don't overlap, making it easy to compare TWFE vs. robust estimators">ggplot(all_results, aes(x = rel_time, y = coef, color = estimator, shape = estimator)) +
   geom_hline(yintercept = 0, color = "black", linewidth = 0.5) +
   geom_vline(xintercept = -0.5, color = "gray", linetype = "dashed") +
   geom_errorbar(aes(ymin = ci_lo, ymax = ci_hi),
@@ -1453,6 +1455,7 @@ Key observations:
 - The agreement across estimators strengthens the causal interpretation
 
 Saved as: estimator_comparison.png</div>
+          <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 500 320" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="500" height="320" fill="white"/><text x="250" y="20" font-size="13" fill="#333" text-anchor="middle" font-weight="bold">DiD Estimator Comparison</text><line x1="70" y1="35" x2="70" y2="250" stroke="#333"/><line x1="70" y1="250" x2="470" y2="250" stroke="#333"/><line x1="70" y1="165" x2="470" y2="165" stroke="black" stroke-width="0.8"/><line x1="263" y1="35" x2="263" y2="250" stroke="#999" stroke-dasharray="4,3"/><text x="20" y="145" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,20,145)">Treatment Effect</text><text x="270" y="288" font-size="10" fill="#333" text-anchor="middle">Periods Relative to Treatment</text><text x="65" y="58" font-size="8" fill="#666" text-anchor="end">0.8</text><text x="65" y="112" font-size="8" fill="#666" text-anchor="end">0.4</text><text x="65" y="168" font-size="8" fill="#666" text-anchor="end">0</text><text x="110" y="262" font-size="8" fill="#666" text-anchor="middle">-5</text><text x="150" y="262" font-size="8" fill="#666" text-anchor="middle">-3</text><text x="190" y="262" font-size="8" fill="#666" text-anchor="middle">-1</text><text x="300" y="262" font-size="8" fill="#666" text-anchor="middle">1</text><text x="340" y="262" font-size="8" fill="#666" text-anchor="middle">2</text><text x="380" y="262" font-size="8" fill="#666" text-anchor="middle">3</text><text x="420" y="262" font-size="8" fill="#666" text-anchor="middle">4</text><text x="460" y="262" font-size="8" fill="#666" text-anchor="middle">5</text><circle cx="108" cy="166" r="3" fill="#1f77b4"/><circle cx="148" cy="168" r="3" fill="#1f77b4"/><circle cx="188" cy="163" r="3" fill="#1f77b4"/><circle cx="298" cy="112" r="3" fill="#1f77b4"/><circle cx="338" cy="104" r="3" fill="#1f77b4"/><circle cx="378" cy="100" r="3" fill="#1f77b4"/><circle cx="418" cy="97" r="3" fill="#1f77b4"/><circle cx="458" cy="95" r="3" fill="#1f77b4"/><rect x="110" y="163" width="6" height="6" fill="#ff7f0e"/><rect x="150" y="162" width="6" height="6" fill="#ff7f0e"/><rect x="190" y="164" width="6" height="6" fill="#ff7f0e"/><rect x="300" y="100" width="6" height="6" fill="#ff7f0e"/><rect x="340" y="90" width="6" height="6" fill="#ff7f0e"/><rect x="380" y="84" width="6" height="6" fill="#ff7f0e"/><rect x="420" y="80" width="6" height="6" fill="#ff7f0e"/><rect x="460" y="77" width="6" height="6" fill="#ff7f0e"/><polygon points="115,161 118,167 112,167" fill="#2ca02c"/><polygon points="155,163 158,169 152,169" fill="#2ca02c"/><polygon points="195,160 198,166 192,166" fill="#2ca02c"/><polygon points="305,99 308,105 302,105" fill="#2ca02c"/><polygon points="345,89 348,95 342,95" fill="#2ca02c"/><polygon points="385,82 388,88 382,88" fill="#2ca02c"/><polygon points="425,78 428,84 422,84" fill="#2ca02c"/><polygon points="465,75 468,81 462,81" fill="#2ca02c"/><polygon points="118,165 122,161 126,165 122,169" fill="#d62728"/><polygon points="158,167 162,163 166,167 162,171" fill="#d62728"/><polygon points="308,102 312,98 316,102 312,106" fill="#d62728"/><polygon points="348,92 352,88 356,92 352,96" fill="#d62728"/><polygon points="388,85 392,81 396,85 392,89" fill="#d62728"/><polygon points="428,81 432,77 436,81 432,85" fill="#d62728"/><polygon points="468,78 472,74 476,78 472,82" fill="#d62728"/><circle cx="100" cy="305" r="4" fill="#1f77b4"/><text x="108" y="309" font-size="8" fill="#333">TWFE</text><rect x="158" y="301" width="8" height="8" fill="#ff7f0e"/><text x="170" y="309" font-size="8" fill="#333">Callaway-SA</text><polygon points="250,301 254,309 246,309" fill="#2ca02c"/><text x="258" y="309" font-size="8" fill="#333">Sun-Abraham</text><polygon points="346,305 350,301 354,305 350,309" fill="#d62728"/><text x="358" y="309" font-size="8" fill="#333">dCDH</text></svg></div></div>
         </div>
 
         <div class="output-simulation" data-output="did-compare" data-lang="stata">
@@ -1522,7 +1525,7 @@ Saved: estimator_comparison.png (10" x 6", 300 dpi)</div>
 <span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
 
 <span class="code-comment"># Plot mean outcomes by group over time</span>
-<span class="code-tooltip" data-tip="Visual check: do treated and control groups have parallel trends before treatment?">fig, ax = plt.subplots(figsize=(10, 6))
+<span class="code-tooltip" data-tip="PARALLEL TRENDS: Plots mean outcomes for treated vs. control groups over time — if the lines move in parallel before the vertical treatment line, the key DiD assumption is plausible">fig, ax = plt.subplots(figsize=(10, 6))
 
 for treated, group_df <span class="code-keyword">in</span> df.groupby(<span class="code-string">'treated_group'</span>):
     yearly_means = group_df.groupby(<span class="code-string">'year'</span>)[<span class="code-string">'outcome'</span>].mean()
@@ -1543,7 +1546,7 @@ plt.show()</span>
 <pre><code><span class="code-comment">* Stata: Parallel Trends Diagnostics</span>
 
 <span class="code-comment">* Visual check</span>
-<span class="code-tooltip" data-tip="Plot mean outcomes for treatment and control groups over time">collapse (mean) outcome, by(year treated_group)
+<span class="code-tooltip" data-tip="STATA: Collapses data to group-year means and plots treated vs. control trends over time — visually checking whether trends were parallel before the treatment year">collapse (mean) outcome, by(year treated_group)
 twoway (connected outcome year if treated_group==1) ///
        (connected outcome year if treated_group==0), ///
        xline(2015, lpattern(dash)) ///
@@ -1551,7 +1554,7 @@ twoway (connected outcome year if treated_group==1) ///
 
 <span class="code-comment">* Test pre-treatment coefficients jointly = 0</span>
 reghdfe outcome ib(-1).rel_time, absorb(unit_id year) cluster(unit_id)
-<span class="code-tooltip" data-tip="Test that all pre-treatment event study coefficients are jointly zero">testparm *rel_time#*  <span class="code-comment">// for negative rel_time values</span></span>
+<span class="code-tooltip" data-tip="STATA: Joint F-test of all pre-treatment event study coefficients — failing to reject the null (all equal zero) supports parallel trends before treatment">testparm *rel_time#*  <span class="code-comment">// for negative rel_time values</span></span>
 
 <span class="code-comment">* Placebo test: fake treatment timing</span>
 gen fake_post = (year >= 2013)  <span class="code-comment">// true treatment in 2015</span>
@@ -1565,7 +1568,7 @@ reg outcome treated_group fake_post fake_treat_post if year < 2015</code></pre>
 <span class="code-keyword">library</span>(dplyr)
 
 <span class="code-comment"># Visual check</span>
-<span class="code-tooltip" data-tip="Plot mean outcomes for treatment and control groups over time">df %>%
+<span class="code-tooltip" data-tip="R: Computes group-year means and plots them with ggplot — parallel lines before the dashed treatment year line support the identifying assumption">df %>%
   group_by(year, treated_group) %>%
   summarise(mean_outcome = mean(outcome)) %>%
   ggplot(aes(x = year, y = mean_outcome, color = factor(treated_group))) +
@@ -1579,7 +1582,7 @@ es_model <- feols(outcome ~ i(rel_time, ref = -1) | unit_id + year,
                   data = df, cluster = ~ unit_id)
 
 <span class="code-comment"># F-test for pre-treatment coefficients = 0</span>
-<span class="code-tooltip" data-tip="wald() tests joint significance of pre-treatment coefficients">pretreat_coefs <- grep("rel_time::-", names(coef(es_model)), value = TRUE)
+<span class="code-tooltip" data-tip="R: Runs a Wald test that all pre-treatment event study coefficients are jointly zero — a large p-value means no evidence against parallel trends">pretreat_coefs <- grep("rel_time::-", names(coef(es_model)), value = TRUE)
 wald(es_model, pretreat_coefs)</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
@@ -1613,6 +1616,7 @@ Joint test of pre-treatment coefficients:
   Conclusion: Cannot reject parallel pre-trends
 
 [Plot shows parallel lines pre-2015, diverging after treatment]</div>
+          <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 460 300" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="460" height="300" fill="white"/><text x="230" y="20" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">Parallel Trends Check</text><line x1="60" y1="30" x2="60" y2="250" stroke="#333"/><line x1="60" y1="250" x2="440" y2="250" stroke="#333"/><line x1="250" y1="30" x2="250" y2="250" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="6,3"/><text x="252" y="42" font-size="8" fill="#e74c3c">2015</text><text x="15" y="140" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,15,140)">Mean Outcome</text><text x="250" y="285" font-size="10" fill="#333" text-anchor="middle">Year</text><text x="55" y="245" font-size="8" fill="#666" text-anchor="end">3.0</text><text x="55" y="185" font-size="8" fill="#666" text-anchor="end">3.5</text><text x="55" y="125" font-size="8" fill="#666" text-anchor="end">4.0</text><text x="55" y="65" font-size="8" fill="#666" text-anchor="end">4.5</text><text x="100" y="264" font-size="7" fill="#666">2010</text><text x="138" y="264" font-size="7" fill="#666">2011</text><text x="176" y="264" font-size="7" fill="#666">2012</text><text x="214" y="264" font-size="7" fill="#666">2013</text><text x="250" y="264" font-size="7" fill="#666">2014</text><text x="288" y="264" font-size="7" fill="#666">2015</text><text x="326" y="264" font-size="7" fill="#666">2016</text><text x="364" y="264" font-size="7" fill="#666">2017</text><text x="402" y="264" font-size="7" fill="#666">2018</text><polyline points="100,236 138,220 176,205 214,189 250,174 288,100 326,83 364,67 402,51" fill="none" stroke="#1f77b4" stroke-width="2"/><circle cx="100" cy="236" r="3.5" fill="#1f77b4"/><circle cx="138" cy="220" r="3.5" fill="#1f77b4"/><circle cx="176" cy="205" r="3.5" fill="#1f77b4"/><circle cx="214" cy="189" r="3.5" fill="#1f77b4"/><circle cx="250" cy="174" r="3.5" fill="#1f77b4"/><circle cx="288" cy="100" r="3.5" fill="#1f77b4"/><circle cx="326" cy="83" r="3.5" fill="#1f77b4"/><circle cx="364" cy="67" r="3.5" fill="#1f77b4"/><circle cx="402" cy="51" r="3.5" fill="#1f77b4"/><polyline points="100,240 138,224 176,209 214,193 250,178 288,160 326,144 364,128 402,112" fill="none" stroke="#ff7f0e" stroke-width="2"/><circle cx="100" cy="240" r="3.5" fill="#ff7f0e"/><circle cx="138" cy="224" r="3.5" fill="#ff7f0e"/><circle cx="176" cy="209" r="3.5" fill="#ff7f0e"/><circle cx="214" cy="193" r="3.5" fill="#ff7f0e"/><circle cx="250" cy="178" r="3.5" fill="#ff7f0e"/><circle cx="288" cy="160" r="3.5" fill="#ff7f0e"/><circle cx="326" cy="144" r="3.5" fill="#ff7f0e"/><circle cx="364" cy="128" r="3.5" fill="#ff7f0e"/><circle cx="402" cy="112" r="3.5" fill="#ff7f0e"/><line x1="120" y1="278" x2="140" y2="278" stroke="#1f77b4" stroke-width="2"/><text x="145" y="282" font-size="9" fill="#333">Treated</text><line x1="210" y1="278" x2="230" y2="278" stroke="#ff7f0e" stroke-width="2"/><text x="235" y="282" font-size="9" fill="#333">Control</text><line x1="300" y1="278" x2="320" y2="278" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="4,2"/><text x="325" y="282" font-size="9" fill="#333">Treatment</text></svg></div></div>
         </div>
 
         <div class="output-simulation" data-output="did-7" data-lang="stata">
@@ -1703,7 +1707,7 @@ Pre-treatment coefficient magnitudes:
 <span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
 
 <span class="code-comment"># Get unique treatment cohorts</span>
-<span class="code-tooltip" data-tip="Identify the year each unit was first treated to define cohorts">cohorts = df[df[<span class="code-string">'treatment'</span>] == 1].groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'year'</span>].min().unique()</span>
+<span class="code-tooltip" data-tip="COHORTS: Finds the distinct years when units first received treatment — each unique treatment timing defines a cohort for the Bacon decomposition">cohorts = df[df[<span class="code-string">'treatment'</span>] == 1].groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'year'</span>].min().unique()</span>
 
 <span class="code-comment"># For each pair of cohorts, compute 2x2 DiD</span>
 <span class="code-comment"># (Simplified — full implementation requires careful timing)</span>
@@ -1722,7 +1726,7 @@ Pre-treatment coefficient magnitudes:
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Install: ssc install bacondecomp</span>
 <span class="code-comment">* Goodman-Bacon decomposition</span>
-<span class="code-tooltip" data-tip="Decomposes the TWFE DiD estimate into all 2x2 comparisons with weights">bacondecomp outcome treatment, id(unit_id) time(year)</span>
+<span class="code-tooltip" data-tip="STATA: Goodman-Bacon decomposition — shows that the TWFE coefficient is a weighted average of all possible 2x2 DiD comparisons, revealing which comparisons (including problematic ones) drive the estimate">bacondecomp outcome treatment, id(unit_id) time(year)</span>
 
 <span class="code-comment">* The command automatically produces:</span>
 <span class="code-comment">* - Table with 2x2 estimates, weights, and comparison types</span>
@@ -1732,7 +1736,7 @@ Pre-treatment coefficient magnitudes:
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-keyword">library</span>(bacondecomp)
 <span class="code-comment"># Goodman-Bacon decomposition of TWFE</span>
-<span class="code-tooltip" data-tip="Decomposes the overall TWFE estimate into weighted 2x2 DiD comparisons">bacon_out <- <span class="code-function">bacon</span>(outcome ~ treatment, data = df,
+<span class="code-tooltip" data-tip="R: Breaks down the TWFE estimate into its component 2x2 DiD comparisons — plots reveal whether 'bad' comparisons (early vs. late treated) have large weights, signaling potential bias">bacon_out <- <span class="code-function">bacon</span>(outcome ~ treatment, data = df,
                    id_var = <span class="code-string">"unit_id"</span>, time_var = <span class="code-string">"year"</span>)</span>
 <span class="code-comment"># View decomposition</span>
 print(bacon_out)
@@ -1770,6 +1774,7 @@ Number of 2x2 comparisons: 6
  - Red circles: Earlier vs. Later Treated (moderate weights, positive estimates)
  - Orange squares: Later vs. Earlier Treated (small weights, negative estimates)
  - Dashed horizontal line at y=0]</div>
+          <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 420 280" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="420" height="280" fill="white"/><text x="210" y="20" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">Goodman-Bacon Decomposition</text><line x1="60" y1="30" x2="60" y2="220" stroke="#333"/><line x1="60" y1="220" x2="390" y2="220" stroke="#333"/><line x1="60" y1="150" x2="390" y2="150" stroke="#999" stroke-width="0.8" stroke-dasharray="4,3"/><text x="15" y="125" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,15,125)">2x2 DiD Estimate</text><text x="225" y="248" font-size="10" fill="#333" text-anchor="middle">Weight</text><text x="55" y="55" font-size="8" fill="#666" text-anchor="end">0.6</text><text x="55" y="100" font-size="8" fill="#666" text-anchor="end">0.3</text><text x="55" y="153" font-size="8" fill="#666" text-anchor="end">0</text><text x="55" y="200" font-size="8" fill="#666" text-anchor="end">-0.3</text><text x="100" y="232" font-size="8" fill="#666" text-anchor="middle">0.1</text><text x="200" y="232" font-size="8" fill="#666" text-anchor="middle">0.3</text><text x="300" y="232" font-size="8" fill="#666" text-anchor="middle">0.5</text><text x="370" y="232" font-size="8" fill="#666" text-anchor="middle">0.6</text><polygon points="355,58 362,70 348,70" fill="#1f77b4"/><circle cx="185" cy="88" r="7" fill="#2ca02c"/><rect x="116" y="175" width="13" height="13" fill="#d62728"/><polygon points="90,260 96,270 84,270" fill="#1f77b4"/><text x="100" y="268" font-size="8" fill="#333">Treated vs Never</text><circle cx="210" cy="265" r="4" fill="#2ca02c"/><text x="218" y="268" font-size="8" fill="#333">Earlier vs Later</text><rect x="316" y="261" width="8" height="8" fill="#d62728"/><text x="328" y="268" font-size="8" fill="#333">Later vs Earlier</text></svg></div></div>
         </div>
 
         <div class="output-simulation" data-output="did-bacon" data-lang="stata">
@@ -1779,7 +1784,7 @@ Number of 2x2 comparisons: 6
 Bacon Decomposition
 ====================
 
-Overall TWFE estimate:  0.4523
+Overall TWFE estimate:  0.4183
 
 ----------------------------------------------------------------------
                   Type         |   Estimate     Weight     Wt. Avg.
@@ -1790,7 +1795,7 @@ Overall TWFE estimate:  0.4523
 -------------------------------+--------------------------------------
                         Total  |                1.0000      0.4183
 
-Note: TWFE estimate (0.4523) is close to the weighted average (0.4183).
+Note: TWFE estimate equals the weighted average of all 2x2 comparisons.
       Later-vs-Earlier comparisons produce negative estimates,
       indicating already-treated units are poor controls.
 
@@ -1804,7 +1809,7 @@ Note: TWFE estimate (0.4523) is close to the weighted average (0.4183).
 2  Earlier vs Later Treated        0.34561    0.23400
 3  Later vs Earlier Treated       -0.12340    0.15400
 
-TWFE estimate: 0.4523
+TWFE estimate: 0.4183
 
 [ggplot scatter: Weight (x) vs 2x2 DiD Estimate (y)
  Points colored by comparison type:
@@ -1849,7 +1854,7 @@ reveals that already-treated units are contaminated controls.</div>
 <span class="code-keyword">import</span> statsmodels.api <span class="code-keyword">as</span> sm
 
 <span class="code-comment"># Demean by unit and time (TWFE residualization)</span>
-<span class="code-tooltip" data-tip="TWFE is equivalent to OLS on demeaned data; the implicit weights on each observation can be negative">df[<span class="code-string">'outcome_dm'</span>] = df.groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'outcome'</span>].transform(<span class="code-string">'demean'</span>)
+<span class="code-tooltip" data-tip="DEMEAN: Shows that TWFE works by subtracting unit and time means — some treated observations get negative implicit weights after demeaning, meaning their effects are subtracted rather than added, potentially biasing the estimate">df[<span class="code-string">'outcome_dm'</span>] = df.groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'outcome'</span>].transform(<span class="code-string">'demean'</span>)
 df[<span class="code-string">'outcome_dm'</span>] -= df.groupby(<span class="code-string">'year'</span>)[<span class="code-string">'outcome_dm'</span>].transform(<span class="code-string">'mean'</span>)
 df[<span class="code-string">'treatment_dm'</span>] = df.groupby(<span class="code-string">'unit_id'</span>)[<span class="code-string">'treatment'</span>].transform(<span class="code-string">'demean'</span>)
 df[<span class="code-string">'treatment_dm'</span>] -= df.groupby(<span class="code-string">'year'</span>)[<span class="code-string">'treatment_dm'</span>].transform(<span class="code-string">'mean'</span>)</span>
@@ -1863,7 +1868,7 @@ print(<span class="code-string">"Observations with negative implicit weights:"</
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Install: ssc install twowayfeweights</span>
 <span class="code-comment">* Compute TWFE weights</span>
-<span class="code-tooltip" data-tip="Reports the number and sum of negative weights in the TWFE regression">twowayfeweights outcome unit_id year treatment, type(feTR)</span>
+<span class="code-tooltip" data-tip="STATA: Computes the implicit weights TWFE assigns to each group-time cell — reports how many are negative and their total sum, indicating the severity of potential bias">twowayfeweights outcome unit_id year treatment, type(feTR)</span>
 
 <span class="code-comment">* The command reports:</span>
 <span class="code-comment">* - Number of positive and negative weights</span>
@@ -1878,7 +1883,7 @@ twowayfeweights outcome unit_id year treatment, type(feTR) ///
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-keyword">library</span>(TwoWayFEWeights)
 <span class="code-comment"># Compute TWFE weights</span>
-<span class="code-tooltip" data-tip="Computes the weights that TWFE implicitly assigns to each group-time cell">weights_out <- <span class="code-function">twowayfeweights</span>(df, <span class="code-string">"outcome"</span>, <span class="code-string">"unit_id"</span>, <span class="code-string">"year"</span>, <span class="code-string">"treatment"</span>,
+<span class="code-tooltip" data-tip="R: Calculates the weight TWFE gives each group-time cell — negative weights mean some treatment effects are subtracted from the overall estimate, which can flip its sign">weights_out <- <span class="code-function">twowayfeweights</span>(df, <span class="code-string">"outcome"</span>, <span class="code-string">"unit_id"</span>, <span class="code-string">"year"</span>, <span class="code-string">"treatment"</span>,
                                 type = <span class="code-string">"feTR"</span>)</span>
 <span class="code-function">summary</span>(weights_out)
 
@@ -1989,7 +1994,7 @@ TWFE may be biased with heterogeneous effects.</div>
 <span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
 
 <span class="code-comment"># Step 1: Estimate FE model on untreated observations only</span>
-<span class="code-tooltip" data-tip="Only untreated obs are used to estimate the fixed effects model — this avoids contamination from treatment">untreated = df[df[<span class="code-string">'treatment'</span>] == 0]</span>
+<span class="code-tooltip" data-tip="IMPUTATION: Restricts to untreated observations only for estimating the fixed effects model, so the predicted counterfactual Y(0) is not contaminated by treatment effects">untreated = df[df[<span class="code-string">'treatment'</span>] == 0]</span>
 <span class="code-comment"># Add unit and time dummies</span>
 untreated_dummies = pd.<span class="code-function">get_dummies</span>(untreated[[<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>]],
                                      columns=[<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
@@ -2001,7 +2006,7 @@ treated_dummies = pd.<span class="code-function">get_dummies</span>(treated[[<sp
                                    columns=[<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
 <span class="code-comment"># Align columns</span>
 treated_dummies = treated_dummies.<span class="code-function">reindex</span>(columns=untreated_dummies.columns, fill_value=0)
-<span class="code-tooltip" data-tip="Impute Y(0) for treated units using the model estimated on untreated data">y0_hat = model_untreated.<span class="code-function">predict</span>(treated_dummies)</span>
+<span class="code-tooltip" data-tip="COUNTERFACTUAL: Uses the model trained on untreated data to predict what treated units' outcomes would have been without treatment — the ATT is then actual outcome minus this prediction">y0_hat = model_untreated.<span class="code-function">predict</span>(treated_dummies)</span>
 
 <span class="code-comment"># Step 3: ATT = mean(Y1 - Y0_hat)</span>
 att = (treated[<span class="code-string">'outcome'</span>].values - y0_hat).mean()
@@ -2015,7 +2020,7 @@ print(<span class="code-keyword">f</span><span class="code-string">"Imputation A
 <span class="code-comment">* Borusyak et al. imputation estimator</span>
 
 <span class="code-comment">* Static ATT</span>
-<span class="code-tooltip" data-tip="Imputes Y(0) for treated obs from a FE model on untreated obs only">did_imputation outcome unit_id year first_treated, allhorizons pretrends(5)</span>
+<span class="code-tooltip" data-tip="STATA: Borusyak et al. imputation estimator — estimates unit and time FEs from untreated data only, imputes Y(0) for treated, then computes ATT with optional pre-trend tests">did_imputation outcome unit_id year first_treated, allhorizons pretrends(5)</span>
 
 <span class="code-comment">* Event study</span>
 did_imputation outcome unit_id year first_treated, ///
@@ -2029,7 +2034,7 @@ did_imputation outcome unit_id year first_treated, ///
 <pre><code><span class="code-keyword">library</span>(didimputation)
 <span class="code-comment"># Borusyak et al. imputation estimator</span>
 <span class="code-comment"># Static ATT</span>
-<span class="code-tooltip" data-tip="Estimates Y(0) from untreated data, then computes ATT as actual minus imputed">did_imp <- <span class="code-function">did_imputation</span>(data = df, yname = <span class="code-string">"outcome"</span>,
+<span class="code-tooltip" data-tip="R: Borusyak et al. imputation — learns unit and time patterns from untreated observations, predicts counterfactual outcomes for treated units, and reports the ATT as the average gap">did_imp <- <span class="code-function">did_imputation</span>(data = df, yname = <span class="code-string">"outcome"</span>,
                            gname = <span class="code-string">"first_treated"</span>,  <span class="code-comment"># cohort indicator</span>
                            tname = <span class="code-string">"year"</span>, idname = <span class="code-string">"unit_id"</span>)</span>
 <span class="code-function">summary</span>(did_imp)
@@ -2160,13 +2165,13 @@ Event Study (with pre-trends):
 df = df.set_index([<span class="code-string">'unit_id'</span>, <span class="code-string">'year'</span>])
 
 <span class="code-comment"># Sharp DiD</span>
-<span class="code-tooltip" data-tip="Standard DiD assumes all assigned units actually take up treatment">sharp = <span class="code-function">PanelOLS</span>(df[<span class="code-string">'outcome'</span>], df[[<span class="code-string">'treatment_actual'</span>]],
+<span class="code-tooltip" data-tip="SHARP DID: Standard approach that assumes perfect compliance — everyone assigned to treatment actually takes it up, so the estimated effect applies to all assigned units">sharp = <span class="code-function">PanelOLS</span>(df[<span class="code-string">'outcome'</span>], df[[<span class="code-string">'treatment_actual'</span>]],
                   entity_effects=True, time_effects=True).<span class="code-function">fit</span>(
                   cov_type=<span class="code-string">'clustered'</span>, cluster_entity=True)</span>
 
 <span class="code-comment"># Fuzzy DiD with IV</span>
 <span class="code-comment"># Use treatment_assigned as instrument for treatment_actual</span>
-<span class="code-tooltip" data-tip="Fuzzy DiD: the group x post assignment instruments for actual treatment uptake">fuzzy = <span class="code-function">IV2SLS</span>(df[<span class="code-string">'outcome'</span>],
+<span class="code-tooltip" data-tip="FUZZY DID: When compliance is imperfect, uses treatment assignment as an instrument for actual treatment — estimates the LATE (effect for compliers) via 2SLS within the panel structure">fuzzy = <span class="code-function">IV2SLS</span>(df[<span class="code-string">'outcome'</span>],
                exog=None,
                endog=df[[<span class="code-string">'treatment_actual'</span>]],
                instruments=df[[<span class="code-string">'treatment_assigned'</span>]]).<span class="code-function">fit</span>(
@@ -2180,7 +2185,7 @@ reghdfe outcome treatment_actual, absorb(unit_id year) cluster(unit_id)
 
 <span class="code-comment">* Fuzzy DiD: IV within DiD framework</span>
 <span class="code-comment">* treatment_assigned = group x post interaction (intent to treat)</span>
-<span class="code-tooltip" data-tip="Instruments actual treatment with the DiD interaction (intent-to-treat)">ivreghdfe outcome (treatment_actual = treatment_assigned), ///
+<span class="code-tooltip" data-tip="STATA: Uses treatment assignment (intent-to-treat) as an instrument for actual treatment uptake within the TWFE framework, recovering the local average treatment effect for compliers">ivreghdfe outcome (treatment_actual = treatment_assigned), ///
     absorb(unit_id year) cluster(unit_id)</span>
 
 <span class="code-comment">* Or equivalently with xtivreg</span>
@@ -2198,7 +2203,7 @@ sharp <- <span class="code-function">feols</span>(outcome ~ treatment_actual | u
 
 <span class="code-comment"># Fuzzy DiD: instrument actual treatment with assignment</span>
 <span class="code-comment"># The DiD interaction (group x post) instruments for actual treatment</span>
-<span class="code-tooltip" data-tip="The | after FEs introduces IV: treatment_actual is instrumented by treatment_assigned">fuzzy <- <span class="code-function">feols</span>(outcome ~ 1 | unit_id + year |
+<span class="code-tooltip" data-tip="R: In fixest, the second | introduces instrumental variables — treatment_actual is instrumented by treatment_assigned, with unit and year FEs absorbed, estimating the LATE for compliers">fuzzy <- <span class="code-function">feols</span>(outcome ~ 1 | unit_id + year |
                treatment_actual ~ treatment_assigned, data = df)</span>
 <span class="code-function">summary</span>(fuzzy)
 
@@ -2340,7 +2345,7 @@ Comparison:
 
 <span class="code-comment"># The idea: for a given M (maximum violation of parallel trends),</span>
 <span class="code-comment"># compute the worst-case bias and adjust confidence intervals</span>
-<span class="code-tooltip" data-tip="M=0 assumes exact parallel trends; larger M allows for bigger violations, widening the CI"><span class="code-comment"># M = 0: standard CI (assumes exact parallel trends)</span>
+<span class="code-tooltip" data-tip="SENSITIVITY: M controls how much parallel trends can be violated — M=0 is the standard CI, while larger M values widen the CI to remain valid under greater violations, showing how robust your result is"><span class="code-comment"># M = 0: standard CI (assumes exact parallel trends)</span>
 <span class="code-comment"># M > 0: wider CI (allows for some violation)</span></span>
 
 <span class="code-comment"># In practice, use R's HonestDiD package:</span>
@@ -2359,7 +2364,7 @@ print(<span class="code-string">"See: https://github.com/asheshrambachan/HonestD
 reghdfe outcome ib(-1).rel_time, absorb(unit_id year) cluster(unit_id)
 
 <span class="code-comment">* Step 2: HonestDiD sensitivity analysis</span>
-<span class="code-tooltip" data-tip="Computes CIs that remain valid even if parallel trends are violated by up to magnitude M">honestdid, pre(4) post(5) mvec(0 0.5 1 1.5 2)</span>
+<span class="code-tooltip" data-tip="STATA: HonestDiD tests robustness by computing CIs at different violation magnitudes M — if the CI still excludes zero at reasonable M values, your finding survives plausible violations of parallel trends">honestdid, pre(4) post(5) mvec(0 0.5 1 1.5 2)</span>
 
 <span class="code-comment">* The command produces a sensitivity plot showing</span>
 <span class="code-comment">* how confidence intervals widen as M increases.</span>
@@ -2380,7 +2385,7 @@ betahat <- <span class="code-function">coef</span>(es)
 sigma <- <span class="code-function">vcov</span>(es)
 
 <span class="code-comment"># Step 3: Sensitivity analysis — relative magnitudes approach</span>
-<span class="code-tooltip" data-tip="Asks: how large could post-treatment bias be relative to the max pre-trend?">sensitivity <- <span class="code-function">createSensitivityResults_relativeMagnitudes</span>(
+<span class="code-tooltip" data-tip="R: Tests how robust the treatment effect is by asking: if post-treatment violations of parallel trends are up to Mbar times the largest pre-trend, does the effect remain significant?">sensitivity <- <span class="code-function">createSensitivityResults_relativeMagnitudes</span>(
   betahat = betahat,
   sigma = sigma,
   numPrePeriods = 4,    <span class="code-comment"># number of pre-treatment periods</span>

@@ -248,9 +248,9 @@
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
 <span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
-<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Splits arrays into random train and test subsets. test_size=0.2 means 20% of data is held out for testing.">train_test_split</span>
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Standard OLS regression from scikit-learn. Fits a linear model by minimizing the sum of squared residuals.">LinearRegression</span>
-<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Computes the mean squared error between actual and predicted values. Take the square root to get RMSE.">mean_squared_error</span>
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="TRAIN/TEST: Splits your dataset into two parts — one for training the model and one for testing how well it predicts on new, unseen data.">train_test_split</span>
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="OLS: Loads the familiar ordinary least squares regression, implemented in scikit-learn so it follows the same fit/predict pattern as all other ML models.">LinearRegression</span>
+<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="MSE: Measures prediction accuracy — averages the squared differences between what the model predicted and the actual values. Lower is better.">mean_squared_error</span>
 
 <span class="code-comment"># Generate simulated data</span>
 <span class="code-function">np.random.seed</span>(<span class="code-number">42</span>)
@@ -260,14 +260,14 @@ X = <span class="code-function">np.random.randn</span>(n, <span class="code-numb
 y = <span class="code-number">2</span> * X[:, <span class="code-number">0</span>] + <span class="code-number">1.5</span> * X[:, <span class="code-number">1</span>] - <span class="code-number">1</span> * X[:, <span class="code-number">2</span>] + <span class="code-function">np.random.randn</span>(n) * <span class="code-number">0.5</span>
 
 <span class="code-comment"># Step 1: Split into training (80%) and test (20%) sets</span>
-X_train, X_test, y_train, y_test = <span class="code-tooltip" data-tip="Randomly assigns 80% of observations to training and 20% to testing. random_state ensures reproducibility across runs.">train_test_split</span>(X, y, test_size=<span class="code-number">0.2</span>, random_state=<span class="code-number">42</span>)
+X_train, X_test, y_train, y_test = <span class="code-tooltip" data-tip="SPLIT: Randomly divides the 500 observations — 400 for training, 100 for testing. random_state=42 is a seed that ensures everyone gets the same split.">train_test_split</span>(X, y, test_size=<span class="code-number">0.2</span>, random_state=<span class="code-number">42</span>)
 
 <span class="code-comment"># Step 2: Fit model on training data only</span>
 model = <span class="code-function">LinearRegression</span>()
-model.<span class="code-tooltip" data-tip="Estimates the regression coefficients using only the training data. The test data is never used during fitting.">fit</span>(X_train, y_train)
+model.<span class="code-tooltip" data-tip="FIT: Learns the regression coefficients using only the 400 training observations. The 100 test observations are kept hidden — the model never sees them during training.">fit</span>(X_train, y_train)
 
 <span class="code-comment"># Step 3: Predict on test data</span>
-y_pred = model.<span class="code-tooltip" data-tip="Uses the fitted model to generate predictions for new (unseen) data points.">predict</span>(X_test)
+y_pred = model.<span class="code-tooltip" data-tip="PREDICT: Applies the learned coefficients to the test features to generate predicted y values. Since the model never saw these observations, this tests real-world performance.">predict</span>(X_test)
 
 <span class="code-comment"># Step 4: Evaluate out-of-sample performance</span>
 rmse = np.<span class="code-function">sqrt</span>(<span class="code-function">mean_squared_error</span>(y_test, y_pred))
@@ -292,14 +292,14 @@ rmse = np.<span class="code-function">sqrt</span>(<span class="code-function">me
 <span class="code-keyword">gen</span> y = 2*x1 + 1.5*x2 - 1*x3 + <span class="code-function">rnormal</span>()*0.5
 
 <span class="code-comment">* Step 1: Create a train/test split indicator</span>
-<span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="Creates a uniform random variable, then flags the top 20% as test observations.">split</span> = <span class="code-function">runiform</span>()
+<span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="SPLIT: Draws a random number between 0 and 1 for each observation. Those above 0.8 become the test set (~20%), simulating a random train/test split in Stata.">split</span> = <span class="code-function">runiform</span>()
 <span class="code-keyword">gen</span> test = (split > 0.8)
 
 <span class="code-comment">* Step 2: Fit model on training data only</span>
 <span class="code-keyword">regress</span> y x1-x10 <span class="code-keyword">if</span> test == 0
 
 <span class="code-comment">* Step 3: Predict on all data (including test)</span>
-<span class="code-keyword">predict</span> <span class="code-tooltip" data-tip="Generates fitted values from the regression for all observations, including the held-out test set.">yhat</span>
+<span class="code-keyword">predict</span> <span class="code-tooltip" data-tip="PREDICT: Creates predicted y values for every observation using the coefficients estimated on training data only. We then evaluate accuracy on the test set.">yhat</span>
 
 <span class="code-comment">* Step 4: Evaluate on test set only</span>
 <span class="code-keyword">gen</span> resid_sq = (y - yhat)^2 <span class="code-keyword">if</span> test == 1
@@ -312,8 +312,8 @@ rmse = np.<span class="code-function">sqrt</span>(<span class="code-function">me
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Tidymodels package for data splitting. Provides initial_split(), training(), and testing() functions.">rsample</span>)
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Tidymodels package for performance metrics like rmse(), mae(), and rsq().">yardstick</span>)
+<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="RSAMPLE: Part of tidymodels — provides clean functions for splitting data into training and test sets, and for creating cross-validation folds.">rsample</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="YARDSTICK: Tidymodels package that computes performance metrics like RMSE, MAE, and R-squared in a consistent, tidy format.">yardstick</span>)
 
 <span class="code-comment"># Generate simulated data</span>
 <span class="code-function">set.seed</span>(<span class="code-number">42</span>)
@@ -324,7 +324,7 @@ y &lt;- <span class="code-number">2</span> * X[, <span class="code-number">1</sp
 df &lt;- <span class="code-function">data.frame</span>(y = y, X)
 
 <span class="code-comment"># Step 1: Split into training (80%) and test (20%)</span>
-split &lt;- <span class="code-tooltip" data-tip="Splits the data frame into training and test sets. prop=0.8 means 80% goes to training.">initial_split</span>(df, prop = <span class="code-number">0.8</span>)
+split &lt;- <span class="code-tooltip" data-tip="SPLIT: Creates a random 80/20 division of the data frame — 80% for training the model, 20% reserved for testing on unseen data.">initial_split</span>(df, prop = <span class="code-number">0.8</span>)
 train_data &lt;- <span class="code-function">training</span>(split)
 test_data  &lt;- <span class="code-function">testing</span>(split)
 
@@ -446,7 +446,7 @@ R-squared (test):      0.9548</pre></div>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Generates polynomial features from the original variables. degree=5 creates x, x^2, x^3, x^4, x^5 and all interactions.">PolynomialFeatures</span>
+<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="POLYNOMIAL: Generates polynomial features (x, x^2, x^3, ...) from raw input. This lets a simple linear model fit complex curved relationships — but high degrees risk overfitting.">PolynomialFeatures</span>
 <span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LinearRegression
 <span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error
 
@@ -464,7 +464,7 @@ y_test  = np.<span class="code-function">sin</span>(X_test).ravel() + np.random.
 <span class="code-function">print</span>(<span class="code-string">"-"</span> * <span class="code-number">40</span>)
 
 <span class="code-keyword">for</span> degree <span class="code-keyword">in</span> [<span class="code-number">1</span>, <span class="code-number">5</span>, <span class="code-number">15</span>]:
-    poly = <span class="code-tooltip" data-tip="Transforms the single feature x into [1, x, x^2, ..., x^degree]. This lets a linear model fit a polynomial curve.">PolynomialFeatures</span>(degree)
+    poly = <span class="code-tooltip" data-tip="TRANSFORM: Converts x into [1, x, x^2, ..., x^degree] for each degree (1, 5, 15). Degree 1 = straight line, degree 5 = smooth curve, degree 15 = wiggly curve that may overfit.">PolynomialFeatures</span>(degree)
     X_train_poly = poly.<span class="code-function">fit_transform</span>(X_train)
     X_test_poly  = poly.<span class="code-function">transform</span>(X_test)
 
@@ -492,7 +492,7 @@ y_test  = np.<span class="code-function">sin</span>(X_test).ravel() + np.random.
 
 <span class="code-comment">* Generate polynomial terms</span>
 <span class="code-keyword">forvalues</span> p = 2/15 {
-    <span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="Creates polynomial terms x^2, x^3, ... x^15 for fitting polynomial regression models of increasing complexity.">x`p'</span> = x^`p'
+    <span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="POLYNOMIAL: Creates x^2 through x^15 so we can fit polynomial regressions of increasing complexity and compare their train vs. test error to illustrate overfitting.">x`p'</span> = x^`p'
 }
 
 <span class="code-comment">* Fit polynomial regressions of increasing degree</span>
@@ -546,7 +546,7 @@ results &lt;- <span class="code-function">data.frame</span>(Degree = <span class
 
 <span class="code-keyword">for</span> (d <span class="code-keyword">in</span> degrees) {
   <span class="code-comment"># Fit polynomial regression</span>
-  model &lt;- <span class="code-tooltip" data-tip="poly(x, d, raw=TRUE) generates polynomial basis up to degree d. raw=TRUE gives the raw x, x^2, ... rather than orthogonal polynomials.">lm</span>(y_train ~ <span class="code-function">poly</span>(x_train, d, raw = <span class="code-keyword">TRUE</span>))
+  model &lt;- <span class="code-tooltip" data-tip="POLYNOMIAL: poly(x, d, raw=TRUE) creates x, x^2, ..., x^d as predictors. raw=TRUE gives literal powers rather than orthogonal polynomials, making coefficients directly interpretable.">lm</span>(y_train ~ <span class="code-function">poly</span>(x_train, d, raw = <span class="code-keyword">TRUE</span>))
 
   <span class="code-comment"># Predict on train and test</span>
   pred_train &lt;- <span class="code-function">predict</span>(model)
@@ -722,7 +722,7 @@ results &lt;- <span class="code-function">data.frame</span>(Degree = <span class
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Splits data into K consecutive folds. n_splits=5 means 5 folds. shuffle=True randomizes before splitting.">KFold</span>, <span class="code-tooltip" data-tip="Evaluates a model by running K-fold CV internally. Returns an array of K test scores (one per fold).">cross_val_score</span>
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="KFOLD: Divides the data into 5 equal groups (folds). Each fold takes a turn as the test set while the other 4 are used for training — giving 5 independent estimates of performance.">KFold</span>, <span class="code-tooltip" data-tip="CV SCORE: Automates the entire cross-validation process — splits, trains, and evaluates the model on each fold, returning 5 test scores you can average.">cross_val_score</span>
 <span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LinearRegression
 
 <span class="code-comment"># Use the same simulated data</span>
@@ -736,7 +736,7 @@ kf = <span class="code-function">KFold</span>(n_splits=<span class="code-number"
 model = <span class="code-function">LinearRegression</span>()
 
 <span class="code-comment"># cross_val_score returns negative MSE (sklearn convention: higher = better)</span>
-scores = <span class="code-tooltip" data-tip="Runs 5-fold CV: trains on 4 folds, tests on 1, rotates. scoring='neg_mean_squared_error' returns negative MSE (sklearn convention).">cross_val_score</span>(model, X, y, cv=kf, scoring=<span class="code-string">'neg_mean_squared_error'</span>)
+scores = <span class="code-tooltip" data-tip="CV: Runs the linear regression 5 times — each time training on 4 folds and testing on 1. Returns negative MSE (sklearn convention: higher = better, so MSE is negated).">cross_val_score</span>(model, X, y, cv=kf, scoring=<span class="code-string">'neg_mean_squared_error'</span>)
 
 <span class="code-comment"># Convert to positive RMSE</span>
 rmse_scores = np.<span class="code-function">sqrt</span>(-scores)
@@ -763,7 +763,7 @@ rmse_scores = np.<span class="code-function">sqrt</span>(-scores)
 <span class="code-comment">* Assign observations to 5 folds randomly</span>
 <span class="code-keyword">gen</span> u = <span class="code-function">runiform</span>()
 <span class="code-keyword">sort</span> u
-<span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="Assigns each observation to a fold (1-5). Using the modulo of observation number ensures roughly equal fold sizes.">fold</span> = <span class="code-function">mod</span>(_n - 1, 5) + 1
+<span class="code-keyword">gen</span> <span class="code-tooltip" data-tip="FOLD: Assigns each observation to one of 5 groups (1-5) after random sorting. The modulo trick ensures roughly equal group sizes for balanced cross-validation.">fold</span> = <span class="code-function">mod</span>(_n - 1, 5) + 1
 
 <span class="code-comment">* Perform 5-fold CV</span>
 <span class="code-keyword">gen</span> cv_resid_sq = .
@@ -786,7 +786,7 @@ rmse_scores = np.<span class="code-function">sqrt</span>(-scores)
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="Tidymodels package for resampling. vfold_cv() creates V-fold cross-validation splits.">rsample</span>)
+<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="RSAMPLE: Tidymodels package for resampling strategies. Here we use vfold_cv() to create the 5 cross-validation folds needed for evaluating our model.">rsample</span>)
 
 <span class="code-comment"># Generate data</span>
 <span class="code-function">set.seed</span>(<span class="code-number">42</span>)
@@ -797,12 +797,12 @@ y &lt;- <span class="code-number">2</span> * X[, <span class="code-number">1</sp
 df &lt;- <span class="code-function">data.frame</span>(y = y, X)
 
 <span class="code-comment"># Create 5-fold CV splits</span>
-folds &lt;- <span class="code-tooltip" data-tip="Creates 5-fold cross-validation resampling object. Each fold is used as the test set exactly once.">vfold_cv</span>(df, v = <span class="code-number">5</span>)
+folds &lt;- <span class="code-tooltip" data-tip="CV FOLDS: Creates 5 cross-validation splits from the data. Each observation appears in the test set exactly once, ensuring every data point contributes to the performance estimate.">vfold_cv</span>(df, v = <span class="code-number">5</span>)
 
 <span class="code-comment"># Compute RMSE for each fold</span>
 rmse_vals &lt;- <span class="code-function">sapply</span>(<span class="code-number">1</span>:<span class="code-number">5</span>, <span class="code-keyword">function</span>(i) {
-  train_data &lt;- <span class="code-tooltip" data-tip="Extracts the training (analysis) set from a cross-validation split.">analysis</span>(folds$splits[[i]])
-  test_data  &lt;- <span class="code-tooltip" data-tip="Extracts the test (assessment) set from a cross-validation split.">assessment</span>(folds$splits[[i]])
+  train_data &lt;- <span class="code-tooltip" data-tip="TRAIN SET: Extracts the 80% of data used for training in this particular fold. Called 'analysis' set in tidymodels terminology.">analysis</span>(folds$splits[[i]])
+  test_data  &lt;- <span class="code-tooltip" data-tip="TEST SET: Extracts the held-out 20% used for testing in this fold. Called 'assessment' set in tidymodels — these observations were not used during training.">assessment</span>(folds$splits[[i]])
   model &lt;- <span class="code-function">lm</span>(y ~ ., data = train_data)
   preds &lt;- <span class="code-function">predict</span>(model, newdata = test_data)
   <span class="code-function">sqrt</span>(<span class="code-function">mean</span>((test_data$y - preds)^2))

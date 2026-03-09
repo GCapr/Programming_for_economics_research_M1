@@ -262,12 +262,10 @@ function initReadLikeNovel() {
 
     var lines = parseCodeLines(codeEl);
 
-    // First pass: compute annotations and find max code-line width
+    // First pass: compute annotations for each line
     var lineData = [];
-    var maxLen = 0;
 
     for (var i = 0; i < lines.length; i++) {
-      var textLen = lines[i].dom.textContent.length;
       var type = classifyLine(lines[i].dom);
       var annotation = '';
 
@@ -283,26 +281,24 @@ function initReadLikeNovel() {
           break;
       }
 
-      lineData.push({ html: lines[i].html, textLen: textLen, annotation: annotation });
-      if (annotation && textLen > maxLen) maxLen = textLen;
+      // Get leading whitespace to indent annotations under their code line
+      var textContent = lines[i].dom.textContent;
+      var leadMatch = textContent.match(/^(\s*)/);
+      var leadingWS = leadMatch ? leadMatch[1] : '';
+
+      lineData.push({ html: lines[i].html, annotation: annotation, indent: leadingWS });
     }
 
-    // Second pass: build annotated HTML with column-aligned annotations
+    // Second pass: build annotated HTML — annotations on their own line below code
     var annotatedLines = [];
-    var padCol = maxLen + 4;
 
     for (var i = 0; i < lineData.length; i++) {
+      annotatedLines.push(lineData[i].html);
       if (lineData[i].annotation) {
-        var padding = padCol - lineData[i].textLen;
-        if (padding < 2) padding = 2;
-        var spaces = new Array(padding + 1).join(' ');
         annotatedLines.push(
-          lineData[i].html +
-          '<span class="novel-annotation">' + spaces + '\u2190 ' +
+          '<span class="novel-annotation">' + lineData[i].indent + '   \u2190 ' +
           escapeHtmlText(lineData[i].annotation) + '</span>'
         );
-      } else {
-        annotatedLines.push(lineData[i].html);
       }
     }
 

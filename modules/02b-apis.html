@@ -363,8 +363,8 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Import the requests library for making HTTP calls</span>
-<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="requests: Library for making HTTP requests to web servers">requests</span>
-<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="pandas: Data manipulation library, aliased as 'pd' by convention">pandas</span> <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="REQUESTS: Python library for talking to web APIs. It sends HTTP requests (like typing a URL in a browser) and returns the server's response with your data.">requests</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="PANDAS: Loaded here so we can convert the raw API response into a structured DataFrame for analysis. Aliased as 'pd' by universal convention.">pandas</span> <span class="code-keyword">as</span> pd
 
 <span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
 <span class="code-comment"># STEP 1: BUILD THE URL (brick by brick)</span>
@@ -378,11 +378,11 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
 <span class="code-tooltip" data-tip="INDICATOR CODE: A unique identifier for the specific data series. NY.GDP.MKTP.CD = GDP in current US dollars. The World Bank has thousands of indicators—search their database to find others.">indicator</span> = <span class="code-string">"NY.GDP.MKTP.CD"</span>       <span class="code-comment"># GDP in current US$</span>
 
 <span class="code-comment"># Assemble the URL</span>
-<span class="code-tooltip" data-tip="We build the URL by concatenating strings - you can swap country/indicator easily!">url</span> = <span class="code-string">f"</span>{base}<span class="code-string">/country/</span>{country}<span class="code-string">/indicator/</span>{indicator}<span class="code-string">"</span>
+<span class="code-tooltip" data-tip="URL ASSEMBLY: Builds the complete API URL by inserting our country and indicator variables into a template. Using variables makes it easy to change the country or indicator without rewriting the URL.">url</span> = <span class="code-string">f"</span>{base}<span class="code-string">/country/</span>{country}<span class="code-string">/indicator/</span>{indicator}<span class="code-string">"</span>
 <span class="code-keyword">print</span>(<span class="code-string">f"URL built: {url}"</span>)
 
 <span class="code-comment"># Parameters: Filters added to the URL as ?key=value&key=value</span>
-<span class="code-tooltip" data-tip="Dictionary of parameters: format=json for JSON output, date for year range, per_page for max results">params</span> = {
+<span class="code-tooltip" data-tip="PARAMS: A dictionary of query parameters that get appended to the URL as ?format=json&amp;date=2015:2022&amp;per_page=100. These tell the API what format, time range, and page size you want.">params</span> = {
     <span class="code-string">"format"</span>: <span class="code-string">"json"</span>,      <span class="code-comment"># Return data as JSON (not XML)</span>
     <span class="code-string">"date"</span>: <span class="code-string">"2015:2022"</span>,   <span class="code-comment"># Get data from 2015 to 2022</span>
     <span class="code-string">"per_page"</span>: <span class="code-number">100</span>        <span class="code-comment"># Maximum records per page</span>
@@ -393,11 +393,11 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
 <span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
 
 <span class="code-comment"># requests.get() combines url + params and sends to server</span>
-<span class="code-tooltip" data-tip="requests.get() sends an HTTP GET request and returns a Response object">response</span> = requests.get(url, params=params)
+<span class="code-tooltip" data-tip="RESPONSE: requests.get() sends our URL and parameters to the World Bank server and returns a Response object containing the status code and data. Like clicking a link and getting the page back.">response</span> = requests.get(url, params=params)
 <span class="code-keyword">print</span>(<span class="code-string">f"Status Code: {response.status_code}"</span>)  <span class="code-comment"># 200 = success</span>
 
 <span class="code-comment"># Parse the JSON response into a Python object</span>
-<span class="code-tooltip" data-tip=".json() converts the response body from JSON text to Python dictionaries/lists">data</span> = response.json()
+<span class="code-tooltip" data-tip="DATA: The .json() method parses the response body from raw JSON text into Python dictionaries and lists that you can navigate with bracket notation like data[1].">data</span> = response.json()
 
 <span class="code-comment"># World Bank returns [metadata, records] - we want index 1</span>
 <span class="code-tooltip" data-tip="INDEXING: The API returns a list with two items: [0] is metadata (info about the response), [1] is the actual data records. We grab index 1 to get just the data we want.">records</span> = data[<span class="code-tooltip" data-tip="INDEX 1: In Python, counting starts at 0. So [1] gets the SECOND item in the list. The first item [0] is metadata we don't need."><span class="code-number">1</span></span>]
@@ -438,9 +438,9 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># Load required libraries</span>
-<span class="code-function">library</span>(<span class="code-tooltip" data-tip="httr: HTTP client library for making web requests">httr</span>)
-<span class="code-function">library</span>(<span class="code-tooltip" data-tip="jsonlite: Library for parsing JSON data">jsonlite</span>)
-<span class="code-function">library</span>(<span class="code-tooltip" data-tip="tidyverse: Collection of data science packages including dplyr and ggplot2">tidyverse</span>)
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="HTTR: R's HTTP client library for sending web requests to APIs. Similar to Python's requests library -- handles GET/POST requests, authentication, and response parsing.">httr</span>)
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="JSONLITE: Converts JSON data (the format most APIs return) into R lists and data frames. The fromJSON() function does the heavy lifting.">jsonlite</span>)
+<span class="code-function">library</span>(<span class="code-tooltip" data-tip="TIDYVERSE: Gives us tibble() for creating clean data frames, filter() for removing missing values, and the %>% pipe operator for chaining operations.">tidyverse</span>)
 
 <span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
 <span class="code-comment"># STEP 1: BUILD THE URL (brick by brick)</span>
@@ -454,7 +454,7 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
 <span class="code-tooltip" data-tip="INDICATOR CODE: Unique identifier for GDP in current US dollars. The World Bank uses standardized codes for all their data series. Browse their site to find other indicators.">indicator</span> <- <span class="code-string">"NY.GDP.MKTP.CD"</span>      <span class="code-comment"># GDP in current US$</span>
 
 <span class="code-comment"># Assemble the URL using paste0()</span>
-<span class="code-tooltip" data-tip="paste0() concatenates strings without spaces - building the URL brick by brick">url</span> <- <span class="code-function">paste0</span>(base, <span class="code-string">"/country/"</span>, country, <span class="code-string">"/indicator/"</span>, indicator)
+<span class="code-tooltip" data-tip="URL ASSEMBLY: paste0() glues strings together without spaces, building the full API URL from our base, country, and indicator variables. Easy to change one piece without rewriting everything.">url</span> <- <span class="code-function">paste0</span>(base, <span class="code-string">"/country/"</span>, country, <span class="code-string">"/indicator/"</span>, indicator)
 <span class="code-function">cat</span>(<span class="code-string">"URL built:"</span>, url, <span class="code-string">"\n"</span>)
 
 <span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
@@ -462,7 +462,7 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
 <span class="code-comment"># ═══════════════════════════════════════════════════════════════════</span>
 
 <span class="code-comment"># GET() combines url + query params and sends to server</span>
-<span class="code-tooltip" data-tip="GET() from httr sends an HTTP GET request; query= adds URL parameters">response</span> <- <span class="code-function">GET</span>(url, query = <span class="code-function">list</span>(
+<span class="code-tooltip" data-tip="RESPONSE: GET() sends our URL and query parameters to the World Bank server. The query list becomes ?format=json&amp;date=2015:2022&amp;per_page=100 appended to the URL.">response</span> <- <span class="code-function">GET</span>(url, query = <span class="code-function">list</span>(
   format = <span class="code-string">"json"</span>,      <span class="code-comment"># Request JSON format</span>
   date = <span class="code-string">"2015:2022"</span>,   <span class="code-comment"># Year range</span>
   per_page = <span class="code-number">100</span>        <span class="code-comment"># Max results</span>
@@ -472,7 +472,7 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
 <span class="code-function">cat</span>(<span class="code-string">"Status:"</span>, <span class="code-function">status_code</span>(response), <span class="code-string">"\n"</span>)
 
 <span class="code-comment"># Parse JSON response</span>
-<span class="code-tooltip" data-tip="content() extracts response body; fromJSON() parses JSON to R objects">data</span> <- <span class="code-function">content</span>(response, <span class="code-string">"text"</span>) %>% <span class="code-function">fromJSON</span>()
+<span class="code-tooltip" data-tip="DATA: content() extracts the raw text from the server response, then fromJSON() converts that JSON text into R lists and data frames you can work with.">data</span> <- <span class="code-function">content</span>(response, <span class="code-string">"text"</span>) %>% <span class="code-function">fromJSON</span>()
 
 <span class="code-comment"># Extract records (second element of response list)</span>
 <span class="code-tooltip" data-tip="DOUBLE BRACKETS: In R, [[2]] extracts the SECOND element as a standalone object. Single brackets [2] would keep it as a list. The API returns metadata first, then data—we want the data.">records</span> <- data[[2]]
@@ -495,7 +495,8 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
             <span>Python Output</span>
             <button class="close-output">&times;</button>
           </div>
-          <div class="output-body">Status Code: <span class="out-num">200</span>
+          <div class="output-body">URL built: https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD
+Status Code: <span class="out-num">200</span>
         country  year           gdp
 <span class="out-num">0</span>  United States  <span class="out-num">2022</span>  <span class="out-num">2.546206e+13</span>
 <span class="out-num">1</span>  United States  <span class="out-num">2021</span>  <span class="out-num">2.331481e+13</span>
@@ -536,7 +537,8 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
             <span>R Output (RStudio Console)</span>
             <button class="close-output">&times;</button>
           </div>
-          <div class="output-body">Status: <span class="out-num">200</span>
+          <div class="output-body">URL built: https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD
+Status: <span class="out-num">200</span>
 <span class="out-str"># A tibble: 8 x 3</span>
   country        year          gdp
   <span class="out-blue">&lt;chr&gt;</span>         <span class="out-blue">&lt;int&gt;</span>        <span class="out-blue">&lt;dbl&gt;</span>
@@ -591,11 +593,11 @@ response = requests.get(full_url)         <span style="color: #9ca3af;"># Send t
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Example: Using an API key (FRED API)</span>
 <span class="code-keyword">import</span> requests
-<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="os module: Provides functions for interacting with the operating system, including environment variables">os</span>
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="OS: Python's operating system module. Used here to securely read API keys from environment variables instead of hardcoding them in your script.">os</span>
 
 <span class="code-comment"># NEVER hardcode API keys in your code!</span>
 <span class="code-comment"># Instead, use environment variables for security</span>
-<span class="code-tooltip" data-tip="os.environ.get() retrieves environment variables - safer than hardcoding secrets">api_key</span> = os.environ.get(<span class="code-string">'FRED_API_KEY'</span>)
+<span class="code-tooltip" data-tip="API_KEY: Reads your FRED API key from an environment variable. This is the secure way to handle secrets -- your key stays out of your code and out of version control (Git).">api_key</span> = os.environ.get(<span class="code-string">'FRED_API_KEY'</span>)
 <span class="code-comment"># Set in terminal: export FRED_API_KEY=your_key_here</span>
 
 url = <span class="code-string">"https://api.stlouisfed.org/fred/series/observations"</span>

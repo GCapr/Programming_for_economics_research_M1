@@ -297,16 +297,16 @@
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Example: How text becomes tokens</span>
-<span class="code-tooltip" data-tip="The raw text input that will be processed by the LLM. Before the model can understand it, it must be broken into smaller pieces called tokens.">text = <span class="code-string">"Hello, how are you doing today?"</span></span>
+<span class="code-tooltip" data-tip="INPUT TEXT: The sentence we want the LLM to process. But models cannot read text directly — they need it split into tokens (sub-word pieces) and converted to numbers first.">text = <span class="code-string">"Hello, how are you doing today?"</span></span>
 
 <span class="code-comment"># Tokenized (roughly):</span>
-<span class="code-tooltip" data-tip="Tokens are pieces of text - sometimes words, sometimes word parts. Notice spaces are often attached to tokens. Punctuation gets its own tokens.">tokens = [<span class="code-string">"Hello"</span>, <span class="code-string">","</span>, <span class="code-string">" how"</span>, <span class="code-string">" are"</span>, <span class="code-string">" you"</span>, <span class="code-string">" doing"</span>, <span class="code-string">" today"</span>, <span class="code-string">"?"</span>]</span>
+<span class="code-tooltip" data-tip="TOKENS: The text split into pieces the model can process. Notice that tokens are not always full words — spaces attach to the following word and punctuation becomes its own token. 6 words become 8 tokens.">tokens = [<span class="code-string">"Hello"</span>, <span class="code-string">","</span>, <span class="code-string">" how"</span>, <span class="code-string">" are"</span>, <span class="code-string">" you"</span>, <span class="code-string">" doing"</span>, <span class="code-string">" today"</span>, <span class="code-string">"?"</span>]</span>
 
 <span class="code-comment"># Each token maps to an integer ID</span>
-<span class="code-tooltip" data-tip="The model's vocabulary assigns a unique number to each token. The model actually works with these numbers, not the text. Each model has its own vocabulary.">token_ids = [<span class="code-number">15496</span>, <span class="code-number">11</span>, <span class="code-number">703</span>, <span class="code-number">527</span>, <span class="code-number">499</span>, <span class="code-number">3815</span>, <span class="code-number">3432</span>, <span class="code-number">30</span>]</span>
+<span class="code-tooltip" data-tip="TOKEN IDS: Each token maps to a unique integer in the model's vocabulary. The model processes these numbers through its neural network — it never 'sees' text, only sequences of IDs like these.">token_ids = [<span class="code-number">15496</span>, <span class="code-number">11</span>, <span class="code-number">703</span>, <span class="code-number">527</span>, <span class="code-number">499</span>, <span class="code-number">3815</span>, <span class="code-number">3432</span>, <span class="code-number">30</span>]</span>
 
 <span class="code-comment"># Models work with token IDs, not text</span>
-<span class="code-comment"># <span class="code-tooltip" data-tip="A rough rule of thumb for estimating token counts. 'Hello world' is 2 words but might be 2-3 tokens depending on the tokenizer.">Typical: 1 word ≈ 1.3 tokens (or ~4 characters per token)</span></span></code></pre>
+<span class="code-comment"># <span class="code-tooltip" data-tip="RULE OF THUMB: Useful for estimating API costs and context limits. A 1000-word document uses roughly 1300 tokens. Models have fixed token budgets (e.g., 128k for GPT-4), so this ratio helps you plan.">Typical: 1 word ≈ 1.3 tokens (or ~4 characters per token)</span></span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
         </div>
@@ -362,24 +362,24 @@ Punctuation is usually a separate token.</pre>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Simplified generation loop</span>
-<span class="code-tooltip" data-tip="The user's input text. The model will continue from where this prompt ends, predicting what comes next.">prompt = <span class="code-string">"The capital of France is"</span></span>
-<span class="code-tooltip" data-tip="Converts text to token IDs. The model only understands numbers, so we must translate text first.">tokens = tokenize(prompt)</span>  <span class="code-comment"># [464, 3361, 315, 9822, 374]</span>
+<span class="code-tooltip" data-tip="PROMPT: Your input to the model. The LLM will treat this as an incomplete sentence and predict what comes next — in this case, it should produce 'Paris.' The quality of your prompt determines the quality of the response.">prompt = <span class="code-string">"The capital of France is"</span></span>
+<span class="code-tooltip" data-tip="TOKENIZE: Translates the prompt into the sequence of integer IDs the model can process. This is always the first step — the model cannot work with raw text.">tokens = tokenize(prompt)</span>  <span class="code-comment"># [464, 3361, 315, 9822, 374]</span>
 
-<span class="code-tooltip" data-tip="Generation is a loop: predict one token, add it, repeat. max_tokens limits how long the response can be."><span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(max_tokens):</span>
+<span class="code-tooltip" data-tip="AUTOREGRESSIVE LOOP: The model generates text one token at a time — predict the next token, append it, then use the whole sequence to predict the token after that. max_tokens caps the response length."><span class="code-keyword">for</span> _ <span class="code-keyword">in</span> range(max_tokens):</span>
     <span class="code-comment"># Model outputs probability for each vocabulary word</span>
-    <span class="code-tooltip" data-tip="The model outputs a probability for EVERY word in its vocabulary. High probability = more likely to be the next word.">probs = model(tokens)</span>  <span class="code-comment"># Shape: [vocab_size]</span>
+    <span class="code-tooltip" data-tip="FORWARD PASS: The model reads all tokens so far and outputs a probability for every word in its vocabulary (often 50k+ words). 'Paris' will have high probability here because the model learned geography during training.">probs = model(tokens)</span>  <span class="code-comment"># Shape: [vocab_size]</span>
 
     <span class="code-comment"># Sample next token (or take argmax for greedy)</span>
-    <span class="code-tooltip" data-tip="Chooses the next token based on probabilities. temperature controls randomness: 0 = always pick most likely, higher = more random/creative.">next_token = sample(probs, temperature=<span class="code-number">0.7</span>)</span>
+    <span class="code-tooltip" data-tip="SAMPLING: Picks the next token from the probability distribution. temperature=0.7 adds mild randomness — mostly picks high-probability tokens but occasionally surprises. At 0, always picks the single most likely word; at 1+, much more creative/risky.">next_token = sample(probs, temperature=<span class="code-number">0.7</span>)</span>
 
     <span class="code-comment"># Append and continue</span>
-    <span class="code-tooltip" data-tip="Add the chosen token to the sequence. Now the model will use ALL previous tokens (including this one) to predict the next.">tokens.append(next_token)</span>
+    <span class="code-tooltip" data-tip="GROW SEQUENCE: Appends the chosen token to the running sequence. On the next loop iteration, the model sees this token too, so each new prediction is conditioned on everything generated so far.">tokens.append(next_token)</span>
 
-    <span class="code-tooltip" data-tip="Stop when the model generates a special 'end of text' token, or when we hit max_tokens."><span class="code-keyword">if</span> next_token == END_TOKEN:
+    <span class="code-tooltip" data-tip="STOP CONDITION: Generation ends when the model produces a special end-of-sequence token (meaning it 'chose' to stop) or when we hit the max_tokens limit. Without this, generation would continue forever."><span class="code-keyword">if</span> next_token == END_TOKEN:
         <span class="code-keyword">break</span></span>
 
 <span class="code-comment"># Detokenize back to text</span>
-<span class="code-tooltip" data-tip="Converts token IDs back to readable text. The reverse of tokenization - numbers become words again.">output = detokenize(tokens)</span>
+<span class="code-tooltip" data-tip="DETOKENIZE: Converts the sequence of token IDs back into human-readable text. The reverse of tokenization — maps numbers back to words and joins them into a coherent string.">output = detokenize(tokens)</span>
 <span class="code-comment"># "The capital of France is Paris."</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
@@ -537,10 +537,10 @@ Temperature used: 0.7</pre>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Zero-shot</span>
-<span class="code-tooltip" data-tip="Zero-shot means no examples provided - just the task. Works for simple, well-understood tasks. The model relies entirely on its training.">prompt = <span class="code-string">"Translate to French: Hello, how are you?"</span></span>
+<span class="code-tooltip" data-tip="ZERO-SHOT: Give the model a task with no examples. Works well for simple, common tasks the model saw during training (translation, summarization). Fastest to write but less reliable for unusual or specialized tasks.">prompt = <span class="code-string">"Translate to French: Hello, how are you?"</span></span>
 
 <span class="code-comment"># Few-shot</span>
-<span class="code-tooltip" data-tip="Few-shot learning: provide examples of input-output pairs before the actual task. The model learns the pattern from your examples and applies it.">prompt = <span class="code-string">"""Translate to French:
+<span class="code-tooltip" data-tip="FEW-SHOT: Show the model 2-3 examples of the input-output pattern you want, then give it a new input. The model infers the task from the examples — much more reliable for specialized formats or domain-specific tasks.">prompt = <span class="code-string">"""Translate to French:
 English: Hello
 French: Bonjour
 
@@ -551,14 +551,14 @@ English: How are you?
 French:"""</span></span>
 
 <span class="code-comment"># Chain-of-thought</span>
-<span class="code-tooltip" data-tip="Chain-of-thought prompting asks the model to show its reasoning step by step. This dramatically improves accuracy on math and logic problems.">prompt = <span class="code-string">"""Solve step by step:
+<span class="code-tooltip" data-tip="CHAIN-OF-THOUGHT: Asking 'Let's think step by step' forces the model to show its reasoning before answering. This dramatically improves accuracy on math, logic, and multi-step problems by preventing the model from jumping to (wrong) conclusions.">prompt = <span class="code-string">"""Solve step by step:
 If a train travels 120 miles in 2 hours, then continues
 for 3 more hours at the same speed, what is the total distance?
 
 Let's think step by step:"""</span></span>
 
 <span class="code-comment"># Role + structured output</span>
-<span class="code-tooltip" data-tip="Role prompting ('You are a...') sets context and expertise level. Requesting structured output (JSON) makes responses easier to parse programmatically.">prompt = <span class="code-string">"""You are a data analyst. Given this data,
+<span class="code-tooltip" data-tip="ROLE + FORMAT: Assigning a role ('You are a data analyst') primes the model with domain expertise. Requesting JSON output makes the response machine-parseable — essential when you want to feed LLM results into downstream code.">prompt = <span class="code-string">"""You are a data analyst. Given this data,
 identify the top 3 trends. Format as JSON:
 {"trends": ["trend1", "trend2", "trend3"]}"""</span></span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
@@ -611,36 +611,36 @@ Response:
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Using OpenAI API</span>
-<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="The official OpenAI Python library. Install with: pip install openai">openai</span> <span class="code-keyword">import</span> OpenAI
+<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="OPENAI SDK: The official Python library for calling GPT models. Install with pip install openai. Handles authentication, request formatting, and response parsing.">openai</span> <span class="code-keyword">import</span> OpenAI
 
-<span class="code-tooltip" data-tip="Creates an API client. It automatically reads your API key from the OPENAI_API_KEY environment variable - never hardcode keys in your code!">client = OpenAI()</span>  <span class="code-comment"># Uses OPENAI_API_KEY env var</span>
+<span class="code-tooltip" data-tip="API CLIENT: Initializes the connection to OpenAI's servers. Automatically reads your API key from the OPENAI_API_KEY environment variable — never hardcode keys in your scripts, as they could leak if shared.">client = OpenAI()</span>  <span class="code-comment"># Uses OPENAI_API_KEY env var</span>
 
-<span class="code-tooltip" data-tip="Sends a request to the OpenAI API. chat.completions is for conversational models like GPT-4. The create() method makes the actual API call.">response = client.chat.completions.create(</span>
-    <span class="code-tooltip" data-tip="Which model to use. Different models have different capabilities and costs. gpt-4 is more capable but slower and pricier than gpt-3.5-turbo.">model=<span class="code-string">"gpt-4"</span>,</span>
-    <span class="code-tooltip" data-tip="Conversation history as a list. 'system' sets behavior, 'user' is the human, 'assistant' is the AI. The model sees all messages to maintain context.">messages=[
+<span class="code-tooltip" data-tip="API CALL: Sends your prompt to OpenAI's servers and receives a response. chat.completions is the endpoint for conversational models (GPT-3.5, GPT-4). Each call costs money based on input + output tokens.">response = client.chat.completions.create(</span>
+    <span class="code-tooltip" data-tip="MODEL CHOICE: GPT-4 is more capable but slower and more expensive than GPT-3.5-turbo. For research tasks requiring accuracy (coding, reasoning, analysis), GPT-4 is worth the cost; for simple tasks, the cheaper model suffices.">model=<span class="code-string">"gpt-4"</span>,</span>
+    <span class="code-tooltip" data-tip="CONVERSATION: A list of messages with roles. 'system' sets the assistant's behavior, 'user' is your input, 'assistant' would be previous AI responses. The model sees all messages, enabling multi-turn conversations.">messages=[
         {<span class="code-string">"role"</span>: <span class="code-string">"system"</span>, <span class="code-string">"content"</span>: <span class="code-string">"You are a helpful assistant."</span>},
         {<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: <span class="code-string">"Explain regression discontinuity."</span>}
     ],</span>
-    <span class="code-tooltip" data-tip="Controls randomness: 0 = deterministic, 1 = creative. For factual tasks use lower values; for creative writing use higher.">temperature=<span class="code-number">0.7</span>,</span>
-    <span class="code-tooltip" data-tip="Maximum tokens in the response. Limits cost and response length. 500 tokens is roughly 375 words.">max_tokens=<span class="code-number">500</span></span>
+    <span class="code-tooltip" data-tip="TEMPERATURE: Controls output randomness. 0 = always pick the most likely next token (deterministic, good for factual tasks). 1 = sample proportionally (creative, diverse). 0.7 is a balanced default.">temperature=<span class="code-number">0.7</span>,</span>
+    <span class="code-tooltip" data-tip="RESPONSE LIMIT: Caps the response at 500 tokens (~375 words). Controls both cost and verbosity. Set higher for detailed explanations, lower for concise answers.">max_tokens=<span class="code-number">500</span></span>
 )
 
-<span class="code-tooltip" data-tip="The response contains multiple possible completions (choices). We take the first one and extract the actual text content."><span class="code-function">print</span>(response.choices[<span class="code-number">0</span>].message.content)</span>
+<span class="code-tooltip" data-tip="EXTRACT RESPONSE: The API returns a structured object. choices[0] is the first (usually only) completion, and .message.content gives you the actual text the model generated."><span class="code-function">print</span>(response.choices[<span class="code-number">0</span>].message.content)</span>
 
 <span class="code-comment"># Using Anthropic API</span>
-<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="The official Anthropic Python library for Claude models. Install with: pip install anthropic">anthropic</span> <span class="code-keyword">import</span> Anthropic
+<span class="code-keyword">from</span> <span class="code-tooltip" data-tip="ANTHROPIC SDK: The official Python library for Claude models. Install with pip install anthropic. The API structure is similar to OpenAI's but with some key differences shown below.">anthropic</span> <span class="code-keyword">import</span> Anthropic
 
-<span class="code-tooltip" data-tip="Creates Anthropic client. Reads from ANTHROPIC_API_KEY environment variable automatically.">client = Anthropic()</span>
+<span class="code-tooltip" data-tip="API CLIENT: Initializes the Anthropic connection. Like OpenAI, reads the API key from an environment variable (ANTHROPIC_API_KEY) automatically.">client = Anthropic()</span>
 
-<span class="code-tooltip" data-tip="Sends request to Claude. Anthropic uses 'messages' instead of 'chat.completions'. The API structure is similar but with some differences.">message = client.messages.create(</span>
-    <span class="code-tooltip" data-tip="Claude model version. The date in the name indicates the model snapshot. Newer versions may have improved capabilities.">model=<span class="code-string">"claude-3-sonnet-20240229"</span>,</span>
-    <span class="code-tooltip" data-tip="Maximum response length. Claude's max_tokens is required (not optional like OpenAI's).">max_tokens=<span class="code-number">1024</span>,</span>
+<span class="code-tooltip" data-tip="API CALL: Sends the prompt to Claude. Anthropic uses client.messages.create() instead of OpenAI's client.chat.completions.create() — different method name, same concept.">message = client.messages.create(</span>
+    <span class="code-tooltip" data-tip="MODEL VERSION: The date in the name (20240229) identifies the specific model snapshot. Claude 3 comes in tiers: Haiku (fast/cheap), Sonnet (balanced), Opus (most capable). Choose based on your task complexity and budget.">model=<span class="code-string">"claude-3-sonnet-20240229"</span>,</span>
+    <span class="code-tooltip" data-tip="RESPONSE LIMIT: Required for Anthropic's API (unlike OpenAI where it's optional). 1024 tokens allows a ~750-word response. Set this based on how detailed you need the answer to be.">max_tokens=<span class="code-number">1024</span>,</span>
     messages=[
         {<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: <span class="code-string">"Explain difference-in-differences."</span>}
     ]
 )
 
-<span class="code-tooltip" data-tip="Claude's response structure differs from OpenAI's. The content is a list, so we access the first item's text."><span class="code-function">print</span>(message.content[<span class="code-number">0</span>].text)</span></code></pre>
+<span class="code-tooltip" data-tip="EXTRACT RESPONSE: Claude returns content as a list of content blocks. We take the first block's .text to get the generated string. Slightly different from OpenAI's .choices[0].message.content path."><span class="code-function">print</span>(message.content[<span class="code-number">0</span>].text)</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
         </div>

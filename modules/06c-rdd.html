@@ -343,7 +343,7 @@
 df[<span class="code-string">'x_centered'</span>] = df[<span class="code-string">'running_var'</span>] - cutoff
 
 <span class="code-comment"># Sharp RDD estimation</span>
-<span class="code-tooltip" data-tip="rdrobust implements optimal bandwidth selection and bias-corrected estimation">result = rdrobust(
+<span class="code-tooltip" data-tip="RDD: Estimates the causal effect at the cutoff by fitting local polynomials on each side, automatically choosing the optimal bandwidth and applying bias correction for reliable inference">result = rdrobust(
     y=df[<span class="code-string">'outcome'</span>],
     x=df[<span class="code-string">'x_centered'</span>],
     c=0  <span class="code-comment"># cutoff (centered)</span>
@@ -367,7 +367,7 @@ result = rdrobust(
 gen x_centered = running_var - 50
 
 <span class="code-comment">* Sharp RDD</span>
-<span class="code-tooltip" data-tip="rdrobust uses MSE-optimal bandwidth and robust bias-corrected inference">rdrobust outcome x_centered, c(0)</span>
+<span class="code-tooltip" data-tip="STATA: Estimates the discontinuity in outcome at the cutoff using local linear regression with an automatically chosen optimal bandwidth and bias-corrected confidence intervals">rdrobust outcome x_centered, c(0)</span>
 
 <span class="code-comment">* With covariates</span>
 rdrobust outcome x_centered, c(0) covs(age gender)
@@ -384,7 +384,7 @@ rdrobust outcome x_centered, c(0) kernel(triangular) p(1)</code></pre>
 df$x_centered <- df$running_var - 50
 
 <span class="code-comment"># Sharp RDD</span>
-<span class="code-tooltip" data-tip="rdrobust() implements Calonico, Cattaneo, Titiunik (2014) optimal bandwidth">rd_result <- rdrobust(y = df$outcome,
+<span class="code-tooltip" data-tip="R: Estimates the jump in outcome at the cutoff with optimal bandwidth selection and robust bias-corrected inference, the standard modern approach to RDD">rd_result <- rdrobust(y = df$outcome,
                       x = df$x_centered,
                       c = 0)</span>
 summary(rd_result)
@@ -498,7 +498,7 @@ rho (h/b)                     0.606        0.606
 <span class="code-keyword">from</span> rdrobust <span class="code-keyword">import</span> rdbwselect
 
 <span class="code-comment"># Optimal bandwidth selection</span>
-<span class="code-tooltip" data-tip="rdbwselect computes MSE-optimal and CER-optimal bandwidths">bw_result = rdbwselect(
+<span class="code-tooltip" data-tip="BANDWIDTH: Finds the optimal window around the cutoff — too narrow means too few observations and noisy estimates, too wide risks bias from observations far from the cutoff">bw_result = rdbwselect(
     y=df[<span class="code-string">'outcome'</span>],
     x=df[<span class="code-string">'x_centered'</span>],
     c=0
@@ -523,14 +523,14 @@ result = rdrobust(
 <pre><code><span class="code-comment">* Stata: Bandwidth Selection</span>
 
 <span class="code-comment">* Optimal bandwidth</span>
-<span class="code-tooltip" data-tip="rdbwselect reports MSE-optimal, CER-optimal, and other bandwidth choices">rdbwselect outcome x_centered, c(0)</span>
+<span class="code-tooltip" data-tip="STATA: Reports different optimal bandwidths — MSE-optimal minimizes mean squared error, CER-optimal provides better coverage for confidence intervals">rdbwselect outcome x_centered, c(0)</span>
 
 <span class="code-comment">* With different methods</span>
 rdbwselect outcome x_centered, c(0) bwselect(mserd)  <span class="code-comment">// MSE</span>
 rdbwselect outcome x_centered, c(0) bwselect(cerrd)  <span class="code-comment">// CER</span>
 
 <span class="code-comment">* Robustness check: vary bandwidth</span>
-<span class="code-tooltip" data-tip="Check if results are sensitive to bandwidth choice">foreach h in 3 5 7 10 {
+<span class="code-tooltip" data-tip="ROBUSTNESS: Re-estimates the RDD effect at several bandwidths — if the estimate is stable across choices, the result is not driven by one particular bandwidth">foreach h in 3 5 7 10 {
     rdrobust outcome x_centered, c(0) h(`h')
 }</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
@@ -540,7 +540,7 @@ rdbwselect outcome x_centered, c(0) bwselect(cerrd)  <span class="code-comment">
 <span class="code-keyword">library</span>(rdrobust)
 
 <span class="code-comment"># Optimal bandwidth</span>
-<span class="code-tooltip" data-tip="rdbwselect() computes optimal bandwidths using different criteria">bw <- rdbwselect(y = df$outcome, x = df$x_centered, c = 0)</span>
+<span class="code-tooltip" data-tip="R: Computes the data-driven optimal bandwidth that balances the bias-variance tradeoff — you can then use this bandwidth in rdrobust or compare across different criteria">bw <- rdbwselect(y = df$outcome, x = df$x_centered, c = 0)</span>
 summary(bw)
 
 <span class="code-comment"># Use specific bandwidth</span>
@@ -668,7 +668,7 @@ Robustness check across bandwidths:
 <span class="code-keyword">from</span> rdrobust <span class="code-keyword">import</span> rdrobust
 
 <span class="code-comment"># Fuzzy RDD: treatment is not perfectly determined by cutoff</span>
-<span class="code-tooltip" data-tip="fuzzy parameter takes the actual treatment indicator">result = rdrobust(
+<span class="code-tooltip" data-tip="FUZZY RDD: When crossing the cutoff increases treatment probability but doesn't guarantee it, the fuzzy option uses the cutoff as an instrument for actual treatment — estimating the LATE for compliers near the cutoff">result = rdrobust(
     y=df[<span class="code-string">'outcome'</span>],
     x=df[<span class="code-string">'x_centered'</span>],
     c=0,
@@ -689,7 +689,7 @@ print(<span class="code-string">"First stage jump:"</span>, first_stage.coef[0])
 <pre><code><span class="code-comment">* Stata: Fuzzy RDD</span>
 
 <span class="code-comment">* Fuzzy RDD with treatment indicator</span>
-<span class="code-tooltip" data-tip="fuzzy() option specifies the endogenous treatment variable">rdrobust outcome x_centered, c(0) fuzzy(treatment)</span>
+<span class="code-tooltip" data-tip="STATA: Fuzzy RDD — the cutoff induces a jump in treatment probability rather than a sharp switch, so rdrobust instruments actual treatment with the cutoff to estimate a local IV effect">rdrobust outcome x_centered, c(0) fuzzy(treatment)</span>
 
 <span class="code-comment">* Check first stage</span>
 rdrobust treatment x_centered, c(0)
@@ -703,7 +703,7 @@ rdplot treatment x_centered, c(0) graph_options(title("First Stage"))</code></pr
 <span class="code-keyword">library</span>(rdrobust)
 
 <span class="code-comment"># Fuzzy RDD</span>
-<span class="code-tooltip" data-tip="fuzzy parameter specifies the endogenous treatment">rd_fuzzy <- rdrobust(y = df$outcome,
+<span class="code-tooltip" data-tip="R: Fuzzy RDD estimation — handles imperfect compliance at the cutoff by using it as an instrument for actual treatment, returning the causal effect for those who comply near the threshold">rd_fuzzy <- rdrobust(y = df$outcome,
                      x = df$x_centered,
                      c = 0,
                      fuzzy = df$treatment)</span>
@@ -832,17 +832,17 @@ First-stage F-statistic: 49.79</pre></div>
 <span class="code-keyword">from</span> rdrobust <span class="code-keyword">import</span> rdrobust
 
 <span class="code-comment"># 1. McCrary density test (manipulation check)</span>
-<span class="code-tooltip" data-tip="Tests for bunching at cutoff - indicates manipulation if density jumps">density_test = rddensity(X=df[<span class="code-string">'x_centered'</span>], c=0)
+<span class="code-tooltip" data-tip="MANIPULATION: Tests whether units bunch just above/below the cutoff — a significant density jump suggests people can manipulate their score to get treatment, violating the RDD assumption">density_test = rddensity(X=df[<span class="code-string">'x_centered'</span>], c=0)
 print(density_test)</span>
 
 <span class="code-comment"># 2. Covariate balance at cutoff</span>
-<span class="code-tooltip" data-tip="Test that predetermined covariates don't jump at cutoff">covariates = [<span class="code-string">'age'</span>, <span class="code-string">'gender'</span>, <span class="code-string">'prior_income'</span>]
+<span class="code-tooltip" data-tip="BALANCE: Checks that predetermined characteristics (age, gender, prior income) are smooth at the cutoff — a jump would suggest units on each side differ systematically, undermining the design">covariates = [<span class="code-string">'age'</span>, <span class="code-string">'gender'</span>, <span class="code-string">'prior_income'</span>]
 <span class="code-keyword">for</span> cov <span class="code-keyword">in</span> covariates:
     result = rdrobust(y=df[cov], x=df[<span class="code-string">'x_centered'</span>], c=0)
     print(f<span class="code-string">"{cov}: coef={result.coef[0]:.3f}, p={result.pv[0]:.3f}"</span>)</span>
 
 <span class="code-comment"># 3. Placebo cutoffs</span>
-<span class="code-tooltip" data-tip="Test at fake cutoffs where there should be no effect">placebo_cutoffs = [-10, -5, 5, 10]  <span class="code-comment"># relative to true cutoff</span>
+<span class="code-tooltip" data-tip="PLACEBO: Estimates the RDD at fake cutoffs away from the true one — finding effects there would suggest the result is spurious rather than a true discontinuity">placebo_cutoffs = [-10, -5, 5, 10]  <span class="code-comment"># relative to true cutoff</span>
 <span class="code-keyword">for</span> pc <span class="code-keyword">in</span> placebo_cutoffs:
     result = rdrobust(y=df[<span class="code-string">'outcome'</span>], x=df[<span class="code-string">'x_centered'</span>], c=pc)
     print(f<span class="code-string">"Placebo c={pc}: coef={result.coef[0]:.3f}"</span>)</span></code></pre>
@@ -853,10 +853,10 @@ print(density_test)</span>
 <span class="code-comment">* ssc install rddensity</span>
 
 <span class="code-comment">* 1. McCrary density test</span>
-<span class="code-tooltip" data-tip="Tests for manipulation - significant result suggests bunching at cutoff">rddensity x_centered, c(0) plot</span>
+<span class="code-tooltip" data-tip="STATA: McCrary density test — plots and tests whether the density of the running variable has a discontinuity at the cutoff, which would indicate strategic sorting">rddensity x_centered, c(0) plot</span>
 
 <span class="code-comment">* 2. Covariate balance tests</span>
-<span class="code-tooltip" data-tip="Predetermined covariates should be continuous at cutoff">foreach var in age gender prior_income {
+<span class="code-tooltip" data-tip="STATA: Runs rdrobust on each covariate as if it were the outcome — no significant jump in predetermined variables at the cutoff supports the validity of the RDD">foreach var in age gender prior_income {
     rdrobust `var' x_centered, c(0)
 }</span>
 
@@ -866,7 +866,7 @@ foreach c in -10 -5 5 10 {
 }
 
 <span class="code-comment">* 4. Donut hole test (exclude obs near cutoff)</span>
-<span class="code-tooltip" data-tip="Drop observations very close to cutoff to check if manipulation drives results">rdrobust outcome x_centered if abs(x_centered) > 1, c(0)</span></code></pre>
+<span class="code-tooltip" data-tip="STATA: Donut hole test — excludes observations within 1 unit of the cutoff and re-estimates; if results hold, the effect is not driven by potentially manipulated observations near the threshold">rdrobust outcome x_centered if abs(x_centered) > 1, c(0)</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
@@ -875,7 +875,7 @@ foreach c in -10 -5 5 10 {
 <span class="code-keyword">library</span>(rddensity)
 
 <span class="code-comment"># 1. McCrary density test</span>
-<span class="code-tooltip" data-tip="Tests for bunching/manipulation at the cutoff">dens_test <- rddensity(X = df$x_centered, c = 0)
+<span class="code-tooltip" data-tip="R: McCrary density test — checks if units cluster suspiciously at the cutoff, which would indicate people can manipulate their score to receive treatment">dens_test <- rddensity(X = df$x_centered, c = 0)
 summary(dens_test)</span>
 
 <span class="code-comment"># Plot density</span>
@@ -1027,7 +1027,7 @@ Placebo Cutoff Tests:
 <span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
 
 <span class="code-comment"># rdplot creates binned scatter with polynomial fit</span>
-<span class="code-tooltip" data-tip="rdplot bins data and fits separate polynomials on each side">rdplot(
+<span class="code-tooltip" data-tip="VISUALIZATION: Creates a binned scatter plot with separate polynomial fits on each side of the cutoff — the gap between the two fitted lines at the cutoff is the visual RDD estimate">rdplot(
     y=df[<span class="code-string">'outcome'</span>],
     x=df[<span class="code-string">'x_centered'</span>],
     c=0,
@@ -1064,7 +1064,7 @@ plt.show()</code></pre>
 <pre><code><span class="code-comment">* Stata: RDD Plot</span>
 
 <span class="code-comment">* rdplot creates optimal binned scatter plot</span>
-<span class="code-tooltip" data-tip="rdplot bins data optimally and fits polynomials">rdplot outcome x_centered, c(0)</span>
+<span class="code-tooltip" data-tip="STATA: Creates the classic RDD plot — bins observations and fits separate lines on each side of the cutoff, making the treatment effect visible as the jump between them">rdplot outcome x_centered, c(0)</span>
 
 <span class="code-comment">* With options</span>
 rdplot outcome x_centered, c(0) ///
@@ -1082,7 +1082,7 @@ rdplot outcome x_centered, c(0) ci(95) shade</code></pre>
 <span class="code-keyword">library</span>(rdrobust)
 
 <span class="code-comment"># rdplot creates binned scatter with polynomial fit</span>
-<span class="code-tooltip" data-tip="rdplot() creates publication-ready RDD visualization">rdplot(y = df$outcome,
+<span class="code-tooltip" data-tip="R: Generates a publication-ready RDD scatter plot with optimal binning and polynomial fits, clearly showing the discontinuity in outcomes at the scholarship cutoff">rdplot(y = df$outcome,
        x = df$x_centered,
        c = 0,
        title = "RDD: Effect of Scholarship",
@@ -1127,6 +1127,7 @@ IMSE-optimal bins      17            19
 Left side mean (at cutoff):  45.23
 Right side mean (at cutoff): 48.08
 Visual gap at cutoff: ~2.85 points</pre></div>
+          <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 460 300" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="460" height="300" fill="white"/><text x="230" y="20" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">RDD: Effect of Scholarship</text><line x1="60" y1="30" x2="60" y2="250" stroke="#333"/><line x1="60" y1="250" x2="440" y2="250" stroke="#333"/><line x1="250" y1="30" x2="250" y2="250" stroke="#999" stroke-dasharray="5,3"/><text x="15" y="145" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,15,145)">Outcome</text><text x="250" y="285" font-size="10" fill="#333" text-anchor="middle">Running Variable (centered)</text><text x="55" y="250" font-size="8" fill="#666" text-anchor="end">38</text><text x="55" y="190" font-size="8" fill="#666" text-anchor="end">42</text><text x="55" y="130" font-size="8" fill="#666" text-anchor="end">46</text><text x="55" y="70" font-size="8" fill="#666" text-anchor="end">50</text><text x="80" y="264" font-size="8" fill="#666" text-anchor="middle">-40</text><text x="155" y="264" font-size="8" fill="#666" text-anchor="middle">-20</text><text x="250" y="264" font-size="8" fill="#666" text-anchor="middle">0</text><text x="345" y="264" font-size="8" fill="#666" text-anchor="middle">20</text><text x="420" y="264" font-size="8" fill="#666" text-anchor="middle">40</text><circle cx="85" cy="232" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="100" cy="225" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="115" cy="218" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="130" cy="210" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="145" cy="200" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="160" cy="190" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="175" cy="182" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="190" cy="170" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="205" cy="158" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="220" cy="148" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="235" cy="135" r="4" fill="#1f77b4" opacity="0.5"/><circle cx="270" cy="92" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="285" cy="88" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="300" cy="84" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="315" cy="80" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="330" cy="77" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="345" cy="74" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="360" cy="70" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="375" cy="66" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="390" cy="63" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="405" cy="60" r="4" fill="#ff7f0e" opacity="0.5"/><circle cx="420" cy="56" r="4" fill="#ff7f0e" opacity="0.5"/><line x1="80" y1="235" x2="245" y2="130" stroke="red" stroke-width="2"/><line x1="255" y1="95" x2="425" y2="53" stroke="red" stroke-width="2"/><line x1="250" y1="130" x2="250" y2="95" stroke="#2ca02c" stroke-width="2" stroke-dasharray="4,2"/><text x="260" y="115" font-size="9" fill="#2ca02c" font-weight="bold">gap</text></svg></div></div>
         </div>
 
         <div class="output-simulation" data-output="rdd-5" data-lang="stata">
@@ -1177,9 +1178,9 @@ X-axis: Test Score (centered)
 Y-axis: College Enrollment
 
 Visual discontinuity estimate:
-  Left limit:  0.452 (enrollment rate)
-  Right limit: 0.481 (enrollment rate)
-  Jump:        0.029 (2.9 percentage points)</pre></div>
+  Left limit:  45.23
+  Right limit: 48.08
+  Jump:        ~2.85 points</pre></div>
         </div>
 
         <div class="info-box warning">

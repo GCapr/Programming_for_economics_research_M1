@@ -432,9 +432,9 @@
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Ridge regression with built-in cross-validation. Automatically selects the best alpha (lambda) from a grid of values.">RidgeCV</span>
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="RIDGE CV: Ridge regression that automatically tests many penalty strengths and picks the one with the lowest cross-validation error — no manual tuning needed.">RidgeCV</span>
 <span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
-<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Standardizes features to have mean=0 and std=1. Essential before applying regularization so all features are on the same scale.">StandardScaler</span>
+<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="SCALER: Standardizes each feature to mean=0, std=1. Essential before Ridge/LASSO because the penalty treats all coefficients equally — if features are on different scales, the penalty would unfairly shrink some more than others.">StandardScaler</span>
 <span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error
 
 <span class="code-comment"># Generate data with 50 features (many irrelevant)</span>
@@ -446,11 +446,11 @@ y = <span class="code-number">3</span>*X[:, <span class="code-number">0</span>] 
 <span class="code-comment"># Split and standardize</span>
 X_train, X_test, y_train, y_test = <span class="code-function">train_test_split</span>(X, y, test_size=<span class="code-number">0.2</span>, random_state=<span class="code-number">42</span>)
 scaler = <span class="code-function">StandardScaler</span>()
-X_train_sc = scaler.<span class="code-tooltip" data-tip="Computes mean and std from training data and transforms it. Always fit_transform on train, then transform (not fit_transform) on test.">fit_transform</span>(X_train)
+X_train_sc = scaler.<span class="code-tooltip" data-tip="SCALE: Learns the mean and std from training data and applies the transformation. Important: always use fit_transform on train, then plain transform on test — to avoid leaking test set information.">fit_transform</span>(X_train)
 X_test_sc  = scaler.<span class="code-function">transform</span>(X_test)
 
 <span class="code-comment"># Fit Ridge with cross-validated alpha selection</span>
-alphas = <span class="code-tooltip" data-tip="Creates 50 values logarithmically spaced from 10^-4 to 10^4. This wide range ensures we search over very weak to very strong penalties.">np.logspace</span>(-<span class="code-number">4</span>, <span class="code-number">4</span>, <span class="code-number">50</span>)
+alphas = <span class="code-tooltip" data-tip="LAMBDA GRID: Creates 50 penalty values spanning from 0.0001 (almost no penalty) to 10,000 (extreme shrinkage). Logarithmic spacing ensures good coverage across orders of magnitude.">np.logspace</span>(-<span class="code-number">4</span>, <span class="code-number">4</span>, <span class="code-number">50</span>)
 ridge = <span class="code-function">RidgeCV</span>(alphas=alphas, cv=<span class="code-number">5</span>)
 ridge.<span class="code-function">fit</span>(X_train_sc, y_train)
 
@@ -477,10 +477,10 @@ rmse = np.<span class="code-function">sqrt</span>(<span class="code-function">me
 
 <span class="code-comment">* Fit Ridge regression using lasso2 with alpha(0)</span>
 <span class="code-comment">* alpha(0) = Ridge, alpha(1) = LASSO</span>
-<span class="code-tooltip" data-tip="The lasso2 command from the lassopack package. alpha(0) specifies Ridge regression (pure L2 penalty). cvlasso can be used for cross-validated selection.">lasso2</span> y x1-x50, <span class="code-keyword">alpha</span>(0) <span class="code-keyword">lambda</span>(0.01 0.1 1 10 100)
+<span class="code-tooltip" data-tip="RIDGE: The lasso2 command with alpha(0) fits Ridge regression (pure L2 penalty that shrinks all coefficients toward zero without eliminating any). Tests several lambda values to find the best penalty strength.">lasso2</span> y x1-x50, <span class="code-keyword">alpha</span>(0) <span class="code-keyword">lambda</span>(0.01 0.1 1 10 100)
 
 <span class="code-comment">* Cross-validated Ridge</span>
-<span class="code-tooltip" data-tip="Cross-validated LASSO/Ridge. lopt selects the lambda that minimizes CV error. alpha(0) specifies Ridge.">cvlasso</span> y x1-x50, <span class="code-keyword">alpha</span>(0) <span class="code-keyword">lopt</span>
+<span class="code-tooltip" data-tip="CV RIDGE: Automatically finds the best penalty using cross-validation. lopt picks the lambda that minimizes out-of-sample prediction error, giving the optimal balance between bias and variance.">cvlasso</span> y x1-x50, <span class="code-keyword">alpha</span>(0) <span class="code-keyword">lopt</span>
 
 <span class="code-comment">* Predict and evaluate</span>
 <span class="code-keyword">predict</span> yhat
@@ -490,7 +490,7 @@ rmse = np.<span class="code-function">sqrt</span>(<span class="code-function">me
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="The standard R package for regularized regression. Provides Ridge, LASSO, and Elastic Net via the alpha parameter.">glmnet</span>)
+<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="GLMNET: The go-to R package for Ridge, LASSO, and Elastic Net. The alpha parameter controls the penalty type: 0 = Ridge, 1 = LASSO, between = Elastic Net.">glmnet</span>)
 
 <span class="code-comment"># Generate data with 50 features</span>
 <span class="code-function">set.seed</span>(<span class="code-number">42</span>)
@@ -504,7 +504,7 @@ X_train &lt;- X[train_idx, ]; y_train &lt;- y[train_idx]
 X_test  &lt;- X[-train_idx, ]; y_test  &lt;- y[-train_idx]
 
 <span class="code-comment"># Fit Ridge with cross-validation (alpha = 0 for Ridge)</span>
-cv_ridge &lt;- <span class="code-tooltip" data-tip="Fits a regularized regression with K-fold CV. alpha=0 means Ridge (pure L2). Returns optimal lambda and CV error curve.">cv.glmnet</span>(X_train, y_train, alpha = <span class="code-number">0</span>)
+cv_ridge &lt;- <span class="code-tooltip" data-tip="CV RIDGE: Fits Ridge regression (alpha=0) across a range of penalty values and uses cross-validation to find the best one. Returns both the optimal lambda and the full CV error curve for plotting.">cv.glmnet</span>(X_train, y_train, alpha = <span class="code-number">0</span>)
 
 <span class="code-comment"># Best lambda and predictions</span>
 best_lambda &lt;- cv_ridge$lambda.min
@@ -567,7 +567,7 @@ Non-zero coefs: 50 out of 50</pre></div>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="LASSO with built-in cross-validation. Automatically tests many alpha values and selects the one with lowest CV error.">LassoCV</span>
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="LASSO CV: LASSO regression with automatic cross-validation. Unlike Ridge, LASSO can set coefficients exactly to zero — performing variable selection by dropping irrelevant predictors.">LassoCV</span>
 <span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> StandardScaler
 <span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
 <span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error
@@ -604,10 +604,10 @@ selected = np.<span class="code-function">where</span>(lasso.coef_ != <span clas
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* LASSO with cross-validation</span>
 <span class="code-comment">* alpha(1) = LASSO (default)</span>
-<span class="code-tooltip" data-tip="Cross-validated LASSO. Without the alpha() option, lasso2 defaults to alpha(1) which is LASSO. lopt selects the lambda minimizing CV error.">cvlasso</span> y x1-x50, <span class="code-keyword">lopt</span>
+<span class="code-tooltip" data-tip="CV LASSO: Cross-validated LASSO (alpha defaults to 1 = pure L1 penalty). lopt automatically picks the lambda that minimizes prediction error, selecting only the most useful variables.">cvlasso</span> y x1-x50, <span class="code-keyword">lopt</span>
 
 <span class="code-comment">* Show selected variables</span>
-<span class="code-tooltip" data-tip="lasso2 with the optimal lambda found by cvlasso. The output shows which variables have non-zero coefficients.">lasso2</span> y x1-x50, <span class="code-keyword">lambda</span>(<span class="code-function">`e(lopt)'</span>)
+<span class="code-tooltip" data-tip="LASSO FIT: Re-fits LASSO at the optimal lambda chosen by cross-validation. The output reveals which variables survived — those with non-zero coefficients are the ones LASSO deemed important.">lasso2</span> y x1-x50, <span class="code-keyword">lambda</span>(<span class="code-function">`e(lopt)'</span>)
 
 <span class="code-comment">* View selected coefficients</span>
 <span class="code-keyword">display</span> <span class="code-string">"Number of selected variables: "</span> e(s)
@@ -633,7 +633,7 @@ X_train &lt;- X[train_idx, ]; y_train &lt;- y[train_idx]
 X_test  &lt;- X[-train_idx, ]; y_test  &lt;- y[-train_idx]
 
 <span class="code-comment"># Fit LASSO with cross-validation (alpha = 1 for LASSO)</span>
-cv_lasso &lt;- <span class="code-tooltip" data-tip="cv.glmnet with alpha=1 fits LASSO. It tests a sequence of lambda values and selects the best via cross-validation.">cv.glmnet</span>(X_train, y_train, alpha = <span class="code-number">1</span>)
+cv_lasso &lt;- <span class="code-tooltip" data-tip="CV LASSO: alpha=1 means pure LASSO (L1 penalty). cv.glmnet tests a range of penalty strengths and selects the best via cross-validation, automatically performing variable selection.">cv.glmnet</span>(X_train, y_train, alpha = <span class="code-number">1</span>)
 
 <span class="code-comment"># Extract results</span>
 coef_lasso &lt;- <span class="code-function">coef</span>(cv_lasso, s = <span class="code-string">"lambda.min"</span>)
@@ -700,7 +700,7 @@ Non-zero coefs:     6 out of 50
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Elastic Net with built-in CV. l1_ratio controls the mix between L1 and L2. l1_ratio=1 is LASSO, l1_ratio=0 is Ridge.">ElasticNetCV</span>
+<pre><code><span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="ELASTIC NET: Combines LASSO and Ridge penalties. l1_ratio controls the mix — 0.5 means half L1 (variable selection) and half L2 (shrinkage), getting the best of both worlds.">ElasticNetCV</span>
 
 <span class="code-comment"># Fit Elastic Net with CV over both alpha and l1_ratio</span>
 enet = <span class="code-function">ElasticNetCV</span>(
@@ -721,7 +721,7 @@ rmse_enet = np.<span class="code-function">sqrt</span>(<span class="code-functio
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Elastic Net with alpha = 0.5 (equal mix of L1 and L2)</span>
-<span class="code-tooltip" data-tip="elasticnet is a Stata command for Elastic Net. alpha(0.5) means equal weight on L1 and L2 penalties.">elasticnet</span> y x1-x50, <span class="code-keyword">alpha</span>(0.5)
+<span class="code-tooltip" data-tip="ELASTIC NET: Fits a model with a blended penalty — alpha(0.5) gives equal weight to LASSO-style variable selection and Ridge-style shrinkage. Useful when correlated variables are present.">elasticnet</span> y x1-x50, <span class="code-keyword">alpha</span>(0.5)
 
 <span class="code-comment">* Cross-validated Elastic Net</span>
 <span class="code-keyword">cvlasso</span> y x1-x50, <span class="code-keyword">alpha</span>(0.5) <span class="code-keyword">lopt</span>
@@ -733,7 +733,7 @@ rmse_enet = np.<span class="code-function">sqrt</span>(<span class="code-functio
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># Elastic Net: alpha = 0.5 (equal mix of L1 and L2)</span>
-cv_enet &lt;- <span class="code-tooltip" data-tip="alpha=0.5 gives equal weight to L1 and L2 penalties. This is the 'standard' Elastic Net mixing parameter.">cv.glmnet</span>(X_train, y_train, alpha = <span class="code-number">0.5</span>)
+cv_enet &lt;- <span class="code-tooltip" data-tip="ELASTIC NET: alpha=0.5 blends LASSO (variable selection) and Ridge (shrinkage) equally. Especially helpful when predictors are correlated — LASSO alone would arbitrarily pick one, while Elastic Net keeps groups together.">cv.glmnet</span>(X_train, y_train, alpha = <span class="code-number">0.5</span>)
 
 y_pred_enet &lt;- <span class="code-function">predict</span>(cv_enet, X_test, s = <span class="code-string">"lambda.min"</span>)
 rmse_enet &lt;- <span class="code-function">sqrt</span>(<span class="code-function">mean</span>((y_test - y_pred_enet)^2))
@@ -793,14 +793,14 @@ Non-zero coefs: 5 out of 50</pre></div>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="LassoCV automatically computes the entire lambda path and selects the best via cross-validation. n_alphas controls how many lambda values to try.">LassoCV</span>
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="LASSO CV: Fits LASSO across a full range of penalty values and uses cross-validation to identify both lambda.min (best prediction) and helps compute lambda.1se (simplest model within 1 SE of the best).">LassoCV</span>
 
 <span class="code-comment"># Fit LASSO with detailed CV information</span>
 lasso_cv = <span class="code-function">LassoCV</span>(cv=<span class="code-number">5</span>, n_alphas=<span class="code-number">100</span>, random_state=<span class="code-number">42</span>)
 lasso_cv.<span class="code-function">fit</span>(X_train_sc, y_train)
 
 <span class="code-comment"># The CV curve: mean MSE and std for each alpha</span>
-mse_mean = np.<span class="code-function">mean</span>(lasso_cv.<span class="code-tooltip" data-tip="Array of shape (n_alphas, n_folds) containing the MSE for each alpha and each fold. Average across folds to get the CV curve.">mse_path_</span>, axis=<span class="code-number">1</span>)
+mse_mean = np.<span class="code-function">mean</span>(lasso_cv.<span class="code-tooltip" data-tip="CV ERRORS: A matrix of MSE values — one row per lambda, one column per fold. Averaging across folds gives the CV error curve that we use to pick the optimal penalty.">mse_path_</span>, axis=<span class="code-number">1</span>)
 mse_std  = np.<span class="code-function">std</span>(lasso_cv.mse_path_, axis=<span class="code-number">1</span>)
 
 <span class="code-comment"># lambda_min (best alpha)</span>
@@ -810,7 +810,7 @@ best_idx = np.<span class="code-function">argmin</span>(mse_mean)
 
 <span class="code-comment"># lambda_1se: largest alpha within 1 SE of minimum</span>
 threshold = mse_mean[best_idx] + mse_std[best_idx]
-<span class="code-tooltip" data-tip="Finds the largest lambda whose CV error is within one standard error of the minimum. This gives a simpler model with nearly equal performance.">candidates</span> = np.<span class="code-function">where</span>(mse_mean &lt;= threshold)[<span class="code-number">0</span>]
+<span class="code-tooltip" data-tip="1SE RULE: Finds the largest lambda (strongest penalty) whose CV error is within one standard error of the minimum. This 'one-standard-error rule' trades a tiny bit of accuracy for a much simpler model.">candidates</span> = np.<span class="code-function">where</span>(mse_mean &lt;= threshold)[<span class="code-number">0</span>]
 idx_1se = candidates[<span class="code-number">0</span>]  <span class="code-comment"># largest alpha (first in sorted order)</span>
 <span class="code-function">print</span>(<span class="code-string">f"lambda_1se:         {lasso_cv.alphas_[idx_1se]:.6f}"</span>)
 <span class="code-function">print</span>(<span class="code-string">f"CV MSE at 1se:      {mse_mean[idx_1se]:.4f}"</span>)
@@ -826,7 +826,7 @@ idx_1se = candidates[<span class="code-number">0</span>]  <span class="code-comm
 <span class="code-keyword">display</span> <span class="code-string">"Lambda (1 SE):    "</span> e(lse)
 
 <span class="code-comment">* Fit at lambda_1se for a more parsimonious model</span>
-<span class="code-tooltip" data-tip="Fits LASSO at the one-standard-error lambda, which selects fewer variables for a simpler model.">lasso2</span> y x1-x50, <span class="code-keyword">lambda</span>(<span class="code-function">`e(lse)'</span>)
+<span class="code-tooltip" data-tip="1SE LASSO: Fits LASSO using the more conservative 1SE lambda. This selects fewer variables, producing a simpler, more interpretable model that predicts almost as well as the minimum-error model.">lasso2</span> y x1-x50, <span class="code-keyword">lambda</span>(<span class="code-function">`e(lse)'</span>)
 <span class="code-keyword">display</span> <span class="code-string">"Variables selected (1se): "</span> e(s)</code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
@@ -834,8 +834,8 @@ idx_1se = candidates[<span class="code-number">0</span>]  <span class="code-comm
 <pre><code><span class="code-comment"># The cv.glmnet object contains both lambda.min and lambda.1se</span>
 cv_lasso &lt;- <span class="code-function">cv.glmnet</span>(X_train, y_train, alpha = <span class="code-number">1</span>)
 
-<span class="code-function">cat</span>(<span class="code-string">"lambda.min:  "</span>, <span class="code-function">round</span>(cv_lasso$<span class="code-tooltip" data-tip="The lambda that minimizes CV error. Gives the best prediction but may select more variables.">lambda.min</span>, <span class="code-number">6</span>), <span class="code-string">"\n"</span>)
-<span class="code-function">cat</span>(<span class="code-string">"lambda.1se:  "</span>, <span class="code-function">round</span>(cv_lasso$<span class="code-tooltip" data-tip="The largest lambda within 1 SE of the minimum CV error. Gives a simpler model with nearly the same accuracy.">lambda.1se</span>, <span class="code-number">6</span>), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"lambda.min:  "</span>, <span class="code-function">round</span>(cv_lasso$<span class="code-tooltip" data-tip="LAMBDA MIN: The penalty that gives the lowest cross-validation error — best prediction accuracy, but may keep many variables in the model.">lambda.min</span>, <span class="code-number">6</span>), <span class="code-string">"\n"</span>)
+<span class="code-function">cat</span>(<span class="code-string">"lambda.1se:  "</span>, <span class="code-function">round</span>(cv_lasso$<span class="code-tooltip" data-tip="LAMBDA 1SE: A more conservative choice — the strongest penalty whose error is statistically indistinguishable from the best. Produces a sparser, more interpretable model.">lambda.1se</span>, <span class="code-number">6</span>), <span class="code-string">"\n"</span>)
 
 <span class="code-comment"># Compare number of selected variables</span>
 coef_min &lt;- <span class="code-function">coef</span>(cv_lasso, s = <span class="code-string">"lambda.min"</span>)
@@ -844,7 +844,7 @@ coef_1se &lt;- <span class="code-function">coef</span>(cv_lasso, s = <span class
 <span class="code-function">cat</span>(<span class="code-string">"Non-zero (1se):"</span>, <span class="code-function">sum</span>(coef_1se[-<span class="code-number">1</span>] != <span class="code-number">0</span>), <span class="code-string">"\n"</span>)
 
 <span class="code-comment"># Plot the CV curve</span>
-<span class="code-tooltip" data-tip="Plots the CV error curve with error bars. The left dashed line marks lambda.min, the right marks lambda.1se.">plot</span>(cv_lasso)
+<span class="code-tooltip" data-tip="CV PLOT: Visualizes the CV error curve — how prediction error changes with penalty strength. Two dashed lines mark lambda.min (best) and lambda.1se (simplest good model).">plot</span>(cv_lasso)
 <span class="code-function">title</span>(<span class="code-string">"LASSO Cross-Validation Curve"</span>)</code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
@@ -923,11 +923,11 @@ y = <span class="code-number">1.0</span>*d + <span class="code-number">2</span>*
 
 <span class="code-comment"># Step 1: LASSO of Y on X (select controls for outcome)</span>
 lasso_y = <span class="code-function">LassoCV</span>(cv=<span class="code-number">5</span>).<span class="code-function">fit</span>(X, y)
-<span class="code-tooltip" data-tip="np.where finds indices where LASSO coefficients are non-zero, identifying the variables selected as predictive of the outcome.">sel_y</span> = <span class="code-function">set</span>(np.<span class="code-function">where</span>(lasso_y.coef_ != <span class="code-number">0</span>)[<span class="code-number">0</span>])
+<span class="code-tooltip" data-tip="SELECTED FOR Y: Identifies which of the 50 controls have non-zero LASSO coefficients when predicting Y. These are the variables LASSO considers important for the outcome.">sel_y</span> = <span class="code-function">set</span>(np.<span class="code-function">where</span>(lasso_y.coef_ != <span class="code-number">0</span>)[<span class="code-number">0</span>])
 
 <span class="code-comment"># Step 2: LASSO of D on X (select controls for treatment)</span>
 lasso_d = <span class="code-function">LassoCV</span>(cv=<span class="code-number">5</span>).<span class="code-function">fit</span>(X, d)
-<span class="code-tooltip" data-tip="Variables selected as predictive of treatment assignment. These may be confounders even if they weakly predict Y.">sel_d</span> = <span class="code-function">set</span>(np.<span class="code-function">where</span>(lasso_d.coef_ != <span class="code-number">0</span>)[<span class="code-number">0</span>])
+<span class="code-tooltip" data-tip="SELECTED FOR D: Variables LASSO picks as predictors of treatment. The 'double' in double selection: we must also control for variables predicting D, even if they weakly predict Y, to avoid omitted variable bias.">sel_d</span> = <span class="code-function">set</span>(np.<span class="code-function">where</span>(lasso_d.coef_ != <span class="code-number">0</span>)[<span class="code-number">0</span>])
 
 <span class="code-comment"># Step 3: Take the union</span>
 sel_union = <span class="code-function">sorted</span>(sel_y | sel_d)
@@ -961,14 +961,14 @@ ols_result = sm.<span class="code-function">OLS</span>(y, X_ols).<span class="co
 
 <span class="code-comment">* Post-double-selection LASSO</span>
 <span class="code-comment">* pdslasso automatically performs both selection steps</span>
-<span class="code-tooltip" data-tip="Post-double-selection LASSO from the pdslasso package. Automatically runs LASSO on both Y and D, takes the union, and runs OLS with valid inference.">pdslasso</span> y d (x1-x50)
+<span class="code-tooltip" data-tip="PDS LASSO: Post-double-selection in one command. Runs LASSO on both Y and D, takes the union of selected controls, then estimates the treatment effect by OLS with valid standard errors.">pdslasso</span> y d (x1-x50)
 
 <span class="code-comment">* The output shows the treatment effect with valid standard errors</span>
 <span class="code-keyword">display</span> <span class="code-string">"True treatment effect: 1.0"</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="R package for high-dimensional metrics including post-double-selection LASSO. rlassoEffect() performs the full procedure automatically.">hdm</span>)
+<pre><code><span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="HDM: R package for high-dimensional causal inference. rlassoEffect() performs the full post-double-selection procedure automatically — LASSO on Y, LASSO on D, union of controls, then OLS with valid inference.">hdm</span>)
 
 <span class="code-comment"># Simulate causal inference setting</span>
 <span class="code-function">set.seed</span>(<span class="code-number">42</span>)
@@ -978,7 +978,7 @@ d &lt;- <span class="code-number">0.5</span>*X[,<span class="code-number">1</spa
 y &lt;- <span class="code-number">1.0</span>*d + <span class="code-number">2</span>*X[,<span class="code-number">1</span>] + <span class="code-number">1.5</span>*X[,<span class="code-number">2</span>] + <span class="code-number">1</span>*X[,<span class="code-number">3</span>] + <span class="code-function">rnorm</span>(n)*<span class="code-number">0.5</span>
 
 <span class="code-comment"># Post-double-selection: automatic procedure</span>
-result &lt;- <span class="code-tooltip" data-tip="Runs post-double-selection LASSO automatically. method='double selection' runs LASSO on both Y and D, takes the union, and reports valid inference.">rlassoEffect</span>(x = X, y = y, d = d, method = <span class="code-string">"double selection"</span>)
+result &lt;- <span class="code-tooltip" data-tip="DOUBLE SELECTION: Automates the Belloni-Chernozhukov-Hansen procedure. Runs LASSO on Y and on D separately, unions the selected controls, then reports the treatment effect with correct standard errors.">rlassoEffect</span>(x = X, y = y, d = d, method = <span class="code-string">"double selection"</span>)
 
 <span class="code-function">cat</span>(<span class="code-string">"Post-double-selection results:\n"</span>)
 <span class="code-function">print</span>(<span class="code-function">summary</span>(result))

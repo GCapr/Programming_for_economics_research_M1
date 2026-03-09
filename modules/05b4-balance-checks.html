@@ -187,7 +187,7 @@
         diff = mean_t - mean_c
 
         <span class="code-comment"># T-test for difference</span>
-        <span class="code-tooltip" data-tip="Two-sample t-test comparing treatment and control means">t_stat, p_val = stats.ttest_ind(treat, control)</span>
+        <span class="code-tooltip" data-tip="T-TEST: Tests whether the average of each covariate differs significantly between treatment and control groups — a large p-value (>0.05) is good, meaning the groups are balanced on this variable.">t_stat, p_val = stats.ttest_ind(treat, control)</span>
 
         <span class="code-comment"># Standardized difference</span>
         pooled_sd = np.sqrt((treat.var() + control.var()) / 2)
@@ -226,16 +226,16 @@ balance = balance_table(df, <span class="code-string">'treatment'</span>, covari
 <span class="code-comment">* Install: ssc install ietoolkit</span>
 
 <span class="code-comment">* Basic balance table</span>
-<span class="code-tooltip" data-tip="iebaltab creates publication-ready balance tables automatically">iebaltab age income education female, ///
+<span class="code-tooltip" data-tip="BALANCE TABLE: iebaltab (from the World Bank's ietoolkit) automatically generates a publication-ready table comparing all baseline covariates between treatment and control, with means, differences, and p-values.">iebaltab age income education female, ///
     grpvar(treatment) ///
     save("balance_table.xlsx") replace</span>
 
 <span class="code-comment">* With additional options</span>
 iebaltab age income education female, ///
     grpvar(treatment) ///
-    <span class="code-tooltip" data-tip="ftest adds F-test for joint significance of all differences">ftest</span> ///
-    <span class="code-tooltip" data-tip="stdev shows standard deviations instead of standard errors">stdev</span> ///
-    <span class="code-tooltip" data-tip="starlevels sets significance stars">starlevels(0.1 0.05 0.01)</span> ///
+    <span class="code-tooltip" data-tip="JOINT TEST: Adds an F-test that checks whether ALL variables are jointly balanced — even if individual tests look fine, a significant F-test suggests systematic imbalance.">ftest</span> ///
+    <span class="code-tooltip" data-tip="DISPLAY: Shows standard deviations (spread of the data) below each mean, which helps readers gauge the practical significance of any differences.">stdev</span> ///
+    <span class="code-tooltip" data-tip="STARS: Adds significance stars (*, **, ***) at the 10%, 5%, and 1% levels — in a balance table, you want to see NO stars, meaning no significant differences.">starlevels(0.1 0.05 0.01)</span> ///
     save("balance_table.xlsx") replace
 
 <span class="code-comment">* Manual approach</span>
@@ -260,7 +260,7 @@ df <- data.frame(
 )
 
 <span class="code-comment"># Create balance table</span>
-<span class="code-tooltip" data-tip="bal.tab() from cobalt creates comprehensive balance statistics">balance <- bal.tab(
+<span class="code-tooltip" data-tip="BALANCE TABLE: bal.tab() computes standardized mean differences between treatment and control for every covariate — values below 0.1 indicate good balance.">balance <- bal.tab(
   treatment ~ age + income + education + female,
   data = df,
   binary = <span class="code-string">"std"</span>  <span class="code-comment"># Standardize binary variables</span>
@@ -411,7 +411,7 @@ attrition = df.groupby(<span class="code-string">'treatment'</span>)[<span class
 <span class="code-function">print</span>(attrition)
 
 <span class="code-comment"># 2. Test if attrition differs by treatment</span>
-<span class="code-tooltip" data-tip="Chi-square test for difference in attrition rates">contingency = pd.crosstab(df[<span class="code-string">'treatment'</span>], df[<span class="code-string">'completed'</span>])
+<span class="code-tooltip" data-tip="DIFFERENTIAL ATTRITION: Creates a cross-tab of treatment vs. completion and runs a chi-square test — a significant result (p &lt; 0.05) would mean treated participants are dropping out at a different rate than controls, which could bias your results.">contingency = pd.crosstab(df[<span class="code-string">'treatment'</span>], df[<span class="code-string">'completed'</span>])
 chi2, p, dof, expected = chi2_contingency(contingency)
 <span class="code-function">print</span>(f<span class="code-string">"\nChi-squared test for differential attrition:"</span>)
 <span class="code-function">print</span>(f<span class="code-string">"Chi2 = {chi2:.3f}, p-value = {p:.4f}"</span>)</span></code></pre>
@@ -425,7 +425,7 @@ gen completed = !missing(outcome)
 tab treatment completed, row
 
 <span class="code-comment">* 2. Test for differential attrition</span>
-<span class="code-tooltip" data-tip="prtest compares proportions between groups">prtest completed, by(treatment)</span>
+<span class="code-tooltip" data-tip="PROPORTION TEST: Compares the completion rate between treatment and control — if treated participants drop out more, the remaining sample is no longer balanced and your treatment effect estimate could be biased.">prtest completed, by(treatment)</span>
 
 <span class="code-comment">* 3. Lee bounds for treatment effects under selection</span>
 <span class="code-comment">* (Bounds on treatment effect accounting for differential attrition)</span>
@@ -458,7 +458,7 @@ df$completed <- !is.na(df$outcome)
 <span class="code-function">print</span>(<span class="code-function">table</span>(df$treatment, df$completed))
 
 <span class="code-comment"># 2. Test for differential attrition</span>
-<span class="code-tooltip" data-tip="prop.test compares completion proportions">result <- prop.test(<span class="code-function">table</span>(df$treatment, df$completed))
+<span class="code-tooltip" data-tip="PROPORTION TEST: Tests whether completion rates differ between treatment and control — a non-significant result (p > 0.05) is reassuring that attrition is not biasing your treatment effect.">result <- prop.test(<span class="code-function">table</span>(df$treatment, df$completed))
 <span class="code-function">print</span>(result)</span></code></pre>
 <button class="run-btn" data-lang="r">Run Code</button>
           </div>

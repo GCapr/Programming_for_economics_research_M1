@@ -410,7 +410,7 @@
 
 model = nn.<span class="code-function">Sequential</span>(
     <span class="code-comment"># First hidden layer</span>
-    nn.<span class="code-function">Linear</span>(<span class="code-tooltip" data-tip="The number of input features. Must match the number of columns in your feature matrix X.">8</span>, <span class="code-tooltip" data-tip="Number of neurons in this hidden layer. 128 neurons means 128 different linear combinations of the inputs, each followed by an activation function.">128</span>),
+    nn.<span class="code-function">Linear</span>(<span class="code-tooltip" data-tip="INPUTS: 8 input neurons, one for each feature in the dataset (e.g., median income, house age, etc.). Must match your data's column count exactly.">8</span>, <span class="code-tooltip" data-tip="HIDDEN LAYER: 128 neurons — each computes a different weighted combination of the 8 inputs plus a bias, then passes through ReLU. Together they learn 128 different 'features' from the raw data.">128</span>),
     nn.<span class="code-function">ReLU</span>(),         <span class="code-comment"># Activation: max(0, z)</span>
 
     <span class="code-comment"># Second hidden layer</span>
@@ -422,7 +422,7 @@ model = nn.<span class="code-function">Sequential</span>(
     nn.<span class="code-function">ReLU</span>(),
 
     <span class="code-comment"># Output layer (linear activation for regression)</span>
-    nn.<span class="code-function">Linear</span>(<span class="code-tooltip" data-tip="Input size must match the output of the previous layer (32 neurons).">32</span>, <span class="code-tooltip" data-tip="Single output neuron for regression. For K-class classification, use K neurons with softmax.">1</span>)
+    nn.<span class="code-function">Linear</span>(<span class="code-tooltip" data-tip="FROM HIDDEN: Takes the 32 outputs from the previous hidden layer as inputs to the output layer.">32</span>, <span class="code-tooltip" data-tip="OUTPUT: One neuron outputs the final prediction (housing price). For classification with K classes, you would use K output neurons instead.">1</span>)
 )
 
 <span class="code-comment"># Print the architecture summary</span>
@@ -464,12 +464,12 @@ print(f<span class="code-string">"\nTotal parameters: {total:,}"</span>)
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Neural network definition with torch (R interface to LibTorch)</span>
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="The R interface to PyTorch's C++ backend (LibTorch). Provides tensor operations and neural network building blocks.">torch</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="TORCH: The R interface to the PyTorch deep learning framework. Provides the same tensor operations and neural network layers as Python's PyTorch.">torch</span>)
 
 <span class="code-comment"># Define network architecture using nn_sequential</span>
 model &lt;- <span class="code-function">nn_sequential</span>(
   <span class="code-comment"># First hidden layer: 13 inputs (Boston Housing features)</span>
-  <span class="code-function">nn_linear</span>(<span class="code-tooltip" data-tip="Number of input features. Boston Housing has 13 predictor columns.">13</span>, 128),
+  <span class="code-function">nn_linear</span>(<span class="code-tooltip" data-tip="INPUTS: 13 neurons matching the 13 predictors in the Boston Housing dataset (crime rate, room count, tax rate, etc.).">13</span>, 128),
   <span class="code-function">nn_relu</span>(),
 
   <span class="code-comment"># Second hidden layer</span>
@@ -507,7 +507,7 @@ n_params &lt;- <span class="code-function">sum</span>(<span class="code-function
   (6): Linear(in_features=32, out_features=1, bias=True)
 )
 
-Total trainable parameters: 11,425
+Total trainable parameters: 11,521
   0.weight          shape: [128, 8]        params: 1,024
   0.bias            shape: [128]           params: 128
   2.weight          shape: [64, 128]       params: 8,192
@@ -540,7 +540,7 @@ Total parameters: 2,369</pre></div>
  (5): nn_relu
  (6): nn_linear (32 -> 1)
 
-Total trainable parameters: 12,609</pre></div>
+Total trainable parameters: 12,161</pre></div>
         </div>
 
 
@@ -569,7 +569,7 @@ Total trainable parameters: 12,609</pre></div>
 <span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
 <span class="code-keyword">from</span> torch.utils.data <span class="code-keyword">import</span> DataLoader, TensorDataset
 <span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="Scales each feature to have mean 0 and standard deviation 1. This is essential for neural networks because features on different scales cause the gradient landscape to be elongated, making optimization difficult.">StandardScaler</span>
+<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="STANDARDIZE: Rescales each feature to mean 0, std 1. Critical for neural networks — without this, features like 'income' (thousands) would dominate features like 'rooms' (single digits), making training unstable.">StandardScaler</span>
 <span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
 <span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
 
@@ -592,7 +592,7 @@ y_te = torch.<span class="code-function">FloatTensor</span>(y_test).<span class=
 
 <span class="code-comment"># Create DataLoader for mini-batch training</span>
 train_ds = <span class="code-function">TensorDataset</span>(X_tr, y_tr)
-train_loader = <span class="code-function">DataLoader</span>(train_ds, <span class="code-tooltip" data-tip="Number of observations per mini-batch. 64 is a common default. Larger batches are faster per epoch but may generalize worse.">batch_size=64</span>, shuffle=True)
+train_loader = <span class="code-function">DataLoader</span>(train_ds, <span class="code-tooltip" data-tip="MINI-BATCH: Feeds 64 observations at a time to the network. After each batch, the weights are updated. This is much faster than using all data at once and the noise from random batches helps find better solutions.">batch_size=64</span>, shuffle=True)
 
 <span class="code-comment"># Define model</span>
 model = nn.<span class="code-function">Sequential</span>(
@@ -604,10 +604,10 @@ model = nn.<span class="code-function">Sequential</span>(
 
 <span class="code-comment"># Loss function and optimizer</span>
 criterion = nn.<span class="code-function">MSELoss</span>()
-optimizer = torch.optim.<span class="code-function">Adam</span>(model.<span class="code-function">parameters</span>(), <span class="code-tooltip" data-tip="Starting learning rate for Adam. 0.001 is the default and a good starting point for most problems.">lr=0.001</span>)
+optimizer = torch.optim.<span class="code-function">Adam</span>(model.<span class="code-function">parameters</span>(), <span class="code-tooltip" data-tip="LEARNING RATE: Controls how big each weight update step is. 0.001 is the standard starting point for Adam — too large and training diverges, too small and it takes forever.">lr=0.001</span>)
 
 <span class="code-comment"># Training loop</span>
-<span class="code-tooltip" data-tip="Number of complete passes through the entire training dataset. Each epoch, every observation is seen once (in different mini-batches).">n_epochs</span> = 100
+<span class="code-tooltip" data-tip="EPOCHS: 100 complete passes through the training data. Each epoch, every observation is seen once (shuffled into different mini-batches). The model improves gradually over epochs.">n_epochs</span> = 100
 <span class="code-keyword">for</span> epoch <span class="code-keyword">in</span> <span class="code-function">range</span>(n_epochs):
     model.<span class="code-function">train</span>()  <span class="code-comment"># Set model to training mode</span>
     epoch_loss = 0.0
@@ -703,7 +703,7 @@ for epoch in range(100):
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Neural network training with torch + luz</span>
 <span class="code-keyword">library</span>(torch)
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="A high-level interface for torch in R, similar to Keras. Simplifies the training loop by providing fit(), predict(), and other convenience methods.">luz</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="LUZ: A high-level wrapper for R's torch package, similar to Keras in Python. Handles the training loop, early stopping, and metrics automatically so you don't write boilerplate code.">luz</span>)
 
 <span class="code-comment"># Prepare data</span>
 <span class="code-keyword">data</span>(<span class="code-string">"BostonHousing"</span>, package = <span class="code-string">"mlbench"</span>)
@@ -817,9 +817,9 @@ Epoch 100 | Train:  4.8901 | Test:  9.7654</pre></div>
 <span class="code-comment"># Model with dropout and batch normalization</span>
 model_reg = nn.<span class="code-function">Sequential</span>(
     nn.<span class="code-function">Linear</span>(8, 128),
-    <span class="code-tooltip" data-tip="Normalizes the output of the previous layer across the mini-batch. Stabilizes and accelerates training.">nn.<span class="code-function">BatchNorm1d</span>(128)</span>,
+    <span class="code-tooltip" data-tip="BATCH NORM: Normalizes the 128 outputs to have mean~0, std~1 within each mini-batch. This stabilizes training by preventing activations from drifting to extreme values across layers.">nn.<span class="code-function">BatchNorm1d</span>(128)</span>,
     nn.<span class="code-function">ReLU</span>(),
-    <span class="code-tooltip" data-tip="Randomly zeros 30% of neurons during training. This prevents co-adaptation and acts as ensemble regularization.">nn.<span class="code-function">Dropout</span>(0.3)</span>,
+    <span class="code-tooltip" data-tip="DROPOUT: During training, randomly turns off 30% of neurons each batch. This forces the network to spread knowledge across many neurons, preventing over-reliance on any single one — like training an ensemble.">nn.<span class="code-function">Dropout</span>(0.3)</span>,
 
     nn.<span class="code-function">Linear</span>(128, 64),
     nn.<span class="code-function">BatchNorm1d</span>(64),
@@ -837,14 +837,14 @@ model_reg = nn.<span class="code-function">Sequential</span>(
 optimizer = torch.optim.<span class="code-function">Adam</span>(
     model_reg.<span class="code-function">parameters</span>(),
     lr=0.001,
-    <span class="code-tooltip" data-tip="L2 penalty on the weights. A value of 1e-4 adds a small penalty proportional to the sum of squared weights, discouraging large weight values.">weight_decay=1e-4</span>
+    <span class="code-tooltip" data-tip="WEIGHT DECAY: Adds an L2 penalty (like Ridge regression) to discourage large weights. 1e-4 is a small penalty that prevents weights from growing uncontrollably without restricting the model too much.">weight_decay=1e-4</span>
 )
 criterion = nn.<span class="code-function">MSELoss</span>()
 
 <span class="code-comment"># Training with early stopping</span>
 best_val_loss = <span class="code-function">float</span>(<span class="code-string">'inf'</span>)
 best_model_state = <span class="code-keyword">None</span>
-<span class="code-tooltip" data-tip="Number of epochs to wait for improvement before stopping. If the validation loss does not improve for 15 consecutive epochs, training stops.">patience</span> = 15
+<span class="code-tooltip" data-tip="EARLY STOPPING: If validation loss does not improve for 15 consecutive epochs, training stops and we restore the best model. This is the simplest and most effective way to prevent overfitting in neural networks.">patience</span> = 15
 patience_counter = 0
 
 <span class="code-keyword">for</span> epoch <span class="code-keyword">in</span> <span class="code-function">range</span>(200):
@@ -959,9 +959,9 @@ print(f<span class="code-string">"Best validation loss: {best_loss:.4f}"</span>)
 <span class="code-comment"># Model with dropout</span>
 net_reg &lt;- <span class="code-function">nn_sequential</span>(
   <span class="code-function">nn_linear</span>(13, 128),
-  <span class="code-tooltip" data-tip="Batch normalization layer for 128 features."><span class="code-function">nn_batch_norm1d</span>(128)</span>,
+  <span class="code-tooltip" data-tip="BATCH NORM: Normalizes the 128 outputs of the previous layer to stabilize training and help gradients flow more smoothly through the network."><span class="code-function">nn_batch_norm1d</span>(128)</span>,
   <span class="code-function">nn_relu</span>(),
-  <span class="code-tooltip" data-tip="Dropout with 30% probability. Randomly zeroes neurons during training."><span class="code-function">nn_dropout</span>(p = 0.3)</span>,
+  <span class="code-tooltip" data-tip="DROPOUT: Randomly turns off 30% of neurons during each training step, forcing the network to develop redundant representations and reducing overfitting."><span class="code-function">nn_dropout</span>(p = 0.3)</span>,
 
   <span class="code-function">nn_linear</span>(128, 64),
   <span class="code-function">nn_batch_norm1d</span>(64),
@@ -977,7 +977,7 @@ net_reg &lt;- <span class="code-function">nn_sequential</span>(
 
 <span class="code-comment"># Optimizer with weight decay</span>
 optimizer &lt;- <span class="code-function">optim_adam</span>(net_reg$parameters, lr = 0.001,
-                       <span class="code-tooltip" data-tip="L2 weight decay penalty of 0.0001.">weight_decay = 1e-4</span>)
+                       <span class="code-tooltip" data-tip="WEIGHT DECAY: An L2 penalty of 0.0001 on all weights — the neural network equivalent of Ridge regression. Keeps weights small and helps prevent overfitting.">weight_decay = 1e-4</span>)
 criterion &lt;- <span class="code-function">nn_mse_loss</span>()
 
 <span class="code-comment"># Training with early stopping</span>
@@ -1111,7 +1111,7 @@ model = nn.<span class="code-function">Sequential</span>(
 
 <span class="code-comment"># ============ 3. TRAINING ============</span>
 optimizer = torch.optim.<span class="code-function">Adam</span>(model.<span class="code-function">parameters</span>(), lr=0.001, weight_decay=1e-4)
-<span class="code-tooltip" data-tip="Reduces the learning rate by a factor of 0.5 when the validation loss has not improved for 10 epochs. This fine-tunes the model as it approaches the optimum.">scheduler</span> = torch.optim.lr_scheduler.<span class="code-function">ReduceLROnPlateau</span>(
+<span class="code-tooltip" data-tip="LR SCHEDULER: Automatically halves the learning rate when validation loss plateaus for 10 epochs. As training progresses, smaller steps help the model fine-tune toward the optimum.">scheduler</span> = torch.optim.lr_scheduler.<span class="code-function">ReduceLROnPlateau</span>(
     optimizer, mode=<span class="code-string">'min'</span>, factor=0.5, patience=10
 )
 criterion = nn.<span class="code-function">MSELoss</span>()

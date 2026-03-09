@@ -174,7 +174,7 @@ df[<span class="code-string">'treatment_bernoulli'</span>] = np.random.binomial(
 <span class="code-comment"># Method 2: Complete randomization (fixed number treated)</span>
 n = len(df)
 n_treat = n // 2
-<span class="code-tooltip" data-tip="Creates exactly n_treat 1s and the rest 0s, then shuffles">assignment = np.array([1] * n_treat + [0] * (n - n_treat))
+<span class="code-tooltip" data-tip="COMPLETE RANDOMIZATION: Creates a vector with exactly 5 ones and 5 zeros, then shuffles the order randomly — guarantees exactly half are treated, unlike coin-flip methods where groups can be unequal by chance.">assignment = np.array([1] * n_treat + [0] * (n - n_treat))
 np.random.shuffle(assignment)</span>
 df[<span class="code-string">'treatment_complete'</span>] = assignment
 <span class="code-function">print</span>(df)</code></pre>
@@ -188,7 +188,7 @@ set seed 42
 gen treatment = rbinomial(1, 0.5)
 
 <span class="code-comment">* Method 2: Complete randomization (exact proportions)</span>
-<span class="code-tooltip" data-tip="randtreat is a community-contributed command - install with: ssc install randtreat">randtreat, generate(treatment) setseed(42)</span>
+<span class="code-tooltip" data-tip="COMPLETE RANDOMIZATION: randtreat ensures exactly equal group sizes (unlike coin flips). Install first with 'ssc install randtreat' — widely used in development economics RCTs.">randtreat, generate(treatment) setseed(42)</span>
 
 <span class="code-comment">* Multiple treatment arms</span>
 randtreat, generate(treatment) mult(3) setseed(42)
@@ -205,10 +205,10 @@ set.seed(42)
 df <- data.frame(id = 1:10)
 
 <span class="code-comment"># Simple random assignment</span>
-<span class="code-tooltip" data-tip="simple_ra() does Bernoulli randomization">df$treatment_bernoulli <- simple_ra(N = nrow(df))</span>
+<span class="code-tooltip" data-tip="BERNOULLI: Each person independently gets a 50% coin flip for treatment — simple but group sizes may be unequal by chance.">df$treatment_bernoulli <- simple_ra(N = nrow(df))</span>
 
 <span class="code-comment"># Complete random assignment (fixed number treated)</span>
-<span class="code-tooltip" data-tip="complete_ra() ensures exact treatment proportions">df$treatment_complete <- complete_ra(N = nrow(df), prob = 0.5)</span>
+<span class="code-tooltip" data-tip="COMPLETE: Guarantees exactly 50% are treated and 50% are control — more precise than Bernoulli because group sizes are fixed, not random.">df$treatment_complete <- complete_ra(N = nrow(df), prob = 0.5)</span>
 
 <span class="code-function">print</span>(df)</code></pre>
 <button class="run-btn" data-lang="r">Run Code</button>
@@ -302,7 +302,7 @@ np.random.seed(42)
     df = df.copy()
     df[<span class="code-string">'treatment'</span>] = np.nan
 
-    <span class="code-tooltip" data-tip="Randomize separately within each stratum">for name, group <span class="code-keyword">in</span> df.groupby(strata_cols):
+    <span class="code-tooltip" data-tip="STRATIFIED: Randomizes separately within each gender-age subgroup, so each stratum has roughly equal treatment/control splits — ensures balance on key variables by design.">for name, group <span class="code-keyword">in</span> df.groupby(strata_cols):
         n = len(group)
         n_treat = int(n * prob_treat)
         assignment = [1] * n_treat + [0] * (n - n_treat)
@@ -330,7 +330,7 @@ df = stratified_randomize(df, strata_cols=[<span class="code-string">'gender'</s
 set seed 42
 
 <span class="code-comment">* Stratify by gender and region</span>
-<span class="code-tooltip" data-tip="strata() option ensures randomization happens within each combination of stratifying variables">randtreat, generate(treatment) strata(gender region) setseed(42)</span>
+<span class="code-tooltip" data-tip="STRATIFIED: Randomizes within each gender-region combination separately, ensuring balance on these key variables — e.g., equal treatment/control among Northern females, Southern males, etc.">randtreat, generate(treatment) strata(gender region) setseed(42)</span>
 
 <span class="code-comment">* With unequal treatment probabilities</span>
 randtreat, generate(treatment) strata(gender) ///
@@ -351,7 +351,7 @@ df <- data.frame(
 )
 
 <span class="code-comment"># Block random assignment (stratified)</span>
-<span class="code-tooltip" data-tip="block_ra() randomizes within blocks/strata. Pass the blocking variable.">df$treatment <- block_ra(
+<span class="code-tooltip" data-tip="BLOCK RANDOMIZATION: Assigns treatment separately within each gender group, guaranteeing equal numbers of treated males and treated females — ensures gender balance by design.">df$treatment <- block_ra(
   blocks = df$gender,
   prob = 0.5
 )</span>
@@ -470,7 +470,7 @@ clusters = df[<span class="code-string">'school_id'</span>].unique()
 n_clusters = len(clusters)
 
 <span class="code-comment"># Randomize at cluster level</span>
-<span class="code-tooltip" data-tip="Assign treatment to clusters, not individuals">cluster_treatment = dict(zip(
+<span class="code-tooltip" data-tip="CLUSTER ASSIGNMENT: Creates a dictionary mapping each school to treatment (1) or control (0) — all students in the same school get the same treatment status, as required when interventions operate at the group level.">cluster_treatment = dict(zip(
     clusters,
     np.random.binomial(1, 0.5, n_clusters)
 ))</span>
@@ -487,7 +487,7 @@ df[<span class="code-string">'treatment'</span>] = df[<span class="code-string">
 set seed 42
 
 <span class="code-comment">* Randomize at cluster level</span>
-<span class="code-tooltip" data-tip="cluster() option assigns all units in a cluster to the same treatment">randtreat, generate(treatment) cluster(school_id) setseed(42)</span>
+<span class="code-tooltip" data-tip="CLUSTER RANDOMIZATION: All students in the same school get the same treatment — necessary when the intervention operates at the school level (e.g., new curriculum, teacher training).">randtreat, generate(treatment) cluster(school_id) setseed(42)</span>
 
 <span class="code-comment">* Stratified cluster randomization</span>
 randtreat, generate(treatment) cluster(school_id) ///
@@ -507,7 +507,7 @@ df <- data.frame(
 )
 
 <span class="code-comment"># Cluster random assignment</span>
-<span class="code-tooltip" data-tip="cluster_ra() assigns all units in a cluster to the same treatment">df$treatment <- cluster_ra(
+<span class="code-tooltip" data-tip="CLUSTER RANDOMIZATION: Randomly assigns entire schools to treatment or control — all students in school A get the same status, ensuring the design matches how the intervention is actually delivered.">df$treatment <- cluster_ra(
   clusters = df$school_id,
   prob = 0.5
 )</span>

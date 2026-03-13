@@ -1529,6 +1529,147 @@ p5 <- df_viz %>%
           </div>
         </div>
 
+        <!-- Filtering and Data Quality -->
+        <h2>Step 6: Filtering Rows and Fixing Data Types</h2>
+
+        <p>
+          Before computing statistics, you often need to <strong>filter rows</strong> based on conditions and <strong>fix data types</strong> (e.g., columns that should be numeric but were read as strings). These operations are fundamental to every data exploration workflow.
+        </p>
+
+        <h3>Boolean Indexing (Filtering Rows by Condition)</h3>
+
+        <p>
+          In Python, you filter rows by creating a <strong>Boolean mask</strong> — a Series of True/False values — and passing it inside <code>df[...]</code>. Only rows where the condition is True are kept.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Boolean indexing</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+
+<span class="code-comment"># Single condition: keep rows where year is 2020</span>
+df_2020 = df[df[<span class="code-string">'year'</span>] == <span class="code-number">2020</span>]
+
+<span class="code-comment"># How it works:</span>
+<span class="code-comment">#   df['year'] == 2020  creates a Boolean Series (True/False per row)</span>
+<span class="code-comment">#   df[...]             keeps only the True rows</span>
+
+<span class="code-comment"># Combining conditions: use & (and) or | (or) with PARENTHESES</span>
+high_income = df[(df[<span class="code-string">'region'</span>] == <span class="code-string">'North'</span>) & (df[<span class="code-string">'income'</span>] > <span class="code-number">50000</span>)]
+
+<span class="code-comment"># COMMON BUG: Python's 'and' keyword does NOT work with pandas Series</span>
+<span class="code-comment"># df[df['region'] == 'North' and df['income'] > 50000]  # ERROR!</span>
+<span class="code-comment"># Use & instead, with parentheses around each condition</span>
+
+<span class="code-comment"># The .query() method is a readable alternative for complex filters</span>
+result = df.query(<span class="code-string">'year >= 2010 & income > 0'</span>)</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Filtering with if conditions</span>
+
+<span class="code-comment">* Filter with if (keeps data temporarily for that command)</span>
+<span class="code-keyword">summarize</span> income <span class="code-keyword">if</span> year == 2020
+
+<span class="code-comment">* Combine conditions with & (and) and | (or)</span>
+<span class="code-keyword">summarize</span> income <span class="code-keyword">if</span> region == <span class="code-string">"North"</span> & income > 50000
+
+<span class="code-comment">* Permanently drop rows</span>
+<span class="code-keyword">keep if</span> year >= 2010 & income > 0
+
+<span class="code-comment">* Or drop specific rows</span>
+<span class="code-keyword">drop if</span> income <= 0 | missing(income)</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Filtering with dplyr::filter()</span>
+<span class="code-function">library</span>(dplyr)
+
+<span class="code-comment"># Single condition</span>
+df_2020 <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">filter</span>(year == <span class="code-number">2020</span>)
+
+<span class="code-comment"># Combine conditions: comma means AND, | means OR</span>
+high_income <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(region == <span class="code-string">"North"</span>, income > <span class="code-number">50000</span>)
+
+<span class="code-comment"># COMMON BUG: | needs a full comparison on each side</span>
+<span class="code-comment"># filter(region == 'North' | 'South')   # WRONG!</span>
+<span class="code-comment"># filter(region == 'North' | region == 'South')  # Correct</span>
+<span class="code-comment"># Or use %in%:</span>
+subset <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">filter</span>(region <span class="code-operator">%in%</span> <span class="code-function">c</span>(<span class="code-string">"North"</span>, <span class="code-string">"South"</span>))</code></pre>
+          </div>
+        </div>
+
+        <h3>Fixing Data Types with pd.to_numeric()</h3>
+
+        <p>
+          When numeric columns are accidentally read as strings (due to commas in <code>45,000</code>, currency symbols, or stray text), statistical functions like <code>.mean()</code> silently skip them. Always check <code>df.dtypes</code> and convert with <code>pd.to_numeric()</code>.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Fixing data types</span>
+
+<span class="code-comment"># Check column types — look for 'object' where you expect numbers</span>
+<span class="code-function">print</span>(df.dtypes)
+
+<span class="code-comment"># Convert a column to numeric; errors='coerce' turns bad values to NaN</span>
+df[<span class="code-string">'income'</span>] = pd.to_numeric(df[<span class="code-string">'income'</span>], errors=<span class="code-string">'coerce'</span>)
+
+<span class="code-comment"># Remove commas before converting (common in European/financial data)</span>
+df[<span class="code-string">'income'</span>] = df[<span class="code-string">'income'</span>].str.replace(<span class="code-string">','</span>, <span class="code-string">''</span>).astype(float)
+
+<span class="code-comment"># Drop rows where key columns are missing after conversion</span>
+df = df.dropna(subset=[<span class="code-string">'income'</span>])</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Fixing data types</span>
+
+<span class="code-comment">* Check variable types</span>
+<span class="code-keyword">describe</span>
+
+<span class="code-comment">* Convert string to numeric (destring removes non-numeric characters)</span>
+<span class="code-keyword">destring</span> income, replace force
+
+<span class="code-comment">* Or remove specific characters first</span>
+<span class="code-keyword">replace</span> income_str = subinstr(income_str, <span class="code-string">","</span>, <span class="code-string">""</span>, .)
+<span class="code-keyword">destring</span> income_str, gen(income) force
+
+<span class="code-comment">* Drop observations with missing values</span>
+<span class="code-keyword">drop if</span> missing(income)</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Fixing data types</span>
+
+<span class="code-comment"># Check column types</span>
+<span class="code-function">str</span>(df)
+
+<span class="code-comment"># Convert character to numeric (non-numeric values become NA)</span>
+df$income <span class="code-operator"><-</span> <span class="code-function">as.numeric</span>(df$income)
+
+<span class="code-comment"># Remove commas first if needed</span>
+df$income <span class="code-operator"><-</span> <span class="code-function">as.numeric</span>(<span class="code-function">gsub</span>(<span class="code-string">","</span>, <span class="code-string">""</span>, df$income))
+
+<span class="code-comment"># Drop rows with missing values in specific columns</span>
+df <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">filter</span>(!<span class="code-function">is.na</span>(income))</code></pre>
+          </div>
+        </div>
+
         <!-- Complete First Analysis Script -->
         <h2>Complete "First Analysis" Script</h2>
         <p>Use this script as a guideline to produce one you can run on <strong>every new dataset</strong> before any analysis:</p>

@@ -1487,6 +1487,74 @@ Validation failed:
           </p>
         </div>
 
+        <h3>Merge Diagnostics</h3>
+
+        <p>
+          When combining datasets, always verify the merge quality. Did all records match? Are there unexpected unmatched observations? Merge diagnostics help you catch data issues that would silently bias your analysis — for example, if 20% of firms in your master dataset have no match in the financial data, your analysis sample may not be representative.
+        </p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">What to look for in the code</div>
+          <p style="margin-bottom: 0;">
+            In Stata, every <code>merge</code> creates a <code>_merge</code> variable with values: 1 (master only), 2 (using only), 3 (matched). Always <code>tab _merge</code> to inspect match quality before deciding which observations to keep. In Python, <code>pd.merge()</code> with <code>indicator=True</code> creates a similar diagnostic column. In R, <code>anti_join()</code> finds unmatched rows.
+          </p>
+        </div>
+
+        <div class="code-tabs" data-runnable="merge-diag">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Merge diagnostics</span>
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+
+<span class="code-comment"># Merge with indicator to track match quality</span>
+<span class="code-tooltip" data-tip="indicator=True adds a '_merge' column showing 'left_only', 'right_only', or 'both' for each row. This is the Python equivalent of Stata's _merge variable.">merged = pd.merge(firms, financials, on=<span class="code-string">'firm_id'</span>,
+                  how=<span class="code-string">'outer'</span>, indicator=<span class="code-keyword">True</span>)</span>
+
+<span class="code-comment"># Inspect match quality</span>
+<span class="code-tooltip" data-tip="Value counts shows how many rows matched ('both'), were only in the left dataset ('left_only'), or only in the right ('right_only'). Large numbers of unmatched rows indicate data problems."><span class="code-function">print</span>(merged[<span class="code-string">'_merge'</span>].value_counts())</span>
+
+<span class="code-comment"># Keep only matched observations</span>
+matched = merged[merged[<span class="code-string">'_merge'</span>] == <span class="code-string">'both'</span>].drop(columns=[<span class="code-string">'_merge'</span>])</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Merge diagnostics</span>
+
+<span class="code-comment">* Load master data and merge</span>
+<span class="code-tooltip" data-tip="merge 1:1 performs a one-to-one merge on firm_id. Stata automatically creates _merge: 1 = master only, 2 = using only, 3 = matched. Always tabulate _merge before proceeding.">use firms.dta, clear
+merge 1:1 firm_id using financials.dta</span>
+
+<span class="code-comment">* ALWAYS inspect merge quality</span>
+<span class="code-tooltip" data-tip="tab _merge shows: 'master only' = firms with no financial data, 'using only' = financial records with no firm data, 'matched' = successfully linked. Investigate unexpected unmatched records.">tab _merge</span>
+
+<span class="code-comment">* Keep only matched observations</span>
+<span class="code-tooltip" data-tip="Keeping _merge == 3 retains only successfully matched records. After filtering, drop the _merge variable itself to clean up the dataset.">keep if _merge == 3
+drop _merge</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Merge diagnostics</span>
+<span class="code-keyword">library</span>(dplyr)
+
+<span class="code-comment"># Inner join keeps only matches</span>
+matched <- inner_join(firms, financials, by = <span class="code-string">"firm_id"</span>)
+
+<span class="code-comment"># Find unmatched records using anti_join</span>
+<span class="code-tooltip" data-tip="anti_join returns rows in the left table that have NO match in the right table. Use this to investigate why records failed to merge — common causes are ID formatting differences, typos, or missing data.">firms_only <- anti_join(firms, financials, by = <span class="code-string">"firm_id"</span>)
+financials_only <- anti_join(financials, firms, by = <span class="code-string">"firm_id"</span>)</span>
+
+<span class="code-comment"># Report match quality</span>
+cat(<span class="code-string">"Matched:"</span>, nrow(matched), <span class="code-string">"\n"</span>)
+cat(<span class="code-string">"Firms only:"</span>, nrow(firms_only), <span class="code-string">"\n"</span>)
+cat(<span class="code-string">"Financials only:"</span>, nrow(financials_only), <span class="code-string">"\n"</span>)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
         <h2 id="case-study">4.6 Case Study: CPS Data Cleaning</h2>
 
         <p>

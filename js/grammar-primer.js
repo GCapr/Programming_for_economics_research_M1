@@ -1,14 +1,14 @@
 /**
- * Code Grammar Primer — Interactive Flashcard Exercises
+ * Code Grammar Primer — Interactive Code Learning
  *
  * Helps students understand code composition through card-based learning.
- * Two modes:
- *   BUILD — Given descriptions, construct the code (forward)
- *   READ  — Given code, identify what each piece does (reverse)
  *
- * Each code token becomes a flippable card showing either its grammatical
- * role (what it IS) or the actual code (what you WRITE). Students must
- * think before flipping — the brief pause builds retrieval practice.
+ * TWO RENDERING MODES:
+ *   TEACH (data-mode="teach") — Inline teaching blocks that show code with
+ *         color-coded tokens and explanations visible by default. No quiz,
+ *         no flipping. Designed to be placed after concept paragraphs.
+ *   EXERCISE (default) — Interactive flashcard exercises with Build/Read modes.
+ *         Students flip cards to test their understanding.
  */
 (function () {
   'use strict';
@@ -31,6 +31,20 @@
       return;
     }
 
+    // Check if this is a teach-mode block
+    var isTeachMode = container.getAttribute('data-mode') === 'teach';
+
+    if (isTeachMode) {
+      var teachState = {
+        lang: localStorage.getItem('preferredLang') || 'python',
+        exercises: data.exercises || [],
+        container: container,
+        scriptEl: scriptEl
+      };
+      renderTeach(teachState);
+      return;
+    }
+
     var state = {
       mode: 'build',
       exerciseIndex: 0,
@@ -44,7 +58,120 @@
     render(state);
   }
 
-  // ─── Main Render ──────────────────────────────────────────────
+  // ─── Teach Mode Render ────────────────────────────────────────
+  // Shows code tokens with explanations visible — no quiz mechanics.
+
+  function renderTeach(state) {
+    var container = state.container;
+    var scriptEl = state.scriptEl;
+    var exercises = state.exercises;
+    var lang = state.lang;
+
+    container.innerHTML = '';
+    container.appendChild(scriptEl);
+
+    if (exercises.length === 0) return;
+
+    // Teach mode shows first (and typically only) exercise
+    var ex = exercises[0];
+    var tokens = ex.languages[lang]
+      || ex.languages['python']
+      || ex.languages[Object.keys(ex.languages)[0]]
+      || [];
+    if (tokens.length === 0) return;
+
+    // ── Header with title + language tabs ──────────────────
+    var header = ce('div', 'gp-header gp-teach-header');
+
+    var titleRow = ce('div', 'gp-title-row');
+    var title = ce('div', 'gp-title gp-teach-title');
+    title.innerHTML = '&#9998; Code Grammar';
+    titleRow.appendChild(title);
+    header.appendChild(titleRow);
+
+    container.appendChild(header);
+
+    // ── Language tabs ──────────────────────────────────────
+    var langBar = ce('div', 'gp-lang-bar');
+    var langNames = { python: 'Python', stata: 'Stata', r: 'R' };
+    ['python', 'stata', 'r'].forEach(function (l) {
+      if (!ex.languages[l]) return;
+      var btn = ce('button', 'gp-lang-btn' + (lang === l ? ' active' : ''));
+      btn.textContent = langNames[l] || l;
+      btn.addEventListener('click', function () {
+        state.lang = l;
+        renderTeach(state);
+      });
+      langBar.appendChild(btn);
+    });
+    container.appendChild(langBar);
+
+    // ── Pattern hint ──────────────────────────────────────
+    if (ex.pattern) {
+      var pattern = ce('div', 'gp-pattern gp-teach-pattern');
+      pattern.innerHTML = 'Pattern: <code>' + escapeHtml(ex.pattern) + '</code>';
+      container.appendChild(pattern);
+    }
+
+    // ── Assembled code line ───────────────────────────────
+    var assembled = ce('div', 'gp-teach-assembled');
+    var pre = ce('pre', 'gp-assembled-code');
+    var code = ce('code', '');
+
+    // Build color-coded assembled code
+    tokens.forEach(function (token) {
+      var span = document.createElement('span');
+      span.className = 'gp-teach-token';
+      span.setAttribute('data-color', token.color || 'text');
+      span.textContent = token.code;
+      code.appendChild(span);
+    });
+    pre.appendChild(code);
+    assembled.appendChild(pre);
+    container.appendChild(assembled);
+
+    // ── Token breakdown ───────────────────────────────────
+    var breakdown = ce('div', 'gp-teach-breakdown');
+
+    tokens.forEach(function (token) {
+      // Skip whitespace-only tokens
+      if (token.code.trim() === '' && token.role === 'Space') return;
+      if (token.code === '\n' && token.role === 'Newline') return;
+
+      var row = ce('div', 'gp-teach-row');
+      row.setAttribute('data-color', token.color || 'text');
+
+      var codeEl = ce('code', 'gp-teach-code');
+      codeEl.textContent = token.code;
+      row.appendChild(codeEl);
+
+      var info = ce('div', 'gp-teach-info');
+
+      var roleEl = ce('div', 'gp-teach-role');
+      roleEl.textContent = token.role;
+      info.appendChild(roleEl);
+
+      if (token.tip) {
+        var tipEl = ce('div', 'gp-teach-tip');
+        tipEl.textContent = token.tip;
+        info.appendChild(tipEl);
+      }
+
+      row.appendChild(info);
+      breakdown.appendChild(row);
+    });
+
+    container.appendChild(breakdown);
+
+    // ── Structure note ────────────────────────────────────
+    if (ex.structureNote) {
+      var note = ce('div', 'gp-structure-note');
+      note.innerHTML = ex.structureNote;
+      container.appendChild(note);
+    }
+  }
+
+  // ─── Main Render (Exercise Mode) ────────────────────────────────
 
   function render(state) {
     var container = state.container;

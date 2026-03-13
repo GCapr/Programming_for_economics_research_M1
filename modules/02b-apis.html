@@ -351,6 +351,48 @@ full_url = base + endpoint + params       <span style="color: #9ca3af;"># Assemb
 response = requests.get(full_url)         <span style="color: #9ca3af;"># Send to server!</span></pre>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Here's how to build an API URL by assembling base, country, and indicator into a formatted string.",
+                  "pattern": "variable = f\"{base}/path/{variable}/path/{variable}\"",
+                  "structureNote": "API URLs are built piece by piece: a <strong>base URL</strong> (the server address), an <strong>endpoint path</strong> (what resource you want), and <strong>parameters</strong> (filters). Using variables for each piece makes it easy to swap countries or indicators without rewriting the entire URL.",
+                  "languages": {
+                    "python": [
+                      {"code": "url", "role": "Variable", "tip": "Will hold the complete API URL string, ready to be passed to requests.get()", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the constructed URL string to the variable", "color": "operator"},
+                      {"code": "f\"", "role": "F-string start", "tip": "The f prefix creates a 'formatted string literal' -- Python evaluates any {expressions} inside the quotes and inserts their values", "color": "string"},
+                      {"code": "{base}", "role": "Variable insert", "tip": "Inserts the value of 'base' (e.g., 'https://api.worldbank.org/v2') into the string at this position", "color": "variable"},
+                      {"code": "/country/", "role": "Path segment", "tip": "A literal path component in the API URL -- tells the server you want country-level data", "color": "string"},
+                      {"code": "{country}", "role": "Variable insert", "tip": "Inserts the country code variable (e.g., 'USA') -- swapping this variable changes which country you query", "color": "variable"},
+                      {"code": "/indicator/", "role": "Path segment", "tip": "Another literal path component -- tells the server you want a specific indicator", "color": "string"},
+                      {"code": "{indicator}", "role": "Variable insert", "tip": "Inserts the indicator code variable (e.g., 'NY.GDP.MKTP.CD') -- the World Bank code for the data series", "color": "variable"},
+                      {"code": "\"", "role": "String end", "tip": "Closes the f-string -- the final URL is now a single string like 'https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD'", "color": "string"}
+                    ],
+                    "r": [
+                      {"code": "url", "role": "Variable", "tip": "Will hold the complete API URL string", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow -- stores the result of paste0() in 'url'", "color": "operator"},
+                      {"code": "paste0", "role": "Function", "tip": "Concatenates strings with no separator (paste0 = paste with zero gap) -- R's equivalent of Python f-strings for building URLs", "color": "function"},
+                      {"code": "(", "role": "Open paren", "tip": "Begins the list of strings to concatenate", "color": "syntax"},
+                      {"code": "base", "role": "Variable", "tip": "The base URL string, e.g., 'https://api.worldbank.org/v2'", "color": "variable"},
+                      {"code": ", ", "role": "Separator", "tip": "Separates arguments -- each argument is a piece of the URL to glue together", "color": "syntax"},
+                      {"code": "\"/country/\"", "role": "Literal string", "tip": "A fixed path segment in the URL", "color": "string"},
+                      {"code": ", country, ", "role": "Variable + separator", "tip": "The country code variable (e.g., 'USA') inserted between the literal path segments", "color": "variable"},
+                      {"code": "\"/indicator/\"", "role": "Literal string", "tip": "Another fixed path segment", "color": "string"},
+                      {"code": ", indicator", "role": "Variable", "tip": "The indicator code variable (e.g., 'NY.GDP.MKTP.CD')", "color": "variable"},
+                      {"code": ")", "role": "Close paren", "tip": "Ends paste0() -- all pieces are now joined into one URL string", "color": "syntax"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <!-- Your First API Call -->
         <h2>Your First API Call</h2>
 
@@ -553,92 +595,48 @@ Status: <span class="out-num">200</span>
 <span class="out-num">8</span> United States  <span class="out-num">2015</span> <span class="out-num">18238930000000</span></div>
         </div>
 
-        <!-- Common World Bank Indicators - Research Project Context -->
-        <div class="research-banner">
-          <h3>Research Project: Indicator Codes</h3>
-          <p style="margin-bottom: 0.75rem;">For our "Climate Vulnerability and Economic Growth" project, we'll use these World Bank indicator codes. You plug these codes into your API URL to fetch specific data:</p>
-        </div>
-
-        <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
-          <thead>
-            <tr style="background: #f8f9fa;">
-              <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Indicator Code</th>
-              <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>NY.GDP.MKTP.CD</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">GDP (current US$)</td></tr>
-            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>NY.GDP.PCAP.CD</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">GDP per capita (current US$)</td></tr>
-            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EN.ATM.CO2E.KT</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">CO2 emissions (kt)</td></tr>
-            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EN.ATM.CO2E.PC</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">CO2 emissions per capita (metric tons)</td></tr>
-            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>SP.POP.TOTL</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Total population</td></tr>
-            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EG.USE.PCAP.KG.OE</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Energy use per capita (kg oil equivalent)</td></tr>
-            <tr><td style="padding: 0.5rem;"><code>AG.LND.FRST.ZS</code></td><td style="padding: 0.5rem;">Forest area (% of land area)</td></tr>
-          </tbody>
-        </table>
-
-        <p>Full list: <a href="https://data.worldbank.org/indicator" target="_blank">data.worldbank.org/indicator</a></p>
-
-        <!-- API Authentication -->
-        <h2>API Authentication</h2>
-
-        <div class="concept-box">
-          <h4>Why Authentication?</h4>
-          <p style="margin-bottom: 0;">Many APIs require an <strong>API key</strong> to track usage and prevent abuse. The World Bank API is free and doesn't require authentication, but others (like FRED, Alpha Vantage, OpenAI) do. You typically get a key by registering on the provider's website.</p>
-        </div>
-
-        <div class="code-tabs">
-          <div class="tab-buttons">
-            <button class="tab-button active" data-lang="python">Python</button>
-          </div>
-          <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-comment"># Example: Using an API key (FRED API)</span>
-<span class="code-keyword">import</span> requests
-<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="OS: Python's operating system module. Used here to securely read API keys from environment variables instead of hardcoding them in your script.">os</span>
-
-<span class="code-comment"># NEVER hardcode API keys in your code!</span>
-<span class="code-comment"># Instead, use environment variables for security</span>
-<span class="code-tooltip" data-tip="API_KEY: Reads your FRED API key from an environment variable. This is the secure way to handle secrets -- your key stays out of your code and out of version control (Git).">api_key</span> = os.environ.get(<span class="code-string">'FRED_API_KEY'</span>)
-<span class="code-comment"># Set in terminal: export FRED_API_KEY=your_key_here</span>
-
-url = <span class="code-string">"https://api.stlouisfed.org/fred/series/observations"</span>
-params = {
-    <span class="code-string">"series_id"</span>: <span class="code-string">"GDP"</span>,       <span class="code-comment"># The data series to fetch</span>
-    <span class="code-string">"api_key"</span>: api_key,        <span class="code-comment"># Your authentication key</span>
-    <span class="code-string">"file_type"</span>: <span class="code-string">"json"</span>       <span class="code-comment"># Response format</span>
-}
-
-response = requests.get(url, params=params)</code></pre>
-          </div>
-        </div>
-
-        <div class="info-box warning">
-          <div class="info-box-title">Security Warning</div>
-          <p><strong>Never commit API keys to Git!</strong> We haven't covered Git yet (that's in <a href="08-github.html">Module 8</a>), but this is important enough to mention now. Git is a version control system that tracks all your code changes&mdash;including any secrets you accidentally include.</p>
-          <p>Use environment variables or a <code>.env</code> file (and add it to <code>.gitignore</code>). Exposed keys can be stolen and abused, potentially costing you money or compromising your accounts.</p>
-          <p style="margin-bottom: 0;"><strong>We'll explain Git, commits, and <code>.gitignore</code> properly in <a href="08-github.html">Module 8: Git & GitHub</a>.</strong></p>
-        </div>
-
-        <!-- Next Steps -->
-        <h2>Next Steps</h2>
-
-        <p>In the next module (Data Cleaning), we'll take the data we fetched and:</p>
-        <ul>
-          <li>Handle missing values in our GDP and CO2 data</li>
-          <li>Merge with additional datasets</li>
-          <li>Create derived variables for analysis</li>
-        </ul>
-
-        <!-- ═══ MODULE 02b GRAMMAR PRIMER ═══ -->
-        <section class="grammar-primer-section">
-          <h2 id="code-grammar">Code Grammar</h2>
-          <p>Practice the syntax patterns used in this module. In <strong>Build</strong> mode, read the descriptions and figure out the code. In <strong>Read</strong> mode, look at the code and identify what each piece does. Click cards to check your answers.</p>
-          <div class="grammar-primer">
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
             {
               "exercises": [
                 {
-                  "instruction": "Send an HTTP GET request to a URL and store the server's response",
+                  "instruction": "Here's how to define a dictionary of API query parameters for format, date range, and page size.",
+                  "pattern": "variable = {\"key\": \"value\", ...}",
+                  "structureNote": "Query parameters control what the API returns. They become <code>?format=json&date=2015:2022&per_page=100</code> at the end of the URL. Using a dictionary keeps them organized and lets requests.get() handle the URL encoding automatically.",
+                  "languages": {
+                    "python": [
+                      {"code": "params", "role": "Variable", "tip": "Stores the parameter dictionary -- this will be passed to requests.get(url, params=params)", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the dictionary to the variable", "color": "operator"},
+                      {"code": "{", "role": "Dict open", "tip": "Opens a Python dictionary literal -- stores key-value pairs", "color": "syntax"},
+                      {"code": "\"format\"", "role": "Key", "tip": "The parameter name -- tells the API what response format you want", "color": "string"},
+                      {"code": ": ", "role": "Key-value separator", "tip": "In dictionaries, colon separates each key from its value", "color": "syntax"},
+                      {"code": "\"json\"", "role": "Value", "tip": "Requests JSON format (instead of XML) -- JSON is easier to parse in code", "color": "string"},
+                      {"code": ", ", "role": "Item separator", "tip": "Commas separate key-value pairs within the dictionary", "color": "syntax"},
+                      {"code": "\"date\"", "role": "Key", "tip": "The date range parameter -- specifies which years of data to return", "color": "string"},
+                      {"code": ": ", "role": "Key-value separator", "tip": "Separates the key from its value", "color": "syntax"},
+                      {"code": "\"2015:2022\"", "role": "Value", "tip": "A year range in World Bank format -- colon separates start and end years", "color": "string"},
+                      {"code": ", ", "role": "Item separator", "tip": "Another comma before the next pair", "color": "syntax"},
+                      {"code": "\"per_page\"", "role": "Key", "tip": "Controls pagination -- how many records per API response page", "color": "string"},
+                      {"code": ": ", "role": "Key-value separator", "tip": "Separates key from value", "color": "syntax"},
+                      {"code": "100", "role": "Value (integer)", "tip": "Maximum records per page -- ensures you get all data in one request for small datasets", "color": "special"},
+                      {"code": "}", "role": "Dict close", "tip": "Closes the dictionary -- three parameters are now ready to pass to the API", "color": "syntax"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Here's how to send an HTTP GET request to a URL and store the server's response.",
                   "pattern": "variable = library.get(url, params=dict)",
                   "structureNote": "The <code>requests.get()</code> call is the core of every API interaction. It combines the URL and parameters into a single HTTP request, sends it to the server, and returns a Response object containing the status code, headers, and body. The <code>params</code> dictionary is automatically appended to the URL as <code>?key=value&key=value</code>.",
                   "languages": {
@@ -681,40 +679,20 @@ response = requests.get(url, params=params)</code></pre>
                       {"code": ")", "role": "Close paren", "tip": "Ends the GET() call -- the request is now sent", "color": "syntax"}
                     ]
                   }
-                },
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
                 {
-                  "instruction": "Build an API URL by assembling base, country, and indicator into an f-string",
-                  "pattern": "variable = f\"{base}/path/{variable}/path/{variable}\"",
-                  "structureNote": "API URLs are built piece by piece: a <strong>base URL</strong> (the server address), an <strong>endpoint path</strong> (what resource you want), and <strong>parameters</strong> (filters). Using variables for each piece makes it easy to swap countries or indicators without rewriting the entire URL.",
-                  "languages": {
-                    "python": [
-                      {"code": "url", "role": "Variable", "tip": "Will hold the complete API URL string, ready to be passed to requests.get()", "color": "variable"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the constructed URL string to the variable", "color": "operator"},
-                      {"code": "f\"", "role": "F-string start", "tip": "The f prefix creates a 'formatted string literal' -- Python evaluates any {expressions} inside the quotes and inserts their values", "color": "string"},
-                      {"code": "{base}", "role": "Variable insert", "tip": "Inserts the value of 'base' (e.g., 'https://api.worldbank.org/v2') into the string at this position", "color": "variable"},
-                      {"code": "/country/", "role": "Path segment", "tip": "A literal path component in the API URL -- tells the server you want country-level data", "color": "string"},
-                      {"code": "{country}", "role": "Variable insert", "tip": "Inserts the country code variable (e.g., 'USA') -- swapping this variable changes which country you query", "color": "variable"},
-                      {"code": "/indicator/", "role": "Path segment", "tip": "Another literal path component -- tells the server you want a specific indicator", "color": "string"},
-                      {"code": "{indicator}", "role": "Variable insert", "tip": "Inserts the indicator code variable (e.g., 'NY.GDP.MKTP.CD') -- the World Bank code for the data series", "color": "variable"},
-                      {"code": "\"", "role": "String end", "tip": "Closes the f-string -- the final URL is now a single string like 'https://api.worldbank.org/v2/country/USA/indicator/NY.GDP.MKTP.CD'", "color": "string"}
-                    ],
-                    "r": [
-                      {"code": "url", "role": "Variable", "tip": "Will hold the complete API URL string", "color": "variable"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow -- stores the result of paste0() in 'url'", "color": "operator"},
-                      {"code": "paste0", "role": "Function", "tip": "Concatenates strings with no separator (paste0 = paste with zero gap) -- R's equivalent of Python f-strings for building URLs", "color": "function"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the list of strings to concatenate", "color": "syntax"},
-                      {"code": "base", "role": "Variable", "tip": "The base URL string, e.g., 'https://api.worldbank.org/v2'", "color": "variable"},
-                      {"code": ", ", "role": "Separator", "tip": "Separates arguments -- each argument is a piece of the URL to glue together", "color": "syntax"},
-                      {"code": "\"/country/\"", "role": "Literal string", "tip": "A fixed path segment in the URL", "color": "string"},
-                      {"code": ", country, ", "role": "Variable + separator", "tip": "The country code variable (e.g., 'USA') inserted between the literal path segments", "color": "variable"},
-                      {"code": "\"/indicator/\"", "role": "Literal string", "tip": "Another fixed path segment", "color": "string"},
-                      {"code": ", indicator", "role": "Variable", "tip": "The indicator code variable (e.g., 'NY.GDP.MKTP.CD')", "color": "variable"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends paste0() -- all pieces are now joined into one URL string", "color": "syntax"}
-                    ]
-                  }
-                },
-                {
-                  "instruction": "Parse the JSON body of an HTTP response into a native data structure",
+                  "instruction": "Here's how to parse the JSON body of an HTTP response into a native data structure.",
                   "pattern": "variable = response.json()",
                   "structureNote": "APIs return data as <strong>JSON text</strong> (a string). Before you can work with it, you must <strong>parse</strong> it into your language's native data structures (Python dicts/lists, R lists). This is the bridge between raw server output and usable data objects.",
                   "languages": {
@@ -738,9 +716,20 @@ response = requests.get(url, params=params)</code></pre>
                       {"code": "()", "role": "Call parens", "tip": "The input comes from the pipe, so no explicit argument is needed here", "color": "syntax"}
                     ]
                   }
-                },
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
                 {
-                  "instruction": "Extract the data records from the World Bank API response (skipping metadata at index 0)",
+                  "instruction": "Here's how to extract the data records from the World Bank API response, skipping the metadata at index 0.",
                   "pattern": "variable = data[index]",
                   "structureNote": "The World Bank API returns a two-element list: <code>[metadata, records]</code>. Index 0 is pagination metadata (total pages, etc.) and index 1 is the actual data. This two-part structure is common in APIs that support pagination -- you must know which part to grab.",
                   "languages": {
@@ -761,33 +750,20 @@ response = requests.get(url, params=params)</code></pre>
                       {"code": "]]", "role": "Close brackets", "tip": "Closes the extraction -- the result is the data records directly, not wrapped in a list", "color": "syntax"}
                     ]
                   }
-                },
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
                 {
-                  "instruction": "Define a dictionary of API query parameters (format, date range, and page size)",
-                  "pattern": "variable = {\"key\": \"value\", ...}",
-                  "structureNote": "Query parameters control what the API returns. They become <code>?format=json&date=2015:2022&per_page=100</code> at the end of the URL. Using a dictionary keeps them organized and lets requests.get() handle the URL encoding automatically.",
-                  "languages": {
-                    "python": [
-                      {"code": "params", "role": "Variable", "tip": "Stores the parameter dictionary -- this will be passed to requests.get(url, params=params)", "color": "variable"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the dictionary to the variable", "color": "operator"},
-                      {"code": "{", "role": "Dict open", "tip": "Opens a Python dictionary literal -- stores key-value pairs", "color": "syntax"},
-                      {"code": "\"format\"", "role": "Key", "tip": "The parameter name -- tells the API what response format you want", "color": "string"},
-                      {"code": ": ", "role": "Key-value separator", "tip": "In dictionaries, colon separates each key from its value", "color": "syntax"},
-                      {"code": "\"json\"", "role": "Value", "tip": "Requests JSON format (instead of XML) -- JSON is easier to parse in code", "color": "string"},
-                      {"code": ", ", "role": "Item separator", "tip": "Commas separate key-value pairs within the dictionary", "color": "syntax"},
-                      {"code": "\"date\"", "role": "Key", "tip": "The date range parameter -- specifies which years of data to return", "color": "string"},
-                      {"code": ": ", "role": "Key-value separator", "tip": "Separates the key from its value", "color": "syntax"},
-                      {"code": "\"2015:2022\"", "role": "Value", "tip": "A year range in World Bank format -- colon separates start and end years", "color": "string"},
-                      {"code": ", ", "role": "Item separator", "tip": "Another comma before the next pair", "color": "syntax"},
-                      {"code": "\"per_page\"", "role": "Key", "tip": "Controls pagination -- how many records per API response page", "color": "string"},
-                      {"code": ": ", "role": "Key-value separator", "tip": "Separates key from value", "color": "syntax"},
-                      {"code": "100", "role": "Value (integer)", "tip": "Maximum records per page -- ensures you get all data in one request for small datasets", "color": "special"},
-                      {"code": "}", "role": "Dict close", "tip": "Closes the dictionary -- three parameters are now ready to pass to the API", "color": "syntax"}
-                    ]
-                  }
-                },
-                {
-                  "instruction": "Create a DataFrame from API records using a list comprehension with nested key access and a filter",
+                  "instruction": "Here's how to create a DataFrame from API records using a list comprehension with nested key access and a filter.",
                   "pattern": "df = pd.DataFrame([{...} for item in list if condition])",
                   "structureNote": "This single line does three things at once: (1) <strong>loops</strong> through each record, (2) <strong>extracts and reshapes</strong> nested fields into a flat dictionary, and (3) <strong>filters out</strong> records with missing values. The result is a clean, analysis-ready DataFrame. This pattern is extremely common when converting API responses to tabular data.",
                   "languages": {
@@ -820,9 +796,46 @@ response = requests.get(url, params=params)</code></pre>
                       {"code": "filter(!is.na(gdp))", "role": "Filter", "tip": "Keeps only rows where gdp is NOT missing. !is.na() means 'is not NA' -- equivalent to Python's 'is not None'", "color": "function"}
                     ]
                   }
-                },
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
+        <!-- Common World Bank Indicators - Research Project Context -->
+        <div class="research-banner">
+          <h3>Research Project: Indicator Codes</h3>
+          <p style="margin-bottom: 0.75rem;">For our "Climate Vulnerability and Economic Growth" project, we'll use these World Bank indicator codes. You plug these codes into your API URL to fetch specific data:</p>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+          <thead>
+            <tr style="background: #f8f9fa;">
+              <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Indicator Code</th>
+              <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid #dee2e6;">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>NY.GDP.MKTP.CD</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">GDP (current US$)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>NY.GDP.PCAP.CD</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">GDP per capita (current US$)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EN.ATM.CO2E.KT</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">CO2 emissions (kt)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EN.ATM.CO2E.PC</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">CO2 emissions per capita (metric tons)</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>SP.POP.TOTL</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Total population</td></tr>
+            <tr><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;"><code>EG.USE.PCAP.KG.OE</code></td><td style="padding: 0.5rem; border-bottom: 1px solid #dee2e6;">Energy use per capita (kg oil equivalent)</td></tr>
+            <tr><td style="padding: 0.5rem;"><code>AG.LND.FRST.ZS</code></td><td style="padding: 0.5rem;">Forest area (% of land area)</td></tr>
+          </tbody>
+        </table>
+
+        <p>Full list: <a href="https://data.worldbank.org/indicator" target="_blank">data.worldbank.org/indicator</a></p>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
                 {
-                  "instruction": "Store a World Bank indicator code in a local macro (Stata's variable system)",
+                  "instruction": "Here's how to store a World Bank indicator code in a local macro, which is Stata's variable system for text values.",
                   "pattern": "local macroname \"value\"",
                   "structureNote": "Stata uses <strong>local macros</strong> instead of variables to store text values. You define them with <code>local name \"value\"</code> and reference them with the backtick-apostrophe syntax <code>`name'</code>. This is Stata's way of parameterizing your code -- change the macro once, and every reference updates automatically.",
                   "languages": {
@@ -834,9 +847,60 @@ response = requests.get(url, params=params)</code></pre>
                       {"code": "\"NY.GDP.MKTP.CD\"", "role": "Macro value", "tip": "The World Bank indicator code for GDP in current US dollars. This text will replace `indicator' wherever it appears", "color": "string"}
                     ]
                   }
-                },
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
+        <!-- API Authentication -->
+        <h2>API Authentication</h2>
+
+        <div class="concept-box">
+          <h4>Why Authentication?</h4>
+          <p style="margin-bottom: 0;">Many APIs require an <strong>API key</strong> to track usage and prevent abuse. The World Bank API is free and doesn't require authentication, but others (like FRED, Alpha Vantage, OpenAI) do. You typically get a key by registering on the provider's website.</p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Example: Using an API key (FRED API)</span>
+<span class="code-keyword">import</span> requests
+<span class="code-keyword">import</span> <span class="code-tooltip" data-tip="OS: Python's operating system module. Used here to securely read API keys from environment variables instead of hardcoding them in your script.">os</span>
+
+<span class="code-comment"># NEVER hardcode API keys in your code!</span>
+<span class="code-comment"># Instead, use environment variables for security</span>
+<span class="code-tooltip" data-tip="API_KEY: Reads your FRED API key from an environment variable. This is the secure way to handle secrets -- your key stays out of your code and out of version control (Git).">api_key</span> = os.environ.get(<span class="code-string">'FRED_API_KEY'</span>)
+<span class="code-comment"># Set in terminal: export FRED_API_KEY=your_key_here</span>
+
+url = <span class="code-string">"https://api.stlouisfed.org/fred/series/observations"</span>
+params = {
+    <span class="code-string">"series_id"</span>: <span class="code-string">"GDP"</span>,       <span class="code-comment"># The data series to fetch</span>
+    <span class="code-string">"api_key"</span>: api_key,        <span class="code-comment"># Your authentication key</span>
+    <span class="code-string">"file_type"</span>: <span class="code-string">"json"</span>       <span class="code-comment"># Response format</span>
+}
+
+response = requests.get(url, params=params)</code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Security Warning</div>
+          <p><strong>Never commit API keys to Git!</strong> We haven't covered Git yet (that's in <a href="08-github.html">Module 8</a>), but this is important enough to mention now. Git is a version control system that tracks all your code changes&mdash;including any secrets you accidentally include.</p>
+          <p>Use environment variables or a <code>.env</code> file (and add it to <code>.gitignore</code>). Exposed keys can be stolen and abused, potentially costing you money or compromising your accounts.</p>
+          <p style="margin-bottom: 0;"><strong>We'll explain Git, commits, and <code>.gitignore</code> properly in <a href="08-github.html">Module 8: Git & GitHub</a>.</strong></p>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
                 {
-                  "instruction": "Securely retrieve an API key from an environment variable instead of hardcoding it",
+                  "instruction": "Here's how to securely retrieve an API key from an environment variable instead of hardcoding it.",
                   "pattern": "variable = os.environ.get('KEY_NAME')",
                   "structureNote": "API keys are secrets -- like passwords. <strong>Never write them directly in your code</strong> because they could end up in Git, in shared files, or on GitHub. Environment variables keep secrets outside your code: you set them in your terminal, and your code reads them at runtime.",
                   "languages": {
@@ -858,7 +922,17 @@ response = requests.get(url, params=params)</code></pre>
             }
             </script>
           </div>
-        </section>
+        </div>
+
+        <!-- Next Steps -->
+        <h2>Next Steps</h2>
+
+        <p>In the next module (Data Cleaning), we'll take the data we fetched and:</p>
+        <ul>
+          <li>Handle missing values in our GDP and CO2 data</li>
+          <li>Merge with additional datasets</li>
+          <li>Create derived variables for analysis</li>
+        </ul>
 
         <div class="nav-footer">
           <a href="02a-file-import.html" class="nav-link prev">Importing from Files (02a)</a>

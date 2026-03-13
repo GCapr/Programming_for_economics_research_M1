@@ -671,6 +671,172 @@ RMSE: 1.92344   Adj. R2: 0.28364
           </p>
         </div>
 
+        <h3>Comparing Models: estimates store + esttab</h3>
+
+        <p>
+          A common workflow is to estimate several specifications (e.g., classical SEs vs. robust SEs, or progressively adding controls) and present them side-by-side. In Stata, the pattern is: run a regression, store its results with <code>estimates store</code>, repeat for each model, then display them together with <code>esttab</code>. In Python, the <code>Stargazer</code> package serves a similar role; in R, <code>modelsummary</code> or <code>etable</code> from fixest.
+        </p>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Compare like with like</div>
+          <p style="margin-bottom: 0;">
+            When comparing models side-by-side, always use the same type of standard errors across all columns. Switching from classical SEs in one model to robust SEs in another makes it impossible to tell whether a change in significance is due to the added controls or the different SE type.
+          </p>
+        </div>
+
+        <div class="code-tabs" data-runnable="est-compare">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Compare models with Stargazer</span>
+<span class="code-keyword">from</span> stargazer.stargazer <span class="code-keyword">import</span> Stargazer
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+
+<span class="code-comment"># Model 1: baseline</span>
+m1 = smf.ols(<span class="code-string">'wage ~ education'</span>, data=df).fit(cov_type=<span class="code-string">'HC1'</span>)
+
+<span class="code-comment"># Model 2: add controls</span>
+m2 = smf.ols(<span class="code-string">'wage ~ education + experience'</span>, data=df).fit(cov_type=<span class="code-string">'HC1'</span>)
+
+<span class="code-comment"># Model 3: full specification</span>
+m3 = smf.ols(<span class="code-string">'wage ~ education + experience + age'</span>, data=df).fit(cov_type=<span class="code-string">'HC1'</span>)
+
+<span class="code-comment"># Side-by-side comparison</span>
+table = Stargazer([m1, m2, m3])
+print(table.render_text())</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Compare models with esttab</span>
+<span class="code-comment">* ssc install estout, replace</span>
+
+<span class="code-comment">* Model 1: baseline</span>
+regress wage education, robust
+<span class="code-tooltip" data-tip="STORE: Saves the current regression results under the name 'baseline'. You can store up to 300 models and recall them later for comparison, testing, or export.">estimates store baseline</span>
+
+<span class="code-comment">* Model 2: add controls</span>
+regress wage education experience, robust
+estimates store controls
+
+<span class="code-comment">* Model 3: full specification</span>
+regress wage education experience age, robust
+estimates store full
+
+<span class="code-comment">* Side-by-side comparison table</span>
+<span class="code-tooltip" data-tip="ESTTAB: Displays stored estimates in a publication-ready table. 'se' shows standard errors below coefficients; 'star' adds significance stars. Replace 'se' with 'b(3) se(3)' for 3 decimal places.">esttab baseline controls full, se star(* 0.10 ** 0.05 *** 0.01)</span>
+
+<span class="code-comment">* Export to LaTeX</span>
+esttab baseline controls full using "output/tables/results.tex", ///
+    se replace star(* 0.10 ** 0.05 *** 0.01)</code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Compare models with fixest::etable or modelsummary</span>
+<span class="code-keyword">library</span>(fixest)
+
+<span class="code-comment"># Estimate three specifications</span>
+m1 <- feols(wage ~ education, data = df, vcov = "hetero")
+m2 <- feols(wage ~ education + experience, data = df, vcov = "hetero")
+m3 <- feols(wage ~ education + experience + age, data = df, vcov = "hetero")
+
+<span class="code-comment"># Side-by-side comparison</span>
+<span class="code-tooltip" data-tip="ETABLE: fixest's built-in function for comparing multiple models. Automatically aligns coefficients across specifications and reports the correct standard errors.">etable(m1, m2, m3, se.below = TRUE)</span>
+
+<span class="code-comment"># Export to LaTeX</span>
+etable(m1, m2, m3, tex = TRUE, file = "output/tables/results.tex")</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <h3>Regression Diagnostics</h3>
+
+        <p>
+          After estimation, diagnostic tests help verify model assumptions and identify potential problems. Three key diagnostics are: <strong>variance inflation factors</strong> (detect multicollinearity), <strong>heteroskedasticity tests</strong> (validate SE choice), and <strong>residual plots</strong> (check model specification).
+        </p>
+
+        <div class="code-tabs" data-runnable="est-diag">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Regression diagnostics</span>
+<span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
+<span class="code-keyword">from</span> statsmodels.stats.outliers_influence <span class="code-keyword">import</span> variance_inflation_factor
+<span class="code-keyword">from</span> statsmodels.stats.diagnostic <span class="code-keyword">import</span> het_breuschpagan
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+
+model = smf.ols(<span class="code-string">'wage ~ education + experience + age'</span>, data=df).fit()
+
+<span class="code-comment"># 1. Variance Inflation Factors (VIF) — detect multicollinearity</span>
+<span class="code-tooltip" data-tip="VIF measures how much a coefficient's variance is inflated by correlation with other predictors. VIF > 10 suggests severe multicollinearity. The fix: drop one of the correlated variables.">X = model.model.exog
+<span class="code-keyword">for</span> i, name <span class="code-keyword">in</span> enumerate(model.model.exog_names):
+    <span class="code-function">print</span>(f<span class="code-string">"{name}: VIF = {variance_inflation_factor(X, i):.2f}"</span>)</span>
+
+<span class="code-comment"># 2. Breusch-Pagan test for heteroskedasticity</span>
+<span class="code-tooltip" data-tip="Tests whether the error variance changes with the predictors. If p &lt; 0.05, reject homoskedasticity and use robust SEs. A significant result confirms that robust or clustered SEs are necessary.">bp_stat, bp_pval, _, _ = het_breuschpagan(model.resid, model.model.exog)
+<span class="code-function">print</span>(f<span class="code-string">"Breusch-Pagan p-value: {bp_pval:.4f}"</span>)</span>
+
+<span class="code-comment"># 3. Residual vs. Fitted plot — check specification</span>
+<span class="code-tooltip" data-tip="If the model is well-specified, residuals should scatter randomly around zero with no pattern. A curved pattern suggests a missing nonlinear term; a funnel shape suggests heteroskedasticity.">plt.scatter(model.fittedvalues, model.resid, alpha=<span class="code-number">0.3</span>)
+plt.axhline(y=<span class="code-number">0</span>, color=<span class="code-string">'red'</span>, linestyle=<span class="code-string">'--'</span>)
+plt.xlabel(<span class="code-string">'Fitted values'</span>)
+plt.ylabel(<span class="code-string">'Residuals'</span>)
+plt.title(<span class="code-string">'Residual vs. Fitted Plot'</span>)
+plt.savefig(<span class="code-string">'diagnostics.pdf'</span>, bbox_inches=<span class="code-string">'tight'</span>)</span></code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Regression diagnostics</span>
+
+reg wage education experience age, robust
+
+<span class="code-comment">* 1. Variance Inflation Factors</span>
+<span class="code-tooltip" data-tip="estat vif computes VIF for each predictor after regression. VIF > 10 signals multicollinearity. Common cause: including both age and experience (highly correlated).">estat vif</span>
+
+<span class="code-comment">* 2. Breusch-Pagan heteroskedasticity test</span>
+<span class="code-tooltip" data-tip="If p &lt; 0.05, reject homoskedasticity. This confirms the need for robust or clustered SEs. Note: run on the model without robust option first (test requires classical residuals).">
+<span class="code-comment">* Must re-estimate without robust for this test</span>
+quietly reg wage education experience age
+estat hettest</span>
+
+<span class="code-comment">* 3. Residual vs. Fitted plot</span>
+<span class="code-tooltip" data-tip="rvfplot produces a scatter of residuals vs. predicted values. Random scatter means the model is well-specified. Patterns indicate misspecification.">rvfplot, yline(0)</span></code></pre>
+            <button class="run-btn" data-lang="stata">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Regression diagnostics</span>
+<span class="code-keyword">library</span>(car)  <span class="code-comment"># for vif()</span>
+
+model <- lm(wage ~ education + experience + age, data = df)
+
+<span class="code-comment"># 1. Variance Inflation Factors</span>
+<span class="code-tooltip" data-tip="vif() from the car package computes VIF for each predictor. Values above 10 indicate multicollinearity. Consider dropping or combining highly correlated variables.">vif(model)</span>
+
+<span class="code-comment"># 2. Breusch-Pagan test</span>
+<span class="code-keyword">library</span>(lmtest)
+<span class="code-tooltip" data-tip="bptest() tests for heteroskedasticity. If p &lt; 0.05, use robust SEs (vcovHC) or switch to feols with vcov = 'hetero'.">bptest(model)</span>
+
+<span class="code-comment"># 3. Residual vs. Fitted plot</span>
+<span class="code-tooltip" data-tip="plot() with which = 1 produces the residual vs. fitted plot. R's built-in lm diagnostics also include Q-Q plot (which=2), Scale-Location (which=3), and Cook's distance (which=4).">plot(model, which = 1)</span></code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Diagnostic Checklist</div>
+          <p style="margin-bottom: 0;">
+            <strong>VIF > 10:</strong> Multicollinearity -- coefficients are unstable. Drop or combine correlated variables.<br>
+            <strong>Breusch-Pagan p < 0.05:</strong> Heteroskedasticity detected -- use robust SEs (<code>cov_type='HC1'</code>).<br>
+            <strong>Curved residual plot:</strong> Misspecification -- try adding polynomial or log terms.<br>
+            <strong>Funnel-shaped residuals:</strong> Heteroskedasticity -- confirms the need for robust SEs.
+          </p>
+        </div>
+
         <h2 id="panel">7.3 Panel Data Methods</h2>
 
         <p>
@@ -3485,8 +3651,17 @@ print(<span class="code-string">"Bootstrap SEs:"</span>, results[<span class="co
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Bootstrap</span>
 
+<span class="code-comment">* Set seed for reproducibility (alternative to inline seed())</span>
+set seed 42
+
 <span class="code-comment">* Simple bootstrap</span>
 <span class="code-tooltip" data-tip="BOOTSTRAP: Draws 1000 random samples with replacement and re-runs the regression each time. The seed ensures reproducibility so you get the same results every time.">bootstrap _b, reps(1000) seed(12345): reg outcome treatment controls</span>
+
+<span class="code-comment">* Post-estimation: display all bootstrap statistics</span>
+<span class="code-tooltip" data-tip="ESTAT BOOTSTRAP: Displays normal-based, percentile, and bias-corrected confidence intervals from the bootstrap distribution. The 'all' option shows every available CI type for comparison.">estat bootstrap, all</span>
+
+<span class="code-comment">* Extract percentile confidence intervals</span>
+<span class="code-tooltip" data-tip="PERCENTILE CI: Displays the stored percentile confidence intervals from the bootstrap. Useful for non-symmetric distributions where normal-based CIs may be inaccurate.">matrix list e(ci_percentile)</span>
 
 <span class="code-comment">* Cluster bootstrap (for clustered data)</span>
 <span class="code-tooltip" data-tip="CLUSTER BOOTSTRAP: Resamples entire schools (clusters) rather than individual observations, respecting the within-cluster correlation structure of the data.">bootstrap _b, reps(1000) seed(12345) cluster(school_id): ///

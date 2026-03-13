@@ -1269,7 +1269,369 @@ installation complete.
 [1] '<span class="out-num">2.0.0</span>'</div>
         </div>
 
-        <h2 id="first-script">1.4 Your First Script</h2>
+        <h2 id="syntax-patterns">1.4 Essential Syntax Patterns</h2>
+
+        <p>
+          Before writing full scripts, let's cover several syntax patterns that appear constantly in research code. Understanding these patterns will help you read and write code across all three languages.
+        </p>
+
+        <h3 id="keyword-args">Keyword Arguments</h3>
+
+        <p>
+          Functions often accept <strong>keyword arguments</strong> (also called named arguments): you pass values by name using the <code>name=value</code> syntax. This makes code more readable and lets you skip optional parameters you don't need.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Keyword arguments</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+
+<span class="code-comment"># Positional argument: 'data.csv' is the first (required) argument</span>
+<span class="code-comment"># Keyword arguments: encoding and sep are passed by name</span>
+df = pd.read_csv(<span class="code-string">'data.csv'</span>, encoding=<span class="code-string">'utf-8'</span>, sep=<span class="code-string">';'</span>)
+
+<span class="code-comment"># Keyword arguments make the intent clear:</span>
+df = pd.read_csv(<span class="code-string">'data.csv'</span>,
+                  sep=<span class="code-string">';'</span>,           <span class="code-comment"># semicolon delimiter (European data)</span>
+                  encoding=<span class="code-string">'latin-1'</span>, <span class="code-comment"># handle accented characters</span>
+                  na_values=[<span class="code-string">'.'</span>, <span class="code-string">''</span>])  <span class="code-comment"># treat these as missing</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Options after the comma act like keyword arguments</span>
+
+<span class="code-comment">* Everything after the comma is an option (named parameter)</span>
+<span class="code-keyword">import delimited</span> <span class="code-string">"data.csv"</span>, encoding(<span class="code-string">"utf-8"</span>) delimiter(<span class="code-string">";"</span>) clear
+
+<span class="code-comment">* summarize with the 'detail' option</span>
+<span class="code-keyword">summarize</span> income, detail
+
+<span class="code-comment">* regress with the 'robust' option</span>
+<span class="code-keyword">reg</span> income treatment age, robust</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Named arguments work the same way</span>
+<span class="code-function">library</span>(readr)
+
+<span class="code-comment"># Named arguments: delim, locale, na are passed by name</span>
+df <span class="code-operator"><-</span> <span class="code-function">read_delim</span>(<span class="code-string">"data.csv"</span>,
+                delim = <span class="code-string">";"</span>,
+                locale = <span class="code-function">locale</span>(encoding = <span class="code-string">"latin1"</span>),
+                na = <span class="code-function">c</span>(<span class="code-string">""</span>, <span class="code-string">"NA"</span>, <span class="code-string">"."</span>))
+
+<span class="code-comment"># na.rm = TRUE is a named argument you'll see everywhere</span>
+<span class="code-function">mean</span>(df$income, na.rm = <span class="code-keyword">TRUE</span>)</code></pre>
+          </div>
+        </div>
+
+        <h3 id="dot-accessor">The Dot Accessor and Method Chaining</h3>
+
+        <p>
+          In Python, the <strong>dot accessor</strong> pattern (<code>object.method()</code>) calls a function that belongs to an object. When you chain multiple dots, each method operates on the result of the previous one — this is called <strong>method chaining</strong>.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: The dot accessor pattern</span>
+<span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span>
+
+<span class="code-comment"># Single dot: call a method on an object</span>
+df.head()           <span class="code-comment"># DataFrame.head() shows first 5 rows</span>
+df.describe()       <span class="code-comment"># DataFrame.describe() shows summary stats</span>
+
+<span class="code-comment"># Method chaining: each dot operates on the previous result</span>
+result = df.groupby(<span class="code-string">'region'</span>)[<span class="code-string">'income'</span>].mean()
+<span class="code-comment"># Step by step:</span>
+<span class="code-comment">#   df.groupby('region')  → GroupBy object</span>
+<span class="code-comment">#   ...['income']         → select the income column</span>
+<span class="code-comment">#   .mean()               → compute the mean per group</span>
+
+<span class="code-comment"># IMPORTANT: .mean refers to the method object; .mean() calls it</span>
+<span class="code-comment"># Forgetting parentheses is a common bug!</span>
+wrong = df[<span class="code-string">'income'</span>].mean    <span class="code-comment"># Bug: returns method object, not a number</span>
+right = df[<span class="code-string">'income'</span>].mean()   <span class="code-comment"># Correct: calls the method, returns the mean</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Commands are separate (no method chaining)</span>
+<span class="code-comment">* Each command is its own line</span>
+
+<span class="code-keyword">use</span> <span class="code-string">"data.dta"</span>, clear
+<span class="code-keyword">describe</span>
+<span class="code-keyword">summarize</span> income
+
+<span class="code-comment">* Stata achieves "grouping" with the bysort prefix</span>
+<span class="code-keyword">bysort</span> region: <span class="code-keyword">summarize</span> income</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: The pipe operator %>% chains operations (like method chaining)</span>
+<span class="code-function">library</span>(dplyr)
+
+<span class="code-comment"># The pipe passes the result of each step to the next function</span>
+result <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">group_by</span>(region) <span class="code-operator">%>%</span>
+  <span class="code-function">summarise</span>(avg_income = <span class="code-function">mean</span>(income, na.rm = <span class="code-keyword">TRUE</span>))
+
+<span class="code-comment"># R 4.1+ also has a native pipe: |></span>
+result <span class="code-operator"><-</span> df |>
+  <span class="code-function">group_by</span>(region) |>
+  <span class="code-function">summarise</span>(avg_income = <span class="code-function">mean</span>(income, na.rm = <span class="code-keyword">TRUE</span>))</code></pre>
+          </div>
+        </div>
+
+        <h3 id="for-loops">For Loops</h3>
+
+        <p>
+          Loops let you repeat operations. Each language has its own syntax for iterating over sequences of values.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: for loops</span>
+
+<span class="code-comment"># Loop over a range of numbers</span>
+<span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-number">10</span>):
+    <span class="code-function">print</span>(i)           <span class="code-comment"># prints 0, 1, 2, ..., 9</span>
+
+<span class="code-comment"># Loop over a list of items</span>
+<span class="code-keyword">for</span> country <span class="code-keyword">in</span> [<span class="code-string">'US'</span>, <span class="code-string">'UK'</span>, <span class="code-string">'FR'</span>]:
+    <span class="code-function">print</span>(country)
+
+<span class="code-comment"># Loop over DataFrame columns</span>
+<span class="code-keyword">for</span> col <span class="code-keyword">in</span> df.columns:
+    <span class="code-function">print</span>(col, df[col].dtype)</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: foreach and forvalues loops</span>
+
+<span class="code-comment">* Loop over a range of numbers</span>
+<span class="code-keyword">forvalues</span> i = 1/10 {
+    <span class="code-keyword">display</span> `i'
+}
+
+<span class="code-comment">* Loop over a list of items</span>
+<span class="code-keyword">foreach</span> c <span class="code-keyword">in</span> US UK FR {
+    <span class="code-keyword">display</span> <span class="code-string">"`c'"</span>
+}
+
+<span class="code-comment">* Loop over variables</span>
+<span class="code-keyword">foreach</span> v <span class="code-keyword">of varlist</span> income education age {
+    <span class="code-keyword">summarize</span> `v'
+}</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: for loops</span>
+
+<span class="code-comment"># Loop over a sequence of numbers</span>
+<span class="code-keyword">for</span> (i <span class="code-keyword">in</span> <span class="code-number">1</span>:<span class="code-number">10</span>) {
+  <span class="code-function">print</span>(i)
+}
+
+<span class="code-comment"># Loop over a vector of items</span>
+<span class="code-keyword">for</span> (country <span class="code-keyword">in</span> <span class="code-function">c</span>(<span class="code-string">"US"</span>, <span class="code-string">"UK"</span>, <span class="code-string">"FR"</span>)) {
+  <span class="code-function">print</span>(country)
+}
+
+<span class="code-comment"># Loop over column names</span>
+<span class="code-keyword">for</span> (col <span class="code-keyword">in</span> <span class="code-function">names</span>(df)) {
+  <span class="code-function">print</span>(<span class="code-function">paste</span>(col, <span class="code-function">class</span>(df[[col]])))
+}</code></pre>
+          </div>
+        </div>
+
+        <h3 id="nested-functions">Nested Function Calls</h3>
+
+        <p>
+          You can pass the output of one function directly as the input to another. Nested calls evaluate <strong>inside-out</strong>: the innermost function runs first, and its result becomes the argument to the next function.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Nested function calls</span>
+<span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span>
+
+incomes = [<span class="code-number">30000</span>, <span class="code-number">45000</span>, <span class="code-number">52000</span>, <span class="code-number">48000</span>, <span class="code-number">120000</span>]
+
+<span class="code-comment"># Nested: evaluate inside-out</span>
+result = np.round(np.mean(np.log(incomes)), <span class="code-number">2</span>)
+<span class="code-comment"># Step 1: np.log(incomes)  → log-transform each value</span>
+<span class="code-comment"># Step 2: np.mean(...)     → average the log values</span>
+<span class="code-comment"># Step 3: np.round(..., 2) → round to 2 decimal places</span>
+
+<span class="code-comment"># Equivalent step-by-step (easier to debug):</span>
+log_incomes = np.log(incomes)
+mean_log = np.mean(log_incomes)
+result = np.round(mean_log, <span class="code-number">2</span>)</code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Nested functions work the same way</span>
+
+<span class="code-keyword">display</span> round(ln(<span class="code-number">50000</span>), <span class="code-number">0.01</span>)
+<span class="code-comment">* Step 1: ln(50000)         → natural log = 10.819...</span>
+<span class="code-comment">* Step 2: round(..., 0.01)  → round to 2 decimals = 10.82</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Nested function calls</span>
+incomes <span class="code-operator"><-</span> <span class="code-function">c</span>(<span class="code-number">30000</span>, <span class="code-number">45000</span>, <span class="code-number">52000</span>, <span class="code-number">48000</span>, <span class="code-number">120000</span>)
+
+<span class="code-comment"># Nested: innermost runs first</span>
+result <span class="code-operator"><-</span> <span class="code-function">round</span>(<span class="code-function">mean</span>(<span class="code-function">log</span>(incomes)), <span class="code-number">2</span>)
+
+<span class="code-comment"># Or use the pipe to read left-to-right:</span>
+result <span class="code-operator"><-</span> incomes <span class="code-operator">%>%</span> <span class="code-function">log</span>() <span class="code-operator">%>%</span> <span class="code-function">mean</span>() <span class="code-operator">%>%</span> <span class="code-function">round</span>(<span class="code-number">2</span>)</code></pre>
+          </div>
+        </div>
+
+        <h3 id="functions-scope">Defining Functions and Variable Scope</h3>
+
+        <p>
+          You can define your own reusable functions. An important concept is <strong>scope</strong>: variables defined inside a function are local to it, while variables defined outside (global) can be accessed from within — but relying on globals is fragile.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: Function definition and scope</span>
+
+<span class="code-keyword">def</span> <span class="code-function">compute_tax</span>(dataframe, rate):
+    <span class="code-string">"""Add a tax column to the dataframe."""</span>
+    dataframe[<span class="code-string">'tax'</span>] = dataframe[<span class="code-string">'income'</span>] * rate
+    <span class="code-keyword">return</span> dataframe
+
+<span class="code-comment"># Call the function with explicit arguments</span>
+df = compute_tax(df, rate=<span class="code-number">0.25</span>)
+
+<span class="code-comment"># Scope pitfall: this works but is fragile</span>
+rate = <span class="code-number">0.25</span>  <span class="code-comment"># global variable</span>
+<span class="code-keyword">def</span> <span class="code-function">bad_tax</span>(dataframe):
+    <span class="code-comment"># 'rate' is found in global scope — works, but fragile</span>
+    dataframe[<span class="code-string">'tax'</span>] = dataframe[<span class="code-string">'income'</span>] * rate
+    <span class="code-keyword">return</span> dataframe
+<span class="code-comment"># Better: pass rate as a parameter (explicit is better than implicit)</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Programs are Stata's equivalent of functions</span>
+
+<span class="code-keyword">program define</span> compute_tax
+    <span class="code-keyword">args</span> varname rate
+    <span class="code-keyword">gen</span> tax = `varname' * `rate'
+<span class="code-keyword">end</span>
+
+<span class="code-comment">* Call it</span>
+compute_tax income 0.25
+
+<span class="code-comment">* Scope: local macros are local to the program</span>
+<span class="code-comment">* global macros are visible everywhere (use sparingly)</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Function definition and scope</span>
+
+compute_tax <span class="code-operator"><-</span> <span class="code-keyword">function</span>(dataframe, rate) {
+  dataframe$tax <span class="code-operator"><-</span> dataframe$income * rate
+  <span class="code-keyword">return</span>(dataframe)
+}
+
+<span class="code-comment"># Call the function</span>
+df <span class="code-operator"><-</span> <span class="code-function">compute_tax</span>(df, rate = <span class="code-number">0.25</span>)
+
+<span class="code-comment"># R scope: functions look in parent environments for undefined variables</span>
+<span class="code-comment"># Same pitfall as Python — always pass values as parameters</span></code></pre>
+          </div>
+        </div>
+
+        <h3 id="indexing-differences">Indexing: 0-Based vs 1-Based</h3>
+
+        <p>
+          A critical difference between languages: <strong>Python uses 0-based indexing</strong> (the first element is at position 0), while <strong>R and Stata use 1-based indexing</strong> (the first element is at position 1). This is a frequent source of off-by-one bugs when translating code.
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Python: 0-based indexing</span>
+gdp = [<span class="code-number">100</span>, <span class="code-number">200</span>, <span class="code-number">300</span>]
+
+<span class="code-function">print</span>(gdp[<span class="code-number">0</span>])   <span class="code-comment"># 100 — first element</span>
+<span class="code-function">print</span>(gdp[<span class="code-number">1</span>])   <span class="code-comment"># 200 — second element</span>
+<span class="code-function">print</span>(gdp[<span class="code-number">2</span>])   <span class="code-comment"># 300 — third element</span>
+<span class="code-comment"># gdp[3] would be IndexError — only 3 elements (0, 1, 2)</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: 1-based indexing</span>
+<span class="code-keyword">clear</span>
+<span class="code-keyword">input</span> gdp
+100
+200
+300
+<span class="code-keyword">end</span>
+
+<span class="code-keyword">display</span> gdp[1]   <span class="code-comment">// 100 — first observation</span>
+<span class="code-keyword">display</span> gdp[2]   <span class="code-comment">// 200 — second observation</span>
+<span class="code-keyword">display</span> gdp[3]   <span class="code-comment">// 300 — third observation</span></code></pre>
+          </div>
+
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: 1-based indexing</span>
+gdp <span class="code-operator"><-</span> <span class="code-function">c</span>(<span class="code-number">100</span>, <span class="code-number">200</span>, <span class="code-number">300</span>)
+
+<span class="code-function">print</span>(gdp[<span class="code-number">1</span>])   <span class="code-comment"># 100 — first element</span>
+<span class="code-function">print</span>(gdp[<span class="code-number">2</span>])   <span class="code-comment"># 200 — second element</span>
+<span class="code-function">print</span>(gdp[<span class="code-number">3</span>])   <span class="code-comment"># 300 — third element</span>
+<span class="code-comment"># gdp[0] returns numeric(0) in R — it doesn't error, just returns empty</span></code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Cross-Language Gotcha: Integer Division</div>
+          <p>
+            Python has two division operators: <code>/</code> (true division: <code>7/2 = 3.5</code>) and <code>//</code> (floor division: <code>7//2 = 3</code>). Stata and R only have <code>/</code>, which always gives true division. When translating code, using <code>//</code> instead of <code>/</code> silently truncates your results.
+          </p>
+        </div>
+
+        <h2 id="first-script">1.5 Your First Script</h2>
 
         <p>
           Let's put everything together by writing a simple script that loads data, performs basic calculations, and creates a visualization. We'll use the famous <strong>Gapminder</strong> dataset, which contains life expectancy, GDP per capita, and population data for countries over time.
@@ -1622,7 +1984,7 @@ Oceania             <span class="out-num">80.7</span>
 Saving 10 x 6 in image</div>
         </div>
 
-        <h2 id="exercises">1.5 Exercises</h2>
+        <h2 id="exercises">1.6 Exercises</h2>
 
         <!-- Interactive Exercise 1.1 -->
         <div class="interactive-exercise" data-exercise="1.1">

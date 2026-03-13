@@ -873,6 +873,67 @@ Non-zero (min): 6
 Non-zero (1se): 4</pre></div>
         </div>
 
+        <h3>Alternative: GridSearchCV for Hyperparameter Tuning</h3>
+
+        <p>
+          While <code>LassoCV</code> and <code>RidgeCV</code> handle cross-validated penalty selection in one step, you can also use scikit-learn's general-purpose <code>GridSearchCV</code>, which works with <em>any</em> model and any set of hyperparameters. This is particularly useful when tuning multiple hyperparameters simultaneously (e.g., Elastic Net's alpha and l1_ratio), or when you want a unified workflow across different model types.
+        </p>
+
+        <div class="code-tabs" data-runnable="ml-reg-gridsearch">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> GridSearchCV
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> Lasso
+
+<span class="code-comment"># Define the parameter grid</span>
+param_grid = {<span class="code-string">'alpha'</span>: [0.001, 0.01, 0.1, 1.0, 10.0]}
+
+<span class="code-comment"># GridSearchCV tries every alpha with 5-fold CV</span>
+<span class="code-tooltip" data-tip="GRIDSEARCHCV: A general-purpose hyperparameter tuner. It trains the model with every value in param_grid using K-fold cross-validation and selects the combination that minimizes the CV error.">grid_search = GridSearchCV(
+    Lasso(), param_grid,
+    cv=5, scoring=<span class="code-string">'neg_mean_squared_error'</span>
+)</span>
+grid_search.fit(X_train_scaled, y_train)
+
+<span class="code-comment"># Best alpha selected by CV</span>
+print(<span class="code-string">f"Best alpha: {grid_search.best_params_['alpha']}"</span>)
+print(<span class="code-string">f"Best CV MSE: {-grid_search.best_score_:.4f}"</span>)
+
+<span class="code-comment"># Evaluate ONCE on the test set (never touch test set during tuning)</span>
+y_pred = grid_search.predict(X_test_scaled)
+test_rmse = np.sqrt(np.mean((y_pred - y_test)**2))
+print(<span class="code-string">f"Test RMSE: {test_rmse:.4f}"</span>)</code></pre>
+            <button class="run-btn" data-lang="python">Run Code</button>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: manual grid search with cv.glmnet</span>
+<span class="code-keyword">library</span>(glmnet)
+
+<span class="code-comment"># cv.glmnet automatically searches over a lambda grid</span>
+cv_lasso <- cv.glmnet(X_train, y_train, alpha = 1, nfolds = 5)
+
+<span class="code-comment"># For multiple hyperparameters, use caret or tidymodels</span>
+<span class="code-keyword">library</span>(caret)
+grid <- expand.grid(alpha = 1, lambda = 10^seq(-3, 1, length = 50))
+<span class="code-tooltip" data-tip="CARET TRAIN: R's general-purpose tuning framework. trainControl specifies 5-fold CV; tuneGrid defines the hyperparameter combinations to try. Works with any model type supported by caret.">model <- train(y ~ ., data = train_data,
+               method = "glmnet",
+               trControl = trainControl(method = "cv", number = 5),
+               tuneGrid = grid)</span>
+print(model$bestTune)</code></pre>
+            <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Never tune on the test set</div>
+          <p style="margin-bottom: 0;">
+            If you loop over hyperparameter values and pick the one with the best <em>test</em> error, you are effectively overfitting to the test set. The reported test performance will be optimistic. Always use cross-validation on the <em>training set</em> to select hyperparameters, then evaluate on the test set exactly once.
+          </p>
+        </div>
+
 
         <!-- ============================================================ -->
         <!-- POST-LASSO AND POST-SELECTION INFERENCE -->

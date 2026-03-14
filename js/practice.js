@@ -37,7 +37,9 @@
     timedMode: false,
     timerInterval: null,
     timerRemaining: 0,
-    exerciseTimes: []
+    exerciseTimes: [],
+    // ─── Study checklist ─────────────────────────────────────────
+    studyChecklist: []
   };
 
   // ─── Constants ────────────────────────────────────────────────────
@@ -311,6 +313,245 @@
       '  0% { transform: scale(1); }' +
       '  40% { transform: scale(1.04); background: rgba(16,185,129,0.12); }' +
       '  100% { transform: scale(1); }' +
+      '}' +
+
+      /* ── Learn-this reference link ──────────────────────────────── */
+      '.learn-ref-box {' +
+      '  display: flex;' +
+      '  align-items: center;' +
+      '  gap: 0.6rem;' +
+      '  margin-top: 0.75rem;' +
+      '  padding: 0.65rem 0.9rem;' +
+      '  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);' +
+      '  border: 1px solid #bfdbfe;' +
+      '  border-radius: 8px;' +
+      '  font-size: 0.85rem;' +
+      '  line-height: 1.4;' +
+      '}' +
+      '.learn-ref-box .ref-icon {' +
+      '  font-size: 1.1rem;' +
+      '  flex-shrink: 0;' +
+      '}' +
+      '.learn-ref-box .ref-text {' +
+      '  flex: 1;' +
+      '  color: var(--color-text);' +
+      '}' +
+      '.learn-ref-box .ref-text strong {' +
+      '  color: var(--color-accent);' +
+      '}' +
+      '.learn-ref-box .ref-actions {' +
+      '  display: flex;' +
+      '  gap: 0.4rem;' +
+      '  flex-shrink: 0;' +
+      '}' +
+      '.ref-btn {' +
+      '  padding: 0.3rem 0.65rem;' +
+      '  font-size: 0.78rem;' +
+      '  font-weight: 600;' +
+      '  border-radius: 6px;' +
+      '  cursor: pointer;' +
+      '  border: 1px solid transparent;' +
+      '  transition: all 0.2s ease;' +
+      '  white-space: nowrap;' +
+      '}' +
+      '.ref-btn-go {' +
+      '  background: var(--color-accent);' +
+      '  color: #fff;' +
+      '}' +
+      '.ref-btn-go:hover { opacity: 0.85; }' +
+      '.ref-btn-checklist {' +
+      '  background: #fff;' +
+      '  color: var(--color-accent);' +
+      '  border-color: var(--color-accent);' +
+      '}' +
+      '.ref-btn-checklist:hover { background: #eff6ff; }' +
+      '.ref-btn-checklist.added {' +
+      '  background: #ecfdf5;' +
+      '  border-color: #10b981;' +
+      '  color: #059669;' +
+      '  cursor: default;' +
+      '}' +
+
+      /* ── Floating checklist badge ────────────────────────────────── */
+      '.checklist-fab {' +
+      '  position: fixed;' +
+      '  bottom: 5.5rem;' +
+      '  right: 1.5rem;' +
+      '  width: 48px;' +
+      '  height: 48px;' +
+      '  border-radius: 50%;' +
+      '  background: var(--color-accent);' +
+      '  color: #fff;' +
+      '  border: none;' +
+      '  font-size: 1.3rem;' +
+      '  cursor: pointer;' +
+      '  box-shadow: 0 4px 12px rgba(0,0,0,0.15);' +
+      '  z-index: 9000;' +
+      '  display: none;' +
+      '  align-items: center;' +
+      '  justify-content: center;' +
+      '  transition: transform 0.2s ease;' +
+      '}' +
+      '.checklist-fab:hover { transform: scale(1.1); }' +
+      '.checklist-fab .fab-count {' +
+      '  position: absolute;' +
+      '  top: -4px;' +
+      '  right: -4px;' +
+      '  background: #ef4444;' +
+      '  color: #fff;' +
+      '  font-size: 0.65rem;' +
+      '  font-weight: 700;' +
+      '  min-width: 18px;' +
+      '  height: 18px;' +
+      '  border-radius: 9px;' +
+      '  display: flex;' +
+      '  align-items: center;' +
+      '  justify-content: center;' +
+      '  padding: 0 4px;' +
+      '}' +
+
+      /* ── Checklist slide-over panel ─────────────────────────────── */
+      '.checklist-panel {' +
+      '  position: fixed;' +
+      '  top: 0; right: 0;' +
+      '  width: 380px;' +
+      '  max-width: 90vw;' +
+      '  height: 100vh;' +
+      '  background: #fff;' +
+      '  box-shadow: -4px 0 24px rgba(0,0,0,0.12);' +
+      '  z-index: 9500;' +
+      '  transform: translateX(100%);' +
+      '  transition: transform 0.3s ease;' +
+      '  display: flex;' +
+      '  flex-direction: column;' +
+      '}' +
+      '.checklist-panel.open { transform: translateX(0); }' +
+      '.checklist-panel-header {' +
+      '  display: flex;' +
+      '  align-items: center;' +
+      '  justify-content: space-between;' +
+      '  padding: 1rem 1.2rem;' +
+      '  border-bottom: 1px solid #e5e7eb;' +
+      '}' +
+      '.checklist-panel-header h3 {' +
+      '  margin: 0;' +
+      '  font-size: 1rem;' +
+      '  font-family: var(--font-heading);' +
+      '}' +
+      '.checklist-panel-close {' +
+      '  background: none;' +
+      '  border: none;' +
+      '  font-size: 1.4rem;' +
+      '  cursor: pointer;' +
+      '  color: var(--color-text-light);' +
+      '  line-height: 1;' +
+      '}' +
+      '.checklist-panel-body {' +
+      '  flex: 1;' +
+      '  overflow-y: auto;' +
+      '  padding: 1rem 1.2rem;' +
+      '}' +
+      '.checklist-empty {' +
+      '  text-align: center;' +
+      '  color: var(--color-text-light);' +
+      '  padding: 2rem 1rem;' +
+      '  font-size: 0.9rem;' +
+      '}' +
+      '.checklist-item {' +
+      '  display: flex;' +
+      '  align-items: flex-start;' +
+      '  gap: 0.6rem;' +
+      '  padding: 0.6rem 0;' +
+      '  border-bottom: 1px solid #f3f4f6;' +
+      '}' +
+      '.checklist-item:last-child { border-bottom: none; }' +
+      '.checklist-item .cl-bullet {' +
+      '  flex-shrink: 0;' +
+      '  width: 8px;' +
+      '  height: 8px;' +
+      '  border-radius: 50%;' +
+      '  background: var(--color-accent);' +
+      '  margin-top: 6px;' +
+      '}' +
+      '.checklist-item .cl-content { flex: 1; }' +
+      '.checklist-item .cl-skill {' +
+      '  font-weight: 600;' +
+      '  font-size: 0.85rem;' +
+      '  color: var(--color-text);' +
+      '}' +
+      '.checklist-item .cl-module {' +
+      '  font-size: 0.78rem;' +
+      '  color: var(--color-text-light);' +
+      '  margin-top: 2px;' +
+      '}' +
+      '.checklist-item .cl-module a {' +
+      '  color: var(--color-accent);' +
+      '  text-decoration: none;' +
+      '}' +
+      '.checklist-item .cl-module a:hover { text-decoration: underline; }' +
+      '.checklist-item .cl-remove {' +
+      '  background: none;' +
+      '  border: none;' +
+      '  color: #9ca3af;' +
+      '  cursor: pointer;' +
+      '  font-size: 1rem;' +
+      '  flex-shrink: 0;' +
+      '  padding: 0 0.2rem;' +
+      '}' +
+      '.checklist-item .cl-remove:hover { color: #ef4444; }' +
+
+      '.checklist-panel-footer {' +
+      '  padding: 0.8rem 1.2rem;' +
+      '  border-top: 1px solid #e5e7eb;' +
+      '  display: flex;' +
+      '  gap: 0.5rem;' +
+      '}' +
+      '.checklist-panel-footer button {' +
+      '  flex: 1;' +
+      '  padding: 0.5rem;' +
+      '  font-size: 0.8rem;' +
+      '  font-weight: 600;' +
+      '  border-radius: 6px;' +
+      '  cursor: pointer;' +
+      '  transition: all 0.2s ease;' +
+      '}' +
+      '.cl-download-btn {' +
+      '  background: var(--color-accent);' +
+      '  color: #fff;' +
+      '  border: none;' +
+      '}' +
+      '.cl-download-btn:hover { opacity: 0.85; }' +
+      '.cl-clear-btn {' +
+      '  background: #fff;' +
+      '  color: #6b7280;' +
+      '  border: 1px solid #d1d5db;' +
+      '}' +
+      '.cl-clear-btn:hover { background: #f9fafb; }' +
+
+      /* ── Checklist summary in results panel ──────────────────────── */
+      '.results-checklist-summary {' +
+      '  margin-top: 1.5rem;' +
+      '  padding: 1rem;' +
+      '  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);' +
+      '  border: 1px solid #bfdbfe;' +
+      '  border-radius: 10px;' +
+      '  text-align: center;' +
+      '}' +
+      '.results-checklist-summary h4 {' +
+      '  margin: 0 0 0.5rem;' +
+      '  font-size: 0.95rem;' +
+      '  font-family: var(--font-heading);' +
+      '}' +
+      '.results-checklist-summary p {' +
+      '  font-size: 0.85rem;' +
+      '  color: var(--color-text-light);' +
+      '  margin: 0 0 0.75rem;' +
+      '}' +
+      '.results-checklist-actions {' +
+      '  display: flex;' +
+      '  gap: 0.5rem;' +
+      '  justify-content: center;' +
+      '  flex-wrap: wrap;' +
       '}';
 
     document.head.appendChild(style);
@@ -599,6 +840,7 @@
     setupLevelButtons();
     setupStartButton();
     setupNavigation();
+    setupChecklistPanel();
   });
 
   /**
@@ -770,6 +1012,10 @@
       console.error('[Practice Lab] No exercises for level:', state.level);
       return;
     }
+
+    // Tag exercises with their original index so reference lookup
+    // works correctly after shuffling.
+    levelData.forEach(function (ex, i) { ex._refIndex = i; });
 
     // Shuffle and pick up to MAX_EXERCISES
     var shuffled = shuffleArray(levelData);
@@ -1023,7 +1269,8 @@
   // ─── Explanation Box ──────────────────────────────────────────────
 
   /**
-   * Create and return an explanation box element.
+   * Create and return an explanation box element, including a
+   * "learn this" reference link when a mapping exists.
    */
   function createExplanation(text) {
     var box = ce('div', 'explanation-box visible');
@@ -1033,7 +1280,217 @@
     content.textContent = text;
     box.appendChild(heading);
     box.appendChild(content);
+
+    // Append course-reference link if mapping is available
+    var ref = getExerciseReference(state.currentIndex);
+    if (ref) {
+      box.appendChild(createRefBox(ref));
+    }
     return box;
+  }
+
+  /**
+   * Look up the course reference for the exercise at the given index.
+   */
+  function getExerciseReference(index) {
+    if (!window.PRACTICE_REFERENCES) return null;
+    var topicRefs = window.PRACTICE_REFERENCES[state.topic];
+    if (!topicRefs) return null;
+    var levelRefs = topicRefs[state.level];
+    if (!levelRefs) return null;
+
+    // The exercise at `index` in state.exercises was drawn from the pool.
+    // We stored the original index in state.exercises[index]._refIndex
+    // which was set during startSession.
+    var ex = state.exercises[index];
+    var refIdx = (ex && ex._refIndex !== undefined) ? ex._refIndex : index;
+    return levelRefs[refIdx] || null;
+  }
+
+  /**
+   * Build the "Learn this" reference box with Go / Add-to-checklist buttons.
+   */
+  function createRefBox(ref) {
+    var url = ref.page + (ref.anchor ? '#' + ref.anchor : '');
+    var moduleName = (window.PRACTICE_MODULE_NAMES && window.PRACTICE_MODULE_NAMES[ref.page])
+      ? window.PRACTICE_MODULE_NAMES[ref.page] : ref.page;
+
+    var box = ce('div', 'learn-ref-box');
+
+    var icon = ce('span', 'ref-icon');
+    icon.textContent = '\uD83D\uDCD6'; // open book emoji
+    box.appendChild(icon);
+
+    var textDiv = ce('div', 'ref-text');
+    textDiv.innerHTML = '<strong>' + escapeHtml(ref.skill) + '</strong><br>' +
+      '<span style="font-size:0.8rem;color:var(--color-text-light)">' +
+      escapeHtml(moduleName) + '</span>';
+    box.appendChild(textDiv);
+
+    var actions = ce('div', 'ref-actions');
+
+    var goBtn = ce('a', 'ref-btn ref-btn-go');
+    goBtn.href = url;
+    goBtn.target = '_blank';
+    goBtn.textContent = 'Go to lesson';
+    actions.appendChild(goBtn);
+
+    var clBtn = ce('button', 'ref-btn ref-btn-checklist');
+    // Check if already in checklist
+    var alreadyAdded = state.studyChecklist.some(function (item) {
+      return item.skill === ref.skill && item.page === ref.page;
+    });
+    if (alreadyAdded) {
+      clBtn.textContent = '\u2713 Added';
+      clBtn.className = 'ref-btn ref-btn-checklist added';
+    } else {
+      clBtn.textContent = '+ Checklist';
+      clBtn.addEventListener('click', function () {
+        addToChecklist(ref);
+        clBtn.textContent = '\u2713 Added';
+        clBtn.className = 'ref-btn ref-btn-checklist added';
+      });
+    }
+    actions.appendChild(clBtn);
+
+    box.appendChild(actions);
+    return box;
+  }
+
+  /**
+   * Add a reference to the study checklist (no duplicates).
+   */
+  function addToChecklist(ref) {
+    var exists = state.studyChecklist.some(function (item) {
+      return item.skill === ref.skill && item.page === ref.page;
+    });
+    if (!exists) {
+      state.studyChecklist.push({
+        skill: ref.skill,
+        page: ref.page,
+        anchor: ref.anchor,
+        moduleName: (window.PRACTICE_MODULE_NAMES && window.PRACTICE_MODULE_NAMES[ref.page])
+          ? window.PRACTICE_MODULE_NAMES[ref.page] : ref.page
+      });
+    }
+    updateChecklistFab();
+    renderChecklistPanel();
+  }
+
+  /**
+   * Show/hide the floating checklist badge and update its count.
+   */
+  function updateChecklistFab() {
+    var fab = document.getElementById('checklist-fab');
+    if (!fab) return;
+    var count = state.studyChecklist.length;
+    if (count > 0) {
+      fab.style.display = 'flex';
+      fab.querySelector('.fab-count').textContent = count;
+    } else {
+      fab.style.display = 'none';
+    }
+  }
+
+  /**
+   * Render checklist items in the slide-over panel.
+   */
+  function renderChecklistPanel() {
+    var body = document.getElementById('checklist-panel-body');
+    if (!body) return;
+
+    if (state.studyChecklist.length === 0) {
+      body.innerHTML = '<div class="checklist-empty">No skills added yet.<br>Click <strong>+ Checklist</strong> on any exercise to save skills for later review.</div>';
+      return;
+    }
+
+    body.innerHTML = '';
+    state.studyChecklist.forEach(function (item, idx) {
+      var row = ce('div', 'checklist-item');
+
+      var bullet = ce('div', 'cl-bullet');
+      row.appendChild(bullet);
+
+      var content = ce('div', 'cl-content');
+      var skillEl = ce('div', 'cl-skill');
+      skillEl.textContent = item.skill;
+      content.appendChild(skillEl);
+
+      var moduleEl = ce('div', 'cl-module');
+      var url = item.page + (item.anchor ? '#' + item.anchor : '');
+      moduleEl.innerHTML = '<a href="' + escapeHtml(url) + '" target="_blank">' +
+        escapeHtml(item.moduleName) + '</a>';
+      content.appendChild(moduleEl);
+      row.appendChild(content);
+
+      var removeBtn = ce('button', 'cl-remove');
+      removeBtn.innerHTML = '&times;';
+      removeBtn.title = 'Remove';
+      removeBtn.addEventListener('click', function () {
+        state.studyChecklist.splice(idx, 1);
+        updateChecklistFab();
+        renderChecklistPanel();
+      });
+      row.appendChild(removeBtn);
+
+      body.appendChild(row);
+    });
+  }
+
+  /**
+   * Toggle the checklist slide-over panel.
+   */
+  function toggleChecklistPanel() {
+    var panel = document.getElementById('checklist-panel');
+    if (!panel) return;
+    panel.classList.toggle('open');
+    renderChecklistPanel();
+  }
+
+  /**
+   * Download the study checklist as a .docx Word file.
+   * Uses a simple HTML-to-Word approach (Word can open .doc HTML files).
+   */
+  function downloadChecklistAsWord() {
+    if (state.studyChecklist.length === 0) return;
+
+    var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+      'xmlns:w="urn:schemas-microsoft-com:office:word" ' +
+      'xmlns="http://www.w3.org/TR/REC-html40">' +
+      '<head><meta charset="utf-8">' +
+      '<style>' +
+      'body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a1a; }' +
+      'h1 { font-size: 16pt; color: #1e3a5f; border-bottom: 2px solid #1e3a5f; padding-bottom: 4pt; }' +
+      'table { width: 100%; border-collapse: collapse; margin-top: 12pt; }' +
+      'th { background: #1e3a5f; color: #fff; text-align: left; padding: 6pt 8pt; font-size: 10pt; }' +
+      'td { padding: 6pt 8pt; border-bottom: 1px solid #e0e0e0; font-size: 10pt; }' +
+      'tr:nth-child(even) td { background: #f7f9fc; }' +
+      'a { color: #2563eb; text-decoration: none; }' +
+      '.checkbox { font-size: 14pt; }' +
+      '</style></head><body>' +
+      '<h1>My Study Checklist \u2014 ProTools ER1 Practice Lab</h1>' +
+      '<table><tr><th style="width:5%">&nbsp;</th><th style="width:50%">Skill to Learn</th>' +
+      '<th style="width:45%">Where to Study</th></tr>';
+
+    state.studyChecklist.forEach(function (item) {
+      var url = item.page + (item.anchor ? '#' + item.anchor : '');
+      html += '<tr>' +
+        '<td class="checkbox">\u2610</td>' +
+        '<td>' + escapeHtml(item.skill) + '</td>' +
+        '<td><a href="' + escapeHtml(url) + '">' + escapeHtml(item.moduleName) + '</a></td>' +
+        '</tr>';
+    });
+
+    html += '</table></body></html>';
+
+    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'ProTools_ER1_Study_Checklist.doc';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
   }
 
   // ─── Code Block ───────────────────────────────────────────────────
@@ -1930,6 +2387,9 @@
     // Inject average time if timed mode was used
     injectTimeSummary(results);
 
+    // Inject checklist summary if there are items
+    injectChecklistSummary(results);
+
     // Confetti celebrations for session results
     setTimeout(function () {
       if (pct === 100) {
@@ -2070,10 +2530,54 @@
   }
 
   /**
+   * Inject a checklist summary card into the results panel when items exist.
+   */
+  function injectChecklistSummary(results) {
+    var old = results.querySelector('.results-checklist-summary');
+    if (old) old.remove();
+
+    if (state.studyChecklist.length === 0) return;
+
+    var wrapper = ce('div', 'results-checklist-summary');
+    var heading = ce('h4', '');
+    heading.textContent = '\uD83D\uDCCB Your Study Checklist (' + state.studyChecklist.length + ' skill' +
+      (state.studyChecklist.length > 1 ? 's' : '') + ')';
+    wrapper.appendChild(heading);
+
+    var desc = ce('p', '');
+    desc.textContent = 'Review the skills you flagged, or download them as a Word file to study offline.';
+    wrapper.appendChild(desc);
+
+    var actions = ce('div', 'results-checklist-actions');
+
+    var viewBtn = ce('button', 'ref-btn ref-btn-checklist');
+    viewBtn.textContent = 'View Checklist';
+    viewBtn.style.padding = '0.45rem 1rem';
+    viewBtn.addEventListener('click', function () { toggleChecklistPanel(); });
+    actions.appendChild(viewBtn);
+
+    var dlBtn = ce('button', 'ref-btn ref-btn-go');
+    dlBtn.textContent = 'Download as Word';
+    dlBtn.style.padding = '0.45rem 1rem';
+    dlBtn.addEventListener('click', function () { downloadChecklistAsWord(); });
+    actions.appendChild(dlBtn);
+
+    wrapper.appendChild(actions);
+
+    // Insert before the action buttons
+    var retryBtn = results.querySelector('#retry-btn');
+    if (retryBtn && retryBtn.parentNode && retryBtn.parentNode.parentNode) {
+      retryBtn.parentNode.parentNode.insertBefore(wrapper, retryBtn.parentNode);
+    } else {
+      results.appendChild(wrapper);
+    }
+  }
+
+  /**
    * Remove dynamically injected results extras before starting a new session.
    */
   function cleanupResultsExtras() {
-    var selectors = ['.star-rating', '.results-points-total', '.results-time-summary', '.results-perfect-msg'];
+    var selectors = ['.star-rating', '.results-points-total', '.results-time-summary', '.results-perfect-msg', '.results-checklist-summary'];
     selectors.forEach(function (sel) {
       var el = document.querySelector(sel);
       if (el) el.remove();
@@ -2125,6 +2629,69 @@
     }
 
     requestAnimationFrame(step);
+  }
+
+  // ─── Checklist Panel Setup ────────────────────────────────────────
+
+  /**
+   * Dynamically inject the floating checklist button and slide-over panel
+   * into the page, and wire up their event handlers.
+   */
+  function setupChecklistPanel() {
+    // Floating action button
+    var fab = document.createElement('button');
+    fab.id = 'checklist-fab';
+    fab.className = 'checklist-fab';
+    fab.title = 'Study Checklist';
+    fab.innerHTML = '\uD83D\uDCCB<span class="fab-count">0</span>';
+    fab.addEventListener('click', function () { toggleChecklistPanel(); });
+    document.body.appendChild(fab);
+
+    // Slide-over panel
+    var panel = document.createElement('div');
+    panel.id = 'checklist-panel';
+    panel.className = 'checklist-panel';
+    panel.innerHTML =
+      '<div class="checklist-panel-header">' +
+      '  <h3>\uD83D\uDCCB Study Checklist</h3>' +
+      '  <button class="checklist-panel-close">&times;</button>' +
+      '</div>' +
+      '<div class="checklist-panel-body" id="checklist-panel-body">' +
+      '  <div class="checklist-empty">No skills added yet.<br>Click <strong>+ Checklist</strong> on any exercise to save skills for later review.</div>' +
+      '</div>' +
+      '<div class="checklist-panel-footer">' +
+      '  <button class="cl-download-btn" id="cl-download-btn">Download as Word</button>' +
+      '  <button class="cl-clear-btn" id="cl-clear-btn">Clear All</button>' +
+      '</div>';
+    document.body.appendChild(panel);
+
+    // Close button
+    panel.querySelector('.checklist-panel-close').addEventListener('click', function () {
+      panel.classList.remove('open');
+    });
+
+    // Download button
+    document.getElementById('cl-download-btn').addEventListener('click', function () {
+      downloadChecklistAsWord();
+    });
+
+    // Clear button
+    document.getElementById('cl-clear-btn').addEventListener('click', function () {
+      if (state.studyChecklist.length === 0) return;
+      if (!confirm('Clear all checklist items?')) return;
+      state.studyChecklist = [];
+      updateChecklistFab();
+      renderChecklistPanel();
+    });
+
+    // Click outside panel to close
+    document.addEventListener('click', function (e) {
+      if (panel.classList.contains('open') &&
+          !panel.contains(e.target) &&
+          e.target !== fab && !fab.contains(e.target)) {
+        panel.classList.remove('open');
+      }
+    });
   }
 
 })();

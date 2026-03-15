@@ -16,6 +16,7 @@
         type: "read",
         title: "OLS with Robust Standard Errors",
         prompt: "What does this code produce?",
+        hint: "Look at the <code>cov_type</code> argument passed to <code>.fit()</code>. What does <code>HC1</code> stand for in the context of standard errors?",
         lang: "python",
         code: "import statsmodels.api as sm\n\nX = sm.add_constant(df['education'])\nmodel = sm.OLS(df['wage'], X)\nresults = model.fit(cov_type='HC1')\nprint(results.summary())",
         options: [
@@ -32,6 +33,7 @@
         type: "read",
         title: "Robust Option in Stata",
         prompt: "A researcher runs `regress wage education experience, robust` and compares with `regress wage education experience`. Which statement is true?",
+        hint: "The <code>, robust</code> option changes how standard errors are computed. Think about whether it affects the coefficients themselves or only the uncertainty around them.",
         lang: "stata",
         code: "regress wage education experience, robust",
         options: [
@@ -43,27 +45,29 @@
         correct: 0,
         explanation: "The robust option only changes the variance-covariance estimator used for standard errors. The point estimates (coefficients) are identical to classical OLS. Robust standard errors account for heteroskedasticity without altering the fitted model."
       },
-      // 3 - bug (Python) — Mistake: using classical SEs when robust is needed
+      // 3 - bug (R) — Mistake: using classical SEs when robust is needed
       {
         type: "bug",
-        title: "Ignoring Heteroskedasticity",
+        title: "Ignoring Heteroskedasticity in R",
         prompt: "A researcher finds strong heteroskedasticity in the residuals but runs this code. What is the problem?",
-        lang: "python",
-        code: "import statsmodels.api as sm\n\nX = sm.add_constant(df[['income', 'age']])\nmodel = sm.OLS(df['consumption'], X)\nresults = model.fit()\nprint(results.summary())",
+        hint: "The researcher already knows there is heteroskedasticity. Look at how <code>summary()</code> computes standard errors by default — does it account for heteroskedasticity?",
+        lang: "r",
+        code: "model <- lm(consumption ~ income + age, data = df)\nsummary(model)",
         options: [
-          "Line 3: add_constant cannot handle multiple regressors",
-          "Line 5: model.fit() uses classical SEs, ignoring the heteroskedasticity — should use cov_type='HC1'",
-          "Line 4: the dependent variable should come second in sm.OLS()",
-          "Line 6: summary() does not display standard errors"
+          "Line 1: lm() cannot handle multiple regressors",
+          "Line 2: summary() reports classical SEs, ignoring the heteroskedasticity — should use coeftest(model, vcov = vcovHC(model, type = \"HC1\"))",
+          "Line 1: the formula should use consumption ~ income * age for interaction",
+          "Line 2: summary() does not display standard errors"
         ],
         correct: 1,
-        explanation: "When heteroskedasticity is present, classical standard errors are biased and hypothesis tests are invalid. The fix is model.fit(cov_type='HC1'), which computes robust standard errors without changing the coefficient estimates."
+        explanation: "When heteroskedasticity is present, classical standard errors from summary(lm()) are biased. The fix is to use the sandwich and lmtest packages: coeftest(model, vcov = vcovHC(model, type = 'HC1')) computes robust standard errors without changing the coefficient estimates."
       },
       // 4 - bug (Stata) — Mistake: interpreting logit coefficients as probability changes
       {
         type: "bug",
         title: "Logit Coefficient Interpretation",
         prompt: "A researcher estimates a logit and interprets the results. What mistake did they make?",
+        hint: "In a logit model, coefficients are expressed in <b>log-odds</b>, not probabilities. Can you interpret 0.35 directly as a percentage-point change?",
         lang: "stata",
         code: "logit employed education age income\n* Coefficient on education: 0.35\n* Interpretation: \"A one-year increase in\n*   education raises the probability of\n*   employment by 0.35 (35 percentage points)\"",
         options: [
@@ -80,6 +84,7 @@
         type: "reorder",
         title: "Robust Standard Errors in R",
         prompt: "Arrange these lines to run OLS with HC1 robust standard errors in R.",
+        hint: "Start by loading the required packages (<code>sandwich</code> and <code>lmtest</code>), then fit the model, and finally display robust results.",
         lang: "r",
         lines: [
           "library(sandwich)",
@@ -95,6 +100,7 @@
         type: "reorder",
         title: "Compare Classical vs Robust SEs",
         prompt: "Arrange these Stata lines to run a regression with both classical and robust SEs and export a comparison table.",
+        hint: "Run the classical regression first, store it, then run the robust version and store it. The comparison table comes last.",
         lang: "stata",
         lines: [
           "regress income education age",
@@ -110,7 +116,8 @@
       {
         type: "fill",
         title: "Choosing an HC Variant",
-        prompt: "Fill in the blanks to fit OLS with the standard robust variance estimator (the one with small-sample correction).",
+        prompt: "Fill in the blanks to fit OLS with the standard robust variance estimator (the one with small-sample correction). Type the OLS model class name in GAP1 and the HC variant code in GAP2.",
+        hint: "GAP1: The statsmodels class for ordinary least squares is three uppercase letters.<br>GAP2: The HC variant with small-sample correction is <code>HC</code> followed by one digit.",
         lang: "python",
         codeTemplate: "import statsmodels.api as sm\n\nX = sm.add_constant(df['education'])\nmodel = sm.___GAP1___(df['wage'], X)\nresults = model.fit(cov_type='___GAP2___')\nprint(results.bse)",
         gaps: {
@@ -124,6 +131,7 @@
         type: "match",
         title: "Robust SEs Across Languages",
         prompt: "Match equivalent robust standard error commands across Python, Stata, and R.",
+        hint: "Look for commands that perform the same task (e.g., fitting with robust SEs, panel FE with robust SEs) but in different languages. The language labels on each side will help.",
         pairs: [
           {
             left: "model.fit(cov_type='HC1')",
@@ -157,13 +165,14 @@
     // INTERMEDIATE (8 exercises)
     // -----------------------------------------------------------------------
     intermediate: [
-      // 1 - read (Stata) — Skill: clustered SEs
+      // 1 - read (R) — Skill: clustered SEs
       {
         type: "read",
-        title: "Clustered Standard Errors",
+        title: "Clustered Standard Errors in R",
         prompt: "Why does this code use clustered standard errors instead of just robust?",
-        lang: "stata",
-        code: "use firm_panel.dta, clear\nregress wage education experience, vce(cluster firm_id)",
+        hint: "Notice the <code>cluster = firm_panel$firm_id</code> argument. Think about what happens when workers within the same firm share unobserved characteristics.",
+        lang: "r",
+        code: "library(sandwich)\nlibrary(lmtest)\n\nmodel <- lm(wage ~ education + experience, data = firm_panel)\ncoeftest(model, vcov = vcovCL(model, cluster = firm_panel$firm_id))",
         options: [
           "Because observations within the same firm may have correlated errors, and clustering accounts for this within-group correlation",
           "Because clustering makes the coefficient estimates more efficient",
@@ -171,13 +180,14 @@
           "Because robust standard errors cannot be computed with more than two regressors"
         ],
         correct: 0,
-        explanation: "Clustered SEs allow for arbitrary correlation of errors within each cluster (firm). If workers at the same firm share unobserved characteristics, their errors are correlated, and ignoring this understates standard errors. You need roughly 30+ clusters for reliable inference."
+        explanation: "Clustered SEs (via vcovCL from the sandwich package) allow for arbitrary correlation of errors within each cluster (firm). If workers at the same firm share unobserved characteristics, their errors are correlated, and ignoring this understates standard errors. You need roughly 30+ clusters for reliable inference."
       },
       // 2 - read (Python) — Skill: panel FE absorbs time-invariant variables
       {
         type: "read",
         title: "Fixed Effects and Time-Invariant Variables",
         prompt: "A researcher runs this panel regression. Why is the gender variable absent from the output?",
+        hint: "Entity fixed effects demean each variable within each individual. If a variable <b>never changes</b> over time for a person, what happens after demeaning?",
         lang: "python",
         code: "from linearmodels.panel import PanelOLS\nimport pandas as pd\n\ndf = df.set_index(['person_id', 'year'])\nmod = PanelOLS(df['wage'], df[['experience', 'gender']],\n               entity_effects=True)\nresults = mod.fit(cov_type='clustered', cluster_entity=True)\nprint(results)",
         options: [
@@ -194,6 +204,7 @@
         type: "bug",
         title: "Too Few Clusters",
         prompt: "This study uses data from 8 countries. What is wrong with this approach?",
+        hint: "Cluster-robust standard errors rely on asymptotic theory as the number of clusters grows large. How many clusters does this study have, and is that enough?",
         lang: "stata",
         code: "use multi_country.dta, clear\nregress gdp_growth trade_openness inflation, vce(cluster country)\n* 8 countries, 20 years each = 160 obs\n* \"Clustered standard errors account for\n*   within-country correlation\"",
         options: [
@@ -210,6 +221,7 @@
         type: "bug",
         title: "Logit Marginal Effects in R",
         prompt: "This code fits a logit model but the researcher directly interprets the coefficients. What is the issue?",
+        hint: "Logit coefficients are in <b>log-odds</b> units. Can you convert 0.42 directly to a percentage change in probability?",
         lang: "r",
         code: "model <- glm(employed ~ education + age,\n             family = binomial(link = \"logit\"), data = df)\nsummary(model)\n# \"Coefficient on education = 0.42, so one more year\n#   of education raises employment probability by 42%\"",
         options: [
@@ -226,6 +238,7 @@
         type: "reorder",
         title: "Bootstrap Standard Errors",
         prompt: "Arrange these lines to compute bootstrap standard errors for an OLS coefficient in Python.",
+        hint: "Start with imports and seed, then initialize storage, run the bootstrap loop, and finally compute the standard deviation of the collected coefficients.",
         lang: "python",
         lines: [
           "import numpy as np",
@@ -238,27 +251,29 @@
         correctOrder: [0, 1, 2, 3, 4, 5],
         explanation: "First import numpy and set the seed for reproducibility. Initialize an empty list, then run 1000 bootstrap replications sampling with replacement. Finally compute the standard deviation of the bootstrapped coefficients — this is the bootstrap SE."
       },
-      // 6 - reorder (Stata) — Skill: panel FE with clustering
+      // 6 - reorder (R) — Skill: panel FE with clustering using fixest
       {
         type: "reorder",
-        title: "Panel Fixed Effects with Clustering",
-        prompt: "Arrange these Stata lines to estimate entity and time fixed effects with clustered standard errors.",
-        lang: "stata",
+        title: "Panel Fixed Effects with Clustering in R",
+        prompt: "Arrange these R lines to estimate entity and time fixed effects with clustered standard errors.",
+        hint: "Load the package first, then the data, then estimate the model with <code>feols()</code>, and finally display and export results.",
+        lang: "r",
         lines: [
-          "use firm_panel.dta, clear",
-          "xtset firm_id year",
-          "xtreg revenue rd_spending employees i.year, fe vce(cluster firm_id)",
-          "estimates store fe_clustered",
-          "esttab fe_clustered, se star(* 0.10 ** 0.05 *** 0.01)"
+          "library(fixest)",
+          "firm_panel <- read.csv(\"firm_panel.csv\")",
+          "model <- feols(revenue ~ rd_spending + employees | firm_id + year,\n               vcov = ~firm_id, data = firm_panel)",
+          "summary(model)",
+          "etable(model, se = \"cluster\")"
         ],
         correctOrder: [0, 1, 2, 3, 4],
-        explanation: "First load data and declare the panel structure with xtset. Then estimate entity FE (fe) with time dummies (i.year) and cluster SEs at the firm level. Store the results and display them with significance stars."
+        explanation: "First load the fixest package and the data. Then estimate entity and time FE using the | syntax, with firm-clustered SEs via vcov = ~firm_id. Display the summary and export a formatted table with etable()."
       },
       // 7 - fill (Stata) — Skill: logit marginal effects
       {
         type: "fill",
         title: "Logit with Marginal Effects",
-        prompt: "Fill in the blanks to estimate a logit model and compute average marginal effects in Stata.",
+        prompt: "Fill in the blanks to estimate a logit model and compute average marginal effects in Stata. Type the estimation command in GAP1 and the post-estimation command in GAP2.",
+        hint: "GAP1: The Stata command for logistic regression that reports log-odds coefficients.<br>GAP2: The Stata post-estimation command that computes average marginal effects.",
         lang: "stata",
         codeTemplate: "___GAP1___ employed education age income, robust\n___GAP2___, dydx(*)",
         gaps: {
@@ -272,6 +287,7 @@
         type: "match",
         title: "Panel Fixed Effects Across Languages",
         prompt: "Match equivalent panel fixed effects specifications across Stata, Python, and R.",
+        hint: "Match commands that add the same type of fixed effects (entity-only, entity + clustered SEs, two-way FE). The language labels will help you identify equivalent operations.",
         pairs: [
           {
             left: "xtreg y x, fe",
@@ -305,13 +321,14 @@
     // ADVANCED (8 exercises)
     // -----------------------------------------------------------------------
     advanced: [
-      // 1 - read (Python) — Skill: two-way clustering
+      // 1 - read (R) — Skill: two-way clustering
       {
         type: "read",
-        title: "Two-Way Clustered Standard Errors",
-        prompt: "What does the cov_type and clusters argument accomplish in this code?",
-        lang: "python",
-        code: "from linearmodels.panel import PanelOLS\n\ndf = df.set_index(['firm_id', 'year'])\nmod = PanelOLS(df['revenue'], df[['rd_spending', 'employees']],\n               entity_effects=True)\nresults = mod.fit(cov_type='clustered',\n                  cluster_entity=True, cluster_time=True)\nprint(results.summary)",
+        title: "Two-Way Clustered Standard Errors in R",
+        prompt: "What does the vcov argument accomplish in this code?",
+        hint: "Notice the <code>vcov = ~firm_id + year</code> syntax with a <b>plus sign</b> between two variables. This allows for correlation along two separate dimensions.",
+        lang: "r",
+        code: "library(fixest)\n\nmodel <- feols(revenue ~ rd_spending + employees | firm_id,\n               vcov = ~firm_id + year, data = df)",
         options: [
           "It clusters standard errors by both firm and year, allowing for correlation within firms and within time periods simultaneously",
           "It runs two separate regressions, one for each cluster dimension",
@@ -319,13 +336,14 @@
           "It applies the bootstrap separately within each firm-year cell"
         ],
         correct: 0,
-        explanation: "Two-way clustering allows errors to be correlated both within firms (across time) and within years (across firms). This is important when shocks affect all firms in a year (macro shocks) and persist within firms over time."
+        explanation: "Two-way clustering (vcov = ~firm_id + year) allows errors to be correlated both within firms (across time) and within years (across firms). This is important when shocks affect all firms in a year (macro shocks) and persist within firms over time. fixest handles multi-way clustering natively."
       },
       // 2 - read (Stata) — Skill: wild bootstrap for few clusters
       {
         type: "read",
         title: "Wild Cluster Bootstrap",
         prompt: "Why does this researcher use wild cluster bootstrap instead of standard clustered SEs?",
+        hint: "Check how many states (clusters) are in the sample. Standard clustered SEs need roughly 30+ clusters to be reliable.",
         lang: "stata",
         code: "regress test_score treatment class_size, vce(cluster state)\n* Only 12 states in the sample\nboottest treatment, cluster(state) reps(999) seed(42)",
         options: [
@@ -342,6 +360,7 @@
         type: "bug",
         title: "Bootstrap on Clustered Data",
         prompt: "This code bootstraps standard errors for a model with firm-level clustering. What is the fundamental error?",
+        hint: "Look at what unit is being resampled in the bootstrap loop. Is it individual observations or entire clusters (firms)?",
         lang: "python",
         code: "import numpy as np\nimport statsmodels.api as sm\n\nnp.random.seed(42)\nboot_coefs = []\nfor i in range(1000):\n    idx = np.random.choice(len(df), size=len(df), replace=True)\n    boot_df = df.iloc[idx]\n    X_b = sm.add_constant(boot_df[['education', 'experience']])\n    coef = sm.OLS(boot_df['wage'], X_b).fit().params[1]\n    boot_coefs.append(coef)\nboot_se = np.std(boot_coefs, ddof=1)",
         options: [
@@ -358,6 +377,7 @@
         type: "bug",
         title: "Comparing Models with Mixed SE Types",
         prompt: "A researcher presents these results side by side. What is misleading about this comparison?",
+        hint: "Compare the options after the <code>regress</code> commands in Model 1 and Model 2. Are they using the same type of standard errors?",
         lang: "stata",
         code: "* Model 1: baseline\nregress wage education age\nestimates store m1\n\n* Model 2: add controls\nregress wage education age gender occupation, robust\nestimates store m2\n\nesttab m1 m2, se star(* 0.10 ** 0.05 *** 0.01)\n* \"Education coefficient becomes insignificant in Model 2\"",
         options: [
@@ -374,6 +394,7 @@
         type: "reorder",
         title: "Two-Way Fixed Effects in Python",
         prompt: "Arrange these lines to estimate a two-way FE model with clustered SEs and display the results.",
+        hint: "Start with the import, then set the panel index, specify the model with both entity and time effects, fit it, and print results last.",
         lang: "python",
         lines: [
           "from linearmodels.panel import PanelOLS",
@@ -390,6 +411,7 @@
         type: "reorder",
         title: "Reproducible Bootstrap in Stata",
         prompt: "Arrange these Stata lines to run a reproducible bootstrap of an OLS regression.",
+        hint: "Load the data first, set the seed for reproducibility, then run the bootstrap command, and finally inspect the results.",
         lang: "stata",
         lines: [
           "use worker_data.dta, clear",
@@ -405,7 +427,8 @@
       {
         type: "fill",
         title: "Two-Way FE with fixest",
-        prompt: "Fill in the blanks to estimate a two-way fixed effects model with firm-clustered SEs using the fixest package in R.",
+        prompt: "Fill in the blanks to estimate a two-way fixed effects model with firm-clustered SEs using the fixest package in R. Type the fixest estimation function in GAP1 and the clustering variable in GAP2.",
+        hint: "GAP1: The fixest function for OLS with fixed effects (short for 'fixed-effects OLS').<br>GAP2: The variable to cluster on — look at the fixed effects in the formula for a clue.",
         lang: "r",
         codeTemplate: "library(fixest)\nresult <- ___GAP1___(revenue ~ rd_spending + employees | firm_id + year,\n                  vcov = ~___GAP2___, data = df)\nsummary(result)",
         gaps: {
@@ -419,6 +442,7 @@
         type: "match",
         title: "SE Methods and Their Use Cases",
         prompt: "Match each standard error method with its appropriate use case.",
+        hint: "Think about the data structure each method is designed for: cross-sectional, grouped with many clusters, grouped with few clusters, or panel data.",
         pairs: [
           {
             left: "HC1 robust SEs",
@@ -458,43 +482,46 @@
     // BEGINNER (8 exercises)
     // -----------------------------------------------------------------------
     beginner: [
-      // 1 - read (Stata) — Skill: reading master script pattern
+      // 1 - read (Python) — Skill: reading master script pattern
       {
         type: "read",
-        title: "Master Script Pattern",
-        prompt: "What is the purpose of defining global root at the top of this Stata master script?",
-        lang: "stata",
-        code: "* master.do\nglobal root \"/Users/maria/projects/wage_study\"\n\ndo \"$root/code/01_import.do\"\ndo \"$root/code/02_clean.do\"\ndo \"$root/code/03_analysis.do\"\ndo \"$root/code/04_tables.do\"",
+        title: "Master Script Pattern in Python",
+        prompt: "What is the purpose of defining ROOT at the top of this Python master script?",
+        hint: "Think about what happens when a collaborator clones this project on a different computer. How many lines would they need to change?",
+        lang: "python",
+        code: "# master.py\nimport os\nimport subprocess\n\nROOT = \"/Users/maria/projects/wage_study\"\n\nfor script in ['01_import.py', '02_clean.py',\n               '03_analysis.py', '04_tables.py']:\n    subprocess.run(['python', os.path.join(ROOT, 'code', script)],\n                   check=True)",
         options: [
-          "So that each collaborator only needs to change one line (the root path) to run the entire project on their machine",
-          "Because Stata requires all paths to be absolute",
-          "To prevent Stata from overwriting files accidentally",
+          "So that each collaborator only needs to change one line (the ROOT path) to run the entire project on their machine",
+          "Because Python requires all paths to be absolute",
+          "To prevent Python from overwriting files accidentally",
           "To make the code run faster by caching the path"
         ],
         correct: 0,
-        explanation: "The master script pattern uses one absolute path at the top, then all other references are relative to that root. When a collaborator clones the project, they change only the global root line and everything works. This is the cornerstone of portable replication."
+        explanation: "The master script pattern uses one absolute path at the top, then all other references are relative to that root via os.path.join(). When a collaborator clones the project, they change only the ROOT line and everything works. This is the cornerstone of portable replication."
       },
-      // 2 - read (general) — Skill: folder structure conventions
+      // 2 - read (R) — Skill: portable paths with here package
       {
         type: "read",
-        title: "Project Folder Structure",
-        prompt: "Which statement about this standard project folder structure is correct?",
-        lang: "text",
-        code: "project/\n  data/\n    raw/        <- original datasets\n    processed/  <- cleaned datasets\n  code/\n    01_import.do\n    02_clean.do\n    03_analysis.do\n  output/\n    tables/\n    figures/\n    logs/",
+        title: "Portable Paths with here() in R",
+        prompt: "What advantage does the here() function provide in this R script?",
+        hint: "The <code>here()</code> function automatically finds the project root (where <code>.Rproj</code> or <code>.here</code> lives). How does this help collaborators?",
+        lang: "r",
+        code: "library(here)\n\nraw_data <- read.csv(here(\"data\", \"raw\", \"survey.csv\"))\n\nclean_data <- raw_data[raw_data$age >= 18, ]\n\nwrite.csv(clean_data,\n          here(\"data\", \"processed\", \"survey_clean.csv\"),\n          row.names = FALSE)",
         options: [
-          "Files in data/raw/ should never be modified — create processed versions in data/processed/ instead",
-          "The numbering of scripts is just for aesthetics and has no functional purpose",
-          "Output files should be stored alongside the code that generates them",
-          "The raw/ and processed/ folders should contain identical copies of the data"
+          "here() builds paths relative to the project root (where .Rproj or .here lives), so the code works on any machine without changing paths",
+          "here() makes the code run faster by caching file paths",
+          "here() automatically creates missing directories",
+          "here() is required by R to read CSV files"
         ],
         correct: 0,
-        explanation: "Raw data is sacred — it should be read-only so you can always trace your results back to the original source. All cleaning creates new files in data/processed/. This guarantees that running the pipeline from scratch produces identical results."
+        explanation: "The here package finds the project root (marked by .Rproj, .here, or .git) and builds all paths relative to it. This means collaborators never need to edit file paths — here('data', 'raw', 'survey.csv') resolves correctly on any machine where the project is cloned."
       },
       // 3 - bug (general) — Mistake: absolute paths in shared code
       {
         type: "bug",
         title: "Non-Portable Paths",
         prompt: "A student shares their project with a collaborator who cannot run the code. What is wrong?",
+        hint: "Look at the file paths in the <code>use</code> and <code>save</code> commands. Would these paths exist on someone else's computer?",
         lang: "stata",
         code: "* 01_import.do\nuse \"/Users/marco/Desktop/thesis/data/raw/survey.dta\", clear\nkeep if year >= 2010\nsave \"/Users/marco/Desktop/thesis/data/processed/survey_clean.dta\", replace",
         options: [
@@ -506,41 +533,45 @@
         correct: 1,
         explanation: "Absolute paths like /Users/marco/... only work on Marco's machine. The fix is to define global root at the top and use $root/data/raw/survey.dta. This way collaborators only change the root path to run the entire project."
       },
-      // 4 - bug (general) — Mistake: modifying raw data
+      // 4 - bug (Python) — Mistake: modifying raw data
       {
         type: "bug",
         title: "Overwriting Raw Data",
         prompt: "This cleaning script has a critical error in its approach to data management. What is it?",
-        lang: "stata",
-        code: "* 02_clean.do\nuse \"$root/data/raw/census.dta\", clear\ndrop if age < 18\nreplace income = . if income < 0\nsave \"$root/data/raw/census.dta\", replace",
+        hint: "Compare the file path in <code>pd.read_csv()</code> with the path in <code>df.to_csv()</code>. Where is the cleaned data being saved?",
+        lang: "python",
+        code: "# 02_clean.py\nimport pandas as pd\nimport os\n\nROOT = os.environ.get('PROJECT_ROOT', '.')\ndf = pd.read_csv(os.path.join(ROOT, 'data', 'raw', 'census.csv'))\ndf = df[df['age'] >= 18]\ndf.loc[df['income'] < 0, 'income'] = None\ndf.to_csv(os.path.join(ROOT, 'data', 'raw', 'census.csv'), index=False)",
         options: [
-          "Line 3: drop if should use keep if instead",
-          "Line 4: replacing negative incomes with missing is bad practice",
-          "Line 5: saving back to data/raw/ overwrites the original data — should save to data/processed/",
-          "Line 2: clear option is unnecessary"
+          "Line 7: filtering with df['age'] >= 18 should use .query() instead",
+          "Line 8: replacing negative incomes with None is bad practice",
+          "Line 9: saving back to data/raw/ overwrites the original data — should save to data/processed/",
+          "Line 6: os.path.join is unnecessary — should use string concatenation"
         ],
         correct: 2,
         explanation: "Saving processed data back into the raw/ folder destroys the original dataset. If something goes wrong in cleaning, you cannot recover. Always save cleaned data to data/processed/ and keep raw data untouched. This is a fundamental replicability principle."
       },
-      // 5 - reorder (Git) — Skill: basic git workflow
+      // 5 - reorder (R) — Skill: creating project directory structure
       {
         type: "reorder",
-        title: "Basic Git Workflow",
-        prompt: "Arrange these commands in the correct order for the standard Git workflow.",
-        lang: "bash",
+        title: "Setting Up a Reproducible R Project",
+        prompt: "Arrange these R lines to create a standard project folder structure programmatically.",
+        hint: "Load the package first, define the directories, create them, then confirm. The <code>here()</code> function is used to make paths portable.",
+        lang: "r",
         lines: [
-          "git add analysis.py",
-          "git commit -m \"Add baseline regression with robust SEs\"",
-          "git push origin main"
+          "library(here)",
+          "dirs <- c('data/raw', 'data/processed', 'code', 'output/tables', 'output/figures')",
+          "for (d in dirs) dir.create(here(d), recursive = TRUE, showWarnings = FALSE)",
+          "cat('Project structure created at:', here(), '\\n')"
         ],
-        correctOrder: [0, 1, 2],
-        explanation: "The Git workflow follows three stages: (1) git add stages changes from the working directory, (2) git commit saves a snapshot to local history with a descriptive message, (3) git push uploads commits to the remote repository."
+        correctOrder: [0, 1, 2, 3],
+        explanation: "Load the here package for portable paths, define the standard directory structure (raw data, processed data, code, output), create all directories recursively, and confirm. This ensures every collaborator has the same folder layout when setting up the project."
       },
       // 6 - reorder (Stata) — Skill: numbered script execution
       {
         type: "reorder",
         title: "Numbered Script Pipeline",
         prompt: "Arrange these do-files in the correct execution order for a research project.",
+        hint: "Follow the numbered prefixes: data must be imported before it can be cleaned, cleaned before analysis, and analysis before exporting tables.",
         lang: "stata",
         lines: [
           "do \"$root/code/01_import_data.do\"",
@@ -551,24 +582,26 @@
         correctOrder: [0, 1, 2, 3],
         explanation: "Scripts are numbered to enforce execution order. Import raw data first, then clean and merge, run the analysis, and finally export results. This pipeline must run from start to finish to reproduce all results from the original data."
       },
-      // 7 - fill (Git) — Skill: .gitignore patterns
+      // 7 - fill (Python) — Skill: programmatic .gitignore creation
       {
         type: "fill",
-        title: "Writing a .gitignore",
-        prompt: "Fill in the blanks to prevent large data files and sensitive credentials from being tracked by Git.",
-        lang: "text",
-        codeTemplate: "# Ignore all Stata data files\n___GAP1___\n# Ignore raw data folder\ndata/raw/\n# Ignore environment secrets\n___GAP2___",
+        title: "Creating a .gitignore with Python",
+        prompt: "Fill in the blanks to create a .gitignore file that excludes data and secret files from version control. Type the pattern for secret environment files in GAP1 and the output filename in GAP2.",
+        hint: "GAP1: The standard filename for environment variable / secret files starts with a dot.<br>GAP2: The Git configuration file that specifies which files to ignore also starts with a dot.",
+        lang: "python",
+        codeTemplate: "from pathlib import Path\n\nignore_patterns = [\n    '*.dta',\n    '*.csv',\n    'data/raw/',\n    '___GAP1___',\n    '*.log'\n]\n\nPath('___GAP2___').write_text('\\n'.join(ignore_patterns))\nprint('.gitignore created')",
         gaps: {
-          "GAP1": { answer: "*.dta", accept: ["*.dta"] },
-          "GAP2": { answer: ".env", accept: [".env", "*.env"] }
+          "GAP1": { answer: ".env", accept: [".env", "*.env"] },
+          "GAP2": { answer: ".gitignore", accept: [".gitignore"] }
         },
-        explanation: "The .gitignore file tells Git which files to exclude from version control. Large data files (*.dta) and secret credentials (.env) should never be committed — data because of size and privacy, secrets because anyone with repo access could see them."
+        explanation: "The .gitignore file tells Git which files to exclude from version control. .env files contain secrets (API keys) and should never be committed. Writing the .gitignore programmatically ensures every collaborator starts with the same exclusion rules when setting up the project."
       },
       // 8 - match — Skill: Git three states
       {
         type: "match",
         title: "Git Concepts",
         prompt: "Match each Git concept with its description.",
+        hint: "Think about the lifecycle of a file change: it starts in your working directory, gets staged with <code>git add</code>, and becomes permanent with <code>git commit</code>.",
         pairs: [
           {
             left: "Working directory",
@@ -607,6 +640,7 @@
         type: "read",
         title: "Log Files for Reproducibility",
         prompt: "Why does this master script include log commands?",
+        hint: "The <code>log using</code> command captures all Stata output to a file. Think about what a reviewer could do with this file without re-running the code.",
         lang: "stata",
         code: "global root \"/Users/maria/projects/wage_study\"\nlog using \"$root/output/logs/analysis.log\", replace\n\ndo \"$root/code/01_import.do\"\ndo \"$root/code/02_clean.do\"\ndo \"$root/code/03_analysis.do\"\n\nlog close",
         options: [
@@ -618,43 +652,46 @@
         correct: 0,
         explanation: "A log file captures everything Stata prints: regression output, summary statistics, error messages. This creates an auditable trail — a reviewer can verify results match the paper without installing Stata or accessing the data."
       },
-      // 2 - read (Git) — Skill: why git add . is dangerous
+      // 2 - read (R) — Skill: version-pinning with renv
       {
         type: "read",
-        title: "The Danger of git add .",
-        prompt: "A researcher runs these commands. What risk does this create?",
-        lang: "bash",
-        code: "# In project directory containing:\n#   analysis.py, .env (with API key), data.csv (500MB)\ngit add .\ngit commit -m \"Add analysis\"\ngit push origin main",
+        title: "Reproducible R Environments with renv",
+        prompt: "What does this renv workflow accomplish for reproducibility?",
+        hint: "Look at what <code>renv::snapshot()</code> and <code>renv::restore()</code> do. Think about what happens when a package gets updated and changes its behavior.",
+        lang: "r",
+        code: "# Set up renv for the project\nrenv::init()\n\n# Install packages as usual\ninstall.packages(\"fixest\")\ninstall.packages(\"sandwich\")\n\n# Save the exact package versions to a lockfile\nrenv::snapshot()\n\n# A collaborator restores the same versions:\nrenv::restore()",
         options: [
-          "git add . stages everything including the .env secrets file and the 500MB data file, pushing sensitive and large files to the remote",
-          "git add . only stages Python files, so data.csv will be excluded",
-          "git push will fail because the commit message is too short",
-          "git add . creates a new branch instead of committing to main"
+          "renv records exact package versions in a lockfile so collaborators install the same versions, ensuring code runs identically across machines",
+          "renv makes R packages run faster by caching them locally",
+          "renv is required by R to install packages from CRAN",
+          "renv automatically updates all packages to the latest version"
         ],
         correct: 0,
-        explanation: "git add . stages ALL untracked and modified files in the directory. This includes .env (exposing API keys to anyone with repo access) and data.csv (bloating the repository permanently). Always use git add <specific-files> or maintain a proper .gitignore."
+        explanation: "renv creates a project-local library and a lockfile (renv.lock) recording every package version. When a collaborator runs renv::restore(), they get exactly the same package versions. This prevents the common problem of code breaking because a package update changed function behavior."
       },
-      // 3 - bug (Git) — Mistake: vague commit messages
+      // 3 - bug (Python) — Mistake: hardcoded paths in shared code
       {
         type: "bug",
-        title: "Commit Message Quality",
-        prompt: "A researcher's git log looks like this. What is wrong with these commit messages?",
-        lang: "bash",
-        code: "git log --oneline\n# a3f2b1c fix\n# 8d4e2a1 update\n# 1c7f3b2 changes\n# 9e5a4d3 stuff\n# 2b8c1e4 wip",
+        title: "Hardcoded Paths in Python",
+        prompt: "A collaborator cannot run this Python script. What is wrong?",
+        hint: "Look at the strings passed to <code>pd.read_csv()</code> and <code>df.to_csv()</code>. Would these file paths work on a Mac, Linux, or a different Windows user's machine?",
+        lang: "python",
+        code: "import pandas as pd\n\ndf = pd.read_csv('C:/Users/marco/Desktop/thesis/data/raw/survey.csv')\ndf = df[df['year'] >= 2010]\ndf.to_csv('C:/Users/marco/Desktop/thesis/data/processed/survey_clean.csv',\n          index=False)",
         options: [
-          "The commit hashes are too short to be valid",
-          "The messages are meaningless — they do not describe WHAT changed or WHY, making it impossible to trace the project's evolution",
-          "Git requires commit messages to be at least 10 characters",
-          "The --oneline flag hides important information"
+          "Line 3: pd.read_csv cannot handle CSV files",
+          "Lines 3 and 5 use absolute paths specific to Marco's Windows computer — should use os.path.join() with a configurable root or pathlib.Path",
+          "Line 4: filtering by year should use .query() instead",
+          "Line 5: index=False should not be used with to_csv()"
         ],
         correct: 1,
-        explanation: "Good commit messages describe what changed and why: \"Add robust SEs to baseline regression\" or \"Fix missing data handling in cleaning script\". Vague messages like \"fix\" or \"update\" make it impossible to understand the project history or find when a bug was introduced."
+        explanation: "Absolute paths like C:/Users/marco/... only work on Marco's machine. The fix is to define a ROOT variable (or use pathlib) and build all paths relative to it: ROOT / 'data' / 'raw' / 'survey.csv'. This way collaborators only change the root path to run the project."
       },
       // 4 - bug (Stata) — Mistake: manual copy-paste of results
       {
         type: "bug",
         title: "Manual Result Reporting",
         prompt: "This workflow has a replicability flaw. What is it?",
+        hint: "Look at how the regression coefficient gets from Stata into the LaTeX file. Is this process automated or manual?",
         lang: "stata",
         code: "regress wage education experience, robust\n* Copy coefficient from Stata output\n* Paste into LaTeX file manually:\n* \\beta_1 = 0.084 (0.012)\n* Then compile paper.tex",
         options: [
@@ -666,27 +703,28 @@
         correct: 1,
         explanation: "Manual copy-paste of results is a major replicability risk: transcription errors are common and impossible to detect. The fix is automated export: esttab using \"$root/output/tables/results.tex\", se replace generates the LaTeX table directly from Stata output."
       },
-      // 5 - reorder (Git) — Skill: branching workflow
+      // 5 - reorder (R) — Skill: automated table export for reproducibility
       {
         type: "reorder",
-        title: "Git Feature Branch Workflow",
-        prompt: "Arrange these commands to create a feature branch, do work, and merge it back to main.",
-        lang: "bash",
+        title: "Automated Table Export in R",
+        prompt: "Arrange these R lines to run a regression and export a reproducible LaTeX table.",
+        hint: "Load packages first, then estimate the model, export the table, and confirm. The <code>etable()</code> function from fixest handles the export.",
+        lang: "r",
         lines: [
-          "git checkout -b add-robustness-checks",
-          "git add robustness.py",
-          "git commit -m \"Add placebo tests and alternative specifications\"",
-          "git checkout main",
-          "git merge add-robustness-checks"
+          "library(fixest)\nlibrary(here)",
+          "model <- feols(wage ~ education + experience | firm_id,\n               data = df)",
+          "etable(model, tex = TRUE,\n       file = here('output', 'tables', 'regression.tex'))",
+          "cat('Table exported to:', here('output', 'tables', 'regression.tex'))"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
-        explanation: "Create and switch to a new branch with checkout -b. Do your work, stage, and commit. Then switch back to main and merge the feature branch in. This keeps main stable while you experiment on a separate branch."
+        correctOrder: [0, 1, 2, 3],
+        explanation: "Load packages (fixest for estimation, here for portable paths), run the regression with fixed effects, export the LaTeX table directly with etable(). This pipeline is fully reproducible — re-running the script regenerates the exact same table from data."
       },
       // 6 - reorder (Python) — Skill: table export for reproducibility
       {
         type: "reorder",
         title: "Automated Table Export in Python",
         prompt: "Arrange these lines to run regressions and export a reproducible LaTeX table.",
+        hint: "Import libraries first, then run the regression, create the Stargazer table, and write it to a file.",
         lang: "python",
         lines: [
           "import statsmodels.api as sm",
@@ -698,24 +736,26 @@
         correctOrder: [0, 1, 2, 3, 4],
         explanation: "Import the packages, run the regression, create a Stargazer table object, and write the LaTeX output to a file. This pipeline is fully reproducible — re-running the script regenerates the exact same table from the data."
       },
-      // 7 - fill (Git) — Skill: merge conflict markers
+      // 7 - fill (R) — Skill: seed setting for reproducible analysis
       {
         type: "fill",
-        title: "Resolving a Merge Conflict",
-        prompt: "Fill in the Git commands to resolve a merge conflict and complete the merge.",
-        lang: "bash",
-        codeTemplate: "# After git merge feature-branch shows a conflict:\n# Edit the file to resolve the conflict markers\n# Then:\ngit ___GAP1___ analysis.py\ngit ___GAP2___ -m \"Resolve merge conflict in analysis.py\"",
+        title: "Reproducible Random Sampling in R",
+        prompt: "Fill in the blanks to ensure this bootstrap procedure gives identical results every time. Type the R seed-setting function in GAP1 and the function to compute standard deviation in GAP2.",
+        hint: "GAP1: The R function to fix the random number generator seed is <code>set.</code> followed by the word for a starting value.<br>GAP2: The R function for standard deviation is two lowercase letters.",
+        lang: "r",
+        codeTemplate: "___GAP1___(42)\n\nboot_coefs <- replicate(1000, {\n  idx <- sample(nrow(df), replace = TRUE)\n  boot_df <- df[idx, ]\n  coef(lm(wage ~ education, data = boot_df))[2]\n})\n\nboot_se <- ___GAP2___(boot_coefs)\ncat('Bootstrap SE:', round(boot_se, 4))",
         gaps: {
-          "GAP1": { answer: "add", accept: ["add"] },
-          "GAP2": { answer: "commit", accept: ["commit"] }
+          "GAP1": { answer: "set.seed", accept: ["set.seed"] },
+          "GAP2": { answer: "sd", accept: ["sd"] }
         },
-        explanation: "After manually resolving the conflict markers (<<<<<<< ======= >>>>>>>) in your editor, you git add the resolved file to mark it as resolved, then git commit to finalize the merge. The merge is not complete until you commit."
+        explanation: "set.seed(42) ensures the random number generator produces the same sequence every time, making bootstrap results reproducible. sd() computes the standard deviation of the bootstrapped coefficients, which is the bootstrap standard error."
       },
       // 8 - match — Skill: replicability best practices
       {
         type: "match",
         title: "Replicability Best Practices",
         prompt: "Match each replicability problem with its solution.",
+        hint: "Each problem is caused by a specific bad practice. Think about what <b>single change</b> would fix each issue (portable paths, numbered scripts, automated export, or data separation).",
         pairs: [
           {
             left: "Code only works on one computer",
@@ -749,27 +789,29 @@
     // ADVANCED (8 exercises)
     // -----------------------------------------------------------------------
     advanced: [
-      // 1 - read (Git) — Skill: reading .gitignore patterns
+      // 1 - read (Python) — Skill: virtual environments for reproducibility
       {
         type: "read",
-        title: "Understanding .gitignore Patterns",
-        prompt: "Given this .gitignore, which file WOULD be tracked by Git?",
-        lang: "text",
-        code: "# .gitignore\n*.dta\n*.csv\ndata/raw/\n.env\n*.log\noutput/figures/*.png",
+        title: "Virtual Environments for Reproducibility",
+        prompt: "What does this workflow accomplish for research reproducibility?",
+        hint: "Notice the <code>==</code> syntax in requirements.txt (e.g., <code>pandas==2.1.4</code>). What happens if a collaborator installs a newer version of a package that changed its behavior?",
+        lang: "python",
+        code: "# Terminal commands embedded in Python project README:\n# 1. Create environment\n# python -m venv .venv\n# source .venv/bin/activate\n\n# 2. Install pinned dependencies\n# pip install -r requirements.txt\n\n# requirements.txt contains:\n# pandas==2.1.4\n# statsmodels==0.14.1\n# scikit-learn==1.3.2\n# numpy==1.26.2",
         options: [
-          "data/raw/survey.dta",
-          "code/03_analysis.do",
-          "output/figures/regression_plot.png",
-          ".env"
+          "Pinning exact package versions in requirements.txt ensures every collaborator uses identical library versions, preventing results from changing due to package updates",
+          "Virtual environments make Python code run faster by isolating the interpreter",
+          "The requirements.txt file is only needed for publishing packages to PyPI",
+          "Virtual environments prevent Python from accessing the internet"
         ],
-        correct: 1,
-        explanation: "The .gitignore excludes .dta, .csv, everything in data/raw/, .env, .log, and .png files in output/figures/. The file code/03_analysis.do matches none of these patterns, so Git would track it. Code files should always be version-controlled."
+        correct: 0,
+        explanation: "Pinning package versions (pandas==2.1.4) ensures that code produces the same results months or years later. Without version pinning, a collaborator might install a newer version of statsmodels that computes standard errors differently, silently changing results."
       },
       // 2 - read (Stata) — Skill: path management with globals
       {
         type: "read",
         title: "Portable Path Management",
         prompt: "Why does this master script define multiple global macros for subdirectories?",
+        hint: "Look at how <code>$data</code>, <code>$code</code>, and <code>$output</code> are derived from <code>$root</code>. How many lines need changing when a collaborator sets up the project?",
         lang: "stata",
         code: "global root \"/Users/maria/projects/wage_study\"\nglobal data \"$root/data\"\nglobal code \"$root/code\"\nglobal output \"$root/output\"\n\nuse \"$data/raw/survey.dta\", clear\ndo \"$code/02_clean.do\"\nesttab using \"$output/tables/results.tex\", se replace",
         options: [
@@ -781,27 +823,29 @@
         correct: 0,
         explanation: "Defining sub-globals like $data, $code, and $output makes scripts cleaner (shorter paths) while keeping everything portable. A collaborator changes only the root line, and all derived paths update automatically. This is a professional-grade project organization pattern."
       },
-      // 3 - bug (Git) — Mistake: committing secrets to Git
+      // 3 - bug (R) — Mistake: non-portable path in R script
       {
         type: "bug",
-        title: "Leaked API Key in Git History",
-        prompt: "A researcher realizes they committed a file with an API key three commits ago. They delete the file and commit. Is the problem solved?",
-        lang: "bash",
-        code: "# Three commits ago:\ngit add config.py  # contains API_KEY = \"sk-abc123...\"\ngit commit -m \"Add config\"\ngit push origin main\n\n# Now (trying to fix):\nrm config.py\ngit add config.py\ngit commit -m \"Remove config with API key\"\ngit push origin main",
+        title: "Non-Portable R Script",
+        prompt: "A collaborator cannot run this R analysis script. What is wrong?",
+        hint: "Look at the strings in <code>read_csv()</code> and <code>write_csv()</code>. Do they contain paths specific to one user's machine?",
+        lang: "r",
+        code: "library(tidyverse)\n\ndf <- read_csv(\"/Users/maria/Desktop/thesis/data/raw/survey.csv\")\n\ndf_clean <- df %>%\n  filter(age >= 18) %>%\n  mutate(log_income = log(income + 1))\n\nwrite_csv(df_clean,\n          \"/Users/maria/Desktop/thesis/data/processed/survey_clean.csv\")",
         options: [
-          "Yes, deleting the file and pushing removes all traces of the API key",
-          "No — the API key is still in Git history; anyone can see it with git log and checkout the old commit. The key must be revoked and history rewritten with git filter-branch or BFG",
-          "No — the file was not properly deleted because git rm should have been used instead of rm",
-          "Yes, but only if you also add config.py to .gitignore"
+          "Line 3: read_csv cannot handle CSV files on macOS",
+          "Lines 3 and 9 use absolute paths specific to Maria's computer — should use here::here() for portable project-relative paths",
+          "Line 6: filter() should use subset() instead in R",
+          "Line 7: log() cannot be used inside mutate()"
         ],
         correct: 1,
-        explanation: "Git stores the complete history of every file. Deleting a file only removes it from the current commit — all previous versions remain accessible. Once a secret is pushed, assume it is compromised: revoke the key immediately. Prevention via .gitignore is far easier than cleanup."
+        explanation: "Absolute paths like /Users/maria/... only work on Maria's machine. The fix is to use the here package: read_csv(here('data', 'raw', 'survey.csv')). The here() function finds the project root automatically, so any collaborator can run the script without editing paths."
       },
       // 4 - bug (Stata) — Mistake: non-reproducible pipeline (missing dependencies)
       {
         type: "bug",
         title: "Broken Pipeline Dependency",
         prompt: "A reviewer runs the master script and gets an error on 03_analysis.do. The researcher says it works on their machine. What is wrong?",
+        hint: "Look carefully at the master script. Is every numbered script being executed? Check for any commented-out lines.",
         lang: "stata",
         code: "* master.do\nglobal root \"/Users/maria/projects/wage_study\"\n\ndo \"$root/code/01_import.do\"\n* do \"$root/code/02_clean.do\"   // commented out to save time\ndo \"$root/code/03_analysis.do\"\ndo \"$root/code/04_tables.do\"",
         options: [
@@ -813,26 +857,29 @@
         correct: 1,
         explanation: "The researcher commented out 02_clean.do to save time because the processed data already existed on their machine. But a new reviewer does not have the processed data. The pipeline must run end-to-end from raw data to final output — skipping steps breaks replicability."
       },
-      // 5 - reorder (Git) — Skill: pull before push to avoid conflicts
+      // 5 - reorder (Python) — Skill: reproducible pipeline with Makefile-style script
       {
         type: "reorder",
-        title: "Safe Collaboration with Git",
-        prompt: "Arrange these commands for the safe workflow when pushing changes to a shared repository.",
-        lang: "bash",
+        title: "Reproducible Pipeline in Python",
+        prompt: "Arrange these Python lines to create a master script that runs the full analysis pipeline.",
+        hint: "Start with imports, define ROOT relative to the script's location, list the numbered scripts, execute them in order, and print a completion message.",
+        lang: "python",
         lines: [
-          "git add 03_analysis.do",
-          "git commit -m \"Add industry fixed effects to wage regression\"",
-          "git pull origin main",
-          "git push origin main"
+          "import subprocess\nfrom pathlib import Path",
+          "ROOT = Path(__file__).parent",
+          "scripts = ['01_import.py', '02_clean.py',\n           '03_analysis.py', '04_tables.py']",
+          "for script in scripts:\n    result = subprocess.run(\n        ['python', ROOT / 'code' / script], check=True)\n    print(f'Completed: {script}')",
+          "print('Full pipeline finished successfully.')"
         ],
-        correctOrder: [0, 1, 2, 3],
-        explanation: "Stage and commit your local changes first, then pull to integrate any remote changes (and resolve conflicts if needed), then push. Pulling before pushing prevents rejected pushes and ensures you are working with the latest version of the shared code."
+        correctOrder: [0, 1, 2, 3, 4],
+        explanation: "Import tools, define the project root relative to the script location (making it portable), list the numbered scripts in order, execute each sequentially with check=True (so it stops on errors), and confirm completion. This ensures the entire pipeline runs from raw data to results."
       },
       // 6 - reorder (Stata) — Skill: complete reproducible workflow
       {
         type: "reorder",
         title: "Full Reproducible Master Script",
         prompt: "Arrange these lines into a complete, reproducible master script.",
+        hint: "Define the root path first, then open the log file, execute the numbered scripts in order, and close the log at the end.",
         lang: "stata",
         lines: [
           "global root \"/Users/maria/projects/wage_study\"",
@@ -845,24 +892,26 @@
         correctOrder: [0, 1, 2, 3, 4, 5],
         explanation: "Define the root path first, open a log file to capture all output, run the numbered scripts in order, and close the log. This produces a complete audit trail and ensures the pipeline runs end-to-end from raw data to final results."
       },
-      // 7 - fill (Git) — Skill: creating a feature branch
+      // 7 - fill (R) — Skill: writing a portable R analysis script
       {
         type: "fill",
-        title: "Feature Branch Workflow",
-        prompt: "Fill in the blanks to create a feature branch, push it, and open a pull request.",
-        lang: "bash",
-        codeTemplate: "git checkout -b ___GAP1___\n# ... make changes and commit ...\ngit push -u origin ___GAP2___",
+        title: "Portable R Project Setup",
+        prompt: "Fill in the blanks to create a portable R script that reads data and exports results using project-relative paths. Type the R package name for portable paths in GAP1 and the path-building function in GAP2.",
+        hint: "Both blanks use the same R package/function that builds paths relative to the project root. It rhymes with 'there'.",
+        lang: "r",
+        codeTemplate: "library(___GAP1___)\nlibrary(fixest)\n\ndf <- read.csv(here('data', 'processed', 'panel.csv'))\nmodel <- feols(wage ~ education | firm_id, data = df)\n\netable(model, tex = TRUE,\n       file = ___GAP2___('output', 'tables', 'results.tex'))",
         gaps: {
-          "GAP1": { answer: "add-robustness-checks", accept: ["add-robustness-checks", "feature-branch", "robustness-checks", "new-feature"] },
-          "GAP2": { answer: "add-robustness-checks", accept: ["add-robustness-checks", "feature-branch", "robustness-checks", "new-feature"] }
+          "GAP1": { answer: "here", accept: ["here"] },
+          "GAP2": { answer: "here", accept: ["here"] }
         },
-        explanation: "git checkout -b creates and switches to a new branch. After committing your work, git push -u origin <branch-name> pushes the branch to the remote and sets up tracking. The branch name should match in both commands."
+        explanation: "The here package finds the project root (marked by .Rproj or .here) and builds all paths relative to it. Using here() for both reading data and exporting tables means the script works on any machine without editing paths — a core requirement for reproducible research."
       },
       // 8 - match — Skill: Git workflow concepts
       {
         type: "match",
         title: "Git Workflow for Research",
         prompt: "Match each Git practice with the reason it matters for research replicability.",
+        hint: "Think about how each practice contributes to reproducibility: tracking decisions, isolating experiments, protecting sensitive data, or coordinating with collaborators.",
         pairs: [
           {
             left: "Descriptive commit messages",
@@ -907,6 +956,7 @@
         type: "read",
         title: "Train-Test Split",
         prompt: "What does this code do, and why is test_size=0.2 and random_state=42 specified?",
+        hint: "Look at the <code>train_test_split</code> function. <code>test_size=0.2</code> controls the proportion held out, and <code>random_state</code> fixes the randomness.",
         lang: "python",
         code: "from sklearn.model_selection import train_test_split\n\nX = df[['income', 'education', 'age']]\ny = df['consumption']\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42)",
         options: [
@@ -918,59 +968,63 @@
         correct: 0,
         explanation: "test_size=0.2 holds out 20% of observations for evaluation (the model never trains on these). random_state=42 fixes the random seed so the exact same observations end up in train vs test every time, ensuring reproducible results."
       },
-      // 2 - read (Python) — Skill: understanding cross-validation
+      // 2 - read (Stata) — Skill: understanding train/test split
       {
         type: "read",
-        title: "Cross-Validation Purpose",
-        prompt: "Why does this code use 5-fold cross-validation instead of a single train-test split?",
-        lang: "python",
-        code: "from sklearn.model_selection import cross_val_score\nfrom sklearn.linear_model import LinearRegression\n\nmodel = LinearRegression()\nscores = cross_val_score(model, X, y, cv=5,\n                         scoring='neg_mean_squared_error')\nprint(f'Mean CV MSE: {-scores.mean():.4f}')",
+        title: "Train-Test Split in Stata",
+        prompt: "What does this Stata code do, and why is the seed set before splitting?",
+        hint: "The <code>set seed</code> command ensures reproducibility. Then <code>runiform()</code> assigns random numbers used to split the data. Look at the proportion in the <code>gen train</code> line.",
+        lang: "stata",
+        code: "set seed 42\ngen sample = runiform()\nsort sample\ngen train = (_n <= int(0.8 * _N))\n\nreg consumption income education age if train == 1\npredict yhat\ngen sq_err = (consumption - yhat)^2 if train == 0\nsum sq_err if train == 0",
         options: [
-          "Cross-validation trains 5 separate models on different folds, giving a more reliable estimate of out-of-sample performance than a single random split",
-          "Cross-validation makes the model 5 times more accurate",
-          "Cross-validation is required because LinearRegression cannot use train_test_split",
-          "5-fold CV trains on 5% of data and tests on 95%, which is more rigorous"
+          "Splits data into 80% training and 20% test sets using a random number; set seed 42 ensures the same split every time for reproducibility",
+          "Splits data into 20% training and 80% test sets randomly each time",
+          "Removes 20% of the data as outliers and keeps 80% for analysis",
+          "Creates 42 random samples and averages the results"
         ],
         correct: 0,
-        explanation: "With 5-fold CV, the data is split 5 ways; each fold serves as the test set once while the other 4 are training data. This reduces the variance of the performance estimate — a single random split might be lucky or unlucky, but averaging over 5 folds is more stable."
+        explanation: "set seed 42 fixes the random number generator. gen sample = runiform() assigns a random number to each observation, and after sorting, the first 80% become the training set. The regression is fit only on training data (if train == 1), and prediction errors are evaluated on the held-out test set."
       },
-      // 3 - bug (Python) — Mistake: not setting random_state (non-reproducible)
+      // 3 - bug (R) — Mistake: not setting seed (non-reproducible)
       {
         type: "bug",
-        title: "Non-Reproducible Split",
+        title: "Non-Reproducible Split in R",
         prompt: "A colleague runs this code twice and gets different RMSE values each time. Why?",
-        lang: "python",
-        code: "from sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression\nimport numpy as np\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2)\nmodel = LinearRegression().fit(X_train, y_train)\nrmse = np.sqrt(np.mean((model.predict(X_test) - y_test)**2))\nprint(f'RMSE: {rmse:.4f}')",
+        hint: "The code uses <code>initial_split()</code> which involves randomness. Is there a <code>set.seed()</code> call before it?",
+        lang: "r",
+        code: "library(rsample)\n\nsplit <- initial_split(df, prop = 0.8)\ntrain_data <- training(split)\ntest_data <- testing(split)\n\nmodel <- lm(consumption ~ income + education + age, data = train_data)\npredictions <- predict(model, newdata = test_data)\nrmse <- sqrt(mean((predictions - test_data$consumption)^2))\ncat('RMSE:', round(rmse, 4))",
         options: [
-          "Line 7: LinearRegression needs explicit hyperparameters",
-          "Line 8: the RMSE formula is incorrect",
-          "Line 5-6: train_test_split is missing random_state, so each run creates a different random split",
-          "Line 6: test_size=0.2 is too small for reliable results"
+          "Line 7: lm() needs explicit hyperparameters",
+          "Line 9: the RMSE formula is incorrect",
+          "Line 3: initial_split is missing set.seed() before it, so each run creates a different random split",
+          "Line 3: prop = 0.8 is too large for reliable results"
         ],
         correct: 2,
-        explanation: "Without random_state, train_test_split uses a different random seed each time, producing different train/test splits and therefore different RMSE values. Setting random_state=42 (or any fixed integer) ensures the same split and reproducible results."
+        explanation: "Without set.seed() before initial_split(), R uses a different random seed each time, producing different train/test splits and therefore different RMSE values. Adding set.seed(42) before the split ensures the same observations end up in train vs test every time."
       },
-      // 4 - bug (Python) — Mistake: using accuracy on imbalanced classes
+      // 4 - bug (Stata) — Mistake: using accuracy on imbalanced classes
       {
         type: "bug",
-        title: "Misleading Accuracy",
+        title: "Misleading Accuracy in Stata",
         prompt: "A classifier for loan default achieves 95% accuracy. The researcher celebrates. What is wrong?",
-        lang: "python",
-        code: "from sklearn.linear_model import LogisticRegression\nfrom sklearn.metrics import accuracy_score\n\n# Data: 95% non-default, 5% default\nmodel = LogisticRegression().fit(X_train, y_train)\ny_pred = model.predict(X_test)\nprint(f'Accuracy: {accuracy_score(y_test, y_pred):.2%}')\n# Output: Accuracy: 95.00%",
+        hint: "Look at the class distribution: 95% non-default, 5% default. What accuracy would a model that <b>always predicts no default</b> achieve?",
+        lang: "stata",
+        code: "* Data: 95% non-default, 5% default\nlogit default income credit_score age if train == 1\npredict phat if train == 0, pr\ngen predicted_default = (phat > 0.5) if train == 0\ngen correct = (predicted_default == default) if train == 0\nsum correct\n* Output: mean = .95 (95% accuracy)",
         options: [
-          "LogisticRegression is the wrong model for binary classification",
-          "With 95% non-default, a model predicting \"no default\" for everyone gets 95% accuracy — should use precision, recall, or AUC instead",
-          "accuracy_score requires probability predictions, not class labels",
-          "The model needs more than two classes to compute accuracy"
+          "logit is the wrong model for binary classification in Stata",
+          "With 95% non-default, a model predicting no default for everyone gets 95% accuracy — should use estat classification or lroc for AUC instead",
+          "The predict command should use the xb option, not pr",
+          "The threshold 0.5 should always be used for classification"
         ],
         correct: 1,
-        explanation: "When classes are imbalanced (95% vs 5%), accuracy is misleading because a naive \"always predict majority class\" classifier achieves 95%. Use precision (of those predicted default, how many actually defaulted), recall (of actual defaults, how many were caught), or AUC for a meaningful evaluation."
+        explanation: "When classes are imbalanced (95% vs 5%), accuracy is misleading because a naive 'always predict no default' classifier achieves 95%. In Stata, use estat classification for confusion matrix details, or lroc after logit for the AUC, which evaluates discrimination across all thresholds."
       },
       // 5 - reorder (Python) — Skill: basic ML pipeline
       {
         type: "reorder",
         title: "Basic ML Pipeline",
         prompt: "Arrange these lines into a correct machine learning workflow.",
+        hint: "The ML workflow follows: import, split data, create model, train (fit), then evaluate on test data. Training and evaluation must use separate data.",
         lang: "python",
         lines: [
           "from sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression",
@@ -987,6 +1041,7 @@
         type: "reorder",
         title: "Train-Test Split in R",
         prompt: "Arrange these R lines to split data, train a model, and evaluate it.",
+        hint: "Start by loading the package, then set seed and split, extract train/test sets, fit the model on training data, and evaluate on test data.",
         lang: "r",
         lines: [
           "library(rsample)",
@@ -1002,7 +1057,8 @@
       {
         type: "fill",
         title: "Lasso Regression",
-        prompt: "Fill in the blanks to fit a Lasso regression with regularization strength 0.1.",
+        prompt: "Fill in the blanks to fit a Lasso regression with regularization strength 0.1. Type the sklearn class name in GAP1 and the alpha value in GAP2.",
+        hint: "GAP1: The sklearn class for L1-regularized linear regression starts with an uppercase letter and has 5 characters.<br>GAP2: The regularization strength specified in the prompt — a decimal number.",
         lang: "python",
         codeTemplate: "from sklearn.linear_model import ___GAP1___\n\nmodel = ___GAP1___(alpha=___GAP2___)\nmodel.fit(X_train, y_train)\nprint(f'Non-zero coefficients: {(model.coef_ != 0).sum()}')",
         gaps: {
@@ -1016,6 +1072,7 @@
         type: "match",
         title: "ML Evaluation Metrics",
         prompt: "Match each metric with what it measures.",
+        hint: "RMSE and R-squared are for regression (continuous outcomes). AUC and Recall are for classification (binary outcomes). Think about what each acronym stands for.",
         pairs: [
           {
             left: "RMSE (Root Mean Squared Error)",
@@ -1049,43 +1106,46 @@
     // INTERMEDIATE (8 exercises)
     // -----------------------------------------------------------------------
     intermediate: [
-      // 1 - read (Python) — Skill: feature scaling requirement for Lasso/Ridge
+      // 1 - read (Stata) — Skill: feature scaling requirement for Lasso
       {
         type: "read",
-        title: "Feature Scaling for Regularization",
-        prompt: "Why does this code scale features before fitting a Lasso model?",
-        lang: "python",
-        code: "from sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import Lasso\n\nscaler = StandardScaler()\nX_train_scaled = scaler.fit_transform(X_train)\nX_test_scaled = scaler.transform(X_test)\n\nmodel = Lasso(alpha=0.1).fit(X_train_scaled, y_train)\ny_pred = model.predict(X_test_scaled)",
+        title: "Feature Scaling for Lasso in Stata",
+        prompt: "Why does this code standardize features before fitting a Lasso model?",
+        hint: "Lasso penalizes the <b>absolute size</b> of coefficients. If one feature is measured in thousands and another in single digits, which coefficient will be naturally larger?",
+        lang: "stata",
+        code: "* Standardize features\nforeach var of varlist income education age {\n    egen std_`var' = std(`var')\n}\n\n* Fit Lasso on standardized features\nlasso linear consumption std_income std_education std_age",
         options: [
-          "Lasso penalizes coefficients by magnitude, so unscaled features with larger values get penalized more — scaling puts all features on equal footing",
-          "StandardScaler makes the model converge faster but does not affect results",
-          "Scaling is required because Lasso only accepts values between 0 and 1",
-          "Scaling removes outliers that would otherwise bias the Lasso coefficients"
+          "Lasso penalizes coefficients by magnitude, so unscaled features with larger values get penalized more — standardizing puts all features on equal footing",
+          "egen std() makes the model converge faster but does not affect results",
+          "Standardization is required because lasso linear only accepts values between 0 and 1",
+          "Standardization removes outliers that would otherwise bias the Lasso coefficients"
         ],
         correct: 0,
-        explanation: "Lasso's L1 penalty is applied equally to all coefficients regardless of scale. If income is in thousands and age is in years, income's coefficient is naturally smaller, making it more likely to survive the penalty. Scaling ensures the penalty treats all features fairly."
+        explanation: "Lasso's L1 penalty is applied equally to all coefficients regardless of scale. If income is in thousands and age is in years, income's coefficient is naturally smaller, making it more likely to survive the penalty. Standardizing with egen std() ensures the penalty treats all features fairly."
       },
-      // 2 - read (Python) — Skill: random forest hyperparameters
+      // 2 - read (R) — Skill: random forest hyperparameters in R
       {
         type: "read",
-        title: "Random Forest Hyperparameters",
-        prompt: "What do n_estimators and max_features control in this random forest?",
-        lang: "python",
-        code: "from sklearn.ensemble import RandomForestRegressor\n\nrf = RandomForestRegressor(\n    n_estimators=500,\n    max_features='sqrt',\n    random_state=42\n)\nrf.fit(X_train, y_train)",
+        title: "Random Forest Hyperparameters in R",
+        prompt: "What do num.trees and mtry control in this random forest?",
+        hint: "<code>num.trees</code> controls how many trees are in the forest. <code>mtry</code> controls how many features each tree considers at each split — this is what decorrelates the trees.",
+        lang: "r",
+        code: "library(ranger)\n\nrf <- ranger(\n    wage ~ income + education + age + experience,\n    data = train_data,\n    num.trees = 500,\n    mtry = 2,\n    seed = 42\n)\nprint(rf)",
         options: [
-          "n_estimators=500 grows 500 trees; max_features='sqrt' means each tree split considers only sqrt(p) features at random, reducing correlation between trees",
-          "n_estimators=500 limits each tree to 500 nodes; max_features='sqrt' removes the square root of features",
-          "n_estimators=500 uses 500 observations per tree; max_features='sqrt' scales all features by their square root",
-          "n_estimators=500 creates 500 cross-validation folds; max_features='sqrt' selects the top sqrt(p) features globally"
+          "num.trees = 500 grows 500 trees; mtry = 2 means each tree split considers only 2 features at random, reducing correlation between trees",
+          "num.trees = 500 limits each tree to 500 nodes; mtry = 2 removes 2 features from the model",
+          "num.trees = 500 uses 500 observations per tree; mtry = 2 scales features by a factor of 2",
+          "num.trees = 500 creates 500 cross-validation folds; mtry = 2 selects the top 2 features globally"
         ],
         correct: 0,
-        explanation: "Random forests aggregate many decorrelated trees. n_estimators controls how many trees are grown (more is generally better but slower). max_features='sqrt' means at each split, only a random subset of sqrt(p) features is considered, which decorrelates the trees and reduces overfitting."
+        explanation: "Random forests aggregate many decorrelated trees. num.trees controls how many trees are grown (more is generally better but slower). mtry controls how many features are randomly considered at each split — lower values decorrelate the trees and reduce overfitting. A common default is sqrt(p)."
       },
       // 3 - bug (Python) — Mistake: fitting scaler on full data (data leakage)
       {
         type: "bug",
         title: "Data Leakage Through Scaling",
         prompt: "This code has a subtle but critical data leakage problem. Where is it?",
+        hint: "Look at when <code>fit_transform</code> is called and what data it uses. Is the scaler learning statistics from data that the model should never see during training?",
         lang: "python",
         code: "from sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import Lasso\n\nscaler = StandardScaler()\nX_scaled = scaler.fit_transform(X)  # scale ALL data\n\nX_train, X_test = X_scaled[:800], X_scaled[800:]\ny_train, y_test = y[:800], y[800:]\n\nmodel = Lasso(alpha=0.1).fit(X_train, y_train)",
         options: [
@@ -1097,43 +1157,46 @@
         correct: 1,
         explanation: "Fitting the scaler on all data (including test) means the training features are centered and scaled using information from the test set. This is data leakage — the model indirectly 'sees' test data. The fix: fit scaler on X_train only, then transform both X_train and X_test."
       },
-      // 4 - bug (Python) — Mistake: overfitting by tuning on test set
+      // 4 - bug (R) — Mistake: overfitting by tuning on test set
       {
         type: "bug",
-        title: "Tuning on the Test Set",
+        title: "Tuning on the Test Set in R",
         prompt: "This researcher reports an impressive test RMSE. What methodological error did they make?",
-        lang: "python",
-        code: "from sklearn.linear_model import Lasso\nimport numpy as np\n\nbest_rmse = float('inf')\nfor alpha in [0.001, 0.01, 0.1, 1.0, 10.0]:\n    model = Lasso(alpha=alpha).fit(X_train, y_train)\n    y_pred = model.predict(X_test)\n    rmse = np.sqrt(np.mean((y_pred - y_test)**2))\n    if rmse < best_rmse:\n        best_rmse = rmse\n        best_alpha = alpha\nprint(f'Best test RMSE: {best_rmse:.4f}')",
+        hint: "The loop tries multiple lambda values and picks the one with the best <b>test</b> RMSE. How many times is the test set used? The test set should only be used <b>once</b>.",
+        lang: "r",
+        code: "library(glmnet)\n\nlambdas <- c(0.001, 0.01, 0.1, 1.0, 10.0)\nbest_rmse <- Inf\n\nfor (lam in lambdas) {\n  model <- glmnet(X_train, y_train, alpha = 1, lambda = lam)\n  preds <- predict(model, X_test)\n  rmse <- sqrt(mean((preds - y_test)^2))\n  if (rmse < best_rmse) {\n    best_rmse <- rmse\n    best_lambda <- lam\n  }\n}\ncat('Best test RMSE:', round(best_rmse, 4))",
         options: [
-          "Lasso cannot loop over multiple alpha values",
+          "glmnet cannot loop over multiple lambda values",
           "The RMSE calculation is incorrect",
-          "Selecting alpha that minimizes test error uses the test set for model selection — this overfits to the test set. Use cross-validation on the training set instead",
-          "The alpha values should be evenly spaced, not on a log scale"
+          "Selecting lambda that minimizes test error uses the test set for model selection — this overfits to the test set. Use cv.glmnet() on the training set instead",
+          "The lambda values should be evenly spaced, not on a log scale"
         ],
         correct: 2,
-        explanation: "The test set must be touched only once for final evaluation. Using it to choose alpha means the reported test RMSE is optimistic — it reflects the best of 5 attempts, not true out-of-sample performance. Use cross-validation on the training set to select alpha, then evaluate once on the test set."
+        explanation: "The test set must be touched only once for final evaluation. Using it to choose lambda means the reported test RMSE is optimistic — it reflects the best of 5 attempts, not true out-of-sample performance. Use cv.glmnet(X_train, y_train) to select lambda via cross-validation, then evaluate once on the test set."
       },
-      // 5 - reorder (Python) — Skill: GridSearchCV pipeline
+      // 5 - reorder (Stata) — Skill: Lasso with cross-validation in Stata
       {
         type: "reorder",
-        title: "Hyperparameter Tuning with GridSearchCV",
-        prompt: "Arrange these lines to properly tune a Lasso model using cross-validation.",
-        lang: "python",
+        title: "Lasso with Cross-Validation in Stata",
+        prompt: "Arrange these Stata lines to fit a Lasso model with automatic cross-validated lambda selection.",
+        hint: "Load data and set seed first, then fit the Lasso with CV, inspect the selected coefficients, and finally evaluate predictions.",
+        lang: "stata",
         lines: [
-          "from sklearn.linear_model import Lasso\nfrom sklearn.model_selection import GridSearchCV",
-          "param_grid = {'alpha': [0.001, 0.01, 0.1, 1.0, 10.0]}",
-          "grid_search = GridSearchCV(Lasso(), param_grid,\n                          cv=5, scoring='neg_mean_squared_error')",
-          "grid_search.fit(X_train, y_train)",
-          "print(f'Best alpha: {grid_search.best_params_}')\nfinal_rmse = np.sqrt(np.mean(\n    (grid_search.predict(X_test) - y_test)**2))\nprint(f'Test RMSE: {final_rmse:.4f}')"
+          "use household_data.dta, clear",
+          "set seed 42",
+          "lasso linear consumption income education age experience,\n    selection(cv, folds(5))",
+          "lassocoef, display(coef, penalized)",
+          "predict yhat\ngen sq_err = (consumption - yhat)^2\nsum sq_err"
         ],
         correctOrder: [0, 1, 2, 3, 4],
-        explanation: "Import, define the parameter grid, create GridSearchCV with 5-fold CV, fit on training data (this tries all alpha values using CV), then use the best model to predict on the test set exactly once. This avoids overfitting to the test set."
+        explanation: "Load data, set seed for reproducibility, fit lasso linear with 5-fold cross-validation to select the optimal penalty. lassocoef shows which variables were selected and their coefficients. Finally, generate predictions and evaluate the squared errors."
       },
       // 6 - reorder (Python) — Skill: proper scaling pipeline
       {
         type: "reorder",
         title: "Correct Scaling Pipeline",
         prompt: "Arrange these lines to properly scale features without data leakage.",
+        hint: "Import first, split data, then fit the scaler on <b>training data only</b> (<code>fit_transform</code>), apply it to test data (<code>transform</code> only), and finally train and evaluate.",
         lang: "python",
         lines: [
           "from sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import Ridge",
@@ -1145,24 +1208,26 @@
         correctOrder: [0, 1, 2, 3, 4],
         explanation: "Import, split data FIRST, then fit the scaler on training data only (fit_transform), apply the same transformation to test data (transform only — no fitting). Finally train and evaluate. Fitting the scaler on train only prevents data leakage."
       },
-      // 7 - fill (Python) — Skill: decision tree with max_depth
+      // 7 - fill (Stata) — Skill: Lasso feature selection
       {
         type: "fill",
-        title: "Decision Tree Depth Control",
-        prompt: "Fill in the blanks to fit a decision tree regressor with a maximum depth of 5 and evaluate it.",
-        lang: "python",
-        codeTemplate: "from sklearn.tree import ___GAP1___\n\nmodel = ___GAP1___(max_depth=___GAP2___, random_state=42)\nmodel.fit(X_train, y_train)\nprint(f'Test R2: {model.score(X_test, y_test):.4f}')",
+        title: "Lasso Feature Selection in Stata",
+        prompt: "Fill in the blanks to fit a Lasso regression with cross-validated penalty selection in Stata. Type the Stata command name in GAP1 and the number of CV folds in GAP2.",
+        hint: "GAP1: The Stata 16+ command for L1-regularized regression is five lowercase letters.<br>GAP2: A common number of cross-validation folds (between 3 and 10).",
+        lang: "stata",
+        codeTemplate: "set seed 42\n___GAP1___ linear consumption income education age experience,\n    selection(cv, folds(___GAP2___))\nlassocoef, display(coef, penalized)",
         gaps: {
-          "GAP1": { answer: "DecisionTreeRegressor", accept: ["DecisionTreeRegressor"] },
-          "GAP2": { answer: "5", accept: ["5"] }
+          "GAP1": { answer: "lasso", accept: ["lasso"] },
+          "GAP2": { answer: "5", accept: ["5", "10"] }
         },
-        explanation: "DecisionTreeRegressor creates a tree that recursively splits the feature space. max_depth=5 limits the tree to 5 levels, preventing overfitting. Without depth control, the tree can memorize training data perfectly but perform poorly on new data."
+        explanation: "The lasso linear command in Stata (16+) fits a Lasso regression. selection(cv, folds(5)) uses 5-fold cross-validation to select the optimal penalty lambda. lassocoef shows which variables survived the L1 penalty (non-zero coefficients) — this is automatic feature selection."
       },
       // 8 - match — Skill: regularization concepts
       {
         type: "match",
         title: "Regularization Methods",
         prompt: "Match each regularization method with its key property.",
+        hint: "L1 (Lasso) creates <b>sparse</b> models (some coefficients exactly zero). L2 (Ridge) shrinks but keeps all features. Higher penalty = simpler model. CV finds the best penalty.",
         pairs: [
           {
             left: "Lasso (L1 penalty)",
@@ -1201,6 +1266,7 @@
         type: "read",
         title: "Double/Debiased Machine Learning",
         prompt: "What does DoubleMLPLR do and what are ml_l and ml_m?",
+        hint: "Double ML uses two separate ML models as 'nuisance learners': one predicts the outcome (Y) from controls, and one predicts the treatment (D) from controls. This partials out confounders.",
         lang: "python",
         code: "from doubleml import DoubleMLPLR, DoubleMLData\nfrom sklearn.ensemble import RandomForestRegressor\n\ndml_data = DoubleMLData(df, y_col='wage', d_cols='training',\n                        x_cols=['age', 'education', 'experience'])\nml_l = RandomForestRegressor(n_estimators=500)\nml_m = RandomForestRegressor(n_estimators=500)\n\ndml_plr = DoubleMLPLR(dml_data, ml_l, ml_m)\ndml_plr.fit()\nprint(dml_plr.summary)",
         options: [
@@ -1217,6 +1283,7 @@
         type: "read",
         title: "Causal Forest for Heterogeneous Effects",
         prompt: "What does this causal forest estimate and how does it differ from a standard random forest?",
+        hint: "A standard random forest predicts E[Y|X]. A <b>causal</b> forest estimates E[Y(1) - Y(0) | X] — the treatment effect that varies by individual characteristics.",
         lang: "r",
         code: "library(grf)\n\ncf <- causal_forest(\n    X = as.matrix(df[, c('age', 'education', 'income')]),\n    Y = df$wage,\n    W = df$training,\n    num.trees = 2000\n)\ntau_hat <- predict(cf)$predictions\nhist(tau_hat, main = 'Distribution of Treatment Effects')",
         options: [
@@ -1228,27 +1295,29 @@
         correct: 0,
         explanation: "A causal forest from grf estimates Conditional Average Treatment Effects (CATEs) — how the effect of training on wage varies across individuals with different characteristics. Unlike prediction forests that estimate E[Y|X], causal forests estimate E[Y(1)-Y(0)|X], the treatment effect function."
       },
-      // 3 - bug (Python) — Mistake: not scaling features before Lasso
+      // 3 - bug (Stata) — Mistake: not scaling features before Lasso
       {
         type: "bug",
-        title: "Unscaled Lasso Regression",
-        prompt: "This Lasso model keeps only the income variable and drops education. The researcher concludes education does not matter. What went wrong?",
-        lang: "python",
-        code: "from sklearn.linear_model import Lasso\n\n# income in dollars (mean ~50000), education in years (mean ~14)\nmodel = Lasso(alpha=1.0).fit(X_train, y_train)\nprint('Coefficients:', dict(zip(features, model.coef_)))\n# Output: income: 0.0003, education: 0.0, age: 0.0",
+        title: "Unscaled Lasso in Stata",
+        prompt: "This Lasso model keeps only income and drops education. The researcher concludes education does not matter. What went wrong?",
+        hint: "Compare the scales: income is in dollars (mean ~50000) while education is in years (mean ~14). How does this affect the coefficient magnitudes and Lasso's penalty?",
+        lang: "stata",
+        code: "* income in dollars (mean ~50000), education in years (mean ~14)\nlasso linear consumption income education age\nlassocoef\n* Output: only income has a non-zero coefficient\n* \"Education has no effect on consumption\"",
         options: [
-          "Lasso cannot handle more than two features",
-          "Alpha=1.0 is always too strong for any dataset",
-          "Features were not scaled — income's large scale makes its coefficient tiny, so the penalty hits education (small scale, larger coefficient) harder. Need StandardScaler first",
+          "lasso linear cannot handle more than two features",
+          "The default penalty is always too strong for any dataset",
+          "Features were not standardized — income's large scale makes its coefficient tiny, so the penalty hits education harder. Need egen std_var = std(var) first",
           "Lasso dropped education because it is truly uncorrelated with the outcome"
         ],
         correct: 2,
-        explanation: "Lasso penalizes the absolute sum of coefficients. Without scaling, income (mean ~50000) has a tiny coefficient to compensate for its large values, while education (mean ~14) has a larger coefficient. The penalty disproportionately shrinks education to zero. Always scale features before Lasso/Ridge."
+        explanation: "Lasso penalizes the absolute sum of coefficients. Without standardization, income (mean ~50000) has a tiny coefficient to compensate for its large values, while education (mean ~14) has a larger coefficient. The penalty disproportionately shrinks education to zero. Standardize with egen std_x = std(x) before fitting."
       },
       // 4 - bug (Python) — Mistake: confusing prediction with causal interpretation
       {
         type: "bug",
         title: "Prediction vs Causation",
         prompt: "A researcher makes a policy recommendation based on this analysis. What is the flaw?",
+        hint: "The random forest identifies that education is a strong <b>predictor</b> of wages. But does prediction imply causation? Could unobserved factors (like ability) explain both?",
         lang: "python",
         code: "from sklearn.ensemble import RandomForestRegressor\n\nrf = RandomForestRegressor(n_estimators=500, random_state=42)\nrf.fit(X_train, y_train)\nprint(f'Test R2: {rf.score(X_test, y_test):.4f}')  # 0.85\n\n# Feature importance shows education is most important\n# Policy recommendation: \"Increasing education by\n#   1 year will raise wages by $5,200\"",
         options: [
@@ -1260,43 +1329,46 @@
         correct: 2,
         explanation: "Prediction models identify correlations, not causal effects. High importance of education in a random forest means it is useful for prediction, but this could be driven by confounders like ability or family background. Policy recommendations require causal methods (DML, IV, RCTs), not just predictive accuracy."
       },
-      // 5 - reorder (Python) — Skill: Double ML pipeline
+      // 5 - reorder (Stata) — Skill: Lasso for treatment effect estimation
       {
         type: "reorder",
-        title: "Double ML Estimation Pipeline",
-        prompt: "Arrange these lines to estimate a causal treatment effect using Double ML.",
-        lang: "python",
+        title: "Lasso-Based Treatment Effect in Stata",
+        prompt: "Arrange these Stata lines to estimate a treatment effect using Lasso for variable selection (double selection).",
+        hint: "Load data first, then the two Lasso steps select controls for outcome and treatment separately. The <code>dsregress</code> command combines them into the final debiased estimate.",
+        lang: "stata",
         lines: [
-          "from doubleml import DoubleMLPLR, DoubleMLData\nfrom sklearn.ensemble import RandomForestRegressor",
-          "dml_data = DoubleMLData(df, y_col='wage', d_cols='training',\n                        x_cols=['age', 'education', 'experience'])",
-          "ml_l = RandomForestRegressor(n_estimators=500, random_state=42)\nml_m = RandomForestRegressor(n_estimators=500, random_state=42)",
-          "dml_plr = DoubleMLPLR(dml_data, ml_l, ml_m, n_folds=5)",
-          "dml_plr.fit()\nprint(dml_plr.summary)"
+          "use training_data.dta, clear\nset seed 42",
+          "* Step 1: Lasso-select controls for outcome\nlasso linear wage age education experience x1-x20,\n    selection(cv)",
+          "* Step 2: Lasso-select controls for treatment\nlasso linear training age education experience x1-x20,\n    selection(cv)",
+          "* Step 3: Post-double-selection estimator\ndsregress wage training,\n    controls(age education experience x1-x20)",
+          "* Display results with valid standard errors\nestimates table, se"
         ],
         correctOrder: [0, 1, 2, 3, 4],
-        explanation: "Import the packages, structure the data (specifying outcome, treatment, and controls), define the two nuisance ML models (for outcome and treatment prediction), create the DML object with cross-fitting folds, and fit. The summary reports the debiased treatment effect with valid standard errors."
+        explanation: "Load data and set seed, then Stata's dsregress implements double selection: Lasso selects controls relevant for the outcome (wage), Lasso selects controls relevant for the treatment (training), and the final regression includes the union of selected controls. This yields a debiased treatment effect estimate."
       },
-      // 6 - reorder (Python) — Skill: full pipeline with scaling, CV, and evaluation
+      // 6 - reorder (R) — Skill: full Lasso pipeline with glmnet
       {
         type: "reorder",
-        title: "Complete Regularized Pipeline",
-        prompt: "Arrange these lines for a complete Lasso pipeline with scaling, CV tuning, and honest evaluation.",
-        lang: "python",
+        title: "Complete Lasso Pipeline in R",
+        prompt: "Arrange these R lines for a Lasso pipeline with CV tuning and honest evaluation.",
+        hint: "Load packages, split data, prepare matrices, use <code>cv.glmnet()</code> to find the best lambda via cross-validation, then evaluate <b>once</b> on the test set.",
+        lang: "r",
         lines: [
-          "from sklearn.linear_model import LassoCV\nfrom sklearn.preprocessing import StandardScaler",
-          "X_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42)",
-          "scaler = StandardScaler()\nX_train_s = scaler.fit_transform(X_train)\nX_test_s = scaler.transform(X_test)",
-          "model = LassoCV(cv=5, random_state=42).fit(X_train_s, y_train)\nprint(f'Best alpha: {model.alpha_:.4f}')",
-          "y_pred = model.predict(X_test_s)\nrmse = np.sqrt(np.mean((y_pred - y_test)**2))\nprint(f'Test RMSE: {rmse:.4f}')"
+          "library(glmnet)\nlibrary(rsample)",
+          "set.seed(42)\nsplit <- initial_split(df, prop = 0.8)\ntrain_data <- training(split)\ntest_data <- testing(split)",
+          "X_train <- as.matrix(train_data[, c('income', 'education', 'age')])\ny_train <- train_data$consumption\nX_test <- as.matrix(test_data[, c('income', 'education', 'age')])\ny_test <- test_data$consumption",
+          "cv_model <- cv.glmnet(X_train, y_train, alpha = 1, nfolds = 5)\ncat('Best lambda:', cv_model$lambda.min, '\\n')",
+          "preds <- predict(cv_model, X_test, s = 'lambda.min')\nrmse <- sqrt(mean((preds - y_test)^2))\ncat('Test RMSE:', round(rmse, 4))"
         ],
         correctOrder: [0, 1, 2, 3, 4],
-        explanation: "Import, split data, scale using train stats only (fit_transform on train, transform on test), tune alpha with LassoCV using 5-fold CV on training data, and evaluate once on the test set. This avoids both data leakage (scaling) and overfitting to the test set (CV for tuning)."
+        explanation: "Load packages, split data with a seed, prepare matrices for glmnet, use cv.glmnet with 5 folds to select the optimal lambda via cross-validation, then evaluate once on the test set with lambda.min. This avoids overfitting to the test set."
       },
       // 7 - fill (R) — Skill: causal forest in R
       {
         type: "fill",
         title: "Causal Forest in R",
-        prompt: "Fill in the blanks to estimate heterogeneous treatment effects with a causal forest.",
+        prompt: "Fill in the blanks to estimate heterogeneous treatment effects with a causal forest. Type the R package name in GAP1 and the treatment variable name in GAP2.",
+        hint: "GAP1: The R package for Generalized Random Forests is a 3-letter abbreviation.<br>GAP2: The treatment variable — look at the context (wage outcome, treatment effect of a program).",
         lang: "r",
         codeTemplate: "library(___GAP1___)\n\ncf <- causal_forest(\n    X = as.matrix(df[, c('age', 'education', 'income')]),\n    Y = df$wage,\n    W = df$___GAP2___,\n    num.trees = 2000\n)\naverage_treatment_effect(cf)",
         gaps: {
@@ -1310,6 +1382,7 @@
         type: "match",
         title: "Prediction ML vs Causal ML",
         prompt: "Match each method with its appropriate research question.",
+        hint: "Prediction methods answer 'what will happen?' while causal methods answer 'what is the effect of an intervention?' Causal forests add 'for whom is the effect strongest?'",
         pairs: [
           {
             left: "Random Forest / Lasso (prediction ML)",

@@ -856,6 +856,56 @@ Jump in treatment probability at cutoff: 0.628 (SE = 0.089)
 First-stage F-statistic: 49.79</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This estimates a fuzzy regression discontinuity design, where crossing the cutoff increases treatment probability but does not guarantee it \u2014 the cutoff is used as an instrument for actual treatment",
+                  "languages": {
+                    "python": [
+                      {"code": "result", "role": "Variable", "tip": "Stores the fuzzy RDD estimation results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the result.", "color": "peach"},
+                      {"code": "rdrobust", "role": "Function", "tip": "Robust RDD estimation with optimal bandwidth selection.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "y=df['outcome']", "role": "Argument", "tip": "The outcome variable.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "x=df['x_centered']", "role": "Argument", "tip": "The running variable, centered at the cutoff.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "fuzzy=df['treatment']", "role": "Argument", "tip": "Actual treatment status \u2014 enables fuzzy RDD by instrumenting this with the cutoff.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "rdrobust", "role": "Command", "tip": "Robust RDD estimation with bias-corrected inference.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome x_centered", "role": "Variables", "tip": "Outcome variable and running variable.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates variables from options.", "color": "overlay"},
+                      {"code": "c(0)", "role": "Option", "tip": "Cutoff value (0 since the running variable is centered).", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "fuzzy(treatment)", "role": "Option", "tip": "Enables fuzzy RDD \u2014 instruments actual treatment with the cutoff.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "rd_fuzzy", "role": "Variable", "tip": "Stores the fuzzy RDD results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "rdrobust", "role": "Function", "tip": "Robust RDD estimation from the rdrobust package.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "y = df$outcome", "role": "Argument", "tip": "Outcome variable.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "x = df$x_centered", "role": "Argument", "tip": "Running variable centered at cutoff.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "fuzzy = df$treatment", "role": "Argument", "tip": "Actual treatment status for fuzzy RDD.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "In a <strong>fuzzy RDD</strong>, the running variable crossing the cutoff does not deterministically assign treatment. Instead, it creates a jump in treatment probability. The fuzzy option uses this jump as an instrument for actual treatment, yielding a Local Average Treatment Effect for compliers near the cutoff."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h2 id="diagnostics">Diagnostics and Validity Tests</h2>
 
         <p>
@@ -1051,6 +1101,52 @@ Placebo Cutoff Tests:
       10     -0.312       0.678     0.645</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This runs the key RDD validity tests: the McCrary density test for manipulation of the running variable, covariate balance checks at the cutoff, and placebo tests at fake cutoffs",
+                  "languages": {
+                    "python": [
+                      {"code": "density_test", "role": "Variable", "tip": "Stores the McCrary density test results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the test result.", "color": "peach"},
+                      {"code": "rddensity", "role": "Function", "tip": "McCrary-style density test for manipulation at the cutoff.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "X=df['x_centered']", "role": "Argument", "tip": "The running variable to test for density discontinuity.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "c=0", "role": "Argument", "tip": "The cutoff value to test for manipulation.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "rddensity", "role": "Command", "tip": "McCrary density test for manipulation of the running variable.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "x_centered", "role": "Variable", "tip": "The running variable.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates variable from options.", "color": "overlay"},
+                      {"code": "c(0)", "role": "Option", "tip": "Cutoff value.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "plot", "role": "Option", "tip": "Produces a density plot showing whether there is a jump at the cutoff.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "dens_test", "role": "Variable", "tip": "Stores the McCrary density test results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "rddensity", "role": "Function", "tip": "Density continuity test from the rddensity package.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "X = df$x_centered", "role": "Argument", "tip": "Running variable to test.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "c = 0", "role": "Argument", "tip": "Cutoff value.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "RDD validity rests on units being unable to precisely <strong>manipulate</strong> their position relative to the cutoff. The McCrary test checks for suspicious bunching. Covariate continuity tests verify that predetermined characteristics are smooth across the threshold. Placebo cutoff tests confirm the effect only exists at the true cutoff."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h2 id="visualization">Visualization</h2>
 
         <p>
@@ -1223,6 +1319,54 @@ Visual discontinuity estimate:
   Left limit:  45.23
   Right limit: 48.08
   Jump:        ~2.85 points</pre></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This creates the canonical RDD visualization \u2014 a binned scatter plot with separate polynomial fits on each side of the cutoff, making the treatment effect visible as the gap between the two fitted lines",
+                  "languages": {
+                    "python": [
+                      {"code": "rdplot", "role": "Function", "tip": "Creates a publication-quality RDD scatter plot with optimal binning.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "y=df['outcome']", "role": "Argument", "tip": "Outcome variable for the y-axis.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "x=df['x_centered']", "role": "Argument", "tip": "Running variable for the x-axis.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "c=0", "role": "Argument", "tip": "Cutoff where the discontinuity is expected.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "nbins=[20, 20]", "role": "Argument", "tip": "Number of bins on each side of the cutoff.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "rdplot", "role": "Command", "tip": "Creates an optimally-binned RDD scatter plot.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome x_centered", "role": "Variables", "tip": "Outcome (y-axis) and running variable (x-axis).", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates variables from options.", "color": "overlay"},
+                      {"code": "c(0)", "role": "Option", "tip": "Cutoff value for the vertical dividing line.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "rdplot", "role": "Function", "tip": "Creates a binned scatter plot with polynomial fits from the rdrobust package.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "y = df$outcome", "role": "Argument", "tip": "Outcome variable.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "x = df$x_centered", "role": "Argument", "tip": "Running variable.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "c = 0", "role": "Argument", "tip": "Cutoff value.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "title = \"RDD: Effect of Scholarship\"", "role": "Argument", "tip": "Plot title describing the specific application.", "color": "green"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "A good RDD plot is essential for <strong>visual credibility</strong>. It shows: (1) raw data as binned scatter points, (2) fitted polynomials on each side of the cutoff, (3) a vertical line at the cutoff, and (4) the visible gap. The <code>rdplot</code> command selects optimal bins and polynomial orders automatically."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="info-box warning">

@@ -2232,11 +2232,11 @@ pre.novel-annotated .read-novel-btn {
 }
 
 /* ═══ TEACH MODE ════════════════════════════════════════════
-   Inline teaching blocks — tokens shown with explanations.
-   No quiz, no flipping. Used after concept paragraphs.
+   Annotated code breakdowns with interactive hover highlighting.
+   Numbered annotations connect the assembled code to explanations.
    ════════════════════════════════════════════════════════════ */
 
-/* Teach-mode section wrapper — lighter, no heavy borders */
+/* Teach-mode section wrapper */
 .grammar-teach-section {
   margin: 1.5rem 0 2rem 0;
 }
@@ -2248,43 +2248,82 @@ pre.novel-annotated .read-novel-btn {
   line-height: 1.5;
 }
 
-/* Teach-mode primer container — slightly smaller */
+/* Teach-mode primer container */
 .grammar-primer[data-mode="teach"] {
-  padding: 1.25rem;
+  padding: 1.5rem;
   border-radius: 10px;
-  border-left: 3px solid var(--color-accent);
+  border: 1px solid rgba(237, 137, 54, 0.2);
+  border-left: 4px solid var(--color-accent);
+  background: linear-gradient(135deg, var(--color-code-bg) 0%, #1a1b2e 100%);
 }
 
-/* Teach header — compact */
+/* ── Teach header ──────────────────────────────────────────── */
+
 .gp-teach-header {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.gp-teach-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .gp-teach-title {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   color: var(--color-accent);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-/* Teach pattern — prominent */
-.gp-teach-pattern {
-  margin-bottom: 0.75rem;
-  font-size: 0.85rem;
+.gp-teach-icon {
+  font-size: 1rem;
 }
 
-/* Assembled code in teach mode */
-.gp-teach-assembled {
+.gp-teach-lang-bar {
+  margin-bottom: 0;
+}
+
+/* ── Instruction (what this code does) ─────────────────────── */
+
+.gp-teach-instruction {
+  font-size: 0.95rem;
+  color: #bac2de;
+  line-height: 1.55;
   margin-bottom: 1rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ── Assembled code (annotated code line) ──────────────────── */
+
+.gp-teach-assembled {
+  margin-bottom: 1.25rem;
 }
 
 .gp-teach-assembled .gp-assembled-code {
   margin-bottom: 0;
-  padding: 0.6rem 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
 /* Color-coded tokens in assembled line */
+.gp-teach-token {
+  transition: all 0.2s ease;
+  border-radius: 2px;
+  padding: 0 1px;
+  cursor: default;
+}
+
 .gp-teach-token[data-color="keyword"],
 .gp-teach-token[data-color="mauve"]    { color: #cba6f7; }
 .gp-teach-token[data-color="function"],
@@ -2310,27 +2349,39 @@ pre.novel-annotated .read-novel-btn {
 .gp-teach-token[data-color="sapphire"] { color: #74c7ec; }
 .gp-teach-token[data-color="text"]     { color: #cdd6f4; }
 
-/* Token breakdown rows */
+/* Hover-highlight on assembled tokens */
+.gp-teach-token.gp-highlight {
+  background: rgba(237, 137, 54, 0.25);
+  box-shadow: 0 0 0 2px rgba(237, 137, 54, 0.35);
+  border-radius: 3px;
+}
+
+/* ── Token breakdown with numbered annotations ─────────────── */
+
 .gp-teach-breakdown {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   margin-bottom: 1rem;
 }
 
 .gp-teach-row {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.5rem 0.65rem;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  transition: background 0.2s ease;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.2s ease;
+  cursor: default;
 }
 
-.gp-teach-row:hover {
-  background: rgba(255,255,255,0.06);
+/* Hover-highlight on breakdown rows */
+.gp-teach-row:hover,
+.gp-teach-row.gp-highlight {
+  background: rgba(237, 137, 54, 0.08);
+  border-color: rgba(237, 137, 54, 0.25);
 }
 
 /* Color-coded left border on rows */
@@ -2359,17 +2410,36 @@ pre.novel-annotated .read-novel-btn {
 .gp-teach-row[data-color="sapphire"]  { border-left: 3px solid #74c7ec; }
 .gp-teach-row[data-color="text"]      { border-left: 3px solid #585b70; }
 
+/* Numbered annotation badge */
+.gp-teach-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border-radius: 50%;
+  background: rgba(237, 137, 54, 0.2);
+  color: var(--color-accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: var(--font-code);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
 /* Code token in breakdown */
 .gp-teach-code {
   font-family: var(--font-code);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   white-space: pre;
-  background: rgba(0,0,0,0.25);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  min-width: 80px;
+  background: rgba(0,0,0,0.3);
+  padding: 0.25rem 0.55rem;
+  border-radius: 5px;
+  min-width: 60px;
   flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.06);
 }
 
 /* Row-level code coloring */
@@ -2405,18 +2475,28 @@ pre.novel-annotated .read-novel-btn {
 }
 
 .gp-teach-role {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--color-accent);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 0.15rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.1rem;
+  display: inline-block;
 }
 
 .gp-teach-tip {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: #a6adc8;
-  line-height: 1.45;
+  line-height: 1.5;
+}
+
+/* Structure note — "Big picture" */
+.gp-note-label {
+  font-weight: 700;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
 }
 
 /* ── Teach mode responsive ──────────────────────────────── */
@@ -2424,6 +2504,11 @@ pre.novel-annotated .read-novel-btn {
 @media (max-width: 768px) {
   .grammar-primer[data-mode="teach"] {
     padding: 1rem;
+  }
+
+  .gp-teach-title-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .gp-teach-row {
@@ -2434,6 +2519,10 @@ pre.novel-annotated .read-novel-btn {
   .gp-teach-code {
     min-width: unset;
     align-self: flex-start;
+  }
+
+  .gp-teach-badge {
+    display: none;
   }
 }
 

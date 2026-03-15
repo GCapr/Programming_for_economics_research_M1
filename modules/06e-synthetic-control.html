@@ -1021,6 +1021,52 @@ trade_openness     0.456     0.448       0.412
    [Path plot displayed]</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This demonstrates how to validate a synthetic control estimate through four key diagnostics: pre-treatment fit quality (RMSPE), covariate balance, weight sparsity, and leave-one-out robustness",
+                  "languages": {
+                    "python": [
+                      {"code": "pre_rmspe", "role": "Variable", "tip": "Root Mean Squared Prediction Error before treatment — measures how well the synthetic control tracks the treated unit.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the computed RMSPE.", "color": "peach"},
+                      {"code": "np.sqrt(", "role": "Function", "tip": "NumPy square root.", "color": "blue"},
+                      {"code": "np.mean(", "role": "Function", "tip": "Computes the mean of squared prediction errors.", "color": "blue"},
+                      {"code": "(treated_pre - synthetic_pre)**2", "role": "Expression", "tip": "Squared differences between actual and synthetic outcomes in the pre-treatment period.", "color": "pink"},
+                      {"code": "))", "role": "Parens", "tip": "", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "ereturn list", "role": "Command", "tip": "Lists all stored estimation results from the last synth command.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "matrix list", "role": "Command", "tip": "Displays a stored matrix.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "e(Y_balance)", "role": "Matrix", "tip": "Predictor balance table — shows treated vs synthetic values for each covariate.", "color": "lavender"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "matrix list", "role": "Command", "tip": "Displays stored results.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "e(W_weights)", "role": "Matrix", "tip": "Donor weights — shows which comparison units contribute to the synthetic control.", "color": "lavender"}
+                    ],
+                    "r": [
+                      {"code": "synth.tables", "role": "Object", "tip": "Summary tables from the Synth package.", "color": "pink"},
+                      {"code": "$", "role": "Accessor", "tip": "Extracts a named element from the list.", "color": "overlay"},
+                      {"code": "tab.pred", "role": "Property", "tip": "Predictor comparison table — treated vs synthetic on each covariate.", "color": "lavender"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "sum(", "role": "Function", "tip": "Counts TRUE values.", "color": "blue"},
+                      {"code": "synth.out$solution.w", "role": "Property", "tip": "The donor unit weights from the optimization.", "color": "lavender"},
+                      {"code": " > 0.05", "role": "Condition", "tip": "Checks which weights exceed 5% — more donors with meaningful weight means a genuine blend.", "color": "peach"},
+                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "SC diagnostics validate credibility: <strong>(1)</strong> a small pre-treatment RMSPE confirms the synthetic control closely tracks the treated unit; <strong>(2)</strong> covariate balance ensures predictors match; <strong>(3)</strong> weight sparsity checks whether the synthetic control is a genuine blend or just one comparison unit; <strong>(4)</strong> leave-one-out drops each major donor to verify the result is not driven by any single country."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h2 id="extensions">Modern Extensions</h2>
 
         <h3>Augmented Synthetic Control (Ben-Michael et al. 2021)</h3>
@@ -1095,6 +1141,37 @@ Pre-treatment RMSPE   234.56      154.23
 
 [Plot displayed showing point estimates with confidence bands]</pre></div>
           <div style="background:#f8f9fa;padding:1rem;border-top:1px solid #e5e7eb"><p style="font-weight:600;margin:0 0 1rem;color:#374151">Generated figures:</p><div style="background:white;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;padding:1rem"><svg viewBox="0 0 460 300" width="100%" xmlns="http://www.w3.org/2000/svg" style="font-family:sans-serif"><rect width="460" height="300" fill="white"/><text x="230" y="20" font-size="12" fill="#333" text-anchor="middle" font-weight="bold">Augmented Synthetic Control: Treatment Effects</text><line x1="60" y1="30" x2="60" y2="250" stroke="#333"/><line x1="60" y1="250" x2="440" y2="250" stroke="#333"/><line x1="60" y1="130" x2="440" y2="130" stroke="#999" stroke-width="0.5" stroke-dasharray="3,3"/><line x1="170" y1="30" x2="170" y2="250" stroke="#e74c3c" stroke-dasharray="5,3"/><text x="172" y="42" font-size="8" fill="#e74c3c">1990</text><text x="15" y="140" font-size="10" fill="#333" text-anchor="middle" transform="rotate(-90,15,140)">ATT</text><text x="250" y="285" font-size="10" fill="#333" text-anchor="middle">Year</text><text x="55" y="50" font-size="8" fill="#666" text-anchor="end">1000</text><text x="55" y="133" font-size="8" fill="#666" text-anchor="end">0</text><text x="55" y="210" font-size="8" fill="#666" text-anchor="end">-2000</text><text x="55" y="245" font-size="8" fill="#666" text-anchor="end">-3000</text><text x="95" y="264" font-size="7" fill="#666">1986</text><text x="170" y="264" font-size="7" fill="#666">1990</text><text x="300" y="264" font-size="7" fill="#666">1995</text><text x="420" y="264" font-size="7" fill="#666">2000</text><polygon points="170,128 195,125 220,120 245,116 270,108 295,95 320,88 345,75 370,68 395,58 420,50 420,78 395,88 370,100 345,108 320,118 295,125 270,135 245,142 220,148 195,152 170,150" fill="#1f77b4" opacity="0.15"/><polyline points="170,138 195,140 220,135 245,130 270,122 295,110 320,103 345,92 370,84 395,73 420,64" fill="none" stroke="#1f77b4" stroke-width="2"/><polyline points="80,132 95,128 110,135 125,130 140,133 155,128" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="3,2"/><circle cx="195" cy="140" r="3" fill="#1f77b4"/><circle cx="245" cy="130" r="3" fill="#1f77b4"/><circle cx="295" cy="110" r="3" fill="#1f77b4"/><circle cx="345" cy="92" r="3" fill="#1f77b4"/><circle cx="395" cy="73" r="3" fill="#1f77b4"/><circle cx="420" cy="64" r="3" fill="#1f77b4"/><rect x="280" y="270" width="12" height="3" fill="#1f77b4"/><text x="296" y="275" font-size="8" fill="#333">ATT with 95% CI</text></svg></div></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This demonstrates the augmented synthetic control method, which combines standard SC with ridge regression to correct for remaining pre-treatment imbalance and provide valid inference",
+                  "languages": {
+                    "r": [
+                      {"code": "library", "role": "Keyword", "tip": "Loads an R package.", "color": "mauve"},
+                      {"code": "(augsynth)", "role": "Package", "tip": "The augsynth package for augmented synthetic control methods.", "color": "yellow"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "asyn", "role": "Variable", "tip": "Stores the augmented synthetic control result.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "augsynth(", "role": "Function", "tip": "Fits an augmented synthetic control model.", "color": "blue"},
+                      {"code": "outcome ~ treatment", "role": "Formula", "tip": "Maps outcome to treatment indicator.", "color": "green"},
+                      {"code": " | ", "role": "Operator", "tip": "Separates the main formula from auxiliary covariates.", "color": "peach"},
+                      {"code": "covariate1 + covariate2", "role": "Covariates", "tip": "Auxiliary predictors used by the ridge augmentation to improve pre-treatment fit.", "color": "sky"},
+                      {"code": ",\n                 ", "role": "Separator", "tip": "", "color": "text"},
+                      {"code": "progfunc = \"Ridge\"", "role": "Argument", "tip": "Uses ridge regression to augment SC weights — corrects for any remaining imbalance after weighting.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Augmented SC improves on standard SC by adding a <strong>ridge regression</strong> bias-correction step: after constructing SC weights, it uses an outcome model to adjust for any remaining pre-treatment imbalance. Set <code>progfunc = \"None\"</code> for standard SC, or <code>\"Ridge\"</code> for augmented SC. The augmented version provides valid <strong>standard errors</strong> and confidence intervals, unlike basic SC which typically relies on permutation inference."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <h3>Synthetic Difference-in-Differences (Arkhangelsky et al. 2021)</h3>
@@ -1277,6 +1354,62 @@ Time weights (lambda):
  - Synthetic control path (dashed)
  - Treatment time vertical line
  - Confidence bands]</pre></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This demonstrates synthetic difference-in-differences (SDID), which combines SC unit weights with DiD time weights to construct a doubly-robust counterfactual that is more efficient than either method alone",
+                  "languages": {
+                    "python": [
+                      {"code": "from", "role": "Keyword", "tip": "Import statement.", "color": "mauve"},
+                      {"code": " synthdid.synthdid ", "role": "Module", "tip": "The synthdid Python package.", "color": "yellow"},
+                      {"code": "import", "role": "Keyword", "tip": "Imports a specific class.", "color": "mauve"},
+                      {"code": " SynthDID", "role": "Class", "tip": "The Synthetic DiD estimator class.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "sdid", "role": "Variable", "tip": "Stores the SDID estimator object.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Creates the estimator.", "color": "peach"},
+                      {"code": "SynthDID(", "role": "Constructor", "tip": "Initializes SDID with the outcome matrix and treatment indicators.", "color": "blue"},
+                      {"code": "Y, treatment_matrix", "role": "Arguments", "tip": "Y is the units-by-time outcome matrix; treatment_matrix flags treated unit-periods.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "sdid", "role": "Command", "tip": "Synthetic DiD estimator command.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome", "role": "Depvar", "tip": "The outcome variable (e.g., GDP).", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "unit_id year", "role": "Panel IDs", "tip": "Unit and time identifiers for the panel structure.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "treatment", "role": "Treatment", "tip": "Binary indicator for treated unit-periods.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "vce(bootstrap)", "role": "Option", "tip": "Bootstrap standard errors for inference.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "library", "role": "Keyword", "tip": "Loads a package.", "color": "mauve"},
+                      {"code": "(synthdid)", "role": "Package", "tip": "The synthdid R package by Arkhangelsky et al.", "color": "yellow"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "setup", "role": "Variable", "tip": "Stores the prepared panel matrices.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "panel.matrices(", "role": "Function", "tip": "Converts panel data into the matrix format needed by synthdid.", "color": "blue"},
+                      {"code": "df, unit = unit_id, time = year, outcome = outcome, treatment = treatment", "role": "Arguments", "tip": "Specifies the panel structure — unit, time, outcome, and treatment columns.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "sdid_est", "role": "Variable", "tip": "The SDID point estimate.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "synthdid_estimate(", "role": "Function", "tip": "Computes the SDID treatment effect.", "color": "blue"},
+                      {"code": "setup$Y, setup$N0, setup$T0", "role": "Arguments", "tip": "Outcome matrix, number of control units, and number of pre-treatment periods.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "SDID combines the strengths of both SC and DiD: it uses <strong>unit weights</strong> (like SC) to match control units to the treated unit, and <strong>time weights</strong> (unique to SDID) to focus on pre-treatment periods most predictive of post-treatment outcomes. This double-weighting makes SDID more efficient than either method alone. Use <code>did_estimate()</code> and <code>sc_estimate()</code> from the same package to compare all three estimators on identical data."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="citation">

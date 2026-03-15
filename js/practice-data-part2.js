@@ -16,6 +16,7 @@
         type: "read",
         title: "Targeted vs Blanket Drop of Missing Values",
         prompt: "How many rows does `result` contain?",
+        hint: "Focus on the <code>subset</code> parameter in <code>dropna()</code> — it controls which column's missing values trigger row removal.",
         lang: "python",
         code: "import pandas as pd\n\ndf = pd.DataFrame({\n    'income':    [50000, None, 72000, None, 61000],\n    'education': [12,    16,   None,  14,   18]\n})\nresult = df.dropna(subset=['income'])\nprint(len(result))",
         options: [
@@ -32,6 +33,7 @@
         type: "read",
         title: "Type Conversion in Stata",
         prompt: "What does the `destring` command do here?",
+        hint: "The command name <code>destring</code> literally means 'remove the string-ness.' Look at what <code>ignore()</code> does to the formatting characters.",
         lang: "stata",
         code: "list income in 1/3\n* income: \"45000\" \"62,500\" \".\"\n\ndestring income, replace ignore(\",\")",
         options: [
@@ -43,27 +45,29 @@
         correct: 1,
         explanation: "destring converts a string variable to numeric. The ignore(\",\") option tells Stata to strip commas before conversion. The entry \".\" becomes Stata's numeric missing value. This is a common cleaning step when data imported from CSV has formatting characters."
       },
-      // 3 — bug (Python): forgetting reassignment with dropna
+      // 3 — bug (R): forgetting reassignment with na.omit
       {
         type: "bug",
         title: "Why Are Missing Values Still There?",
         prompt: "A student runs this code but finds that `df` still contains missing values. What is the bug?",
-        lang: "python",
-        code: "import pandas as pd\n\ndf = pd.DataFrame({'wage': [45000, None, 52000, None]})\ndf.dropna(subset=['wage'])\nprint(df)",
+        hint: "Look carefully at what happens to the result of the subsetting operation. Is it being stored anywhere?",
+        lang: "r",
+        code: "df <- data.frame(wage = c(45000, NA, 52000, NA))\ndf[complete.cases(df$wage), ]\nprint(df)",
         options: [
-          "dropna() does not work on numeric columns",
-          "The result of dropna() is not saved — need df = df.dropna(...) or inplace=True",
-          "subset should be a string, not a list",
-          "None is not recognized as missing — should use np.nan"
+          "complete.cases() does not work on numeric columns",
+          "The result of subsetting is not saved — need df <- df[complete.cases(df$wage), ]",
+          "complete.cases should use is.na instead",
+          "NA is not recognized as missing — should use NULL"
         ],
         correct: 1,
-        explanation: "In pandas, most methods return a new DataFrame rather than modifying in place. Writing df.dropna(subset=['wage']) without assignment discards the result. The fix is df = df.dropna(subset=['wage']) or df.dropna(subset=['wage'], inplace=True)."
+        explanation: "In R, subsetting with df[complete.cases(df$wage), ] returns a new data frame but does not modify df in place. Without assigning the result back (df <- df[complete.cases(df$wage), ]), the original df is unchanged. This parallels the pandas pitfall of forgetting reassignment with .dropna()."
       },
       // 4 — bug (R): string method on wrong type
       {
         type: "bug",
         title: "String Cleaning Fails on Numeric Column",
         prompt: "This R code throws an error. Why?",
+        hint: "Check the data type of <code>zipcode</code>. What type does <code>data.frame()</code> create from plain numbers? Does <code>str_pad</code> expect that type?",
         lang: "r",
         code: "library(dplyr)\nlibrary(stringr)\n\ndf <- data.frame(zipcode = c(75001, 75002, 75003))\ndf <- df %>%\n  mutate(zipcode = str_pad(zipcode, width = 5, pad = \"0\"))",
         options: [
@@ -80,6 +84,7 @@
         type: "reorder",
         title: "Order a Basic Cleaning Pipeline",
         prompt: "Arrange these lines to: load data, drop missing income, convert education to integer, then save.",
+        hint: "Think about why you need to drop missing values <b>before</b> converting types. What happens if you try <code>.astype(int)</code> on a column with NaN?",
         lang: "python",
         lines: [
           "df.to_csv('cleaned.csv', index=False)",
@@ -95,6 +100,7 @@
         type: "reorder",
         title: "Order a Stata Cleaning Workflow",
         prompt: "Arrange these Stata commands in the correct order to clean income data.",
+        hint: "Start by loading data. You must convert from string to numeric (<code>destring</code>) before you can use numeric operations like <code>drop if missing()</code> or <code>round()</code>.",
         lang: "stata",
         lines: [
           "drop if missing(income)",
@@ -109,7 +115,8 @@
       {
         type: "fill",
         title: "Mean Imputation in Python",
-        prompt: "Fill in the gap to replace missing income values with the column mean.",
+        prompt: "Fill in the gap to replace missing income values with the column mean. Type an expression using <code>df['income']</code> and a pandas method.",
+        hint: "Use the <code>.mean()</code> method on <code>df['income']</code> to compute the average of non-missing values.",
         lang: "python",
         codeTemplate: "import pandas as pd\nimport numpy as np\n\ndf = pd.DataFrame({'income': [50000, np.nan, 72000, np.nan, 61000]})\ndf['income'] = df['income'].fillna(___FILL___)",
         gaps: {
@@ -125,6 +132,7 @@
         type: "match",
         title: "Cleaning Operations Across Languages",
         prompt: "Match each cleaning task with the correct code.",
+        hint: "Look for language-specific keywords: <code>dropna</code> and <code>fillna</code> are pandas (Python), <code>destring</code> is Stata, and <code>trimws</code> is R.",
         pairs: [
           { left: "Drop rows where wage is missing", leftLang: "text", right: "df = df.dropna(subset=['wage'])", rightLang: "python" },
           { left: "Convert string to numeric in Stata", leftLang: "text", right: "destring wage, replace", rightLang: "stata" },
@@ -143,6 +151,7 @@
         type: "read",
         title: "String Cleaning Chain in Pandas",
         prompt: "What does the name column look like after this chain?",
+        hint: "Trace each step in order: <code>strip()</code> removes edge spaces, <code>lower()</code> lowercases, and the regex <code>\\s+</code> matches one or more whitespace characters.",
         lang: "python",
         code: "import pandas as pd\n\ndf = pd.DataFrame({'name': ['  John  DOE ', ' jane   smith']})\ndf['name'] = (df['name']\n    .str.strip()\n    .str.lower()\n    .str.replace(r'\\s+', ' ', regex=True))\nprint(df['name'].tolist())",
         options: [
@@ -159,6 +168,7 @@
         type: "read",
         title: "Conditional Assignment with case_when",
         prompt: "What value does income_group take when income is 55000?",
+        hint: "<code>case_when</code> evaluates conditions top to bottom and returns the value for the first condition that is TRUE. Check which range 55000 falls into.",
         lang: "r",
         code: "library(dplyr)\n\ndf <- df %>% mutate(\n  income_group = case_when(\n    income < 30000            ~ \"low\",\n    income >= 30000 & income < 60000 ~ \"middle\",\n    income >= 60000           ~ \"high\",\n    TRUE                      ~ \"unknown\"\n  )\n)",
         options: [
@@ -175,6 +185,7 @@
         type: "bug",
         title: "Why Doesn't the Regex Work?",
         prompt: "A student tries to remove all digits from a column but it only removes the literal string '\\d+'. What is the bug?",
+        hint: "Think about how <code>str.replace()</code> interprets the first argument. By default in recent pandas, is it treated as a regex or a literal string?",
         lang: "python",
         code: "import pandas as pd\n\ndf = pd.DataFrame({'address': ['123 Main St', '456 Oak Ave']})\ndf['address'] = df['address'].str.replace('\\d+', '')\nprint(df['address'].tolist())",
         options: [
@@ -191,6 +202,7 @@
         type: "bug",
         title: "Too Many Observations Dropped",
         prompt: "A student wants to drop observations where income is missing, but loses far more rows than expected. What is the bug?",
+        hint: "Look at what variables are inside the <code>missing()</code> function. How does <code>missing()</code> behave when given multiple variables?",
         lang: "stata",
         code: "use survey.dta, clear\n* Want to keep only rows where income is non-missing\ndrop if missing(income, education, age, region)\ncount",
         options: [
@@ -207,6 +219,7 @@
         type: "reorder",
         title: "Imputation with Missing Indicator",
         prompt: "Arrange these lines to create a missing indicator BEFORE imputing income with the median.",
+        hint: "The key constraint is that you must record which values are missing <b>before</b> filling them. Once you <code>fillna()</code>, you cannot tell which values were originally NaN.",
         lang: "python",
         lines: [
           "df['income'] = df['income'].fillna(df['income'].median())",
@@ -222,6 +235,7 @@
         type: "reorder",
         title: "Remove Duplicates then Winsorize in R",
         prompt: "Arrange these R commands to deduplicate on firm_id, compute quantile bounds, then clip outliers.",
+        hint: "Deduplication must come first so repeated firms do not distort the quantiles. Then compute bounds, then clip with <code>pmin</code>/<code>pmax</code>.",
         lang: "r",
         lines: [
           "df$revenue <- pmin(pmax(df$revenue, q01), q99)",
@@ -232,26 +246,28 @@
         correctOrder: [3, 1, 2, 0],
         explanation: "First deduplicate so that repeated firms do not distort the quantile computation. Then compute the 1st and 99th percentiles. Finally, clip revenue to those bounds using pmin/pmax. Computing quantiles on duplicated data would give biased bounds if some firms appear many times."
       },
-      // 7 — fill (Python): loc-based conditional assignment
+      // 7 — fill (Stata): conditional replacement with replace if
       {
         type: "fill",
-        title: "Conditional Assignment with .loc",
-        prompt: "Fill in the gap to set income to NaN for all rows where income is negative.",
-        lang: "python",
-        codeTemplate: "import numpy as np\nimport pandas as pd\n\ndf = pd.DataFrame({'income': [50000, -999, 72000, -1, 61000]})\n___LOC___ = np.nan",
+        title: "Conditional Replacement in Stata",
+        prompt: "Fill in the gap to set income to missing for all observations where income is negative. Type a <code>replace</code> command using <code>.</code> for missing and an <code>if</code> condition.",
+        hint: "Stata syntax: <code>replace varname = value if condition</code>. The missing value in Stata is represented by a dot (<code>.</code>).",
+        lang: "stata",
+        codeTemplate: "* income contains: 50000, -999, 72000, -1, 61000\n___REPLACE___",
         gaps: {
-          "LOC": {
-            answer: "df.loc[df['income'] < 0, 'income']",
-            accept: ["df.loc[df['income'] < 0, 'income']", "df.loc[df[\"income\"] < 0, \"income\"]", "df.loc[df.income < 0, 'income']"]
+          "REPLACE": {
+            answer: "replace income = . if income < 0",
+            accept: ["replace income = . if income < 0", "replace income=. if income<0", "replace income = . if income<0"]
           }
         },
-        explanation: "df.loc[condition, column] selects rows matching the boolean condition and the specified column, then assigns the value. Here df['income'] < 0 creates a boolean mask, and 'income' targets the column to modify. This is the standard pandas idiom for conditional assignment."
+        explanation: "replace income = . if income < 0 sets income to Stata's numeric missing value (.) for observations where income is negative. The if qualifier restricts the replacement to rows meeting the condition. This is equivalent to df.loc[df['income'] < 0, 'income'] = np.nan in pandas."
       },
       // 8 — match: Python vs R cleaning equivalents
       {
         type: "match",
         title: "Cleaning Equivalents: Python vs R",
         prompt: "Match each Python cleaning operation with its R equivalent.",
+        hint: "Look for functional parallels: <code>str.lower()</code> matches <code>tolower()</code>, <code>fillna()</code> matches direct assignment with <code>is.na()</code>, etc.",
         pairs: [
           { left: "df['x'].str.lower()", leftLang: "python", right: "tolower(df$x)", rightLang: "r" },
           { left: "df['x'].fillna(df['x'].mean())", leftLang: "python", right: "df$x[is.na(df$x)] <- mean(df$x, na.rm=TRUE)", rightLang: "r" },
@@ -270,6 +286,7 @@
         type: "read",
         title: "Conditional Replacement with np.where",
         prompt: "What values does the 'wage_clean' column contain after this code?",
+        hint: "<code>np.where(condition, value_if_true, value_if_false)</code> — check each wage value against <code>> 0</code>. Pay special attention to <code>0</code> itself.",
         lang: "python",
         code: "import pandas as pd\nimport numpy as np\n\ndf = pd.DataFrame({'wage': [50000, -999, 72000, 0, 61000]})\ndf['wage_clean'] = np.where(\n    df['wage'] > 0,\n    df['wage'],\n    np.nan\n)\nprint(df['wage_clean'].tolist())",
         options: [
@@ -286,6 +303,7 @@
         type: "read",
         title: "Merge Diagnostics in Stata",
         prompt: "What does the tabulation of _merge tell you?",
+        hint: "In Stata, <code>_merge</code> has three categories: master only (in left dataset only), using only (in right dataset only), and matched (in both). Read the frequency table carefully.",
         lang: "stata",
         code: "use firms.dta, clear\nmerge 1:1 firm_id using financials.dta\ntab _merge\n\n*  _merge     |   Freq.\n* -----------+---------\n*  master only|     150\n*  matched    |     800\n*  using only |      50",
         options: [
@@ -302,6 +320,7 @@
         type: "bug",
         title: "Imputation Destroys Information",
         prompt: "A student imputes missing wages with the mean. Their regression coefficient on wage later has a smaller standard error than expected. What went wrong?",
+        hint: "Think about what happens to the distribution of wage when 30% of values are all replaced by the same number. How does that affect variance?",
         lang: "python",
         code: "import pandas as pd\n\ndf = pd.read_csv('survey.csv')\n# 30% of wages are missing\ndf['wage'] = df['wage'].fillna(df['wage'].mean())\n\n# Later: regression uses wage as predictor\n# Coefficient SE is suspiciously small",
         options: [
@@ -318,6 +337,7 @@
         type: "bug",
         title: "String Cleaning on the Wrong Type",
         prompt: "This code produces unexpected results when cleaning firm IDs. What is the bug?",
+        hint: "Check the type of <code>firm_id</code>. When R coerces a numeric (double) to character, the representation may not be what you expect (e.g., trailing decimals).",
         lang: "r",
         code: "library(dplyr)\nlibrary(stringr)\n\ndf <- data.frame(firm_id = c(1001, 2002, 3003))\ndf <- df %>%\n  mutate(firm_id = str_replace(firm_id, \"00\", \"-\"))",
         options: [
@@ -334,6 +354,7 @@
         type: "reorder",
         title: "Complete Data Cleaning Pipeline",
         prompt: "Arrange these steps in the correct order for a robust cleaning pipeline.",
+        hint: "Deduplicate first so stats are not distorted. Create the missing indicator before imputation. Compute quantile bounds before clipping.",
         lang: "python",
         lines: [
           "df = df.drop_duplicates(subset=['firm_id', 'year'])",
@@ -350,6 +371,7 @@
         type: "reorder",
         title: "Stata Cleaning with Merge Diagnostics",
         prompt: "Arrange these Stata commands to merge datasets and verify the result.",
+        hint: "The workflow is: load data, merge, inspect <code>_merge</code>, keep only matched observations, then clean up the <code>_merge</code> variable.",
         lang: "stata",
         lines: [
           "drop if _merge != 3",
@@ -361,26 +383,28 @@
         correctOrder: [3, 1, 2, 0, 4],
         explanation: "Load the master data, perform the merge, tabulate _merge to inspect match quality, drop unmatched observations (keeping only _merge == 3), then drop the _merge variable itself to clean up. Always inspect _merge before deciding which observations to keep."
       },
-      // 7 — fill (Python): winsorization
+      // 7 — fill (R): winsorization
       {
         type: "fill",
-        title: "Winsorize Outliers in Python",
-        prompt: "Fill in the gap to clip revenue to the 1st and 99th percentiles.",
-        lang: "python",
-        codeTemplate: "import pandas as pd\n\ndf = pd.read_csv('firms.csv')\nq01 = df['revenue'].quantile(0.01)\nq99 = df['revenue'].quantile(0.99)\ndf['revenue'] = df['revenue'].___CLIP___",
+        title: "Winsorize Outliers in R",
+        prompt: "Fill in the gap to clip revenue to the 1st and 99th percentiles using <code>pmin</code> and <code>pmax</code>. Use the variables <code>df$revenue</code>, <code>q01</code>, and <code>q99</code>.",
+        hint: "Nest <code>pmax()</code> inside <code>pmin()</code>: first set a floor with <code>pmax(df$revenue, q01)</code>, then cap the ceiling with <code>pmin(..., q99)</code>.",
+        lang: "r",
+        codeTemplate: "q01 <- quantile(df$revenue, 0.01, na.rm = TRUE)\nq99 <- quantile(df$revenue, 0.99, na.rm = TRUE)\ndf$revenue <- ___CLIP___",
         gaps: {
           "CLIP": {
-            answer: "clip(lower=q01, upper=q99)",
-            accept: ["clip(lower=q01, upper=q99)", "clip(q01, q99)", "clip(lower=q01,upper=q99)"]
+            answer: "pmin(pmax(df$revenue, q01), q99)",
+            accept: ["pmin(pmax(df$revenue, q01), q99)", "pmin(pmax(df$revenue,q01),q99)"]
           }
         },
-        explanation: "The .clip(lower=q01, upper=q99) method caps values below q01 at q01 and above q99 at q99. This is winsorization — it preserves extreme observations rather than dropping them, reducing the influence of outliers without losing sample size."
+        explanation: "pmax(df$revenue, q01) replaces values below q01 with q01, and pmin(..., q99) then caps values above q99 at q99. The nesting order matters: pmax first sets the floor, pmin then sets the ceiling. This is the R equivalent of pandas .clip(lower=q01, upper=q99)."
       },
       // 8 — match: diagnosing data quality issues
       {
         type: "match",
         title: "Data Quality Checks Across Languages",
         prompt: "Match each data quality check with the correct implementation.",
+        hint: "Identify the language of each code snippet first (Python uses <code>df[...]</code>, Stata uses <code>tab</code>, R uses <code>colSums</code>), then match by the operation described.",
         pairs: [
           { left: "Check for duplicate keys", leftLang: "text", right: "df.duplicated(subset=['firm_id', 'year']).sum()", rightLang: "python" },
           { left: "Inspect merge quality", leftLang: "text", right: "tab _merge", rightLang: "stata" },
@@ -405,6 +429,7 @@
         type: "read",
         title: "OLS with Robust Standard Errors",
         prompt: "What type of standard errors does this regression use?",
+        hint: "Look at the <code>cov_type</code> parameter passed to <code>.fit()</code>. HC1 is a specific type of variance-covariance estimator.",
         lang: "python",
         code: "import statsmodels.formula.api as smf\n\nmodel = smf.ols('wage ~ education + experience', data=df)\nresults = model.fit(cov_type='HC1')\nprint(results.summary())",
         options: [
@@ -421,6 +446,7 @@
         type: "read",
         title: "Interpreting Stata Regression Output",
         prompt: "What does this Stata command estimate?",
+        hint: "The <code>reg</code> command runs OLS. The <code>i.</code> prefix creates indicator (dummy) variables. The <code>robust</code> option affects standard errors.",
         lang: "stata",
         code: "reg wage education experience i.female, robust",
         options: [
@@ -437,6 +463,7 @@
         type: "bug",
         title: "Overconfident Inference",
         prompt: "A student finds p < 0.01 but their advisor says the standard errors are wrong. What is the bug?",
+        hint: "Compare this <code>.fit()</code> call to the previous exercise. What is missing from the arguments?",
         lang: "python",
         code: "import statsmodels.formula.api as smf\n\nmodel = smf.ols('income ~ education + age', data=df)\nresults = model.fit()\nprint(results.pvalues)",
         options: [
@@ -453,6 +480,7 @@
         type: "bug",
         title: "Wrong Interaction Term Syntax",
         prompt: "A student wants to include education and its interaction with female, but NOT the main effect of female. The model includes female anyway. Why?",
+        hint: "In R formulas, <code>*</code> and <code>:</code> have different meanings. One includes main effects automatically, the other does not.",
         lang: "r",
         code: "model <- lm(wage ~ education * female, data = df)\nsummary(model)",
         options: [
@@ -469,6 +497,7 @@
         type: "reorder",
         title: "Order an OLS Estimation Workflow",
         prompt: "Arrange these lines to run an OLS regression with robust SEs and display results.",
+        hint: "The workflow is: import, define the model, fit with robust SEs, then print. The <code>.ols()</code> call defines the model; <code>.fit()</code> actually estimates it.",
         lang: "python",
         lines: [
           "print(results.summary())",
@@ -479,26 +508,28 @@
         correctOrder: [2, 3, 1, 0],
         explanation: "First import the module, then specify the model formula, then fit with robust standard errors, then display results. The .fit() step is where estimation actually happens — the .ols() call only defines the model structure."
       },
-      // 6 — reorder (Stata): regression with table export
+      // 6 — reorder (R): regression with table export
       {
         type: "reorder",
-        title: "Stata Regression and Export Workflow",
-        prompt: "Arrange these Stata commands to estimate two models and export a comparison table.",
-        lang: "stata",
+        title: "R Regression and Export Workflow",
+        prompt: "Arrange these R commands to estimate two models and export a comparison table.",
+        hint: "Load the package first, then estimate both models (simple before complex), and finally export. <code>msummary()</code> needs the fitted model objects to exist before it can create the table.",
+        lang: "r",
         lines: [
-          "esttab m1 m2 using \"table.tex\", se star(* 0.1 ** 0.05 *** 0.01)",
-          "eststo m1: reg wage education, robust",
-          "eststo m2: reg wage education experience i.female, robust",
-          "eststo clear"
+          "msummary(list(m1, m2), output = 'table.tex', stars = c('*' = 0.1, '**' = 0.05, '***' = 0.01))",
+          "m1 <- lm(wage ~ education, data = df)",
+          "m2 <- lm(wage ~ education + experience + female, data = df)",
+          "library(modelsummary)"
         ],
         correctOrder: [3, 1, 2, 0],
-        explanation: "First clear any stored estimates, then estimate and store each model with eststo, then export both to a LaTeX table with esttab. The se option displays standard errors below coefficients, and star() defines significance thresholds."
+        explanation: "First load the modelsummary package, then estimate each model with lm(), then export both to a LaTeX table with msummary(). The stars argument defines significance thresholds. modelsummary is the R equivalent of Stata's esttab for producing publication-ready tables."
       },
       // 7 — fill (Stata): clustered SEs
       {
         type: "fill",
         title: "Clustered Standard Errors in Stata",
-        prompt: "Fill in the gap to cluster standard errors at the firm level.",
+        prompt: "Fill in the gap to cluster standard errors at the firm level. Type <code>cluster(firm_id)</code> or <code>vce(cluster firm_id)</code>.",
+        hint: "Stata syntax for clustering: <code>cluster(varname)</code> after the comma in a <code>reg</code> command.",
         lang: "stata",
         codeTemplate: "reg wage education experience, ___CLUSTER___",
         gaps: {
@@ -514,6 +545,7 @@
         type: "match",
         title: "Regression Commands Across Languages",
         prompt: "Match each estimation task with the correct command.",
+        hint: "Identify the language of each command: <code>smf.ols</code> is Python, <code>xtreg</code> is Stata, <code>glm</code> is R. Then match by the estimation method described.",
         pairs: [
           { left: "OLS with robust SEs", leftLang: "text", right: "smf.ols(...).fit(cov_type='HC1')", rightLang: "python" },
           { left: "Fixed effects regression", leftLang: "text", right: "xtreg y x, fe robust", rightLang: "stata" },
@@ -531,6 +563,7 @@
         type: "read",
         title: "Clustered Standard Errors in Python",
         prompt: "What does the cov_kwds argument control?",
+        hint: "Look at <code>cov_type='cluster'</code> together with <code>cov_kwds</code>. The keyword arguments configure <b>how</b> the clustering is done — specifically which variable defines the groups.",
         lang: "python",
         code: "import statsmodels.formula.api as smf\n\nmodel = smf.ols('revenue ~ rd_spending + capital', data=df)\nresults = model.fit(\n    cov_type='cluster',\n    cov_kwds={'groups': df['firm_id']}\n)\nprint(results.summary())",
         options: [
@@ -547,6 +580,7 @@
         type: "read",
         title: "Two-Way Fixed Effects in R",
         prompt: "What fixed effects are included in this model?",
+        hint: "In <code>feols</code>, variables after the <code>|</code> are fixed effects, and <code>cluster = ~firm_id</code> controls standard error computation. These are separate concepts.",
         lang: "r",
         code: "library(fixest)\n\nmodel <- feols(\n  log_wage ~ education + experience | firm_id + year,\n  cluster = ~firm_id,\n  data = panel\n)",
         options: [
@@ -563,6 +597,7 @@
         type: "bug",
         title: "Logit Coefficient Misinterpretation",
         prompt: "A student reports: 'One more year of education increases the probability of being hired by 0.45.' Is this correct?",
+        hint: "Think about what logit coefficients actually measure. Are they in probability units or in some other scale?",
         lang: "python",
         code: "import statsmodels.formula.api as smf\n\nmodel = smf.logit('hired ~ education + experience', data=df)\nresults = model.fit()\nprint(results.params)\n# education    0.45\n# experience   0.12",
         options: [
@@ -579,6 +614,7 @@
         type: "bug",
         title: "Post-Treatment Bias",
         prompt: "A student studies the effect of a job training program on wages. Their advisor says one control variable is problematic. Which one?",
+        hint: "Look at when each variable was measured relative to the treatment (training in 2020). Controlling for a variable that is <b>affected by</b> the treatment introduces bias.",
         lang: "stata",
         code: "* Training program assigned randomly in 2020\nreg wage_2021 training age education job_title_2021, robust",
         options: [
@@ -595,6 +631,7 @@
         type: "reorder",
         title: "Logit Estimation with Marginal Effects in R",
         prompt: "Arrange these lines to estimate a logit model and compute average marginal effects.",
+        hint: "Load the package first, then estimate with <code>glm</code>, then compute marginal effects with <code>margins()</code>, and finally display. You need the model object before you can pass it to <code>margins()</code>.",
         lang: "r",
         lines: [
           "summary(ame)",
@@ -605,27 +642,28 @@
         correctOrder: [3, 2, 1, 0],
         explanation: "Load the margins package, estimate the logit model with glm(family = binomial), compute average marginal effects with margins(), then display the results. Marginal effects convert log-odds coefficients into interpretable probability changes, which is essential for logit/probit models."
       },
-      // 6 — reorder (Python): panel regression
+      // 6 — reorder (Stata): panel regression with fixed effects
       {
         type: "reorder",
-        title: "Panel Data Regression in Python",
-        prompt: "Arrange these lines to set up a panel index and run a fixed-effects regression.",
-        lang: "python",
+        title: "Panel Data Regression in Stata",
+        prompt: "Arrange these Stata commands to declare panel structure and run a fixed-effects regression.",
+        hint: "You must <code>use</code> the data before <code>xtset</code>, and <code>xtset</code> before <code>xtreg</code>. Display results last.",
+        lang: "stata",
         lines: [
-          "print(results.summary)",
-          "results = model.fit(cov_type='clustered', cluster_entity=True)",
-          "from linearmodels.panel import PanelOLS",
-          "model = PanelOLS.from_formula('wage ~ 1 + education + experience + EntityEffects', data=df)",
-          "df = df.set_index(['firm_id', 'year'])"
+          "estimates table m1, se",
+          "eststo m1: xtreg wage education experience, fe cluster(firm_id)",
+          "xtset firm_id year",
+          "use firm_panel.dta, clear"
         ],
-        correctOrder: [2, 4, 3, 1, 0],
-        explanation: "Import PanelOLS, set a multi-index on the panel identifiers, specify the model with EntityEffects, fit with clustered SEs at the entity level, then display. The multi-index tells linearmodels which dimension is the entity and which is time."
+        correctOrder: [3, 2, 1, 0],
+        explanation: "Load the data, declare panel structure with xtset (entity and time identifiers), run the fixed-effects regression with xtreg and cluster SEs at the firm level, then display results. xtset tells Stata which variable identifies units and which identifies time periods."
       },
       // 7 — fill (R): interaction term
       {
         type: "fill",
         title: "Interaction Term in R Formula",
-        prompt: "Fill in the gap to include education, female, AND their interaction in the model.",
+        prompt: "Fill in the gap to include education, female, AND their interaction in the model. Type the R formula shorthand using <code>education</code> and <code>female</code>.",
+        hint: "In R, the <code>*</code> operator between two variables expands to both main effects plus their interaction: <code>A * B</code> = <code>A + B + A:B</code>.",
         lang: "r",
         codeTemplate: "model <- lm(wage ~ ___FORMULA___, data = df)",
         gaps: {
@@ -641,6 +679,7 @@
         type: "match",
         title: "Interpreting Estimation Output",
         prompt: "Match each statistic with what it tells you.",
+        hint: "Think about what each statistic measures: R-squared is about fit, F-statistic is about joint significance, coefficient/SE gives individual significance, and clusters affect inference.",
         pairs: [
           { left: "R-squared = 0.02", leftLang: "text", right: "The model explains 2% of variance in the outcome — common in micro data", rightLang: "text" },
           { left: "F-statistic p < 0.001", leftLang: "text", right: "The predictors are jointly significant — at least one coefficient is nonzero", rightLang: "text" },
@@ -659,6 +698,7 @@
         type: "read",
         title: "Formula Syntax: * vs : in Python",
         prompt: "How many estimated coefficients does this model have (including intercept)?",
+        hint: "Count the terms: the intercept is always implicit in <code>statsmodels</code> formulas. The <code>:</code> operator creates only the interaction, not the main effects.",
         lang: "python",
         code: "import statsmodels.formula.api as smf\n\nmodel = smf.ols('wage ~ education + experience + education:experience', data=df)\nresults = model.fit(cov_type='HC1')",
         options: [
@@ -675,6 +715,7 @@
         type: "read",
         title: "Exporting Regression Tables in Stata",
         prompt: "What does this esttab command produce?",
+        hint: "Look at the <code>keep()</code> option — it controls which coefficients appear in the table. Also note the <code>using</code> clause specifies the output file format.",
         lang: "stata",
         code: "eststo m1: reg wage education, robust\neststo m2: reg wage education experience, robust\neststo m3: reg wage education experience i.female, robust\n\nesttab m1 m2 m3 using \"table1.tex\", replace ///\n  se star(* 0.1 ** 0.05 *** 0.01) ///\n  keep(education experience) ///\n  title(\"Wage Regressions\")",
         options: [
@@ -691,6 +732,7 @@
         type: "bug",
         title: "Missing Cluster Correction",
         prompt: "A student studies firm-level panel data but finds suspiciously small p-values. What is the bug?",
+        hint: "With 500 firms observed 10 times each, errors within the same firm are likely correlated. Does <code>HC1</code> handle that kind of correlation?",
         lang: "python",
         code: "import statsmodels.formula.api as smf\n\n# Panel: 500 firms observed over 10 years = 5000 obs\nmodel = smf.ols('revenue ~ rd_spending + capital', data=panel_df)\nresults = model.fit(cov_type='HC1')\nprint(results.pvalues)",
         options: [
@@ -707,6 +749,7 @@
         type: "bug",
         title: "Bootstrap Standard Errors",
         prompt: "A student implements a bootstrap for standard errors but gets a different number of coefficients in each iteration. What is the bug?",
+        hint: "When resampling with replacement, some categories of a factor variable may be entirely absent in certain bootstrap samples. What happens to the model matrix then?",
         lang: "r",
         code: "set.seed(42)\nn <- nrow(df)\nboot_coefs <- numeric(1000)\nfor (b in 1:1000) {\n  idx <- sample(1:n, n, replace = TRUE)\n  boot_df <- df[idx, ]\n  # Some bootstrap samples drop a factor level of 'region'\n  m <- lm(wage ~ education + factor(region), data = boot_df)\n  boot_coefs[b] <- coef(m)[\"education\"]\n}",
         options: [
@@ -718,27 +761,29 @@
         correct: 1,
         explanation: "When bootstrapping with factor variables, some resamples may not contain all levels of 'region'. This changes the model matrix and the number of coefficients, potentially causing coef(m)['education'] to return NA or the wrong value. The fix: ensure all factor levels are preserved with factor(region, levels = levels(df$region)) or use a cluster bootstrap."
       },
-      // 5 — reorder (Python): bootstrap SE computation
+      // 5 — reorder (R): bootstrap SE computation
       {
         type: "reorder",
-        title: "Bootstrap Standard Error Computation",
-        prompt: "Arrange these lines to compute a bootstrap standard error for the education coefficient.",
-        lang: "python",
+        title: "Bootstrap Standard Error Computation in R",
+        prompt: "Arrange these R lines to compute a bootstrap standard error for the education coefficient.",
+        hint: "Initialize the loop first, then inside each iteration: resample, estimate, store. After the loop, compute the SD of the stored coefficients.",
+        lang: "r",
         lines: [
-          "se_education = np.std(boot_coefs)",
-          "boot_coefs.append(coef)",
-          "boot_sample = df.sample(n=len(df), replace=True)",
-          "boot_coefs = []\nfor b in range(1000):",
-          "    coef = smf.ols('wage ~ education', data=boot_sample).fit().params['education']"
+          "se_education <- sd(boot_coefs)",
+          "boot_coefs[b] <- coef(m)[\"education\"]",
+          "boot_sample <- df[sample(1:n, n, replace = TRUE), ]",
+          "n <- nrow(df)\nboot_coefs <- numeric(1000)\nfor (b in 1:1000) {",
+          "  m <- lm(wage ~ education, data = boot_sample)"
         ],
         correctOrder: [3, 2, 4, 1, 0],
-        explanation: "Initialize a list and loop, resample with replacement, estimate the model on each bootstrap sample, collect the coefficient, then compute the standard deviation of the bootstrap distribution. The SD of bootstrap coefficients is the bootstrap standard error — this is the core idea of the bootstrap."
+        explanation: "Initialize vector and loop, resample rows with replacement, estimate the model on each bootstrap sample, store the coefficient, then compute the standard deviation. The SD of bootstrap coefficients is the bootstrap standard error — this is the core idea of the bootstrap."
       },
       // 6 — reorder (Stata): stepwise model building
       {
         type: "reorder",
         title: "Stepwise Model Building in Stata",
         prompt: "Arrange these commands to estimate three nested models and compare them.",
+        hint: "Start by clearing stored estimates. Then estimate models from simplest to most complex. Display the comparison table last with <code>esttab</code>.",
         lang: "stata",
         lines: [
           "esttab m1 m2 m3, se r2 star(* 0.1 ** 0.05 *** 0.01)",
@@ -754,7 +799,8 @@
       {
         type: "fill",
         title: "Regression Table with Stargazer",
-        prompt: "Fill in the gap to add a second model to the Stargazer table.",
+        prompt: "Fill in the gap to add a second model to the Stargazer table. Pass a Python list containing <code>model1</code> and <code>model2</code>.",
+        hint: "Stargazer expects a list of fitted model objects: <code>[model1, model2]</code>.",
         lang: "python",
         codeTemplate: "from stargazer.stargazer import Stargazer\n\nmodel1 = smf.ols('wage ~ education', data=df).fit(cov_type='HC1')\nmodel2 = smf.ols('wage ~ education + experience', data=df).fit(cov_type='HC1')\n\ntable = Stargazer(___MODELS___)\nprint(table.render_latex())",
         gaps: {
@@ -770,6 +816,7 @@
         type: "match",
         title: "Diagnostic Commands Across Languages",
         prompt: "Match each diagnostic task with the correct command.",
+        hint: "Identify the language from the syntax: <code>margins</code> and <code>estat</code> are Stata, <code>plot(model, which=...)</code> is R, and <code>from ... import ...</code> is Python.",
         pairs: [
           { left: "Marginal effects after logit", leftLang: "text", right: "margins, dydx(*)", rightLang: "stata" },
           { left: "Variance inflation factors", leftLang: "text", right: "from statsmodels.stats.outliers_influence import variance_inflation_factor", rightLang: "python" },
@@ -794,6 +841,7 @@
         type: "read",
         title: "Difference-in-Differences: The Key Coefficient",
         prompt: "Which coefficient gives the DiD treatment effect estimate?",
+        hint: "In DiD, the treatment effect is captured by the <b>interaction</b> of the group indicator and the time indicator. Which variable is the interaction?",
         lang: "stata",
         code: "gen treat_post = treated * post\nreg outcome treated post treat_post, robust",
         options: [
@@ -810,6 +858,7 @@
         type: "read",
         title: "Propensity Score Matching in R",
         prompt: "What does the matchit() function do in this code?",
+        hint: "The function is from the <code>MatchIt</code> package and uses <code>method = \"nearest\"</code>. Think about what 'nearest neighbor' means in the context of propensity scores.",
         lang: "r",
         code: "library(MatchIt)\n\nm <- matchit(training ~ age + education + income,\n             method = \"nearest\", data = df)\nmatched_df <- match.data(m)\nsummary(m)",
         options: [
@@ -826,6 +875,7 @@
         type: "bug",
         title: "DiD Standard Errors Are Too Small",
         prompt: "A student estimates DiD on a state-level panel and finds extremely significant results. What is the bug?",
+        hint: "With 50 states observed over 20 years, observations within the same state are correlated. Does the <code>robust</code> option handle within-group serial correlation?",
         lang: "stata",
         code: "* State-level panel: 50 states x 20 years = 1000 obs\ngen treat_post = treated_state * post_reform\nreg outcome treated_state post_reform treat_post, robust",
         options: [
@@ -842,6 +892,7 @@
         type: "bug",
         title: "Weak Instrument Problem",
         prompt: "A student runs an IV regression but the results look unreliable — huge standard errors and implausible coefficients. What should they check?",
+        hint: "Look at the first-stage F-statistic. There is a well-known threshold for instrument strength. Is the reported value above or below it?",
         lang: "python",
         code: "from linearmodels.iv import IV2SLS\n\nmodel = IV2SLS.from_formula(\n    'wage ~ 1 + experience + [education ~ distance_to_college]',\n    data=df\n)\nresults = model.fit(cov_type='robust')\nprint(results.first_stage)\n# F-statistic: 3.2",
         options: [
@@ -853,17 +904,18 @@
         correct: 1,
         explanation: "An F-statistic of 3.2 in the first stage indicates a weak instrument — distance_to_college barely predicts education. The rule of thumb is F > 10 (Stock and Yogo, 2005). Weak instruments lead to biased IV estimates (toward OLS) and unreliable inference. The student needs a stronger instrument or should report weak-IV-robust confidence intervals."
       },
-      // 5 — reorder (Stata): basic DiD setup
+      // 5 — reorder (Python): basic DiD setup
       {
         type: "reorder",
-        title: "Setting Up a DiD Regression",
-        prompt: "Arrange these Stata commands to run a basic difference-in-differences analysis.",
-        lang: "stata",
+        title: "Setting Up a DiD Regression in Python",
+        prompt: "Arrange these Python lines to run a basic difference-in-differences analysis.",
+        hint: "Load data first, then create the post indicator, then create the interaction (treated x post), and finally estimate. You need the interaction variable to exist before running the regression.",
+        lang: "python",
         lines: [
-          "reg outcome treated post treat_post, cluster(state)",
-          "gen treat_post = treated * post",
-          "gen post = (year >= 2015)",
-          "use state_panel.dta, clear"
+          "results = smf.ols('outcome ~ treated + post + treat_post', data=df).fit(cov_type='cluster', cov_kwds={'groups': df['state']})",
+          "df['treat_post'] = df['treated'] * df['post']",
+          "df['post'] = (df['year'] >= 2015).astype(int)",
+          "df = pd.read_stata('state_panel.dta')"
         ],
         correctOrder: [3, 2, 1, 0],
         explanation: "Load the panel data, create the post-treatment indicator, generate the interaction term (treated x post), then estimate with clustered SEs at the state level. The interaction coefficient is the DiD estimate — the differential change in outcomes for treated vs control states after 2015."
@@ -873,6 +925,7 @@
         type: "reorder",
         title: "Running an RDD Analysis in R",
         prompt: "Arrange these R commands to estimate a regression discontinuity design.",
+        hint: "Load the package, inspect bandwidth selection first, then estimate with <code>rdrobust()</code>, and display results last. Bandwidth selection is informational and typically comes before estimation.",
         lang: "r",
         lines: [
           "summary(rd_result)",
@@ -887,7 +940,8 @@
       {
         type: "fill",
         title: "Two-Stage Least Squares in Stata",
-        prompt: "Fill in the gap to instrument education with distance_to_college.",
+        prompt: "Fill in the gap to instrument education with distance_to_college. Type <code>education = distance_to_college</code> inside the parentheses.",
+        hint: "Stata IV syntax: <code>(endogenous_var = instrument_var)</code>. The endogenous variable goes on the left, the instrument on the right.",
         lang: "stata",
         codeTemplate: "ivregress 2sls wage experience (___ENDOG___), robust\nestat firststage",
         gaps: {
@@ -903,6 +957,7 @@
         type: "match",
         title: "Causal Methods and Key Assumptions",
         prompt: "Match each causal inference method with its core identifying assumption.",
+        hint: "Each method has one key assumption: DiD relies on trends, RDD on sorting behavior, IV on the instrument's exclusion, and matching on observable confounders.",
         pairs: [
           { left: "Difference-in-Differences", leftLang: "text", right: "Parallel trends: treated and control would have followed the same trajectory absent treatment", rightLang: "text" },
           { left: "Regression Discontinuity", leftLang: "text", right: "No manipulation: units cannot precisely sort around the cutoff", rightLang: "text" },
@@ -921,6 +976,7 @@
         type: "read",
         title: "Two-Way Fixed Effects DiD",
         prompt: "What does the coefficient on treated estimate in this TWFE specification?",
+        hint: "With both country and year fixed effects, the coefficient is identified from <b>within-country</b> variation over time, net of common shocks. This is the TWFE DiD logic.",
         lang: "r",
         code: "library(fixest)\n\nmodel <- feols(\n  log_gdp ~ treated | country + year,\n  cluster = ~country,\n  data = panel\n)",
         options: [
@@ -937,6 +993,7 @@
         type: "read",
         title: "Event Study Specification",
         prompt: "Why is ref = -1 used in this event study?",
+        hint: "In event studies, one period must be omitted as the reference (normalization). Think about which period makes the pre-treatment coefficients interpretable as a parallel trends test.",
         lang: "stata",
         code: "* rel_time = year - treatment_year\n* ranges from -5 to +5\nreghdfe outcome ib(-1).rel_time, absorb(unit_id year) cluster(unit_id)",
         options: [
@@ -953,6 +1010,7 @@
         type: "bug",
         title: "Matching on a Post-Treatment Variable",
         prompt: "A student matches on several covariates to estimate the effect of a job training program. What is the problem?",
+        hint: "Check the year suffix on each variable. The training was assigned in January 2020. Is every matching variable measured <b>before</b> treatment?",
         lang: "r",
         code: "library(MatchIt)\n\n# Training program assigned in January 2020\nm <- matchit(\n  training ~ age + education + occupation_2021 + pre_wage,\n  method = \"nearest\",\n  data = df\n)\nmatched_df <- match.data(m)",
         options: [
@@ -969,6 +1027,7 @@
         type: "bug",
         title: "RDD with Global Polynomial",
         prompt: "A student estimates RDD by fitting a polynomial on the full sample. What is the methodological problem?",
+        hint: "RDD identification comes from observations <b>near the cutoff</b>. What happens when observations far from the cutoff influence a high-order polynomial fit?",
         lang: "python",
         code: "import numpy as np\nimport statsmodels.formula.api as smf\n\n# Running variable: test score, cutoff at 60\ndf['score_c'] = df['score'] - 60\ndf['score_c2'] = df['score_c'] ** 2\ndf['score_c3'] = df['score_c'] ** 3\ndf['treat'] = (df['score'] >= 60).astype(int)\n\nmodel = smf.ols(\n    'outcome ~ treat + score_c + score_c2 + score_c3',\n    data=df  # uses ALL data, not local\n).fit(cov_type='HC1')",
         options: [
@@ -985,6 +1044,7 @@
         type: "reorder",
         title: "DiD Event Study with Plot",
         prompt: "Arrange these R commands to estimate an event study and plot the dynamic effects.",
+        hint: "Load the package, compute relative time, estimate the event study model, then plot. You need <code>rel_time</code> to exist before using it in the formula.",
         lang: "r",
         lines: [
           "iplot(model, xlab = 'Periods relative to treatment', ylab = 'Effect')",
@@ -1000,6 +1060,7 @@
         type: "reorder",
         title: "IV Estimation with Diagnostics in Stata",
         prompt: "Arrange these Stata commands to run an IV regression and check instrument strength.",
+        hint: "Load data, run <code>ivregress</code>, then post-estimation diagnostics. <code>estat firststage</code> checks instrument relevance, and <code>estat endogeneity</code> tests whether IV is even necessary.",
         lang: "stata",
         lines: [
           "estat firststage",
@@ -1014,7 +1075,8 @@
       {
         type: "fill",
         title: "RDD with rdrobust in Python",
-        prompt: "Fill in the gap to run an RDD at the cutoff score of 60.",
+        prompt: "Fill in the gap to run an RDD at the cutoff score of 60. Type the parameter <code>c=60</code>.",
+        hint: "The <code>c</code> parameter in <code>rdrobust()</code> specifies the cutoff value for the running variable.",
         lang: "python",
         codeTemplate: "from rdrobust import rdrobust\n\nresult = rdrobust(y=df['outcome'], x=df['score'], ___CUTOFF___)\nprint(result)",
         gaps: {
@@ -1030,6 +1092,7 @@
         type: "match",
         title: "Causal Inference Commands Across Languages",
         prompt: "Match each causal method with the correct implementation.",
+        hint: "Match by method: <code>feols</code> with fixed effects is TWFE DiD, <code>estat firststage</code> is an IV diagnostic, <code>rdbwselect</code> is for RDD, and <code>LogisticRegression</code> estimates propensity scores.",
         pairs: [
           { left: "DiD with TWFE (R)", leftLang: "text", right: "feols(y ~ treated | unit + year, cluster = ~unit, data = df)", rightLang: "r" },
           { left: "IV first-stage F-test (Stata)", leftLang: "text", right: "estat firststage", rightLang: "stata" },
@@ -1048,6 +1111,7 @@
         type: "read",
         title: "Synthetic Control: Understanding Donor Weights",
         prompt: "What does the synthetic control method do with the donor pool?",
+        hint: "The method creates a counterfactual from the donor countries. The key question is <b>how</b> it combines them — equally, optimally, or randomly?",
         lang: "r",
         code: "library(Synth)\n\ndataprep_out <- dataprep(\n  foo = panel,\n  predictors = c(\"gdp\", \"population\", \"trade_share\"),\n  predictors.op = \"mean\",\n  dependent = \"gdp\",\n  unit.variable = \"country_id\",\n  time.variable = \"year\",\n  treatment.identifier = 7,\n  controls.identifier = c(1:6, 8:20),\n  time.predictors.prior = 1985:1999,\n  time.optimize.ssr = 1985:1999,\n  time.plot = 1985:2010\n)\nsynth_out <- synth(dataprep_out)",
         options: [
@@ -1064,6 +1128,7 @@
         type: "read",
         title: "Overidentification Test for IV",
         prompt: "What does the Sargan-Hansen test tell you in this overidentified IV model?",
+        hint: "The model has 2 instruments and 1 endogenous variable (overidentified). The overid test p-value is 0.365. A high p-value means failure to reject the null. What is the null hypothesis?",
         lang: "stata",
         code: "ivregress 2sls wage experience (education = distance_to_college parent_education), robust\nestat overid\n* Sargan (score) chi2(1) = 0.82, p = 0.365",
         options: [
@@ -1080,6 +1145,7 @@
         type: "bug",
         title: "Event Study with Wrong Reference Period",
         prompt: "A student's event study plot shows a spike at period -1. Their advisor says the normalization is wrong. Why?",
+        hint: "Look at which period is set as <code>ref</code>. If the reference is the treatment period itself, what do the pre-treatment coefficients measure?",
         lang: "r",
         code: "library(fixest)\n\n# rel_time: -5, -4, ..., -1, 0, 1, ..., 5\nmodel <- feols(\n  outcome ~ i(rel_time, ref = 0) | unit_id + year,\n  cluster = ~unit_id,\n  data = df\n)",
         options: [
@@ -1096,6 +1162,7 @@
         type: "bug",
         title: "RDD Robustness to Bandwidth Choice",
         prompt: "A reviewer says the RDD result is not robust. What should the student do?",
+        hint: "The student reports only one bandwidth. Robustness in RDD typically requires showing results are stable when using different bandwidths (e.g., half and double the optimal).",
         lang: "stata",
         code: "* Only reports one bandwidth\nrdrobust outcome score, c(60)\n* Estimated effect: 5.2 (p = 0.03)\n* MSE-optimal bandwidth: h = 8.3",
         options: [
@@ -1107,27 +1174,29 @@
         correct: 1,
         explanation: "A single bandwidth gives a single estimate. Robustness requires showing the result is stable when the bandwidth varies. Standard practice: report the MSE-optimal bandwidth result plus alternative bandwidths (e.g., h/2 and 2h). If the effect is significant only at the optimal bandwidth, it may be fragile. rdrobust also reports a bias-corrected confidence interval by default."
       },
-      // 5 — reorder (Stata): synthetic control
+      // 5 — reorder (Python): synthetic control
       {
         type: "reorder",
-        title: "Synthetic Control in Stata",
-        prompt: "Arrange these Stata commands to run a synthetic control analysis.",
-        lang: "stata",
+        title: "Synthetic Control in Python",
+        prompt: "Arrange these Python lines to run a synthetic control analysis.",
+        hint: "The flow is: import, load/index data, fit the synthetic control, plot treated vs synthetic, then run placebo tests. The placebo step comes last as a robustness check.",
+        lang: "python",
         lines: [
-          "synth gdp gdp(1985) gdp(1986) gdp(1987) population trade_share, trunit(7) trperiod(1990)",
-          "tsset country_id year",
-          "synth_runner gdp gdp(1985) gdp(1986) gdp(1987) population trade_share, trunit(7) trperiod(1990) gen_vars",
-          "use country_panel.dta, clear",
-          "graph twoway (line gdp year if country_id == 7) (line _Y_synthetic year if country_id == 7)"
+          "sc = Synth()\nsc.fit(treated_unit=7, treatment_period=1990, predictors=['gdp', 'population', 'trade_share'])",
+          "import pandas as pd\nfrom SparseSC import Synth",
+          "panel = pd.read_stata('country_panel.dta')\npanel = panel.set_index(['country_id', 'year'])",
+          "plt.plot(years, treated_gdp, label='Treated')\nplt.plot(years, sc.synthetic_, label='Synthetic')\nplt.axvline(x=1990, linestyle='--')\nplt.legend()\nplt.show()",
+          "# Placebo: run synth for each donor unit\nplacebo_effects = [Synth().fit(treated_unit=d, treatment_period=1990, predictors=['gdp', 'population', 'trade_share']) for d in donors]"
         ],
-        correctOrder: [3, 1, 0, 4, 2],
-        explanation: "Load data, declare panel structure with tsset, run synth to find optimal donor weights matching country 7's pre-1990 GDP trajectory, plot the treated vs synthetic country, then run placebo tests with synth_runner (applies the method to every donor country to build a distribution of placebo effects for inference)."
+        correctOrder: [1, 2, 0, 3, 4],
+        explanation: "Import packages, load and index the panel data, fit the synthetic control to match country 7's pre-1990 trajectory, plot treated vs synthetic counterfactual, then run placebo tests on each donor country to build a distribution of placebo effects for inference."
       },
       // 6 — reorder (Python): matching with balance check
       {
         type: "reorder",
         title: "Propensity Score Matching with Balance Check",
         prompt: "Arrange these Python steps for matching with a proper balance diagnostic.",
+        hint: "Import first, estimate propensity scores, find nearest-neighbor matches, construct the matched sample, then check covariate balance. The balance check must come after the matched sample is created.",
         lang: "python",
         lines: [
           "matched = df.loc[df.index.isin(treated.index) | df.index.isin(matched_control.index)]",
@@ -1143,7 +1212,8 @@
       {
         type: "fill",
         title: "Event Study in R with fixest",
-        prompt: "Fill in the gap to estimate an event study with period -1 as the reference.",
+        prompt: "Fill in the gap to estimate an event study with period -1 as the reference. Type the <code>i()</code> function call using <code>rel_time</code> and <code>ref = -1</code>.",
+        hint: "The <code>fixest</code> syntax for event study dummies is <code>i(variable, ref = value)</code>, where <code>ref</code> specifies the omitted reference period.",
         lang: "r",
         codeTemplate: "library(fixest)\n\nmodel <- feols(\n  outcome ~ ___EVENTSTUDY___ | unit_id + year,\n  cluster = ~unit_id,\n  data = df\n)\niplot(model)",
         gaps: {
@@ -1159,6 +1229,7 @@
         type: "match",
         title: "Robustness Tests for Causal Methods",
         prompt: "Match each causal method with its standard robustness or placebo test.",
+        hint: "Each method has a signature robustness check: event studies test pre-trends, RDD varies bandwidth, IV checks instrument strength, and synthetic control uses placebo units.",
         pairs: [
           { left: "DiD event study", leftLang: "text", right: "Pre-treatment coefficients should be near zero (parallel trends test)", rightLang: "text" },
           { left: "RDD", leftLang: "text", right: "Vary the bandwidth: results should be stable across h/2, h, and 2h", rightLang: "text" },

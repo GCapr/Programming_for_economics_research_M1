@@ -818,6 +818,54 @@ Stock-Yogo 10% maximal size: 19.93
 Conclusion: F >> critical value, instruments are strong</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This performs weak-instrument-robust inference using the Anderson-Rubin confidence interval and LIML estimator, which remain valid even when the first-stage F-statistic is below conventional thresholds",
+                  "languages": {
+                    "python": [
+                      {"code": "def", "role": "Keyword", "tip": "Defines a function.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "anderson_rubin_ci", "role": "Function Name", "tip": "Computes the Anderson-Rubin confidence interval via grid search.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens parameters.", "color": "overlay"},
+                      {"code": "y, d, z, x", "role": "Parameters", "tip": "Outcome, endogenous regressor, instruments, and controls.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "alpha=0.05", "role": "Parameter", "tip": "Significance level for the confidence interval.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes parameters.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "ivregress liml", "role": "Command", "tip": "Limited Information Maximum Likelihood \u2014 less biased than 2SLS with weak instruments.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "wage experience", "role": "Variables", "tip": "Outcome and exogenous controls.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "(education = z1 z2)", "role": "IV Spec", "tip": "Endogenous variable instrumented by z1 and z2.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "robust", "role": "Option", "tip": "Heteroskedasticity-robust standard errors.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "iv_robust", "role": "Variable", "tip": "Stores the ivmodel object for weak-IV-robust inference.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "ivmodel", "role": "Function", "tip": "Creates an IV model object that provides AR, CLR, and LIML estimates.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "Y = df$wage", "role": "Argument", "tip": "Outcome variable.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "D = df$education", "role": "Argument", "tip": "Endogenous regressor.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "Z = cbind(df$z1, df$z2)", "role": "Argument", "tip": "Excluded instruments matrix.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Standard 2SLS confidence intervals can be severely distorted with <strong>weak instruments</strong> (first-stage F < 10). The Anderson-Rubin CI is constructed by testing every possible treatment effect value and retaining those not rejected \u2014 it is valid regardless of instrument strength. LIML has smaller finite-sample bias than 2SLS."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h2 id="bartik">Bartik/Shift-Share Instruments</h2>
 
         <p>
@@ -1051,6 +1099,50 @@ First-stage statistics:
 local_emp_growth     28.34   < 2e-16
 
 Partial R2 of excluded instruments: 0.0892</pre></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This constructs a Bartik (shift-share) instrument that predicts local employment growth by weighting national industry trends by each location's initial industry composition",
+                  "languages": {
+                    "python": [
+                      {"code": "bartik", "role": "Variable", "tip": "The constructed Bartik instrument \u2014 predicted local employment growth.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the instrument values.", "color": "peach"},
+                      {"code": "(shares * national_growth)", "role": "Product", "tip": "Multiplies each location's industry share by that industry's national growth rate.", "color": "pink"},
+                      {"code": ".groupby('location').sum()", "role": "Method Chain", "tip": "Sums across industries within each location to get the predicted employment change.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "ivregress 2sls", "role": "Command", "tip": "Two-stage least squares estimation.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "wage controls", "role": "Variables", "tip": "Outcome and exogenous control variables.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "(local_emp_growth = bartik)", "role": "IV Spec", "tip": "Instruments local employment growth with the Bartik predicted growth.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "cluster(location)", "role": "Option", "tip": "Clusters standard errors at the location level.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "iv_model", "role": "Variable", "tip": "Stores the IV regression result.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "feols", "role": "Function", "tip": "Fixed-effects OLS/IV from fixest.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "wage ~ controls", "role": "Formula", "tip": "Outcome and exogenous controls.", "color": "pink"},
+                      {"code": " | ", "role": "Separator", "tip": "Separates formula from IV specification.", "color": "peach"},
+                      {"code": "local_emp_growth ~ bartik", "role": "IV Spec", "tip": "Endogenous variable ~ instrument.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "cluster = ~ location", "role": "Argument", "tip": "Clusters standard errors by location.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "The Bartik instrument isolates <strong>demand-driven</strong> variation in local employment. It combines base-year industry shares with national industry growth rates, predicting how much local employment would grow based solely on national trends. Leave-one-out construction avoids mechanical correlation."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="info-box warning">
@@ -1415,6 +1507,46 @@ veteran     -9598.42   4812.34  -1.995   0.0462 *
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This demonstrates the Wald estimator \u2014 the simplest form of IV with a binary instrument, where the treatment effect equals the reduced-form effect divided by the first-stage compliance rate",
+                  "languages": {
+                    "python": [
+                      {"code": "reduced_form", "role": "Variable", "tip": "The ITT effect \u2014 difference in mean earnings between eligible and non-eligible.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Computes and stores the reduced form.", "color": "peach"},
+                      {"code": "df.loc[df['eligible']==1, 'earnings'].mean()", "role": "Treated Mean", "tip": "Mean earnings for those who were draft-eligible.", "color": "pink"},
+                      {"code": " - ", "role": "Operator", "tip": "Subtracts the control mean.", "color": "peach"},
+                      {"code": "df.loc[df['eligible']==0, 'earnings'].mean()", "role": "Control Mean", "tip": "Mean earnings for those not draft-eligible.", "color": "pink"}
+                    ],
+                    "stata": [
+                      {"code": "ivregress 2sls", "role": "Command", "tip": "Two-stage least squares \u2014 with a binary instrument, gives exactly the Wald ratio.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "earnings", "role": "Variable", "tip": "Outcome: lifetime earnings.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "(veteran = eligible)", "role": "IV Spec", "tip": "Instruments veteran status with draft eligibility.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "robust", "role": "Option", "tip": "Robust standard errors.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "reduced_form", "role": "Variable", "tip": "ITT effect: earnings difference between eligible and non-eligible.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "mean(df$earnings[df$eligible == 1])", "role": "Expression", "tip": "Mean earnings among draft-eligible men.", "color": "pink"},
+                      {"code": " - ", "role": "Operator", "tip": "Subtracts control group mean.", "color": "peach"},
+                      {"code": "mean(df$earnings[df$eligible == 0])", "role": "Expression", "tip": "Mean earnings among non-eligible men.", "color": "pink"}
+                    ]
+                  },
+                  "structureNote": "The Wald estimator is the <strong>building block</strong> of IV. With a single binary instrument, the LATE equals (mean outcome difference by Z) / (mean treatment difference by Z). The numerator is the reduced form (intent-to-treat effect); the denominator is the first stage (compliance rate). With a single binary instrument, 2SLS produces exactly the same point estimate."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <div class="info-box note">
           <div class="info-box-title">The Wald Estimator Identifies LATE</div>
           <p>
@@ -1551,6 +1683,60 @@ Based on 999 bootstrap replicates
 Intervals:
 Level  Percentile
 95%    ( 0.6612,  1.1256 )</div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This demonstrates the control function approach — an alternative to 2SLS that includes first-stage residuals as a regressor in the outcome equation, providing both a causal estimate and a direct test of endogeneity",
+                  "languages": {
+                    "python": [
+                      {"code": "first_stage", "role": "Variable", "tip": "Stores the first-stage regression results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the fitted model.", "color": "peach"},
+                      {"code": "smf.ols(", "role": "Function", "tip": "OLS regression via statsmodels formula API.", "color": "blue"},
+                      {"code": "'education ~ distance + experience'", "role": "Formula", "tip": "Regresses the endogenous variable on the instrument (distance) and controls.", "color": "green"},
+                      {"code": ", data=df).fit()", "role": "Method Chain", "tip": "Passes data and fits the model.", "color": "teal"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "df['v_hat']", "role": "Column", "tip": "Creates a new column to store first-stage residuals.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Saves residuals to the DataFrame.", "color": "peach"},
+                      {"code": "first_stage.resid", "role": "Property", "tip": "The OLS residuals — the part of education unexplained by the instrument.", "color": "lavender"}
+                    ],
+                    "stata": [
+                      {"code": "reg", "role": "Command", "tip": "OLS regression.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "education", "role": "Depvar", "tip": "Endogenous variable in the first stage.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "distance experience", "role": "Regressors", "tip": "Instrument and controls.", "color": "sky"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "predict", "role": "Command", "tip": "Post-estimation command to generate predictions.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "v_hat", "role": "Variable", "tip": "Name for the saved residuals.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "residuals", "role": "Option", "tip": "Saves residuals rather than fitted values.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "first_stage", "role": "Variable", "tip": "Stores the first-stage model object.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment operator.", "color": "peach"},
+                      {"code": "lm(", "role": "Function", "tip": "Linear model (OLS).", "color": "blue"},
+                      {"code": "education ~ distance + experience", "role": "Formula", "tip": "Regresses education on instrument and controls.", "color": "green"},
+                      {"code": ", data = df)", "role": "Argument", "tip": "Passes the data frame.", "color": "sky"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "df$v_hat", "role": "Column", "tip": "New column for first-stage residuals.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "Stores the residuals.", "color": "peach"},
+                      {"code": "residuals(", "role": "Function", "tip": "Extracts residuals from a fitted model.", "color": "blue"},
+                      {"code": "first_stage", "role": "Argument", "tip": "The first-stage model.", "color": "pink"},
+                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "The control function approach works in two steps: <strong>(1)</strong> regress the endogenous variable on the instrument and controls, saving the residuals <code>v_hat</code>; <strong>(2)</strong> include <code>v_hat</code> in the outcome equation alongside the endogenous variable. The coefficient on <code>v_hat</code> directly tests endogeneity (significant = endogenous), and the coefficient on education equals the IV estimate. <em>Always bootstrap</em> the standard errors because the two-step procedure makes naive SEs invalid."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="info-box warning">

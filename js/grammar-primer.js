@@ -1,12 +1,12 @@
 /**
  * Code Grammar Primer — Interactive Code Learning
  *
- * Helps students understand code composition through card-based learning.
+ * Helps students understand code composition through annotated breakdowns.
  *
  * TWO RENDERING MODES:
  *   TEACH (data-mode="teach") — Inline teaching blocks that show code with
- *         color-coded tokens and explanations visible by default. No quiz,
- *         no flipping. Designed to be placed after concept paragraphs.
+ *         color-coded tokens, numbered annotations, and interactive hover
+ *         highlighting. Designed to be placed after concept paragraphs.
  *   EXERCISE (default) — Interactive flashcard exercises with Build/Read modes.
  *         Students flip cards to test their understanding.
  */
@@ -59,7 +59,7 @@
   }
 
   // ─── Teach Mode Render ────────────────────────────────────────
-  // Shows code tokens with explanations visible — no quiz mechanics.
+  // Shows code tokens with numbered annotations and interactive highlighting.
 
   function renderTeach(state) {
     var container = state.container;
@@ -80,19 +80,26 @@
       || [];
     if (tokens.length === 0) return;
 
-    // ── Header with title + language tabs ──────────────────
+    // Build a list of "visible" tokens (non-whitespace) for numbering
+    var visibleTokens = [];
+    var tokenIndexMap = []; // maps visible index → original token index
+    tokens.forEach(function (token, i) {
+      if (token.code.trim() === '' && token.role === 'Space') return;
+      if (token.code === '\n' && token.role === 'Newline') return;
+      visibleTokens.push(token);
+      tokenIndexMap.push(i);
+    });
+
+    // ── Header row: title + language tabs ────────────────────
     var header = ce('div', 'gp-header gp-teach-header');
 
-    var titleRow = ce('div', 'gp-title-row');
+    var titleRow = ce('div', 'gp-teach-title-row');
     var title = ce('div', 'gp-title gp-teach-title');
-    title.innerHTML = '&#9998; Code Grammar';
+    title.innerHTML = '<span class="gp-teach-icon">&#128270;</span> Syntax Breakdown';
     titleRow.appendChild(title);
-    header.appendChild(titleRow);
 
-    container.appendChild(header);
-
-    // ── Language tabs ──────────────────────────────────────
-    var langBar = ce('div', 'gp-lang-bar');
+    // Language tabs inline with title
+    var langBar = ce('div', 'gp-lang-bar gp-teach-lang-bar');
     var langNames = { python: 'Python', stata: 'Stata', r: 'R' };
     ['python', 'stata', 'r'].forEach(function (l) {
       if (!ex.languages[l]) return;
@@ -104,50 +111,77 @@
       });
       langBar.appendChild(btn);
     });
-    container.appendChild(langBar);
+    titleRow.appendChild(langBar);
+    header.appendChild(titleRow);
 
-    // ── Pattern hint ──────────────────────────────────────
-    if (ex.pattern) {
-      var pattern = ce('div', 'gp-pattern gp-teach-pattern');
-      pattern.innerHTML = 'Pattern: <code>' + escapeHtml(ex.pattern) + '</code>';
-      container.appendChild(pattern);
+    container.appendChild(header);
+
+    // ── Instruction (what this code does) ────────────────────
+    if (ex.instruction) {
+      var instruction = ce('div', 'gp-teach-instruction');
+      instruction.innerHTML = ex.instruction;
+      container.appendChild(instruction);
     }
 
-    // ── Assembled code line ───────────────────────────────
+    // ── Annotated code line ──────────────────────────────────
     var assembled = ce('div', 'gp-teach-assembled');
     var pre = ce('pre', 'gp-assembled-code');
     var code = ce('code', '');
 
-    // Build color-coded assembled code
-    tokens.forEach(function (token) {
+    // Build color-coded assembled code with numbered hover targets
+    var visibleIdx = 0;
+    tokens.forEach(function (token, i) {
       var span = document.createElement('span');
       span.className = 'gp-teach-token';
       span.setAttribute('data-color', token.color || 'text');
       span.textContent = token.code;
+
+      // Only add annotation index for visible (non-whitespace) tokens
+      var isVisible = !(token.code.trim() === '' && token.role === 'Space')
+                   && !(token.code === '\n' && token.role === 'Newline');
+
+      if (isVisible) {
+        span.setAttribute('data-annot-idx', visibleIdx);
+        // Hover highlighting: assembled token → breakdown row
+        (function (idx) {
+          span.addEventListener('mouseenter', function () {
+            highlightPair(container, idx, true);
+          });
+          span.addEventListener('mouseleave', function () {
+            highlightPair(container, idx, false);
+          });
+        })(visibleIdx);
+        visibleIdx++;
+      }
+
       code.appendChild(span);
     });
     pre.appendChild(code);
     assembled.appendChild(pre);
     container.appendChild(assembled);
 
-    // ── Token breakdown ───────────────────────────────────
+    // ── Numbered token breakdown ─────────────────────────────
     var breakdown = ce('div', 'gp-teach-breakdown');
 
-    tokens.forEach(function (token) {
-      // Skip whitespace-only tokens
-      if (token.code.trim() === '' && token.role === 'Space') return;
-      if (token.code === '\n' && token.role === 'Newline') return;
-
+    visibleTokens.forEach(function (token, idx) {
       var row = ce('div', 'gp-teach-row');
       row.setAttribute('data-color', token.color || 'text');
+      row.setAttribute('data-annot-idx', idx);
 
+      // Number badge
+      var badge = ce('span', 'gp-teach-badge');
+      badge.textContent = (idx + 1);
+      row.appendChild(badge);
+
+      // Code fragment
       var codeEl = ce('code', 'gp-teach-code');
       codeEl.textContent = token.code;
       row.appendChild(codeEl);
 
+      // Info: role + tip
       var info = ce('div', 'gp-teach-info');
 
-      var roleEl = ce('div', 'gp-teach-role');
+      var roleEl = ce('span', 'gp-teach-role');
       roleEl.textContent = token.role;
       info.appendChild(roleEl);
 
@@ -158,16 +192,51 @@
       }
 
       row.appendChild(info);
+
+      // Hover highlighting: breakdown row → assembled token
+      (function (i) {
+        row.addEventListener('mouseenter', function () {
+          highlightPair(container, i, true);
+        });
+        row.addEventListener('mouseleave', function () {
+          highlightPair(container, i, false);
+        });
+      })(idx);
+
       breakdown.appendChild(row);
     });
 
     container.appendChild(breakdown);
 
-    // ── Structure note ────────────────────────────────────
+    // ── Structure note (big picture) ─────────────────────────
     if (ex.structureNote) {
       var note = ce('div', 'gp-structure-note');
-      note.innerHTML = ex.structureNote;
+      note.innerHTML = '<span class="gp-note-label">Big picture:</span> ' + ex.structureNote;
       container.appendChild(note);
+    }
+  }
+
+  // ─── Interactive Highlight (Teach Mode) ────────────────────────
+
+  function highlightPair(container, idx, active) {
+    // Highlight the assembled token
+    var token = container.querySelector('.gp-teach-token[data-annot-idx="' + idx + '"]');
+    // Highlight the breakdown row
+    var row = container.querySelector('.gp-teach-row[data-annot-idx="' + idx + '"]');
+
+    if (token) {
+      if (active) {
+        token.classList.add('gp-highlight');
+      } else {
+        token.classList.remove('gp-highlight');
+      }
+    }
+    if (row) {
+      if (active) {
+        row.classList.add('gp-highlight');
+      } else {
+        row.classList.remove('gp-highlight');
+      }
     }
   }
 

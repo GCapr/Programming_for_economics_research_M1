@@ -1052,6 +1052,58 @@ Overall ATT:
 [ggdid() displays event study plot with proper aggregation]</div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This estimates group-time average treatment effects using Callaway and Sant\u2019Anna (2021), which handles staggered treatment adoption without the negative weighting problem of standard TWFE",
+                  "languages": {
+                    "python": [
+                      {"code": "att_gt", "role": "Variable", "tip": "Stores the group-time ATT estimator object.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the estimator.", "color": "peach"},
+                      {"code": "ATTgt", "role": "Class", "tip": "The Callaway-Sant\u2019Anna group-time ATT estimator from the csdid package.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens configuration.", "color": "overlay"},
+                      {"code": "yname='outcome'", "role": "Argument", "tip": "Name of the outcome variable.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "gname='first_treat'", "role": "Argument", "tip": "Variable indicating when each unit was first treated (0 if never treated).", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "control_group='nevertreated'", "role": "Argument", "tip": "Uses never-treated units as the comparison group (alternative: 'notyettreated').", "color": "green"},
+                      {"code": ")", "role": "Paren", "tip": "Closes configuration.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "csdid", "role": "Command", "tip": "Callaway-Sant\u2019Anna DiD estimator for staggered treatments.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome", "role": "Variable", "tip": "The dependent variable.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates varlist from options.", "color": "overlay"},
+                      {"code": "ivar(unit_id)", "role": "Option", "tip": "Panel unit identifier.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "time(year)", "role": "Option", "tip": "Time period variable.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "gvar(first_treat)", "role": "Option", "tip": "Variable indicating when each unit was first treated.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "out", "role": "Variable", "tip": "Stores the group-time ATT results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "att_gt", "role": "Function", "tip": "Estimates group-time ATTs from the did package.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "yname = \"outcome\"", "role": "Argument", "tip": "Outcome variable name.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "gname = \"first_treat\"", "role": "Argument", "tip": "Variable coding first treatment period (0 = never treated).", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "control_group = \"nevertreated\"", "role": "Argument", "tip": "Comparison group: never-treated or not-yet-treated units.", "color": "green"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "The Callaway-Sant\u2019Anna estimator computes a separate ATT for each <strong>cohort-time pair</strong> (g,t), where g is when a group was first treated and t is the calendar period. These are then aggregated into an overall ATT or event-study coefficients. Using never-treated (or not-yet-treated) units as controls avoids contaminating the comparison with already-treated units."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h3>de Chaisemartin-D'Haultfoeuille (2020)</h3>
 
         <div class="code-tabs" data-runnable="did-5">
@@ -1165,6 +1217,46 @@ Joint test for placebos: chi2(3) = 0.78, p = 0.854
 [did_multiplegt_plot() shows event study figure]</div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This estimates treatment effects using de Chaisemartin and D\u2019Haultfoeuille (2020), which is robust to heterogeneous effects and can handle units that switch treatment on and off",
+                  "languages": {
+                    "stata": [
+                      {"code": "did_multiplegt", "role": "Command", "tip": "de Chaisemartin-D\u2019Haultfoeuille estimator for heterogeneous treatment effects.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome unit_id year treatment", "role": "Variables", "tip": "Outcome, unit ID, time variable, and treatment indicator.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates variables from options.", "color": "overlay"},
+                      {"code": "robust_dynamic", "role": "Option", "tip": "Uses the robust dynamic specification allowing heterogeneous effects.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "dynamic(5)", "role": "Option", "tip": "Estimates dynamic effects for 5 post-treatment periods.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "placebo(3)", "role": "Option", "tip": "Tests for pre-treatment effects over 3 periods (should be zero under parallel trends).", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "result", "role": "Variable", "tip": "Stores the estimation results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "did_multiplegt", "role": "Function", "tip": "R implementation of the dCDH estimator.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "Y = \"outcome\"", "role": "Argument", "tip": "Outcome variable name.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "D = \"treatment\"", "role": "Argument", "tip": "Treatment indicator \u2014 can switch on and off.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "dynamic = 5, placebo = 3", "role": "Arguments", "tip": "Number of dynamic and placebo periods to estimate.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "The dCDH estimator is unique in handling <strong>switching treatments</strong> \u2014 units that can move in and out of treatment over time. It reports dynamic effects (how the effect evolves post-treatment) and placebo tests (whether there are spurious effects in pre-treatment periods). A non-significant joint placebo test supports parallel trends."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h3>Sun-Abraham (2021)</h3>
 
         <div class="code-tabs" data-runnable="did-6">
@@ -1261,6 +1353,45 @@ Aggregated ATT (average post-treatment effect):
 0.4736 0.0923 [0.2927, 0.6545] ***
 
 [iplot() shows Sun-Abraham event study with cohort-weighted estimates]</div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This estimates treatment effects using the Sun and Abraham (2021) interaction-weighted estimator, which correctly averages cohort-specific effects to avoid TWFE bias from staggered treatment timing",
+                  "languages": {
+                    "stata": [
+                      {"code": "eventstudyinteract", "role": "Command", "tip": "Sun-Abraham interaction-weighted estimator for staggered DiD.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome rel_time_*", "role": "Variables", "tip": "Outcome variable and relative-time dummy variables.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates variables from options.", "color": "overlay"},
+                      {"code": "cohort(cohort)", "role": "Option", "tip": "Variable identifying treatment cohorts (year of first treatment).", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "control_cohort(never_treat)", "role": "Option", "tip": "Indicator for the never-treated comparison group.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "absorb(unit_id year)", "role": "Option", "tip": "Absorbs unit and time fixed effects.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "sa_model", "role": "Variable", "tip": "Stores the Sun-Abraham estimation result.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "feols", "role": "Function", "tip": "Fixed-effects OLS from the fixest package.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "outcome ~ ", "role": "Formula", "tip": "Outcome variable on the left of the formula.", "color": "pink"},
+                      {"code": "sunab(cohort, year)", "role": "Function", "tip": "Sun-Abraham interaction-weighted estimator \u2014 automatically creates cohort x period interactions.", "color": "blue"},
+                      {"code": " | ", "role": "Pipe", "tip": "Separates the formula from fixed effects.", "color": "peach"},
+                      {"code": "unit_id + year", "role": "Fixed Effects", "tip": "Unit and time fixed effects, absorbed for efficiency.", "color": "pink"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Sun-Abraham works by interacting treatment indicators with cohort dummies, then <strong>re-weighting</strong> these cohort-specific effects to produce unbiased event study coefficients. Unlike TWFE, it never uses already-treated units as implicit controls."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <h3 id="comparing">Comparing All Estimators</h3>
@@ -1543,6 +1674,50 @@ Interpretation:
 Saved: estimator_comparison.png (10" x 6", 300 dpi)</div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This creates a multi-estimator comparison plot overlaying event study coefficients from TWFE, Callaway-Sant\u2019Anna, Sun-Abraham, and other robust estimators on a single figure",
+                  "languages": {
+                    "python": [
+                      {"code": "ax.errorbar", "role": "Method", "tip": "Plots point estimates with confidence interval error bars for each estimator.", "color": "teal"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "x, y", "role": "Coordinates", "tip": "Relative time periods and treatment effect point estimates.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "yerr=yerr", "role": "Argument", "tip": "Confidence interval widths (lower and upper).", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "label=name", "role": "Argument", "tip": "Estimator name for the legend.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "twoway", "role": "Command", "tip": "Stata's graph command for overlaying multiple plot types.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "(rcap ci_lo ci_hi rel_time)", "role": "CI Bars", "tip": "Draws confidence interval bars for each estimator.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "(scatter coef rel_time)", "role": "Points", "tip": "Plots point estimates as markers.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "ggplot", "role": "Function", "tip": "Creates a ggplot2 plot.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "all_results", "role": "Data", "tip": "Combined data frame with coefficients from all estimators.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "aes(x = rel_time, y = coef, color = estimator)", "role": "Aesthetics", "tip": "Maps relative time to x-axis, coefficient to y-axis, colors by estimator.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"},
+                      {"code": " + ", "role": "Operator", "tip": "Adds ggplot layers.", "color": "peach"},
+                      {"code": "position_dodge(width = 0.3)", "role": "Adjustment", "tip": "Horizontally offsets estimators to prevent overlapping error bars.", "color": "sky"}
+                    ]
+                  },
+                  "structureNote": "Plotting multiple estimators together is a powerful <strong>robustness check</strong>. If all estimators agree on the treatment effect trajectory, this strengthens the causal interpretation. When they diverge \u2014 particularly if TWFE is attenuated relative to robust estimators \u2014 this signals that negative weighting from staggered adoption may be biasing the standard approach."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <div class="citation">
           <div class="citation-title">Reference</div>
           <ul>
@@ -1725,6 +1900,44 @@ Pre-treatment coefficient magnitudes:
   No evidence of differential pre-trends</div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This tests the parallel trends assumption by plotting group means over time and statistically testing whether pre-treatment event study coefficients are jointly zero",
+                  "languages": {
+                    "python": [
+                      {"code": "fig, ax", "role": "Variables", "tip": "Figure and axes objects for the matplotlib plot.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Unpacks the figure and axes.", "color": "peach"},
+                      {"code": "plt.subplots", "role": "Function", "tip": "Creates a figure with one set of axes.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "figsize=(10, 6)", "role": "Argument", "tip": "Sets the figure size in inches.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "testparm", "role": "Command", "tip": "Tests whether multiple coefficients are jointly zero.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "*rel_time#*", "role": "Pattern", "tip": "Selects all pre-treatment relative-time coefficients for the joint F-test.", "color": "pink"}
+                    ],
+                    "r": [
+                      {"code": "wald", "role": "Function", "tip": "Wald test for joint significance of coefficients.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "es_model", "role": "Model", "tip": "The event study model estimated with feols.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "pretreat_coefs", "role": "Coefficients", "tip": "Character vector of pre-treatment coefficient names to test jointly.", "color": "pink"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Parallel trends is the <strong>key identifying assumption</strong> of DiD: absent treatment, treated and control groups would have followed the same trajectory. While untestable, you can check (1) visual parallelism before treatment, (2) a joint F-test that pre-treatment event study coefficients equal zero, and (3) placebo tests at fake treatment dates."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <!-- ============================================================ -->
         <!-- SECTION 1: Goodman-Bacon Decomposition                       -->
         <!-- ============================================================ -->
@@ -1862,6 +2075,49 @@ TWFE estimate: 0.4183
 
 Note: The negative estimate for "Later vs Earlier" comparisons
 reveals that already-treated units are contaminated controls.</div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This performs the Goodman-Bacon (2021) decomposition, showing that the TWFE coefficient is a weighted average of all possible 2x2 DiD comparisons \u2014 revealing whether problematic comparisons drive the estimate",
+                  "languages": {
+                    "python": [
+                      {"code": "cohorts", "role": "Variable", "tip": "Array of unique treatment timing years \u2014 each defines a cohort.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the cohort identifiers.", "color": "peach"},
+                      {"code": "df[df['treatment'] == 1]", "role": "Filter", "tip": "Selects only treated observations.", "color": "pink"},
+                      {"code": ".groupby('unit_id')['year'].min()", "role": "Method Chain", "tip": "Finds the first year each unit was treated.", "color": "teal"},
+                      {"code": ".unique()", "role": "Method", "tip": "Gets unique treatment cohorts.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "bacondecomp", "role": "Command", "tip": "Goodman-Bacon decomposition \u2014 breaks TWFE into component 2x2 DiD estimates.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome treatment", "role": "Variables", "tip": "Outcome variable and treatment indicator.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates variables from options.", "color": "overlay"},
+                      {"code": "id(unit_id)", "role": "Option", "tip": "Panel unit identifier.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "time(year)", "role": "Option", "tip": "Time period variable.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "bacon_out", "role": "Variable", "tip": "Stores the decomposition results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "bacon", "role": "Function", "tip": "Goodman-Bacon decomposition from the bacondecomp package.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "outcome ~ treatment", "role": "Formula", "tip": "Outcome regressed on treatment status.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "data = df, id_var = \"unit_id\", time_var = \"year\"", "role": "Arguments", "tip": "Data, unit identifier, and time variable.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "The Bacon decomposition breaks TWFE into three types of 2x2 comparisons: <strong>treated vs. never-treated</strong> (clean), <strong>earlier vs. later treated</strong> (potentially biased), and <strong>later vs. earlier treated</strong> (most problematic). Plotting weights vs. estimates reveals whether the problematic comparisons drive the TWFE coefficient."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="citation">
@@ -2004,6 +2260,46 @@ Sum of negative weights: -0.1834
 
 Interpretation: 20% of group-time cells receive negative weight.
 TWFE may be biased with heterogeneous effects.</div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This computes the implicit weights TWFE assigns to each group-time cell, checking whether any weights are negative \u2014 a sign that heterogeneous treatment effects could severely bias the TWFE estimate",
+                  "languages": {
+                    "python": [
+                      {"code": "df['outcome_dm']", "role": "Variable", "tip": "Demeaned outcome \u2014 after removing unit and time means.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the demeaned values.", "color": "peach"},
+                      {"code": "df.groupby('unit_id')['outcome']", "role": "Group", "tip": "Groups observations by unit.", "color": "pink"},
+                      {"code": ".transform('demean')", "role": "Method", "tip": "Subtracts the unit mean from each observation (within transformation).", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "twowayfeweights", "role": "Command", "tip": "Computes the implicit weights TWFE assigns to each group-time cell.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome unit_id year treatment", "role": "Variables", "tip": "Outcome, unit ID, time, and treatment variables.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates variables from options.", "color": "overlay"},
+                      {"code": "type(feTR)", "role": "Option", "tip": "Computes weights for the fixed-effects treatment regression.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "weights_out", "role": "Variable", "tip": "Stores the computed TWFE weights for each group-time cell.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "twowayfeweights", "role": "Function", "tip": "Computes TWFE weights from the TwoWayFEWeights package.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "df, \"outcome\", \"unit_id\", \"year\", \"treatment\"", "role": "Arguments", "tip": "Data and variable names.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "type = \"feTR\"", "role": "Argument", "tip": "Type of TWFE regression to decompose.", "color": "green"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "de Chaisemartin and D\u2019Haultfoeuille (2020) show that TWFE implicitly assigns <strong>negative weights</strong> to some treated observations when treatment timing varies. If treatment effects are heterogeneous, these negative weights can produce a TWFE estimate that is severely biased \u2014 even of the wrong sign."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="info-box warning">
@@ -2175,6 +2471,49 @@ Event Study (with pre-trends):
  95% CIs shown as vertical bars, dashed line at y = 0]</div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This estimates the ATT using the Borusyak, Jaravel, and Spiess (2024) imputation approach, which learns unit and time patterns from untreated observations to impute counterfactual outcomes for treated units",
+                  "languages": {
+                    "python": [
+                      {"code": "untreated", "role": "Variable", "tip": "Subset containing only untreated observations.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the filtered data.", "color": "peach"},
+                      {"code": "df[df['treatment'] == 0]", "role": "Filter", "tip": "Keeps only observations where treatment is zero \u2014 the clean data for learning the counterfactual model.", "color": "pink"}
+                    ],
+                    "stata": [
+                      {"code": "did_imputation", "role": "Command", "tip": "Borusyak et al. imputation estimator for staggered DiD.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome unit_id year first_treated", "role": "Variables", "tip": "Outcome, unit ID, time, and first-treatment-period variables.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates variables from options.", "color": "overlay"},
+                      {"code": "allhorizons", "role": "Option", "tip": "Reports effects at all post-treatment horizons.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "pretrends(5)", "role": "Option", "tip": "Includes 5 pre-treatment periods to test for parallel trends violations.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "did_imp", "role": "Variable", "tip": "Stores the imputation estimation results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "did_imputation", "role": "Function", "tip": "Borusyak et al. imputation estimator from the didimputation package.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "data = df", "role": "Argument", "tip": "The panel dataset.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "yname = \"outcome\"", "role": "Argument", "tip": "Outcome variable name.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "gname = \"first_treated\"", "role": "Argument", "tip": "Cohort indicator \u2014 year of first treatment.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "The imputation approach works in three steps: (1) estimate unit and time fixed effects using <strong>only untreated observations</strong>, (2) predict what treated units\u2019 outcomes would have been without treatment, (3) the treatment effect is the gap between actual and imputed outcomes. This completely avoids negative weighting."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <div class="citation">
           <div class="citation-title">Reference</div>
           <ul>
@@ -2344,6 +2683,54 @@ Comparison:
   Sharp DiD (OLS):   0.452 — Intent-to-Treat (ITT) effect
   Fuzzy DiD (IV):    0.723 — Local Average Treatment Effect (LATE)
   Implied compliance: 62.5%</div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This estimates a fuzzy difference-in-differences model, where treatment assignment instruments actual treatment uptake via 2SLS within a panel fixed effects framework",
+                  "languages": {
+                    "python": [
+                      {"code": "fuzzy", "role": "Variable", "tip": "Stores the fuzzy DiD (IV) estimation result.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the model result.", "color": "peach"},
+                      {"code": "IV2SLS", "role": "Class", "tip": "Two-stage least squares estimator from linearmodels.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "endog=df[['treatment_actual']]", "role": "Endogenous", "tip": "The endogenous regressor \u2014 actual treatment uptake.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "instruments=df[['treatment_assigned']]", "role": "Instruments", "tip": "The instrument \u2014 treatment assignment (intent-to-treat).", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "ivreghdfe", "role": "Command", "tip": "IV regression with high-dimensional fixed effects.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "outcome", "role": "Variable", "tip": "The dependent variable.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "(treatment_actual = treatment_assigned)", "role": "IV Spec", "tip": "Endogenous variable = instrument.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates specification from options.", "color": "overlay"},
+                      {"code": "absorb(unit_id year)", "role": "Option", "tip": "Absorbs unit and time fixed effects.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "cluster(unit_id)", "role": "Option", "tip": "Clusters standard errors at the unit level.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "fuzzy", "role": "Variable", "tip": "Stores the fuzzy DiD result.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "feols", "role": "Function", "tip": "Fixed-effects OLS/IV from fixest.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "outcome ~ 1 | unit_id + year", "role": "Formula + FE", "tip": "Outcome with unit and year fixed effects.", "color": "pink"},
+                      {"code": " | ", "role": "Separator", "tip": "Second pipe introduces IV specification.", "color": "peach"},
+                      {"code": "treatment_actual ~ treatment_assigned", "role": "IV Spec", "tip": "Endogenous ~ instrument.", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Standard (sharp) DiD assumes perfect compliance. <strong>Fuzzy DiD</strong> handles imperfect compliance by using treatment assignment as an instrument for actual treatment, estimating the Local Average Treatment Effect (LATE) for compliers \u2014 those whose treatment status changes because of the policy."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="info-box tip">
@@ -2519,6 +2906,47 @@ Interpretation:
   Breakdown value: M &asymp; 1.85
   (The result is overturned only if post-treatment violations
    exceed 1.85x the maximum pre-treatment trend deviation)</div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This performs the Rambachan and Roth (2023) HonestDiD sensitivity analysis, computing confidence intervals that remain valid even if parallel trends are violated by up to a specified magnitude M",
+                  "languages": {
+                    "python": [
+                      {"code": "# M = 0: standard CI", "role": "Comment", "tip": "M = 0 assumes exact parallel trends \u2014 gives the standard confidence interval.", "color": "pink"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "# M > 0: wider CI", "role": "Comment", "tip": "M > 0 allows for violations of parallel trends \u2014 the CI widens to remain valid.", "color": "pink"}
+                    ],
+                    "stata": [
+                      {"code": "honestdid", "role": "Command", "tip": "HonestDiD sensitivity analysis for DiD designs.", "color": "blue"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates from options.", "color": "overlay"},
+                      {"code": "pre(4)", "role": "Option", "tip": "Number of pre-treatment periods in the event study.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "post(5)", "role": "Option", "tip": "Number of post-treatment periods.", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "mvec(0 0.5 1 1.5 2)", "role": "Option", "tip": "Grid of M values \u2014 each allows post-treatment violations up to M times the max pre-trend.", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "sensitivity", "role": "Variable", "tip": "Stores the sensitivity analysis results.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
+                      {"code": "createSensitivityResults_relativeMagnitudes", "role": "Function", "tip": "Computes robust CIs allowing violations proportional to the largest pre-trend.", "color": "blue"},
+                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
+                      {"code": "betahat = betahat, sigma = sigma", "role": "Arguments", "tip": "Event study coefficients and their variance-covariance matrix.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "Mbarvec = seq(0, 2, by = 0.5)", "role": "Argument", "tip": "Grid of M values from 0 (standard) to 2 (allowing large violations).", "color": "sky"},
+                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Standard pre-trend tests have <strong>low power</strong> (Roth, 2022). HonestDiD asks a more informative question: how large do parallel trends violations need to be before the conclusion changes? The breakdown value of M tells you the maximum violation magnitude the result can survive."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="info-box warning">

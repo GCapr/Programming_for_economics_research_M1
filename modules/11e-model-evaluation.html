@@ -1250,6 +1250,44 @@ Classification Metrics:
   AUC-ROC:   0.9406</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you evaluate a classification model using confusion matrix, precision/recall, F1, and AUC-ROC",
+                  "pattern": "cm = confusion_matrix(y_true, y_pred); auc = roc_auc_score(y_true, y_prob)",
+                  "structureNote": "<strong>Accuracy</strong> alone is misleading with imbalanced classes. <strong>Precision</strong> = of predicted positives, how many are correct. <strong>Recall</strong> (sensitivity) = of actual positives, how many were detected. <strong>F1</strong> = harmonic mean of precision and recall. <strong>AUC-ROC</strong> measures ranking quality across all thresholds. In medical/fraud detection, prioritize recall (catch all cases); in spam filtering, prioritize precision (avoid false flags).",
+                  "languages": {
+                    "python": [
+                      {"code": "cm", "role": "Variable", "tip": "Confusion matrix: 2x2 array of TN, FP, FN, TP.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "confusion_matrix", "role": "Function", "tip": "From sklearn.metrics. Returns the confusion matrix.", "color": "blue"},
+                      {"code": "(y_test, y_pred)", "role": "Arguments", "tip": "True labels and predicted labels.", "color": "sky"},
+                      {"code": "\nprint(classification_report(y_test, y_pred))", "role": "Full Report", "tip": "Prints precision, recall, F1 for each class plus averages.", "color": "teal"},
+                      {"code": "\nauc = roc_auc_score(y_test, y_prob)", "role": "AUC-ROC", "tip": "Uses predicted probabilities (not hard labels). Measures ranking quality.", "color": "blue"}
+                    ],
+                    "stata": [
+                      {"code": "estat classification", "role": "Command", "tip": "After logit/probit: reports sensitivity, specificity, and overall accuracy.", "color": "mauve"},
+                      {"code": "\nlroc", "role": "ROC Command", "tip": "Plots the ROC curve and reports AUC after logistic regression.", "color": "teal"},
+                      {"code": "\nlsens", "role": "Sensitivity Plot", "tip": "Plots sensitivity and specificity as a function of the classification threshold.", "color": "teal"}
+                    ],
+                    "r": [
+                      {"code": "confusionMatrix", "role": "Function", "tip": "From caret package. Comprehensive classification diagnostics.", "color": "blue"},
+                      {"code": "(factor(y_pred), factor(y_test))", "role": "Arguments", "tip": "Predicted and true labels as factors.", "color": "sky"},
+                      {"code": "\n# AUC-ROC:", "role": "Comment", "tip": "Use pROC package for ROC analysis.", "color": "overlay"},
+                      {"code": "\nroc_obj <- roc(y_test, y_prob)", "role": "ROC Object", "tip": "From pROC package. Creates ROC curve from probabilities.", "color": "blue"},
+                      {"code": "\nauc(roc_obj)", "role": "AUC", "tip": "Extracts the area under the ROC curve.", "color": "teal"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
 
         <!-- ===================== HYPERPARAMETER TUNING ===================== -->
         <h2 id="hyperparameter-tuning">Hyperparameter Tuning</h2>
@@ -1458,6 +1496,50 @@ Final test set metrics:
   &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;
 1 rmse    standard       2.54  Preprocessor1_Model1
 2 rsq     standard       0.867 Preprocessor1_Model1</pre></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you systematically tune hyperparameters using grid search, random search, or Bayesian optimization with cross-validation",
+                  "pattern": "grid_search = GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error')",
+                  "structureNote": "<strong>Grid search</strong> tries every combination (exhaustive but expensive). <strong>Random search</strong> samples randomly (more efficient for high-dimensional grids). <strong>Bayesian optimization</strong> (Optuna) learns which regions are promising and focuses there. Always tune on the <strong>training set</strong> with cross-validation -- never on the test set.",
+                  "languages": {
+                    "python": [
+                      {"code": "grid_search", "role": "Variable", "tip": "Stores the grid search object and results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "GridSearchCV", "role": "Class", "tip": "From sklearn.model_selection. Exhaustive hyperparameter search.", "color": "blue"},
+                      {"code": "(GradientBoostingRegressor()", "role": "Model", "tip": "Model to tune. Can be any sklearn estimator.", "color": "sky"},
+                      {"code": ", param_grid", "role": "Parameters", "tip": "Dictionary: {'n_estimators': [100, 200], 'max_depth': [3, 5, 7]}.", "color": "lavender"},
+                      {"code": ", cv=5", "role": "CV Folds", "tip": "5-fold cross-validation for each combination.", "color": "lavender"},
+                      {"code": ", scoring='neg_mean_squared_error'", "role": "Metric", "tip": "Score to optimize. Negative because sklearn maximizes.", "color": "yellow"},
+                      {"code": ")", "role": "Close Paren", "tip": "Best params in .best_params_, best score in .best_score_.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "* Stata: Manual grid search", "role": "Comment", "tip": "Loop over hyperparameter values, record CV error.", "color": "overlay"},
+                      {"code": "\nforeach ntree in 50 100 200 500 {", "role": "Outer Loop", "tip": "Iterate over number of trees.", "color": "mauve"},
+                      {"code": "\n  foreach depth in 2 5 10 {", "role": "Inner Loop", "tip": "Iterate over tree depth.", "color": "mauve"},
+                      {"code": "\n    * Cross-validate and record RMSE", "role": "Evaluate", "tip": "Train model with these parameters, compute CV error.", "color": "overlay"},
+                      {"code": "\n  }", "role": "End Inner", "tip": "End depth loop.", "color": "overlay"},
+                      {"code": "\n}", "role": "End Outer", "tip": "Pick the combination with lowest CV error.", "color": "overlay"}
+                    ],
+                    "r": [
+                      {"code": "tune_result", "role": "Variable", "tip": "Stores the tuning results.", "color": "pink"},
+                      {"code": " <- tune_grid(", "role": "Function", "tip": "From tidymodels. Cross-validated grid search.", "color": "blue"},
+                      {"code": "workflow()", "role": "Workflow", "tip": "Tidymodels workflow containing the model and recipe.", "color": "sky"},
+                      {"code": ", resamples = vfold_cv(train, v = 5)", "role": "CV Folds", "tip": "5-fold cross-validation resamples.", "color": "lavender"},
+                      {"code": ", grid = grid_regular(trees(), min_n(), levels = 5)", "role": "Grid", "tip": "Regular grid over hyperparameter ranges.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Use show_best() to see top hyperparameter combinations.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
 
@@ -1686,6 +1768,47 @@ results &lt;- <span class="code-function">data.frame</span>(frac = fractions, n 
           20       1.4812       2.9483
           22       1.5034       2.8156
           25       1.5198       2.7134</pre></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you generate learning curves and validation curves to diagnose underfitting vs. overfitting",
+                  "pattern": "train_sizes, train_scores, val_scores = learning_curve(model, X, y, cv=5)",
+                  "structureNote": "Learning curves show how performance changes with <strong>training set size</strong>. A large gap between train and validation scores signals <strong>overfitting</strong> (more data or regularization helps). Both scores being low signals <strong>underfitting</strong> (need a more flexible model). Validation curves show performance vs. a single hyperparameter.",
+                  "languages": {
+                    "python": [
+                      {"code": "train_sizes, train_scores, val_scores", "role": "Return Values", "tip": "Arrays: training sizes used, train scores per fold, validation scores per fold.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Unpacks the three return values.", "color": "peach"},
+                      {"code": "learning_curve", "role": "Function", "tip": "From sklearn.model_selection. Computes train/val scores at increasing training set sizes.", "color": "blue"},
+                      {"code": "(estimator", "role": "Model", "tip": "Any sklearn estimator (e.g., RandomForestRegressor()).", "color": "sky"},
+                      {"code": ", X, y", "role": "Data", "tip": "Features and target variable.", "color": "pink"},
+                      {"code": ", cv=5", "role": "CV Folds", "tip": "5-fold cross-validation at each training size.", "color": "lavender"},
+                      {"code": ", train_sizes=np.linspace(0.1, 1.0, 10)", "role": "Sizes", "tip": "Fraction of training data to use: 10% to 100% in 10 steps.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Plot mean +/- std of train/val scores to visualize bias-variance tradeoff.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "* Stata: Manual learning curve via loop", "role": "Comment", "tip": "No built-in learning_curve function -- implement manually.", "color": "overlay"},
+                      {"code": "\nforvalues n = 100(100)1000 {", "role": "Loop", "tip": "Loop over training set sizes from 100 to 1000.", "color": "mauve"},
+                      {"code": "\n  sample `n', count", "role": "Subsample", "tip": "Train on a subset of the data.", "color": "sky"},
+                      {"code": "\n  * Train and record RMSE on training and validation sets", "role": "Evaluate", "tip": "Record both training and validation error at each size.", "color": "overlay"},
+                      {"code": "\n}", "role": "End Loop", "tip": "Plot the two error curves to diagnose fit.", "color": "overlay"}
+                    ],
+                    "r": [
+                      {"code": "# Using mlr3 or caret for learning curves", "role": "Comment", "tip": "R has multiple options for learning curves.", "color": "overlay"},
+                      {"code": "\nlrn_curve <- lrn('regr.ranger')", "role": "Learner", "tip": "Define the model to evaluate.", "color": "blue"},
+                      {"code": "\nresult <- mlr3::benchmark(design)", "role": "Benchmark", "tip": "Run the model at each training size with cross-validation.", "color": "teal"},
+                      {"code": "\nautoplot(result)", "role": "Plot", "tip": "Visualize the learning curve showing train/test error vs. training size.", "color": "blue"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
 

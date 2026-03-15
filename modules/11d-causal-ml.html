@@ -502,6 +502,54 @@ Standard error:                     0.0251
 True theta: 0.5000</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you manually implement Double/Debiased Machine Learning (DML) with cross-fitting",
+                  "pattern": "Step 1: ML predict Y from X → Step 2: ML predict D from X → Step 3: regress residuals",
+                  "structureNote": "DML removes regularization bias by <strong>partialling out</strong> confounders using ML. Cross-fitting prevents overfitting: split data into K folds, train on K-1, predict on the held-out fold. The final step regresses Y-residuals on D-residuals to get the causal effect &theta;. This works because ML flexibly controls for X without requiring a correct functional form.",
+                  "languages": {
+                    "python": [
+                      {"code": "# Step 1: Predict Y from X (nuisance)", "role": "Comment", "tip": "Learn E[Y|X] flexibly using any ML method.", "color": "overlay"},
+                      {"code": "\nml_y = LassoCV(cv=5).fit(X_train, y_train)", "role": "Y Model", "tip": "Cross-validated LASSO to predict outcome from confounders.", "color": "blue"},
+                      {"code": "\ny_resid = y - ml_y.predict(X)", "role": "Y Residuals", "tip": "Residualize Y: remove the part predicted by X.", "color": "pink"},
+                      {"code": "\n# Step 2: Predict D from X (nuisance)", "role": "Comment", "tip": "Learn E[D|X] to residualize the treatment.", "color": "overlay"},
+                      {"code": "\nml_d = LassoCV(cv=5).fit(X_train, d_train)", "role": "D Model", "tip": "LASSO to predict treatment from confounders.", "color": "blue"},
+                      {"code": "\nd_resid = d - ml_d.predict(X)", "role": "D Residuals", "tip": "Residualize D: remove confounding variation.", "color": "pink"},
+                      {"code": "\n# Step 3: Regress residuals", "role": "Comment", "tip": "OLS of Y-residuals on D-residuals gives the causal effect.", "color": "overlay"},
+                      {"code": "\ntheta = np.sum(d_resid * y_resid) / np.sum(d_resid * d_resid)", "role": "Causal Effect", "tip": "The Frisch-Waugh-Lovell theorem: partialling out X gives the same coefficient as controlling for X.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "* Step 1: LASSO of Y on X", "role": "Step 1", "tip": "Flexibly predict outcome from confounders.", "color": "overlay"},
+                      {"code": "\ncvlasso y x1-x10\npredict y_hat", "role": "Y Prediction", "tip": "CV LASSO for outcome, save predictions.", "color": "mauve"},
+                      {"code": "\ngen y_resid = y - y_hat", "role": "Y Residuals", "tip": "Residualize Y.", "color": "pink"},
+                      {"code": "\n* Step 2: LASSO of D on X", "role": "Step 2", "tip": "Predict treatment from confounders.", "color": "overlay"},
+                      {"code": "\ncvlasso d x1-x10\npredict d_hat", "role": "D Prediction", "tip": "CV LASSO for treatment.", "color": "mauve"},
+                      {"code": "\ngen d_resid = d - d_hat", "role": "D Residuals", "tip": "Residualize D.", "color": "pink"},
+                      {"code": "\n* Step 3: OLS on residuals", "role": "Step 3", "tip": "Regress Y-residuals on D-residuals.", "color": "overlay"},
+                      {"code": "\nreg y_resid d_resid, robust", "role": "Causal Effect", "tip": "Coefficient on d_resid = causal effect theta.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "# Step 1: ML for Y", "role": "Step 1", "tip": "Flexibly predict Y from X.", "color": "overlay"},
+                      {"code": "\nml_y <- cv.glmnet(X, y, alpha = 1)", "role": "Y Model", "tip": "Cross-validated LASSO for the outcome.", "color": "blue"},
+                      {"code": "\ny_resid <- y - predict(ml_y, X, s = 'lambda.min')", "role": "Y Residuals", "tip": "Residualize Y.", "color": "pink"},
+                      {"code": "\n# Step 2: ML for D", "role": "Step 2", "tip": "Predict treatment from confounders.", "color": "overlay"},
+                      {"code": "\nml_d <- cv.glmnet(X, d, alpha = 1)", "role": "D Model", "tip": "Cross-validated LASSO for treatment.", "color": "blue"},
+                      {"code": "\nd_resid <- d - predict(ml_d, X, s = 'lambda.min')", "role": "D Residuals", "tip": "Residualize D.", "color": "pink"},
+                      {"code": "\n# Step 3: OLS on residuals", "role": "Step 3", "tip": "Causal effect from partialled-out regression.", "color": "overlay"},
+                      {"code": "\ntheta <- lm(y_resid ~ d_resid - 1)", "role": "Causal Effect", "tip": "No intercept: residuals are already centered.", "color": "blue"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <p>The estimated treatment effect is close to the true value of 0.50, and the 95% confidence interval covers it. Notice that we get a valid, interpretable causal estimate even though the true function g(X) contains nonlinear terms (X&#x2082;&#x00B2;) and interactions (X&#x2083; &times; X&#x2084;) that a simple linear regression would miss. The LASSO handles the variable selection flexibly, and the cross-fitting ensures that we do not overfit.</p>
 
         <h4>Using Dedicated Packages</h4>
@@ -1360,6 +1408,44 @@ Left: Scatter of estimated vs. true CATEs — points cluster around 45-degree li
 Right: Estimated CATEs increase linearly with X[,1], tracking true tau(x) = 1 + 2*X1.</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you visualize heterogeneous treatment effects (CATEs) from a causal forest to identify effect modifiers",
+                  "pattern": "cate = cf.predict(X); plt.scatter(X[:,0], cate)",
+                  "structureNote": "After estimating a causal forest, visualizing CATEs reveals <strong>which covariates drive treatment effect heterogeneity</strong>. Plot estimated CATEs against each covariate to identify effect modifiers. A scatter of estimated vs. true CATEs (in simulations) validates the model. In practice, use <strong>variable importance</strong> from the causal forest to prioritize which covariates to examine.",
+                  "languages": {
+                    "python": [
+                      {"code": "cate", "role": "Variable", "tip": "Vector of estimated conditional average treatment effects.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "cf.effect(X)", "role": "Predict CATEs", "tip": "Predicts individual treatment effects from the fitted causal forest.", "color": "teal"},
+                      {"code": "\nplt.scatter(X[:, 0], cate)", "role": "Scatter Plot", "tip": "Plots CATEs against a covariate to identify effect modifiers.", "color": "blue"},
+                      {"code": "\nplt.xlabel('X1')", "role": "X Label", "tip": "Label the covariate axis.", "color": "green"},
+                      {"code": "\nplt.ylabel('Estimated CATE')", "role": "Y Label", "tip": "Label the treatment effect axis.", "color": "green"}
+                    ],
+                    "stata": [
+                      {"code": "predict cate", "role": "Predict", "tip": "Generates individual CATE predictions after causal forest estimation.", "color": "mauve"},
+                      {"code": "\ntwoway scatter cate x1", "role": "Scatter Plot", "tip": "Plots estimated CATEs against covariate X1.", "color": "teal"},
+                      {"code": ", ytitle(\"Estimated CATE\")", "role": "Labels", "tip": "Adds axis labels to the plot.", "color": "green"}
+                    ],
+                    "r": [
+                      {"code": "cate", "role": "Variable", "tip": "Vector of estimated CATEs.", "color": "pink"},
+                      {"code": " <- predict(cf)$predictions", "role": "Predict CATEs", "tip": "Extracts CATE predictions from the causal forest.", "color": "teal"},
+                      {"code": "\nplot(X[, 1], cate", "role": "Scatter Plot", "tip": "Base R scatter plot of CATEs vs covariate.", "color": "blue"},
+                      {"code": ", xlab = 'X1', ylab = 'Estimated CATE'", "role": "Labels", "tip": "Axis labels for the plot.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "Look for trends: a slope means X1 modifies the treatment effect.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <p>The scatter plot of estimated versus true CATEs shows that the causal forest captures the systematic variation in treatment effects well. The plot of CATEs against X<sub>1</sub> (the variable that drives heterogeneity in our simulation) reveals the linear relationship &tau;(x) = 1 + 2x<sub>1</sub> that we built into the data. In practice, where you do not know the true CATE, these plots help identify which covariates are the strongest effect modifiers and guide policy targeting.</p>
 
 
@@ -1541,6 +1627,46 @@ Variable splits:
 [2] X1 >  -0.49  --> treat</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you learn an optimal treatment assignment policy from estimated heterogeneous treatment effects",
+                  "pattern": "policy = policy_tree(X, Gamma, depth=2)",
+                  "structureNote": "Policy learning finds an <strong>optimal treatment rule</strong> that maps covariates to treatment decisions. Given estimated CATEs, the optimal unconstrained policy is 'treat if CATE > 0.' The <strong>policytree</strong> package learns interpretable shallow decision trees that approximate this rule, making the policy transparent and implementable.",
+                  "languages": {
+                    "python": [
+                      {"code": "cf", "role": "Variable", "tip": "A fitted CausalForestDML model with estimated CATEs.", "color": "pink"},
+                      {"code": " = CausalForestDML(...).fit(y, d, X=X, W=W)", "role": "Causal Forest", "tip": "First estimate heterogeneous effects using causal forest.", "color": "blue"},
+                      {"code": "\ncate", "role": "Variable", "tip": "Individual-level treatment effect estimates.", "color": "pink"},
+                      {"code": " = cf.effect(X)", "role": "Get CATEs", "tip": "Predict CATEs for each observation.", "color": "teal"},
+                      {"code": "\npolicy", "role": "Decision Rule", "tip": "Simple rule: treat if estimated CATE > 0.", "color": "pink"},
+                      {"code": " = (cate > 0).astype(int)", "role": "Threshold", "tip": "Binary treatment recommendation based on positive CATE.", "color": "peach"}
+                    ],
+                    "stata": [
+                      {"code": "python:", "role": "Python Block", "tip": "Stata uses Python for policy learning via econml.", "color": "mauve"},
+                      {"code": "\nfrom econml.dml import CausalForestDML", "role": "Import", "tip": "EconML provides causal forest and policy tools.", "color": "yellow"},
+                      {"code": "\ncf = CausalForestDML(...).fit(y, d, X=X, W=W)", "role": "Fit", "tip": "Estimate the causal forest.", "color": "blue"},
+                      {"code": "\npolicy = (cf.effect(X) > 0).astype(int)", "role": "Policy", "tip": "Assign treatment to those with positive estimated effect.", "color": "teal"}
+                    ],
+                    "r": [
+                      {"code": "cf", "role": "Variable", "tip": "A fitted causal_forest model from grf.", "color": "pink"},
+                      {"code": " <- causal_forest(X, Y, W)", "role": "Causal Forest", "tip": "Estimate heterogeneous effects.", "color": "blue"},
+                      {"code": "\ndr_scores", "role": "Variable", "tip": "Doubly-robust scores for policy optimization.", "color": "pink"},
+                      {"code": " <- double_robust_scores(cf)", "role": "DR Scores", "tip": "Constructs augmented IPW scores for policy learning.", "color": "teal"},
+                      {"code": "\npolicy", "role": "Variable", "tip": "The learned treatment policy (shallow decision tree).", "color": "pink"},
+                      {"code": " <- policy_tree(X, dr_scores, depth = 2)", "role": "Policy Tree", "tip": "From policytree package. Learns an interpretable, optimal treatment rule.", "color": "blue"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <p>The policy tree identifies X<sub>0</sub> (X<sub>1</sub> in Stata/R) as the key variable for treatment assignment, with a cutoff around -0.5. This makes sense: the true CATE is &tau;(x) = 1 + 2x<sub>0</sub>, which crosses zero at x<sub>0</sub> = -0.5. The policy correctly recommends treating individuals with x<sub>0</sub> > -0.5 (who have positive treatment effects) and withholding treatment from those with x<sub>0</sub> &lt; -0.5 (who would be harmed). This is a powerful result: from observational data, we have learned an interpretable, near-optimal treatment rule.</p>
 
 
@@ -1719,6 +1845,48 @@ Cor(estimated, true):  0.7896</pre></div>
 ATE (estimated): 1.0341
 True ATE:        1.0238
 Correlation:     0.7896</pre></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you estimate heterogeneous treatment effects using BART (Bayesian Additive Regression Trees)",
+                  "pattern": "bart_model <- bartc(y, treatment, confounders, data)",
+                  "structureNote": "BART is a Bayesian nonparametric method that estimates individual treatment effects with natural <strong>uncertainty quantification</strong> through posterior distributions. Unlike causal forests, BART provides <strong>credible intervals</strong> rather than confidence intervals. The bartCause package separates the response surface into treated and control potential outcomes.",
+                  "languages": {
+                    "r": [
+                      {"code": "bart_fit", "role": "Variable", "tip": "Stores the fitted BART causal model.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment operator.", "color": "peach"},
+                      {"code": "bartc", "role": "Function", "tip": "From bartCause package. Bayesian causal inference via BART.", "color": "blue"},
+                      {"code": "(response = y", "role": "Outcome", "tip": "The outcome variable.", "color": "sky"},
+                      {"code": ", treatment = d", "role": "Treatment", "tip": "Binary treatment indicator.", "color": "sky"},
+                      {"code": ", confounders = X", "role": "Confounders", "tip": "Matrix of covariates to control for.", "color": "pink"},
+                      {"code": ", estimand = 'ate'", "role": "Estimand", "tip": "'ate' for average treatment effect, 'att' for effect on the treated.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Runs MCMC sampling. Use summary() for posterior means and credible intervals.", "color": "overlay"}
+                    ],
+                    "python": [
+                      {"code": "model", "role": "Variable", "tip": "Stores the BART model.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "XBART", "role": "Class", "tip": "From xbart or bartpy package. Python BART implementation.", "color": "blue"},
+                      {"code": "(num_trees=200", "role": "Trees", "tip": "Number of trees in the BART ensemble. 200 is typical.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Creates the model.", "color": "overlay"},
+                      {"code": "\nmodel.fit(X_treated, y_treated)", "role": "Fit Treated", "tip": "Fit separate BART models for treated and control groups.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "python:", "role": "Python Block", "tip": "Stata uses embedded Python for BART models.", "color": "mauve"},
+                      {"code": "\nfrom bartpy.sklearnmodel import SklearnModel", "role": "Import", "tip": "BartPy provides sklearn-compatible BART.", "color": "yellow"},
+                      {"code": "\nbart = SklearnModel(n_trees=200)", "role": "Create Model", "tip": "200-tree BART ensemble.", "color": "blue"},
+                      {"code": "\nbart.fit(X, y)", "role": "Fit", "tip": "Fits the BART model via MCMC.", "color": "teal"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <p>BART provides good point estimates and, through the posterior distribution, natural uncertainty quantification. The credible intervals from the R implementation account for both estimation uncertainty and model uncertainty. The main advantage of BART over causal forests is its Bayesian uncertainty quantification; the main disadvantage is that BART does not have the same formal asymptotic guarantees as causal forests, and computation can be slower for large datasets.</p>

@@ -536,6 +536,40 @@ Loaded <span class="out-num">14,112</span> rows, <span class="out-num">4</span> 
           </div>
         </div>
 
+        <div class="concept-box">
+          <h4>Portable File Paths Across Operating Systems</h4>
+          <p>Windows uses backslashes (<code>\</code>) as path separators, while Mac and Linux use forward slashes (<code>/</code>). Hardcoding one style makes your code break on other systems. Each language offers a function that automatically inserts the correct separator for the current OS:</p>
+          <div class="code-tabs">
+            <div class="tab-buttons">
+              <button class="tab-button active" data-lang="python">Python</button>
+              <button class="tab-button" data-lang="r">R</button>
+            </div>
+            <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-keyword">import</span> os
+
+<span class="code-comment"># os.path.join() inserts the correct separator for your OS</span>
+<span class="code-tooltip" data-tip="OS.PATH.JOIN(): Combines folder and file names using the correct path separator for your operating system. On Windows it uses backslashes, on Mac/Linux it uses forward slashes. This makes your code portable.">path = os.path.join(<span class="code-string">'data'</span>, <span class="code-string">'raw'</span>, <span class="code-string">'gdp_panel.csv'</span>)</span>
+<span class="code-comment"># On Mac/Linux: 'data/raw/gdp_panel.csv'</span>
+<span class="code-comment"># On Windows:   'data\raw\gdp_panel.csv'</span>
+
+df = pd.read_csv(path)</code></pre>
+            </div>
+            <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># file.path() inserts the correct separator for your OS</span>
+<span class="code-tooltip" data-tip="FILE.PATH(): Combines folder and file names using the correct path separator for your operating system. On Windows it uses backslashes, on Mac/Linux it uses forward slashes. This makes your code work on any computer.">path <span class="code-operator"><-</span> <span class="code-function">file.path</span>(<span class="code-string">'data'</span>, <span class="code-string">'raw'</span>, <span class="code-string">'gdp_panel.csv'</span>)</span>
+<span class="code-comment"># On Mac/Linux: 'data/raw/gdp_panel.csv'</span>
+<span class="code-comment"># On Windows:   'data\raw\gdp_panel.csv'</span>
+
+df <span class="code-operator"><-</span> <span class="code-function">read_csv</span>(path)
+
+<span class="code-comment"># Compare with paste() — NOT portable:</span>
+<span class="code-comment"># path <- paste('data', 'raw', 'gdp_panel.csv', sep = '/')</span>
+<span class="code-comment"># This hardcodes '/' which may fail on Windows</span></code></pre>
+            </div>
+          </div>
+          <p><strong>Rule of thumb:</strong> Always use <code>os.path.join()</code> in Python and <code>file.path()</code> in R when constructing paths from folder and file name components. This is especially important for research code shared between coauthors who may use different operating systems.</p>
+        </div>
+
         <h3>Loading Excel and Stata Files</h3>
 
         <div class="code-tabs" data-runnable="load-other">

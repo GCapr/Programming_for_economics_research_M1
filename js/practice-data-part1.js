@@ -9,6 +9,9 @@
 
     // ----------------------------------------------------------
     // BEGINNER (8 exercises)
+    // Takeaways: import aliases, assignment operators, arithmetic
+    //   with variables, strings need quotes, Stata macro expansion,
+    //   assignment across languages, keyword arguments, workflow order
     // ----------------------------------------------------------
     beginner: [
       {
@@ -45,7 +48,7 @@
       },
       {
         type: "read",
-        title: "Arithmetic with Stored Variables in R",
+        title: "Arithmetic with Stored Variables",
         prompt: "After running this code, what is the value of gdp_growth?",
         hint: "Trace the arithmetic step by step: subtract, then divide. The result is a decimal, not a percentage.",
         lang: "r",
@@ -121,7 +124,7 @@
       },
       {
         type: "reorder",
-        title: "R Data Loading Workflow",
+        title: "R Script Workflow Order",
         prompt: "Arrange these lines to: load a library, read a CSV, and print the first 6 rows.",
         hint: "You must load a library before calling its functions, and you must read data before you can preview it. <code>library()</code> comes first, <code>head()</code> comes last.",
         lang: "r",
@@ -137,6 +140,9 @@
 
     // ----------------------------------------------------------
     // INTERMEDIATE (8 exercises)
+    // Takeaways: method chaining, string formatting, = vs == in filters,
+    //   Stata macro reference syntax, R pipe operator, Stata workflow,
+    //   Stata package installation, cross-language equivalences
     // ----------------------------------------------------------
     intermediate: [
       {
@@ -264,6 +270,10 @@
 
     // ----------------------------------------------------------
     // ADVANCED (8 exercises)
+    // Takeaways: nested function evaluation order, variable scope,
+    //   0-based vs 1-based indexing, Stata prefix syntax (collapse),
+    //   Stata multi-step workflow, R pipe chains, loop syntax across
+    //   languages, modulo operator across languages
     // ----------------------------------------------------------
     advanced: [
       {
@@ -398,6 +408,10 @@
 
     // ----------------------------------------------------------
     // BEGINNER (8 exercises)
+    // Takeaways: pd.read_csv basics, Stata import delimited,
+    //   R glimpse() for preview, Windows file path escaping,
+    //   read_excel with sheet_name, Stata import pipeline,
+    //   file reading across languages, encoding errors
     // ----------------------------------------------------------
     beginner: [
       {
@@ -524,6 +538,9 @@
 
     // ----------------------------------------------------------
     // INTERMEDIATE (8 exercises)
+    // Takeaways: left join behavior, Stata 1:m merge, case-sensitive
+    //   merge keys, Stata URL import, API-to-DataFrame pipeline,
+    //   R left_join with dplyr, merge across languages, nested JSON
     // ----------------------------------------------------------
     intermediate: [
       {
@@ -651,6 +668,9 @@
 
     // ----------------------------------------------------------
     // ADVANCED (8 exercises)
+    // Takeaways: wide-to-long reshape (melt), Stata reshape long,
+    //   missing merge keys, JS-rendered content, scraping pipeline,
+    //   R pivot_longer, reshape across languages, portable file paths
     // ----------------------------------------------------------
     advanced: [
       {
@@ -786,6 +806,9 @@
 
     // ----------------------------------------------------------
     // BEGINNER (8 exercises)
+    // Takeaways: describe() output, summarize detail, counting missing
+    //   values, na.rm in R, frequency tables with count(), exploration
+    //   workflow order, exploration commands across languages, bysort prefix
     // ----------------------------------------------------------
     beginner: [
       {
@@ -913,6 +936,11 @@
 
     // ----------------------------------------------------------
     // INTERMEDIATE (8 exercises)
+    // Takeaways: multiple aggregations with .agg(), Boolean indexing
+    //   mechanics, string columns break numeric aggregations,
+    //   incomplete Boolean logic in R, dplyr pipeline order,
+    //   cross-tabulation in Stata, correlation matrix in Stata,
+    //   grouped summary operations across languages
     // ----------------------------------------------------------
     intermediate: [
       {
@@ -1040,6 +1068,10 @@
 
     // ----------------------------------------------------------
     // ADVANCED (8 exercises)
+    // Takeaways: chained query+groupby+agg, multi-index groupby results,
+    //   Stata & operator for AND, commas in numbers cause wrong types,
+    //   complete Stata exploration script, R grouped summary with sd,
+    //   advanced exploration across languages, principled exploration workflow
     // ----------------------------------------------------------
     advanced: [
       {

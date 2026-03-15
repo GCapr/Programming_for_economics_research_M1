@@ -1134,6 +1134,105 @@ Group Statistics (tidyverse):
           </div>
         </div>
 
+        <h3>Advanced GroupBy: Multi-Index Results and Group Transformations</h3>
+
+        <p>When you group by <strong>two or more columns</strong>, the result has a multi-level index (also called a hierarchical index). Understanding how to navigate this structure is essential for panel data analysis.</p>
+
+        <div class="concept-box">
+          <h4>Multi-Index GroupBy Results</h4>
+          <p>Grouping by two columns (e.g., country and sector) produces a <strong>multi-level index</strong> where the first grouping variable is the outer level and the second is the inner level. You can use <code>.loc[]</code> to select a slice of the outer level.</p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># Grouping by two columns creates a multi-level index</span>
+<span class="code-tooltip" data-tip="GROUPBY WITH TWO KEYS: Passing a list of columns creates groups defined by unique combinations (e.g., France-Agriculture, France-Industry, etc.). The result has a multi-level index.">result = df.groupby([<span class="code-string">'country'</span>, <span class="code-string">'sector'</span>])[<span class="code-string">'employment'</span>].sum()</span>
+
+<span class="code-comment"># result is a Series with a multi-level index:</span>
+<span class="code-comment">#   country   sector</span>
+<span class="code-comment">#   France    Agriculture    150000</span>
+<span class="code-comment">#             Industry       820000</span>
+<span class="code-comment">#             Services      1500000</span>
+<span class="code-comment">#   Germany   Agriculture    120000</span>
+<span class="code-comment">#             ...</span>
+
+<span class="code-comment"># Use .loc[] on the outer level to get one country's breakdown</span>
+<span class="code-tooltip" data-tip=".LOC['France']: Selects the outer level of the multi-index. Returns a Series indexed only by the inner level (sector), showing employment per sector for France.">france_sectors = result.loc[<span class="code-string">'France'</span>]</span>
+<span class="code-comment"># Returns a Series indexed by sector:</span>
+<span class="code-comment">#   Agriculture     150000</span>
+<span class="code-comment">#   Industry        820000</span>
+<span class="code-comment">#   Services       1500000</span>
+
+<span class="code-comment"># To flatten back to a regular DataFrame:</span>
+<span class="code-tooltip" data-tip="RESET_INDEX(): Converts the multi-level index back into regular columns. The result is a flat DataFrame with columns: country, sector, employment.">result_flat = result.reset_index()</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata: Grouped summaries do not create multi-level indices</span>
+<span class="code-comment">* Instead, use collapse or table with multiple by-variables</span>
+
+<span class="code-comment">* Option 1: collapse (replaces data in memory)</span>
+<span class="code-keyword">collapse</span> (sum) employment, by(country sector)
+<span class="code-keyword">list</span> if country == <span class="code-string">"France"</span>
+
+<span class="code-comment">* Option 2: table (displays without modifying data)</span>
+<span class="code-keyword">table</span> country sector, statistic(sum employment)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># R: Grouped summaries produce a regular tibble, not a multi-index</span>
+result <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">group_by</span>(country, sector) <span class="code-operator">%>%</span>
+  <span class="code-function">summarise</span>(total_emp = <span class="code-function">sum</span>(employment, na.rm = TRUE), .groups = <span class="code-string">"drop"</span>)
+
+<span class="code-comment"># Filter to one country</span>
+france_sectors <span class="code-operator"><-</span> result <span class="code-operator">%>%</span> <span class="code-function">filter</span>(country == <span class="code-string">"France"</span>)</code></pre>
+          </div>
+        </div>
+
+        <div class="concept-box">
+          <h4>Group Transformations: Adding Group Statistics Without Collapsing</h4>
+          <p>Sometimes you want to add a group-level statistic (like the group mean) as a <strong>new column</strong> to every row, without collapsing the data. This is different from <code>groupby().mean()</code> or <code>collapse</code>, which reduce each group to a single row.</p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="r">R</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># transform() adds a group statistic to every row WITHOUT collapsing</span>
+<span class="code-tooltip" data-tip="TRANSFORM('mean'): Unlike .mean() which returns one value per group, transform() broadcasts the group mean back to every row. Each row gets its group's average in the new column. The original DataFrame keeps all its rows.">df[<span class="code-string">'group_mean_income'</span>] = df.groupby(<span class="code-string">'region'</span>)[<span class="code-string">'income'</span>].transform(<span class="code-string">'mean'</span>)</span>
+
+<span class="code-comment"># Now each row has a new column with its region's average income</span>
+<span class="code-comment"># Useful for computing deviations from group means:</span>
+df[<span class="code-string">'income_deviation'</span>] = df[<span class="code-string">'income'</span>] - df[<span class="code-string">'group_mean_income'</span>]</code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* egen with bysort: adds group stats without collapsing</span>
+<span class="code-tooltip" data-tip="BYSORT + EGEN: 'bysort region:' sorts and groups by region. 'egen' (extended generate) creates a new variable. 'mean(income)' computes the mean within each group. Every row gets its group's average."><span class="code-keyword">bysort</span> region: <span class="code-keyword">egen</span> group_mean_income = mean(income)</span>
+
+<span class="code-comment">* Now compute deviations from the group mean</span>
+<span class="code-keyword">gen</span> income_deviation = income - group_mean_income</code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># mutate() with group_by() adds group stats without collapsing</span>
+<span class="code-tooltip" data-tip="MUTATE WITH GROUP_BY: Unlike summarise() which collapses to one row per group, mutate() keeps all rows and adds a new column. The group mean is repeated for every row in that group.">df <span class="code-operator"><-</span> df <span class="code-operator">%>%</span>
+  <span class="code-function">group_by</span>(region) <span class="code-operator">%>%</span>
+  <span class="code-function">mutate</span>(group_mean_income = <span class="code-function">mean</span>(income, na.rm = TRUE)) <span class="code-operator">%>%</span>
+  <span class="code-function">ungroup</span>()</span>
+
+<span class="code-comment"># Compute deviations from the group mean</span>
+df <span class="code-operator"><-</span> df <span class="code-operator">%>%</span> <span class="code-function">mutate</span>(income_deviation = income - group_mean_income)</code></pre>
+          </div>
+        </div>
+
+        <p><strong>Key distinction:</strong> <code>groupby().mean()</code> / <code>collapse</code> / <code>summarise()</code> <em>reduce</em> each group to one row. <code>transform()</code> / <code>bysort: egen</code> / <code>mutate()</code> with <code>group_by()</code> <em>preserve</em> every row and add a new column. This is critical for computing within-group deviations, demeaning panel data, or adding group-level controls to individual observations.</p>
+
         <!-- STEP 4 & 5: Visualization and Correlation -->
         <h2>Step 4-5: Visualization & Correlations</h2>
 

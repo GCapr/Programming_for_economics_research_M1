@@ -3,311 +3,316 @@
 (function () {
   'use strict';
 
+  /* helper — keeps entries compact */
+  function r(page, anchor, skill) {
+    return { page: page, anchor: anchor, skill: skill };
+  }
+
   window.PRACTICE_REFERENCES = {
 
     // ── TOPIC 1: SYNTAX & BASICS ──────────────────────────────────────
     syntax: {
       beginner: [
-        { page: "01-getting-started.html", anchor: "packages",      skill: "Import and alias libraries in Python" },
-        { page: "01-getting-started.html", anchor: "basic-syntax",   skill: "Distinguish assignment (=) from comparison (==)" },
-        { page: "01-getting-started.html", anchor: "basic-syntax",   skill: "Use the <- assignment operator in R" },
-        { page: "01-getting-started.html", anchor: "basic-syntax",   skill: "Quote string values correctly" },
-        { page: "01-getting-started.html", anchor: "syntax-patterns", skill: "Use local macros in Stata" },
-        { page: "01-getting-started.html", anchor: "basic-syntax",   skill: "Compare assignment syntax across Python, R, and Stata" },
-        { page: "01-getting-started.html", anchor: "keyword-args",   skill: "Use keyword arguments in function calls" },
-        { page: "01-getting-started.html", anchor: "dot-accessor",   skill: "Use the dot accessor to call methods" }
+        r("01-getting-started.html", "packages",          "Understand import aliases in Python"),
+        r("01-getting-started.html", "basic-syntax",       "Distinguish assignment (<-) from comparison (==) in R"),
+        r("01-getting-started.html", "basic-syntax",       "Perform arithmetic with stored variables in R"),
+        r("01-getting-started.html", "syntax-patterns",    "Quote string values correctly in Stata"),
+        r("01-getting-started.html", "syntax-patterns",    "Use local macro expansion in Stata"),
+        r("01-getting-started.html", "basic-syntax",       "Compare assignment syntax across Python, R, and Stata"),
+        r("01-getting-started.html", "keyword-args",       "Use keyword arguments in function calls"),
+        r("01-getting-started.html", "first-script",       "Order steps in an R script workflow")
       ],
       intermediate: [
-        { page: "01-getting-started.html", anchor: "dot-accessor",    skill: "Chain methods on DataFrames" },
-        { page: "01-getting-started.html", anchor: "syntax-patterns", skill: "Read and use f-strings in Python" },
-        { page: "01-getting-started.html", anchor: "syntax-patterns", skill: "Use comparison operators in data filters" },
-        { page: "01-getting-started.html", anchor: "syntax-patterns", skill: "Reference local macros in Stata" },
-        { page: "01-getting-started.html", anchor: "dot-accessor",    skill: "Use the pipe operator in R" },
-        { page: "01-getting-started.html", anchor: "first-script",    skill: "Build a multi-step Stata workflow" },
-        { page: "01-getting-started.html", anchor: "packages",        skill: "Install and load packages in Stata" },
-        { page: "01-getting-started.html", anchor: "basic-syntax",    skill: "Compare equivalent operations across languages" }
+        r("01-getting-started.html", "dot-accessor",       "Chain methods on DataFrames with groupby"),
+        r("01-getting-started.html", "syntax-patterns",    "Use paste() and round() for string formatting in R"),
+        r("01-getting-started.html", "basic-syntax",       "Distinguish = (assignment) from == (comparison) in filters"),
+        r("01-getting-started.html", "syntax-patterns",    "Debug Stata macro reference syntax (backtick-apostrophe)"),
+        r("01-getting-started.html", "dot-accessor",       "Use the pipe operator (%>%) in R"),
+        r("01-getting-started.html", "first-script",       "Order a Stata data exploration workflow"),
+        r("01-getting-started.html", "packages",           "Install and load packages in Stata with ssc"),
+        r("01-getting-started.html", "basic-syntax",       "Compare equivalent operations across Python and Stata")
       ],
       advanced: [
-        { page: "01-getting-started.html", anchor: "nested-functions",    skill: "Read nested function calls" },
-        { page: "01-getting-started.html", anchor: "functions-scope",     skill: "Understand variable scope in functions" },
-        { page: "01-getting-started.html", anchor: "indexing-differences", skill: "Handle 0-based vs 1-based indexing" },
-        { page: "01-getting-started.html", anchor: "dot-accessor",        skill: "Avoid common method chaining mistakes" },
-        { page: "01-getting-started.html", anchor: "first-script",        skill: "Read a multi-step Python script" },
-        { page: "01-getting-started.html", anchor: "dot-accessor",        skill: "Build complex R pipe chains" },
-        { page: "01-getting-started.html", anchor: "for-loops",           skill: "Write for loops across languages" },
-        { page: "01-getting-started.html", anchor: "indexing-differences", skill: "Handle integer division differences" }
+        r("01-getting-started.html", "nested-functions",    "Read nested function calls (inside-out evaluation)"),
+        r("01-getting-started.html", "functions-scope",     "Understand variable scope in Python functions"),
+        r("01-getting-started.html", "indexing-differences", "Handle 0-based vs 1-based indexing across languages"),
+        r("01-getting-started.html", "syntax-patterns",     "Use Stata collapse prefix syntax correctly"),
+        r("01-getting-started.html", "first-script",        "Build a multi-step Stata analysis workflow"),
+        r("01-getting-started.html", "dot-accessor",        "Build complex R pipe chains with multiple steps"),
+        r("01-getting-started.html", "for-loops",           "Write for loops across Python, Stata, and R"),
+        r("01-getting-started.html", "indexing-differences", "Compare the modulo operator (%%) across languages")
       ]
     },
 
     // ── TOPIC 2: DATA IMPORT ──────────────────────────────────────────
     data_import: {
       beginner: [
-        { page: "02a-file-import.html", anchor: "",          skill: "Read CSV files with pd.read_csv()" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Import data files in Stata" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Import and preview data in R" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Fix file path errors" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Read Excel files in Python" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Build a basic data pipeline in Stata" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Compare file reading across languages" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Handle file encoding issues" }
+        r("02a-file-import.html", "",              "Read CSV files with pd.read_csv() in Python"),
+        r("02a-file-import.html", "",              "Import delimited data and describe variables in Stata"),
+        r("02a-file-import.html", "",              "Import and preview data with glimpse() in R"),
+        r("02a-file-import.html", "",              "Fix Windows file path escape character errors"),
+        r("02a-file-import.html", "",              "Read Excel files with sheet_name in Python"),
+        r("02a-file-import.html", "",              "Build a basic data import pipeline in Stata"),
+        r("02a-file-import.html", "",              "Compare file reading functions across languages"),
+        r("02a-file-import.html", "",              "Handle file encoding errors with European data")
       ],
       intermediate: [
-        { page: "02a-file-import.html", anchor: "",          skill: "Perform left joins with pandas merge()" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Use Stata merge command" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Debug merge key mismatches" },
-        { page: "02b-apis.html",        anchor: "",          skill: "Fetch data from APIs" },
-        { page: "02b-apis.html",        anchor: "",          skill: "Convert API responses to DataFrames" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Perform joins in R with dplyr" },
-        { page: "02a-file-import.html", anchor: "",          skill: "Compare merge operations across languages" },
-        { page: "02b-apis.html",        anchor: "",          skill: "Navigate JSON data structures" }
+        r("02a-file-import.html", "",              "Understand left join behavior with unmatched rows"),
+        r("02a-file-import.html", "",              "Use Stata 1:m merge specification for panel data"),
+        r("02a-file-import.html", "",              "Debug case-sensitive merge key mismatches"),
+        r("02b-apis.html",        "",              "Import data from a URL in Stata"),
+        r("02b-apis.html",        "",              "Build an API-to-DataFrame pipeline in Python"),
+        r("02a-file-import.html", "",              "Perform left joins with dplyr in R"),
+        r("02a-file-import.html", "",              "Compare merge operations across Python and Stata"),
+        r("02b-apis.html",        "",              "Navigate nested JSON from APIs in R")
       ],
       advanced: [
-        { page: "02a-file-import.html",  anchor: "",              skill: "Reshape data from wide to long format" },
-        { page: "02a-file-import.html",  anchor: "",              skill: "Use Stata reshape command" },
-        { page: "02a-file-import.html",  anchor: "",              skill: "Choose correct merge type for panel data" },
-        { page: "02c-web-scraping.html", anchor: "basic-scraping", skill: "Debug web scraping selectors" },
-        { page: "02c-web-scraping.html", anchor: "basic-scraping", skill: "Build a web scraping pipeline" },
-        { page: "02a-file-import.html",  anchor: "",              skill: "Use pivot_longer() in R" },
-        { page: "02a-file-import.html",  anchor: "",              skill: "Compare reshape operations across languages" },
-        { page: "08-replicability.html", anchor: "",              skill: "Use portable file paths with os.path.join" }
+        r("02a-file-import.html",  "",              "Reshape data from wide to long with melt()"),
+        r("02a-file-import.html",  "",              "Use Stata reshape long for panel data"),
+        r("02a-file-import.html",  "",              "Include all key variables in Stata merge commands"),
+        r("02c-web-scraping.html", "basic-scraping", "Handle JavaScript-rendered content in web scraping"),
+        r("02c-web-scraping.html", "basic-scraping", "Build a complete web scraping pipeline"),
+        r("02a-file-import.html",  "",              "Use pivot_longer() for reshaping in R"),
+        r("02a-file-import.html",  "",              "Compare reshape operations across languages"),
+        r("08-replicability.html", "",              "Use portable file paths with file.path() in R")
       ]
     },
 
     // ── TOPIC 3: DATA EXPLORATION ─────────────────────────────────────
     data_exploration: {
       beginner: [
-        { page: "03-data-exploration.html", anchor: "", skill: "Use describe() for summary statistics" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Get summary statistics in Stata" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Identify missing values in data" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Handle missing values in R summaries" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Create frequency tables in Python" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Build a data exploration workflow" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Compare exploration commands across languages" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Use bysort for grouped operations in Stata" }
+        r("03-data-exploration.html", "", "Read and interpret .describe() output in Python"),
+        r("03-data-exploration.html", "", "Use summarize with the detail option in Stata"),
+        r("03-data-exploration.html", "", "Count missing values per column with .isnull().sum()"),
+        r("03-data-exploration.html", "", "Use na.rm = TRUE with R mean() to handle missing data"),
+        r("03-data-exploration.html", "", "Create frequency tables with dplyr count()"),
+        r("03-data-exploration.html", "", "Order data exploration steps in a logical workflow"),
+        r("03-data-exploration.html", "", "Compare exploration commands across languages"),
+        r("03-data-exploration.html", "", "Use bysort prefix for grouped commands in Stata")
       ],
       intermediate: [
-        { page: "03-data-exploration.html",  anchor: "",            skill: "Aggregate data with groupby" },
-        { page: "03-data-exploration.html",  anchor: "",            skill: "Filter data with boolean conditions" },
-        { page: "03-data-exploration.html",  anchor: "",            skill: "Avoid aggregating wrong column types" },
-        { page: "03-data-exploration.html",  anchor: "",            skill: "Debug filter logic in R" },
-        { page: "03-data-exploration.html",  anchor: "",            skill: "Build filter-group-summarize pipelines" },
-        { page: "03-data-exploration.html",  anchor: "",            skill: "Create cross-tabulations in Stata" },
-        { page: "05-data-analysis.html",     anchor: "correlation", skill: "Compute correlation matrices" },
-        { page: "03-data-exploration.html",  anchor: "",            skill: "Compare summary statistics across languages" }
+        r("03-data-exploration.html", "", "Compute multiple aggregations with .agg()"),
+        r("03-data-exploration.html", "", "Understand Boolean indexing mechanics in pandas"),
+        r("03-data-exploration.html", "", "Detect string columns that silently break numeric aggregations"),
+        r("03-data-exploration.html", "", "Fix incomplete Boolean logic in R filter()"),
+        r("03-data-exploration.html", "", "Build filter-group-summarize pipelines in dplyr"),
+        r("03-data-exploration.html", "", "Create cross-tabulations in Stata"),
+        r("05-data-analysis.html",   "correlation", "Compute correlation matrices in Stata"),
+        r("03-data-exploration.html", "", "Compare grouped summary operations across languages")
       ],
       advanced: [
-        { page: "03-data-exploration.html", anchor: "", skill: "Chain exploration operations" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Handle multi-index groupby results" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Debug chained boolean filters" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Use describe() include parameter correctly" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Write a complete exploration script" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Compute multiple grouped summaries in R" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Compare advanced exploration across languages" },
-        { page: "03-data-exploration.html", anchor: "", skill: "Structure a cohesive data exploration" }
+        r("03-data-exploration.html", "", "Chain query(), groupby(), and agg() in pandas"),
+        r("03-data-exploration.html", "", "Navigate multi-index groupby results"),
+        r("03-data-exploration.html", "", "Use the & operator for AND logic in Stata"),
+        r("03-data-exploration.html", "", "Debug wrong column types caused by commas in numbers"),
+        r("03-data-exploration.html", "", "Build a complete Stata exploration workflow"),
+        r("03-data-exploration.html", "", "Compute multiple grouped summaries with sd in R"),
+        r("03-data-exploration.html", "", "Compare advanced exploration operations across languages"),
+        r("03-data-exploration.html", "", "Structure a principled data exploration workflow")
       ]
     },
 
     // ── TOPIC 4: DATA CLEANING ────────────────────────────────────────
     data_cleaning: {
       beginner: [
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Use dropna() with subset parameter" },
-        { page: "04-data-cleaning.html", anchor: "validation",   skill: "Convert data types in Stata with destring" },
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Debug persistent missing values" },
-        { page: "04-data-cleaning.html", anchor: "strings",      skill: "Apply string methods to correct column types" },
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Order cleaning operations correctly" },
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Order Stata cleaning steps" },
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Impute missing values with column means" },
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Compare cleaning operations across languages" }
+        r("04-data-cleaning.html", "missing-data", "Use dropna() with subset parameter for targeted removal"),
+        r("04-data-cleaning.html", "validation",   "Convert strings to numbers with destring in Stata"),
+        r("04-data-cleaning.html", "missing-data", "Reassign after subsetting to persist changes in R"),
+        r("04-data-cleaning.html", "strings",      "Handle implicit type coercion with string functions on numeric data"),
+        r("04-data-cleaning.html", "missing-data", "Order cleaning steps: drop missing before type conversion"),
+        r("04-data-cleaning.html", "missing-data", "Order Stata cleaning: destring before numeric operations"),
+        r("04-data-cleaning.html", "missing-data", "Impute missing values with column means using fillna()"),
+        r("04-data-cleaning.html", "missing-data", "Compare core cleaning operations across languages")
       ],
       intermediate: [
-        { page: "04-data-cleaning.html", anchor: "strings",      skill: "Chain string cleaning in pandas" },
-        { page: "04-data-cleaning.html", anchor: "outliers",     skill: "Use case_when() for conditional assignment in R" },
-        { page: "04-data-cleaning.html", anchor: "strings",      skill: "Debug regular expressions" },
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Diagnose over-aggressive data dropping" },
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Create missing indicators during imputation" },
-        { page: "04-data-cleaning.html", anchor: "outliers",     skill: "Remove duplicates and winsorize in R" },
-        { page: "04-data-cleaning.html", anchor: "outliers",     skill: "Use .loc for conditional assignment in pandas" },
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Compare cleaning operations: Python vs R" }
+        r("04-data-cleaning.html", "strings",      "Chain string cleaning methods: strip, lower, replace"),
+        r("04-data-cleaning.html", "outliers",     "Use case_when() for conditional recoding in R"),
+        r("04-data-cleaning.html", "strings",      "Use regex=True with str.replace for pattern matching"),
+        r("04-data-cleaning.html", "missing-data", "Avoid dropping too many rows with missing() on multiple variables"),
+        r("04-data-cleaning.html", "missing-data", "Create missing indicators before imputation"),
+        r("04-data-cleaning.html", "outliers",     "Deduplicate before computing quantile bounds in R"),
+        r("04-data-cleaning.html", "outliers",     "Use replace...if for conditional assignment in Stata"),
+        r("04-data-cleaning.html", "missing-data", "Compare cleaning operations: Python vs R")
       ],
       advanced: [
-        { page: "04-data-cleaning.html", anchor: "outliers",    skill: "Use np.where() for conditional replacement" },
-        { page: "04-data-cleaning.html", anchor: "validation",  skill: "Run merge diagnostics in Stata" },
-        { page: "04-data-cleaning.html", anchor: "missing-data", skill: "Understand imputation trade-offs" },
-        { page: "04-data-cleaning.html", anchor: "strings",     skill: "Convert types before string cleaning" },
-        { page: "04-data-cleaning.html", anchor: "case-study",  skill: "Build a complete cleaning pipeline" },
-        { page: "04-data-cleaning.html", anchor: "validation",  skill: "Combine Stata cleaning with merge checks" },
-        { page: "04-data-cleaning.html", anchor: "outliers",    skill: "Winsorize outliers programmatically" },
-        { page: "04-data-cleaning.html", anchor: "validation",  skill: "Compare data quality checks across languages" }
+        r("04-data-cleaning.html", "outliers",     "Handle boundary conditions in np.where (zero is not positive)"),
+        r("04-data-cleaning.html", "validation",   "Interpret Stata merge diagnostics (_merge)"),
+        r("04-data-cleaning.html", "missing-data", "Understand how mean imputation reduces variance"),
+        r("04-data-cleaning.html", "strings",      "Detect silent coercion when cleaning numeric columns as strings"),
+        r("04-data-cleaning.html", "case-study",   "Build a full cleaning pipeline: dedup, indicator, quantiles, impute, clip"),
+        r("04-data-cleaning.html", "validation",   "Follow the Stata merge workflow: merge, inspect, filter, drop _merge"),
+        r("04-data-cleaning.html", "outliers",     "Winsorize outliers with pmin/pmax in R"),
+        r("04-data-cleaning.html", "validation",   "Compare data quality diagnostics across languages")
       ]
     },
 
     // ── TOPIC 5: DATA ANALYSIS ────────────────────────────────────────
     data_analysis: {
       beginner: [
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Run OLS with robust standard errors" },
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Interpret Stata regression output" },
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Avoid overconfident statistical inference" },
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Write interaction terms correctly" },
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Order OLS estimation steps" },
-        { page: "05-data-analysis.html", anchor: "summary-tables", skill: "Export regression results in Stata" },
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Cluster standard errors in Stata" },
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Compare regression commands across languages" }
+        r("05-data-analysis.html", "regression",     "Specify robust standard errors with cov_type='HC1'"),
+        r("05-data-analysis.html", "regression",     "Interpret Stata reg command with i. prefix and robust option"),
+        r("05-data-analysis.html", "regression",     "Recognize that default classical SEs may be unreliable"),
+        r("05-data-analysis.html", "regression",     "Distinguish * (main effects + interaction) from : (interaction only) in R formulas"),
+        r("05-data-analysis.html", "regression",     "Order OLS estimation steps: import, define, fit, display"),
+        r("05-data-analysis.html", "summary-tables", "Estimate models and export comparison tables in R"),
+        r("05-data-analysis.html", "regression",     "Cluster standard errors with cluster() in Stata"),
+        r("05-data-analysis.html", "regression",     "Compare regression commands across languages")
       ],
       intermediate: [
-        { page: "05-data-analysis.html", anchor: "regression", skill: "Cluster standard errors in Python" },
-        { page: "05-data-analysis.html", anchor: "regression", skill: "Estimate two-way fixed effects in R" },
-        { page: "05-data-analysis.html", anchor: "regression", skill: "Interpret logit coefficients correctly" },
-        { page: "05-data-analysis.html", anchor: "regression", skill: "Avoid post-treatment bias" },
-        { page: "05-data-analysis.html", anchor: "regression", skill: "Estimate logit marginal effects in R" },
-        { page: "05-data-analysis.html", anchor: "regression", skill: "Run panel data regressions in Python" },
-        { page: "05-data-analysis.html", anchor: "regression", skill: "Use interaction terms in R formulas" },
-        { page: "05-data-analysis.html", anchor: "regression", skill: "Read and interpret estimation output" }
+        r("05-data-analysis.html", "regression",     "Use cov_type='cluster' with cov_kwds for clustered SEs in Python"),
+        r("05-data-analysis.html", "regression",     "Use feols syntax for two-way fixed effects in R"),
+        r("05-data-analysis.html", "regression",     "Interpret logit coefficients as log-odds, not probabilities"),
+        r("05-data-analysis.html", "regression",     "Avoid controlling for post-treatment variables"),
+        r("05-data-analysis.html", "regression",     "Compute logit marginal effects in R"),
+        r("05-data-analysis.html", "regression",     "Declare panel structure with xtset before xtreg in Stata"),
+        r("05-data-analysis.html", "regression",     "Use * shorthand for interaction with main effects in R"),
+        r("05-data-analysis.html", "regression",     "Interpret key regression output statistics")
       ],
       advanced: [
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Distinguish * from : in formula syntax" },
-        { page: "05-data-analysis.html", anchor: "summary-tables", skill: "Export regression tables with esttab" },
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Apply cluster corrections to standard errors" },
-        { page: "07-estimation.html",    anchor: "bootstrap",      skill: "Compute bootstrap standard errors" },
-        { page: "07-estimation.html",    anchor: "bootstrap",      skill: "Implement bootstrap SE computation" },
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Build models step by step in Stata" },
-        { page: "05-data-analysis.html", anchor: "summary-tables", skill: "Create regression tables with stargazer in R" },
-        { page: "05-data-analysis.html", anchor: "regression",     skill: "Compare diagnostic commands across languages" }
+        r("05-data-analysis.html", "regression",     "Understand : creates only the interaction, not main effects"),
+        r("05-data-analysis.html", "summary-tables", "Use esttab keep() to control displayed coefficients"),
+        r("05-data-analysis.html", "regression",     "Recognize HC1 is insufficient for panel data: need clustered SEs"),
+        r("07-estimation.html",    "bootstrap",      "Handle bootstrap resamples that drop factor levels"),
+        r("07-estimation.html",    "bootstrap",      "Implement bootstrap SE: resample, estimate, store, compute SD"),
+        r("05-data-analysis.html", "summary-tables", "Build models step by step with eststo in Stata"),
+        r("05-data-analysis.html", "summary-tables", "Create regression tables with Stargazer in Python/R"),
+        r("05-data-analysis.html", "regression",     "Compare estimation diagnostics across languages")
       ]
     },
 
     // ── TOPIC 6: CAUSAL INFERENCE ─────────────────────────────────────
     causal_inference: {
       beginner: [
-        { page: "06b-did.html",              anchor: "classic",    skill: "Identify the key DiD coefficient" },
-        { page: "06a-matching.html",         anchor: "psm",       skill: "Implement propensity score matching in R" },
-        { page: "06b-did.html",              anchor: "classic",    skill: "Fix DiD standard error issues" },
-        { page: "06d-iv.html",               anchor: "weak",      skill: "Diagnose weak instruments" },
-        { page: "06b-did.html",              anchor: "classic",    skill: "Set up a DiD regression" },
-        { page: "06c-rdd.html",              anchor: "sharp",     skill: "Run an RDD analysis in R" },
-        { page: "06d-iv.html",               anchor: "2sls",      skill: "Estimate 2SLS in Stata" },
-        { page: "06-causal-inference.html",  anchor: "",          skill: "Match causal methods to their key assumptions" }
+        r("06b-did.html",              "classic",    "Identify the DiD interaction coefficient as the treatment effect"),
+        r("06a-matching.html",         "psm",        "Understand what matchit() does for propensity score matching"),
+        r("06b-did.html",              "classic",    "Use cluster() instead of robust for DiD panel data"),
+        r("06d-iv.html",               "weak",       "Diagnose weak instruments using first-stage F-statistic"),
+        r("06b-did.html",              "classic",    "Set up a DiD regression: load, create post, create interaction, estimate"),
+        r("06c-rdd.html",              "sharp",      "Follow the RDD workflow: load package, bandwidth, estimate, display"),
+        r("06d-iv.html",               "2sls",       "Write the Stata IV syntax: (endogenous = instrument)"),
+        r("06-causal-inference.html",  "",           "Match causal methods to their core identifying assumptions")
       ],
       intermediate: [
-        { page: "06b-did.html",              anchor: "twfe",        skill: "Estimate two-way FE for DiD" },
-        { page: "06b-did.html",              anchor: "event-study", skill: "Specify event study models" },
-        { page: "06a-matching.html",         anchor: "diagnostics", skill: "Avoid matching on post-treatment variables" },
-        { page: "06c-rdd.html",              anchor: "bandwidth",   skill: "Choose bandwidth for RDD" },
-        { page: "06b-did.html",              anchor: "event-study", skill: "Create DiD event study plots" },
-        { page: "06d-iv.html",               anchor: "diagnostics", skill: "Run IV diagnostics in Stata" },
-        { page: "06c-rdd.html",              anchor: "sharp",       skill: "Use rdrobust for RDD in Python" },
-        { page: "06-causal-inference.html",  anchor: "",            skill: "Compare causal inference commands across languages" }
+        r("06b-did.html",              "twfe",        "Understand what the treated coefficient identifies in TWFE"),
+        r("06b-did.html",              "event-study", "Use ref = -1 as the standard event study reference period"),
+        r("06a-matching.html",         "diagnostics", "Avoid matching on post-treatment variables"),
+        r("06c-rdd.html",              "bandwidth",   "Recognize global polynomial RDD is driven by distant observations"),
+        r("06b-did.html",              "event-study", "Compute rel_time, estimate, and plot event studies in R"),
+        r("06d-iv.html",               "diagnostics", "Follow IV workflow: estimate, check strength, test endogeneity"),
+        r("06c-rdd.html",              "sharp",       "Use rdrobust with the c= cutoff parameter"),
+        r("06-causal-inference.html",  "",            "Compare causal inference implementations across languages")
       ],
       advanced: [
-        { page: "06e-synthetic-control.html", anchor: "basic",       skill: "Interpret synthetic control donor weights" },
-        { page: "06d-iv.html",                anchor: "diagnostics",  skill: "Run IV overidentification tests" },
-        { page: "06b-did.html",               anchor: "event-study",  skill: "Choose the correct reference period" },
-        { page: "06c-rdd.html",               anchor: "bandwidth",    skill: "Test RDD robustness to bandwidth" },
-        { page: "06e-synthetic-control.html", anchor: "basic",        skill: "Implement synthetic control in Stata" },
-        { page: "06a-matching.html",          anchor: "diagnostics",  skill: "Check balance after matching" },
-        { page: "06b-did.html",               anchor: "event-study",  skill: "Estimate event studies with fixest in R" },
-        { page: "06-causal-inference.html",   anchor: "",             skill: "Design robustness tests for causal methods" }
+        r("06e-synthetic-control.html", "basic",       "Understand synthetic control optimal donor weighting"),
+        r("06d-iv.html",                "diagnostics", "Interpret overidentification test p-values for IV validity"),
+        r("06b-did.html",               "event-study", "Choose ref = -1, not ref = 0, for interpretable pre-trends"),
+        r("06c-rdd.html",               "bandwidth",   "Test RDD robustness across alternative bandwidths (h/2, h, 2h)"),
+        r("06e-synthetic-control.html", "basic",       "Implement synthetic control: import, load, fit, plot, placebo"),
+        r("06a-matching.html",          "diagnostics", "Check covariate balance after propensity score matching"),
+        r("06b-did.html",               "event-study", "Estimate event studies with i(rel_time, ref=-1) in fixest"),
+        r("06-causal-inference.html",   "",            "Match causal methods to their signature robustness tests")
       ]
     },
 
     // ── TOPIC 7: ESTIMATION ───────────────────────────────────────────
     estimation: {
       beginner: [
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Specify robust standard errors in Python" },
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Use the robust option in Stata" },
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Address heteroskedasticity in regressions" },
-        { page: "07-estimation.html", anchor: "nonlinear",       skill: "Interpret logit coefficients as odds ratios" },
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Compute robust standard errors in R" },
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Compare classical and robust standard errors" },
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Choose the right HC variant" },
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Compare robust SE methods across languages" }
+        r("07-estimation.html", "standard-errors", "Understand that HC1 changes SEs but not coefficient estimates"),
+        r("07-estimation.html", "standard-errors", "Use the robust option in Stata for heteroskedasticity-robust SEs"),
+        r("07-estimation.html", "standard-errors", "Detect heteroskedasticity and apply robust SEs in R"),
+        r("07-estimation.html", "nonlinear",       "Interpret logit coefficients as log-odds, not probability changes"),
+        r("07-estimation.html", "standard-errors", "Order steps for robust SEs in R: load packages, fit, coeftest"),
+        r("07-estimation.html", "standard-errors", "Compare classical vs robust SEs side by side in Stata"),
+        r("07-estimation.html", "standard-errors", "Request robust SEs with cov_type='HC1' in Python"),
+        r("07-estimation.html", "standard-errors", "Compare robust SE commands across Python, Stata, and R")
       ],
       intermediate: [
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Cluster standard errors correctly" },
-        { page: "07-estimation.html", anchor: "panel",           skill: "Understand fixed effects and time-invariant variables" },
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Handle inference with too few clusters" },
-        { page: "07-estimation.html", anchor: "nonlinear",       skill: "Compute logit marginal effects in R" },
-        { page: "07-estimation.html", anchor: "bootstrap",       skill: "Implement bootstrap standard errors" },
-        { page: "07-estimation.html", anchor: "panel",           skill: "Combine fixed effects with clustered SEs" },
-        { page: "07-estimation.html", anchor: "nonlinear",       skill: "Estimate logit with marginal effects" },
-        { page: "07-estimation.html", anchor: "panel",           skill: "Compare panel FE methods across languages" }
+        r("07-estimation.html", "standard-errors", "Cluster standard errors for within-group correlation"),
+        r("07-estimation.html", "panel",           "Understand fixed effects absorb time-invariant variables"),
+        r("07-estimation.html", "standard-errors", "Handle inference with too few clusters (< 30)"),
+        r("07-estimation.html", "nonlinear",       "Compute logit marginal effects with margins() in R"),
+        r("07-estimation.html", "bootstrap",       "Implement bootstrap standard errors in Python"),
+        r("07-estimation.html", "panel",           "Combine fixed effects with clustered SEs in R using fixest"),
+        r("07-estimation.html", "nonlinear",       "Estimate logit with marginal effects in Stata"),
+        r("07-estimation.html", "panel",           "Compare panel FE specifications across languages")
       ],
       advanced: [
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Compute two-way clustered standard errors" },
-        { page: "07-estimation.html", anchor: "bootstrap",       skill: "Implement wild cluster bootstrap" },
-        { page: "07-estimation.html", anchor: "bootstrap",       skill: "Bootstrap correctly with clustered data" },
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Compare models with different SE types" },
-        { page: "07-estimation.html", anchor: "panel",           skill: "Estimate two-way FE in Python" },
-        { page: "07-estimation.html", anchor: "bootstrap",       skill: "Set seeds for reproducible bootstrap in Stata" },
-        { page: "07-estimation.html", anchor: "panel",           skill: "Use fixest for two-way fixed effects in R" },
-        { page: "07-estimation.html", anchor: "standard-errors", skill: "Match SE methods to appropriate use cases" }
+        r("07-estimation.html", "standard-errors", "Compute two-way clustered standard errors in R"),
+        r("07-estimation.html", "bootstrap",       "Use wild cluster bootstrap for few-cluster inference"),
+        r("07-estimation.html", "bootstrap",       "Resample entire clusters in block bootstrap, not individual observations"),
+        r("07-estimation.html", "standard-errors", "Detect misleading comparisons using mixed SE types"),
+        r("07-estimation.html", "panel",           "Estimate two-way FE with clustered SEs in Python"),
+        r("07-estimation.html", "bootstrap",       "Set seeds for reproducible bootstrap in Stata"),
+        r("07-estimation.html", "panel",           "Use feols for two-way fixed effects with clustering in R"),
+        r("07-estimation.html", "standard-errors", "Match SE methods to appropriate use cases")
       ]
     },
 
     // ── TOPIC 8: REPLICABILITY & GIT ──────────────────────────────────
     replicability: {
       beginner: [
-        { page: "08-replicability.html", anchor: "",              skill: "Create a master script for reproducibility" },
-        { page: "08-replicability.html", anchor: "",              skill: "Organize research project folders" },
-        { page: "08-replicability.html", anchor: "",              skill: "Use portable file paths" },
-        { page: "08-replicability.html", anchor: "",              skill: "Protect raw data from overwriting" },
-        { page: "09-github.html",        anchor: "git-workflow",  skill: "Follow the basic git workflow" },
-        { page: "08-replicability.html", anchor: "",              skill: "Number scripts for execution order" },
-        { page: "09-github.html",        anchor: "staging-area",  skill: "Write .gitignore files" },
-        { page: "09-github.html",        anchor: "key-concepts",  skill: "Understand core git concepts" }
+        r("08-replicability.html", "",              "Create a master script with a single ROOT path for portability"),
+        r("08-replicability.html", "",              "Use here() for portable project-relative paths in R"),
+        r("08-replicability.html", "",              "Use relative paths instead of absolute paths in shared code"),
+        r("08-replicability.html", "",              "Protect raw data by saving cleaned data to a separate folder"),
+        r("08-replicability.html", "",              "Set up a reproducible R project folder structure"),
+        r("08-replicability.html", "",              "Number scripts for clear execution order"),
+        r("09-github.html",        "staging-area",  "Write .gitignore files to exclude data and secrets"),
+        r("09-github.html",        "key-concepts",  "Understand core Git concepts: working directory, staging, commits")
       ],
       intermediate: [
-        { page: "08-replicability.html", anchor: "",                skill: "Create log files for reproducibility" },
-        { page: "09-github.html",        anchor: "staging-area",    skill: "Use selective git staging" },
-        { page: "09-github.html",        anchor: "committing",      skill: "Write clear commit messages" },
-        { page: "08-replicability.html", anchor: "",                skill: "Automate result reporting" },
-        { page: "09-github.html",        anchor: "git-workflow",    skill: "Use feature branches for collaboration" },
-        { page: "08-replicability.html", anchor: "",                skill: "Automate table export in Python" },
-        { page: "09-github.html",        anchor: "common-mistakes", skill: "Resolve git merge conflicts" },
-        { page: "08-replicability.html", anchor: "",                skill: "Apply replicability best practices" }
+        r("08-replicability.html", "",              "Use log files to capture all Stata output for reproducibility"),
+        r("08-replicability.html", "",              "Pin package versions with renv for reproducible R environments"),
+        r("08-replicability.html", "",              "Replace hardcoded paths with configurable ROOT variables"),
+        r("08-replicability.html", "",              "Automate result reporting instead of manual copy-paste"),
+        r("08-replicability.html", "",              "Automate table export with etable() in R"),
+        r("08-replicability.html", "",              "Automate table export with Stargazer in Python"),
+        r("08-replicability.html", "",              "Set seeds for reproducible random sampling"),
+        r("08-replicability.html", "",              "Apply replicability best practices: paths, numbering, export, data separation")
       ],
       advanced: [
-        { page: "09-github.html",        anchor: "staging-area",    skill: "Write advanced .gitignore patterns" },
-        { page: "08-replicability.html", anchor: "",                skill: "Manage paths portably across systems" },
-        { page: "09-github.html",        anchor: "common-mistakes", skill: "Handle leaked secrets in git history" },
-        { page: "08-replicability.html", anchor: "",                skill: "Debug broken pipeline dependencies" },
-        { page: "09-github.html",        anchor: "push-pull",       skill: "Collaborate safely with git push/pull" },
-        { page: "08-replicability.html", anchor: "",                skill: "Write a full reproducible master script" },
-        { page: "09-github.html",        anchor: "git-workflow",    skill: "Implement feature branch workflows" },
-        { page: "09-github.html",        anchor: "git-workflow",    skill: "Apply git workflows to research" }
+        r("08-replicability.html", "",              "Pin exact package versions with requirements.txt and venv"),
+        r("08-replicability.html", "",              "Manage paths portably with Stata global macros"),
+        r("08-replicability.html", "",              "Replace non-portable absolute paths with here() in R"),
+        r("08-replicability.html", "",              "Debug broken pipeline dependencies from commented-out scripts"),
+        r("08-replicability.html", "",              "Build a reproducible master pipeline in Python"),
+        r("08-replicability.html", "",              "Write a full reproducible master script in Stata with logging"),
+        r("08-replicability.html", "",              "Create portable R scripts with the here package"),
+        r("09-github.html",        "git-workflow",  "Apply Git workflow practices to research collaboration")
       ]
     },
 
     // ── TOPIC 9: MACHINE LEARNING ─────────────────────────────────────
     machine_learning: {
       beginner: [
-        { page: "11e-model-evaluation.html", anchor: "train-test-split",  skill: "Split data into training and test sets" },
-        { page: "11e-model-evaluation.html", anchor: "cross-validation",  skill: "Understand cross-validation purpose" },
-        { page: "11e-model-evaluation.html", anchor: "train-test-split",  skill: "Use random seeds for reproducible splits" },
-        { page: "11e-model-evaluation.html", anchor: "pitfalls",          skill: "Avoid misleading accuracy metrics" },
-        { page: "11-machine-learning.html",  anchor: "supervised-unsupervised", skill: "Build a basic ML pipeline" },
-        { page: "11e-model-evaluation.html", anchor: "train-test-split",  skill: "Implement train-test split in R" },
-        { page: "11a-regularization.html",   anchor: "lasso",             skill: "Fit a Lasso regression" },
-        { page: "11e-model-evaluation.html", anchor: "regression-metrics", skill: "Match ML evaluation metrics" }
+        r("11e-model-evaluation.html", "train-test-split",  "Split data into training and test sets with random_state"),
+        r("11e-model-evaluation.html", "train-test-split",  "Implement train-test split in Stata with runiform()"),
+        r("11e-model-evaluation.html", "train-test-split",  "Use set.seed() for reproducible splits in R"),
+        r("11e-model-evaluation.html", "pitfalls",          "Avoid misleading accuracy on imbalanced data"),
+        r("11-machine-learning.html",  "supervised-unsupervised", "Build a basic ML pipeline: split, create, fit, evaluate"),
+        r("11e-model-evaluation.html", "train-test-split",  "Implement train-test split and evaluation in R"),
+        r("11a-regularization.html",   "lasso",             "Fit a Lasso regression with sklearn"),
+        r("11e-model-evaluation.html", "regression-metrics", "Match ML evaluation metrics to what they measure")
       ],
       intermediate: [
-        { page: "11a-regularization.html",   anchor: "intuition",            skill: "Scale features before regularization" },
-        { page: "11b-trees.html",            anchor: "random-forests",       skill: "Tune random forest hyperparameters" },
-        { page: "11e-model-evaluation.html", anchor: "pitfalls",             skill: "Prevent data leakage through scaling" },
-        { page: "11e-model-evaluation.html", anchor: "pitfalls",             skill: "Avoid tuning on the test set" },
-        { page: "11e-model-evaluation.html", anchor: "hyperparameter-tuning", skill: "Use GridSearchCV for hyperparameter tuning" },
-        { page: "11a-regularization.html",   anchor: "intuition",            skill: "Build correct scaling pipelines" },
-        { page: "11b-trees.html",            anchor: "cart",                 skill: "Control decision tree depth" },
-        { page: "11a-regularization.html",   anchor: "comparison",           skill: "Compare regularization methods" }
+        r("11a-regularization.html",   "intuition",            "Scale features before regularization in Stata"),
+        r("11b-trees.html",            "random-forests",       "Tune random forest hyperparameters (num.trees, mtry) in R"),
+        r("11e-model-evaluation.html", "pitfalls",             "Prevent data leakage by fitting scaler on training data only"),
+        r("11e-model-evaluation.html", "pitfalls",             "Avoid tuning hyperparameters on the test set"),
+        r("11e-model-evaluation.html", "hyperparameter-tuning", "Use cross-validation for Lasso lambda selection in Stata"),
+        r("11a-regularization.html",   "intuition",            "Build correct scaling pipelines without data leakage"),
+        r("11a-regularization.html",   "lambda-selection",     "Use Lasso for feature selection in Stata"),
+        r("11a-regularization.html",   "comparison",           "Compare regularization methods: Lasso vs Ridge")
       ],
       advanced: [
-        { page: "11d-causal-ml.html",        anchor: "dml",             skill: "Implement double/debiased machine learning" },
-        { page: "11d-causal-ml.html",        anchor: "causal-forests",  skill: "Estimate heterogeneous effects with causal forests" },
-        { page: "11a-regularization.html",   anchor: "lasso",           skill: "Debug unscaled Lasso regressions" },
-        { page: "11-machine-learning.html",  anchor: "prediction-vs-causation", skill: "Distinguish prediction from causation" },
-        { page: "11d-causal-ml.html",        anchor: "dml",             skill: "Build a double ML estimation pipeline" },
-        { page: "11a-regularization.html",   anchor: "lasso",           skill: "Create a complete regularized pipeline" },
-        { page: "11d-causal-ml.html",        anchor: "causal-forests",  skill: "Implement causal forests in R" },
-        { page: "11d-causal-ml.html",        anchor: "why-causal-ml",   skill: "Compare prediction ML with causal ML" }
+        r("11d-causal-ml.html",        "dml",             "Implement double/debiased machine learning"),
+        r("11d-causal-ml.html",        "causal-forests",  "Estimate heterogeneous treatment effects with causal forests"),
+        r("11a-regularization.html",   "lasso",           "Debug unscaled Lasso that drops important features"),
+        r("11-machine-learning.html",  "prediction-vs-causation", "Distinguish prediction from causal interpretation"),
+        r("11d-causal-ml.html",        "dml",             "Use Lasso for double-selection treatment effect estimation in Stata"),
+        r("11a-regularization.html",   "lasso",           "Build a complete Lasso pipeline with CV in R"),
+        r("11d-causal-ml.html",        "causal-forests",  "Implement causal forests with grf in R"),
+        r("11d-causal-ml.html",        "why-causal-ml",   "Compare prediction ML with causal ML methods")
       ]
     }
   };

@@ -218,6 +218,16 @@
           </p>
         </div>
 
+        <div class="info-box note">
+          <div class="info-box-title">How robust SEs work in Python</div>
+          <p>
+            In Python's statsmodels, you request robust standard errors by passing the <code>cov_type</code> argument to the <code>.fit()</code> method. Without this argument, <code>.fit()</code> uses classical (homoskedastic) standard errors. The argument name <code>cov_type</code> stands for "covariance type" — it tells the estimator which variance-covariance matrix formula to use when computing standard errors. The value <code>'HC1'</code> selects the Huber-White sandwich estimator with a small-sample correction factor of n/(n-k), matching Stata's <code>,robust</code> option exactly. The key thing to remember: <strong>coefficients stay identical</strong> regardless of <code>cov_type</code> — only the standard errors change.
+          </p>
+          <p style="margin-bottom: 0;">
+            The four HC variants differ only in their small-sample corrections: <strong>HC0</strong> applies no correction (biased downward in small samples), <strong>HC1</strong> applies n/(n-k) (matches Stata's <code>,robust</code>), <strong>HC2</strong> adjusts by leverage (better when some observations are influential), and <strong>HC3</strong> applies the strongest correction (jackknife-like, conservative). For most applied work, <strong>HC1 is the standard choice</strong>.
+          </p>
+        </div>
+
         <div class="code-tabs" data-runnable="est-1">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="python">Python</button>
@@ -4327,6 +4337,22 @@ model <- lm(outcome ~ treatment, data = df)
 <span class="code-tooltip" data-tip="WILD CLUSTER BOOTSTRAP: Uses the wild bootstrap method that works well even with few clusters (less than 30), where standard clustered SEs can be severely biased.">boottest(model, param = "treatment", clustid = ~ school_id, B = 999)</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">Bootstrap Pitfall: Factor Variables and Missing Levels</div>
+          <p>
+            When bootstrapping models with factor (categorical) variables, some resampled datasets may not contain all levels of a factor. For example, if your model includes <code>factor(region)</code> with levels North, South, East, West, a bootstrap resample might contain no observations from "East." This causes problems:
+          </p>
+          <ul style="margin-bottom: 0.5rem;">
+            <li>The model matrix will have fewer dummy columns than the original model</li>
+            <li>Coefficient positions may shift, making extraction by name or index unreliable</li>
+            <li>Some bootstrap iterations may produce errors or NA values</li>
+          </ul>
+          <p style="margin-bottom: 0;">
+            <strong>Fix (R):</strong> Pre-define factor levels before the loop: <code>df$region &lt;- factor(df$region, levels = c("North", "South", "East", "West"))</code>. R will then create dummies for all levels even if a level is absent in the resample (the dummy column will be all zeros, and its coefficient will be <code>NA</code>). Extract coefficients by name, not position, and handle <code>NA</code>s gracefully.
+            <br><strong>Fix (Python):</strong> Use <code>pd.Categorical(df['region'], categories=[...])</code> or use <code>C(region)</code> in the statsmodels formula, which handles this automatically.
+          </p>
         </div>
 
         <div class="output-simulation" data-for="est-8">

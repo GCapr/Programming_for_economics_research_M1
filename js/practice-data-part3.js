@@ -112,26 +112,26 @@
         correctOrder: [0, 1, 2, 3, 4],
         explanation: "The first regression must run before estimates store can save it. Then the robust version must run before it can be stored. esttab comes last because both stored estimates must exist before they can be displayed side by side. The order matters because estimates store captures the most recent estimation, so each regression must be immediately followed by its store command."
       },
-      // 7 - fill (Python) — Skill: HC variants
+      // 7 - fill (Python) — Skill: requesting robust SEs in the fit command
       {
         type: "fill",
-        title: "Choosing an HC Variant",
-        prompt: "Fill in the blanks to fit OLS with the standard robust variance estimator (the one with small-sample correction). Type the OLS model class name in GAP1 and the HC variant code in GAP2.",
-        hint: "GAP1: The statsmodels class for ordinary least squares is three uppercase letters.<br>GAP2: The HC variant with small-sample correction is <code>HC</code> followed by one digit.",
+        title: "Requesting Robust Standard Errors",
+        prompt: "Fill in the blanks to request heteroskedasticity-robust standard errors when fitting an OLS model. Type the argument name in GAP1 and the HC variant with small-sample correction in GAP2.",
+        hint: "GAP1: The argument to <code>.fit()</code> that controls the covariance type is two words joined by an underscore.<br>GAP2: The HC variant with small-sample correction is <code>HC</code> followed by one digit.",
         lang: "python",
-        codeTemplate: "import statsmodels.api as sm\n\nX = sm.add_constant(df['education'])\nmodel = sm.___GAP1___(df['wage'], X)\nresults = model.fit(cov_type='___GAP2___')\nprint(results.bse)",
+        codeTemplate: "import statsmodels.formula.api as smf\n\nresults = smf.ols('wage ~ education + experience', data=df).fit(\n    ___GAP1___='___GAP2___'\n)\nprint(results.summary())",
         gaps: {
-          "GAP1": { answer: "OLS", accept: ["OLS"] },
+          "GAP1": { answer: "cov_type", accept: ["cov_type"] },
           "GAP2": { answer: "HC1", accept: ["HC1"] }
         },
-        explanation: "GAP1 is OLS — the statsmodels class for ordinary least squares estimation. A common mistake is writing 'ols' in lowercase, but Python class names are case-sensitive. GAP2 is HC1 — the robust SE variant that applies the n/(n-k) small-sample correction, equivalent to Stata's ,robust option. Students often confuse HC0 (no correction, biased in small samples) with HC1, or forget the digit entirely."
+        explanation: "GAP1 is cov_type — the argument to .fit() that specifies which variance-covariance estimator to use. Without it, .fit() uses classical (homoskedastic) standard errors. GAP2 is HC1 — the robust SE variant that applies the n/(n-k) small-sample correction, equivalent to Stata's ,robust option. Students often confuse HC0 (no correction, biased in small samples) with HC1, or forget the digit entirely. Both blanks relate to the same concept: how to request robust SEs when fitting a model."
       },
       // 8 - match — Skill: robust SEs across languages
       {
         type: "match",
         title: "Robust SEs Across Languages",
         prompt: "Match equivalent robust standard error commands across Python, Stata, and R.",
-        hint: "Look for commands that perform the same task (e.g., fitting with robust SEs, panel FE with robust SEs) but in different languages. The language labels on each side will help.",
+        hint: "Look for commands that perform the same task (e.g., fitting with robust SEs, computing a robust variance matrix) but in different languages. The language labels on each side will help.",
         pairs: [
           {
             left: "model.fit(cov_type='HC1')",
@@ -141,24 +141,24 @@
           },
           {
             left: "vcovHC(model, type = \"HC1\")",
-            leftLang: "R",
-            right: "results.cov_params()",
+            leftLang: "R (sandwich)",
+            right: "coeftest(model, vcov = vcovHC(model))",
+            rightLang: "R (lmtest)"
+          },
+          {
+            left: "feols(y ~ x, vcov = \"hetero\", data = df)",
+            leftLang: "R (fixest)",
+            right: "smf.ols('y ~ x', data=df).fit(cov_type='HC1')",
             rightLang: "Python"
           },
           {
-            left: "xtreg y x, fe vce(robust)",
+            left: "regress y x1 x2, vce(robust)",
             leftLang: "Stata",
-            right: "PanelOLS(..., entity_effects=True).fit(cov_type='robust')",
-            rightLang: "Python"
-          },
-          {
-            left: "coeftest(model, vcov = vcovHC(model))",
-            leftLang: "R",
-            right: "results.summary()  # with HC1",
-            rightLang: "Python"
+            right: "regress y x1 x2, robust",
+            rightLang: "Stata"
           }
         ],
-        explanation: "All four pairs perform equivalent operations across languages. The key syntactic differences: Python uses named arguments inside .fit() or .cov_params(), Stata uses post-comma options like ,robust or vce(), and R requires separate packages (sandwich for vcovHC, lmtest for coeftest) rather than built-in options. Understanding these equivalences lets you translate estimation code between languages."
+        explanation: "All four pairs perform equivalent operations. Python uses cov_type='HC1' inside .fit(). Stata uses either ,robust or ,vce(robust) — they are identical. In R, vcovHC() computes the robust variance matrix and coeftest() uses it to display results — these two functions work together. R's fixest package offers a cleaner one-line syntax with vcov = 'hetero'. Understanding these equivalences lets you translate estimation code between languages."
       }
     ],
 

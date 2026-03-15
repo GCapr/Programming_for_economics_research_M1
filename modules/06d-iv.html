@@ -341,12 +341,9 @@ Weak instruments    1 3007     42.34  <2e-16 ***
                     "python": [
                       {"code": "model", "role": "Variable", "tip": "Stores the IV model object.", "color": "pink"},
                       {"code": " = ", "role": "Assignment", "tip": "Stores the model.", "color": "peach"},
-                      {"code": "IV2SLS.from_formula", "role": "Constructor", "tip": "From linearmodels.iv. Creates a 2SLS model from a formula string.", "color": "blue"},
-                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "IV2SLS.from_formula(", "role": "Constructor", "tip": "From linearmodels.iv. Creates a 2SLS model from a formula string.", "color": "blue"},
                       {"code": "'wage ~ 1 + experience + [education ~ distance_to_college]'", "role": "Formula", "tip": "wage = outcome, experience = exogenous control, education = endogenous var, distance_to_college = instrument. [endog ~ instruments] inside brackets.", "color": "green"},
-                      {"code": ", data=df", "role": "Data", "tip": "The DataFrame.", "color": "sky"},
-                      {"code": ")", "role": "Close Paren", "tip": "Ends model specification.", "color": "overlay"},
-                      {"code": "\n", "role": "Newline", "tip": "Next line.", "color": "text"},
+                      {"code": ", data=df)\n", "role": "Data", "tip": "The DataFrame.", "color": "sky"},
                       {"code": "results = model.fit(cov_type='robust')", "role": "Fit", "tip": "Estimates the model with robust standard errors.", "color": "teal"}
                     ],
                     "stata": [
@@ -401,8 +398,7 @@ Weak instruments    1 3007     42.34  <2e-16 ***
                     "r": [
                       {"code": "summary(iv_model", "role": "Summary", "tip": "The summary function for ivreg objects.", "color": "blue"},
                       {"code": ", vcov = vcovHC", "role": "Robust SEs", "tip": "Heteroskedasticity-consistent variance-covariance matrix.", "color": "lavender"},
-                      {"code": ", diagnostics = TRUE", "role": "Diagnostics", "tip": "Requests diagnostic tests including the first-stage F-statistic, Wu-Hausman, and Sargan tests.", "color": "lavender"},
-                      {"code": ")", "role": "Close Paren", "tip": "Ends the call.", "color": "overlay"}
+                      {"code": ", diagnostics = TRUE)", "role": "Diagnostics", "tip": "Requests diagnostic tests including the first-stage F-statistic, Wu-Hausman, and Sargan tests.", "color": "lavender"}
                     ]
                   }
                 }
@@ -591,10 +587,8 @@ First-stage F-stat (joint test of instruments): 38.42</pre></div>
                   "structureNote": "The <strong>first-stage F-statistic</strong> tests whether the instrument actually predicts the endogenous variable. The Stock-Yogo rule of thumb: F > 10 suggests the instrument is strong enough. With weak instruments, 2SLS is biased toward OLS and confidence intervals have poor coverage.",
                   "languages": {
                     "python": [
-                      {"code": "print", "role": "Function", "tip": "Displays the F-statistic.", "color": "blue"},
-                      {"code": "(", "role": "Open Paren", "tip": "Begins argument.", "color": "overlay"},
-                      {"code": "f\"First-stage F: {first_stage.fvalue:.2f}\"", "role": "F-string", "tip": "Formatted string. first_stage.fvalue is the F-statistic from the first-stage OLS. :.2f shows 2 decimal places.", "color": "green"},
-                      {"code": ")", "role": "Close Paren", "tip": "Ends print.", "color": "overlay"}
+                      {"code": "print(", "role": "Function", "tip": "Displays the F-statistic.", "color": "blue"},
+                      {"code": "f\"First-stage F: {first_stage.fvalue:.2f}\")", "role": "F-string", "tip": "Formatted string. first_stage.fvalue is the F-statistic from the first-stage OLS. :.2f shows 2 decimal places.", "color": "green"}
                     ],
                     "stata": [
                       {"code": "estat firststage", "role": "Post-estimation", "tip": "After ivregress, this command displays first-stage diagnostics including the F-statistic.", "color": "mauve"}
@@ -621,12 +615,10 @@ First-stage F-stat (joint test of instruments): 38.42</pre></div>
                   "structureNote": "When you have <strong>more instruments than endogenous variables</strong>, the Sargan-Hansen test checks whether all instruments are valid. Rejecting the null means at least one instrument is correlated with the error term (i.e., invalid). This test only works with 2+ instruments for 1 endogenous variable.",
                   "languages": {
                     "python": [
-                      {"code": "print", "role": "Function", "tip": "Displays the test result.", "color": "blue"},
-                      {"code": "(", "role": "Open Paren", "tip": "Begins argument.", "color": "overlay"},
+                      {"code": "print(", "role": "Function", "tip": "Displays the test result.", "color": "blue"},
                       {"code": "\"Sargan test:\"", "role": "Label", "tip": "Descriptive label.", "color": "green"},
                       {"code": ", ", "role": "Separator", "tip": "Print can take multiple arguments.", "color": "text"},
-                      {"code": "results.sargan", "role": "Test Result", "tip": "The Sargan-Hansen J-statistic and p-value. Available after fitting IV2SLS with multiple instruments. Null: all instruments are valid.", "color": "teal"},
-                      {"code": ")", "role": "Close Paren", "tip": "Ends print.", "color": "overlay"}
+                      {"code": "results.sargan)", "role": "Test Result", "tip": "The Sargan-Hansen J-statistic and p-value. Available after fitting IV2SLS with multiple instruments. Null: all instruments are valid.", "color": "teal"}
                     ],
                     "stata": [
                       {"code": "estat overid", "role": "Post-estimation", "tip": "After ivregress, tests the overidentifying restrictions. Reports Sargan (homoskedastic) or Hansen J (robust) statistic.", "color": "mauve"}
@@ -827,22 +819,17 @@ Conclusion: F >> critical value, instruments are strong</pre></div>
                   "instruction": "This performs weak-instrument-robust inference using the Anderson-Rubin confidence interval and LIML estimator, which remain valid even when the first-stage F-statistic is below conventional thresholds",
                   "languages": {
                     "python": [
-                      {"code": "def", "role": "Keyword", "tip": "Defines a function.", "color": "mauve"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "def ", "role": "Keyword", "tip": "Defines a function.", "color": "mauve"},
                       {"code": "anderson_rubin_ci", "role": "Function Name", "tip": "Computes the Anderson-Rubin confidence interval via grid search.", "color": "blue"},
                       {"code": "(", "role": "Paren", "tip": "Opens parameters.", "color": "overlay"},
-                      {"code": "y, d, z, x", "role": "Parameters", "tip": "Outcome, endogenous regressor, instruments, and controls.", "color": "pink"},
-                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "y, d, z, x, ", "role": "Parameters", "tip": "Outcome, endogenous regressor, instruments, and controls.", "color": "pink"},
                       {"code": "alpha=0.05", "role": "Parameter", "tip": "Significance level for the confidence interval.", "color": "sky"},
                       {"code": ")", "role": "Paren", "tip": "Closes parameters.", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "ivregress liml", "role": "Command", "tip": "Limited Information Maximum Likelihood \u2014 less biased than 2SLS with weak instruments.", "color": "blue"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
-                      {"code": "wage experience", "role": "Variables", "tip": "Outcome and exogenous controls.", "color": "pink"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
-                      {"code": "(education = z1 z2)", "role": "IV Spec", "tip": "Endogenous variable instrumented by z1 and z2.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "ivregress liml ", "role": "Command", "tip": "Limited Information Maximum Likelihood — less biased than 2SLS with weak instruments.", "color": "blue"},
+                      {"code": "wage experience ", "role": "Variables", "tip": "Outcome and exogenous controls.", "color": "pink"},
+                      {"code": "(education = z1 z2), ", "role": "IV Spec", "tip": "Endogenous variable instrumented by z1 and z2.", "color": "sky"},
                       {"code": "robust", "role": "Option", "tip": "Heteroskedasticity-robust standard errors.", "color": "mauve"}
                     ],
                     "r": [
@@ -850,15 +837,13 @@ Conclusion: F >> critical value, instruments are strong</pre></div>
                       {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
                       {"code": "ivmodel", "role": "Function", "tip": "Creates an IV model object that provides AR, CLR, and LIML estimates.", "color": "blue"},
                       {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "Y = df$wage", "role": "Argument", "tip": "Outcome variable.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
-                      {"code": "D = df$education", "role": "Argument", "tip": "Endogenous regressor.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "Y = df$wage, ", "role": "Argument", "tip": "Outcome variable.", "color": "sky"},
+                      {"code": "D = df$education, ", "role": "Argument", "tip": "Endogenous regressor.", "color": "sky"},
                       {"code": "Z = cbind(df$z1, df$z2)", "role": "Argument", "tip": "Excluded instruments matrix.", "color": "sky"},
                       {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
                     ]
                   },
-                  "structureNote": "Standard 2SLS confidence intervals can be severely distorted with <strong>weak instruments</strong> (first-stage F < 10). The Anderson-Rubin CI is constructed by testing every possible treatment effect value and retaining those not rejected \u2014 it is valid regardless of instrument strength. LIML has smaller finite-sample bias than 2SLS."
+                  "structureNote": "Standard 2SLS confidence intervals can be severely distorted with <strong>weak instruments</strong> (first-stage F < 10). The Anderson-Rubin CI is constructed by testing every possible treatment effect value and retaining those not rejected — it is valid regardless of instrument strength. LIML has smaller finite-sample bias than 2SLS."
                 }
               ]
             }
@@ -1110,18 +1095,15 @@ Partial R2 of excluded instruments: 0.0892</pre></div>
                   "instruction": "This constructs a Bartik (shift-share) instrument that predicts local employment growth by weighting national industry trends by each location's initial industry composition",
                   "languages": {
                     "python": [
-                      {"code": "bartik", "role": "Variable", "tip": "The constructed Bartik instrument \u2014 predicted local employment growth.", "color": "pink"},
+                      {"code": "bartik", "role": "Variable", "tip": "The constructed Bartik instrument — predicted local employment growth.", "color": "pink"},
                       {"code": " = ", "role": "Assignment", "tip": "Stores the instrument values.", "color": "peach"},
                       {"code": "(shares * national_growth)", "role": "Product", "tip": "Multiplies each location's industry share by that industry's national growth rate.", "color": "pink"},
                       {"code": ".groupby('location').sum()", "role": "Method Chain", "tip": "Sums across industries within each location to get the predicted employment change.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "ivregress 2sls", "role": "Command", "tip": "Two-stage least squares estimation.", "color": "blue"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
-                      {"code": "wage controls", "role": "Variables", "tip": "Outcome and exogenous control variables.", "color": "pink"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
-                      {"code": "(local_emp_growth = bartik)", "role": "IV Spec", "tip": "Instruments local employment growth with the Bartik predicted growth.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "ivregress 2sls ", "role": "Command", "tip": "Two-stage least squares estimation.", "color": "blue"},
+                      {"code": "wage controls ", "role": "Variables", "tip": "Outcome and exogenous control variables.", "color": "pink"},
+                      {"code": "(local_emp_growth = bartik), ", "role": "IV Spec", "tip": "Instruments local employment growth with the Bartik predicted growth.", "color": "sky"},
                       {"code": "cluster(location)", "role": "Option", "tip": "Clusters standard errors at the location level.", "color": "sky"}
                     ],
                     "r": [
@@ -1129,10 +1111,8 @@ Partial R2 of excluded instruments: 0.0892</pre></div>
                       {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
                       {"code": "feols", "role": "Function", "tip": "Fixed-effects OLS/IV from fixest.", "color": "blue"},
                       {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "wage ~ controls", "role": "Formula", "tip": "Outcome and exogenous controls.", "color": "pink"},
-                      {"code": " | ", "role": "Separator", "tip": "Separates formula from IV specification.", "color": "peach"},
-                      {"code": "local_emp_growth ~ bartik", "role": "IV Spec", "tip": "Endogenous variable ~ instrument.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "wage ~ controls | ", "role": "Formula", "tip": "Outcome and exogenous controls.", "color": "pink"},
+                      {"code": "local_emp_growth ~ bartik, ", "role": "IV Spec", "tip": "Endogenous variable ~ instrument.", "color": "sky"},
                       {"code": "cluster = ~ location", "role": "Argument", "tip": "Clusters standard errors by location.", "color": "sky"},
                       {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
                     ]
@@ -1356,8 +1336,7 @@ Estimates stable across specifications: reassuring for validity.</pre></div>
                     "python": [
                       {"code": "model", "role": "Variable", "tip": "The IV model.", "color": "pink"},
                       {"code": " = ", "role": "Assignment", "tip": "Stores model.", "color": "peach"},
-                      {"code": "IV2SLS.from_formula", "role": "Constructor", "tip": "linearmodels uses bracket syntax: [endogenous ~ instruments] in the formula.", "color": "blue"},
-                      {"code": "(", "role": "Open Paren", "tip": "Begins arguments.", "color": "overlay"},
+                      {"code": "IV2SLS.from_formula(", "role": "Constructor", "tip": "linearmodels uses bracket syntax: [endogenous ~ instruments] in the formula.", "color": "blue"},
                       {"code": "'wage ~ 1 + experience + age + [education ~ distance_to_college]'", "role": "Formula", "tip": "Multiple controls (experience, age) with one endogenous var and one instrument.", "color": "green"},
                       {"code": ", data=df)", "role": "Data", "tip": "The DataFrame.", "color": "sky"}
                     ],
@@ -1513,22 +1492,19 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</div>
             {
               "exercises": [
                 {
-                  "instruction": "This demonstrates the Wald estimator \u2014 the simplest form of IV with a binary instrument, where the treatment effect equals the reduced-form effect divided by the first-stage compliance rate",
+                  "instruction": "This demonstrates the Wald estimator — the simplest form of IV with a binary instrument, where the treatment effect equals the reduced-form effect divided by the first-stage compliance rate",
                   "languages": {
                     "python": [
-                      {"code": "reduced_form", "role": "Variable", "tip": "The ITT effect \u2014 difference in mean earnings between eligible and non-eligible.", "color": "pink"},
+                      {"code": "reduced_form", "role": "Variable", "tip": "The ITT effect — difference in mean earnings between eligible and non-eligible.", "color": "pink"},
                       {"code": " = ", "role": "Assignment", "tip": "Computes and stores the reduced form.", "color": "peach"},
                       {"code": "df.loc[df['eligible']==1, 'earnings'].mean()", "role": "Treated Mean", "tip": "Mean earnings for those who were draft-eligible.", "color": "pink"},
                       {"code": " - ", "role": "Operator", "tip": "Subtracts the control mean.", "color": "peach"},
                       {"code": "df.loc[df['eligible']==0, 'earnings'].mean()", "role": "Control Mean", "tip": "Mean earnings for those not draft-eligible.", "color": "pink"}
                     ],
                     "stata": [
-                      {"code": "ivregress 2sls", "role": "Command", "tip": "Two-stage least squares \u2014 with a binary instrument, gives exactly the Wald ratio.", "color": "blue"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
-                      {"code": "earnings", "role": "Variable", "tip": "Outcome: lifetime earnings.", "color": "pink"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
-                      {"code": "(veteran = eligible)", "role": "IV Spec", "tip": "Instruments veteran status with draft eligibility.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "ivregress 2sls ", "role": "Command", "tip": "Two-stage least squares — with a binary instrument, gives exactly the Wald ratio.", "color": "blue"},
+                      {"code": "earnings ", "role": "Variable", "tip": "Outcome: lifetime earnings.", "color": "pink"},
+                      {"code": "(veteran = eligible), ", "role": "IV Spec", "tip": "Instruments veteran status with draft eligibility.", "color": "sky"},
                       {"code": "robust", "role": "Option", "tip": "Robust standard errors.", "color": "mauve"}
                     ],
                     "r": [
@@ -1698,23 +1674,17 @@ Level  Percentile
                       {"code": " = ", "role": "Assignment", "tip": "Assigns the fitted model.", "color": "peach"},
                       {"code": "smf.ols(", "role": "Function", "tip": "OLS regression via statsmodels formula API.", "color": "blue"},
                       {"code": "'education ~ distance + experience'", "role": "Formula", "tip": "Regresses the endogenous variable on the instrument (distance) and controls.", "color": "green"},
-                      {"code": ", data=df).fit()", "role": "Method Chain", "tip": "Passes data and fits the model.", "color": "teal"},
-                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": ", data=df).fit()\n", "role": "Method Chain", "tip": "Passes data and fits the model.", "color": "teal"},
                       {"code": "df['v_hat']", "role": "Column", "tip": "Creates a new column to store first-stage residuals.", "color": "pink"},
                       {"code": " = ", "role": "Assignment", "tip": "Saves residuals to the DataFrame.", "color": "peach"},
                       {"code": "first_stage.resid", "role": "Property", "tip": "The OLS residuals — the part of education unexplained by the instrument.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "reg", "role": "Command", "tip": "OLS regression.", "color": "blue"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
-                      {"code": "education", "role": "Depvar", "tip": "Endogenous variable in the first stage.", "color": "pink"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
-                      {"code": "distance experience", "role": "Regressors", "tip": "Instrument and controls.", "color": "sky"},
-                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
-                      {"code": "predict", "role": "Command", "tip": "Post-estimation command to generate predictions.", "color": "blue"},
-                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
-                      {"code": "v_hat", "role": "Variable", "tip": "Name for the saved residuals.", "color": "pink"},
-                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "reg ", "role": "Command", "tip": "OLS regression.", "color": "blue"},
+                      {"code": "education ", "role": "Depvar", "tip": "Endogenous variable in the first stage.", "color": "pink"},
+                      {"code": "distance experience\n", "role": "Regressors", "tip": "Instrument and controls.", "color": "sky"},
+                      {"code": "predict ", "role": "Command", "tip": "Post-estimation command to generate predictions.", "color": "blue"},
+                      {"code": "v_hat, ", "role": "Variable", "tip": "Name for the saved residuals.", "color": "pink"},
                       {"code": "residuals", "role": "Option", "tip": "Saves residuals rather than fitted values.", "color": "mauve"}
                     ],
                     "r": [
@@ -1722,8 +1692,7 @@ Level  Percentile
                       {"code": " <- ", "role": "Assignment", "tip": "R assignment operator.", "color": "peach"},
                       {"code": "lm(", "role": "Function", "tip": "Linear model (OLS).", "color": "blue"},
                       {"code": "education ~ distance + experience", "role": "Formula", "tip": "Regresses education on instrument and controls.", "color": "green"},
-                      {"code": ", data = df)", "role": "Argument", "tip": "Passes the data frame.", "color": "sky"},
-                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": ", data = df)\n", "role": "Argument", "tip": "Passes the data frame.", "color": "sky"},
                       {"code": "df$v_hat", "role": "Column", "tip": "New column for first-stage residuals.", "color": "pink"},
                       {"code": " <- ", "role": "Assignment", "tip": "Stores the residuals.", "color": "peach"},
                       {"code": "residuals(", "role": "Function", "tip": "Extracts residuals from a fitted model.", "color": "blue"},

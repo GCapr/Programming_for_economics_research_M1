@@ -87,12 +87,12 @@
         hint: "Start by loading the required packages (<code>sandwich</code> and <code>lmtest</code>), then fit the model, and finally display robust results.",
         lang: "r",
         lines: [
-          "library(sandwich)",
-          "library(lmtest)",
           "model <- lm(wage ~ education + experience, data = df)",
-          "coeftest(model, vcov = vcovHC(model, type = \"HC1\"))"
+          "library(sandwich)",
+          "coeftest(model, vcov = vcovHC(model, type = \"HC1\"))",
+          "library(lmtest)"
         ],
-        correctOrder: [0, 1, 2, 3],
+        correctOrder: [1, 3, 0, 2],
         explanation: "First load the sandwich package (which provides vcovHC for robust variance estimation) and the lmtest package (which provides coeftest for displaying results). These must come before any functions that depend on them. Then fit the OLS model with lm(), which must happen before coeftest() can use it. Finally, coeftest() takes the fitted model and the HC1 robust variance matrix to display coefficients with corrected standard errors."
       },
       // 6 - reorder (Stata) — Skill: store and compare regressions
@@ -103,13 +103,13 @@
         hint: "Run the classical regression first, store it, then run the robust version and store it. The comparison table comes last.",
         lang: "stata",
         lines: [
-          "regress income education age",
-          "estimates store classical",
-          "regress income education age, robust",
           "estimates store robust_se",
-          "esttab classical robust_se, se"
+          "regress income education age",
+          "esttab classical robust_se, se",
+          "estimates store classical",
+          "regress income education age, robust"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [1, 3, 4, 0, 2],
         explanation: "The first regression must run before estimates store can save it. Then the robust version must run before it can be stored. esttab comes last because both stored estimates must exist before they can be displayed side by side. The order matters because estimates store captures the most recent estimation, so each regression must be immediately followed by its store command."
       },
       // 7 - fill (Python) — Skill: requesting robust SEs in the fit command
@@ -242,14 +242,14 @@
         hint: "Start with imports and seed, then initialize storage, run the bootstrap loop, and finally compute the standard deviation of the collected coefficients.",
         lang: "python",
         lines: [
-          "import numpy as np",
-          "np.random.seed(42)",
-          "boot_coefs = []",
-          "for i in range(1000):\n    idx = np.random.choice(len(df), size=len(df), replace=True)\n    boot_df = df.iloc[idx]\n    X_b = sm.add_constant(boot_df['education'])\n    coef = sm.OLS(boot_df['wage'], X_b).fit().params[1]\n    boot_coefs.append(coef)",
           "boot_se = np.std(boot_coefs, ddof=1)",
-          "print(f'Bootstrap SE: {boot_se:.4f}')"
+          "np.random.seed(42)",
+          "print(f'Bootstrap SE: {boot_se:.4f}')",
+          "import numpy as np",
+          "boot_coefs = []",
+          "for i in range(1000):\n    idx = np.random.choice(len(df), size=len(df), replace=True)\n    boot_df = df.iloc[idx]\n    X_b = sm.add_constant(boot_df['education'])\n    coef = sm.OLS(boot_df['wage'], X_b).fit().params[1]\n    boot_coefs.append(coef)"
         ],
-        correctOrder: [0, 1, 2, 3, 4, 5],
+        correctOrder: [3, 1, 4, 5, 0, 2],
         explanation: "numpy must be imported before any numpy functions can be called. The seed must be set before any random sampling to ensure reproducibility. The empty list must be initialized before the loop can append to it. The loop must complete all 1000 replications before the standard deviation can be computed. Finally, printing depends on boot_se existing. Each step produces something the next step requires."
       },
       // 6 - reorder (R) — Skill: panel FE with clustering using fixest
@@ -260,13 +260,13 @@
         hint: "Load the package first, then the data, then estimate the model with <code>feols()</code>, and finally display and export results.",
         lang: "r",
         lines: [
-          "library(fixest)",
-          "firm_panel <- read.csv(\"firm_panel.csv\")",
           "model <- feols(revenue ~ rd_spending + employees | firm_id + year,\n               vcov = ~firm_id, data = firm_panel)",
+          "etable(model, se = \"cluster\")",
+          "library(fixest)",
           "summary(model)",
-          "etable(model, se = \"cluster\")"
+          "firm_panel <- read.csv(\"firm_panel.csv\")"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [2, 4, 0, 3, 1],
         explanation: "The fixest library must load before feols() is available. The data must be read before feols() can reference its columns. The model must be estimated before summary() or etable() can display it. summary() shows a quick console overview, and etable() produces a formatted table — both depend on the fitted model object existing."
       },
       // 7 - fill (Stata) — Skill: logit marginal effects
@@ -399,13 +399,13 @@
         hint: "Start with the import, then set the panel index, specify the model with both entity and time effects, fit it, and print results last.",
         lang: "python",
         lines: [
-          "from linearmodels.panel import PanelOLS",
-          "df = df.set_index(['firm_id', 'year'])",
-          "mod = PanelOLS(df['revenue'], df[['rd_spending', 'employees']],\n               entity_effects=True, time_effects=True)",
           "results = mod.fit(cov_type='clustered', cluster_entity=True)",
-          "print(results.summary)"
+          "from linearmodels.panel import PanelOLS",
+          "print(results.summary)",
+          "df = df.set_index(['firm_id', 'year'])",
+          "mod = PanelOLS(df['revenue'], df[['rd_spending', 'employees']],\n               entity_effects=True, time_effects=True)"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [1, 3, 4, 0, 2],
         explanation: "PanelOLS must be imported before it can be used. The multi-index must be set before PanelOLS can identify the panel structure (which entity and which time period each row belongs to). The model must be specified before fitting. Fitting must happen before results exist to be printed. entity_effects absorbs firm-level unobservables; time_effects absorbs year-level shocks common to all firms."
       },
       // 6 - reorder (Stata) — Skill: bootstrap with seed
@@ -416,13 +416,13 @@
         hint: "Load the data first, set the seed for reproducibility, then run the bootstrap command, and finally inspect the results.",
         lang: "stata",
         lines: [
-          "use worker_data.dta, clear",
-          "set seed 42",
+          "matrix list e(ci_percentile)",
           "bootstrap _b, reps(1000): regress wage education experience",
+          "use worker_data.dta, clear",
           "estat bootstrap, all",
-          "matrix list e(ci_percentile)"
+          "set seed 42"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [2, 4, 1, 3, 0],
         explanation: "Data must be loaded before any analysis. The seed must be set before the bootstrap command so the random resampling is reproducible. The bootstrap command must complete all 1000 replications before estat can summarize the results. matrix list e(ci_percentile) accesses stored bootstrap results, which only exist after estat bootstrap runs."
       },
       // 7 - fill (R) — Skill: two-way FE with clustering using fixest
@@ -561,12 +561,12 @@
         hint: "Load the package first, define the directories, create them, then confirm. The <code>here()</code> function is used to make paths portable.",
         lang: "r",
         lines: [
-          "library(here)",
-          "dirs <- c('data/raw', 'data/processed', 'code', 'output/tables', 'output/figures')",
+          "cat('Project structure created at:', here(), '\\n')",
           "for (d in dirs) dir.create(here(d), recursive = TRUE, showWarnings = FALSE)",
-          "cat('Project structure created at:', here(), '\\n')"
+          "library(here)",
+          "dirs <- c('data/raw', 'data/processed', 'code', 'output/tables', 'output/figures')"
         ],
-        correctOrder: [0, 1, 2, 3],
+        correctOrder: [2, 3, 1, 0],
         explanation: "The here package must be loaded before here() can be called. The directory list must be defined before the loop iterates over it. dir.create() must run before the confirmation message, since the message reports on the created structure. recursive = TRUE is needed because nested directories (e.g., data/raw) require parent directories to be created first."
       },
       // 6 - reorder (Stata) — Skill: numbered script execution
@@ -577,12 +577,12 @@
         hint: "Follow the numbered prefixes: data must be imported before it can be cleaned, cleaned before analysis, and analysis before exporting tables.",
         lang: "stata",
         lines: [
-          "do \"$root/code/01_import_data.do\"",
-          "do \"$root/code/02_clean_merge.do\"",
           "do \"$root/code/03_regression.do\"",
-          "do \"$root/code/04_export_tables.do\""
+          "do \"$root/code/01_import_data.do\"",
+          "do \"$root/code/04_export_tables.do\"",
+          "do \"$root/code/02_clean_merge.do\""
         ],
-        correctOrder: [0, 1, 2, 3],
+        correctOrder: [1, 3, 0, 2],
         explanation: "Each script depends on the output of the previous one: 01_import loads raw data into memory, 02_clean processes and merges it (requires imported data), 03_regression runs the analysis (requires cleaned data), and 04_export formats and saves results (requires regression output). Running them out of order would cause file-not-found errors or use stale data."
       },
       // 7 - fill (Python) — Skill: programmatic .gitignore creation
@@ -715,12 +715,12 @@
         hint: "Load packages first, then estimate the model, export the table, and confirm. The <code>etable()</code> function from fixest handles the export.",
         lang: "r",
         lines: [
-          "library(fixest)\nlibrary(here)",
           "model <- feols(wage ~ education + experience | firm_id,\n               data = df)",
-          "etable(model, tex = TRUE,\n       file = here('output', 'tables', 'regression.tex'))",
-          "cat('Table exported to:', here('output', 'tables', 'regression.tex'))"
+          "cat('Table exported to:', here('output', 'tables', 'regression.tex'))",
+          "library(fixest)\nlibrary(here)",
+          "etable(model, tex = TRUE,\n       file = here('output', 'tables', 'regression.tex'))"
         ],
-        correctOrder: [0, 1, 2, 3],
+        correctOrder: [2, 0, 3, 1],
         explanation: "Libraries must be loaded before their functions can be called (feols from fixest, here from here). The model must be estimated before etable() can format its results. etable() must write the file before the confirmation message references it. This pipeline is fully automated: re-running the script regenerates the identical table from data, eliminating transcription errors."
       },
       // 6 - reorder (Python) — Skill: table export for reproducibility
@@ -731,13 +731,13 @@
         hint: "Import libraries first, then run the regression, create the Stargazer table, and write it to a file.",
         lang: "python",
         lines: [
-          "import statsmodels.api as sm",
-          "from stargazer.stargazer import Stargazer",
-          "X = sm.add_constant(df[['education', 'experience']])\nresults = sm.OLS(df['wage'], X).fit(cov_type='HC1')",
           "table = Stargazer([results])",
-          "with open('output/tables/regression.tex', 'w') as f:\n    f.write(table.render_latex())"
+          "import statsmodels.api as sm",
+          "with open('output/tables/regression.tex', 'w') as f:\n    f.write(table.render_latex())",
+          "X = sm.add_constant(df[['education', 'experience']])\nresults = sm.OLS(df['wage'], X).fit(cov_type='HC1')",
+          "from stargazer.stargazer import Stargazer"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [1, 4, 3, 0, 2],
         explanation: "Both imports must come first since the regression uses sm.OLS and the table uses Stargazer. The regression must produce results before Stargazer can format them into a table. The Stargazer object must be created before render_latex() can generate the LaTeX string. File writing comes last because it depends on the rendered output. This ensures every number in the paper comes directly from the code."
       },
       // 7 - fill (R) — Skill: seed setting for reproducible analysis
@@ -870,13 +870,13 @@
         hint: "Start with imports, define ROOT relative to the script's location, list the numbered scripts, execute them in order, and print a completion message.",
         lang: "python",
         lines: [
-          "import subprocess\nfrom pathlib import Path",
-          "ROOT = Path(__file__).parent",
           "scripts = ['01_import.py', '02_clean.py',\n           '03_analysis.py', '04_tables.py']",
+          "print('Full pipeline finished successfully.')",
+          "import subprocess\nfrom pathlib import Path",
           "for script in scripts:\n    result = subprocess.run(\n        ['python', ROOT / 'code' / script], check=True)\n    print(f'Completed: {script}')",
-          "print('Full pipeline finished successfully.')"
+          "ROOT = Path(__file__).parent"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [2, 4, 0, 3, 1],
         explanation: "Imports must come first so subprocess and Path are available. ROOT must be defined before it is used in the loop. The scripts list must exist before the loop iterates over it. The loop must complete all scripts before the final success message. check=True ensures the pipeline stops on any error rather than silently continuing with stale data — a critical feature for reproducibility."
       },
       // 6 - reorder (Stata) — Skill: complete reproducible workflow
@@ -887,14 +887,14 @@
         hint: "Define the root path first, then open the log file, execute the numbered scripts in order, and close the log at the end.",
         lang: "stata",
         lines: [
-          "global root \"/Users/maria/projects/wage_study\"",
-          "log using \"$root/output/logs/master.log\", replace",
-          "do \"$root/code/01_import.do\"",
           "do \"$root/code/02_clean.do\"",
+          "log close",
+          "log using \"$root/output/logs/master.log\", replace",
+          "global root \"/Users/maria/projects/wage_study\"",
           "do \"$root/code/03_analysis.do\"",
-          "log close"
+          "do \"$root/code/01_import.do\""
         ],
-        correctOrder: [0, 1, 2, 3, 4, 5],
+        correctOrder: [3, 2, 5, 0, 4, 1],
         explanation: "The root path must be defined first because every subsequent line uses $root. The log file must open before the do-files so it captures all their output. The three do-files must execute in numbered order (import produces raw data for clean, clean produces processed data for analysis). log close must come last to ensure all output is captured and the file is properly saved."
       },
       // 7 - fill (R) — Skill: writing a portable R analysis script
@@ -1033,13 +1033,13 @@
         hint: "The ML workflow follows: import, split data, create model, train (fit), then evaluate on test data. Training and evaluation must use separate data.",
         lang: "python",
         lines: [
-          "from sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression",
-          "X_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42)",
+          "y_pred = model.predict(X_test)\nrmse = np.sqrt(np.mean((y_pred - y_test)**2))\nprint(f'Test RMSE: {rmse:.4f}')",
           "model = LinearRegression()",
+          "from sklearn.model_selection import train_test_split\nfrom sklearn.linear_model import LinearRegression",
           "model.fit(X_train, y_train)",
-          "y_pred = model.predict(X_test)\nrmse = np.sqrt(np.mean((y_pred - y_test)**2))\nprint(f'Test RMSE: {rmse:.4f}')"
+          "X_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42)"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [2, 4, 1, 3, 0],
         explanation: "Imports must come first to make functions available. Data must be split before training so the test set is held out. The model object must be created before .fit() can be called on it. The model must be trained before .predict() can generate predictions. Evaluation on the test set comes last because it requires both predictions and the true test labels."
       },
       // 6 - reorder (R) — Skill: train/test split in R
@@ -1050,13 +1050,13 @@
         hint: "Start by loading the package, then set seed and split, extract train/test sets, fit the model on training data, and evaluate on test data.",
         lang: "r",
         lines: [
-          "library(rsample)",
-          "set.seed(42)\nsplit <- initial_split(df, prop = 0.8)",
-          "train_data <- training(split)\ntest_data <- testing(split)",
           "model <- lm(wage ~ education + experience, data = train_data)",
-          "predictions <- predict(model, newdata = test_data)\nrmse <- sqrt(mean((predictions - test_data$wage)^2))\ncat('Test RMSE:', round(rmse, 4))"
+          "set.seed(42)\nsplit <- initial_split(df, prop = 0.8)",
+          "predictions <- predict(model, newdata = test_data)\nrmse <- sqrt(mean((predictions - test_data$wage)^2))\ncat('Test RMSE:', round(rmse, 4))",
+          "library(rsample)",
+          "train_data <- training(split)\ntest_data <- testing(split)"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [3, 1, 4, 0, 2],
         explanation: "rsample must be loaded before initial_split() is available. set.seed() must be called before initial_split() to make the random split reproducible. The split object must exist before training() and testing() can extract subsets. The model must be trained on training data before predictions can be made on test data. Evaluation comes last because it requires both the fitted model and the test data."
       },
       // 7 - fill (Python) — Skill: Lasso regularization
@@ -1189,13 +1189,13 @@
         hint: "Load data and set seed first, then fit the Lasso with CV, inspect the selected coefficients, and finally evaluate predictions.",
         lang: "stata",
         lines: [
-          "use household_data.dta, clear",
           "set seed 42",
-          "lasso linear consumption income education age experience,\n    selection(cv, folds(5))",
           "lassocoef, display(coef, penalized)",
-          "predict yhat\ngen sq_err = (consumption - yhat)^2\nsum sq_err"
+          "predict yhat\ngen sq_err = (consumption - yhat)^2\nsum sq_err",
+          "use household_data.dta, clear",
+          "lasso linear consumption income education age experience,\n    selection(cv, folds(5))"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [3, 0, 4, 1, 2],
         explanation: "Data must be loaded before any analysis. The seed must be set before lasso because cross-validation involves random fold assignment. The lasso command must complete before lassocoef can display which variables were selected. Predictions and error evaluation come last because they require the fitted model. Each step produces output that the next step depends on."
       },
       // 6 - reorder (Python) — Skill: proper scaling pipeline
@@ -1206,13 +1206,13 @@
         hint: "Import first, split data, then fit the scaler on <b>training data only</b> (<code>fit_transform</code>), apply it to test data (<code>transform</code> only), and finally train and evaluate.",
         lang: "python",
         lines: [
-          "from sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import Ridge",
-          "X_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42)",
-          "scaler = StandardScaler()\nX_train_scaled = scaler.fit_transform(X_train)",
           "X_test_scaled = scaler.transform(X_test)",
-          "model = Ridge(alpha=1.0).fit(X_train_scaled, y_train)\nprint(f'Test R2: {model.score(X_test_scaled, y_test):.4f}')"
+          "from sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import Ridge",
+          "model = Ridge(alpha=1.0).fit(X_train_scaled, y_train)\nprint(f'Test R2: {model.score(X_test_scaled, y_test):.4f}')",
+          "scaler = StandardScaler()\nX_train_scaled = scaler.fit_transform(X_train)",
+          "X_train, X_test, y_train, y_test = train_test_split(\n    X, y, test_size=0.2, random_state=42)"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [1, 4, 3, 0, 2],
         explanation: "Imports must come first. The data must be split before any scaling to prevent leakage. The scaler must be fit on training data only (fit_transform), learning the training mean and SD. The test data must be transformed using those same training statistics (transform only — no fitting). Finally, the model trains on scaled training data and evaluates on scaled test data. Fitting the scaler on training only is what prevents data leakage."
       },
       // 7 - fill (Stata) — Skill: Lasso feature selection
@@ -1345,13 +1345,13 @@
         hint: "Load data first, then the two Lasso steps select controls for outcome and treatment separately. The <code>dsregress</code> command combines them into the final debiased estimate.",
         lang: "stata",
         lines: [
+          "* Step 2: Lasso-select controls for treatment\nlasso linear training age education experience x1-x20,\n    selection(cv)",
+          "* Display results with valid standard errors\nestimates table, se",
           "use training_data.dta, clear\nset seed 42",
           "* Step 1: Lasso-select controls for outcome\nlasso linear wage age education experience x1-x20,\n    selection(cv)",
-          "* Step 2: Lasso-select controls for treatment\nlasso linear training age education experience x1-x20,\n    selection(cv)",
-          "* Step 3: Post-double-selection estimator\ndsregress wage training,\n    controls(age education experience x1-x20)",
-          "* Display results with valid standard errors\nestimates table, se"
+          "* Step 3: Post-double-selection estimator\ndsregress wage training,\n    controls(age education experience x1-x20)"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [2, 3, 0, 4, 1],
         explanation: "Data must be loaded and the seed set before any analysis. Step 1 uses Lasso to identify which controls predict the outcome (wage) — this must precede the final estimator. Step 2 uses Lasso to identify which controls predict the treatment (training) — also needed before dsregress. dsregress combines both selection results into a debiased treatment effect estimate. estimates table comes last because it displays the final results. The double-selection approach ensures that omitting relevant controls from either equation does not bias the treatment effect."
       },
       // 6 - reorder (R) — Skill: full Lasso pipeline with glmnet
@@ -1362,13 +1362,13 @@
         hint: "Load packages, split data, prepare matrices, use <code>cv.glmnet()</code> to find the best lambda via cross-validation, then evaluate <b>once</b> on the test set.",
         lang: "r",
         lines: [
-          "library(glmnet)\nlibrary(rsample)",
-          "set.seed(42)\nsplit <- initial_split(df, prop = 0.8)\ntrain_data <- training(split)\ntest_data <- testing(split)",
-          "X_train <- as.matrix(train_data[, c('income', 'education', 'age')])\ny_train <- train_data$consumption\nX_test <- as.matrix(test_data[, c('income', 'education', 'age')])\ny_test <- test_data$consumption",
           "cv_model <- cv.glmnet(X_train, y_train, alpha = 1, nfolds = 5)\ncat('Best lambda:', cv_model$lambda.min, '\\n')",
-          "preds <- predict(cv_model, X_test, s = 'lambda.min')\nrmse <- sqrt(mean((preds - y_test)^2))\ncat('Test RMSE:', round(rmse, 4))"
+          "library(glmnet)\nlibrary(rsample)",
+          "preds <- predict(cv_model, X_test, s = 'lambda.min')\nrmse <- sqrt(mean((preds - y_test)^2))\ncat('Test RMSE:', round(rmse, 4))",
+          "X_train <- as.matrix(train_data[, c('income', 'education', 'age')])\ny_train <- train_data$consumption\nX_test <- as.matrix(test_data[, c('income', 'education', 'age')])\ny_test <- test_data$consumption",
+          "set.seed(42)\nsplit <- initial_split(df, prop = 0.8)\ntrain_data <- training(split)\ntest_data <- testing(split)"
         ],
-        correctOrder: [0, 1, 2, 3, 4],
+        correctOrder: [1, 4, 3, 0, 2],
         explanation: "Libraries must load before their functions are available. The data split must happen before matrices are prepared. Matrices must be constructed before cv.glmnet can use them. cv.glmnet must select the best lambda via cross-validation on training data before the test set is touched. The test evaluation comes last and happens only once — this is the 'honest' part: using the test set for evaluation only, never for model selection."
       },
       // 7 - fill (R) — Skill: causal forest in R

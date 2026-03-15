@@ -921,6 +921,78 @@ the statistical properties of the original data.
 Overall utility score: 0.89 (good preservation)</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This generates synthetic data that statistically resembles your real data, preserving distributions and correlations without exposing any real observations",
+                  "languages": {
+                    "python": [
+                      {"code": "synthesizer", "role": "Variable", "tip": "The model that will learn patterns from your real data.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Stores the synthesizer object.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "GaussianCopulaSynthesizer", "role": "Class", "tip": "A model that learns correlations and distributions using a Gaussian copula approach.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the constructor arguments.", "color": "overlay"},
+                      {"code": "metadata", "role": "Argument", "tip": "Column type information (numeric, categorical, dates) so the synthesizer generates appropriate values.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the constructor.", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "synthesizer", "role": "Variable", "tip": "The synthesizer model.", "color": "pink"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses a method.", "color": "overlay"},
+                      {"code": "fit", "role": "Method", "tip": "Learns the statistical patterns (distributions, correlations) from your real data.", "color": "teal"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the argument.", "color": "overlay"},
+                      {"code": "real_df", "role": "Real Data", "tip": "Your actual dataset. The model learns from it but never stores individual records.", "color": "pink"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the fit call.", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "synthetic_df", "role": "Variable", "tip": "The resulting synthetic dataset — entirely fake but statistically similar.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Stores the generated data.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "synthesizer", "role": "Variable", "tip": "The fitted model.", "color": "pink"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses a method.", "color": "overlay"},
+                      {"code": "sample", "role": "Method", "tip": "Generates new synthetic rows from the learned distributions.", "color": "teal"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the argument.", "color": "overlay"},
+                      {"code": "num_rows=1000", "role": "Argument", "tip": "How many synthetic rows to generate.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the sample call.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "summarize", "role": "Command", "tip": "Computes summary statistics from your real data.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "income", "role": "Variable", "tip": "The real variable to learn from.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates variable from options.", "color": "overlay"},
+                      {"code": "detail", "role": "Option", "tip": "Shows detailed statistics including percentiles.", "color": "sky"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "local", "role": "Command", "tip": "Stores a value in a local macro for later use.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "mean_inc", "role": "Macro Name", "tip": "The local macro that stores the mean. Referenced later as `mean_inc'.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Stores the value.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "r(mean)", "role": "Stored Result", "tip": "The mean from the most recent summarize command.", "color": "lavender"}
+                    ],
+                    "r": [
+                      {"code": "synth_obj", "role": "Variable", "tip": "The synthpop object containing the synthetic data and validation results.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "<-", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "syn", "role": "Function", "tip": "From the synthpop package. Learns patterns from real data and generates synthetic records.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the arguments.", "color": "overlay"},
+                      {"code": "real_df", "role": "Real Data", "tip": "Your actual dataset to synthesize.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates arguments.", "color": "overlay"},
+                      {"code": "seed = 42", "role": "Random Seed", "tip": "Ensures reproducibility — same seed produces the same synthetic data.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the function call.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Structure-preserving synthetic data is essential for data privacy. The <strong>fit-then-sample</strong> pattern is common: first learn the statistical properties of real data, then generate new fake rows that preserve those properties. Use <code>synthpop</code> in R, <code>SDV</code> in Python, or manual parametric bootstrap in Stata. Always validate by comparing real vs. synthetic distributions."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <div class="info-box tip">
           <div class="info-box-title">Choosing a Method</div>
           <p style="margin-bottom: 0;">
@@ -1123,6 +1195,67 @@ safe_sample <- create_llm_safe_sample(real_df, n_samples = 50)
 |  8|  47|  58430.1|Masters     |         1|
 |  9|  29|  35890.6|High School |         0|
 | 10|  55|  67240.9|Bachelors   |         1|</pre></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This creates a small synthetic sample matching your real data's structure, safe to share with AI coding assistants",
+                  "languages": {
+                    "python": [
+                      {"code": "def", "role": "Keyword", "tip": "Defines a new function.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "create_llm_safe_sample", "role": "Function Name", "tip": "A descriptive name for your custom function.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the parameter list.", "color": "overlay"},
+                      {"code": "real_df", "role": "Parameter", "tip": "The real dataset to create a safe version of.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates parameters.", "color": "overlay"},
+                      {"code": "n_samples=50", "role": "Default Parameter", "tip": "Number of fake rows to generate. Default is 50 — enough for LLM context without overwhelming the prompt.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the parameter list.", "color": "overlay"},
+                      {"code": ":", "role": "Colon", "tip": "Begins the function body (indented block follows).", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "clear", "role": "Command", "tip": "Removes existing data from memory to start fresh.", "color": "mauve"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "set seed", "role": "Command", "tip": "Sets the random number seed for reproducibility.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "42", "role": "Seed Value", "tip": "Any integer. Same seed produces the same random data every time.", "color": "red"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "set obs", "role": "Command", "tip": "Sets the number of observations in the empty dataset.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "50", "role": "Count", "tip": "Creates 50 empty rows to fill with fake data.", "color": "red"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "gen", "role": "Command", "tip": "Creates a new variable with generated values.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "age", "role": "Variable", "tip": "The fake age variable.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Sets the value.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "int(rnormal(45, 10))", "role": "Expression", "tip": "Generates random integers from a normal distribution with mean 45 and sd 10.", "color": "blue"}
+                    ],
+                    "r": [
+                      {"code": "create_llm_safe_sample", "role": "Function Name", "tip": "The name of the custom function.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "<-", "role": "Assignment", "tip": "Stores the function definition.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "function", "role": "Keyword", "tip": "Defines a new function in R.", "color": "mauve"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the parameter list.", "color": "overlay"},
+                      {"code": "real_df", "role": "Parameter", "tip": "The real dataset to mimic.", "color": "sky"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates parameters.", "color": "overlay"},
+                      {"code": "n_samples = 50", "role": "Default Parameter", "tip": "Number of fake rows. Default 50 — a reasonable sample for LLM prompts.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the parameter list.", "color": "overlay"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "{", "role": "Open Brace", "tip": "Begins the function body.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Creating LLM-safe sample data lets you get AI coding help without risking data privacy. The function inspects each column's type and generates fake values with similar distributions. For numeric columns, it draws from a normal distribution matching the mean and standard deviation. For categorical columns, it samples from observed categories. Always share synthetic data, never real data, with AI assistants."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <h3>What to Include When Asking LLMs for Help</h3>
@@ -1401,6 +1534,78 @@ file data/temp/simulated_survey.dta saved</pre></div>
 > # Note: 153 NA values in income (~30% missing)
 > # Note: age has max=999 (data entry error at row 10)
 > # Note: satisfaction has max=9 (out of 1-7 range)</pre></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This generates simulated survey data with realistic problems (missing values, outliers, data entry errors) so you can develop and test your cleaning code before real data arrives",
+                  "languages": {
+                    "python": [
+                      {"code": "df", "role": "Variable", "tip": "The DataFrame that will hold the simulated survey data.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Stores the DataFrame.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "pd", "role": "Library Alias", "tip": "Short name for pandas.", "color": "yellow"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses a class in pandas.", "color": "overlay"},
+                      {"code": "DataFrame", "role": "Constructor", "tip": "Creates a new DataFrame from a dictionary of column names and values.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the argument.", "color": "overlay"},
+                      {"code": "{", "role": "Open Brace", "tip": "Begins a dictionary mapping column names to generated arrays.", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "'age'", "role": "Column Name", "tip": "The key in the dictionary becomes the column name.", "color": "green"},
+                      {"code": ": ", "role": "Colon", "tip": "Separates key from value in a dictionary.", "color": "overlay"},
+                      {"code": "np.random.normal(35, 12, n)", "role": "Generator", "tip": "Draws n values from a normal distribution with mean 35 and std 12.", "color": "blue"},
+                      {"code": "}", "role": "Close Brace", "tip": "Ends the dictionary.", "color": "overlay"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the DataFrame constructor.", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "set obs", "role": "Command", "tip": "Sets the number of observations (rows) in the empty dataset.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "500", "role": "Count", "tip": "Creates 500 empty rows to fill with simulated data.", "color": "red"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "gen", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "age", "role": "Variable", "tip": "The new variable name.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Sets the value.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "int(rnormal(35, 12))", "role": "Expression", "tip": "Generates random ages from a normal distribution, then rounds to integer.", "color": "blue"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "replace", "role": "Command", "tip": "Modifies existing values.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "income", "role": "Variable", "tip": "The variable to modify.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Sets the value.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": ".", "role": "Missing", "tip": "Stata's missing value marker. Sets income to missing where the condition is met.", "color": "red"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "if", "role": "Qualifier", "tip": "Only applies the replacement where the condition is true.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "runiform() > 0.7", "role": "Condition", "tip": "Random 30% of rows get set to missing, simulating survey non-response.", "color": "pink"}
+                    ],
+                    "r": [
+                      {"code": "df", "role": "Variable", "tip": "The data frame that will hold simulated data.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "<-", "role": "Assignment", "tip": "Stores the data frame.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "data.frame", "role": "Constructor", "tip": "Creates a new data frame from named vectors.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the column definitions.", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "age", "role": "Column Name", "tip": "The name of the column being created.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Assigns the generated values to this column.", "color": "peach"},
+                      {"code": "as.integer(rnorm(n, 35, 12))", "role": "Generator", "tip": "Draws n values from a normal distribution and rounds to integer.", "color": "blue"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the data.frame constructor.", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Pre-analysis simulation is a powerful research practice: write and test your entire cleaning and analysis pipeline on simulated data <em>before</em> real data arrives. Include realistic problems (missing values, outliers, entry errors) so your code handles them. When real data comes, you only need to change the file path."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <!-- ============================================ -->
@@ -1835,6 +2040,92 @@ R-squared: 0.8734, Adjusted R-squared: 0.8733
 
 Note: OLS overestimates both coefficients because more
 productive firms use more inputs (transmission bias).</div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This generates an AR(1) productivity process where each period's productivity depends on the previous period's, creating persistent firm-level heterogeneity",
+                  "languages": {
+                    "python": [
+                      {"code": "omega", "role": "Variable", "tip": "A 2D array (firms x periods) storing the productivity process.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Initializes the array.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "np", "role": "Library Alias", "tip": "Short name for numpy.", "color": "yellow"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses a function.", "color": "overlay"},
+                      {"code": "zeros", "role": "Function", "tip": "Creates an array filled with zeros. Will be filled period-by-period.", "color": "blue"},
+                      {"code": "((N, T))", "role": "Shape", "tip": "N firms by T time periods.", "color": "sky"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "omega[:, t]", "role": "Column Slice", "tip": "All firms in period t. The : means all rows, t selects the column.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Updates all firms at time t.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "rho", "role": "Persistence", "tip": "AR(1) coefficient (0.7). Controls how sticky productivity is across periods.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "*", "role": "Multiplication", "tip": "Scales last period's productivity by the persistence parameter.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "omega[:, t-1]", "role": "Lagged Value", "tip": "Previous period's productivity. This creates the autoregressive structure.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "+", "role": "Addition", "tip": "Adds the innovation shock.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "np.random.normal(0, 0.3, N)", "role": "Innovation", "tip": "Random shock (eta_t). New information each period that shifts productivity.", "color": "blue"}
+                    ],
+                    "stata": [
+                      {"code": "gen", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "omega", "role": "Variable", "tip": "The productivity variable.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Sets the initial value.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "rnormal(0, 1)", "role": "Generator", "tip": "Draws from standard normal for the initial period.", "color": "blue"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "if", "role": "Qualifier", "tip": "Only applies to the first period.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "year == 1", "role": "Condition", "tip": "Initial condition: draw from normal distribution.", "color": "pink"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "bysort firm (year):", "role": "Panel Sort", "tip": "Sorts by firm and year, then applies within each firm.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "replace", "role": "Command", "tip": "Updates omega for subsequent periods.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "omega", "role": "Variable", "tip": "The variable being updated.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Sets the new value.", "color": "peach"},
+                      {"code": "rho * omega[_n-1]", "role": "AR(1) Term", "tip": "Previous observation's productivity times the persistence parameter. [_n-1] references the prior row within the firm.", "color": "pink"},
+                      {"code": " + ", "role": "Addition", "tip": "Adds the innovation shock.", "color": "peach"},
+                      {"code": "rnormal(0, 0.3)", "role": "Innovation", "tip": "Random shock for this period.", "color": "blue"}
+                    ],
+                    "r": [
+                      {"code": "omega", "role": "Variable", "tip": "A matrix (firms x periods) storing productivity.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "<-", "role": "Assignment", "tip": "Stores the matrix.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "matrix", "role": "Function", "tip": "Creates a matrix filled with a specified value.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the arguments.", "color": "overlay"},
+                      {"code": "0", "role": "Fill Value", "tip": "Initializes all entries to zero.", "color": "red"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates arguments.", "color": "overlay"},
+                      {"code": "N", "role": "Rows", "tip": "Number of firms.", "color": "pink"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates arguments.", "color": "overlay"},
+                      {"code": "TT", "role": "Columns", "tip": "Number of time periods. Named TT to avoid masking base R's T (TRUE).", "color": "pink"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the matrix call.", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "omega[, t]", "role": "Column Slice", "tip": "All firms in period t.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "<-", "role": "Assignment", "tip": "Updates the column.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "rho * omega[, t - 1]", "role": "AR(1) Term", "tip": "Previous period's productivity times persistence (0.7).", "color": "pink"},
+                      {"code": " + ", "role": "Addition", "tip": "Adds the random shock.", "color": "peach"},
+                      {"code": "rnorm(N, 0, 0.3)", "role": "Innovation", "tip": "N random draws from normal with mean 0 and sd 0.3.", "color": "blue"}
+                    ]
+                  },
+                  "structureNote": "An <strong>AR(1) process</strong> (autoregressive of order 1) models persistence: today's value depends on yesterday's plus a random shock. In production function estimation, this creates the <em>endogeneity problem</em> — productive firms (high omega) choose more inputs, so inputs are correlated with the error term. This is why OLS overestimates input elasticities and why structural estimators (Olley-Pakes, ACF) are needed."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="info-box warning">

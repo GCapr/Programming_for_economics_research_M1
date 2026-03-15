@@ -375,7 +375,7 @@
       /* ── Floating checklist badge ────────────────────────────────── */
       '.checklist-fab {' +
       '  position: fixed;' +
-      '  bottom: 5.5rem;' +
+      '  bottom: 10rem;' +
       '  right: 1.5rem;' +
       '  width: 48px;' +
       '  height: 48px;' +
@@ -527,6 +527,59 @@
       '  border: 1px solid #d1d5db;' +
       '}' +
       '.cl-clear-btn:hover { background: #f9fafb; }' +
+
+      /* ── Hint button ──────────────────────────────────────────────── */
+      '.hint-btn {' +
+      '  display: inline-flex;' +
+      '  align-items: center;' +
+      '  gap: 0.35rem;' +
+      '  padding: 0.4rem 0.85rem;' +
+      '  font-size: 0.82rem;' +
+      '  font-weight: 600;' +
+      '  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);' +
+      '  color: #92400e;' +
+      '  border: 1px solid #f59e0b;' +
+      '  border-radius: 20px;' +
+      '  cursor: pointer;' +
+      '  transition: all 0.2s ease;' +
+      '  margin-bottom: 0.75rem;' +
+      '}' +
+      '.hint-btn:hover {' +
+      '  background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);' +
+      '  transform: translateY(-1px);' +
+      '  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);' +
+      '}' +
+      '.hint-btn.used {' +
+      '  background: #fef9c3;' +
+      '  border-color: #d4a017;' +
+      '  opacity: 0.7;' +
+      '  cursor: default;' +
+      '}' +
+      '.hint-box {' +
+      '  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);' +
+      '  border: 1px solid #fbbf24;' +
+      '  border-left: 4px solid #f59e0b;' +
+      '  border-radius: 0 8px 8px 0;' +
+      '  padding: 0.75rem 1rem;' +
+      '  margin-bottom: 1rem;' +
+      '  font-size: 0.88rem;' +
+      '  line-height: 1.55;' +
+      '  color: #78350f;' +
+      '  animation: hintSlideIn 0.3s ease;' +
+      '}' +
+      '.hint-box strong { color: #92400e; }' +
+      '.hint-box code {' +
+      '  background: rgba(146, 64, 14, 0.1);' +
+      '  padding: 1px 5px;' +
+      '  border-radius: 3px;' +
+      '  font-family: var(--font-code);' +
+      '  font-size: 0.85em;' +
+      '  color: #92400e;' +
+      '}' +
+      '@keyframes hintSlideIn {' +
+      '  from { opacity: 0; transform: translateY(-8px); }' +
+      '  to { opacity: 1; transform: translateY(0); }' +
+      '}' +
 
       /* ── Checklist summary in results panel ──────────────────────── */
       '.results-checklist-summary {' +
@@ -1510,6 +1563,31 @@
     return wrapper;
   }
 
+  // ─── Hint Button ─────────────────────────────────────────────────
+
+  /**
+   * Create and return a hint button. When clicked, it reveals the hint text.
+   * If the exercise has no hint, returns null.
+   */
+  function createHintButton(exercise) {
+    var hintText = exercise.hint;
+    if (!hintText) return null;
+
+    var wrapper = ce('div', '');
+    var btn = ce('button', 'hint-btn');
+    btn.innerHTML = '\uD83D\uDCA1 Show Hint';
+    btn.addEventListener('click', function () {
+      if (btn.classList.contains('used')) return;
+      btn.classList.add('used');
+      btn.innerHTML = '\uD83D\uDCA1 Hint';
+      var box = ce('div', 'hint-box');
+      box.innerHTML = hintText;
+      wrapper.appendChild(box);
+    });
+    wrapper.appendChild(btn);
+    return wrapper;
+  }
+
   // ─── READ type ────────────────────────────────────────────────────
 
   /**
@@ -1530,6 +1608,10 @@
     var prompt = ce('p', 'exercise-prompt');
     prompt.textContent = exercise.prompt;
     container.appendChild(prompt);
+
+    // Hint button
+    var hintEl = createHintButton(exercise);
+    if (hintEl) container.appendChild(hintEl);
 
     // Code block
     if (exercise.code) {
@@ -1586,6 +1668,10 @@
     var prompt = ce('p', 'exercise-prompt');
     prompt.textContent = exercise.prompt;
     container.appendChild(prompt);
+
+    // Hint button
+    var hintEl = createHintButton(exercise);
+    if (hintEl) container.appendChild(hintEl);
 
     if (exercise.code) {
       container.appendChild(createCodeBlock(exercise.code, exercise.lang));
@@ -1682,6 +1768,10 @@
     var prompt = ce('p', 'exercise-prompt');
     prompt.textContent = exercise.prompt;
     container.appendChild(prompt);
+
+    // Hint button
+    var hintEl = createHintButton(exercise);
+    if (hintEl) container.appendChild(hintEl);
 
     // Build the sortable list
     var list = ce('div', 'reorder-list');
@@ -1965,6 +2055,10 @@
     prompt.textContent = exercise.prompt;
     container.appendChild(prompt);
 
+    // Hint button
+    var hintEl = createHintButton(exercise);
+    if (hintEl) container.appendChild(hintEl);
+
     // Language badge
     if (exercise.lang) {
       container.appendChild(createLangBadge(exercise.lang));
@@ -2122,6 +2216,18 @@
     var prompt = ce('p', 'exercise-prompt');
     prompt.textContent = exercise.prompt;
     container.appendChild(prompt);
+
+    // Hint button
+    var hintEl = createHintButton(exercise);
+    if (hintEl) container.appendChild(hintEl);
+
+    // Instruction hint
+    if (!ans.answered) {
+      var hint = ce('p', 'match-hint');
+      hint.textContent = 'Click a card on the left, then click its match on the right.';
+      hint.style.cssText = 'font-size:0.82rem;color:var(--color-text-light);text-align:center;margin:-0.25rem 0 0.5rem;font-style:italic;';
+      container.appendChild(hint);
+    }
 
     // Initialize match tracking for this exercise
     if (!state.matchWrongAttempts[index]) {
@@ -2684,13 +2790,14 @@
       renderChecklistPanel();
     });
 
-    // Click outside panel to close
+    // Click outside panel to close (use setTimeout to avoid same-tick race)
     document.addEventListener('click', function (e) {
-      if (panel.classList.contains('open') &&
-          !panel.contains(e.target) &&
-          e.target !== fab && !fab.contains(e.target)) {
-        panel.classList.remove('open');
-      }
+      if (!panel.classList.contains('open')) return;
+      if (panel.contains(e.target)) return;
+      if (e.target === fab || fab.contains(e.target)) return;
+      // Ignore clicks on any element that triggers the panel (e.g. View Checklist btn)
+      if (e.target.closest('.results-checklist-summary')) return;
+      panel.classList.remove('open');
     });
   }
 

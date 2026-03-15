@@ -1640,6 +1640,46 @@ Population   -0.0208</pre></div>
 [SHAP autoplot displayed with horizontal bars for each feature]</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you compute and visualize SHAP values to explain individual predictions from tree-based models",
+                  "pattern": "explainer = shap.TreeExplainer(model); shap_values = explainer.shap_values(X)",
+                  "structureNote": "SHAP (SHapley Additive exPlanations) decomposes each prediction into contributions from each feature. Unlike feature importance, SHAP values show <strong>direction</strong> (positive/negative) and are <strong>locally faithful</strong> -- they sum to the difference between the prediction and the average. The beeswarm plot shows global patterns: color indicates feature value (red=high), position shows impact.",
+                  "languages": {
+                    "python": [
+                      {"code": "explainer", "role": "Variable", "tip": "Stores the SHAP explainer object.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "shap.TreeExplainer", "role": "Class", "tip": "Optimized SHAP calculator for tree models (XGBoost, RF, LightGBM).", "color": "blue"},
+                      {"code": "(xgb_model)", "role": "Model", "tip": "The fitted tree-based model to explain.", "color": "pink"},
+                      {"code": "\nshap_values", "role": "Variable", "tip": "Matrix of SHAP values: one per observation per feature.", "color": "pink"},
+                      {"code": " = explainer.shap_values(X_test)", "role": "Compute SHAP", "tip": "Computes exact SHAP values using the tree structure.", "color": "teal"},
+                      {"code": "\nshap.summary_plot(shap_values, X_test)", "role": "Beeswarm Plot", "tip": "Global visualization: each dot is one observation. X-axis = SHAP value, color = feature value.", "color": "blue"}
+                    ],
+                    "stata": [
+                      {"code": "python:", "role": "Python Block", "tip": "Stata uses Python interface for SHAP -- no native support.", "color": "mauve"},
+                      {"code": "\nimport shap", "role": "Import", "tip": "The shap library must be installed in Stata's Python environment.", "color": "yellow"},
+                      {"code": "\nexplainer = shap.TreeExplainer(model)", "role": "Explainer", "tip": "Same Python SHAP code runs within Stata's python: block.", "color": "blue"},
+                      {"code": "\nshap_values = explainer.shap_values(X)", "role": "Compute", "tip": "Computes SHAP values for the dataset.", "color": "teal"}
+                    ],
+                    "r": [
+                      {"code": "shap_contrib", "role": "Variable", "tip": "Stores the SHAP contribution matrix.", "color": "pink"},
+                      {"code": " <- predict(xgb_model, X_matrix, predcontrib = TRUE)", "role": "SHAP via XGBoost", "tip": "XGBoost's built-in SHAP computation. predcontrib=TRUE returns contributions.", "color": "blue"},
+                      {"code": "\n# Or use shapviz package:", "role": "Comment", "tip": "shapviz provides ggplot-based SHAP visualizations.", "color": "overlay"},
+                      {"code": "\nshap_obj <- shapviz(xgb_model, X_pred = X_matrix)", "role": "shapviz Object", "tip": "Creates a SHAP visualization object from the model.", "color": "blue"},
+                      {"code": "\nsv_importance(shap_obj, kind = 'beeswarm')", "role": "Beeswarm Plot", "tip": "Creates the beeswarm summary plot showing feature importance and direction.", "color": "teal"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
 
         <!-- ===================== TREES VS REGULARIZATION ===================== -->
         <h2 id="comparison">Trees vs. Regularization</h2>

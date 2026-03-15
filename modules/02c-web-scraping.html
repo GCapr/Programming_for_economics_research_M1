@@ -1586,6 +1586,46 @@ Using cached version of https://quotes.toscrape.com/page/1/
 Using cached version of https://quotes.toscrape.com/page/2/</div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This creates a polite scraper object with a 3-second delay between requests, then fetches a page",
+                  "languages": {
+                    "python": [
+                      {"code": "scraper", "role": "Variable", "tip": "Stores the PoliteScraper object. This object remembers settings (delay, cache directory) and tracks request timing.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Stores the new scraper object.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "PoliteScraper", "role": "Class Name", "tip": "Creates a new instance of the PoliteScraper class. The class bundles rate limiting and caching together into one reusable tool.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the constructor arguments.", "color": "overlay"},
+                      {"code": "delay", "role": "Parameter", "tip": "How many seconds to wait between requests. Being polite to servers is both ethical and practical -- aggressive scraping gets you blocked.", "color": "sky"},
+                      {"code": "=", "role": "Equals", "tip": "Assigns the value to this parameter.", "color": "peach"},
+                      {"code": "3", "role": "Value", "tip": "3 seconds between requests. Adjust based on the site's guidelines and your needs.", "color": "peach"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the constructor call.", "color": "overlay"},
+                      {"code": "\n", "role": "Newline", "tip": "", "color": "text"},
+                      {"code": "html", "role": "Variable", "tip": "Stores the fetched HTML content as a string.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Stores the fetched page content.", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "scraper", "role": "Object", "tip": "Our PoliteScraper instance.", "color": "pink"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses the fetch method on the scraper object.", "color": "overlay"},
+                      {"code": "fetch", "role": "Method", "tip": "Fetches a URL with automatic caching and rate limiting. If the page is cached, it skips the network request entirely.", "color": "teal"},
+                      {"code": "(", "role": "Open Paren", "tip": "", "color": "overlay"},
+                      {"code": "\"https://quotes.toscrape.com/page/1/\"", "role": "URL", "tip": "The page to fetch. On first call, this is downloaded and cached. On subsequent calls, the cached version is used.", "color": "green"},
+                      {"code": ")", "role": "Close Paren", "tip": "", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "A <strong>class</strong> bundles related data and functions into a reusable package. The PoliteScraper class handles two key responsibilities: <strong>rate limiting</strong> (waiting between requests to avoid overloading servers) and <strong>caching</strong> (saving pages locally so you don't re-download them). This is essential for any serious scraping project -- being polite keeps you from getting blocked."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h3>Error Handling and Retries</h3>
 
         <p><strong>The problem:</strong> When scraping 200+ sites, things <em>will</em> go wrong. Servers will be temporarily unavailable, your internet connection will hiccup, some pages will return errors. If your scraper crashes at error #50, you lose all progress.</p>
@@ -1662,6 +1702,55 @@ Using cached version of https://quotes.toscrape.com/page/2/</div>
 <i>(If the server were temporarily down, you'd see:)</i></span>
 <span class="out-yellow">Server error. Retry in 5s...</span>
 <span class="out-yellow">Server error. Retry in 10s...</span></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This defines a function that retries a failed web request with exponential backoff -- waiting longer between each attempt",
+                  "languages": {
+                    "python": [
+                      {"code": "def", "role": "Keyword", "tip": "Defines a new function.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "fetch_with_retry", "role": "Function Name", "tip": "Descriptive name explaining what this function does: fetch a URL, with retry logic if it fails.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "Begins the parameter list.", "color": "overlay"},
+                      {"code": "url", "role": "Parameter", "tip": "The URL to fetch. This is the only required parameter.", "color": "pink"},
+                      {"code": ", ", "role": "Separator", "tip": "", "color": "overlay"},
+                      {"code": "max_retries", "role": "Parameter", "tip": "How many times to try before giving up. Has a default value so callers don't have to specify it.", "color": "sky"},
+                      {"code": "=", "role": "Default", "tip": "Sets the default value if the caller doesn't provide one.", "color": "peach"},
+                      {"code": "3", "role": "Default Value", "tip": "Try up to 3 times. Adjust based on how important reliability is vs. speed.", "color": "peach"},
+                      {"code": ", ", "role": "Separator", "tip": "", "color": "overlay"},
+                      {"code": "base_delay", "role": "Parameter", "tip": "Starting wait time in seconds. Gets multiplied for exponential backoff.", "color": "sky"},
+                      {"code": "=", "role": "Default", "tip": "Sets the default.", "color": "peach"},
+                      {"code": "5", "role": "Default Value", "tip": "Start with a 5-second wait. Each retry doubles: 5s, 10s, 20s.", "color": "peach"},
+                      {"code": ")", "role": "Close Paren", "tip": "Ends the parameter list.", "color": "overlay"},
+                      {"code": ":", "role": "Colon", "tip": "Marks the start of the function body.", "color": "overlay"},
+                      {"code": "\n    ", "role": "Newline + Indent", "tip": "", "color": "text"},
+                      {"code": "for", "role": "Keyword", "tip": "Loops through each retry attempt.", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "attempt", "role": "Loop Variable", "tip": "Tracks which attempt we're on (0, 1, 2). Used to calculate the exponential backoff delay.", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "in", "role": "Keyword", "tip": "", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "range", "role": "Function", "tip": "Creates a sequence 0, 1, 2 for 3 retries.", "color": "blue"},
+                      {"code": "(", "role": "Open Paren", "tip": "", "color": "overlay"},
+                      {"code": "max_retries", "role": "Argument", "tip": "Number of attempts.", "color": "pink"},
+                      {"code": ")", "role": "Close Paren", "tip": "", "color": "overlay"},
+                      {"code": ":", "role": "Colon", "tip": "Begins the loop body.", "color": "overlay"},
+                      {"code": "\n        ", "role": "Newline + Indent", "tip": "", "color": "text"},
+                      {"code": "try", "role": "Keyword", "tip": "Wraps code that might fail. If an error occurs, execution jumps to the except block instead of crashing.", "color": "mauve"},
+                      {"code": ":", "role": "Colon", "tip": "", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "<strong>Exponential backoff</strong> is a pattern where you wait progressively longer between retries: 5s, 10s, 20s (using <code>base_delay * 2^attempt</code>). The <code>try/except</code> block catches errors so your scraper doesn't crash. This is essential for robust scraping -- servers go down, connections drop, and rate limits kick in. A well-designed retry function keeps your scraper running through temporary failures."
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
         <div class="info-box tip">

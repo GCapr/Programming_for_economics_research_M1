@@ -279,6 +279,54 @@ Treatment assigned:
           </div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Perform complete random assignment: create a vector with exactly half ones and half zeros, then shuffle it",
+                  "languages": {
+                    "python": [
+                      {"code": "assignment", "role": "Variable", "tip": "Will hold the treatment assignment vector (0s and 1s)", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "Stores the array", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "np", "role": "Library alias", "tip": "NumPy -- Python's numerical computing library", "color": "yellow"},
+                      {"code": ".", "role": "Dot", "tip": "", "color": "overlay"},
+                      {"code": "array", "role": "Function", "tip": "Converts a Python list into a NumPy array for efficient numerical operations", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
+                      {"code": "[1]*n_treat + [0]*(n - n_treat)", "role": "List expression", "tip": "Creates a list with n_treat ones followed by (n - n_treat) zeros -- guarantees exact group sizes", "color": "sky"},
+                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "randtreat", "role": "Command", "tip": "A community-contributed Stata command for randomization -- install with 'ssc install randtreat'", "color": "blue"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "generate(treatment)", "role": "Option", "tip": "Creates a new variable called 'treatment' containing the random assignment", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "setseed(42)", "role": "Option", "tip": "Sets the random seed so the assignment is reproducible -- anyone using seed 42 gets the same result", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "df$treatment_complete", "role": "Variable", "tip": "Creates a new column called 'treatment_complete' in the dataframe df", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "<-", "role": "Assignment", "tip": "R's assignment operator", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "complete_ra", "role": "Function", "tip": "From the randomizr package -- performs complete random assignment with guaranteed exact group sizes", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
+                      {"code": "N = nrow(df)", "role": "Argument", "tip": "Total number of units to randomize", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "", "color": "overlay"},
+                      {"code": "prob = 0.5", "role": "Argument", "tip": "Probability of treatment -- 0.5 means exactly 50% treated and 50% control", "color": "sky"},
+                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Complete randomization guarantees exact group sizes (unlike Bernoulli/coin-flip methods where groups can be unequal by chance). Always set a <strong>seed</strong> for reproducibility."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h2 id="stratified">Stratified Randomization</h2>
 
         <p>
@@ -441,6 +489,52 @@ M  3 3</pre>
           </div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Stratified randomization: randomly assign treatment within each subgroup to guarantee balance on key variables",
+                  "languages": {
+                    "python": [
+                      {"code": "for", "role": "Keyword", "tip": "Loops over each subgroup (stratum) in the data", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "name, group", "role": "Variables", "tip": "Unpacks each stratum: 'name' is the stratum label (e.g. 'M-young'), 'group' is the subset of rows", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "in", "role": "Keyword", "tip": "", "color": "mauve"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "df", "role": "Variable", "tip": "Your DataFrame", "color": "pink"},
+                      {"code": ".", "role": "Dot", "tip": "", "color": "overlay"},
+                      {"code": "groupby", "role": "Method", "tip": "Splits the DataFrame into subgroups based on column values", "color": "teal"},
+                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
+                      {"code": "strata_cols", "role": "Argument", "tip": "The columns defining strata -- e.g. ['gender', 'age_group'] creates separate groups for each combination", "color": "sky"},
+                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "randtreat", "role": "Command", "tip": "Stata's randomization command", "color": "blue"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "generate(treatment)", "role": "Option", "tip": "Name of the variable to create", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "strata(gender region)", "role": "Option", "tip": "Randomizes separately within each gender-region combination -- ensures balanced treatment across subgroups", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "block_ra", "role": "Function", "tip": "From randomizr -- performs block (stratified) random assignment, ensuring balance within each block", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
+                      {"code": "blocks = df$gender", "role": "Argument", "tip": "The blocking variable -- randomization happens separately within each level (M and F)", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "", "color": "overlay"},
+                      {"code": "prob = 0.5", "role": "Argument", "tip": "50% treatment probability within each block", "color": "sky"},
+                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Stratified randomization randomizes <em>within</em> subgroups, guaranteeing that key variables (gender, region, age) are balanced across treatment arms by design -- not just by chance."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h2 id="cluster">Cluster Randomization</h2>
 
         <p>
@@ -595,6 +689,49 @@ D  3 0</pre>
           </div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "Cluster randomization: assign entire groups (schools, villages) to treatment or control, then map back to individuals",
+                  "languages": {
+                    "python": [
+                      {"code": "cluster_treatment", "role": "Variable", "tip": "A dictionary mapping each cluster ID to its treatment assignment", "color": "pink"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "=", "role": "Assignment", "tip": "", "color": "peach"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "dict", "role": "Function", "tip": "Creates a dictionary (key-value pairs) from paired sequences", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
+                      {"code": "zip", "role": "Function", "tip": "Pairs cluster names with their random assignments", "color": "blue"},
+                      {"code": "(clusters, np.random.binomial(1, 0.5, n_clusters))", "role": "Arguments", "tip": "Pairs each cluster with a random 0 or 1 -- all individuals in the same cluster get the same value", "color": "sky"},
+                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                    ],
+                    "stata": [
+                      {"code": "randtreat", "role": "Command", "tip": "Stata's randomization command", "color": "blue"},
+                      {"code": ", ", "role": "Comma", "tip": "", "color": "overlay"},
+                      {"code": "generate(treatment)", "role": "Option", "tip": "Name of the treatment variable to create", "color": "sky"},
+                      {"code": " ", "role": "Space", "tip": "", "color": "text"},
+                      {"code": "cluster(school_id)", "role": "Option", "tip": "Tells randtreat to assign treatment at the school level -- all students in the same school get the same status", "color": "sky"}
+                    ],
+                    "r": [
+                      {"code": "cluster_ra", "role": "Function", "tip": "From randomizr -- assigns treatment at the cluster level, not the individual level", "color": "blue"},
+                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
+                      {"code": "clusters = df$school_id", "role": "Argument", "tip": "The variable identifying which cluster each individual belongs to -- all members of a cluster get the same treatment", "color": "sky"},
+                      {"code": ", ", "role": "Separator", "tip": "", "color": "overlay"},
+                      {"code": "prob = 0.5", "role": "Argument", "tip": "50% of clusters are assigned to treatment", "color": "sky"},
+                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                    ]
+                  },
+                  "structureNote": "Cluster randomization is necessary when the treatment operates at the group level (e.g., a new school curriculum). The key requirement: all individuals within a cluster must receive the same treatment."
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h2 id="verification">Verification and Documentation</h2>
 
         <p>
@@ -626,5 +763,6 @@ D  3 0</pre>
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
   <script src="../js/password-protection.js"></script>
+  <script src="../js/grammar-primer.js"></script>
 </body>
 </html>

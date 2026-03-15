@@ -915,6 +915,44 @@ Non-zero (min): 6
 Non-zero (1se): 4</pre></div>
         </div>
 
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you select the optimal LASSO penalty using cross-validation, with the lambda.min and lambda.1se choices",
+                  "pattern": "lasso_cv = LassoCV(cv=5).fit(X, y)",
+                  "structureNote": "Cross-validation traces out how prediction error changes with penalty strength. <strong>lambda.min</strong> minimizes CV error (best prediction). <strong>lambda.1se</strong> is the largest penalty within 1 SE of the minimum -- it trades a tiny bit of accuracy for a much <strong>simpler, more interpretable</strong> model.",
+                  "languages": {
+                    "python": [
+                      {"code": "lasso_cv", "role": "Variable", "tip": "Stores the cross-validated LASSO model.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "LassoCV", "role": "Class", "tip": "From sklearn.linear_model. LASSO with built-in cross-validation.", "color": "blue"},
+                      {"code": "(cv=5", "role": "Folds", "tip": "Number of cross-validation folds. 5 or 10 is standard.", "color": "lavender"},
+                      {"code": ", n_alphas=100", "role": "Grid Size", "tip": "Number of penalty values to try. More = finer search.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Creates the model object.", "color": "overlay"},
+                      {"code": "\nlasso_cv.fit(X_train_sc, y_train)", "role": "Fit Method", "tip": "Runs CV across all alphas. Best alpha stored in lasso_cv.alpha_.", "color": "teal"}
+                    ],
+                    "stata": [
+                      {"code": "cvlasso", "role": "Command", "tip": "From lassopack. Cross-validated LASSO with automatic lambda grid.", "color": "mauve"},
+                      {"code": " y x1-x50", "role": "Variables", "tip": "Outcome and predictors. Reports both lambda_min and lambda_1se.", "color": "sky"},
+                      {"code": "\nlasso2 y x1-x50, lambda(`e(lse)')", "role": "Refit at 1se", "tip": "Refits LASSO at the more conservative 1se penalty.", "color": "mauve"}
+                    ],
+                    "r": [
+                      {"code": "cv.glmnet", "role": "Function", "tip": "From glmnet package. Cross-validated regularized regression.", "color": "blue"},
+                      {"code": "(X_train, y_train", "role": "Data", "tip": "Matrix of predictors and response vector.", "color": "pink"},
+                      {"code": ", alpha = 1", "role": "LASSO Flag", "tip": "alpha=1 for LASSO, alpha=0 for Ridge, between for Elastic Net.", "color": "lavender"},
+                      {"code": ")", "role": "Close Paren", "tip": "Result contains $lambda.min and $lambda.1se. Use plot() for CV curve.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
+        </div>
+
         <h3>Alternative: GridSearchCV for Hyperparameter Tuning</h3>
 
         <p>
@@ -966,6 +1004,43 @@ grid <- expand.grid(alpha = 1, lambda = 10^seq(-3, 1, length = 50))
                tuneGrid = grid)</span>
 print(model$bestTune)</code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
+          </div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you use GridSearchCV for general-purpose hyperparameter tuning with cross-validation",
+                  "pattern": "grid = GridSearchCV(Model(), param_grid, cv=5).fit(X, y)",
+                  "structureNote": "GridSearchCV is a <strong>general-purpose tuning framework</strong> that works with any model. It tries every combination in the parameter grid using K-fold cross-validation and selects the best. Unlike LassoCV, it can tune <strong>multiple hyperparameters simultaneously</strong>.",
+                  "languages": {
+                    "python": [
+                      {"code": "grid_search", "role": "Variable", "tip": "Stores the grid search results.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
+                      {"code": "GridSearchCV", "role": "Class", "tip": "From sklearn.model_selection. Exhaustive search over parameter grid.", "color": "blue"},
+                      {"code": "(Lasso()", "role": "Model", "tip": "The model to tune. Can be any sklearn estimator.", "color": "sky"},
+                      {"code": ", param_grid", "role": "Parameter Grid", "tip": "Dictionary of parameter names to lists of values to try.", "color": "lavender"},
+                      {"code": ", cv=5", "role": "Folds", "tip": "Number of cross-validation folds.", "color": "lavender"},
+                      {"code": ", scoring='neg_mean_squared_error'", "role": "Metric", "tip": "Scoring metric. Negative because sklearn maximizes scores.", "color": "yellow"},
+                      {"code": ")", "role": "Close Paren", "tip": "Creates the grid search object.", "color": "overlay"},
+                      {"code": "\ngrid_search.fit(X_train_scaled, y_train)", "role": "Fit", "tip": "Runs all combinations. Best params in .best_params_.", "color": "teal"}
+                    ],
+                    "r": [
+                      {"code": "train", "role": "Function", "tip": "From caret package. R's general-purpose model training and tuning.", "color": "blue"},
+                      {"code": "(y ~ ., data = train_data", "role": "Formula", "tip": "Model formula with all available predictors.", "color": "green"},
+                      {"code": ", method = 'glmnet'", "role": "Model Type", "tip": "Model to tune. Caret supports 200+ model types.", "color": "yellow"},
+                      {"code": ", trControl = trainControl(method = 'cv', number = 5)", "role": "CV Control", "tip": "Specifies 5-fold cross-validation for tuning.", "color": "lavender"},
+                      {"code": ", tuneGrid = grid", "role": "Parameter Grid", "tip": "Data frame of hyperparameter combinations to try.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Best parameters stored in model$bestTune.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
           </div>
         </div>
 
@@ -1124,6 +1199,45 @@ t value: 22.12
 Pr(>|t|): < 2e-16
 
 (True treatment effect: 1.0)</pre></div>
+        </div>
+
+        <div class="grammar-teach-section">
+          <div class="grammar-primer" data-mode="teach">
+            <script type="application/json">
+            {
+              "exercises": [
+                {
+                  "instruction": "This is how you implement Post-Double-Selection (Belloni, Chernozhukov, Hansen 2014) for valid causal inference after LASSO variable selection",
+                  "pattern": "Step 1: LASSO Y~X → Step 2: LASSO D~X → Step 3: OLS Y~D+union(selected)",
+                  "structureNote": "Naive post-LASSO inference is <strong>invalid</strong> because selection is data-dependent. Post-double-selection solves this by selecting controls for <strong>both Y and D</strong>, then running OLS on the union. The double selection ensures confounders are not missed, yielding valid standard errors and confidence intervals.",
+                  "languages": {
+                    "python": [
+                      {"code": "# Step 1: LASSO of Y on X", "role": "Step 1", "tip": "Select controls predictive of the outcome.", "color": "overlay"},
+                      {"code": "\nlasso_y = LassoCV(cv=5).fit(X, y)", "role": "LASSO for Y", "tip": "Cross-validated LASSO for outcome model.", "color": "blue"},
+                      {"code": "\n# Step 2: LASSO of D on X", "role": "Step 2", "tip": "Select controls predictive of treatment (confounders).", "color": "overlay"},
+                      {"code": "\nlasso_d = LassoCV(cv=5).fit(X, d)", "role": "LASSO for D", "tip": "Cross-validated LASSO for treatment model.", "color": "blue"},
+                      {"code": "\n# Step 3: OLS on union", "role": "Step 3", "tip": "Run OLS with treatment and the union of selected controls.", "color": "overlay"},
+                      {"code": "\nselected = set(sel_y) | set(sel_d)", "role": "Union", "tip": "Take the union of both selected sets to avoid missing confounders.", "color": "pink"},
+                      {"code": "\nols_result = smf.ols('y ~ d + selected_controls', data=df).fit(cov_type='HC1')", "role": "Final OLS", "tip": "OLS with robust SEs on treatment + union of selected controls.", "color": "blue"}
+                    ],
+                    "stata": [
+                      {"code": "pdslasso", "role": "Command", "tip": "From pdslasso package. Implements post-double-selection in one command.", "color": "mauve"},
+                      {"code": " y d", "role": "Outcome & Treatment", "tip": "Outcome variable and treatment variable.", "color": "sky"},
+                      {"code": " (x1-x50)", "role": "Controls", "tip": "High-dimensional controls to select from. Parentheses denote the selection set.", "color": "green"}
+                    ],
+                    "r": [
+                      {"code": "rlassoEffect", "role": "Function", "tip": "From hdm package. Post-double-selection with rigorous LASSO.", "color": "blue"},
+                      {"code": "(x = X", "role": "Controls", "tip": "Matrix of potential control variables.", "color": "pink"},
+                      {"code": ", y = y", "role": "Outcome", "tip": "Outcome variable.", "color": "sky"},
+                      {"code": ", d = d", "role": "Treatment", "tip": "Treatment variable of interest.", "color": "sky"},
+                      {"code": ")", "role": "Close Paren", "tip": "Returns treatment effect with valid standard errors.", "color": "overlay"}
+                    ]
+                  }
+                }
+              ]
+            }
+            </script>
+          </div>
         </div>
 
 

@@ -467,40 +467,26 @@ dbl (<span class="out-num">9</span>): year, age, education, experience, income, 
             {
               "exercises": [
                 {
-                  "instruction": "Set the working directory so all file paths are relative to your project root",
+                  "instruction": "Setting the project root and building relative paths",
                   "languages": {
                     "stata": [
-                      {"code": "cd ", "role": "Command", "tip": "Changes Stata's current working directory. All relative paths will start from this folder.", "color": "mauve"},
-                      {"code": "\"/Users/giulia/Projects/minimum-wage-study\"", "role": "Path String", "tip": "The absolute path to your project folder. This is the ONLY absolute path in your entire project -- everything else uses relative paths from here.", "color": "green"}
+                      {"code": "cd", "role": "Command", "tip": "Changes Stata's working directory. All subsequent relative paths resolve from here.", "color": "mauve"},
+                      {"code": " \"/Users/giulia/Projects/minimum-wage-study\"", "role": "Absolute Path", "tip": "Quoted string. This is the only absolute path in the project.", "color": "green"}
                     ],
                     "r": [
-                      {"code": "library(", "role": "Keyword", "tip": "Loads an installed R package into the current session.", "color": "mauve"},
-                      {"code": "here)\n", "role": "Package", "tip": "The here package automatically finds your project root by looking for an .Rproj file or .here file. No need to set paths manually.", "color": "yellow"},
-                      {"code": "data", "role": "Variable Name", "tip": "Stores the loaded dataset.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator: store the result on the right into the variable on the left.", "color": "peach"},
-                      {"code": "read_csv(", "role": "Function", "tip": "Reads a CSV file into a tibble (data frame). Part of the readr package in tidyverse.", "color": "blue"},
-                      {"code": "here(", "role": "Function", "tip": "Builds a file path relative to the project root. Ensures your code works on any computer.", "color": "blue"},
-                      {"code": "\"data\", ", "role": "String", "tip": "First folder in the path.", "color": "green"},
-                      {"code": "\"raw\", ", "role": "String", "tip": "Subfolder.", "color": "green"},
-                      {"code": "\"cps_2019.csv\"))", "role": "String", "tip": "The file name. here() joins these into a proper path for your OS.", "color": "green"}
+                      {"code": "library(here)", "role": "Load Package", "tip": "library() loads a package. here finds the project root by looking for .Rproj or .here.", "color": "mauve"},
+                      {"code": "\nread_csv(", "role": "Function", "tip": "From readr. Reads a CSV into a tibble.", "color": "blue"},
+                      {"code": "here(", "role": "Path Builder", "tip": "Builds a cross-platform path from the project root. Takes comma-separated folder/file strings.", "color": "blue"},
+                      {"code": "\"data\", \"raw\", \"cps_2019.csv\"", "role": "Path Segments", "tip": "Each string is a path segment. here() joins them with the OS-appropriate separator.", "color": "green"},
+                      {"code": "))", "role": "Close", "tip": "Double close: inner here(), outer read_csv().", "color": "overlay"}
                     ],
                     "python": [
-                      {"code": "from ", "role": "Keyword", "tip": "Imports a specific item from a module.", "color": "mauve"},
-                      {"code": "pathlib ", "role": "Module", "tip": "Python's built-in module for cross-platform file path handling.", "color": "yellow"},
-                      {"code": "import ", "role": "Keyword", "tip": "Loads the specified class.", "color": "mauve"},
-                      {"code": "Path\n", "role": "Class", "tip": "An object-oriented approach to file paths. Works on Windows, Mac, and Linux without changing your code.", "color": "blue"},
-                      {"code": "data_path", "role": "Variable Name", "tip": "Stores the constructed file path as a Path object.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the path.", "color": "peach"},
-                      {"code": "project_root", "role": "Variable Name", "tip": "A Path object pointing to the project's root directory.", "color": "pink"},
-                      {"code": " / ", "role": "Operator", "tip": "The / operator on Path objects joins path components. This is cross-platform -- it uses the right separator for your OS.", "color": "peach"},
-                      {"code": "\"data\"", "role": "String", "tip": "Subfolder name.", "color": "green"},
-                      {"code": " / ", "role": "Operator", "tip": "Joins another path component.", "color": "peach"},
-                      {"code": "\"raw\"", "role": "String", "tip": "Subfolder name.", "color": "green"},
-                      {"code": " / ", "role": "Operator", "tip": "Joins the file name.", "color": "peach"},
-                      {"code": "\"cps_2019.csv\"", "role": "String", "tip": "The data file. The full path is built programmatically, so it works on any machine.", "color": "green"}
+                      {"code": "from pathlib import Path", "role": "Import", "tip": "from ... import: selective import syntax. Path is a class for OS-independent file paths.", "color": "mauve"},
+                      {"code": "\nproject_root / ", "role": "/ Operator", "tip": "The / operator on Path objects joins path components. Cross-platform: uses \\ on Windows, / on Mac/Linux.", "color": "peach"},
+                      {"code": "\"data\" / \"raw\" / \"cps_2019.csv\"", "role": "Path Segments", "tip": "Each string between / operators is a folder or filename.", "color": "green"}
                     ]
                   },
-                  "structureNote": "For reproducibility, set the project root <strong>once</strong> and build all other paths relative to it. Use <code>pathlib</code> (Python), <code>here()</code> (R), or <code>cd</code> + globals (Stata) so your code works on any collaborator's computer."
+                  "structureNote": "Pattern: Set the project root <strong>once</strong>, then build all paths relative to it. Python uses the <code>/</code> operator on Path objects; R uses <code>here()</code> with comma-separated segments; Stata uses <code>cd</code> + <code>$global</code> macros."
                 }
               ]
             }
@@ -977,31 +963,29 @@ Results exported to output/tables/robustness.tex
             {
               "exercises": [
                 {
-                  "instruction": "The master script defines folder paths as globals and runs all sub-scripts in order, ensuring full reproducibility",
+                  "instruction": "Master script: defining path globals and running sub-scripts",
                   "languages": {
                     "stata": [
-                      {"code": "global ", "role": "Command", "tip": "Creates a global macro accessible from any do-file. Unlike local macros, globals persist across scripts -- perfect for shared folder paths.", "color": "mauve"},
-                      {"code": "data ", "role": "Macro Name", "tip": "The name of this path macro. Access it as $data anywhere in your project.", "color": "pink"},
-                      {"code": "\"$root/data\"\n", "role": "Path String", "tip": "Builds a path using the $root global. All paths derive from one root, so changing it on a different computer fixes everything.", "color": "green"},
-                      {"code": "do ", "role": "Command", "tip": "Executes another do-file. The master script calls each analysis script in sequence.", "color": "mauve"},
-                      {"code": "\"$code/01_import_clean.do\"", "role": "Path String", "tip": "The path to the first sub-script. Using $code means you never hardcode paths inside individual scripts.", "color": "green"}
+                      {"code": "global", "role": "Command", "tip": "Creates a global macro. Unlike local, persists across do-files.", "color": "mauve"},
+                      {"code": " data", "role": "Macro Name", "tip": "User-chosen name. Reference it later as $data.", "color": "pink"},
+                      {"code": " \"$root/data\"", "role": "Value", "tip": "Quoted string. $root expands the previously defined global. All paths chain from one root.", "color": "green"},
+                      {"code": "\ndo", "role": "Command", "tip": "Executes another do-file within the current Stata session.", "color": "mauve"},
+                      {"code": " \"$code/01_import_clean.do\"", "role": "Script Path", "tip": "Uses $code global. Sub-scripts never contain absolute paths -- they inherit globals from the master.", "color": "green"}
                     ],
                     "r": [
-                      {"code": "source(", "role": "Function", "tip": "Runs another R script within the current session. All variables created by that script become available.", "color": "blue"},
-                      {"code": "here(", "role": "Function", "tip": "Builds a portable path from the project root.", "color": "blue"},
-                      {"code": "\"code\", ", "role": "String", "tip": "The code subfolder.", "color": "green"},
-                      {"code": "\"01_import_clean.R\"))", "role": "String", "tip": "The first analysis script. The master runs them sequentially so outputs from one feed into the next.", "color": "green"}
+                      {"code": "source(", "role": "Function", "tip": "Runs an R script in the current session. Objects created by that script persist.", "color": "blue"},
+                      {"code": "here(", "role": "Path Builder", "tip": "Builds a path from the project root.", "color": "blue"},
+                      {"code": "\"code\", \"01_import_clean.R\"", "role": "Path Segments", "tip": "Comma-separated folder and filename strings.", "color": "green"},
+                      {"code": "))", "role": "Close", "tip": "Double close: inner here(), outer source().", "color": "overlay"}
                     ],
                     "python": [
-                      {"code": "ROOT", "role": "Variable Name", "tip": "A Path object storing the project root. Computed automatically from the script's location.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the path.", "color": "peach"},
-                      {"code": "Path(", "role": "Class", "tip": "Creates a cross-platform file path object.", "color": "blue"},
-                      {"code": "__file__)", "role": "Special Variable", "tip": "Python built-in that gives the current script's file path. This makes the code location-independent.", "color": "red"},
-                      {"code": ".resolve()", "role": "Method", "tip": "Converts to an absolute path, resolving any symlinks.", "color": "teal"},
-                      {"code": ".parent.parent", "role": "Property", "tip": "Goes up two directory levels: from code/00_master.py to the project root.", "color": "lavender"}
+                      {"code": "Path(__file__)", "role": "Constructor", "tip": "Path() wraps a string. __file__ is a built-in giving the current script's path.", "color": "blue"},
+                      {"code": ".resolve()", "role": "Method", "tip": "Converts to an absolute path, resolving symlinks.", "color": "blue"},
+                      {"code": ".parent", "role": "Property", "tip": "Returns the parent directory. Chain .parent.parent to go up two levels (e.g., code/ to project root).", "color": "peach"},
+                      {"code": ".parent", "role": "Property", "tip": "Second .parent: from code/ up to the project root.", "color": "peach"}
                     ]
                   },
-                  "structureNote": "A master script is the <strong>single entry point</strong> that reproduces your entire analysis. It (1) defines all folder paths in one place, (2) runs sub-scripts in order, and (3) logs timestamps. A reviewer should be able to run this one file and regenerate all results."
+                  "structureNote": "Pattern: Stata defines path globals with <code>global name \"$root/folder\"</code> and runs scripts with <code>do</code>; R uses <code>source(here(...))</code>; Python uses <code>Path(__file__).resolve().parent</code> to compute the root from the script location."
                 }
               ]
             }

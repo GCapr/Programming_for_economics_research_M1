@@ -505,42 +505,139 @@ True theta: 0.5000</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you manually implement Double/Debiased Machine Learning (DML) with cross-fitting",
+                  "instruction": "Residualize Y and D by subtracting ML predictions: the DML two-step pattern",
                   "pattern": "Step 1: ML predict Y from X → Step 2: ML predict D from X → Step 3: regress residuals",
-                  "structureNote": "DML removes regularization bias by <strong>partialling out</strong> confounders using ML. Cross-fitting prevents overfitting: split data into K folds, train on K-1, predict on the held-out fold. The final step regresses Y-residuals on D-residuals to get the causal effect &theta;. This works because ML flexibly controls for X without requiring a correct functional form.",
+                  "structureNote": "Pattern: (1) <code>y_resid = y - model_y.fit(X).predict(X)</code>, (2) <code>d_resid = d - model_d.fit(X).predict(X)</code>, (3) regress residuals.",
                   "languages": {
                     "python": [
-                      {"code": "# Step 1: Predict Y from X (nuisance)", "role": "Comment", "tip": "Learn E[Y|X] flexibly using any ML method.", "color": "overlay"},
-                      {"code": "\nml_y = LassoCV(cv=5).fit(X_train, y_train)", "role": "Y Model", "tip": "Cross-validated LASSO to predict outcome from confounders.", "color": "blue"},
-                      {"code": "\ny_resid = y - ml_y.predict(X)", "role": "Y Residuals", "tip": "Residualize Y: remove the part predicted by X.", "color": "pink"},
-                      {"code": "\n# Step 2: Predict D from X (nuisance)", "role": "Comment", "tip": "Learn E[D|X] to residualize the treatment.", "color": "overlay"},
-                      {"code": "\nml_d = LassoCV(cv=5).fit(X_train, d_train)", "role": "D Model", "tip": "LASSO to predict treatment from confounders.", "color": "blue"},
-                      {"code": "\nd_resid = d - ml_d.predict(X)", "role": "D Residuals", "tip": "Residualize D: remove confounding variation.", "color": "pink"},
-                      {"code": "\n# Step 3: Regress residuals", "role": "Comment", "tip": "OLS of Y-residuals on D-residuals gives the causal effect.", "color": "overlay"},
-                      {"code": "\ntheta = np.sum(d_resid * y_resid) / np.sum(d_resid * d_resid)", "role": "Causal Effect", "tip": "The Frisch-Waugh-Lovell theorem: partialling out X gives the same coefficient as controlling for X.", "color": "teal"}
+                      {
+                        "code": "ml_y = LassoCV(cv=5).fit(X, y)",
+                        "role": "Method Chain",
+                        "tip": "Chain: instantiate > fit. <code>LassoCV</code> has built-in cross-validation.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\ny_resid = y - ml_y.predict(X)",
+                        "role": "Residualization",
+                        "tip": "Subtraction creates the residual: observed minus predicted.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "\nml_d = LassoCV(cv=5).fit(X, d)",
+                        "role": "Method Chain",
+                        "tip": "Same pattern for the treatment variable.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\nd_resid = d - ml_d.predict(X)",
+                        "role": "Residualization",
+                        "tip": "",
+                        "color": "sky"
+                      }
                     ],
                     "stata": [
-                      {"code": "* Step 1: LASSO of Y on X", "role": "Step 1", "tip": "Flexibly predict outcome from confounders.", "color": "overlay"},
-                      {"code": "\ncvlasso y x1-x10\npredict y_hat", "role": "Y Prediction", "tip": "CV LASSO for outcome, save predictions.", "color": "mauve"},
-                      {"code": "\ngen y_resid = y - y_hat", "role": "Y Residuals", "tip": "Residualize Y.", "color": "pink"},
-                      {"code": "\n* Step 2: LASSO of D on X", "role": "Step 2", "tip": "Predict treatment from confounders.", "color": "overlay"},
-                      {"code": "\ncvlasso d x1-x10\npredict d_hat", "role": "D Prediction", "tip": "CV LASSO for treatment.", "color": "mauve"},
-                      {"code": "\ngen d_resid = d - d_hat", "role": "D Residuals", "tip": "Residualize D.", "color": "pink"},
-                      {"code": "\n* Step 3: OLS on residuals", "role": "Step 3", "tip": "Regress Y-residuals on D-residuals.", "color": "overlay"},
-                      {"code": "\nreg y_resid d_resid, robust", "role": "Causal Effect", "tip": "Coefficient on d_resid = causal effect theta.", "color": "mauve"}
+                      {
+                        "code": "* Step 1: LASSO of Y on X",
+                        "role": "Step 1",
+                        "tip": "Flexibly predict outcome from confounders.",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\ncvlasso y x1-x10\npredict y_hat",
+                        "role": "Y Prediction",
+                        "tip": "CV LASSO for outcome, save predictions.",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "\ngen y_resid = y - y_hat",
+                        "role": "Y Residuals",
+                        "tip": "Residualize Y.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": "\n* Step 2: LASSO of D on X",
+                        "role": "Step 2",
+                        "tip": "Predict treatment from confounders.",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\ncvlasso d x1-x10\npredict d_hat",
+                        "role": "D Prediction",
+                        "tip": "CV LASSO for treatment.",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "\ngen d_resid = d - d_hat",
+                        "role": "D Residuals",
+                        "tip": "Residualize D.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": "\n* Step 3: OLS on residuals",
+                        "role": "Step 3",
+                        "tip": "Regress Y-residuals on D-residuals.",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\nreg y_resid d_resid, robust",
+                        "role": "Causal Effect",
+                        "tip": "Coefficient on d_resid = causal effect theta.",
+                        "color": "mauve"
+                      }
                     ],
                     "r": [
-                      {"code": "# Step 1: ML for Y", "role": "Step 1", "tip": "Flexibly predict Y from X.", "color": "overlay"},
-                      {"code": "\nml_y <- cv.glmnet(X, y, alpha = 1)", "role": "Y Model", "tip": "Cross-validated LASSO for the outcome.", "color": "blue"},
-                      {"code": "\ny_resid <- y - predict(ml_y, X, s = 'lambda.min')", "role": "Y Residuals", "tip": "Residualize Y.", "color": "pink"},
-                      {"code": "\n# Step 2: ML for D", "role": "Step 2", "tip": "Predict treatment from confounders.", "color": "overlay"},
-                      {"code": "\nml_d <- cv.glmnet(X, d, alpha = 1)", "role": "D Model", "tip": "Cross-validated LASSO for treatment.", "color": "blue"},
-                      {"code": "\nd_resid <- d - predict(ml_d, X, s = 'lambda.min')", "role": "D Residuals", "tip": "Residualize D.", "color": "pink"},
-                      {"code": "\n# Step 3: OLS on residuals", "role": "Step 3", "tip": "Causal effect from partialled-out regression.", "color": "overlay"},
-                      {"code": "\ntheta <- lm(y_resid ~ d_resid - 1)", "role": "Causal Effect", "tip": "No intercept: residuals are already centered.", "color": "blue"}
+                      {
+                        "code": "# Step 1: ML for Y",
+                        "role": "Step 1",
+                        "tip": "Flexibly predict Y from X.",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\nml_y <- cv.glmnet(X, y, alpha = 1)",
+                        "role": "Y Model",
+                        "tip": "Cross-validated LASSO for the outcome.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\ny_resid <- y - predict(ml_y, X, s = 'lambda.min')",
+                        "role": "Y Residuals",
+                        "tip": "Residualize Y.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": "\n# Step 2: ML for D",
+                        "role": "Step 2",
+                        "tip": "Predict treatment from confounders.",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\nml_d <- cv.glmnet(X, d, alpha = 1)",
+                        "role": "D Model",
+                        "tip": "Cross-validated LASSO for treatment.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\nd_resid <- d - predict(ml_d, X, s = 'lambda.min')",
+                        "role": "D Residuals",
+                        "tip": "Residualize D.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": "\n# Step 3: OLS on residuals",
+                        "role": "Step 3",
+                        "tip": "Causal effect from partialled-out regression.",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\ntheta <- lm(y_resid ~ d_resid - 1)",
+                        "role": "Causal Effect",
+                        "tip": "No intercept: residuals are already centered.",
+                        "color": "blue"
+                      }
                     ]
                   }
                 }
@@ -759,49 +856,181 @@ D       0.50478    0.02541  19.866   <2e-16 ***</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how to set up a Double ML partially linear regression model with LASSO learners and cross-fitting for causal estimation",
+                  "instruction": "Configure <code>DoubleMLPLR</code> with separate ML learners for outcome and treatment",
                   "pattern": "model = DoubleMLPLR(data, ml_l=learner, ml_m=learner, n_folds=K)",
-                  "structureNote": "DML estimates the causal effect of D on Y by first 'partialling out' the effect of confounders X using ML. Two separate ML models predict (1) Y from X and (2) D from X, then the treatment effect is estimated from the residuals. <code>n_folds</code> controls the cross-fitting: each observation's nuisance prediction uses a model trained on other folds, preventing overfitting bias.",
+                  "structureNote": "Pattern: <code>DoubleMLPLR(data, ml_l=learner_y, ml_m=learner_d, n_folds=k)</code>. Two separate ML models, one per nuisance function.",
                   "languages": {
                     "python": [
-                      {"code": "dml_plr_lasso", "role": "Variable", "tip": "Stores the DoubleMLPLR estimator -- call .fit() to estimate and .summary to view results", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Binds the DML estimator to the variable", "color": "peach"},
-                      {"code": "DoubleMLPLR", "role": "Constructor", "tip": "Partially Linear Regression DML model: Y = theta*D + g(X) + epsilon, where g(X) is estimated by ML", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the arguments", "color": "overlay"},
-                      {"code": "dml_data, ", "role": "Data object", "tip": "A DoubleMLData container holding Y (outcome), D (treatment), and X (controls) -- created with DoubleMLData.from_arrays()", "color": "pink"},
-                      {"code": "ml_l", "role": "Keyword arg", "tip": "The ML learner for predicting Y from X (the outcome nuisance function)", "color": "sky"},
-                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "ml_l, ", "role": "ML model", "tip": "A LassoCV(cv=5) instance -- any sklearn-compatible regressor works here", "color": "pink"},
-                      {"code": "ml_m", "role": "Keyword arg", "tip": "The ML learner for predicting D from X (the treatment nuisance function)", "color": "sky"},
-                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "ml_m, ", "role": "ML model", "tip": "A separate LassoCV(cv=5) instance -- uses a different model for the treatment equation", "color": "pink"},
-                      {"code": "n_folds", "role": "Keyword arg", "tip": "Number of cross-fitting folds", "color": "sky"},
-                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "5", "role": "Integer", "tip": "5-fold cross-fitting: each fold's nuisance predictions come from a model trained on the other 4 folds", "color": "green"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the DoubleMLPLR constructor -- call .fit() to run the estimation", "color": "overlay"}
+                      {
+                        "code": "dml_plr_lasso",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "DoubleMLPLR",
+                        "role": "Class",
+                        "tip": "From <code>doubleml</code> package.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "dml_data,",
+                        "role": "Positional Arg",
+                        "tip": "A DoubleMLData container.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "ml_l",
+                        "role": "Keyword Arg",
+                        "tip": "ML learner for Y ~ X (outcome nuisance).",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "=LassoCV(),",
+                        "role": "Value",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "ml_m",
+                        "role": "Keyword Arg",
+                        "tip": "ML learner for D ~ X (treatment nuisance).",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "=LassoCV(),",
+                        "role": "Value",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "n_folds=5",
+                        "role": "Keyword Arg",
+                        "tip": "Number of cross-fitting folds.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ")",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ],
                     "stata": [
-                      {"code": "ddml ", "role": "Command", "tip": "Stata's DML implementation -- a multi-step command that initializes, specifies learners, cross-fits, and estimates", "color": "mauve"},
-                      {"code": "init, ", "role": "Subcommand", "tip": "Initializes the DML procedure -- sets up the cross-fitting structure", "color": "blue"},
-                      {"code": "kfolds(5) ", "role": "Option", "tip": "Number of cross-fitting folds -- equivalent to n_folds in Python", "color": "sky"},
-                      {"code": "reps(1)", "role": "Option", "tip": "Number of cross-fitting repetitions -- multiple reps reduce sensitivity to the random fold assignment", "color": "sky"}
+                      {
+                        "code": "ddml ",
+                        "role": "Command",
+                        "tip": "Stata's DML implementation -- a multi-step command that initializes, specifies learners, cross-fits, and estimates",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "init, ",
+                        "role": "Subcommand",
+                        "tip": "Initializes the DML procedure -- sets up the cross-fitting structure",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "kfolds(5) ",
+                        "role": "Option",
+                        "tip": "Number of cross-fitting folds -- equivalent to n_folds in Python",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "reps(1)",
+                        "role": "Option",
+                        "tip": "Number of cross-fitting repetitions -- multiple reps reduce sensitivity to the random fold assignment",
+                        "color": "sky"
+                      }
                     ],
                     "r": [
-                      {"code": "dml_plr", "role": "Variable", "tip": "Stores the DoubleMLPLR R6 object", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
-                      {"code": "DoubleMLPLR$new", "role": "Constructor", "tip": "R's DoubleML uses R6 classes -- $new() creates a new instance of the PLR estimator", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins arguments", "color": "overlay"},
-                      {"code": "dml_data, ", "role": "Data object", "tip": "A DoubleMLData object -- created with DoubleMLData$new(df, y_col, d_cols, x_cols)", "color": "pink"},
-                      {"code": "ml_l", "role": "Parameter", "tip": "Outcome nuisance learner (Y ~ X)", "color": "sky"},
-                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "lrn(\"regr.cv_glmnet\"), ", "role": "Learner", "tip": "An mlr3 learner wrapping cv.glmnet -- uses cross-validated LASSO/Ridge", "color": "blue"},
-                      {"code": "ml_m", "role": "Parameter", "tip": "Treatment nuisance learner (D ~ X)", "color": "sky"},
-                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "lrn(\"regr.cv_glmnet\")", "role": "Learner", "tip": "Another cv_glmnet learner for the treatment model", "color": "blue"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the constructor -- call $fit() to run the estimation", "color": "overlay"}
+                      {
+                        "code": "dml_plr",
+                        "role": "Variable",
+                        "tip": "Stores the DoubleMLPLR R6 object",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- ",
+                        "role": "Assignment",
+                        "tip": "R's assignment arrow",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "DoubleMLPLR$new",
+                        "role": "Constructor",
+                        "tip": "R's DoubleML uses R6 classes -- $new() creates a new instance of the PLR estimator",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "Open paren",
+                        "tip": "Begins arguments",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "dml_data, ",
+                        "role": "Data object",
+                        "tip": "A DoubleMLData object -- created with DoubleMLData$new(df, y_col, d_cols, x_cols)",
+                        "color": "pink"
+                      },
+                      {
+                        "code": "ml_l",
+                        "role": "Parameter",
+                        "tip": "Outcome nuisance learner (Y ~ X)",
+                        "color": "sky"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Binding",
+                        "tip": "Connects parameter to value",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "lrn(\"regr.cv_glmnet\"), ",
+                        "role": "Learner",
+                        "tip": "An mlr3 learner wrapping cv.glmnet -- uses cross-validated LASSO/Ridge",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "ml_m",
+                        "role": "Parameter",
+                        "tip": "Treatment nuisance learner (D ~ X)",
+                        "color": "sky"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Binding",
+                        "tip": "Connects parameter to value",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "lrn(\"regr.cv_glmnet\")",
+                        "role": "Learner",
+                        "tip": "Another cv_glmnet learner for the treatment model",
+                        "color": "blue"
+                      },
+                      {
+                        "code": ")",
+                        "role": "Close paren",
+                        "tip": "Ends the constructor -- call $fit() to run the estimation",
+                        "color": "overlay"
+                      }
                     ]
                   }
                 }
@@ -844,44 +1073,161 @@ D       0.50478    0.02541  19.866   <2e-16 ***</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how to create a CausalForestDML that combines DML residualization with a causal forest to estimate heterogeneous treatment effects",
+                  "instruction": "Instantiate <code>CausalForestDML</code> with nuisance models and forest parameters",
                   "pattern": "cf = CausalForestDML(model_y=..., model_t=..., n_estimators=N)",
-                  "structureNote": "<code>CausalForestDML</code> from EconML combines two ideas: (1) DML-style double residualization to remove confounding, and (2) a causal forest to estimate how the treatment effect varies across individuals. The <code>model_y</code> and <code>model_t</code> are the nuisance ML models (like in DML), while <code>n_estimators</code> controls the number of trees in the final causal forest.",
+                  "structureNote": "Pattern: <code>CausalForestDML(model_y=..., model_t=..., n_estimators=N).fit(Y, T, X=X)</code>. Note <code>.fit()</code> takes Y, T, X as separate args.",
                   "languages": {
                     "python": [
-                      {"code": "cf", "role": "Variable", "tip": "Stores the CausalForestDML estimator -- call .fit(Y, D, X=X) then .effect(X) for CATEs", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Binds the estimator to the variable", "color": "peach"},
-                      {"code": "CausalForestDML", "role": "Constructor", "tip": "From econml.dml -- combines DML residualization with a causal forest for heterogeneous treatment effects", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the arguments", "color": "overlay"},
-                      {"code": "model_y", "role": "Keyword arg", "tip": "The ML model for predicting Y from X (outcome nuisance function)", "color": "sky"},
-                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "RandomForestRegressor(...), ", "role": "ML model", "tip": "Any sklearn regressor -- Random Forest with max_depth=5 is a common choice for nuisance estimation", "color": "blue"},
-                      {"code": "model_t", "role": "Keyword arg", "tip": "The ML model for predicting D from X (treatment propensity nuisance function)", "color": "sky"},
-                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "RandomForestRegressor(...), ", "role": "ML model", "tip": "A separate RF instance for the treatment equation -- for binary D, you can also use a classifier", "color": "blue"},
-                      {"code": "n_estimators", "role": "Keyword arg", "tip": "Number of trees in the causal forest (the final stage, not the nuisance models)", "color": "sky"},
-                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "1000", "role": "Integer", "tip": "1000 trees in the causal forest -- more trees improve stability of the CATE estimates", "color": "green"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the constructor -- call .fit(Y, D, X=X) to estimate", "color": "overlay"}
+                      {
+                        "code": "cf",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "CausalForestDML",
+                        "role": "Class",
+                        "tip": "From <code>econml.dml</code>.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "model_y",
+                        "role": "Keyword Arg",
+                        "tip": "Outcome nuisance learner.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "=LassoCV(),",
+                        "role": "Value",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "model_t",
+                        "role": "Keyword Arg",
+                        "tip": "Treatment nuisance learner.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "=LassoCV(),",
+                        "role": "Value",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "n_estimators=1000",
+                        "role": "Keyword Arg",
+                        "tip": "Number of causal trees in the forest.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ")",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ],
                     "r": [
-                      {"code": "cf", "role": "Variable", "tip": "Stores the fitted causal forest object", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
-                      {"code": "causal_forest", "role": "Function", "tip": "From the grf package -- fits a causal forest with honest estimation for heterogeneous treatment effects", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins arguments", "color": "overlay"},
-                      {"code": "X, ", "role": "Covariates", "tip": "The matrix of control variables / effect modifiers", "color": "pink"},
-                      {"code": "Y, ", "role": "Outcome", "tip": "The outcome vector", "color": "pink"},
-                      {"code": "D, ", "role": "Treatment", "tip": "The treatment vector (binary or continuous)", "color": "pink"},
-                      {"code": "num.trees", "role": "Parameter", "tip": "Number of trees in the causal forest", "color": "sky"},
-                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "2000, ", "role": "Integer", "tip": "2000 trees -- the default in grf", "color": "green"},
-                      {"code": "honesty", "role": "Parameter", "tip": "Whether to use honest estimation -- splits each tree's subsample into a splitting half and estimation half", "color": "sky"},
-                      {"code": " = ", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "TRUE", "role": "Boolean", "tip": "Enables honest estimation -- prevents overfitting of treatment effect estimates and enables valid confidence intervals", "color": "mauve"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the causal_forest() call -- the model is fitted immediately", "color": "overlay"}
+                      {
+                        "code": "cf",
+                        "role": "Variable",
+                        "tip": "Stores the fitted causal forest object",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- ",
+                        "role": "Assignment",
+                        "tip": "R's assignment arrow",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "causal_forest",
+                        "role": "Function",
+                        "tip": "From the grf package -- fits a causal forest with honest estimation for heterogeneous treatment effects",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "Open paren",
+                        "tip": "Begins arguments",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "X, ",
+                        "role": "Covariates",
+                        "tip": "The matrix of control variables / effect modifiers",
+                        "color": "pink"
+                      },
+                      {
+                        "code": "Y, ",
+                        "role": "Outcome",
+                        "tip": "The outcome vector",
+                        "color": "pink"
+                      },
+                      {
+                        "code": "D, ",
+                        "role": "Treatment",
+                        "tip": "The treatment vector (binary or continuous)",
+                        "color": "pink"
+                      },
+                      {
+                        "code": "num.trees",
+                        "role": "Parameter",
+                        "tip": "Number of trees in the causal forest",
+                        "color": "sky"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Binding",
+                        "tip": "Connects parameter to value",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "2000, ",
+                        "role": "Integer",
+                        "tip": "2000 trees -- the default in grf",
+                        "color": "green"
+                      },
+                      {
+                        "code": "honesty",
+                        "role": "Parameter",
+                        "tip": "Whether to use honest estimation -- splits each tree's subsample into a splitting half and estimation half",
+                        "color": "sky"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Binding",
+                        "tip": "Connects parameter to value",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "TRUE",
+                        "role": "Boolean",
+                        "tip": "Enables honest estimation -- prevents overfitting of treatment effect estimates and enables valid confidence intervals",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": ")",
+                        "role": "Close paren",
+                        "tip": "Ends the causal_forest() call -- the model is fitted immediately",
+                        "color": "overlay"
+                      }
                     ]
                   }
                 }
@@ -1085,32 +1431,113 @@ True ATE: 1.0103</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "Here is how to retrieve individual-level conditional average treatment effects (CATEs) from a fitted causal forest using the .effect(X) method",
+                  "instruction": "Retrieve treatment effects from a fitted model using <code>.effect(X)</code>",
                   "pattern": "cf.fit(Y, D, X=X); cate = cf.effect(X)",
-                  "structureNote": "After constructing the <code>CausalForestDML</code>, you call <code>.fit(Y, D, X=X)</code> to (1) residualize Y and D using the nuisance models, then (2) fit the causal forest on the residuals. The <code>.effect(X)</code> method then returns the estimated CATE for each observation -- how much the treatment effect varies depending on an individual's characteristics.",
+                  "structureNote": "Pattern: <code>cate = cf.effect(X)</code>. Returns an array of individual-level effects. <code>.fit()</code> must be called first.",
                   "languages": {
                     "python": [
-                      {"code": "cate_hat", "role": "Variable", "tip": "An array of estimated CATEs -- one per observation, capturing how the treatment effect varies across individuals", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the CATE estimates", "color": "peach"},
-                      {"code": "cf", "role": "Object", "tip": "The fitted CausalForestDML model (after calling cf.fit())", "color": "pink"},
-                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the .effect() method", "color": "overlay"},
-                      {"code": "effect", "role": "Method", "tip": "Returns the estimated CATE (Conditional Average Treatment Effect) for each observation in the input matrix", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the argument", "color": "overlay"},
-                      {"code": "X", "role": "Covariates", "tip": "The feature matrix to estimate CATEs for -- can be the training X or new data points", "color": "pink"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns an array of estimated treatment effects", "color": "overlay"}
+                      {
+                        "code": "cate_hat",
+                        "role": "Variable",
+                        "tip": "Array of estimated effects, one per observation.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "cf",
+                        "role": "Object",
+                        "tip": "Fitted CausalForestDML (after <code>.fit()</code>).",
+                        "color": "pink"
+                      },
+                      {
+                        "code": ".",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "effect",
+                        "role": "Method",
+                        "tip": "Returns predicted effects for given covariate values.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "X",
+                        "role": "Argument",
+                        "tip": "Covariate matrix. Same columns as used in <code>.fit()</code>.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ")",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ],
                     "r": [
-                      {"code": "cate_hat", "role": "Variable", "tip": "A vector of estimated CATEs", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
-                      {"code": "predict", "role": "Function", "tip": "R's generic predict function -- for grf causal forests, returns a list with $predictions", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins arguments", "color": "overlay"},
-                      {"code": "cf", "role": "Model", "tip": "The fitted causal forest object", "color": "pink"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the call", "color": "overlay"},
-                      {"code": "$", "role": "List accessor", "tip": "Extracts an element from the list returned by predict()", "color": "overlay"},
-                      {"code": "predictions", "role": "Element", "tip": "The vector of predicted CATEs -- one per observation", "color": "teal"}
+                      {
+                        "code": "cate_hat",
+                        "role": "Variable",
+                        "tip": "A vector of estimated CATEs",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- ",
+                        "role": "Assignment",
+                        "tip": "R's assignment arrow",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "predict",
+                        "role": "Function",
+                        "tip": "R's generic predict function -- for grf causal forests, returns a list with $predictions",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "Open paren",
+                        "tip": "Begins arguments",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "cf",
+                        "role": "Model",
+                        "tip": "The fitted causal forest object",
+                        "color": "pink"
+                      },
+                      {
+                        "code": ")",
+                        "role": "Close paren",
+                        "tip": "Ends the call",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "$",
+                        "role": "List accessor",
+                        "tip": "Extracts an element from the list returned by predict()",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "predictions",
+                        "role": "Element",
+                        "tip": "The vector of predicted CATEs -- one per observation",
+                        "color": "teal"
+                      }
                     ]
                   }
                 }
@@ -1123,28 +1550,101 @@ True ATE: 1.0103</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how to compute the overall Average Treatment Effect with a valid standard error from a fitted causal forest",
+                  "instruction": "Compute the ATE with standard errors via <code>.ate_inference()</code>",
                   "pattern": "ate = average_treatment_effect(cf)",
-                  "structureNote": "While causal forests are designed for <strong>heterogeneous</strong> effects (CATEs), you often still want the overall <strong>average</strong> treatment effect. The <code>average_treatment_effect()</code> function computes the ATE by averaging the CATEs and provides a valid standard error that accounts for the estimation uncertainty. This is specific to the <code>grf</code> package in R; in Python's <code>econml</code>, use <code>cf.ate_inference()</code>.",
+                  "structureNote": "Pattern: <code>inf = cf.ate_inference()</code>. Access <code>.point_estimate</code>, <code>.stderr</code>, <code>.conf_int()</code>.",
                   "languages": {
                     "python": [
-                      {"code": "ate_inf", "role": "Variable", "tip": "Stores the ATE inference object -- contains the point estimate, standard error, and confidence interval", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result", "color": "peach"},
-                      {"code": "cf", "role": "Object", "tip": "The fitted CausalForestDML model", "color": "pink"},
-                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the method", "color": "overlay"},
-                      {"code": "ate_inference", "role": "Method", "tip": "Computes the Average Treatment Effect with standard errors and confidence intervals via the delta method", "color": "blue"},
-                      {"code": "()", "role": "Call parens", "tip": "No arguments needed -- computes the ATE from the already-fitted model", "color": "overlay"}
+                      {
+                        "code": "ate_inf",
+                        "role": "Variable",
+                        "tip": "Inference object with point estimate, SE, CI.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "cf",
+                        "role": "Object",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": ".",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "ate_inference",
+                        "role": "Method",
+                        "tip": "No-arg call. Computes ATE from fitted model.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "()",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\nate_inf.point_estimate",
+                        "role": "Attribute",
+                        "tip": "Scalar ATE value.",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "\nate_inf.conf_int()",
+                        "role": "Method",
+                        "tip": "Returns confidence interval tuple.",
+                        "color": "blue"
+                      }
                     ],
                     "r": [
-                      {"code": "ate", "role": "Variable", "tip": "A named vector with the ATE estimate and its standard error", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
-                      {"code": "average_treatment_effect", "role": "Function", "tip": "From the grf package -- computes the ATE with a valid standard error using the AIPW estimator", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the argument", "color": "overlay"},
-                      {"code": "cf", "role": "Model", "tip": "The fitted causal_forest object", "color": "pink"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the call -- returns c(estimate, std.err)", "color": "overlay"}
+                      {
+                        "code": "ate",
+                        "role": "Variable",
+                        "tip": "A named vector with the ATE estimate and its standard error",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- ",
+                        "role": "Assignment",
+                        "tip": "R's assignment arrow",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "average_treatment_effect",
+                        "role": "Function",
+                        "tip": "From the grf package -- computes the ATE with a valid standard error using the AIPW estimator",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "Open paren",
+                        "tip": "Begins the argument",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "cf",
+                        "role": "Model",
+                        "tip": "The fitted causal_forest object",
+                        "color": "pink"
+                      },
+                      {
+                        "code": ")",
+                        "role": "Close paren",
+                        "tip": "Ends the call -- returns c(estimate, std.err)",
+                        "color": "overlay"
+                      }
                     ]
                   }
                 }
@@ -1397,32 +1897,109 @@ Right: Estimated CATEs increase linearly with X[,1], tracking true tau(x) = 1 + 
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you visualize heterogeneous treatment effects (CATEs) from a causal forest to identify effect modifiers",
+                  "instruction": "Plot CATEs against covariates using <code>plt.scatter(X[:, col], effects)</code>",
                   "pattern": "cate = cf.predict(X); plt.scatter(X[:,0], cate)",
-                  "structureNote": "After estimating a causal forest, visualizing CATEs reveals <strong>which covariates drive treatment effect heterogeneity</strong>. Plot estimated CATEs against each covariate to identify effect modifiers. A scatter of estimated vs. true CATEs (in simulations) validates the model. In practice, use <strong>variable importance</strong> from the causal forest to prioritize which covariates to examine.",
+                  "structureNote": "Pattern: <code>plt.scatter(X[:, j], cate)</code>. Array slicing <code>[:, j]</code> selects column j from all rows.",
                   "languages": {
                     "python": [
-                      {"code": "cate", "role": "Variable", "tip": "Vector of estimated conditional average treatment effects.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "cf.effect(X)", "role": "Predict CATEs", "tip": "Predicts individual treatment effects from the fitted causal forest.", "color": "teal"},
-                      {"code": "\nplt.scatter(X[:, 0], cate)", "role": "Scatter Plot", "tip": "Plots CATEs against a covariate to identify effect modifiers.", "color": "blue"},
-                      {"code": "\nplt.xlabel('X1')", "role": "X Label", "tip": "Label the covariate axis.", "color": "green"},
-                      {"code": "\nplt.ylabel('Estimated CATE')", "role": "Y Label", "tip": "Label the treatment effect axis.", "color": "green"}
+                      {
+                        "code": "cate",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "cf.effect(X)",
+                        "role": "Method Call",
+                        "tip": "",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\nplt.scatter(",
+                        "role": "Function",
+                        "tip": "From matplotlib.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "X[:, 0],",
+                        "role": "Argument",
+                        "tip": "Slice: all rows, column 0. NumPy 2D array indexing.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "cate",
+                        "role": "Argument",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ")",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ],
                     "stata": [
-                      {"code": "predict cate", "role": "Predict", "tip": "Generates individual CATE predictions after causal forest estimation.", "color": "mauve"},
-                      {"code": "\ntwoway scatter cate x1", "role": "Scatter Plot", "tip": "Plots estimated CATEs against covariate X1.", "color": "teal"},
-                      {"code": ", ytitle(\"Estimated CATE\")", "role": "Labels", "tip": "Adds axis labels to the plot.", "color": "green"}
+                      {
+                        "code": "predict cate",
+                        "role": "Predict",
+                        "tip": "Generates individual CATE predictions after causal forest estimation.",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "\ntwoway scatter cate x1",
+                        "role": "Scatter Plot",
+                        "tip": "Plots estimated CATEs against covariate X1.",
+                        "color": "teal"
+                      },
+                      {
+                        "code": ", ytitle(\"Estimated CATE\")",
+                        "role": "Labels",
+                        "tip": "Adds axis labels to the plot.",
+                        "color": "green"
+                      }
                     ],
                     "r": [
-                      {"code": "cate", "role": "Variable", "tip": "Vector of estimated CATEs.", "color": "pink"},
-                      {"code": " <- predict(cf)$predictions", "role": "Predict CATEs", "tip": "Extracts CATE predictions from the causal forest.", "color": "teal"},
-                      {"code": "\nplot(X[, 1], cate", "role": "Scatter Plot", "tip": "Base R scatter plot of CATEs vs covariate.", "color": "blue"},
-                      {"code": ", xlab = 'X1', ylab = 'Estimated CATE'", "role": "Labels", "tip": "Axis labels for the plot.", "color": "green"},
-                      {"code": ")", "role": "Close Paren", "tip": "Look for trends: a slope means X1 modifies the treatment effect.", "color": "overlay"}
+                      {
+                        "code": "cate",
+                        "role": "Variable",
+                        "tip": "Vector of estimated CATEs.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- predict(cf)$predictions",
+                        "role": "Predict CATEs",
+                        "tip": "Extracts CATE predictions from the causal forest.",
+                        "color": "teal"
+                      },
+                      {
+                        "code": "\nplot(X[, 1], cate",
+                        "role": "Scatter Plot",
+                        "tip": "Base R scatter plot of CATEs vs covariate.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": ", xlab = 'X1', ylab = 'Estimated CATE'",
+                        "role": "Labels",
+                        "tip": "Axis labels for the plot.",
+                        "color": "green"
+                      },
+                      {
+                        "code": ")",
+                        "role": "Close Paren",
+                        "tip": "Look for trends: a slope means X1 modifies the treatment effect.",
+                        "color": "overlay"
+                      }
                     ]
                   }
                 }
@@ -1616,34 +2193,133 @@ Variable splits:
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you learn an optimal treatment assignment policy from estimated heterogeneous treatment effects",
+                  "instruction": "Create a binary policy rule with boolean comparison and <code>.astype(int)</code>",
                   "pattern": "policy = policy_tree(X, Gamma, depth=2)",
-                  "structureNote": "Policy learning finds an <strong>optimal treatment rule</strong> that maps covariates to treatment decisions. Given estimated CATEs, the optimal unconstrained policy is 'treat if CATE > 0.' The <strong>policytree</strong> package learns interpretable shallow decision trees that approximate this rule, making the policy transparent and implementable.",
+                  "structureNote": "Pattern: <code>policy = (array > threshold).astype(int)</code>. Boolean comparison returns True/False array; <code>.astype(int)</code> converts to 0/1.",
                   "languages": {
                     "python": [
-                      {"code": "cf", "role": "Variable", "tip": "A fitted CausalForestDML model with estimated CATEs.", "color": "pink"},
-                      {"code": " = CausalForestDML(...).fit(y, d, X=X, W=W)", "role": "Causal Forest", "tip": "First estimate heterogeneous effects using causal forest.", "color": "blue"},
-                      {"code": "\ncate", "role": "Variable", "tip": "Individual-level treatment effect estimates.", "color": "pink"},
-                      {"code": " = cf.effect(X)", "role": "Get CATEs", "tip": "Predict CATEs for each observation.", "color": "teal"},
-                      {"code": "\npolicy", "role": "Decision Rule", "tip": "Simple rule: treat if estimated CATE > 0.", "color": "pink"},
-                      {"code": " = (cate > 0).astype(int)", "role": "Threshold", "tip": "Binary treatment recommendation based on positive CATE.", "color": "peach"}
+                      {
+                        "code": "cate",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "cf.effect(X)",
+                        "role": "Method Call",
+                        "tip": "",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\npolicy",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "(cate > 0)",
+                        "role": "Boolean Comparison",
+                        "tip": "Returns a boolean array (True/False).",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ".",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "astype",
+                        "role": "Method",
+                        "tip": "NumPy type cast. Converts True to 1, False to 0.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(int)",
+                        "role": "Argument",
+                        "tip": "Target dtype.",
+                        "color": "sky"
+                      }
                     ],
                     "stata": [
-                      {"code": "python:", "role": "Python Block", "tip": "Stata uses Python for policy learning via econml.", "color": "mauve"},
-                      {"code": "\nfrom econml.dml import CausalForestDML", "role": "Import", "tip": "EconML provides causal forest and policy tools.", "color": "yellow"},
-                      {"code": "\ncf = CausalForestDML(...).fit(y, d, X=X, W=W)", "role": "Fit", "tip": "Estimate the causal forest.", "color": "blue"},
-                      {"code": "\npolicy = (cf.effect(X) > 0).astype(int)", "role": "Policy", "tip": "Assign treatment to those with positive estimated effect.", "color": "teal"}
+                      {
+                        "code": "python:",
+                        "role": "Python Block",
+                        "tip": "Stata uses Python for policy learning via econml.",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "\nfrom econml.dml import CausalForestDML",
+                        "role": "Import",
+                        "tip": "EconML provides causal forest and policy tools.",
+                        "color": "yellow"
+                      },
+                      {
+                        "code": "\ncf = CausalForestDML(...).fit(y, d, X=X, W=W)",
+                        "role": "Fit",
+                        "tip": "Estimate the causal forest.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\npolicy = (cf.effect(X) > 0).astype(int)",
+                        "role": "Policy",
+                        "tip": "Assign treatment to those with positive estimated effect.",
+                        "color": "teal"
+                      }
                     ],
                     "r": [
-                      {"code": "cf", "role": "Variable", "tip": "A fitted causal_forest model from grf.", "color": "pink"},
-                      {"code": " <- causal_forest(X, Y, W)", "role": "Causal Forest", "tip": "Estimate heterogeneous effects.", "color": "blue"},
-                      {"code": "\ndr_scores", "role": "Variable", "tip": "Doubly-robust scores for policy optimization.", "color": "pink"},
-                      {"code": " <- double_robust_scores(cf)", "role": "DR Scores", "tip": "Constructs augmented IPW scores for policy learning.", "color": "teal"},
-                      {"code": "\npolicy", "role": "Variable", "tip": "The learned treatment policy (shallow decision tree).", "color": "pink"},
-                      {"code": " <- policy_tree(X, dr_scores, depth = 2)", "role": "Policy Tree", "tip": "From policytree package. Learns an interpretable, optimal treatment rule.", "color": "blue"}
+                      {
+                        "code": "cf",
+                        "role": "Variable",
+                        "tip": "A fitted causal_forest model from grf.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- causal_forest(X, Y, W)",
+                        "role": "Causal Forest",
+                        "tip": "Estimate heterogeneous effects.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\ndr_scores",
+                        "role": "Variable",
+                        "tip": "Doubly-robust scores for policy optimization.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- double_robust_scores(cf)",
+                        "role": "DR Scores",
+                        "tip": "Constructs augmented IPW scores for policy learning.",
+                        "color": "teal"
+                      },
+                      {
+                        "code": "\npolicy",
+                        "role": "Variable",
+                        "tip": "The learned treatment policy (shallow decision tree).",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- policy_tree(X, dr_scores, depth = 2)",
+                        "role": "Policy Tree",
+                        "tip": "From policytree package. Learns an interpretable, optimal treatment rule.",
+                        "color": "blue"
+                      }
                     ]
                   }
                 }
@@ -1836,36 +2512,127 @@ Correlation:     0.7896</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate heterogeneous treatment effects using BART (Bayesian Additive Regression Trees)",
+                  "instruction": "Call R's <code>bartc()</code> with formula-style named arguments",
                   "pattern": "bart_model <- bartc(y, treatment, confounders, data)",
-                  "structureNote": "BART is a Bayesian nonparametric method that estimates individual treatment effects with natural <strong>uncertainty quantification</strong> through posterior distributions. Unlike causal forests, BART provides <strong>credible intervals</strong> rather than confidence intervals. The bartCause package separates the response surface into treated and control potential outcomes.",
+                  "structureNote": "R pattern: <code>bartc(response = y, treatment = d, confounders = X)</code>. Named arguments use <code>=</code> in R (not <code>:</code>).",
                   "languages": {
                     "r": [
-                      {"code": "bart_fit", "role": "Variable", "tip": "Stores the fitted BART causal model.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment operator.", "color": "peach"},
-                      {"code": "bartc", "role": "Function", "tip": "From bartCause package. Bayesian causal inference via BART.", "color": "blue"},
-                      {"code": "(response = y", "role": "Outcome", "tip": "The outcome variable.", "color": "sky"},
-                      {"code": ", treatment = d", "role": "Treatment", "tip": "Binary treatment indicator.", "color": "sky"},
-                      {"code": ", confounders = X", "role": "Confounders", "tip": "Matrix of covariates to control for.", "color": "pink"},
-                      {"code": ", estimand = 'ate'", "role": "Estimand", "tip": "'ate' for average treatment effect, 'att' for effect on the treated.", "color": "lavender"},
-                      {"code": ")", "role": "Close Paren", "tip": "Runs MCMC sampling. Use summary() for posterior means and credible intervals.", "color": "overlay"}
+                      {
+                        "code": "bart_fit",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- ",
+                        "role": "Assignment",
+                        "tip": "R assignment operator. Equivalent to Python's <code>=</code>.",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "bartc",
+                        "role": "Function",
+                        "tip": "From the <code>bartCause</code> package.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "response = y,",
+                        "role": "Named Arg",
+                        "tip": "R uses <code>=</code> for named arguments inside function calls.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "treatment = d,",
+                        "role": "Named Arg",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "confounders = X",
+                        "role": "Named Arg",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ")",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ],
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "Stores the BART model.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "XBART", "role": "Class", "tip": "From xbart or bartpy package. Python BART implementation.", "color": "blue"},
-                      {"code": "(num_trees=200", "role": "Trees", "tip": "Number of trees in the BART ensemble. 200 is typical.", "color": "lavender"},
-                      {"code": ")", "role": "Close Paren", "tip": "Creates the model.", "color": "overlay"},
-                      {"code": "\nmodel.fit(X_treated, y_treated)", "role": "Fit Treated", "tip": "Fit separate BART models for treated and control groups.", "color": "teal"}
+                      {
+                        "code": "model",
+                        "role": "Variable",
+                        "tip": "Stores the BART model.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "Stores the result.",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "XBART",
+                        "role": "Class",
+                        "tip": "From xbart or bartpy package. Python BART implementation.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(num_trees=200",
+                        "role": "Trees",
+                        "tip": "Number of trees in the BART ensemble. 200 is typical.",
+                        "color": "lavender"
+                      },
+                      {
+                        "code": ")",
+                        "role": "Close Paren",
+                        "tip": "Creates the model.",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\nmodel.fit(X_treated, y_treated)",
+                        "role": "Fit Treated",
+                        "tip": "Fit separate BART models for treated and control groups.",
+                        "color": "teal"
+                      }
                     ],
                     "stata": [
-                      {"code": "python:", "role": "Python Block", "tip": "Stata uses embedded Python for BART models.", "color": "mauve"},
-                      {"code": "\nfrom bartpy.sklearnmodel import SklearnModel", "role": "Import", "tip": "BartPy provides sklearn-compatible BART.", "color": "yellow"},
-                      {"code": "\nbart = SklearnModel(n_trees=200)", "role": "Create Model", "tip": "200-tree BART ensemble.", "color": "blue"},
-                      {"code": "\nbart.fit(X, y)", "role": "Fit", "tip": "Fits the BART model via MCMC.", "color": "teal"}
+                      {
+                        "code": "python:",
+                        "role": "Python Block",
+                        "tip": "Stata uses embedded Python for BART models.",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "\nfrom bartpy.sklearnmodel import SklearnModel",
+                        "role": "Import",
+                        "tip": "BartPy provides sklearn-compatible BART.",
+                        "color": "yellow"
+                      },
+                      {
+                        "code": "\nbart = SklearnModel(n_trees=200)",
+                        "role": "Create Model",
+                        "tip": "200-tree BART ensemble.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\nbart.fit(X, y)",
+                        "role": "Fit",
+                        "tip": "Fits the BART model via MCMC.",
+                        "color": "teal"
+                      }
                     ]
                   }
                 }

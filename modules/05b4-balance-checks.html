@@ -405,36 +405,24 @@ All      98     102</pre>
             {
               "exercises": [
                 {
-                  "instruction": "Test whether the mean of a covariate differs significantly between treatment and control groups",
+                  "instruction": "Tuple unpacking from ttest_ind(), variable list + grpvar() in Stata, formula with ~ in R's bal.tab()",
                   "languages": {
                     "python": [
-                      {"code": "t_stat", "role": "Variable", "tip": "The t-statistic -- measures how many standard errors apart the two group means are", "color": "pink"},
-                      {"code": ", ", "role": "Separator", "tip": "Python lets you assign two values at once by separating with a comma", "color": "overlay"},
-                      {"code": "p_val ", "role": "Variable", "tip": "The p-value -- probability of seeing this difference if treatment and control were truly equal", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "", "color": "peach"},
-                      {"code": "stats", "role": "Module", "tip": "The scipy.stats module containing statistical tests", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "", "color": "overlay"},
-                      {"code": "ttest_ind", "role": "Function", "tip": "Independent samples t-test -- compares the means of two groups and tests if the difference is statistically significant", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "treat, ", "role": "Argument", "tip": "Values of the covariate for the treatment group", "color": "sky"},
-                      {"code": "control", "role": "Argument", "tip": "Values of the covariate for the control group", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "t_stat, p_val", "role": "Tuple Unpacking", "tip": "Two variables on the left unpack a 2-element tuple from the function return.", "color": "pink"},
+                      {"code": " = stats.ttest_ind(treat, control)", "role": "Function Call", "tip": "Takes two arrays (not a DataFrame). You must subset the data into groups before calling.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "iebaltab ", "role": "Command", "tip": "From the World Bank's ietoolkit -- automatically creates publication-ready balance tables", "color": "blue"},
-                      {"code": "age income education female, ", "role": "Variables", "tip": "The baseline covariates to compare between treatment and control groups", "color": "sky"},
-                      {"code": "grpvar(treatment) ", "role": "Option", "tip": "Specifies which variable defines the groups (treatment vs control)", "color": "sky"},
-                      {"code": "ftest", "role": "Option", "tip": "Adds an F-test for joint significance -- checks if ALL variables together are balanced", "color": "sky"}
+                      {"code": "iebaltab ", "role": "Command", "tip": "From ietoolkit (ssc install ietoolkit). Creates a formatted balance table.", "color": "blue"},
+                      {"code": "age income education female", "role": "Variable List", "tip": "Space-separated covariates to check. Listed before the comma.", "color": "sky"},
+                      {"code": ", grpvar(treatment) ftest", "role": "Options", "tip": "grpvar() identifies the treatment indicator. ftest adds a joint significance test. Options follow the comma.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "bal.tab", "role": "Function", "tip": "From the cobalt package -- creates a balance table with standardized mean differences", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "treatment ~ age + income + education + female, ", "role": "Formula", "tip": "R formula syntax: the ~ means 'predicted by'. Lists the treatment variable and all covariates to check for balance", "color": "green"},
-                      {"code": "data = df", "role": "Argument", "tip": "The data frame containing all these variables", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "bal.tab(", "role": "Function", "tip": "From the cobalt package. Also works with MatchIt and WeightIt objects.", "color": "blue"},
+                      {"code": "treatment ~ age + income + education + female", "role": "Formula", "tip": "treatment (left of ~) is the grouping variable. Covariates (right of ~) are checked for balance.", "color": "green"},
+                      {"code": ", data = df)", "role": "Data Argument", "tip": "", "color": "sky"}
                     ]
                   },
-                  "structureNote": "In a balance table, you <em>want</em> large p-values (> 0.05) and small standardized differences (< 0.1) -- this means the groups are similar, confirming that randomization worked."
+                  "structureNote": "Python's <code>ttest_ind()</code> requires pre-split arrays (manual subsetting). Stata's <code>iebaltab</code> takes a variable list before the comma and options after it. R's <code>bal.tab()</code> uses formula syntax with <code>~</code> to specify the grouping variable and covariates."
                 }
               ]
             }
@@ -735,32 +723,20 @@ sample estimates:
             {
               "exercises": [
                 {
-                  "instruction": "Test whether participants are dropping out at different rates in treatment vs control (differential attrition)",
+                  "instruction": "Cross-tabulation functions: pd.crosstab() vs prtest with by() vs table() nested in prop.test()",
                   "languages": {
                     "python": [
-                      {"code": "contingency ", "role": "Variable", "tip": "A cross-tabulation (2x2 table) of treatment vs completion status", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "", "color": "peach"},
-                      {"code": "pd", "role": "Library alias", "tip": "pandas", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "", "color": "overlay"},
-                      {"code": "crosstab", "role": "Function", "tip": "Creates a frequency table showing counts for each combination of two categorical variables", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "df['treatment'], ", "role": "Row variable", "tip": "Treatment status (0 or 1) defines the rows", "color": "sky"},
-                      {"code": "df['completed']", "role": "Column variable", "tip": "Completion status (True/False) defines the columns", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "contingency = pd.crosstab(", "role": "Cross-tab Function", "tip": "pd.crosstab() takes two Series and returns a frequency table. Alternative: pd.pivot_table() for custom aggregations.", "color": "blue"},
+                      {"code": "df['treatment'], df['completed'])", "role": "Row, Column Variables", "tip": "First argument defines rows, second defines columns. Both are passed as Series (bracket notation).", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "prtest ", "role": "Command", "tip": "Tests whether two group proportions are equal -- here, comparing completion rates", "color": "blue"},
-                      {"code": "completed, ", "role": "Variable", "tip": "A binary variable (0/1) indicating whether the participant completed the study", "color": "pink"},
-                      {"code": "by(treatment)", "role": "Option", "tip": "Splits the test by treatment group -- compares completion rates for treated vs control", "color": "sky"}
+                      {"code": "prtest completed, by(treatment)", "role": "Proportion Test", "tip": "prtest tests equality of proportions. by() splits by groups. Alternative: tab completed treatment, chi2.", "color": "blue"}
                     ],
                     "r": [
-                      {"code": "prop.test", "role": "Function", "tip": "Tests for equality of proportions -- here, whether completion rates differ between groups", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "table(df$treatment, df$completed)", "role": "Argument", "tip": "Creates a 2x2 contingency table of treatment x completion, then tests if proportions differ", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "prop.test(table(df$treatment, df$completed))", "role": "Nested Function Call", "tip": "table() creates the contingency table, which is passed directly to prop.test(). Nesting avoids intermediate variables.", "color": "blue"}
                     ]
                   },
-                  "structureNote": "Differential attrition means treated participants drop out at a different rate than controls. This can bias your results even if randomization was initially perfect -- always check before analyzing outcomes."
+                  "structureNote": "Python and R create a contingency table first, then test it. Stata's <code>prtest</code> with <code>by()</code> does both in one command. R's nested call pattern (<code>test(table(...))</code>) is idiomatic -- no need to store the table separately."
                 }
               ]
             }

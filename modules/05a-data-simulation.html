@@ -465,25 +465,21 @@ High School |        402       40.20       40.20
             {
               "exercises": [
                 {
-                  "instruction": "Setting a random seed ensures reproducibility — every run produces the same 'random' numbers",
-                  "pattern": "library.submodule.function(integer)",
-                  "structureNote": "This follows the <strong>library.submodule.function()</strong> pattern. Setting a seed ensures that every run produces the same 'random' numbers. This is <em>critical</em> for reproducible research: anyone can re-run your code and get identical results.",
+                  "instruction": "Set a random seed: nested submodule access in Python, two-word command in Stata, dotted function name in R",
+                  "pattern": "np.random.seed(N)  |  set seed N  |  set.seed(N)",
+                  "structureNote": "Three syntax conventions for the same operation. Python uses <code>library.submodule.function()</code> chaining. Stata uses a two-word command (<code>set seed</code>). R uses a dotted function name (<code>set.seed</code>) -- the dot is part of the name, not an accessor.",
                   "languages": {
                     "python": [
-                      {"code": "np", "role": "Library Alias", "tip": "Short for numpy, set up with 'import numpy as np'.", "color": "yellow"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the 'random' submodule inside numpy.", "color": "overlay"},
-                      {"code": "random", "role": "Submodule", "tip": "NumPy's random number generation submodule. Contains all distribution functions.", "color": "yellow"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the seed function inside the random submodule.", "color": "overlay"},
-                      {"code": "seed(", "role": "Function", "tip": "Initializes the random number generator. Same seed = same sequence of 'random' numbers every time.", "color": "blue"},
-                      {"code": "42)", "role": "Seed Value", "tip": "Any integer works. 42 is a common convention. The specific number doesn't matter — consistency does.", "color": "sky"}
+                      {"code": "np.random.seed(", "role": "Nested Submodule Call", "tip": "np.random is a submodule, not an object method. Pattern: library.submodule.function().", "color": "blue"},
+                      {"code": "42)", "role": "Seed Value", "tip": "Any integer. The specific number is arbitrary; consistency across runs is what matters.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "set seed ", "role": "Command", "tip": "Stata's command for setting the random number seed. Two words that act as one command.", "color": "mauve"},
-                      {"code": "42", "role": "Seed Value", "tip": "The seed integer. Same seed = same random draws every time you run the code.", "color": "sky"}
+                      {"code": "set seed ", "role": "Two-word Command", "tip": "Stata has several 'set' commands (set obs, set seed, set matsize). The second word specifies what to set.", "color": "mauve"},
+                      {"code": "42", "role": "Seed Value", "tip": "No parentheses, no quotes. Bare integer.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "set.seed(", "role": "Function", "tip": "R's function for setting the random seed. Note the dot — R uses dots in function names (not methods).", "color": "blue"},
-                      {"code": "42)", "role": "Seed Value", "tip": "Any integer. Ensures reproducibility across runs.", "color": "sky"}
+                      {"code": "set.seed(", "role": "Function", "tip": "The dot is part of the function name, not an object accessor. R naming convention uses dots where Python uses underscores.", "color": "blue"},
+                      {"code": "42)", "role": "Seed Value", "tip": "", "color": "sky"}
                     ]
                   }
                 }
@@ -499,31 +495,23 @@ High School |        402       40.20       40.20
             {
               "exercises": [
                 {
-                  "instruction": "Drawing values from a normal distribution uses keyword arguments to specify the mean, standard deviation, and sample size",
-                  "pattern": "variable = library.random.distribution(parameters, size=n)",
-                  "structureNote": "This uses <strong>keyword arguments</strong> to specify distribution parameters. <code>loc</code> is the mean, <code>scale</code> is the standard deviation, <code>size</code> is how many draws. Each language has its own names for these parameters, but the concept is identical: draw from N(mu, sigma).",
+                  "instruction": "Distribution parameter names differ across languages: loc/scale vs mean/sd vs positional arguments",
+                  "pattern": "np.random.normal(loc=, scale=, size=)  |  rnormal(mean, sd)  |  rnorm(n, mean, sd)",
+                  "structureNote": "Same distribution, different parameter names. Python uses <code>loc</code>/<code>scale</code>/<code>size</code>. R uses <code>n</code>/<code>mean</code>/<code>sd</code> and puts n first. Stata uses positional arguments in <code>rnormal(mean, sd)</code>. R's distribution functions follow a prefix convention: <code>r</code> = random, <code>d</code> = density, <code>p</code> = CDF, <code>q</code> = quantile.",
                   "languages": {
                     "python": [
-                      {"code": "income", "role": "Variable Name", "tip": "Name for the array of simulated values. Choose descriptive names.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result into the variable.", "color": "peach"},
-                      {"code": "np.random.normal(", "role": "Function", "tip": "Draws from a normal (Gaussian) distribution. Part of numpy's random submodule.", "color": "blue"},
-                      {"code": "loc=50000, ", "role": "Mean", "tip": "The center (mean) of the distribution. 'loc' stands for location parameter.", "color": "sky"},
-                      {"code": "scale=15000, ", "role": "Std Dev", "tip": "The spread (standard deviation). 'scale' is the scale parameter.", "color": "sky"},
-                      {"code": "size=n)", "role": "Sample Size", "tip": "How many random draws to generate. n=1000 produces a 1000-element array.", "color": "sky"}
+                      {"code": "income = np.random.normal(", "role": "Distribution Function", "tip": "Other distributions: .uniform(), .binomial(), .poisson(), .lognormal(). All in np.random.", "color": "blue"},
+                      {"code": "loc=50000", "role": "Keyword: Mean", "tip": "loc = location parameter (mean). Named keyword arguments make the mapping explicit.", "color": "sky"},
+                      {"code": ", scale=15000", "role": "Keyword: Std Dev", "tip": "scale = scale parameter (standard deviation).", "color": "sky"},
+                      {"code": ", size=n)", "role": "Keyword: Count", "tip": "size= controls how many draws. Returns a numpy array of length n.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "gen ", "role": "Command", "tip": "Creates a new variable in the dataset.", "color": "mauve"},
-                      {"code": "income", "role": "Variable", "tip": "The new variable name.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the expression result to the variable.", "color": "peach"},
-                      {"code": "rnormal(50000, 15000)", "role": "Distribution", "tip": "Draws from N(50000, 15000). First argument is mean, second is standard deviation.", "color": "blue"}
+                      {"code": "gen income = ", "role": "Generate Command", "tip": "gen creates a new variable. Each observation gets its own random draw.", "color": "mauve"},
+                      {"code": "rnormal(50000, 15000)", "role": "Positional Arguments", "tip": "Stata uses positional args: rnormal(mean, sd). No keyword names. Size = number of observations already set.", "color": "blue"}
                     ],
                     "r": [
-                      {"code": "income", "role": "Variable Name", "tip": "Name for the vector of simulated values.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator.", "color": "peach"},
-                      {"code": "rnorm(", "role": "Function", "tip": "Draws from a normal distribution. 'r' prefix means 'random draw' (dnorm = density, pnorm = CDF).", "color": "blue"},
-                      {"code": "n = 1000, ", "role": "Sample Size", "tip": "Number of draws. In R, n comes first.", "color": "sky"},
-                      {"code": "mean = 50000, ", "role": "Mean", "tip": "Center of the distribution.", "color": "sky"},
-                      {"code": "sd = 15000)", "role": "Std Dev", "tip": "Standard deviation of the distribution.", "color": "sky"}
+                      {"code": "income <- rnorm(", "role": "Distribution Function", "tip": "r prefix = random draw. Other distributions: runif(), rbinom(), rpois(), rlnorm().", "color": "blue"},
+                      {"code": "n = 1000, mean = 50000, sd = 15000)", "role": "Named Arguments", "tip": "n comes first in R. Parameter names match statistical notation (mean, sd).", "color": "sky"}
                     ]
                   }
                 }
@@ -539,31 +527,25 @@ High School |        402       40.20       40.20
             {
               "exercises": [
                 {
-                  "instruction": "Randomly assigning categories with specified probabilities generates categorical data with controlled proportions",
-                  "pattern": "variable = library.random.choice(categories, size, probabilities)",
-                  "structureNote": "This generates <strong>categorical data</strong> with controlled proportions. You provide the list of possible values and their probabilities (which must sum to 1). This is essential for simulating survey responses, treatment arms, or demographic variables.",
+                  "instruction": "Categorical sampling: probability weights with p= in Python, nested cond() in Stata, replace=TRUE in R",
+                  "pattern": "np.random.choice(values, size, p=)  |  cond()  |  sample(replace=TRUE, prob=)",
+                  "structureNote": "Python's <code>p=</code> argument takes a probability vector (must sum to 1). Stata has no direct equivalent -- use <code>runiform()</code> with nested <code>cond()</code> to map cumulative cutoffs. R's <code>sample()</code> requires <code>replace=TRUE</code> when drawing more items than categories.",
                   "languages": {
                     "python": [
-                      {"code": "education", "role": "Variable Name", "tip": "Name for the array of categorical values.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "np.random.choice(", "role": "Function", "tip": "Randomly selects from a list of options, with optional probability weights.", "color": "blue"},
-                      {"code": "['HS', 'BA', 'MA', 'PhD'], ", "role": "Categories", "tip": "A list of possible values to draw from. Can be strings or numbers.", "color": "green"},
-                      {"code": "size=n, ", "role": "Sample Size", "tip": "How many draws.", "color": "sky"},
-                      {"code": "p=[0.4, 0.35, 0.2, 0.05])", "role": "Probabilities", "tip": "Probability of each category. Must sum to 1. Here, 40% HS, 35% BA, 20% MA, 5% PhD.", "color": "lavender"}
+                      {"code": "education = np.random.choice(", "role": "Function", "tip": "Draws from a list of discrete options. Without p=, draws uniformly.", "color": "blue"},
+                      {"code": "['HS', 'BA', 'MA', 'PhD']", "role": "Value List", "tip": "A Python list of possible values. Can be strings or numbers.", "color": "green"},
+                      {"code": ", size=n", "role": "Count", "tip": "", "color": "sky"},
+                      {"code": ", p=[0.4, 0.35, 0.2, 0.05])", "role": "Probability Weights", "tip": "Must sum to 1. Each probability corresponds positionally to the value list.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "gen ", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
-                      {"code": "u = runiform()\n", "role": "Uniform Draw", "tip": "Draws U~Uniform(0,1). Used to assign categories based on cumulative probabilities.", "color": "blue"},
-                      {"code": "gen education = cond(u<0.4, 1, cond(u<0.75, 2, cond(u<0.95, 3, 4)))", "role": "Nested Conditional", "tip": "Maps uniform draws to categories using cumulative probability cutoffs: <0.4=HS, <0.75=BA, <0.95=MA, else PhD.", "color": "sky"}
+                      {"code": "gen u = runiform()\n", "role": "Uniform Draw", "tip": "runiform() draws from U(0,1). This is the building block for categorical simulation in Stata.", "color": "blue"},
+                      {"code": "gen education = cond(u<0.4, 1, cond(u<0.75, 2, cond(u<0.95, 3, 4)))", "role": "Nested cond()", "tip": "cond(condition, if_true, if_false). Nesting creates cumulative cutoffs: 0-0.4, 0.4-0.75, 0.75-0.95, 0.95-1.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "education", "role": "Variable Name", "tip": "Name for the character vector.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator.", "color": "peach"},
-                      {"code": "sample(", "role": "Function", "tip": "R's function for random sampling with or without replacement.", "color": "blue"},
-                      {"code": "c('HS','BA','MA','PhD'), ", "role": "Categories", "tip": "c() creates a vector of options to draw from.", "color": "green"},
-                      {"code": "size = n, ", "role": "Sample Size", "tip": "How many draws.", "color": "sky"},
-                      {"code": "replace = TRUE, ", "role": "With Replacement", "tip": "TRUE means the same value can be drawn multiple times. Required when size > number of categories.", "color": "lavender"},
-                      {"code": "prob = c(0.4, 0.35, 0.2, 0.05))", "role": "Probabilities", "tip": "Sampling weights for each category.", "color": "lavender"}
+                      {"code": "education <- sample(", "role": "Function", "tip": "R's general sampling function. Without prob=, draws uniformly.", "color": "blue"},
+                      {"code": "c('HS','BA','MA','PhD')", "role": "Value Vector", "tip": "c() creates a vector. R's equivalent of a Python list.", "color": "green"},
+                      {"code": ", size = n, replace = TRUE", "role": "Options", "tip": "replace=TRUE allows repeated draws. Without it, size cannot exceed the number of categories.", "color": "lavender"},
+                      {"code": ", prob = c(0.4, 0.35, 0.2, 0.05))", "role": "Probability Weights", "tip": "R auto-normalizes if prob does not sum to 1 (Python raises an error instead).", "color": "lavender"}
                     ]
                   }
                 }
@@ -703,28 +685,24 @@ age       0.4125873 0.4879214 1.0000000</pre></div>
             {
               "exercises": [
                 {
-                  "instruction": "Combining multiple arrays into a DataFrame uses the dictionary-to-DataFrame pattern, where each key becomes a column name",
-                  "pattern": "variable = library.DataFrame({key: value, ...})",
-                  "structureNote": "This is the <strong>dictionary-to-DataFrame</strong> pattern. Each key becomes a column name, each value becomes the column data. This is the most common way to assemble simulated data into a structured dataset for analysis.",
+                  "instruction": "Assemble columns into a dataset: dict-to-DataFrame, set obs + gen, or named arguments in data.frame()",
+                  "pattern": "pd.DataFrame({'col': array})  |  set obs N; gen col = ...  |  data.frame(col = vector)",
+                  "structureNote": "Python uses a <strong>dictionary</strong> (<code>{}</code>) where keys become column names. R uses <strong>named arguments</strong> (<code>name = vector</code>). Stata builds datasets sequentially: <code>set obs</code> first, then <code>gen</code> one variable at a time.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "Variable Name", "tip": "Convention for DataFrames. Short and universally understood.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the DataFrame.", "color": "peach"},
-                      {"code": "pd.DataFrame(", "role": "Constructor", "tip": "Creates a pandas DataFrame. Can take a dictionary, list of lists, or numpy array.", "color": "blue"},
-                      {"code": "{", "role": "Dict Open", "tip": "A Python dictionary: keys are column names, values are data arrays.", "color": "overlay"},
-                      {"code": "'age': age, 'income': income", "role": "Key-Value Pairs", "tip": "Each pair maps a column name (string) to a data array. The arrays must all have the same length.", "color": "green"},
-                      {"code": "})", "role": "Dict Close", "tip": "Ends the dictionary.", "color": "overlay"}
+                      {"code": "df = pd.DataFrame(", "role": "Constructor", "tip": "Also accepts: list of dicts, numpy 2D array, or another DataFrame.", "color": "blue"},
+                      {"code": "{", "role": "Dict Literal", "tip": "Curly braces create a dictionary. Syntax: {key: value, key: value}.", "color": "overlay"},
+                      {"code": "'age': age, 'income': income", "role": "Key-Value Pairs", "tip": "String keys become column names. Values must be arrays of equal length.", "color": "green"},
+                      {"code": "})", "role": "Close", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "clear\n", "role": "Command", "tip": "Clears existing data from memory. Stata holds one dataset at a time.", "color": "mauve"},
-                      {"code": "set obs 1000\n", "role": "Set Rows", "tip": "Creates 1000 empty observations. You then fill in variables with 'gen'.", "color": "mauve"},
-                      {"code": "gen age = ...", "role": "Generate Vars", "tip": "Each 'gen' command creates one variable (column). Build the dataset variable by variable.", "color": "blue"}
+                      {"code": "clear\n", "role": "Clear Memory", "tip": "Stata holds one dataset at a time. clear drops it before building a new one.", "color": "mauve"},
+                      {"code": "set obs 1000\n", "role": "Allocate Rows", "tip": "Must set the number of observations before gen can create variables.", "color": "mauve"},
+                      {"code": "gen age = ...", "role": "Add Column", "tip": "Each gen adds one variable. Build the dataset column by column.", "color": "blue"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Variable Name", "tip": "Name for the data frame.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator.", "color": "peach"},
-                      {"code": "data.frame(", "role": "Constructor", "tip": "Creates a data frame from named vectors. Each argument becomes a column.", "color": "blue"},
-                      {"code": "age = age, income = income)", "role": "Named Args", "tip": "Name = vector pairs. Each name becomes a column header, each vector becomes column data.", "color": "green"}
+                      {"code": "df <- data.frame(", "role": "Constructor", "tip": "Also: tibble() from tidyverse (does not convert strings to factors).", "color": "blue"},
+                      {"code": "age = age, income = income)", "role": "Named Arguments", "tip": "name = vector syntax. Names become column headers. Vectors must be equal length.", "color": "green"}
                     ]
                   }
                 }
@@ -896,42 +874,24 @@ Overall utility score: 0.89 (good preservation)</pre></div>
             {
               "exercises": [
                 {
-                  "instruction": "This generates synthetic data that statistically resembles your real data, preserving distributions and correlations without exposing any real observations",
+                  "instruction": "Fit-then-sample pattern: .fit() learns from data, .sample() generates new rows; Stata uses r() stored results",
                   "languages": {
                     "python": [
-                      {"code": "synthesizer ", "role": "Variable", "tip": "The model that will learn patterns from your real data.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the synthesizer object.", "color": "peach"},
-                      {"code": "GaussianCopulaSynthesizer(", "role": "Class", "tip": "A model that learns correlations and distributions using a Gaussian copula approach.", "color": "blue"},
-                      {"code": "metadata)\n", "role": "Argument", "tip": "Column type information (numeric, categorical, dates) so the synthesizer generates appropriate values.", "color": "sky"},
-                      {"code": "synthesizer", "role": "Variable", "tip": "The synthesizer model.", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a method.", "color": "overlay"},
-                      {"code": "fit(", "role": "Method", "tip": "Learns the statistical patterns (distributions, correlations) from your real data.", "color": "teal"},
-                      {"code": "real_df)\n", "role": "Real Data", "tip": "Your actual dataset. The model learns from it but never stores individual records.", "color": "pink"},
-                      {"code": "synthetic_df ", "role": "Variable", "tip": "The resulting synthetic dataset — entirely fake but statistically similar.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the generated data.", "color": "peach"},
-                      {"code": "synthesizer", "role": "Variable", "tip": "The fitted model.", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a method.", "color": "overlay"},
-                      {"code": "sample(", "role": "Method", "tip": "Generates new synthetic rows from the learned distributions.", "color": "teal"},
-                      {"code": "num_rows=1000)", "role": "Argument", "tip": "How many synthetic rows to generate.", "color": "sky"}
+                      {"code": "synthesizer = GaussianCopulaSynthesizer(metadata)\n", "role": "Constructor", "tip": "Instantiates a model object. metadata is passed at construction time.", "color": "blue"},
+                      {"code": "synthesizer.fit(real_df)\n", "role": ".fit() Method", "tip": "Learns from data. The fit-then-use pattern is standard in Python ML libraries (scikit-learn, SDV, etc.).", "color": "teal"},
+                      {"code": "synthetic_df = synthesizer.sample(num_rows=1000)", "role": ".sample() Method", "tip": "Generates data from the learned model. Keyword argument num_rows= controls output size.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "summarize ", "role": "Command", "tip": "Computes summary statistics from your real data.", "color": "mauve"},
-                      {"code": "income, ", "role": "Variable", "tip": "The real variable to learn from.", "color": "pink"},
-                      {"code": "detail\n", "role": "Option", "tip": "Shows detailed statistics including percentiles.", "color": "sky"},
-                      {"code": "local ", "role": "Command", "tip": "Stores a value in a local macro for later use.", "color": "mauve"},
-                      {"code": "mean_inc ", "role": "Macro Name", "tip": "The local macro that stores the mean. Referenced later as `mean_inc'.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the value.", "color": "peach"},
-                      {"code": "r(mean)", "role": "Stored Result", "tip": "The mean from the most recent summarize command.", "color": "lavender"}
+                      {"code": "summarize income, detail\n", "role": "Command + Option", "tip": "detail adds percentiles. Results are stored in r() scalars for later use.", "color": "mauve"},
+                      {"code": "local mean_inc = r(mean)", "role": "Local Macro", "tip": "local creates a macro visible only in the current do-file. Reference with backtick-quote: `mean_inc'.", "color": "mauve"},
+                      {"code": "\ngen income_synth = rnormal(`mean_inc', `sd_inc')", "role": "Macro Substitution", "tip": "Backtick-quote syntax (`name') expands the macro to its value at runtime.", "color": "pink"}
                     ],
                     "r": [
-                      {"code": "synth_obj ", "role": "Variable", "tip": "The synthpop object containing the synthetic data and validation results.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "syn(", "role": "Function", "tip": "From the synthpop package. Learns patterns from real data and generates synthetic records.", "color": "blue"},
-                      {"code": "real_df, ", "role": "Real Data", "tip": "Your actual dataset to synthesize.", "color": "pink"},
-                      {"code": "seed = 42)", "role": "Random Seed", "tip": "Ensures reproducibility — same seed produces the same synthetic data.", "color": "sky"}
+                      {"code": "synth_obj <- syn(", "role": "Function", "tip": "From synthpop. One function handles both fitting and generating (unlike Python's two-step pattern).", "color": "blue"},
+                      {"code": "real_df, seed = 42)", "role": "Arguments", "tip": "seed= is a keyword argument for reproducibility.", "color": "pink"}
                     ]
                   },
-                  "structureNote": "Structure-preserving synthetic data is essential for data privacy. The <strong>fit-then-sample</strong> pattern is common: first learn the statistical properties of real data, then generate new fake rows that preserve those properties. Use <code>synthpop</code> in R, <code>SDV</code> in Python, or manual parametric bootstrap in Stata. Always validate by comparing real vs. synthetic distributions."
+                  "structureNote": "Python ML libraries follow a <strong>fit-then-predict/sample</strong> pattern: construct an object, call <code>.fit(data)</code>, then call <code>.sample()</code> or <code>.predict()</code>. Stata uses <strong>r() stored results</strong> and <strong>local macros</strong> with backtick-quote substitution. R's synthpop combines both steps in <code>syn()</code>."
                 }
               ]
             }
@@ -1149,36 +1109,25 @@ label values education edu_lbl</span>
             {
               "exercises": [
                 {
-                  "instruction": "This creates a small synthetic sample matching your real data's structure, safe to share with AI coding assistants",
+                  "instruction": "Function definition syntax: def + colon + indentation in Python, name <- function() {} in R, sequential commands in Stata",
                   "languages": {
                     "python": [
-                      {"code": "def ", "role": "Keyword", "tip": "Defines a new function.", "color": "mauve"},
-                      {"code": "create_llm_safe_sample(", "role": "Function Name", "tip": "A descriptive name for your custom function.", "color": "blue"},
-                      {"code": "real_df, ", "role": "Parameter", "tip": "The real dataset to create a safe version of.", "color": "sky"},
-                      {"code": "n_samples=50)", "role": "Default Parameter", "tip": "Number of fake rows to generate. Default is 50 — enough for LLM context without overwhelming the prompt.", "color": "sky"},
-                      {"code": ":", "role": "Colon", "tip": "Begins the function body (indented block follows).", "color": "overlay"}
+                      {"code": "def ", "role": "Keyword", "tip": "Defines a function. Python uses def, not function or func.", "color": "mauve"},
+                      {"code": "create_llm_safe_sample(", "role": "Function Name", "tip": "snake_case naming convention for Python functions and variables.", "color": "blue"},
+                      {"code": "real_df, n_samples=50)", "role": "Parameters", "tip": "n_samples=50 is a default argument. Caller can override: func(df, n_samples=100).", "color": "sky"},
+                      {"code": ":", "role": "Colon", "tip": "Starts the indented block. Python uses indentation (not braces) to define scope.", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "clear\n", "role": "Command", "tip": "Removes existing data from memory to start fresh.", "color": "mauve"},
-                      {"code": "set seed ", "role": "Command", "tip": "Sets the random number seed for reproducibility.", "color": "mauve"},
-                      {"code": "42\n", "role": "Seed Value", "tip": "Any integer. Same seed produces the same random data every time.", "color": "red"},
-                      {"code": "set obs ", "role": "Command", "tip": "Sets the number of observations in the empty dataset.", "color": "mauve"},
-                      {"code": "50\n", "role": "Count", "tip": "Creates 50 empty rows to fill with fake data.", "color": "red"},
-                      {"code": "gen ", "role": "Command", "tip": "Creates a new variable with generated values.", "color": "mauve"},
-                      {"code": "age ", "role": "Variable", "tip": "The fake age variable.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Sets the value.", "color": "peach"},
-                      {"code": "int(rnormal(45, 10))", "role": "Expression", "tip": "Generates random integers from a normal distribution with mean 45 and sd 10.", "color": "blue"}
+                      {"code": "clear\nset seed 42\nset obs 50\n", "role": "Setup Commands", "tip": "Stata has no user-defined functions in do-files. Use sequential commands or define a program with program define.", "color": "mauve"},
+                      {"code": "gen age = int(rnormal(45, 10))", "role": "Generate Expression", "tip": "int() truncates to integer. Wrap distribution functions in type-conversion functions as needed.", "color": "blue"}
                     ],
                     "r": [
-                      {"code": "create_llm_safe_sample ", "role": "Function Name", "tip": "The name of the custom function.", "color": "blue"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the function definition.", "color": "peach"},
-                      {"code": "function(", "role": "Keyword", "tip": "Defines a new function in R.", "color": "mauve"},
-                      {"code": "real_df, ", "role": "Parameter", "tip": "The real dataset to mimic.", "color": "sky"},
-                      {"code": "n_samples = 50) ", "role": "Default Parameter", "tip": "Number of fake rows. Default 50 — a reasonable sample for LLM prompts.", "color": "sky"},
-                      {"code": "{", "role": "Open Brace", "tip": "Begins the function body.", "color": "overlay"}
+                      {"code": "create_llm_safe_sample <- function(", "role": "Function Definition", "tip": "R assigns functions like any other object: name <- function(args) { body }.", "color": "mauve"},
+                      {"code": "real_df, n_samples = 50)", "role": "Parameters", "tip": "Default values use = inside function signatures (not <-).", "color": "sky"},
+                      {"code": " {", "role": "Open Brace", "tip": "R uses curly braces {} for function bodies, not indentation.", "color": "overlay"}
                     ]
                   },
-                  "structureNote": "Creating LLM-safe sample data lets you get AI coding help without risking data privacy. The function inspects each column's type and generates fake values with similar distributions. For numeric columns, it draws from a normal distribution matching the mean and standard deviation. For categorical columns, it samples from observed categories. Always share synthetic data, never real data, with AI assistants."
+                  "structureNote": "Function definition syntax: Python uses <code>def name(args):</code> with indentation. R uses <code>name <- function(args) { }</code> with braces. Stata uses <code>program define name</code> for reusable programs, or sequential commands in do-files. Default arguments use <code>=</code> in all three."
                 }
               ]
             }
@@ -1470,44 +1419,23 @@ file data/temp/simulated_survey.dta saved</pre></div>
             {
               "exercises": [
                 {
-                  "instruction": "This generates simulated survey data with realistic problems (missing values, outliers, data entry errors) so you can develop and test your cleaning code before real data arrives",
+                  "instruction": "Dict-to-DataFrame with inline generators; Stata's replace with if qualifier and . (missing) marker",
                   "languages": {
                     "python": [
-                      {"code": "df ", "role": "Variable", "tip": "The DataFrame that will hold the simulated survey data.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the DataFrame.", "color": "peach"},
-                      {"code": "pd", "role": "Library Alias", "tip": "Short name for pandas.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a class in pandas.", "color": "overlay"},
-                      {"code": "DataFrame(", "role": "Constructor", "tip": "Creates a new DataFrame from a dictionary of column names and values.", "color": "blue"},
-                      {"code": "{\n", "role": "Open Brace", "tip": "Begins a dictionary mapping column names to generated arrays.", "color": "overlay"},
-                      {"code": "'age'", "role": "Column Name", "tip": "The key in the dictionary becomes the column name.", "color": "green"},
-                      {"code": ": ", "role": "Colon", "tip": "Separates key from value in a dictionary.", "color": "overlay"},
-                      {"code": "np.random.normal(35, 12, n)", "role": "Generator", "tip": "Draws n values from a normal distribution with mean 35 and std 12.", "color": "blue"},
-                      {"code": "})", "role": "Close Brace", "tip": "Ends the dictionary.", "color": "overlay"}
+                      {"code": "df = pd.DataFrame(", "role": "Constructor", "tip": "", "color": "blue"},
+                      {"code": "{'age': np.random.normal(35, 12, n), ...})", "role": "Dict with Generators", "tip": "Inline expressions as dictionary values. Each generator runs immediately and fills the column.", "color": "green"}
                     ],
                     "stata": [
-                      {"code": "set obs ", "role": "Command", "tip": "Sets the number of observations (rows) in the empty dataset.", "color": "mauve"},
-                      {"code": "500\n", "role": "Count", "tip": "Creates 500 empty rows to fill with simulated data.", "color": "red"},
-                      {"code": "gen ", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
-                      {"code": "age ", "role": "Variable", "tip": "The new variable name.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Sets the value.", "color": "peach"},
-                      {"code": "int(rnormal(35, 12))\n", "role": "Expression", "tip": "Generates random ages from a normal distribution, then rounds to integer.", "color": "blue"},
-                      {"code": "replace ", "role": "Command", "tip": "Modifies existing values.", "color": "mauve"},
-                      {"code": "income ", "role": "Variable", "tip": "The variable to modify.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Sets the value.", "color": "peach"},
-                      {"code": ". ", "role": "Missing", "tip": "Stata's missing value marker. Sets income to missing where the condition is met.", "color": "red"},
-                      {"code": "if ", "role": "Qualifier", "tip": "Only applies the replacement where the condition is true.", "color": "mauve"},
-                      {"code": "runiform() > 0.7", "role": "Condition", "tip": "Random 30% of rows get set to missing, simulating survey non-response.", "color": "pink"}
+                      {"code": "set obs 500\n", "role": "Allocate Rows", "tip": "", "color": "mauve"},
+                      {"code": "gen age = int(rnormal(35, 12))\n", "role": "Generate + Cast", "tip": "int() truncates to integer. Also: round(), ceil(), floor().", "color": "blue"},
+                      {"code": "replace income = . if runiform() > 0.7", "role": "Conditional Replace", "tip": ". is Stata's missing value. The if qualifier filters which rows are affected. This is not an if/else branch.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "df ", "role": "Variable", "tip": "The data frame that will hold simulated data.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the data frame.", "color": "peach"},
-                      {"code": "data.frame(\n", "role": "Constructor", "tip": "Creates a new data frame from named vectors.", "color": "blue"},
-                      {"code": "age", "role": "Column Name", "tip": "The name of the column being created.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the generated values to this column.", "color": "peach"},
-                      {"code": "as.integer(rnorm(n, 35, 12)))", "role": "Generator", "tip": "Draws n values from a normal distribution and rounds to integer.", "color": "blue"}
+                      {"code": "df <- data.frame(", "role": "Constructor", "tip": "", "color": "blue"},
+                      {"code": "age = as.integer(rnorm(n, 35, 12)))", "role": "Type Conversion", "tip": "as.integer() coerces to integer. R type coercion functions: as.numeric(), as.character(), as.factor().", "color": "blue"}
                     ]
                   },
-                  "structureNote": "Pre-analysis simulation is a powerful research practice: write and test your entire cleaning and analysis pipeline on simulated data <em>before</em> real data arrives. Include realistic problems (missing values, outliers, entry errors) so your code handles them. When real data comes, you only need to change the file path."
+                  "structureNote": "Stata's <code>if</code> qualifier (after a command) filters rows -- it is not a control-flow statement. The <code>.</code> (dot) represents missing data in Stata, equivalent to <code>np.nan</code> in Python and <code>NA</code> in R. Use <code>replace</code> to modify existing variables; <code>gen</code> only creates new ones."
                 }
               ]
             }
@@ -1712,32 +1640,23 @@ N = 800: Power =  96.4%
             {
               "exercises": [
                 {
-                  "instruction": "Building a variable with a known causal relationship defines the data generating process (DGP) as baseline plus treatment effect plus noise",
-                  "pattern": "outcome = baseline + effect * treatment + noise",
-                  "structureNote": "This is the <strong>data generating process (DGP)</strong> for simulation. You define exactly how the outcome depends on treatment and other variables, plus random noise. Because you control the true effect, you can check whether your estimation method recovers it correctly.",
+                  "instruction": "DGP formula syntax: vectorized arithmetic with intercept + coefficient * variable + noise",
+                  "pattern": "outcome = intercept + effect * treatment + noise_function()",
+                  "structureNote": "The DGP formula uses <strong>vectorized arithmetic</strong>: <code>effect * treatment</code> multiplies element-wise across the entire array/variable. The <code>+</code> here is actual addition (not the formula operator). All three languages broadcast scalars across vectors automatically.",
                   "languages": {
                     "python": [
-                      {"code": "outcome", "role": "Variable Name", "tip": "The dependent variable you are simulating.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the computed result.", "color": "peach"},
-                      {"code": "10", "role": "Baseline", "tip": "The intercept: average outcome when treatment=0 and no noise.", "color": "sky"},
-                      {"code": " + ", "role": "Addition", "tip": "Adds the treatment effect component.", "color": "overlay"},
-                      {"code": "true_effect * treatment", "role": "Treatment Effect", "tip": "The causal effect. true_effect is the known parameter; treatment is 0/1. Only treated units get the effect.", "color": "teal"},
-                      {"code": " + ", "role": "Addition", "tip": "Adds random noise.", "color": "overlay"},
-                      {"code": "np.random.normal(0, noise_sd, n)", "role": "Random Noise", "tip": "Idiosyncratic error term. Mean 0, so it doesn't shift the average. This creates variation around the true relationship.", "color": "blue"}
+                      {"code": "outcome = 10", "role": "Intercept", "tip": "Scalar. Broadcasting: Python adds 10 to every element of the arrays that follow.", "color": "sky"},
+                      {"code": " + true_effect * treatment", "role": "Vectorized Product", "tip": "* is element-wise multiplication on numpy arrays. treatment is 0/1, so only treated units receive the effect.", "color": "teal"},
+                      {"code": " + np.random.normal(0, noise_sd, n)", "role": "Error Term", "tip": "Three arguments: mean, std, size. Generates n independent noise draws.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "gen", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
-                      {"code": " outcome = ", "role": "Variable", "tip": "The new variable name and assignment.", "color": "pink"},
-                      {"code": "10 + true_effect * treatment + rnormal(0, noise_sd)", "role": "DGP Expression", "tip": "The data generating process. rnormal(0, sd) adds Gaussian noise.", "color": "blue"}
+                      {"code": "gen outcome = ", "role": "Command", "tip": "gen evaluates the expression row by row. Each observation gets its own random draw.", "color": "mauve"},
+                      {"code": "10 + true_effect * treatment + rnormal(0, noise_sd)", "role": "Expression", "tip": "Arithmetic operates observation-by-observation. rnormal() generates a fresh draw per row.", "color": "blue"}
                     ],
                     "r": [
-                      {"code": "outcome", "role": "Variable Name", "tip": "The simulated dependent variable.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator.", "color": "peach"},
-                      {"code": "10", "role": "Baseline", "tip": "The intercept.", "color": "sky"},
-                      {"code": " + ", "role": "Addition", "tip": "Adds treatment effect.", "color": "overlay"},
-                      {"code": "true_effect * treatment", "role": "Treatment Effect", "tip": "Known causal effect times treatment indicator.", "color": "teal"},
-                      {"code": " + ", "role": "Addition", "tip": "Adds noise.", "color": "overlay"},
-                      {"code": "rnorm(n, 0, noise_sd)", "role": "Random Noise", "tip": "Random draws from N(0, noise_sd). Creates realistic variation.", "color": "blue"}
+                      {"code": "outcome <- 10", "role": "Intercept", "tip": "Scalar recycling: R repeats the scalar to match the vector length.", "color": "sky"},
+                      {"code": " + true_effect * treatment", "role": "Vectorized Product", "tip": "Element-wise. R recycles shorter vectors to match longer ones.", "color": "teal"},
+                      {"code": " + rnorm(n, 0, noise_sd)", "role": "Error Term", "tip": "n must be specified explicitly (unlike Stata which infers from current observation count).", "color": "blue"}
                     ]
                   }
                 }
@@ -1753,34 +1672,22 @@ N = 800: Power =  96.4%
             {
               "exercises": [
                 {
-                  "instruction": "A Monte Carlo power analysis simulates many experiments and counts how often the null hypothesis is rejected",
-                  "pattern": "for_loop over simulations, store results, compute power",
-                  "structureNote": "This is the <strong>Monte Carlo simulation</strong> pattern. You repeat an experiment many times (e.g., 1000), each time generating new random data, running the analysis, and recording whether you reject the null hypothesis. The fraction of rejections is your <em>statistical power</em>.",
+                  "instruction": "Monte Carlo loop patterns: for + append in Python, simulate command in Stata, replicate() in R",
+                  "pattern": "for/append loop  |  simulate pval=r(pval), reps(): program  |  replicate(N, expr)",
+                  "structureNote": "Three looping idioms: Python uses <code>for</code> + <code>.append()</code> to build a list iteratively. Stata's <code>simulate</code> command handles the loop internally and collects results. R's <code>replicate()</code> is a functional alternative to for loops. The power calculation uses a <strong>logical comparison</strong> (<code>< 0.05</code>) followed by <code>mean()</code> to compute a proportion.",
                   "languages": {
                     "python": [
-                      {"code": "pvalues", "role": "Storage", "tip": "An empty list to collect p-values from each simulated experiment.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Initialize as empty list.", "color": "peach"},
-                      {"code": "[]\n", "role": "Empty List", "tip": "Will be filled with one p-value per simulation.", "color": "overlay"},
-                      {"code": "for i in range(1000):", "role": "Loop", "tip": "Repeats the simulation 1000 times. Each iteration generates new random data.", "color": "mauve"},
-                      {"code": "\n    ", "role": "Indent", "tip": "Python uses indentation to define the loop body.", "color": "text"},
-                      {"code": "p = simulate_experiment(n, effect)", "role": "One Simulation", "tip": "Runs one simulated experiment, returns the p-value for the treatment effect.", "color": "blue"},
-                      {"code": "\n    ", "role": "Indent", "tip": "Still inside the loop.", "color": "text"},
-                      {"code": "pvalues.append(p)\n", "role": "Store Result", "tip": "Adds this simulation's p-value to the collection.", "color": "teal"},
-                      {"code": "power = np.mean(np.array(pvalues) < 0.05)", "role": "Compute Power", "tip": "Power = fraction of simulations where p < 0.05. If power = 0.80, you reject the null in 80% of simulations.", "color": "sky"}
+                      {"code": "pvalues = []\n", "role": "Empty List", "tip": "[] creates an empty list. Will be grown with .append().", "color": "overlay"},
+                      {"code": "for i in range(1000):", "role": "For Loop", "tip": "range(N) generates 0 to N-1. Colon starts the indented body.", "color": "mauve"},
+                      {"code": "\n    pvalues.append(p)\n", "role": ".append() Method", "tip": ".append() adds one element to the end of the list. Mutates in place.", "color": "teal"},
+                      {"code": "power = np.mean(np.array(pvalues) < 0.05)", "role": "Logical Mean", "tip": "< 0.05 creates a boolean array. np.mean() treats True as 1, False as 0.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "simulate", "role": "Command", "tip": "Stata's built-in Monte Carlo command. Runs a program many times and collects results.", "color": "mauve"},
-                      {"code": " pval=r(pval), ", "role": "Collect", "tip": "Saves the return value r(pval) from each run into a variable called 'pval'.", "color": "sky"},
-                      {"code": "reps(1000)", "role": "Repetitions", "tip": "Run the simulation program 1000 times.", "color": "yellow"},
-                      {"code": ": ", "role": "Colon", "tip": "Introduces the program to run.", "color": "text"},
-                      {"code": "sim_experiment", "role": "Program", "tip": "A user-defined program that runs one experiment and stores r(pval).", "color": "blue"}
+                      {"code": "simulate pval=r(pval), reps(1000): sim_experiment", "role": "Built-in Monte Carlo", "tip": "simulate runs a program repeatedly. pval=r(pval) maps the program's return value to a variable name. The colon introduces the program.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "pvalues", "role": "Storage", "tip": "Pre-allocate a numeric vector to store results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "replicate(1000, ", "role": "Replicate", "tip": "Runs an expression 1000 times and collects results. R's elegant alternative to a for loop.", "color": "blue"},
-                      {"code": "simulate_experiment(n, effect))\n", "role": "One Simulation", "tip": "A function that runs one experiment and returns the p-value.", "color": "teal"},
-                      {"code": "power <- mean(pvalues < 0.05)", "role": "Compute Power", "tip": "Fraction of p-values below 0.05. Logical comparison returns TRUE/FALSE; mean() treats TRUE as 1.", "color": "sky"}
+                      {"code": "pvalues <- replicate(1000, simulate_experiment(n, effect))\n", "role": "Functional Loop", "tip": "replicate(N, expr) evaluates expr N times and returns a vector. No explicit loop needed.", "color": "blue"},
+                      {"code": "power <- mean(pvalues < 0.05)", "role": "Logical Mean", "tip": "< 0.05 returns TRUE/FALSE. mean() coerces: TRUE=1, FALSE=0. Result is a proportion.", "color": "sky"}
                     ]
                   }
                 }
@@ -1996,53 +1903,26 @@ productive firms use more inputs (transmission bias).</div>
             {
               "exercises": [
                 {
-                  "instruction": "This generates an AR(1) productivity process where each period's productivity depends on the previous period's, creating persistent firm-level heterogeneity",
+                  "instruction": "Array slicing for panel simulation: [:, t] column slicing in Python/R, [_n-1] row lag in Stata, bysort prefix",
                   "languages": {
                     "python": [
-                      {"code": "omega ", "role": "Variable", "tip": "A 2D array (firms x periods) storing the productivity process.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Initializes the array.", "color": "peach"},
-                      {"code": "np", "role": "Library Alias", "tip": "Short name for numpy.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a function.", "color": "overlay"},
-                      {"code": "zeros", "role": "Function", "tip": "Creates an array filled with zeros. Will be filled period-by-period.", "color": "blue"},
-                      {"code": "((N, T))\n", "role": "Shape", "tip": "N firms by T time periods.", "color": "sky"},
-                      {"code": "omega[:, t] ", "role": "Column Slice", "tip": "All firms in period t. The : means all rows, t selects the column.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Updates all firms at time t.", "color": "peach"},
-                      {"code": "rho ", "role": "Persistence", "tip": "AR(1) coefficient (0.7). Controls how sticky productivity is across periods.", "color": "pink"},
-                      {"code": "* ", "role": "Multiplication", "tip": "Scales last period's productivity by the persistence parameter.", "color": "peach"},
-                      {"code": "omega[:, t-1] ", "role": "Lagged Value", "tip": "Previous period's productivity. This creates the autoregressive structure.", "color": "pink"},
-                      {"code": "+ ", "role": "Addition", "tip": "Adds the innovation shock.", "color": "peach"},
-                      {"code": "np.random.normal(0, 0.3, N)", "role": "Innovation", "tip": "Random shock (eta_t). New information each period that shifts productivity.", "color": "blue"}
+                      {"code": "omega = np.zeros((N, T))\n", "role": "Preallocate", "tip": "np.zeros(shape) creates an array of zeros. The double parens pass a tuple (N, T) as the shape.", "color": "blue"},
+                      {"code": "omega[:, t]", "role": "Column Slice", "tip": "[:, t] selects all rows in column t. NumPy slicing: [rows, cols]. : means 'all'.", "color": "pink"},
+                      {"code": " = rho * omega[:, t-1]", "role": "Lagged Column", "tip": "[:, t-1] is the previous period. Vectorized: updates all N firms at once.", "color": "pink"},
+                      {"code": " + np.random.normal(0, 0.3, N)", "role": "Innovation Vector", "tip": "Third argument N produces one shock per firm.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "gen ", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
-                      {"code": "omega ", "role": "Variable", "tip": "The productivity variable.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Sets the initial value.", "color": "peach"},
-                      {"code": "rnormal(0, 1) ", "role": "Generator", "tip": "Draws from standard normal for the initial period.", "color": "blue"},
-                      {"code": "if ", "role": "Qualifier", "tip": "Only applies to the first period.", "color": "mauve"},
-                      {"code": "year == 1\n", "role": "Condition", "tip": "Initial condition: draw from normal distribution.", "color": "pink"},
-                      {"code": "bysort firm (year): ", "role": "Panel Sort", "tip": "Sorts by firm and year, then applies within each firm.", "color": "mauve"},
-                      {"code": "replace ", "role": "Command", "tip": "Updates omega for subsequent periods.", "color": "mauve"},
-                      {"code": "omega", "role": "Variable", "tip": "The variable being updated.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Sets the new value.", "color": "peach"},
-                      {"code": "rho * omega[_n-1]", "role": "AR(1) Term", "tip": "Previous observation's productivity times the persistence parameter. [_n-1] references the prior row within the firm.", "color": "pink"},
-                      {"code": " + ", "role": "Addition", "tip": "Adds the innovation shock.", "color": "peach"},
-                      {"code": "rnormal(0, 0.3)", "role": "Innovation", "tip": "Random shock for this period.", "color": "blue"}
+                      {"code": "gen omega = rnormal(0, 1) if year == 1\n", "role": "Conditional gen", "tip": "if qualifier restricts which rows are set. Other rows remain missing (.).", "color": "mauve"},
+                      {"code": "bysort firm (year): ", "role": "Panel Prefix", "tip": "bysort groups by firm, sorts by year within each. The : applies the next command within each group.", "color": "mauve"},
+                      {"code": "replace omega = rho * omega[_n-1] + rnormal(0, 0.3) if year > 1", "role": "Row Lag", "tip": "[_n-1] references the previous observation within the bysort group. _n is the current row number.", "color": "pink"}
                     ],
                     "r": [
-                      {"code": "omega ", "role": "Variable", "tip": "A matrix (firms x periods) storing productivity.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the matrix.", "color": "peach"},
-                      {"code": "matrix(", "role": "Function", "tip": "Creates a matrix filled with a specified value.", "color": "blue"},
-                      {"code": "0, ", "role": "Fill Value", "tip": "Initializes all entries to zero.", "color": "red"},
-                      {"code": "N, ", "role": "Rows", "tip": "Number of firms.", "color": "pink"},
-                      {"code": "TT)\n", "role": "Columns", "tip": "Number of time periods. Named TT to avoid masking base R's T (TRUE).", "color": "pink"},
-                      {"code": "omega[, t] ", "role": "Column Slice", "tip": "All firms in period t.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Updates the column.", "color": "peach"},
-                      {"code": "rho * omega[, t - 1]", "role": "AR(1) Term", "tip": "Previous period's productivity times persistence (0.7).", "color": "pink"},
-                      {"code": " + ", "role": "Addition", "tip": "Adds the random shock.", "color": "peach"},
-                      {"code": "rnorm(N, 0, 0.3)", "role": "Innovation", "tip": "N random draws from normal with mean 0 and sd 0.3.", "color": "blue"}
+                      {"code": "omega <- matrix(0, N, TT)\n", "role": "Preallocate", "tip": "matrix(fill, nrow, ncol). Named TT because T is reserved for TRUE in R.", "color": "blue"},
+                      {"code": "omega[, t]", "role": "Column Slice", "tip": "R matrix indexing: [rows, cols]. Empty before comma means all rows.", "color": "pink"},
+                      {"code": " <- rho * omega[, t - 1] + rnorm(N, 0, 0.3)", "role": "AR(1) Update", "tip": "Vectorized across all N firms in one line.", "color": "pink"}
                     ]
                   },
-                  "structureNote": "An <strong>AR(1) process</strong> (autoregressive of order 1) models persistence: today's value depends on yesterday's plus a random shock. In production function estimation, this creates the <em>endogeneity problem</em> — productive firms (high omega) choose more inputs, so inputs are correlated with the error term. This is why OLS overestimates input elasticities and why structural estimators (Olley-Pakes, ACF) are needed."
+                  "structureNote": "Panel simulation uses <strong>array slicing</strong>: <code>[:, t]</code> (Python/R) selects a column from a matrix. Stata uses <code>[_n-1]</code> for row-level lags within a <code>bysort</code> group. The <code>bysort var1 (var2):</code> prefix sorts within groups and applies the command group by group."
                 }
               ]
             }

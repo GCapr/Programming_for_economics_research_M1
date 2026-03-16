@@ -444,37 +444,25 @@ NOTE: n is number in *each* group
             {
               "exercises": [
                 {
-                  "instruction": "Calculate required sample size for a two-group experiment using a power analysis function",
+                  "instruction": "Power analysis: omit the parameter you want to solve for; keyword arguments specify the known quantities",
                   "languages": {
                     "python": [
-                      {"code": "n ", "role": "Variable", "tip": "Will store the calculated sample size per group", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the result of the function call", "color": "peach"},
-                      {"code": "analysis", "role": "Object", "tip": "The TTestIndPower object you created earlier -- it contains methods for solving power equations", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a method belonging to the object", "color": "overlay"},
-                      {"code": "solve_power", "role": "Method", "tip": "Solves the power equation for whichever parameter you leave out (here, sample size)", "color": "teal"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "effect_size=0.3, ", "role": "Argument", "tip": "Cohen's d = 0.3, a 'small' effect -- the standardized difference you want to detect", "color": "sky"},
-                      {"code": "power=0.8", "role": "Argument", "tip": "80% power -- the standard target probability of detecting the effect", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "n = analysis.solve_power(", "role": "Method Call", "tip": "Called on a TTestIndPower object. The method solves for whichever parameter you omit.", "color": "teal"},
+                      {"code": "effect_size=0.3, power=0.8", "role": "Keyword Arguments", "tip": "Omitting nobs1 tells solve_power to solve for sample size. All other params must be named.", "color": "sky"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "power ", "role": "Command", "tip": "Stata's built-in power analysis command -- no installation needed", "color": "blue"},
-                      {"code": "twomeans ", "role": "Subcommand", "tip": "Specifies a two-sample means test (comparing averages between two groups)", "color": "teal"},
-                      {"code": "50 55, ", "role": "Group means", "tip": "The hypothesized means: control group mean = 50, treatment group mean = 55 (so the expected effect is 5)", "color": "sky"},
-                      {"code": "sd(15) ", "role": "Option", "tip": "Standard deviation of the outcome = 15 -- higher noise means you need more participants", "color": "sky"},
-                      {"code": "power(0.8)", "role": "Option", "tip": "Target 80% power -- Stata solves for sample size since it is the only missing parameter", "color": "sky"}
+                      {"code": "power twomeans ", "role": "Command + Subcommand", "tip": "power is the command; twomeans specifies the test type. Other subcommands: twoproportions, onesample.", "color": "blue"},
+                      {"code": "50 55", "role": "Positional Arguments", "tip": "Control mean then treatment mean. The difference (5) defines the effect size.", "color": "sky"},
+                      {"code": ", sd(15) power(0.8)", "role": "Options", "tip": "Stata solves for the missing quantity. Omitting n() means n is calculated.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "result ", "role": "Variable", "tip": "Stores the power analysis results so you can print or inspect them", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "R's assignment operator", "color": "peach"},
-                      {"code": "pwr.t.test", "role": "Function", "tip": "From the pwr package -- performs power analysis for t-tests", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "d = 0.3, ", "role": "Argument", "tip": "Cohen's d effect size = 0.3 (small effect) -- leave out 'n' so R solves for sample size", "color": "sky"},
-                      {"code": "power = 0.8", "role": "Argument", "tip": "80% power target", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "result <- pwr.t.test(", "role": "Function", "tip": "From the pwr package. Functions for different tests: pwr.t.test, pwr.anova.test, pwr.chisq.test.", "color": "blue"},
+                      {"code": "d = 0.3, power = 0.8", "role": "Named Arguments", "tip": "Omitting n tells the function to solve for it. d is Cohen's d (standardized effect size).", "color": "sky"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
                   },
-                  "structureNote": "Power analysis works by fixing three of four quantities (effect size, sample size, significance level, power) and solving for the fourth. Leave out whichever parameter you want the function to calculate."
+                  "structureNote": "All three languages use the same logic: <strong>specify three of four quantities, solve for the fourth</strong>. The missing parameter is determined by which argument you omit. Python uses an object method, Stata uses positional arguments + options, R uses a standalone function."
                 }
               ]
             }
@@ -717,35 +705,23 @@ Estimated power: 61.8%</pre>
             {
               "exercises": [
                 {
-                  "instruction": "Run a simulation-based power analysis: generate fake data many times and count how often you detect the effect",
+                  "instruction": "Simulation loop syntax: for _ in range() with underscore, simulate reps(): with colon prefix, replicate(N, {block})",
                   "languages": {
                     "python": [
-                      {"code": "for ", "role": "Keyword", "tip": "Starts a loop that repeats the code block a specified number of times", "color": "mauve"},
-                      {"code": "_ ", "role": "Variable", "tip": "A throwaway variable -- the underscore means we don't need the loop counter, just the repetition", "color": "pink"},
-                      {"code": "in ", "role": "Keyword", "tip": "Iterates over the sequence produced by range()", "color": "mauve"},
-                      {"code": "range", "role": "Function", "tip": "Generates a sequence of numbers -- range(1000) gives 0, 1, 2, ..., 999", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "n_sims", "role": "Argument", "tip": "Number of simulations to run -- 1000 is standard for reasonably precise power estimates", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"},
-                      {"code": ":", "role": "Colon", "tip": "Marks the start of the indented code block that will be repeated", "color": "overlay"}
+                      {"code": "for _ in range(n_sims):", "role": "For Loop", "tip": "_ is a convention for a throwaway variable (loop counter not needed). Colon starts the indented body.", "color": "mauve"}
                     ],
                     "stata": [
-                      {"code": "simulate ", "role": "Command", "tip": "Stata command that runs a program many times and collects the results into a dataset", "color": "blue"},
-                      {"code": "pval=r(pval), ", "role": "Return value", "tip": "Tells simulate to store the p-value returned by each run of the program", "color": "sky"},
-                      {"code": "reps(1000) ", "role": "Option", "tip": "Number of repetitions -- run the simulation 1000 times", "color": "sky"},
-                      {"code": "seed(42)", "role": "Option", "tip": "Sets the random seed for reproducibility -- anyone using seed 42 gets the exact same results", "color": "sky"}
+                      {"code": "simulate ", "role": "Command", "tip": "Stata's built-in simulation command. Replaces the current dataset with collected results.", "color": "blue"},
+                      {"code": "pval=r(pval)", "role": "Result Mapping", "tip": "Maps the program's r-class return value r(pval) to a variable named pval in the output dataset.", "color": "sky"},
+                      {"code": ", reps(1000) seed(42)", "role": "Options", "tip": "reps() sets repetitions. seed() ensures reproducibility.", "color": "sky"},
+                      {"code": ": sim_cluster", "role": "Colon + Program", "tip": "The colon introduces the program to run. Arguments to the program follow its name.", "color": "blue"}
                     ],
                     "r": [
-                      {"code": "p_values ", "role": "Variable", "tip": "Will store all 1000 p-values from the simulated experiments", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the result", "color": "peach"},
-                      {"code": "replicate", "role": "Function", "tip": "Repeats an expression many times and collects the results into a vector -- R's equivalent of a simulation loop", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "n_sims, ", "role": "Argument", "tip": "Number of replications (1000)", "color": "sky"},
-                      {"code": "{ ... }", "role": "Code block", "tip": "The expression to repeat -- generates data, runs analysis, returns p-value", "color": "pink"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "p_values <- replicate(n_sims, ", "role": "Replicate", "tip": "replicate(N, expr) evaluates expr N times. Returns a vector if expr returns a scalar.", "color": "blue"},
+                      {"code": "{ ... })", "role": "Code Block", "tip": "Curly braces {} wrap multi-line expressions. The last evaluated value is returned.", "color": "pink"}
                     ]
                   },
-                  "structureNote": "Simulation-based power: (1) generate fake data with a known effect, (2) analyze it, (3) check if p &lt; 0.05, (4) repeat 1000 times. The fraction of rejections is your estimated power."
+                  "structureNote": "Python's <code>_</code> variable is a convention meaning 'unused'. Stata's <code>simulate</code> uses <code>name=r(value)</code> to map program return values to output variables, with <code>:</code> introducing the program. R's <code>replicate()</code> avoids explicit loops entirely."
                 }
               ]
             }

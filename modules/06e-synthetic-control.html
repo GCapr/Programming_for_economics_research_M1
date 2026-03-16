@@ -159,38 +159,25 @@
             {
               "exercises": [
                 {
-                  "instruction": "This is how you set up and fit a synthetic control model",
+                  "instruction": "Python, Stata, and R each structure the SC specification very differently: one-step constructor vs. command + options vs. a separate <code>dataprep</code> step",
                   "pattern": "sc = Synth(data, outcome, id, time, treated_unit, treatment_period)",
-                  "structureNote": "Synthetic control constructs a <strong>weighted combination of control units</strong> that matches the treated unit's pre-treatment trajectory. The algorithm finds weights that minimize the pre-treatment discrepancy between the treated unit and the synthetic version. Post-treatment gaps are the estimated treatment effect.",
+                  "structureNote": "Python passes everything as keyword arguments to <code>Synth()</code>. Stata uses positional predictors + comma-separated options. R requires a separate <code>dataprep()</code> call before <code>synth()</code>.",
                   "languages": {
                     "python": [
-                      {"code": "sc", "role": "Variable", "tip": "Stores the synthetic control object.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the object.", "color": "peach"},
-                      {"code": "Synth", "role": "Constructor", "tip": "From SyntheticControlMethods package. Creates a synthetic control estimator.", "color": "blue"},
-                      {"code": "(df", "role": "Data", "tip": "Panel data in long format: unit, time, outcome, covariates.", "color": "sky"},
-                      {"code": ", outcome_var=\"gdp\"", "role": "Outcome", "tip": "The outcome variable name as a string.", "color": "green"},
-                      {"code": ", id_var=\"country\"", "role": "Unit ID", "tip": "The unit identifier variable.", "color": "green"},
-                      {"code": ", time_var=\"year\"", "role": "Time Var", "tip": "The time variable.", "color": "green"},
-                      {"code": ", treatment_period=1990", "role": "Treatment Time", "tip": "When the treatment/policy occurs. Pre-treatment data is used for fitting.", "color": "lavender"},
-                      {"code": ", treated_unit=\"West Germany\")", "role": "Treated Unit", "tip": "The name/ID of the treated unit.", "color": "lavender"}
+                      {"code": "Synth", "role": "Constructor", "tip": "From <code>SyntheticControlMethods</code>. One-step: configure and create the object, then call <code>.fit()</code>.", "color": "blue"},
+                      {"code": "outcome_var=\"gdp\", id_var=\"country\", time_var=\"year\"", "role": "Panel structure", "tip": "String column names. Python identifies panel structure from these keywords.", "color": "green"},
+                      {"code": "treatment_period=1990, treated_unit=\"West Germany\"", "role": "Treatment spec", "tip": "Numeric period and string unit name. Only one treated unit supported.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "tsset country_id year\n", "role": "Set Panel", "tip": "Declares the panel structure. Required before using synth.", "color": "mauve"},
-                      {"code": "synth", "role": "Command", "tip": "Stata's synthetic control command. ssc install synth.", "color": "mauve"},
-                      {"code": " gdp", "role": "Outcome", "tip": "The outcome variable.", "color": "sky"},
-                      {"code": " gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989)", "role": "Predictors", "tip": "Pre-treatment outcome values to match on. Each year is a separate predictor.", "color": "green"},
-                      {"code": " population trade_openness", "role": "Covariates", "tip": "Additional pre-treatment characteristics to match on.", "color": "green"},
-                      {"code": ", ///\n    trunit(7) trperiod(1990)", "role": "Treatment Spec", "tip": "trunit = treated unit ID number. trperiod = year of treatment.", "color": "yellow"}
+                      {"code": "tsset country_id year", "role": "Prerequisite", "tip": "Required panel declaration. Must run before <code>synth</code>.", "color": "mauve"},
+                      {"code": "synth gdp", "role": "Command + depvar", "tip": "Positional: outcome variable immediately after the command word.", "color": "blue"},
+                      {"code": " gdp(1985) gdp(1986) ... population trade_openness", "role": "Predictors", "tip": "Each <code>var(year)</code> matches on that variable in that year. Plain variable names match on pre-period means.", "color": "sky"},
+                      {"code": ", trunit(7) trperiod(1990)", "role": "Options", "tip": "After the comma. <code>trunit</code> takes the numeric ID, not a string name.", "color": "lavender"}
                     ],
                     "r": [
-                      {"code": "dataprep.out", "role": "Variable", "tip": "Stores the prepared data for Synth.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "dataprep", "role": "Function", "tip": "From the Synth package. Formats data for the synthetic control algorithm.", "color": "blue"},
-                      {"code": "(foo = df", "role": "Data", "tip": "The panel data frame.", "color": "sky"},
-                      {"code": ", predictors = c(\"gdp\", \"population\", \"trade_openness\")", "role": "Predictors", "tip": "Variables to match on in the pre-treatment period.", "color": "green"},
-                      {"code": ", dependent = \"gdp\"", "role": "Outcome", "tip": "The outcome variable to track.", "color": "green"},
-                      {"code": ", treatment.identifier = 7", "role": "Treated Unit", "tip": "Numeric ID of the treated unit.", "color": "lavender"},
-                      {"code": ", controls.identifier = c(1:6, 8:20))", "role": "Donor Pool", "tip": "IDs of potential control units (the donor pool).", "color": "lavender"}
+                      {"code": "dataprep", "role": "Function", "tip": "Separate data-preparation step; returns a list that <code>synth()</code> consumes.", "color": "blue"},
+                      {"code": "foo = df", "role": "Data", "tip": "Unusual parameter name (<code>foo</code>) is a quirk of the <code>Synth</code> package.", "color": "sky"},
+                      {"code": "treatment.identifier = 7, controls.identifier = c(1:6, 8:20)", "role": "Unit spec", "tip": "Numeric IDs. <code>c(1:6, 8:20)</code> creates a vector excluding the treated unit.", "color": "lavender"}
                     ]
                   }
                 }
@@ -432,24 +419,19 @@ Root MSPE: 234.56
             {
               "exercises": [
                 {
-                  "instruction": "This is how you extract donor weights from the synthetic control",
-                  "pattern": "weights = sc.W or matrix list e(W_weights)",
-                  "structureNote": "The <strong>donor weights</strong> show how much each control unit contributes to the synthetic version. Most weights are zero (sparse solution). A few key donors with positive weights form the synthetic control. Examining which donors matter provides intuition about the comparison.",
+                  "instruction": "Donor weights are stored in an attribute (Python), an <code>e()</code> matrix (Stata), or a list element (R)",
+                  "pattern": "weights = sc.W  /  matrix list e(W_weights)  /  synth.tables$tab.w",
+                  "structureNote": "Python: <code>sc.W</code> attribute. Stata: <code>e(W_weights)</code> stored matrix. R: <code>synth.tab()$tab.w</code> from a helper function.",
                   "languages": {
                     "python": [
-                      {"code": "print(", "role": "Function", "tip": "Displays the weights.", "color": "blue"},
-                      {"code": "\"Donor weights:\")\n", "role": "Label", "tip": "Descriptive label.", "color": "green"},
-                      {"code": "print(sc.W)", "role": "Weights", "tip": "sc.W contains the donor weights. Each row is a control unit, value is its weight (sums to 1).", "color": "teal"}
+                      {"code": "sc.W", "role": "Attribute", "tip": "Array of donor weights on the fitted <code>Synth</code> object. Weights sum to 1.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "matrix list", "role": "Command", "tip": "Displays a Stata matrix.", "color": "mauve"},
-                      {"code": " e(W_weights)", "role": "Matrix", "tip": "After running synth, e(W_weights) contains the donor unit weights. e() accesses stored estimation results.", "color": "sky"}
+                      {"code": "matrix list e(W_weights)", "role": "Command", "tip": "<code>e()</code> accesses post-estimation stored results. <code>matrix list</code> prints a Stata matrix.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "synth.tables", "role": "Variable", "tip": "Stores formatted tables from synth results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "synth.tab(dataprep.res = dataprep.out, synth.res = synth.out)\n", "role": "Table Function", "tip": "Creates summary tables from the synth results.", "color": "blue"},
-                      {"code": "print(synth.tables$tab.w)", "role": "Print Weights", "tip": "$tab.w contains the donor weights table. Shows each unit's contribution.", "color": "teal"}
+                      {"code": "synth.tab(dataprep.res = ..., synth.res = ...)", "role": "Function", "tip": "Helper that formats raw <code>synth()</code> output into readable tables.", "color": "blue"},
+                      {"code": "$tab.w", "role": "List element", "tip": "<code>$</code> extracts by name. <code>tab.w</code> = weights table; <code>tab.pred</code> = predictor balance.", "color": "teal"}
                     ]
                   }
                 }
@@ -465,25 +447,20 @@ Root MSPE: 234.56
             {
               "exercises": [
                 {
-                  "instruction": "This is how you plot the treated vs synthetic control trajectories",
-                  "pattern": "plot actual and synthetic outcomes over time",
-                  "structureNote": "The <strong>path plot</strong> is the signature visualization for synthetic control. It shows the treated unit and its synthetic counterpart over time. Pre-treatment fit should be tight (the lines overlap). Post-treatment divergence is the estimated treatment effect. A vertical line marks the treatment date.",
+                  "instruction": "The path plot is generated by a method call in Python, an option in Stata, and a separate function in R",
+                  "pattern": "sc.plot()  /  synth ..., figure  /  path.plot(synth.res, dataprep.res)",
+                  "structureNote": "Python: <code>sc.plot([...])</code> method on the fitted object. Stata: add <code>figure</code> to the <code>synth</code> command options. R: call <code>path.plot()</code> passing both the synth result and the dataprep output.",
                   "languages": {
                     "python": [
-                      {"code": "sc.plot", "role": "Method", "tip": "The Synth object's built-in plotting method.", "color": "teal"},
-                      {"code": "([\"original\", \"pointwise\"])", "role": "Plot Types", "tip": "\"original\" shows treated vs synthetic. \"pointwise\" shows the gap over time with confidence bands.", "color": "green"}
+                      {"code": "sc.plot([\"original\", \"pointwise\"])", "role": "Method call", "tip": "Pass a list of plot types. <code>\"original\"</code> = treated vs. synthetic; <code>\"pointwise\"</code> = gap with CIs.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "synth", "role": "Command", "tip": "The synth command with the figure option.", "color": "mauve"},
-                      {"code": " gdp gdp(1985) ... population trade_openness, ///\n    trunit(7) trperiod(1990)", "role": "Specification", "tip": "Same synth specification.", "color": "sky"},
-                      {"code": " ///\n    figure", "role": "Figure Option", "tip": "Produces the path plot showing treated vs synthetic control trajectories.", "color": "yellow"}
+                      {"code": "figure", "role": "Option", "tip": "Appended after the comma in the <code>synth</code> command. No separate plotting step needed.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "path.plot", "role": "Function", "tip": "From the Synth package. Creates the treated vs synthetic control path plot.", "color": "blue"},
-                      {"code": "(synth.res = synth.out", "role": "Results", "tip": "The synth estimation results.", "color": "sky"},
-                      {"code": ", dataprep.res = dataprep.out", "role": "Data", "tip": "The prepared data from dataprep().", "color": "sky"},
-                      {"code": ", Ylab = \"GDP\", Xlab = \"Year\"", "role": "Labels", "tip": "Axis labels for the plot.", "color": "green"},
-                      {"code": ", tr.intake = 1990)", "role": "Treatment Line", "tip": "Draws a vertical line at the treatment date.", "color": "lavender"}
+                      {"code": "path.plot", "role": "Function", "tip": "Requires both the estimation result and the <code>dataprep</code> output as inputs.", "color": "blue"},
+                      {"code": "synth.res = synth.out, dataprep.res = dataprep.out", "role": "Arguments", "tip": "Two required named arguments. R's Synth package keeps data and results in separate objects.", "color": "sky"},
+                      {"code": "tr.intake = 1990", "role": "Argument", "tip": "Draws a vertical dashed line at the treatment date. Dot notation (not underscore).", "color": "lavender"}
                     ]
                   }
                 }
@@ -505,32 +482,22 @@ Root MSPE: 234.56
             {
               "exercises": [
                 {
-                  "instruction": "This is how you run placebo tests (in-space) for inference",
+                  "instruction": "Python requires a manual loop; Stata and R have wrapper commands that automate placebo tests",
                   "pattern": "for each control unit: fit synth as if it were treated",
-                  "structureNote": "<strong>Placebo tests</strong> are the primary inference method for synthetic control. You re-run the analysis treating each control unit as if it were the treated unit. If the treated unit's effect is unusually large compared to the placebo distribution, the effect is statistically significant. This is a permutation-based approach.",
+                  "structureNote": "Python: write a <code>for</code> loop over control units. Stata: <code>synth_runner</code> automates it. R: <code>generate.placebos()</code> from <code>SCtools</code>.",
                   "languages": {
                     "python": [
-                      {"code": "placebo_effects", "role": "Storage", "tip": "Dictionary to store gaps (treated - synthetic) for each placebo unit.", "color": "pink"},
-                      {"code": " = {}\n", "role": "Empty Dict", "tip": "Will hold unit_name: gap_series pairs.", "color": "overlay"},
-                      {"code": "for unit in control_units:", "role": "Loop", "tip": "Iterate over each control unit, treating it as the 'treated' unit.", "color": "mauve"},
-                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
-                      {"code": "sc = Synth(df, ..., treated_unit=unit)", "role": "Fit Placebo", "tip": "Run synth treating this control unit as treated. Other controls form the donor pool.", "color": "blue"},
-                      {"code": "\n    ", "role": "Indent", "tip": "Still in loop.", "color": "text"},
-                      {"code": "sc.fit()", "role": "Estimate", "tip": "Fit the synthetic control for this placebo unit.", "color": "teal"},
-                      {"code": "\n    ", "role": "Indent", "tip": "Still in loop.", "color": "text"},
-                      {"code": "placebo_effects[unit] = sc.gaps", "role": "Store Gaps", "tip": "sc.gaps = treated - synthetic over time. Store for comparison with the real treated unit.", "color": "sky"}
+                      {"code": "for unit in control_units:", "role": "Loop", "tip": "No built-in placebo automation; you iterate and re-fit <code>Synth()</code> for each control unit.", "color": "mauve"},
+                      {"code": "placebo_effects[unit] = sc.gaps", "role": "Store", "tip": "Dictionary maps unit names to gap Series. <code>sc.gaps</code> = treated minus synthetic over time.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "synth_runner", "role": "Command", "tip": "Automates placebo tests. ssc install synth_runner.", "color": "mauve"},
-                      {"code": " gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) population trade_openness", "role": "Specification", "tip": "Same specification as the main synth command.", "color": "sky"},
-                      {"code": ", ///\n    trunit(7) trperiod(1990)", "role": "Treatment Spec", "tip": "Treated unit and period.", "color": "yellow"},
-                      {"code": " gen_vars", "role": "Option", "tip": "Generates variables for placebo effects and p-values.", "color": "yellow"}
+                      {"code": "synth_runner", "role": "Command", "tip": "Community package (<code>ssc install synth_runner</code>). Automates placebo tests for all control units.", "color": "mauve"},
+                      {"code": "gen_vars", "role": "Option", "tip": "Creates new variables in the dataset containing placebo effects and p-values.", "color": "mauve"},
+                      {"code": "effect_graphs", "role": "Post-command", "tip": "After <code>synth_runner</code>: plots all placebo gaps with the treated unit highlighted.", "color": "blue"}
                     ],
                     "r": [
-                      {"code": "placebo.out", "role": "Variable", "tip": "Stores placebo test results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "generate.placebos(dataprep.out, synth.out, Sigf.ipop = 5)\n", "role": "Function", "tip": "From SCtools. Runs the synth algorithm for each control unit as a placebo.", "color": "blue"},
-                      {"code": "plot_placebos(placebo.out)", "role": "Plot", "tip": "Plots the treated unit gap against all placebo gaps. The treated line should stand out.", "color": "teal"}
+                      {"code": "generate.placebos(dataprep.out, synth.out, Sigf.ipop = 5)", "role": "Function", "tip": "From <code>SCtools</code>. Takes the existing dataprep and synth objects. <code>Sigf.ipop</code> controls optimizer precision.", "color": "blue"},
+                      {"code": "plot_placebos(placebo.out)", "role": "Plot function", "tip": "Produces the spaghetti plot: gray placebos, black treated line.", "color": "teal"}
                     ]
                   }
                 }
@@ -770,22 +737,20 @@ Using tidysynth::plot_placebos():
             {
               "exercises": [
                 {
-                  "instruction": "This is how you calculate the placebo p-value from MSPE ratios",
-                  "pattern": "pvalue = fraction of placebos with effects >= treated effect",
-                  "structureNote": "The <strong>p-value</strong> is the fraction of placebo units with post-treatment effects as large as (or larger than) the treated unit's effect. A common metric is the ratio of post-treatment MSPE to pre-treatment MSPE — a large ratio means the post-treatment gap is unusual relative to the pre-treatment fit.",
+                  "instruction": "Python computes the p-value manually; Stata and R have one-line commands",
+                  "pattern": "pvalue = fraction of placebos with MSPE >= treated MSPE",
+                  "structureNote": "Python: manual computation with <code>np.mean()</code>. Stata: <code>pval_graphs</code> after <code>synth_runner</code>. R: <code>mspe.test()</code> from <code>SCtools</code>.",
                   "languages": {
                     "python": [
-                      {"code": "post_mspe", "role": "Treated MSPE", "tip": "Mean squared prediction error for the treated unit after treatment.", "color": "pink"},
-                      {"code": " = np.mean(treated_gaps[1990:]**2)\n", "role": "Computation", "tip": "Square the gaps and average them. Larger MSPE = bigger treatment effect.", "color": "blue"},
-                      {"code": "placebo_mspe", "role": "Placebo MSPEs", "tip": "Same computation for each placebo unit.", "color": "pink"},
-                      {"code": " = [np.mean(g[1990:]**2) for g in placebo_effects.values()]\n", "role": "List Comprehension", "tip": "Computes post-MSPE for every placebo in one line.", "color": "blue"},
-                      {"code": "pvalue = np.mean(placebo_mspe >= post_mspe)", "role": "P-value", "tip": "Fraction of placebos with effects as large as or larger than the treated unit. Small p-value = significant effect.", "color": "teal"}
+                      {"code": "np.mean(treated_gaps[1990:]**2)", "role": "MSPE", "tip": "Slices the gap Series from 1990 onward, squares, and averages. <code>**2</code> is element-wise squaring.", "color": "blue"},
+                      {"code": "[np.mean(g[1990:]**2) for g in placebo_effects.values()]", "role": "List comprehension", "tip": "Computes the same MSPE for every placebo in one line. <code>.values()</code> iterates over dict values.", "color": "blue"},
+                      {"code": "np.mean(placebo_mspe >= post_mspe)", "role": "P-value", "tip": "Boolean comparison produces 0/1 array; <code>np.mean()</code> gives the fraction that are True.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "pval_graphs", "role": "Command", "tip": "After synth_runner, this command displays the p-value graph showing where the treated unit ranks.", "color": "mauve"}
+                      {"code": "pval_graphs", "role": "Post-command", "tip": "One-line command after <code>synth_runner</code>. Plots time-varying p-values.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "mspe.test(placebo.out)", "role": "Function", "tip": "From SCtools. Computes the MSPE ratio test and reports the p-value based on the permutation distribution.", "color": "blue"}
+                      {"code": "mspe.test(placebo.out)", "role": "Function", "tip": "From <code>SCtools</code>. Computes the MSPE-ratio-based p-value automatically.", "color": "blue"}
                     ]
                   }
                 }
@@ -1015,34 +980,24 @@ trade_openness     0.456     0.448       0.412
             {
               "exercises": [
                 {
-                  "instruction": "This demonstrates how to validate a synthetic control estimate through four key diagnostics: pre-treatment fit quality (RMSPE), covariate balance, weight sparsity, and leave-one-out robustness",
+                  "instruction": "Diagnostics are accessed via attributes (Python), <code>e()</code> stored results (Stata), and list elements (R)",
                   "languages": {
                     "python": [
-                      {"code": "pre_rmspe", "role": "Variable", "tip": "Root Mean Squared Prediction Error before treatment — measures how well the synthetic control tracks the treated unit.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the computed RMSPE.", "color": "peach"},
-                      {"code": "np.sqrt(", "role": "Function", "tip": "NumPy square root.", "color": "blue"},
-                      {"code": "np.mean(", "role": "Function", "tip": "Computes the mean of squared prediction errors.", "color": "blue"},
-                      {"code": "(treated_pre - synthetic_pre)**2", "role": "Expression", "tip": "Squared differences between actual and synthetic outcomes in the pre-treatment period.", "color": "pink"},
-                      {"code": "))", "role": "Parens", "tip": "", "color": "overlay"}
+                      {"code": "np.sqrt(np.mean((treated_pre - synthetic_pre)**2))", "role": "RMSPE", "tip": "Manual computation: subtract arrays, square, mean, then square-root. No built-in <code>.rmspe</code> attribute.", "color": "blue"},
+                      {"code": "sc.comparison", "role": "Attribute", "tip": "Predictor balance table on the fitted <code>Synth</code> object.", "color": "teal"},
+                      {"code": "(sc.W > 0.05).sum()", "role": "Expression", "tip": "Boolean mask + <code>.sum()</code> counts donors with weight above 5%.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "ereturn list\n", "role": "Command", "tip": "Lists all stored estimation results from the last synth command.", "color": "blue"},
-                      {"code": "matrix list ", "role": "Command", "tip": "Displays a stored matrix.", "color": "blue"},
-                      {"code": "e(Y_balance)\n", "role": "Matrix", "tip": "Predictor balance table — shows treated vs synthetic values for each covariate.", "color": "lavender"},
-                      {"code": "matrix list ", "role": "Command", "tip": "Displays stored results.", "color": "blue"},
-                      {"code": "e(W_weights)", "role": "Matrix", "tip": "Donor weights — shows which comparison units contribute to the synthetic control.", "color": "lavender"}
+                      {"code": "ereturn list", "role": "Command", "tip": "Lists all <code>e()</code> stored results. Use after <code>synth</code>.", "color": "blue"},
+                      {"code": "matrix list e(Y_balance)", "role": "Command", "tip": "Predictor balance table: treated vs. synthetic on each matched variable.", "color": "lavender"},
+                      {"code": "matrix list e(W_weights)", "role": "Command", "tip": "Donor weights. Also available: <code>e(V_matrix)</code> for predictor importance weights.", "color": "lavender"}
                     ],
                     "r": [
-                      {"code": "synth.tables", "role": "Object", "tip": "Summary tables from the Synth package.", "color": "pink"},
-                      {"code": "$", "role": "Accessor", "tip": "Extracts a named element from the list.", "color": "overlay"},
-                      {"code": "tab.pred\n", "role": "Property", "tip": "Predictor comparison table — treated vs synthetic on each covariate.", "color": "lavender"},
-                      {"code": "sum(", "role": "Function", "tip": "Counts TRUE values.", "color": "blue"},
-                      {"code": "synth.out$solution.w", "role": "Property", "tip": "The donor unit weights from the optimization.", "color": "lavender"},
-                      {"code": " > 0.05", "role": "Condition", "tip": "Checks which weights exceed 5% — more donors with meaningful weight means a genuine blend.", "color": "peach"},
-                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"}
+                      {"code": "synth.tables$tab.pred", "role": "List element", "tip": "Predictor balance from <code>synth.tab()</code>. Shows treated vs. synthetic values.", "color": "lavender"},
+                      {"code": "synth.out$solution.w", "role": "List element", "tip": "Raw weight vector from the optimization. Use <code>sum(... > 0.05)</code> to count meaningful donors.", "color": "lavender"}
                     ]
                   },
-                  "structureNote": "SC diagnostics validate credibility: <strong>(1)</strong> a small pre-treatment RMSPE confirms the synthetic control closely tracks the treated unit; <strong>(2)</strong> covariate balance ensures predictors match; <strong>(3)</strong> weight sparsity checks whether the synthetic control is a genuine blend or just one comparison unit; <strong>(4)</strong> leave-one-out drops each major donor to verify the result is not driven by any single country."
+                  "structureNote": "Python computes RMSPE manually from arrays. Stata stores everything in <code>e()</code> matrices accessed with <code>matrix list</code>. R keeps results in nested lists accessed with <code>$</code>."
                 }
               ]
             }
@@ -1132,22 +1087,18 @@ Pre-treatment RMSPE   234.56      154.23
             {
               "exercises": [
                 {
-                  "instruction": "This demonstrates the augmented synthetic control method, which combines standard SC with ridge regression to correct for remaining pre-treatment imbalance and provide valid inference",
+                  "instruction": "The <code>augsynth</code> formula uses a <code>|</code> pipe to separate the treatment indicator from auxiliary covariates",
                   "languages": {
                     "r": [
-                      {"code": "library", "role": "Keyword", "tip": "Loads an R package.", "color": "mauve"},
-                      {"code": "(augsynth)\n", "role": "Package", "tip": "The augsynth package for augmented synthetic control methods.", "color": "yellow"},
-                      {"code": "asyn", "role": "Variable", "tip": "Stores the augmented synthetic control result.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "augsynth(", "role": "Function", "tip": "Fits an augmented synthetic control model.", "color": "blue"},
-                      {"code": "outcome ~ treatment", "role": "Formula", "tip": "Maps outcome to treatment indicator.", "color": "green"},
-                      {"code": " | ", "role": "Operator", "tip": "Separates the main formula from auxiliary covariates.", "color": "peach"},
-                      {"code": "covariate1 + covariate2,\n                 ", "role": "Covariates", "tip": "Auxiliary predictors used by the ridge augmentation to improve pre-treatment fit.", "color": "sky"},
-                      {"code": "progfunc = \"Ridge\"", "role": "Argument", "tip": "Uses ridge regression to augment SC weights — corrects for any remaining imbalance after weighting.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"}
+                      {"code": "augsynth", "role": "Function", "tip": "From the <code>augsynth</code> package. One-step call (no separate <code>dataprep</code>).", "color": "blue"},
+                      {"code": "outcome ~ treatment", "role": "Formula LHS", "tip": "Left of <code>|</code>: outcome and treatment indicator. Treatment must be binary.", "color": "pink"},
+                      {"code": " | ", "role": "Pipe", "tip": "Separates the main formula from auxiliary covariates for the ridge correction.", "color": "peach"},
+                      {"code": "covariate1 + covariate2", "role": "Covariates", "tip": "Right of <code>|</code>: auxiliary predictors used by the ridge augmentation step.", "color": "sky"},
+                      {"code": "unit = unit_id, time = year", "role": "Panel spec", "tip": "Unquoted column names identifying units and time periods.", "color": "sky"},
+                      {"code": "progfunc = \"Ridge\"", "role": "Argument", "tip": "Selects the augmentation method. <code>\"None\"</code> = standard SC, <code>\"Ridge\"</code> = augmented, <code>\"GSYN\"</code> = generalized SC.", "color": "lavender"}
                     ]
                   },
-                  "structureNote": "Augmented SC improves on standard SC by adding a <strong>ridge regression</strong> bias-correction step: after constructing SC weights, it uses an outcome model to adjust for any remaining pre-treatment imbalance. Set <code>progfunc = \"None\"</code> for standard SC, or <code>\"Ridge\"</code> for augmented SC. The augmented version provides valid <strong>standard errors</strong> and confidence intervals, unlike basic SC which typically relies on permutation inference."
+                  "structureNote": "The <code>|</code> pipe separates the core formula from augmentation covariates. <code>progfunc</code> controls the bias-correction method: <code>\"None\"</code> gives standard SC, <code>\"Ridge\"</code> adds ridge regression augmentation."
                 }
               ]
             }
@@ -1343,42 +1294,23 @@ Time weights (lambda):
             {
               "exercises": [
                 {
-                  "instruction": "This demonstrates synthetic difference-in-differences (SDID), which combines SC unit weights with DiD time weights to construct a doubly-robust counterfactual that is more efficient than either method alone",
+                  "instruction": "SDID takes matrix inputs in Python/R but uses standard panel syntax in Stata",
                   "languages": {
                     "python": [
-                      {"code": "from", "role": "Keyword", "tip": "Import statement.", "color": "mauve"},
-                      {"code": " synthdid.synthdid ", "role": "Module", "tip": "The synthdid Python package.", "color": "yellow"},
-                      {"code": "import", "role": "Keyword", "tip": "Imports a specific class.", "color": "mauve"},
-                      {"code": " SynthDID\n", "role": "Class", "tip": "The Synthetic DiD estimator class.", "color": "blue"},
-                      {"code": "sdid", "role": "Variable", "tip": "Stores the SDID estimator object.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Creates the estimator.", "color": "peach"},
-                      {"code": "SynthDID(", "role": "Constructor", "tip": "Initializes SDID with the outcome matrix and treatment indicators.", "color": "blue"},
-                      {"code": "Y, treatment_matrix", "role": "Arguments", "tip": "Y is the units-by-time outcome matrix; treatment_matrix flags treated unit-periods.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"}
+                      {"code": "SynthDID(Y, treatment_matrix)", "role": "Constructor", "tip": "<code>Y</code>: units-by-time numpy array. <code>treatment_matrix</code>: same shape, 1 for treated unit-periods. Matrix format, not long-panel.", "color": "blue"},
+                      {"code": "sdid.fit()", "role": "Method", "tip": "Solves for unit weights (<code>sdid.omega</code>) and time weights (<code>sdid.lambda_</code>).", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "sdid ", "role": "Command", "tip": "Synthetic DiD estimator command.", "color": "blue"},
-                      {"code": "outcome ", "role": "Depvar", "tip": "The outcome variable (e.g., GDP).", "color": "pink"},
-                      {"code": "unit_id year ", "role": "Panel IDs", "tip": "Unit and time identifiers for the panel structure.", "color": "sky"},
-                      {"code": "treatment, ", "role": "Treatment", "tip": "Binary indicator for treated unit-periods.", "color": "pink"},
-                      {"code": "vce(bootstrap)", "role": "Option", "tip": "Bootstrap standard errors for inference.", "color": "mauve"}
+                      {"code": "sdid outcome unit_id year treatment", "role": "Command", "tip": "Positional: depvar, unit ID, time var, treatment indicator. Long-format panel data.", "color": "blue"},
+                      {"code": ", vce(bootstrap) seed(1234)", "role": "Options", "tip": "<code>vce(bootstrap)</code> for SEs. <code>seed()</code> ensures reproducibility. <code>graph</code> adds a plot.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "library", "role": "Keyword", "tip": "Loads a package.", "color": "mauve"},
-                      {"code": "(synthdid)\n", "role": "Package", "tip": "The synthdid R package by Arkhangelsky et al.", "color": "yellow"},
-                      {"code": "setup", "role": "Variable", "tip": "Stores the prepared panel matrices.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "panel.matrices(", "role": "Function", "tip": "Converts panel data into the matrix format needed by synthdid.", "color": "blue"},
-                      {"code": "df, unit = unit_id, time = year, outcome = outcome, treatment = treatment", "role": "Arguments", "tip": "Specifies the panel structure — unit, time, outcome, and treatment columns.", "color": "sky"},
-                      {"code": ")\n", "role": "Paren", "tip": "", "color": "overlay"},
-                      {"code": "sdid_est", "role": "Variable", "tip": "The SDID point estimate.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "synthdid_estimate(", "role": "Function", "tip": "Computes the SDID treatment effect.", "color": "blue"},
-                      {"code": "setup$Y, setup$N0, setup$T0", "role": "Arguments", "tip": "Outcome matrix, number of control units, and number of pre-treatment periods.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "", "color": "overlay"}
+                      {"code": "panel.matrices(df, unit=..., time=..., outcome=..., treatment=...)", "role": "Prep function", "tip": "Converts long-format data to the matrix format <code>synthdid_estimate()</code> expects. Returns a list with <code>$Y</code>, <code>$N0</code>, <code>$T0</code>.", "color": "blue"},
+                      {"code": "synthdid_estimate(setup$Y, setup$N0, setup$T0)", "role": "Estimator", "tip": "Takes the outcome matrix and scalars (not column names). Compare with <code>did_estimate()</code> and <code>sc_estimate()</code> for benchmarking.", "color": "blue"},
+                      {"code": "vcov(sdid_est, method = \"bootstrap\")", "role": "SE", "tip": "<code>vcov()</code> is a generic; <code>method</code> selects <code>\"bootstrap\"</code>, <code>\"jackknife\"</code>, or <code>\"placebo\"</code>.", "color": "lavender"}
                     ]
                   },
-                  "structureNote": "SDID combines the strengths of both SC and DiD: it uses <strong>unit weights</strong> (like SC) to match control units to the treated unit, and <strong>time weights</strong> (unique to SDID) to focus on pre-treatment periods most predictive of post-treatment outcomes. This double-weighting makes SDID more efficient than either method alone. Use <code>did_estimate()</code> and <code>sc_estimate()</code> from the same package to compare all three estimators on identical data."
+                  "structureNote": "Python and R work with matrix inputs (<code>Y</code>, <code>N0</code>, <code>T0</code>). Stata uses standard long-panel syntax with positional arguments. All three support bootstrap SEs."
                 }
               ]
             }

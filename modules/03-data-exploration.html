@@ -399,29 +399,29 @@ Loaded <span class="out-num">14,112</span> rows and <span class="out-num">4</spa
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to load a CSV file from a URL into a DataFrame",
-                  "pattern": "variable = alias.function(argument)",
-                  "structureNote": "This follows the <strong>object.method(argument)</strong> pattern. You call a function that belongs to a library, pass it input, and store the result. The <code>=</code> sign means 'store this', not 'equals'.",
+                  "instruction": "How to call a library function via an alias and store the result.",
+                  "pattern": "var = alias.function(arg)  |  var <- function(arg)  |  command arg, option",
+                  "structureNote": "Python uses <code>alias.function()</code> where the dot accesses a name inside the imported module. R uses <code>&lt;-</code> for assignment. Stata uses a two-word command followed by a comma-separated options list.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "Variable Name", "tip": "The name you choose for your DataFrame. 'df' is a convention but you could use any valid name.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result of the right side into the variable on the left. Not 'equals' — it means 'store this'.", "color": "peach"},
-                      {"code": "pd", "role": "Library Alias", "tip": "Short name for pandas, set up with 'import pandas as pd'. Almost every Python data scientist uses this alias.", "color": "yellow"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses a function that belongs to the library on its left. Read as 'pandas's read_csv'.", "color": "overlay"},
-                      {"code": "read_csv(", "role": "Function Name", "tip": "A pandas function that reads CSV files and returns a DataFrame. Automatically detects column names and data types.", "color": "blue"},
-                      {"code": "url)", "role": "Argument", "tip": "The variable containing the file path or URL. Passed as input to the function.", "color": "sky"}
+                      {"code": "df", "role": "Variable", "tip": "Stores the return value.", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the right-hand result to the name on the left.", "color": "operator"},
+                      {"code": "pd", "role": "Module alias", "tip": "Set up earlier with <code>import pandas as pd</code>. The alias is just a shorter name for the module.", "color": "variable"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses a name defined inside the module.", "color": "overlay"},
+                      {"code": "read_csv", "role": "Function", "tip": "A function inside the pandas module, accessed via the dot.", "color": "function"},
+                      {"code": "(url)", "role": "Argument", "tip": "Single positional argument -- a variable holding a string.", "color": "variable"}
                     ],
                     "stata": [
-                      {"code": "import delimited ", "role": "Command", "tip": "Stata's command for loading CSV files. Two words that act as one command.", "color": "mauve"},
-                      {"code": "url", "role": "File Path", "tip": "The URL or file path to load. In Stata, this is a positional argument — no parameter name needed.", "color": "green"},
-                      {"code": ", ", "role": "Comma", "tip": "In Stata, commas separate the main arguments from options.", "color": "text"},
-                      {"code": "clear", "role": "Option", "tip": "Removes any existing data from memory before loading. Stata can only hold one dataset at a time.", "color": "yellow"}
+                      {"code": "import delimited", "role": "Command", "tip": "Two-word command -- Stata treats this pair as a single operation.", "color": "keyword"},
+                      {"code": " url", "role": "Positional arg", "tip": "No parameter name needed -- position tells Stata this is the file path.", "color": "string"},
+                      {"code": ", ", "role": "Comma", "tip": "In Stata, the comma separates core arguments from options.", "color": "overlay"},
+                      {"code": "clear", "role": "Option", "tip": "Options come after the comma. No = sign needed for flags.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Variable Name", "tip": "Name for your data frame — you choose this.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator. Points from right to left: 'take the result and store it in df'.", "color": "peach"},
-                      {"code": "read_csv(", "role": "Function Name", "tip": "From the readr package (part of tidyverse). Reads CSV files into a tibble (enhanced data frame).", "color": "blue"},
-                      {"code": "url)", "role": "Argument", "tip": "The file path or URL to read.", "color": "sky"}
+                      {"code": "df", "role": "Variable", "tip": "Stores the return value.", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow -- points from value to name.", "color": "operator"},
+                      {"code": "read_csv", "role": "Function", "tip": "A standalone function (not accessed via dot -- R does not use module.function syntax).", "color": "function"},
+                      {"code": "(url)", "role": "Argument", "tip": "Single positional argument.", "color": "variable"}
                     ]
                   }
                 }
@@ -437,29 +437,29 @@ Loaded <span class="out-num">14,112</span> rows and <span class="out-num">4</spa
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to print how many rows and columns are in the dataset using formatted text",
-                  "pattern": "print(formatted_string_with_expressions)",
-                  "structureNote": "This shows <strong>function nesting</strong>: functions inside functions. <code>len(df)</code> runs first, its result gets inserted into the f-string, and then <code>print()</code> displays the assembled text. The <code>:,</code> is a format specifier that adds thousand separators.",
+                  "instruction": "How f-string interpolation, format specifiers, and nested function calls work.",
+                  "pattern": "print(f\"text {expr:format} text {expr}\")  |  cat(sprintf(\"text %d\", expr))",
+                  "structureNote": "Python f-strings use <code>{expression}</code> to embed any expression. A colon inside the braces starts a <strong>format specifier</strong> (e.g. <code>:,</code> for thousands separator, <code>:.2f</code> for 2 decimals). R's <code>sprintf</code> uses <code>%d</code> / <code>%s</code> placeholders filled by subsequent arguments in order.",
                   "languages": {
                     "python": [
-                      {"code": "print(", "role": "Function", "tip": "Displays output to the screen. Everything inside its parentheses gets shown.", "color": "blue"},
-                      {"code": "f\"", "role": "F-string Start", "tip": "The 'f' prefix creates a formatted string. Expressions inside {curly braces} get evaluated and inserted.", "color": "green"},
-                      {"code": "Loaded ", "role": "Literal Text", "tip": "Plain text that appears as-is in the output.", "color": "green"},
-                      {"code": "{len(df):,}", "role": "Expression", "tip": "len(df) counts rows. The :, adds thousand separators (14,112 instead of 14112). Curly braces mark code inside the string.", "color": "sky"},
-                      {"code": " rows and ", "role": "Literal Text", "tip": "Plain text between the two expressions.", "color": "green"},
-                      {"code": "{len(df.columns)}", "role": "Expression", "tip": "df.columns returns the column list; len() counts them. This tells you how many variables you have.", "color": "sky"},
-                      {"code": " columns\")", "role": "F-string End", "tip": "Closing quote ends the string.", "color": "green"}
+                      {"code": "print(", "role": "Function", "tip": "Outer function -- its argument is the f-string.", "color": "function"},
+                      {"code": "f\"", "role": "F-string prefix", "tip": "The <code>f</code> before the quote activates interpolation -- braces become live expressions.", "color": "string"},
+                      {"code": "Loaded ", "role": "Literal text", "tip": "Text outside braces is included as-is.", "color": "string"},
+                      {"code": "{len(df):,}", "role": "Interpolation + format", "tip": "Braces hold an expression. The colon starts a format spec: <code>,</code> adds thousand separators.", "color": "variable"},
+                      {"code": " rows and ", "role": "Literal text", "tip": "More literal text.", "color": "string"},
+                      {"code": "{len(df.columns)}", "role": "Interpolation", "tip": "Nested calls are fine inside braces -- len() wraps df.columns.", "color": "variable"},
+                      {"code": " columns\")", "role": "End", "tip": "Closing quote ends the f-string; closing paren ends print().", "color": "string"}
                     ],
                     "stata": [
-                      {"code": "describe, ", "role": "Command", "tip": "Shows comprehensive info about the dataset: variable names, types, labels, and observation count.", "color": "mauve"},
-                      {"code": "short", "role": "Option", "tip": "Shows a compact summary: just observation count, variable count, and total size.", "color": "yellow"}
+                      {"code": "describe", "role": "Command", "tip": "Stata command -- no assignment, no parentheses.", "color": "keyword"},
+                      {"code": ", short", "role": "Option", "tip": "Comma introduces the options list.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "cat(", "role": "Function", "tip": "Concatenate and print. More flexible than print() for formatted output.", "color": "blue"},
-                      {"code": "sprintf(", "role": "Function", "tip": "Creates formatted strings. %d inserts an integer, %s inserts text. Values fill placeholders in order.", "color": "blue"},
-                      {"code": "\"Loaded %d rows and %d columns\\n\", ", "role": "Format String", "tip": "Template with %d placeholders for integers. \\n adds a newline at the end.", "color": "green"},
-                      {"code": "nrow(df), ", "role": "Row Count", "tip": "nrow() returns the number of rows in a data frame.", "color": "blue"},
-                      {"code": "ncol(df)))", "role": "Column Count", "tip": "ncol() returns the number of columns.", "color": "blue"}
+                      {"code": "cat(", "role": "Outer function", "tip": "Prints its argument to the console.", "color": "function"},
+                      {"code": "sprintf(", "role": "Inner function", "tip": "Nested inside cat(). Returns a formatted string.", "color": "function"},
+                      {"code": "\"Loaded %d rows and %d columns\\n\"", "role": "Format string", "tip": "<code>%d</code> is an integer placeholder. <code>\\n</code> is a newline escape.", "color": "string"},
+                      {"code": ", nrow(df), ncol(df)", "role": "Values", "tip": "Fill the %d placeholders left to right, in order.", "color": "function"},
+                      {"code": "))", "role": "Close both", "tip": "Inner paren closes sprintf(), outer closes cat().", "color": "overlay"}
                     ]
                   }
                 }
@@ -608,24 +608,24 @@ tibble [14,112 x 4] (S3: tbl_df/tbl/data.frame)
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to preview the first 5 rows of the dataset",
-                  "pattern": "dataframe.method()",
-                  "structureNote": "This is a <strong>method call</strong>: a function that belongs to an object. The dot connects the object (df) to its method (head). Empty parentheses mean 'use default settings' (5 rows). Methods know about the object they belong to — head() automatically knows which data to show.",
+                  "instruction": "Method call with empty parentheses vs standalone function vs command with a range qualifier.",
+                  "pattern": "obj.method()  |  function(arg)  |  command in start/end",
+                  "structureNote": "Python calls methods on objects with <code>obj.method()</code> -- empty parentheses use default arguments but are still required (without them you reference the function object, not call it). R passes the object as an argument: <code>head(df)</code>. Stata uses <code>in start/end</code> to restrict row ranges.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "Object", "tip": "The DataFrame you want to preview. Methods are called ON this object.", "color": "pink"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Connects the object to its method. Read as 'df's head'.", "color": "overlay"},
-                      {"code": "head", "role": "Method Name", "tip": "Returns the first N rows. Default is 5. Use head(10) to see 10 rows instead.", "color": "teal"},
-                      {"code": "()", "role": "Empty Args", "tip": "Empty parentheses mean 'use default arguments'. Still required — without them, you'd reference the method itself, not call it.", "color": "overlay"}
+                      {"code": "df", "role": "Object", "tip": "The object the method is called on.", "color": "variable"},
+                      {"code": ".", "role": "Dot", "tip": "Method access.", "color": "overlay"},
+                      {"code": "head", "role": "Method", "tip": "A function attached to the object.", "color": "function"},
+                      {"code": "()", "role": "Empty parens", "tip": "Triggers the call with default arguments. Omitting the parens references the function object without calling it.", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "list", "role": "Command", "tip": "Displays observations and their values. Without options, shows all data.", "color": "mauve"},
-                      {"code": " in ", "role": "Qualifier", "tip": "The 'in' qualifier restricts which observations to show by their row numbers.", "color": "mauve"},
-                      {"code": "1/5", "role": "Range", "tip": "Row range: from observation 1 to observation 5. Stata indexes from 1, not 0.", "color": "sky"}
+                      {"code": "list", "role": "Command", "tip": "Stata command -- no parentheses or assignment.", "color": "keyword"},
+                      {"code": " in ", "role": "Qualifier", "tip": "Restricts the command to a row range. Stata-specific syntax.", "color": "keyword"},
+                      {"code": "1/5", "role": "Range", "tip": "Slash separates start and end row numbers. Stata indexes from 1.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "head(", "role": "Function", "tip": "Returns the first N elements. Works on data frames, vectors, and other objects.", "color": "blue"},
-                      {"code": "df)", "role": "Argument", "tip": "The data frame to preview. In R, the data is passed as an argument rather than using dot notation.", "color": "pink"}
+                      {"code": "head", "role": "Function", "tip": "A standalone function -- the data is passed as an argument, not accessed via dot.", "color": "function"},
+                      {"code": "(df)", "role": "Argument", "tip": "The object to operate on, passed by position.", "color": "variable"}
                     ]
                   }
                 }
@@ -773,22 +773,22 @@ Country Name Country Code         Year        Value
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to get summary statistics for all numeric columns",
-                  "pattern": "dataframe.method()",
-                  "structureNote": "Another method call, same pattern as head(). The <strong>describe/summary</strong> family of functions is your first tool for understanding distributions. They show count, mean, std, min, quartiles, and max — the essential statistics for any variable.",
+                  "instruction": "Same method-call pattern as head() -- empty parentheses use defaults.",
+                  "pattern": "obj.method()  |  command  |  function(arg)",
+                  "structureNote": "All three languages use the same idea -- call a summarising routine with no extra arguments to get default output. Python and R require parentheses; Stata does not.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "Object", "tip": "The DataFrame to summarize.", "color": "pink"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the method.", "color": "overlay"},
-                      {"code": "describe", "role": "Method Name", "tip": "Generates summary statistics: count, mean, std, min, 25%, 50%, 75%, max. Only works on numeric columns by default.", "color": "teal"},
-                      {"code": "()", "role": "Empty Args", "tip": "No arguments needed — summarizes all numeric columns with default statistics.", "color": "overlay"}
+                      {"code": "df", "role": "Object", "tip": "The object the method operates on.", "color": "variable"},
+                      {"code": ".", "role": "Dot", "tip": "Method access.", "color": "overlay"},
+                      {"code": "describe", "role": "Method", "tip": "Called with empty parens to use default behaviour.", "color": "function"},
+                      {"code": "()", "role": "Empty parens", "tip": "No arguments -- defaults apply. Still required to trigger the call.", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "summarize", "role": "Command", "tip": "Shows mean, std dev, min, and max for each variable. The workhorse command for descriptive statistics in Stata.", "color": "mauve"}
+                      {"code": "summarize", "role": "Command", "tip": "A standalone command with no arguments -- operates on all loaded data by default.", "color": "keyword"}
                     ],
                     "r": [
-                      {"code": "summary(", "role": "Function", "tip": "Provides a six-number summary: min, 1st quartile, median, mean, 3rd quartile, max. Also shows NA count.", "color": "blue"},
-                      {"code": "df)", "role": "Argument", "tip": "The data frame to summarize.", "color": "pink"}
+                      {"code": "summary", "role": "Function", "tip": "Standalone function.", "color": "function"},
+                      {"code": "(df)", "role": "Argument", "tip": "The data object passed by position.", "color": "variable"}
                     ]
                   }
                 }
@@ -1032,26 +1032,26 @@ Group Statistics (tidyverse):
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to count how many times each unique value appears in a column",
-                  "pattern": "dataframe['column'].method()",
-                  "structureNote": "This introduces <strong>column selection + method chaining</strong>. First, <code>df['Country Name']</code> extracts a single column (a Series). Then <code>.value_counts()</code> is called on that column. This left-to-right chaining is fundamental — each step produces an object the next step works on.",
+                  "instruction": "How bracket column selection chains into a method call, and how R and Stata select columns differently.",
+                  "pattern": "df['col'].method()  |  function(df$col)  |  command varname",
+                  "structureNote": "Python uses square brackets with a string key to select a column, then chains a method with a dot. R uses the <code>$</code> operator. Stata uses bare variable names with no quotes or brackets.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The full dataset.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Begins column selection. Square brackets select parts of a DataFrame.", "color": "overlay"},
-                      {"code": "'Country Name'", "role": "Column Name", "tip": "The name of the column to extract, as a string. Must match exactly (case-sensitive).", "color": "green"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends column selection. This returns a Series (single column of data).", "color": "overlay"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Now calling a method on the extracted column (Series), not the full DataFrame.", "color": "overlay"},
-                      {"code": "value_counts", "role": "Method", "tip": "Counts occurrences of each unique value and sorts from most to least frequent. Essential for understanding categorical variables.", "color": "teal"},
-                      {"code": "()", "role": "Empty Args", "tip": "Uses defaults: counts all values, sorts descending.", "color": "overlay"}
+                      {"code": "df", "role": "Object", "tip": "The DataFrame.", "color": "variable"},
+                      {"code": "['Country Name']", "role": "Bracket selection", "tip": "Square brackets with a string key extract a single column. The string must match the column name exactly.", "color": "string"},
+                      {"code": ".", "role": "Dot", "tip": "Chains a method call onto the selected column.", "color": "overlay"},
+                      {"code": "value_counts", "role": "Method", "tip": "Called on the column object returned by the bracket selection.", "color": "function"},
+                      {"code": "()", "role": "Empty parens", "tip": "Default arguments.", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "tab ", "role": "Command", "tip": "Short for 'tabulate'. Creates a frequency table showing how many times each value appears.", "color": "mauve"},
-                      {"code": "country_name", "role": "Variable", "tip": "The variable to tabulate. Stata doesn't use quotes for variable names.", "color": "sky"}
+                      {"code": "tab", "role": "Command", "tip": "Short for tabulate -- Stata allows command abbreviations.", "color": "keyword"},
+                      {"code": " country_name", "role": "Variable name", "tip": "Bare name, no quotes or brackets. Stata variables are referenced directly.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "table(", "role": "Function", "tip": "Creates a frequency table of unique values. R's equivalent of value_counts.", "color": "blue"},
-                      {"code": "df$country_name)", "role": "Column", "tip": "The $ operator selects a column from a data frame. df$col is R's equivalent of Python's df['col'].", "color": "pink"}
+                      {"code": "table", "role": "Function", "tip": "Standalone function.", "color": "function"},
+                      {"code": "(df", "role": "Data frame", "tip": "The data frame.", "color": "variable"},
+                      {"code": "$", "role": "Column accessor", "tip": "R's column extraction operator -- equivalent to Python's bracket notation.", "color": "overlay"},
+                      {"code": "country_name)", "role": "Column name", "tip": "Bare name after $ -- no quotes needed.", "color": "variable"}
                     ]
                   }
                 }
@@ -1067,37 +1067,30 @@ Group Statistics (tidyverse):
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to calculate the average GDP per country using groupby aggregation",
-                  "pattern": "dataframe.groupby(key)[value].aggregation()",
-                  "structureNote": "This is <strong>split-apply-combine</strong>: the foundational pattern for data analysis. <code>groupby()</code> splits the data by country, <code>['Value']</code> selects which column to aggregate, and <code>.mean()</code> computes the average within each group. This three-step chain is used constantly in research.",
+                  "instruction": "How method chaining builds a three-step pipeline: group, select, aggregate.",
+                  "pattern": "df.groupby('key')['col'].agg()  |  df %>% group_by(key) %>% summarize(name = agg(col))",
+                  "structureNote": "Python chains left to right: each dot-accessed step returns a new object the next step operates on. <code>groupby()</code> returns a grouped object, bracket selection narrows it to one column, and <code>.mean()</code> collapses each group. R's <code>%>%</code> pipe does the same left-to-right flow. Stata's <code>collapse</code> puts the statistic in parentheses before the variable.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The full dataset.", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses the groupby method.", "color": "overlay"},
-                      {"code": "groupby(", "role": "Method", "tip": "Splits the DataFrame into groups based on a column's unique values. Nothing visible happens yet — it prepares for aggregation.", "color": "teal"},
-                      {"code": "'Country Name')", "role": "Group Key", "tip": "The column to group by. Each unique country becomes its own group.", "color": "green"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Selects which column to aggregate from within each group.", "color": "overlay"},
-                      {"code": "'Value'", "role": "Value Column", "tip": "The column containing the numbers to average (GDP values).", "color": "green"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends column selection.", "color": "overlay"},
-                      {"code": ".", "role": "Dot", "tip": "Chains to the aggregation function.", "color": "overlay"},
-                      {"code": "mean", "role": "Aggregation", "tip": "Calculates the average within each group. Other options: sum(), median(), count(), std().", "color": "teal"},
-                      {"code": "()", "role": "Empty Args", "tip": "Computes and returns the result — one mean per country.", "color": "overlay"}
+                      {"code": "df", "role": "Object", "tip": "Starting DataFrame.", "color": "variable"},
+                      {"code": ".groupby(", "role": "Step 1", "tip": "Dot accesses the method. Returns a grouped object -- nothing computed yet.", "color": "function"},
+                      {"code": "'Country Name')", "role": "String key", "tip": "Column name as a string.", "color": "string"},
+                      {"code": "['Value']", "role": "Step 2", "tip": "Bracket selection on the grouped object -- narrows to one column per group.", "color": "string"},
+                      {"code": ".mean()", "role": "Step 3", "tip": "Aggregation method -- collapses each group to a single value. Empty parens use defaults.", "color": "function"}
                     ],
                     "stata": [
-                      {"code": "collapse ", "role": "Command", "tip": "Aggregates data, replacing the dataset with one row per group. Destructive — saves the original first!", "color": "mauve"},
-                      {"code": "(mean) ", "role": "Statistic", "tip": "The aggregation function to apply. Other options: (sum), (median), (count), (sd).", "color": "blue"},
-                      {"code": "value, ", "role": "Variable", "tip": "The variable to aggregate.", "color": "sky"},
-                      {"code": "by(", "role": "Option", "tip": "Specifies the grouping variable.", "color": "yellow"},
-                      {"code": "country_name)", "role": "Group Key", "tip": "Group by this variable — one row per unique country in the result.", "color": "sky"}
+                      {"code": "collapse", "role": "Command", "tip": "Stata command.", "color": "keyword"},
+                      {"code": " (mean)", "role": "Statistic", "tip": "Parenthesised statistic name before the variable -- Stata-specific syntax.", "color": "function"},
+                      {"code": " value", "role": "Variable", "tip": "The variable to aggregate.", "color": "variable"},
+                      {"code": ", by(", "role": "Option", "tip": "Comma introduces options. <code>by()</code> specifies the grouping variable.", "color": "overlay"},
+                      {"code": "country_name)", "role": "Group key", "tip": "Bare variable name inside the parentheses.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Data Frame", "tip": "The full dataset.", "color": "pink"},
-                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the data to the next function. Read as 'then'. The pipe makes code read left-to-right.", "color": "mauve"},
-                      {"code": "group_by", "role": "Function", "tip": "From dplyr. Groups the data by a column — subsequent operations work within each group.", "color": "blue"},
-                      {"code": "(country_name)", "role": "Group Key", "tip": "The column to group by. In dplyr, column names don't need quotes.", "color": "sky"},
-                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the grouped data to the summarize function.", "color": "mauve"},
-                      {"code": "summarize", "role": "Function", "tip": "Computes summary statistics within each group. Creates one row per group.", "color": "blue"},
-                      {"code": "(avg_gdp = mean(value, na.rm=TRUE))", "role": "Aggregation", "tip": "Creates a new column 'avg_gdp' with the mean of 'value'. na.rm=TRUE ignores missing values.", "color": "sky"}
+                      {"code": "df", "role": "Data frame", "tip": "Starting object.", "color": "variable"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Feeds the data frame as the first argument to the next function.", "color": "operator"},
+                      {"code": "group_by(country_name)", "role": "Step 1", "tip": "Bare column name -- no quotes. dplyr uses non-standard evaluation.", "color": "function"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Feeds the grouped data onward.", "color": "operator"},
+                      {"code": "summarize(avg_gdp = mean(value, na.rm=TRUE))", "role": "Step 2", "tip": "<code>name = expr</code> inside summarize creates a new column. <code>na.rm=TRUE</code> is a keyword argument that skips NAs.", "color": "function"}
                     ]
                   }
                 }
@@ -1626,30 +1619,29 @@ Group Statistics (tidyverse):
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to compute the correlation matrix for all numeric columns",
-                  "pattern": "dataframe.method(keyword_argument=value)",
-                  "structureNote": "This introduces <strong>keyword arguments</strong> — named parameters that control how a function behaves. <code>numeric_only=True</code> tells corr() to skip non-numeric columns instead of raising an error. Keyword arguments make code self-documenting: you can see what each setting does.",
+                  "instruction": "How a keyword argument controls method behaviour, and how each language passes named options.",
+                  "pattern": "obj.method(key=Value)  |  function(data, key = \"value\")  |  command varlist, option",
+                  "structureNote": "Python keyword arguments use <code>name=value</code> inside the parentheses. <code>True</code> is Python's boolean literal (capital T). R uses <code>=</code> for keyword arguments too but spells its boolean literals differently. Stata puts options after a comma, with no <code>=</code> for flags.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The dataset to analyze.", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses the method.", "color": "overlay"},
-                      {"code": "corr(", "role": "Method", "tip": "Computes pairwise Pearson correlation between all numeric columns. Returns a square matrix.", "color": "teal"},
-                      {"code": "numeric_only", "role": "Parameter Name", "tip": "A keyword argument that filters to numeric columns only. Named arguments use the 'name=value' syntax.", "color": "lavender"},
-                      {"code": "=", "role": "Equals", "tip": "Assigns a value to the parameter. Different from assignment (=) — this is inside a function call.", "color": "peach"},
-                      {"code": "True)", "role": "Boolean Value", "tip": "Python's boolean for 'yes'. Tells the function to include only numeric columns.", "color": "sky"}
+                      {"code": "df", "role": "Object", "tip": "The object the method is called on.", "color": "variable"},
+                      {"code": ".", "role": "Dot", "tip": "Method access.", "color": "overlay"},
+                      {"code": "corr", "role": "Method", "tip": "Method name.", "color": "function"},
+                      {"code": "(numeric_only=", "role": "Keyword arg", "tip": "<code>name=value</code> syntax -- the parameter name is explicit, so argument order does not matter.", "color": "variable"},
+                      {"code": "True", "role": "Boolean literal", "tip": "Python booleans are capitalised: <code>True</code> and <code>False</code>.", "color": "sky"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "pwcorr ", "role": "Command", "tip": "Pairwise correlations. Shows the correlation matrix for specified variables.", "color": "mauve"},
-                      {"code": "var1 var2 var3", "role": "Variable List", "tip": "List the numeric variables to correlate. Stata requires you to name them explicitly.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "sig", "role": "Option", "tip": "Displays significance levels (p-values) below each correlation coefficient.", "color": "yellow"}
+                      {"code": "pwcorr", "role": "Command", "tip": "Stata command.", "color": "keyword"},
+                      {"code": " var1 var2 var3", "role": "Variable list", "tip": "Space-separated bare names -- Stata selects columns by listing them.", "color": "variable"},
+                      {"code": ", sig", "role": "Option flag", "tip": "Comma introduces options. <code>sig</code> is a flag (no value) -- its presence turns the feature on.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "cor(", "role": "Function", "tip": "Computes correlation matrix. R's base function for Pearson correlation.", "color": "blue"},
-                      {"code": "df_numeric, ", "role": "Data", "tip": "A data frame containing only numeric columns. Use select(where(is.numeric)) to filter first.", "color": "pink"},
-                      {"code": "use", "role": "Parameter", "tip": "Controls handling of missing values.", "color": "lavender"},
-                      {"code": " = ", "role": "Equals", "tip": "Assigns value to the parameter.", "color": "peach"},
-                      {"code": "\"complete.obs\")", "role": "Value", "tip": "Only uses rows where all values are present. Avoids NA propagation in the correlation matrix.", "color": "green"}
+                      {"code": "cor", "role": "Function", "tip": "Standalone function.", "color": "function"},
+                      {"code": "(df_numeric, ", "role": "Positional arg", "tip": "First positional argument.", "color": "variable"},
+                      {"code": "use = ", "role": "Keyword arg", "tip": "R also uses <code>name = value</code> for named arguments.", "color": "variable"},
+                      {"code": "\"complete.obs\"", "role": "String value", "tip": "A string option -- R uses quoted strings where Python might use an enum or boolean.", "color": "string"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -1743,41 +1735,34 @@ Group Statistics (tidyverse):
             {
               "exercises": [
                 {
-                  "instruction": "This filters a DataFrame to keep only rows where the year column equals 2020",
+                  "instruction": "How boolean indexing (Python), pipe + filter (R), and the if qualifier (Stata) select rows.",
+                  "pattern": "df[df['col'] == val]  |  df %>% filter(col == val)  |  command var if var == val",
+                  "structureNote": "Python's <code>df[condition]</code> uses nested brackets -- the inner brackets select a column, the comparison produces a True/False series, and the outer brackets keep only True rows. <code>==</code> is the equality test in all three languages (double equals, not single). When combining conditions in Python, use <code>&</code> and <code>|</code> with parentheses around each condition -- the word <code>and</code> does not work with pandas Series.",
                   "languages": {
                     "python": [
-                      {"code": "df_2020 ", "role": "Variable Name", "tip": "The new variable that will hold the filtered data. Descriptive names make your code readable.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the filtered result into df_2020.", "color": "peach"},
-                      {"code": "df", "role": "DataFrame", "tip": "The original DataFrame you are filtering.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Begins the Boolean indexing — pass a True/False series inside to select rows.", "color": "overlay"},
-                      {"code": "df", "role": "DataFrame", "tip": "You reference df again inside the brackets to create the condition.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Selects a single column from the DataFrame by name.", "color": "overlay"},
-                      {"code": "'year'", "role": "Column Name", "tip": "The column to test. Must be a string matching an existing column name.", "color": "green"},
-                      {"code": "] ", "role": "Close Bracket", "tip": "Ends the column selection, returning a Series of values.", "color": "overlay"},
-                      {"code": "== ", "role": "Equality Test", "tip": "Tests each value for equality (not assignment!). Returns True or False per row.", "color": "peach"},
-                      {"code": "2020", "role": "Value", "tip": "The value to compare against. Only rows where year equals 2020 will be True.", "color": "red"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends the Boolean indexing. Only rows with True are kept.", "color": "overlay"}
+                      {"code": "df_2020", "role": "Variable", "tip": "Stores the filtered result.", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Binds the result.", "color": "operator"},
+                      {"code": "df[", "role": "Outer bracket", "tip": "Opens boolean indexing -- expects a True/False series inside.", "color": "variable"},
+                      {"code": "df['year']", "role": "Column selection", "tip": "Inner brackets extract one column as a Series.", "color": "string"},
+                      {"code": " == ", "role": "Equality operator", "tip": "Double equals tests equality element-wise. Returns True/False per row.", "color": "operator"},
+                      {"code": "2020", "role": "Value", "tip": "Numeric literal to compare against.", "color": "sky"},
+                      {"code": "]", "role": "Close bracket", "tip": "Closes boolean indexing -- only True rows are kept.", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "summarize ", "role": "Command", "tip": "Stata command that shows summary statistics. The if qualifier restricts which rows are included.", "color": "mauve"},
-                      {"code": "income ", "role": "Variable", "tip": "The variable to summarize.", "color": "pink"},
-                      {"code": "if ", "role": "Qualifier", "tip": "Restricts the command to rows meeting a condition. In Stata, if is a qualifier, not a separate filter step.", "color": "mauve"},
-                      {"code": "year ", "role": "Variable", "tip": "The variable to test.", "color": "pink"},
-                      {"code": "== ", "role": "Equality Test", "tip": "Double equals tests for equality. Single = is for assignment in Stata.", "color": "peach"},
-                      {"code": "2020", "role": "Value", "tip": "Only rows where year is 2020 are included.", "color": "red"}
+                      {"code": "summarize income", "role": "Command + var", "tip": "Command followed by the variable to operate on.", "color": "keyword"},
+                      {"code": " if ", "role": "Qualifier", "tip": "Stata-specific qualifier that restricts the command to matching rows. Not a separate step.", "color": "keyword"},
+                      {"code": "year == 2020", "role": "Condition", "tip": "Double equals for equality -- same operator as Python and R.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "df_2020 ", "role": "Variable Name", "tip": "The new variable holding the filtered result.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "R's assignment operator. Stores the result on the right into the variable on the left.", "color": "peach"},
-                      {"code": "df ", "role": "Data Frame", "tip": "The original data frame to filter.", "color": "pink"},
-                      {"code": "%>% ", "role": "Pipe Operator", "tip": "Passes the object on the left as the first argument to the function on the right. Read as 'then'.", "color": "peach"},
-                      {"code": "filter(", "role": "Function", "tip": "A dplyr function that keeps rows where the condition is TRUE. Cleaner than base R subsetting.", "color": "blue"},
-                      {"code": "year ", "role": "Column", "tip": "Inside dplyr functions, you refer to columns by name without quotes or $.", "color": "pink"},
-                      {"code": "== ", "role": "Equality Test", "tip": "Tests each row for equality. Returns TRUE or FALSE.", "color": "peach"},
-                      {"code": "2020)", "role": "Value", "tip": "Only rows where year equals 2020 pass the filter.", "color": "red"}
+                      {"code": "df_2020", "role": "Variable", "tip": "Stores the result.", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R assignment arrow.", "color": "operator"},
+                      {"code": "df", "role": "Data frame", "tip": "Input to the pipe.", "color": "variable"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Feeds df as the first argument to filter().", "color": "operator"},
+                      {"code": "filter(", "role": "Function", "tip": "dplyr function -- keeps rows where the condition is TRUE.", "color": "function"},
+                      {"code": "year", "role": "Column name", "tip": "Bare name -- dplyr uses non-standard evaluation, no quotes or $ needed.", "color": "variable"},
+                      {"code": " == 2020)", "role": "Condition", "tip": "Same == operator. Closing paren ends the filter call.", "color": "sky"}
                     ]
-                  },
-                  "structureNote": "Filtering rows is one of the most common data operations. In Python, you use <strong>Boolean indexing</strong> with <code>df[condition]</code>. In R, you use <code>filter()</code> from dplyr. In Stata, you add an <code>if</code> qualifier to commands. When combining multiple conditions, use <code>&</code> (and) or <code>|</code> (or) — and in Python, always wrap each condition in parentheses."
+                  }
                 }
               ]
             }
@@ -1854,34 +1839,35 @@ Group Statistics (tidyverse):
             {
               "exercises": [
                 {
-                  "instruction": "This converts a column to numeric type, turning unparseable values into missing (NaN) instead of raising an error",
+                  "instruction": "How to overwrite a column in place, and how keyword arguments control error behaviour.",
+                  "pattern": "df['col'] = module.func(df['col'], errors='coerce')  |  df$col <- as.type(df$col)  |  destring var, replace force",
+                  "structureNote": "Python overwrites a column by assigning back into the same bracket expression: <code>df['col'] = ...</code>. The keyword argument <code>errors='coerce'</code> is a string value (not a boolean) -- Python lets any type serve as a keyword arg value. R uses <code>df$col &lt;-</code> for the same overwrite. Stata separates the variable from options with a comma, and <code>force</code> is a flag option (no value needed).",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The DataFrame containing the column to convert.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Selects a column by name.", "color": "overlay"},
-                      {"code": "'income'", "role": "Column Name", "tip": "The column to convert from string to numeric.", "color": "green"},
-                      {"code": "] ", "role": "Close Bracket", "tip": "Ends the column selection.", "color": "overlay"},
-                      {"code": "= ", "role": "Assignment", "tip": "Overwrites the column with the converted values.", "color": "peach"},
-                      {"code": "pd", "role": "Library Alias", "tip": "Short name for pandas.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a function belonging to pandas.", "color": "overlay"},
-                      {"code": "to_numeric(", "role": "Function", "tip": "Converts values to numeric type. Handles strings like '45000' or '$50,000'.", "color": "blue"},
-                      {"code": "df['income'], ", "role": "Input Column", "tip": "The column of values to convert.", "color": "pink"},
-                      {"code": "errors='coerce')", "role": "Error Handling", "tip": "Values that cannot be converted become NaN instead of causing an error. Essential for messy real-world data.", "color": "sky"}
+                      {"code": "df['income']", "role": "Target column", "tip": "Bracket notation on the left side of = overwrites that column.", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Replaces the column contents.", "color": "operator"},
+                      {"code": "pd", "role": "Module alias", "tip": "Module accessed via dot.", "color": "variable"},
+                      {"code": ".", "role": "Dot", "tip": "Accesses a function inside the module.", "color": "overlay"},
+                      {"code": "to_numeric", "role": "Function", "tip": "Module-level function -- not a method on df.", "color": "function"},
+                      {"code": "(df['income'], ", "role": "Positional arg", "tip": "The column to convert, selected with brackets.", "color": "variable"},
+                      {"code": "errors=", "role": "Keyword arg", "tip": "Named parameter controlling error handling.", "color": "variable"},
+                      {"code": "'coerce'", "role": "String value", "tip": "A string literal -- the keyword arg value can be any type.", "color": "string"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "destring ", "role": "Command", "tip": "Converts string variables to numeric. Removes non-numeric characters during conversion.", "color": "mauve"},
-                      {"code": "income, ", "role": "Variable", "tip": "The string variable to convert to numeric.", "color": "pink"},
-                      {"code": "replace ", "role": "Option", "tip": "Overwrites the original variable. Without this, Stata requires a new variable name.", "color": "sky"},
-                      {"code": "force", "role": "Option", "tip": "Converts non-numeric values to missing (.) instead of stopping with an error.", "color": "sky"}
+                      {"code": "destring", "role": "Command", "tip": "Stata command.", "color": "keyword"},
+                      {"code": " income", "role": "Variable", "tip": "Bare variable name.", "color": "variable"},
+                      {"code": ", ", "role": "Comma", "tip": "Separates the variable list from options.", "color": "overlay"},
+                      {"code": "replace", "role": "Option", "tip": "Flag option -- overwrites the variable in place.", "color": "variable"},
+                      {"code": " force", "role": "Option", "tip": "Another flag -- converts failures to missing (.) silently.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "df$income ", "role": "Column", "tip": "Accesses the income column of the data frame using $ notation.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Overwrites the column with the converted values.", "color": "peach"},
-                      {"code": "as.numeric(", "role": "Function", "tip": "Converts values to numeric type. Non-numeric strings become NA with a warning.", "color": "blue"},
-                      {"code": "df$income)", "role": "Input Column", "tip": "The column of values to convert.", "color": "pink"}
+                      {"code": "df$income", "role": "Target column", "tip": "$ on the left of <- overwrites that column.", "color": "variable"},
+                      {"code": " <- ", "role": "Assignment", "tip": "Replaces the column contents.", "color": "operator"},
+                      {"code": "as.numeric", "role": "Function", "tip": "Type conversion function. <code>as.</code> prefix is R's convention for coercion functions.", "color": "function"},
+                      {"code": "(df$income)", "role": "Argument", "tip": "The column to convert, selected with $.", "color": "variable"}
                     ]
-                  },
-                  "structureNote": "Data type conversion is critical because columns read as text cannot be used in calculations. The <code>errors='coerce'</code> pattern (Python) and <code>force</code> option (Stata) gracefully handle unparseable values by converting them to missing rather than crashing your script. Always check <code>df.dtypes</code> (Python), <code>describe</code> (Stata), or <code>str(df)</code> (R) to verify column types before analysis."
+                  }
                 }
               ]
             }

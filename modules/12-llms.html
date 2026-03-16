@@ -365,24 +365,52 @@ Punctuation is usually a separate token.</pre>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "Text is converted into tokens (sub-word pieces) and then into integer IDs that the model processes",
+                  "instruction": "Tokenization splits text into sub-word pieces stored in a list",
                   "languages": {
                     "python": [
-                      {"code": "tokens", "role": "Variable Name", "tip": "Stores the list of sub-word pieces the model will process.", "color": "pink"},
-                      {"code": " = [", "role": "Assignment", "tip": "Stores the value.", "color": "peach"},
-                      {"code": "\"Hello\", ", "role": "String", "tip": "The first token. Notice tokens are not always full words -- spaces and punctuation become separate tokens.", "color": "green"},
-                      {"code": "\",\", ", "role": "String", "tip": "Punctuation is its own token. The tokenizer separates it from the preceding word.", "color": "green"},
-                      {"code": "\" how\"", "role": "String", "tip": "Notice the leading space -- most tokenizers attach whitespace to the following word, not the preceding one.", "color": "green"},
-                      {"code": ", ...]\n", "role": "Punctuation", "tip": "The list continues with more tokens.", "color": "overlay"},
-                      {"code": "token_ids", "role": "Variable Name", "tip": "Each token maps to a unique integer in the model's vocabulary.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the IDs.", "color": "peach"},
-                      {"code": "[15496, 11, 703, ...]", "role": "List of Integers", "tip": "The model never sees text -- it processes sequences of these integer IDs through its neural network layers.", "color": "sky"}
+                      {
+                        "code": "tokens",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = [",
+                        "role": "",
+                        "tip": "List literal.",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\"Hello\",",
+                        "role": "String",
+                        "tip": "Some tokens are full words.",
+                        "color": "green"
+                      },
+                      {
+                        "code": "\",\",",
+                        "role": "String",
+                        "tip": "Punctuation is a separate token.",
+                        "color": "green"
+                      },
+                      {
+                        "code": "\" how\"",
+                        "role": "String",
+                        "tip": "Leading space is part of the token. Tokenizer convention.",
+                        "color": "green"
+                      },
+                      {
+                        "code": ", ...]",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ]
                   },
-                  "structureNote": "LLMs work with <strong>tokens</strong>, not words. Tokenization converts text into sub-word pieces, then maps each piece to an integer ID. A typical ratio is ~1.3 tokens per word. Understanding tokenization matters for estimating API costs and context window limits."
+                  "structureNote": "LLMs tokenize text into sub-word pieces, not whole words. Each token maps to an integer ID in the vocabulary."
                 }
               ]
             }
@@ -496,31 +524,58 @@ Temperature used: 0.7</pre>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "LLMs generate text one token at a time in an autoregressive loop: predict next token, append it, repeat",
+                  "instruction": "Autoregressive generation: loop, predict next token, append, repeat",
                   "languages": {
                     "python": [
-                      {"code": "for ", "role": "Keyword", "tip": "Starts a loop that repeats the generation process for each new token.", "color": "mauve"},
-                      {"code": "_ ", "role": "Variable Name", "tip": "Underscore means we don't need the loop counter -- we just want to repeat max_tokens times.", "color": "pink"},
-                      {"code": "in ", "role": "Keyword", "tip": "Part of the for loop syntax.", "color": "mauve"},
-                      {"code": "range(", "role": "Function", "tip": "Generates a sequence of numbers to control how many tokens to generate.", "color": "blue"},
-                      {"code": "max_tokens):\n    ", "role": "Variable Name", "tip": "The maximum number of tokens to generate. Caps response length and API cost.", "color": "pink"},
-                      {"code": "probs", "role": "Variable Name", "tip": "A probability distribution over the entire vocabulary (50,000+ words).", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "", "color": "peach"},
-                      {"code": "model(", "role": "Variable Name", "tip": "The LLM neural network.", "color": "pink"},
-                      {"code": "tokens)\n    ", "role": "Argument", "tip": "The entire sequence so far -- the model reads all previous tokens to predict the next one.", "color": "sky"},
-                      {"code": "next_token", "role": "Variable Name", "tip": "The token selected from the probability distribution.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "", "color": "peach"},
-                      {"code": "sample(", "role": "Function", "tip": "Picks a token from the probability distribution. With temperature=0, always picks the most likely token.", "color": "blue"},
-                      {"code": "probs, ", "role": "Argument", "tip": "The probability distribution to sample from.", "color": "sky"},
-                      {"code": "temperature", "role": "Parameter", "tip": "Controls randomness: 0 = deterministic, 0.7 = balanced, 1+ = creative.", "color": "sky"},
-                      {"code": "=", "role": "Operator", "tip": "", "color": "peach"},
-                      {"code": "0.7)", "role": "Value", "tip": "A moderate temperature -- mostly picks likely tokens but allows some variety.", "color": "sky"}
+                      {
+                        "code": "for",
+                        "role": "Keyword",
+                        "tip": "",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "_",
+                        "role": "Throwaway Variable",
+                        "tip": "Underscore = convention for unused loop variable.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": "in",
+                        "role": "Keyword",
+                        "tip": "",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "range(",
+                        "role": "Function",
+                        "tip": "Generates integers 0 to N-1.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "max_tokens):",
+                        "role": "Argument",
+                        "tip": "Caps the generation length.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "\n    probs",
+                        "role": "Variable",
+                        "tip": "Probability distribution over vocabulary.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = model(tokens)",
+                        "role": "Call",
+                        "tip": "Forward pass: input tokens -> output probabilities.",
+                        "color": "blue"
+                      }
                     ]
                   },
-                  "structureNote": "LLMs generate text <strong>autoregressively</strong>: at each step, the model reads all tokens so far, outputs a probability for every word in its vocabulary, samples one token, appends it, and repeats. The <code>temperature</code> parameter controls how random the sampling is."
+                  "structureNote": "Pattern: <code>for _ in range(max_tokens): probs = model(tokens); next = sample(probs); tokens.append(next)</code>. Underscore <code>_</code> discards the loop counter."
                 }
               ]
             }
@@ -760,23 +815,58 @@ Response:
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "Few-shot prompting provides examples of the input-output pattern you want, so the model infers the task",
+                  "instruction": "Build a multi-line prompt string with triple quotes and in-context examples",
                   "languages": {
                     "python": [
-                      {"code": "prompt", "role": "Variable Name", "tip": "Stores the complete prompt that will be sent to the LLM.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "", "color": "peach"},
-                      {"code": "\"\"\"", "role": "String Delimiter", "tip": "Triple quotes allow multi-line strings in Python -- essential for writing complex prompts.", "color": "green"},
-                      {"code": "Translate to French:\n", "role": "Instruction", "tip": "The task description. Be specific about what you want the model to do.", "color": "green"},
-                      {"code": "English: Hello\nFrench: Bonjour\n\n", "role": "Example 1", "tip": "First input-output example. The model learns the format from these examples.", "color": "green"},
-                      {"code": "English: Thank you\nFrench: Merci\n\n", "role": "Example 2", "tip": "Second example reinforces the pattern. 2-3 examples usually suffice.", "color": "green"},
-                      {"code": "English: How are you?\nFrench:", "role": "Query", "tip": "The input you want translated. By ending with 'French:' and no answer, you prompt the model to complete the pattern.", "color": "green"},
-                      {"code": "\"\"\"", "role": "String Delimiter", "tip": "Closes the multi-line string.", "color": "green"}
+                      {
+                        "code": "prompt",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "\"\"\"",
+                        "role": "Triple Quote",
+                        "tip": "Multi-line string delimiter.",
+                        "color": "green"
+                      },
+                      {
+                        "code": "Translate to French:",
+                        "role": "Instruction Line",
+                        "tip": "First line sets the task.",
+                        "color": "green"
+                      },
+                      {
+                        "code": "\nEnglish: Hello\nFrench: Bonjour",
+                        "role": "Example",
+                        "tip": "Input-output pair. The model infers the pattern.",
+                        "color": "green"
+                      },
+                      {
+                        "code": "\nEnglish: How are you?\nFrench:",
+                        "role": "Query",
+                        "tip": "Ends with the output prefix. The model completes it.",
+                        "color": "green"
+                      },
+                      {
+                        "code": "\"\"\"",
+                        "role": "Triple Quote",
+                        "tip": "",
+                        "color": "green"
+                      }
                     ]
                   },
-                  "structureNote": "The three main prompting techniques are: <strong>zero-shot</strong> (just the instruction), <strong>few-shot</strong> (instruction + examples), and <strong>chain-of-thought</strong> (asking the model to reason step by step). Few-shot is the most reliable for specialized tasks."
+                  "structureNote": "Pattern: <code>prompt = \"\"\"instruction\\nexample1\\nexample2\\nquery\"\"\"</code>. Triple quotes for multi-line strings. Examples teach the model the expected format."
                 }
               ]
             }
@@ -905,35 +995,124 @@ have followed similar trajectories before treatment...</pre>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "Call an LLM API by creating a client, then sending a message with a model name, conversation history, and parameters",
+                  "instruction": "Call an LLM API using the client > completions > create chain",
                   "languages": {
                     "python": [
-                      {"code": "from ", "role": "Keyword", "tip": "Imports a specific class from a library.", "color": "mauve"},
-                      {"code": "openai ", "role": "Library", "tip": "The official OpenAI Python SDK. Install with: pip install openai", "color": "yellow"},
-                      {"code": "import ", "role": "Keyword", "tip": "", "color": "mauve"},
-                      {"code": "OpenAI\n", "role": "Class", "tip": "The client class that handles authentication and API communication.", "color": "blue"},
-                      {"code": "client", "role": "Variable Name", "tip": "Stores the API client instance.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "", "color": "peach"},
-                      {"code": "OpenAI", "role": "Constructor", "tip": "Initializes the client. Automatically reads your API key from the OPENAI_API_KEY environment variable.", "color": "blue"},
-                      {"code": "()\n", "role": "Punctuation", "tip": "No arguments needed if the API key is set as an environment variable.", "color": "overlay"},
-                      {"code": "response", "role": "Variable Name", "tip": "Stores the API response object.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "", "color": "peach"},
-                      {"code": "client.chat.completions.create(\n    ", "role": "Method Chain", "tip": "Sends a chat completion request to the API. The chained path navigates: client -> chat endpoint -> completions resource -> create action.", "color": "teal"},
-                      {"code": "model", "role": "Parameter", "tip": "Which LLM to use. GPT-4 is more capable but costlier than GPT-3.5-turbo.", "color": "sky"},
-                      {"code": "=", "role": "Operator", "tip": "", "color": "peach"},
-                      {"code": "\"gpt-4\",\n    ", "role": "String", "tip": "The model identifier. Always pin to a specific version for reproducibility.", "color": "green"},
-                      {"code": "messages", "role": "Parameter", "tip": "A list of message dicts with 'role' and 'content'. Roles: 'system' (behavior), 'user' (input), 'assistant' (previous AI responses).", "color": "sky"},
-                      {"code": "=", "role": "Operator", "tip": "", "color": "peach"},
-                      {"code": "[{...}],\n    ", "role": "List of Dicts", "tip": "The conversation history. The model sees all messages, enabling multi-turn conversations.", "color": "sky"},
-                      {"code": "temperature", "role": "Parameter", "tip": "Controls randomness. 0 = deterministic (best for research). 0.7 = balanced. 1+ = creative.", "color": "sky"},
-                      {"code": "=", "role": "Operator", "tip": "", "color": "peach"},
-                      {"code": "0.7\n)", "role": "Value", "tip": "A moderate temperature setting.", "color": "sky"}
+                      {
+                        "code": "from openai import OpenAI",
+                        "role": "Import",
+                        "tip": "<code>from module import Class</code> pattern.",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "\nclient",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "OpenAI",
+                        "role": "Class",
+                        "tip": "Reads API key from env var by default.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "()\n",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "response",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "client.chat.completions.create",
+                        "role": "Method Chain",
+                        "tip": "Dot-chained path: client > chat > completions > create.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "model",
+                        "role": "Keyword Arg",
+                        "tip": "Model identifier string.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "=",
+                        "role": "",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "\"gpt-4\",",
+                        "role": "Value",
+                        "tip": "Pin specific version for reproducibility.",
+                        "color": "green"
+                      },
+                      {
+                        "code": "\nmessages",
+                        "role": "Keyword Arg",
+                        "tip": "List of dicts with 'role' and 'content' keys.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "=",
+                        "role": "",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "[{...}],",
+                        "role": "List of Dicts",
+                        "tip": "Roles: 'system', 'user', 'assistant'.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "\ntemperature",
+                        "role": "Keyword Arg",
+                        "tip": "Float 0-2. 0 = deterministic.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "=",
+                        "role": "",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "0.7\n)",
+                        "role": "Value",
+                        "tip": "",
+                        "color": "sky"
+                      }
                     ]
                   },
-                  "structureNote": "LLM APIs follow a common pattern: (1) create a <strong>client</strong> with your API key, (2) call the <strong>completions endpoint</strong> with a model name, messages, and parameters, (3) extract the generated text from the response. Both OpenAI and Anthropic use this pattern with slightly different method names."
+                  "structureNote": "Pattern: <code>client = OpenAI()</code> then <code>client.chat.completions.create(model=..., messages=[...])</code>. Messages are a list of role/content dicts."
                 }
               ]
             }

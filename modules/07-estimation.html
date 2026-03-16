@@ -335,28 +335,29 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate OLS with robust (heteroskedasticity-consistent) standard errors",
+                  "instruction": "OLS with robust standard errors across three languages",
                   "pattern": "model = ols(formula, data).fit(cov_type='HC1')",
-                  "structureNote": "Robust standard errors remain valid under <strong>heteroskedasticity</strong> without requiring you to model its form. HC1 is the most common variant (matches Stata's <code>,robust</code>). Always use robust SEs unless you have a specific reason for classical SEs.",
+                  "structureNote": "Pattern: <strong>specify model</strong> then <strong>choose SE type at fit time</strong>. Python passes SE type to <code>.fit()</code>; Stata uses a post-comma option; R wraps a fitted model in a separate function.",
                   "languages": {
                     "python": [
-                      {"code": "model_robust", "role": "Variable", "tip": "Stores the fitted model with robust SEs.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "smf.ols", "role": "OLS Function", "tip": "From statsmodels.formula.api. Creates an OLS model.", "color": "blue"},
-                      {"code": "('outcome ~ treatment + controls', data=df)", "role": "Specification", "tip": "R-style formula and data.", "color": "green"},
-                      {"code": ".fit(", "role": "Fit Method", "tip": "Estimates the model. Arguments to fit() control SE computation.", "color": "teal"},
-                      {"code": "cov_type='HC1')", "role": "Robust SEs", "tip": "HC1 = Huber-White sandwich estimator with small-sample correction. HC0, HC2, HC3 are alternatives.", "color": "lavender"}
+                      {"code": "smf.ols", "role": "Constructor", "tip": "Creates an OLS model object. The model is not yet estimated.", "color": "blue"},
+                      {"code": "('outcome ~ treatment + controls'", "role": "Formula", "tip": "R-style formula: dependent ~ independent. The + adds terms.", "color": "green"},
+                      {"code": ", data=df)", "role": "Data Argument", "tip": "Keyword argument pointing to the DataFrame.", "color": "pink"},
+                      {"code": ".fit(", "role": "Chain", "tip": "Method chaining: .fit() is called on the model object returned by smf.ols().", "color": "blue"},
+                      {"code": "cov_type='HC1'", "role": "SE Option", "tip": "Passed as a keyword argument to .fit(). Alternatives: 'HC0', 'HC2', 'HC3'.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "reg", "role": "Command", "tip": "OLS regression.", "color": "mauve"},
-                      {"code": " outcome treatment controls", "role": "Variables", "tip": "Dependent variable followed by independent variables.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "robust", "role": "Option", "tip": "Heteroskedasticity-robust standard errors. Equivalent to vce(robust). HC1 by default.", "color": "yellow"}
+                      {"code": "reg", "role": "Command", "tip": "Stata estimation commands take the form: command depvar indepvars, options.", "color": "mauve"},
+                      {"code": " outcome treatment controls", "role": "Varlist", "tip": "First variable is the dependent; rest are independent. Order matters only for the first variable.", "color": "pink"},
+                      {"code": ", ", "role": "Option Separator", "tip": "The comma separates the varlist from options. All options go after the comma.", "color": "overlay"},
+                      {"code": "robust", "role": "Option", "tip": "Shorthand for vce(robust). Equivalent to HC1.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "coeftest", "role": "Function", "tip": "From lmtest package. Re-tests coefficients with a different covariance matrix.", "color": "blue"},
-                      {"code": "(model", "role": "Model", "tip": "A fitted lm() object.", "color": "pink"},
-                      {"code": ", vcov = vcovHC(model, type = \"HC1\"))", "role": "Robust Vcov", "tip": "vcovHC from sandwich package. Computes the heteroskedasticity-consistent covariance matrix.", "color": "lavender"}
+                      {"code": "coeftest", "role": "Function", "tip": "From lmtest. R applies robust SEs after estimation, not during.", "color": "blue"},
+                      {"code": "(model", "role": "Fitted Object", "tip": "A previously fitted lm() object.", "color": "pink"},
+                      {"code": ", vcov = ", "role": "Argument", "tip": "Named argument that accepts a covariance matrix or a function that produces one.", "color": "peach"},
+                      {"code": "vcovHC(model, type = \"HC1\")", "role": "Vcov Function", "tip": "From sandwich package. The type= argument selects the HC variant.", "color": "blue"}
                     ]
                   }
                 }
@@ -512,29 +513,29 @@ RMSE: 1.92344   Adj. R2: 0.28364
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate OLS with clustered standard errors",
-                  "pattern": "model.fit(cov_type='cluster', groups=cluster_var)",
-                  "structureNote": "<strong>Clustered standard errors</strong> account for within-group correlation (e.g., students in the same school, workers in the same firm). They allow errors to be correlated within clusters but independent across clusters. You need 30-50+ clusters for reliable inference.",
+                  "instruction": "Clustered standard errors across three languages",
+                  "pattern": "smf.ols(formula, data).fit(cov_type='cluster', cov_kwds={...})",
+                  "structureNote": "Pattern: Python passes clustering through a <strong>dictionary</strong> to <code>.fit()</code>; Stata uses a post-comma <code>cluster()</code> option; R uses a <strong>formula operator</strong> <code>~ var</code> inside <code>cluster =</code>.",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "The fitted model.", "color": "pink"},
-                      {"code": " = smf.ols('outcome ~ treatment', data=df).fit(", "role": "OLS + Fit", "tip": "Standard OLS specification.", "color": "blue"},
-                      {"code": "cov_type='cluster', ", "role": "Cluster Type", "tip": "Specifies clustered standard errors.", "color": "lavender"},
-                      {"code": "cov_kwds={'groups': df['school_id']})", "role": "Cluster Variable", "tip": "A dictionary specifying the clustering variable. 'groups' key maps to the cluster identifier column.", "color": "sky"}
+                      {"code": ".fit(", "role": "Chain", "tip": "Clustering is set at fit time, not when defining the model.", "color": "blue"},
+                      {"code": "cov_type='cluster'", "role": "SE Type", "tip": "Keyword argument selecting clustered SEs. Alternatives: 'HC1', 'HAC'.", "color": "sky"},
+                      {"code": ", cov_kwds=", "role": "Kwds Argument", "tip": "A second keyword argument that takes a dictionary of options for the chosen cov_type.", "color": "peach"},
+                      {"code": "{'groups': df['school_id']}", "role": "Cluster Dict", "tip": "The 'groups' key maps to a Series identifying each cluster.", "color": "green"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "reg", "role": "Command", "tip": "OLS regression.", "color": "mauve"},
-                      {"code": " outcome treatment", "role": "Variables", "tip": "Dependent and independent variables.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "cluster(school_id)", "role": "Clustering", "tip": "Clusters SEs at the school level. Also implies robust SEs.", "color": "yellow"}
+                      {"code": "reg", "role": "Command", "tip": "Stata estimation commands: command depvar indepvars, options.", "color": "mauve"},
+                      {"code": " outcome treatment", "role": "Varlist", "tip": "First variable is dependent; rest are independent.", "color": "pink"},
+                      {"code": ", ", "role": "Option Separator", "tip": "Comma separates the varlist from options.", "color": "overlay"},
+                      {"code": "cluster(school_id)", "role": "Cluster Option", "tip": "Parenthesised option specifying the cluster variable. Implies robust.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "model", "role": "Variable", "tip": "The regression object.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "feols", "role": "Function", "tip": "From fixest. Handles clustering natively.", "color": "blue"},
-                      {"code": "(outcome ~ treatment", "role": "Formula", "tip": "The regression formula.", "color": "green"},
-                      {"code": ", data = df", "role": "Data", "tip": "The data frame.", "color": "sky"},
-                      {"code": ", cluster = ~ school_id)", "role": "Clustering", "tip": "~ before the variable name specifies the clustering level.", "color": "lavender"}
+                      {"code": "feols", "role": "Function", "tip": "From fixest. Clustering is a named argument, not a separate step.", "color": "blue"},
+                      {"code": "(outcome ~ treatment", "role": "Formula", "tip": "R-style formula: dependent ~ independent.", "color": "green"},
+                      {"code": ", data = df", "role": "Data Argument", "tip": "Named argument pointing to the data frame.", "color": "pink"},
+                      {"code": ", cluster = ~ school_id", "role": "Cluster Formula", "tip": "The ~ operator turns the variable name into a one-sided formula. Multi-way: ~ var1 + var2.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -717,30 +718,28 @@ Adj. R2                  0.28293      0.36829      0.36878</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you create side-by-side regression comparison tables for publication",
-                  "pattern": "etable(m1, m2, m3, se.below = TRUE)",
-                  "structureNote": "Comparing multiple specifications side by side is essential for <strong>robustness checks</strong>. Start with a baseline model, then progressively add controls. If the key coefficient changes substantially, the result is sensitive to specification. Always report standard errors below coefficients.",
+                  "instruction": "Side-by-side regression comparison tables",
+                  "pattern": "Stargazer([m1, m2, m3])  /  esttab name1 name2, se  /  etable(m1, m2, m3)",
+                  "structureNote": "Pattern: Python wraps models in a <strong>list</strong> passed to a class constructor; Stata uses a two-step <strong>store-then-display</strong> workflow; R passes models as <strong>separate arguments</strong>.",
                   "languages": {
                     "python": [
-                      {"code": "table", "role": "Variable", "tip": "Stores the formatted comparison table.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "Stargazer", "role": "Class", "tip": "From stargazer package. Creates publication-ready tables.", "color": "blue"},
-                      {"code": "([m1, m2, m3])", "role": "Model List", "tip": "List of fitted statsmodels results to compare side by side.", "color": "sky"},
-                      {"code": "\nprint(table.render_text())", "role": "Display", "tip": "render_text() for console, render_html() for notebooks, render_latex() for papers.", "color": "teal"}
+                      {"code": "Stargazer", "role": "Constructor", "tip": "Class from the stargazer package. Instantiated with a list of fitted models.", "color": "blue"},
+                      {"code": "([m1, m2, m3])", "role": "Model List", "tip": "Square brackets create a Python list. Each element is a fitted statsmodels result.", "color": "sky"},
+                      {"code": "\n.render_text()", "role": "Output Method", "tip": "Method chaining. Alternatives: .render_html(), .render_latex().", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "estimates store", "role": "Store Command", "tip": "Saves regression results under a name for later retrieval.", "color": "mauve"},
-                      {"code": " baseline", "role": "Name", "tip": "User-chosen name for the stored model.", "color": "sky"},
-                      {"code": "\nesttab", "role": "Table Command", "tip": "From estout package. Creates publication-ready comparison tables.", "color": "blue"},
-                      {"code": " baseline controls full", "role": "Model Names", "tip": "List of stored model names to include in the table.", "color": "sky"},
-                      {"code": ", se", "role": "SE Option", "tip": "Display standard errors below coefficients.", "color": "yellow"},
-                      {"code": " star(* 0.10 ** 0.05 *** 0.01)", "role": "Stars", "tip": "Significance stars with conventional thresholds.", "color": "lavender"}
+                      {"code": "estimates store", "role": "Store Command", "tip": "Two-word command that saves the current e() results under a name.", "color": "mauve"},
+                      {"code": " baseline", "role": "Name", "tip": "User-chosen label. Run after each regression.", "color": "sky"},
+                      {"code": "\nesttab", "role": "Display Command", "tip": "From estout package (ssc install estout). Reads stored estimates.", "color": "blue"},
+                      {"code": " baseline controls full", "role": "Name List", "tip": "Space-separated list of stored model names.", "color": "sky"},
+                      {"code": ", se", "role": "Option", "tip": "After the comma: display SEs below coefficients.", "color": "peach"},
+                      {"code": " star(* 0.10 ** 0.05 *** 0.01)", "role": "Star Syntax", "tip": "Triplets of symbol, threshold. Each triplet defines one significance level.", "color": "green"}
                     ],
                     "r": [
-                      {"code": "etable", "role": "Function", "tip": "From fixest package. Creates side-by-side model comparison tables.", "color": "blue"},
-                      {"code": "(m1, m2, m3", "role": "Models", "tip": "Multiple fixest model objects to compare.", "color": "sky"},
-                      {"code": ", se.below = TRUE", "role": "Format Option", "tip": "Display standard errors below coefficients (conventional layout).", "color": "yellow"},
-                      {"code": ")", "role": "Close Paren", "tip": "Add tex=TRUE and file='path.tex' to export to LaTeX.", "color": "overlay"}
+                      {"code": "etable", "role": "Function", "tip": "From fixest. Models are passed as separate positional arguments, not a list.", "color": "blue"},
+                      {"code": "(m1, m2, m3", "role": "Model Arguments", "tip": "Comma-separated fixest objects. Order determines column order.", "color": "pink"},
+                      {"code": ", se.below = TRUE", "role": "Named Argument", "tip": "Logical flag. TRUE/FALSE controls layout.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "Add tex = TRUE and file = 'path.tex' to export.", "color": "overlay"}
                     ]
                   }
                 }
@@ -882,28 +881,28 @@ BP = 9.3412, df = 3, p-value = 0.02508
             {
               "exercises": [
                 {
-                  "instruction": "This is how you run key regression diagnostics: VIF for multicollinearity, Breusch-Pagan for heteroskedasticity, and residual plots for specification",
-                  "pattern": "vif(model); bptest(model); plot(residuals)",
-                  "structureNote": "Run diagnostics <strong>after every regression</strong>. VIF > 10 signals multicollinearity. A significant Breusch-Pagan test confirms heteroskedasticity (use robust SEs). Patterns in the residual plot suggest missing nonlinear terms or heteroskedasticity.",
+                  "instruction": "Post-estimation diagnostic commands: VIF, Breusch-Pagan, residual plots",
+                  "pattern": "estat vif  /  estat hettest  /  rvfplot",
+                  "structureNote": "Pattern: Python calls standalone functions with <strong>model attributes</strong> as arguments; Stata uses <strong>post-estimation commands</strong> (<code>estat</code>) that read from the last regression; R calls functions on the <strong>fitted object</strong>.",
                   "languages": {
                     "python": [
-                      {"code": "variance_inflation_factor", "role": "Function", "tip": "From statsmodels.stats.outliers_influence. Computes VIF for each predictor.", "color": "blue"},
-                      {"code": "(X, i)", "role": "Arguments", "tip": "X = design matrix, i = column index. Compute for each predictor.", "color": "sky"},
-                      {"code": "\nhet_breuschpagan", "role": "Function", "tip": "From statsmodels.stats.diagnostic. Tests for heteroskedasticity.", "color": "blue"},
-                      {"code": "(model.resid, model.model.exog)", "role": "Arguments", "tip": "Pass residuals and design matrix. Returns test statistic and p-value.", "color": "sky"},
-                      {"code": "\nplt.scatter(model.fittedvalues, model.resid)", "role": "Residual Plot", "tip": "Scatter plot of fitted values vs residuals. Look for patterns.", "color": "teal"}
+                      {"code": "variance_inflation_factor", "role": "Function", "tip": "From statsmodels.stats.outliers_influence. Called once per column index.", "color": "blue"},
+                      {"code": "(model.model.exog, i)", "role": "Arguments", "tip": "First arg: the design matrix (accessed via model.model.exog). Second: column index to test.", "color": "pink"},
+                      {"code": "\nhet_breuschpagan", "role": "Function", "tip": "From statsmodels.stats.diagnostic. Returns a 4-tuple: (stat, p, f_stat, f_p).", "color": "blue"},
+                      {"code": "(model.resid, model.model.exog)", "role": "Arguments", "tip": "Residuals first, design matrix second. Unpack with tuple assignment.", "color": "pink"}
                     ],
                     "stata": [
-                      {"code": "estat vif", "role": "VIF Command", "tip": "Computes Variance Inflation Factors after regression. VIF > 10 = problem.", "color": "mauve"},
-                      {"code": "\nestat hettest", "role": "BP Test", "tip": "Breusch-Pagan test for heteroskedasticity. p < 0.05 = use robust SEs.", "color": "mauve"},
-                      {"code": "\nrvfplot", "role": "Residual Plot", "tip": "Residual vs. fitted plot. Random scatter = good specification.", "color": "teal"}
+                      {"code": "estat vif", "role": "Post-estimation", "tip": "Two-word command. estat reads from the last regression automatically.", "color": "mauve"},
+                      {"code": "\nestat hettest", "role": "Post-estimation", "tip": "Breusch-Pagan test. Must run after reg without robust option.", "color": "mauve"},
+                      {"code": "\nrvfplot", "role": "Plot Command", "tip": "One-word command producing residual-vs-fitted scatter.", "color": "blue"},
+                      {"code": ", yline(0)", "role": "Option", "tip": "Adds a horizontal reference line at zero.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "vif", "role": "Function", "tip": "From car package. Variance Inflation Factors for multicollinearity.", "color": "blue"},
-                      {"code": "(model)", "role": "Argument", "tip": "A fitted lm() object.", "color": "pink"},
-                      {"code": "\nbptest", "role": "Function", "tip": "From lmtest package. Breusch-Pagan test for heteroskedasticity.", "color": "blue"},
-                      {"code": "(model)", "role": "Argument", "tip": "A fitted lm() object. p < 0.05 confirms heteroskedasticity.", "color": "pink"},
-                      {"code": "\nplot(model, which = 1)", "role": "Diagnostic Plot", "tip": "Residual vs. fitted plot. Also try which=2 (Q-Q) and which=4 (Cook's distance).", "color": "teal"}
+                      {"code": "vif", "role": "Function", "tip": "From car package. Pass a fitted lm() object.", "color": "blue"},
+                      {"code": "(model)", "role": "Argument", "tip": "Single positional argument: the fitted model.", "color": "pink"},
+                      {"code": "\nbptest", "role": "Function", "tip": "From lmtest package. Breusch-Pagan heteroskedasticity test.", "color": "blue"},
+                      {"code": "(model)", "role": "Argument", "tip": "Same fitted lm() object.", "color": "pink"},
+                      {"code": "\nplot(model, which = 1)", "role": "Diagnostic Plot", "tip": "which = selects the plot type: 1 = residuals vs fitted, 2 = Q-Q, 4 = Cook's distance.", "color": "blue"}
                     ]
                   }
                 }
@@ -1105,35 +1104,32 @@ Fixef resid. var.: 1.52416  (500 + 10 FEs)</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate a panel fixed effects model with unit and time effects",
-                  "pattern": "PanelOLS(formula, entity_effects=True, time_effects=True)",
-                  "structureNote": "<strong>Fixed effects</strong> control for all time-invariant differences between units (entity FE) and all common shocks across time (time FE). This is the <strong>within estimator</strong>: it uses only within-unit variation over time. Variables that don't change within units (gender, race) are absorbed and cannot be estimated.",
+                  "instruction": "Panel fixed effects: unit and time FE syntax",
+                  "pattern": "PanelOLS(..., entity_effects=True)  /  xtreg ..., fe  /  feols(y ~ x | id + t)",
+                  "structureNote": "Pattern: Python sets FE via <strong>boolean keyword arguments</strong>; Stata uses a <strong>post-comma option</strong> (<code>fe</code>); R uses a <strong>pipe operator <code>|</code></strong> inside the formula to separate regressors from absorbed FE.",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "The panel model.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the model.", "color": "peach"},
-                      {"code": "PanelOLS.from_formula(", "role": "Constructor", "tip": "From linearmodels.panel. Panel data regression with fixed effects.", "color": "blue"},
-                      {"code": "'outcome ~ treatment + time_varying_controls'", "role": "Formula", "tip": "Only include time-varying regressors. Fixed effects are specified separately.", "color": "green"},
-                      {"code": ", data=df", "role": "Data", "tip": "Panel data with MultiIndex (unit_id, year). Set with df.set_index(['unit_id','year']).", "color": "sky"},
-                      {"code": ", entity_effects=True", "role": "Unit FE", "tip": "Absorbs unit-level fixed effects. Controls for all time-invariant unit characteristics.", "color": "lavender"},
-                      {"code": ", time_effects=True)", "role": "Time FE", "tip": "Absorbs time fixed effects. Controls for common shocks affecting all units.", "color": "lavender"}
+                      {"code": "PanelOLS.from_formula(", "role": "Constructor", "tip": "From linearmodels.panel. Requires a MultiIndex DataFrame (set_index).", "color": "blue"},
+                      {"code": "'outcome ~ treatment + controls'", "role": "Formula", "tip": "Only time-varying regressors. FE are not listed here.", "color": "green"},
+                      {"code": ", data=df", "role": "Data Argument", "tip": "DataFrame must already have a (unit, time) MultiIndex.", "color": "pink"},
+                      {"code": ", entity_effects=True", "role": "Unit FE Flag", "tip": "Boolean keyword. Absorbs unit intercepts.", "color": "sky"},
+                      {"code": ", time_effects=True", "role": "Time FE Flag", "tip": "Boolean keyword. Absorbs time intercepts.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "xtreg", "role": "Command", "tip": "Panel data regression. Requires prior xtset.", "color": "mauve"},
-                      {"code": " outcome treatment time_varying_controls", "role": "Variables", "tip": "Dependent and independent variables.", "color": "sky"},
-                      {"code": " i.year", "role": "Time FE", "tip": "i.year creates year dummies for time fixed effects.", "color": "green"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "fe", "role": "Entity FE", "tip": "The within (fixed effects) estimator. Absorbs unit FE.", "color": "yellow"},
-                      {"code": " cluster(unit_id)", "role": "Clustering", "tip": "Clusters SEs at the unit level.", "color": "yellow"}
+                      {"code": "xtreg", "role": "Command", "tip": "Panel regression command. Requires prior xtset unit_id year.", "color": "mauve"},
+                      {"code": " outcome treatment controls", "role": "Varlist", "tip": "First variable is dependent; rest are independent.", "color": "pink"},
+                      {"code": " i.year", "role": "Factor Variable", "tip": "i. prefix creates dummies for each year -- adds time FE manually.", "color": "peach"},
+                      {"code": ", fe", "role": "FE Option", "tip": "Post-comma option selecting the within (fixed effects) estimator.", "color": "sky"},
+                      {"code": " cluster(unit_id)", "role": "Cluster Option", "tip": "Parenthesised option specifying the cluster variable.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "fe_model", "role": "Variable", "tip": "The fixed effects model.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "feols", "role": "Function", "tip": "From fixest. Fast fixed effects estimation.", "color": "blue"},
-                      {"code": "(outcome ~ treatment + controls", "role": "Formula", "tip": "Only time-varying regressors before the pipe.", "color": "green"},
-                      {"code": " | unit_id + year", "role": "Fixed Effects", "tip": "After |: fixed effects to absorb. unit_id = entity FE, year = time FE.", "color": "teal"},
-                      {"code": ", data = df", "role": "Data", "tip": "The panel data frame.", "color": "sky"},
-                      {"code": ", cluster = ~ unit_id)", "role": "Clustering", "tip": "Clusters SEs at the unit level.", "color": "lavender"}
+                      {"code": "feols", "role": "Function", "tip": "From fixest. Fast fixed-effects OLS.", "color": "blue"},
+                      {"code": "(outcome ~ treatment + controls", "role": "Formula LHS", "tip": "Regressors go before the pipe. Only time-varying variables.", "color": "green"},
+                      {"code": " | unit_id + year", "role": "FE Pipe", "tip": "The | separates regressors from absorbed fixed effects. + adds dimensions.", "color": "peach"},
+                      {"code": ", data = df", "role": "Data Argument", "tip": "Named argument.", "color": "pink"},
+                      {"code": ", cluster = ~ unit_id", "role": "Cluster Formula", "tip": "One-sided formula with ~. Multi-way: ~ var1 + var2.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -1346,29 +1342,29 @@ alternative hypothesis: one model is inconsistent</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate a Random Effects model and compare it with Fixed Effects",
-                  "pattern": "model_re = RandomEffects.from_formula(formula, data).fit()",
-                  "structureNote": "Random Effects assumes unit-specific effects are <strong>uncorrelated with regressors</strong> -- a strong assumption rarely justified in economics. RE is more efficient than FE when valid, and lets you estimate coefficients on <strong>time-invariant variables</strong>. Use the Hausman test to decide between FE and RE.",
+                  "instruction": "Random effects estimation syntax",
+                  "pattern": "RandomEffects.from_formula(...)  /  xtreg ..., re  /  plm(..., model='random')",
+                  "structureNote": "Pattern: Python uses a <strong>separate class</strong> (<code>RandomEffects</code> vs <code>PanelOLS</code>); Stata switches between FE and RE with a single <strong>post-comma option</strong>; R uses a <strong>string argument</strong> <code>model = 'random'</code>.",
                   "languages": {
                     "python": [
-                      {"code": "re_model", "role": "Variable", "tip": "Stores the random effects estimation results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "RandomEffects", "role": "Class", "tip": "From linearmodels.panel. Random effects GLS estimator.", "color": "blue"},
-                      {"code": ".from_formula", "role": "Method", "tip": "Creates the model from an R-style formula.", "color": "teal"},
-                      {"code": "('outcome ~ treatment + controls'", "role": "Formula", "tip": "Model specification. Time-invariant variables can be included.", "color": "green"},
-                      {"code": ", data=df)", "role": "Data", "tip": "Panel data with MultiIndex (unit_id, time).", "color": "pink"},
-                      {"code": ".fit()", "role": "Fit", "tip": "Estimates the RE model via feasible GLS.", "color": "teal"}
+                      {"code": "RandomEffects", "role": "Class", "tip": "From linearmodels.panel. A different class than PanelOLS -- not just a flag.", "color": "blue"},
+                      {"code": ".from_formula(", "role": "Class Method", "tip": "Alternative constructor that accepts an R-style formula string.", "color": "blue"},
+                      {"code": "'outcome ~ treatment + controls'", "role": "Formula", "tip": "Time-invariant variables can appear here (unlike FE).", "color": "green"},
+                      {"code": ", data=df)", "role": "Data Argument", "tip": "Same MultiIndex requirement as PanelOLS.", "color": "pink"},
+                      {"code": ".fit()", "role": "Chain", "tip": "No entity_effects needed -- RE is the class default.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "xtreg", "role": "Command", "tip": "Panel regression command.", "color": "mauve"},
-                      {"code": " outcome treatment controls", "role": "Variables", "tip": "Dependent and independent variables.", "color": "sky"},
-                      {"code": ", re", "role": "RE Option", "tip": "Specifies random effects estimation. Compare with ',fe' for fixed effects.", "color": "yellow"}
+                      {"code": "xtreg", "role": "Command", "tip": "Same command as FE. Requires prior xtset.", "color": "mauve"},
+                      {"code": " outcome treatment controls", "role": "Varlist", "tip": "First variable is dependent.", "color": "pink"},
+                      {"code": ", re", "role": "RE Option", "tip": "Switches from fe to re. One two-letter option changes the estimator.", "color": "sky"}
                     ],
                     "r": [
                       {"code": "plm", "role": "Function", "tip": "From plm package. Panel linear models.", "color": "blue"},
-                      {"code": "(outcome ~ treatment + controls", "role": "Formula", "tip": "Model specification.", "color": "green"},
-                      {"code": ", data = df, index = c('unit_id', 'year')", "role": "Data & Index", "tip": "Data and panel structure identifiers.", "color": "pink"},
-                      {"code": ", model = 'random')", "role": "Model Type", "tip": "'random' = RE. Compare with 'within' (FE) using phtest().", "color": "yellow"}
+                      {"code": "(outcome ~ treatment + controls", "role": "Formula", "tip": "Same formula syntax as the FE version.", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "Named argument.", "color": "pink"},
+                      {"code": ", index = c('unit_id', 'year')", "role": "Panel Index", "tip": "Character vector naming the unit and time columns.", "color": "green"},
+                      {"code": ", model = 'random'", "role": "Model String", "tip": "String argument: 'random', 'within', 'fd', 'pooling', 'between'.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -1528,30 +1524,30 @@ FD estimate: 1.4123</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate the First-Difference estimator as an alternative to Fixed Effects",
-                  "pattern": "model = FirstDifferenceOLS.from_formula(formula, data).fit()",
-                  "structureNote": "First-differencing subtracts each period's observation from the previous period, eliminating unit fixed effects. It is <strong>equivalent to FE when T=2</strong> but differs with longer panels. FD is preferred when errors follow a <strong>random walk</strong> (unit root); FE is preferred when errors are serially uncorrelated.",
+                  "instruction": "First-difference estimator syntax",
+                  "pattern": "FirstDifferenceOLS(...)  /  reg D.y D.x  /  plm(..., model='fd')",
+                  "structureNote": "Pattern: Python uses a <strong>dedicated class</strong>; Stata uses the <strong>D. time-series operator</strong> to difference variables inline; R passes <code>model = 'fd'</code> as a string to the same <code>plm()</code> function used for FE and RE.",
                   "languages": {
                     "python": [
-                      {"code": "fd_model", "role": "Variable", "tip": "Stores the first-difference estimation results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "FirstDifferenceOLS", "role": "Class", "tip": "From linearmodels.panel. First-difference estimator for panel data.", "color": "blue"},
-                      {"code": ".from_formula", "role": "Method", "tip": "Creates the model from an R-style formula.", "color": "teal"},
-                      {"code": "('outcome ~ treatment + controls'", "role": "Formula", "tip": "Model specification. Entity effects are removed by differencing.", "color": "green"},
-                      {"code": ", data=df)", "role": "Data", "tip": "Panel data with MultiIndex (unit_id, time).", "color": "pink"},
-                      {"code": ".fit()", "role": "Fit", "tip": "Estimates the model. Returns standard panel regression output.", "color": "teal"}
+                      {"code": "FirstDifferenceOLS", "role": "Class", "tip": "From linearmodels.panel. Separate class from PanelOLS and RandomEffects.", "color": "blue"},
+                      {"code": ".from_formula(", "role": "Class Method", "tip": "Accepts an R-style formula. Differencing is handled internally.", "color": "blue"},
+                      {"code": "'outcome ~ treatment + controls'", "role": "Formula", "tip": "Write variables in levels -- the class differences them automatically.", "color": "green"},
+                      {"code": ", data=df)", "role": "Data Argument", "tip": "Same MultiIndex requirement.", "color": "pink"},
+                      {"code": ".fit(cov_type='clustered', cluster_entity=True)", "role": "Fit Options", "tip": "Keyword arguments control SE type at fit time.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "reg", "role": "Command", "tip": "OLS on first-differenced variables.", "color": "mauve"},
-                      {"code": " D.outcome D.treatment D.controls", "role": "Variables", "tip": "D. prefix takes first differences within panels. Requires xtset.", "color": "sky"},
-                      {"code": ", robust", "role": "Option", "tip": "Robust standard errors for the differenced equation.", "color": "yellow"}
+                      {"code": "reg", "role": "Command", "tip": "Plain reg, not xtreg -- you difference manually with D. prefix.", "color": "mauve"},
+                      {"code": " D.", "role": "Operator", "tip": "Time-series operator: D.x = x_t - x_{t-1}. Requires prior xtset.", "color": "peach"},
+                      {"code": "outcome D.treatment D.controls", "role": "Differenced Varlist", "tip": "Apply D. to every variable. First observation per unit is lost.", "color": "pink"},
+                      {"code": ", cluster(unit_id)", "role": "Option", "tip": "Cluster at the unit level for the differenced equation.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "plm", "role": "Function", "tip": "From plm package. Panel linear models with various transformations.", "color": "blue"},
-                      {"code": "(outcome ~ treatment + controls", "role": "Formula", "tip": "Model specification.", "color": "green"},
-                      {"code": ", data = df", "role": "Data", "tip": "Panel data frame.", "color": "pink"},
-                      {"code": ", index = c('unit_id', 'year')", "role": "Panel Index", "tip": "Identifies the unit and time dimensions.", "color": "lavender"},
-                      {"code": ", model = 'fd')", "role": "Model Type", "tip": "'fd' = first-difference. Compare with 'within' (FE) and 'random' (RE).", "color": "yellow"}
+                      {"code": "plm", "role": "Function", "tip": "Same function as FE and RE -- only the model argument changes.", "color": "blue"},
+                      {"code": "(outcome ~ treatment + controls", "role": "Formula", "tip": "Write variables in levels. plm differences internally.", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "Named argument.", "color": "pink"},
+                      {"code": ", index = c('unit_id', 'year')", "role": "Panel Index", "tip": "Character vector naming unit and time columns.", "color": "green"},
+                      {"code": ", model = 'fd'", "role": "Model String", "tip": "'fd' selects first-difference. Alternatives: 'within', 'random'.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -1712,29 +1708,27 @@ alternative hypothesis: one model is inconsistent
             {
               "exercises": [
                 {
-                  "instruction": "This is how you run the Hausman test to choose between Fixed Effects and Random Effects",
-                  "pattern": "hausman fe_model re_model",
-                  "structureNote": "The Hausman test compares FE and RE estimates. Under H<sub>0</sub>, both are consistent but RE is more efficient. A significant test (p < 0.05) means the unit effects are correlated with regressors, so only <strong>FE is consistent</strong> and should be used.",
+                  "instruction": "Hausman test: compare FE and RE estimates",
+                  "pattern": "hausman fe_model re_model  /  phtest(fe, re)  /  compare({'FE': fe, 'RE': re})",
+                  "structureNote": "Pattern: All three languages require you to <strong>estimate both models first</strong>, then pass them to a comparison function. Stata uses <code>estimates store</code> as an intermediate step; Python and R pass fitted objects directly.",
                   "languages": {
                     "python": [
-                      {"code": "fe", "role": "Variable", "tip": "Fixed effects estimation result.", "color": "pink"},
-                      {"code": " = PanelOLS.from_formula(...).fit()", "role": "FE Model", "tip": "Estimate FE model with entity_effects=True.", "color": "blue"},
-                      {"code": "\nre", "role": "Variable", "tip": "Random effects estimation result.", "color": "pink"},
-                      {"code": " = RandomEffects.from_formula(...).fit()", "role": "RE Model", "tip": "Estimate RE model for comparison.", "color": "blue"},
-                      {"code": "\ncompare", "role": "Function", "tip": "From linearmodels.panel. Displays FE and RE side by side for Hausman-like comparison.", "color": "blue"},
-                      {"code": "({'FE': fe, 'RE': re})", "role": "Model Dictionary", "tip": "Pass both models as a dictionary for comparison.", "color": "green"}
+                      {"code": "compare", "role": "Function", "tip": "From linearmodels.panel. No built-in chi-squared Hausman test -- displays models side by side.", "color": "blue"},
+                      {"code": "(", "role": "Open", "tip": "", "color": "overlay"},
+                      {"code": "{'FE': fe, 'RE': re}", "role": "Dict Argument", "tip": "A dictionary mapping labels to fitted model objects. Keys become column headers.", "color": "green"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "xtreg ... , fe\nestimates store fe_model", "role": "Store FE", "tip": "Estimate and store FE results.", "color": "mauve"},
-                      {"code": "\nxtreg ... , re\nestimates store re_model", "role": "Store RE", "tip": "Estimate and store RE results.", "color": "mauve"},
-                      {"code": "\nhausman", "role": "Test Command", "tip": "Performs the Hausman specification test.", "color": "blue"},
-                      {"code": " fe_model re_model", "role": "Models", "tip": "Consistent estimator first (FE), then efficient estimator (RE).", "color": "sky"}
+                      {"code": "estimates store fe_model", "role": "Store Command", "tip": "Run after xtreg ..., fe. Saves e() results under a name.", "color": "mauve"},
+                      {"code": "\nhausman", "role": "Test Command", "tip": "Built-in Hausman specification test.", "color": "blue"},
+                      {"code": " fe_model", "role": "Consistent Model", "tip": "First argument: the consistent estimator (FE). Order matters.", "color": "pink"},
+                      {"code": " re_model", "role": "Efficient Model", "tip": "Second argument: the efficient-under-H0 estimator (RE).", "color": "pink"}
                     ],
                     "r": [
-                      {"code": "phtest", "role": "Function", "tip": "From plm package. Performs the Hausman test for panel models.", "color": "blue"},
-                      {"code": "(model_fe", "role": "FE Model", "tip": "Fixed effects model estimated with plm(model = 'within').", "color": "pink"},
-                      {"code": ", model_re", "role": "RE Model", "tip": "Random effects model estimated with plm(model = 'random').", "color": "pink"},
-                      {"code": ")", "role": "Close Paren", "tip": "Returns chi-squared statistic and p-value. p < 0.05 favors FE.", "color": "overlay"}
+                      {"code": "phtest", "role": "Function", "tip": "From plm package. Returns a chi-squared statistic and p-value.", "color": "blue"},
+                      {"code": "(model_fe", "role": "FE Argument", "tip": "plm object fitted with model = 'within'.", "color": "pink"},
+                      {"code": ", model_re", "role": "RE Argument", "tip": "plm object fitted with model = 'random'. Order: FE first, RE second.", "color": "pink"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -1920,31 +1914,31 @@ Wald test for coefficients: chisq(3) = 156.78 (p-value = < 2.22e-16)</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate dynamic panel models using the Arellano-Bond (difference GMM) estimator",
-                  "pattern": "xtabond outcome L.outcome treatment, lags(2)",
-                  "structureNote": "When a <strong>lagged dependent variable</strong> appears on the right-hand side, FE is biased (Nickell bias). Arellano-Bond uses deeper lags of Y as <strong>instruments</strong> for the first-differenced equation. Always check the <strong>Sargan/Hansen test</strong> (p > 0.05 for valid instruments) and <strong>AR(2) test</strong> (p > 0.05 for valid moment conditions).",
+                  "instruction": "Arellano-Bond dynamic panel GMM syntax",
+                  "pattern": "xtabond y x, lags()  /  pgmm(y ~ lag(y,1) + x | lag(y, 2:99))  /  IV2SLS on differenced data",
+                  "structureNote": "Pattern: Stata has a <strong>dedicated command</strong> (<code>xtabond</code>) that handles differencing and instruments internally; R uses a <strong>two-part formula</strong> with <code>|</code> separating regressors from instruments; Python requires <strong>manual differencing + IV</strong>.",
                   "languages": {
                     "python": [
-                      {"code": "# Python: Manual Arellano-Bond via IV on first-differenced data", "role": "Comment", "tip": "Python lacks a native Arellano-Bond command. Implement manually via first-difference + IV.", "color": "overlay"},
-                      {"code": "\ndf_diff", "role": "Variable", "tip": "First-differenced data to remove fixed effects.", "color": "pink"},
-                      {"code": " = df.groupby('unit_id').diff()", "role": "First Difference", "tip": "Takes first differences within each unit to eliminate fixed effects.", "color": "teal"},
-                      {"code": "\nIV2SLS", "role": "IV Estimator", "tip": "From linearmodels.iv. Uses lagged levels as instruments for differences.", "color": "blue"},
-                      {"code": ".from_formula('d_y ~ 1 + [d_lag_y ~ lag2_y + lag3_y]', data=df_diff).fit()", "role": "IV Formula", "tip": "Instruments differenced lagged Y with deeper lags in levels.", "color": "green"}
+                      {"code": "df.groupby('unit_id').diff()", "role": "Differencing", "tip": "No native AB command. Manually first-difference within units using groupby().diff().", "color": "blue"},
+                      {"code": "\nIV2SLS.from_formula(", "role": "IV Constructor", "tip": "From linearmodels.iv. Used to instrument the differenced lag.", "color": "blue"},
+                      {"code": "'dy ~ 1 + dx + [dlag_y ~ lag2_y]'", "role": "IV Formula", "tip": "Square brackets: [endogenous ~ instruments]. Instruments are levels from t-2.", "color": "green"},
+                      {"code": ", data=df_diff).fit()", "role": "Data + Fit", "tip": "Chain .fit() to estimate.", "color": "pink"}
                     ],
                     "stata": [
-                      {"code": "xtabond", "role": "Command", "tip": "Arellano-Bond difference GMM estimator.", "color": "mauve"},
-                      {"code": " outcome", "role": "Dependent Variable", "tip": "The outcome variable. Its lag is automatically included.", "color": "sky"},
-                      {"code": " treatment controls", "role": "Covariates", "tip": "Additional explanatory variables.", "color": "sky"},
-                      {"code": ", lags(2)", "role": "Lag Structure", "tip": "Number of lags of the dependent variable to include.", "color": "lavender"},
-                      {"code": " twostep", "role": "Estimation", "tip": "Two-step GMM is more efficient. One-step is the default.", "color": "yellow"}
+                      {"code": "xtabond", "role": "Command", "tip": "Arellano-Bond difference GMM. Differences and instruments automatically.", "color": "mauve"},
+                      {"code": " outcome", "role": "Depvar", "tip": "Outcome variable. Its lag is included automatically by the command.", "color": "pink"},
+                      {"code": " treatment controls", "role": "Covariates", "tip": "Additional regressors.", "color": "pink"},
+                      {"code": ", lags(1)", "role": "Lag Option", "tip": "Number of lags of the dependent variable to include as regressors.", "color": "sky"},
+                      {"code": " twostep", "role": "Step Option", "tip": "Two-step GMM for efficiency. Default is one-step.", "color": "sky"},
+                      {"code": " vce(robust)", "role": "SE Option", "tip": "Windmeijer-corrected SEs for two-step GMM.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "pgmm", "role": "Function", "tip": "From plm package. Panel GMM estimator including Arellano-Bond.", "color": "blue"},
-                      {"code": "(outcome ~ lag(outcome, 1) + treatment + controls", "role": "Formula", "tip": "Include the lagged dependent variable as a regressor.", "color": "green"},
-                      {"code": " | lag(outcome, 2:99)", "role": "Instruments", "tip": "Uses lags 2+ of the outcome as instruments for the differenced equation.", "color": "lavender"},
-                      {"code": ", data = pdata", "role": "Data", "tip": "Panel data frame created with pdata.frame().", "color": "pink"},
-                      {"code": ", effect = 'individual', model = 'twostep'", "role": "Options", "tip": "Individual effects, two-step efficient GMM.", "color": "yellow"},
-                      {"code": ")", "role": "Close Paren", "tip": "Use sargan() and mtest() for specification tests.", "color": "overlay"}
+                      {"code": "pgmm", "role": "Function", "tip": "From plm package. Panel GMM for dynamic models.", "color": "blue"},
+                      {"code": "(outcome ~ lag(outcome, 1) + treatment", "role": "Formula", "tip": "lag() inside the formula adds the lagged dependent variable.", "color": "green"},
+                      {"code": " | lag(outcome, 2:99)", "role": "Instrument Separator", "tip": "The | separates regressors from GMM instruments. 2:99 means all lags from t-2 onward.", "color": "peach"},
+                      {"code": ", data = pdata", "role": "Data", "tip": "Must be a pdata.frame() with declared panel structure.", "color": "pink"},
+                      {"code": ", model = 'twostep'", "role": "Step Option", "tip": "String: 'onestep' or 'twostep'.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -2193,31 +2187,27 @@ Odds ratios:
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate a logistic regression (binary outcome model)",
-                  "pattern": "model = Logit(formula, data).fit()",
-                  "structureNote": "<strong>Logit</strong> models binary outcomes (0/1) as a function of covariates. Unlike OLS, which can predict probabilities outside [0,1], logit constrains predictions to valid probabilities. Coefficients are in <em>log-odds</em> — use marginal effects for interpretation.",
+                  "instruction": "Logit syntax: binary outcome models",
+                  "pattern": "smf.logit(formula, data).fit()  /  logit y x  /  glm(..., family=binomial())",
+                  "structureNote": "Pattern: Python and Stata have <strong>dedicated logit functions/commands</strong>; R uses the general <code>glm()</code> framework with a <strong>family argument</strong> to select the distribution and link.",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "The logit model results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "smf.logit", "role": "Logit Function", "tip": "From statsmodels.formula.api. Estimates via Maximum Likelihood.", "color": "blue"},
-                      {"code": "('hired ~ education + experience + age'", "role": "Formula", "tip": "Binary outcome ~ predictors. 'hired' must be 0/1.", "color": "green"},
-                      {"code": ", data=df)", "role": "Data", "tip": "The DataFrame.", "color": "sky"},
-                      {"code": ".fit()", "role": "Fit", "tip": "Estimates via MLE. Iteratively finds coefficients that maximize the likelihood of observing the data.", "color": "teal"}
+                      {"code": "smf.logit", "role": "Function", "tip": "From statsmodels.formula.api. Dedicated logit function (also: smf.probit).", "color": "blue"},
+                      {"code": "('hired ~ education + experience + age'", "role": "Formula", "tip": "R-style formula. Dependent variable must be 0/1.", "color": "green"},
+                      {"code": ", data=df)", "role": "Data Argument", "tip": "Named argument pointing to the DataFrame.", "color": "pink"},
+                      {"code": ".fit()", "role": "Chain", "tip": "Estimates via MLE. Returns a results object with .summary(), .params, .pvalues.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "logit", "role": "Command", "tip": "Logistic regression. Reports log-odds coefficients by default.", "color": "mauve"},
-                      {"code": " hired education experience age", "role": "Variables", "tip": "Binary outcome followed by predictors.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "robust", "role": "Option", "tip": "Robust standard errors.", "color": "yellow"}
+                      {"code": "logit", "role": "Command", "tip": "Dedicated command. Use probit for probit. Reports log-odds by default.", "color": "mauve"},
+                      {"code": " hired education experience age", "role": "Varlist", "tip": "First variable is the binary outcome.", "color": "pink"},
+                      {"code": ", robust", "role": "Option", "tip": "Robust SEs. Same option syntax as reg.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "logit_model", "role": "Variable", "tip": "The logit model.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "glm", "role": "Function", "tip": "Generalized Linear Model. glm with family=binomial fits logit.", "color": "blue"},
+                      {"code": "glm", "role": "Function", "tip": "Base R generalised linear models. Not a dedicated logit function.", "color": "blue"},
                       {"code": "(hired ~ education + experience + age", "role": "Formula", "tip": "Same formula syntax as lm().", "color": "green"},
-                      {"code": ", data = df", "role": "Data", "tip": "The data frame.", "color": "sky"},
-                      {"code": ", family = binomial(link = \"logit\"))", "role": "Family", "tip": "Specifies the logit link function. binomial() alone defaults to logit.", "color": "lavender"}
+                      {"code": ", data = df", "role": "Data", "tip": "Named argument.", "color": "pink"},
+                      {"code": ", family = binomial(link = \"logit\")", "role": "Family Argument", "tip": "binomial() selects the binomial distribution; link = selects the link function. Default link is 'logit', so binomial() alone suffices.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -2435,25 +2425,23 @@ age        -0.0053  -0.0052      0.0001</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate average marginal effects from a logit model",
-                  "pattern": "marginal_effects = model.get_margeff()",
-                  "structureNote": "<strong>Marginal effects</strong> convert log-odds coefficients into probability changes: 'a one-unit increase in X changes the probability of Y=1 by p percentage points'. Average marginal effects (AME) average the marginal effect across all observations, accounting for the nonlinearity of the logit.",
+                  "instruction": "Average marginal effects after logit/probit",
+                  "pattern": "model.get_margeff(at='overall')  /  margins, dydx(*)  /  margins(model)",
+                  "structureNote": "Pattern: Python calls a <strong>method on the fitted model</strong> with a string argument selecting AME vs MEM; Stata uses a <strong>post-estimation command</strong> with option syntax; R calls a <strong>standalone function</strong> from the margins package.",
                   "languages": {
                     "python": [
-                      {"code": "mfx", "role": "Variable", "tip": "Stores the marginal effects results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "model.get_margeff", "role": "Method", "tip": "Computes marginal effects from the fitted logit model.", "color": "teal"},
-                      {"code": "(at='overall')\n", "role": "Type", "tip": "'overall' = average marginal effects (AME). 'mean' = marginal effects at the mean (MEM).", "color": "lavender"},
-                      {"code": "print(mfx.summary())", "role": "Display", "tip": "Shows marginal effects with standard errors and p-values.", "color": "blue"}
+                      {"code": "model.get_margeff", "role": "Method", "tip": "Called on the fitted logit/probit result object.", "color": "blue"},
+                      {"code": "(at='overall')", "role": "Type Argument", "tip": "String keyword: 'overall' = AME (averaged across observations), 'mean' = MEM (evaluated at means).", "color": "sky"},
+                      {"code": "\nmfx.summary()", "role": "Display Method", "tip": "Returns a table of marginal effects, SEs, and p-values.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "margins", "role": "Command", "tip": "Post-estimation command for marginal effects. Works after logit, probit, etc.", "color": "mauve"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "dydx(*)", "role": "Option", "tip": "Compute marginal effects (dy/dx) for all variables. * means all predictors.", "color": "yellow"}
+                      {"code": "margins", "role": "Post-estimation", "tip": "Runs after the last logit/probit. Reads stored e() results.", "color": "mauve"},
+                      {"code": ", dydx(*)", "role": "Option", "tip": "dydx = compute derivatives. The * wildcard means all predictors. Replace * with a variable name for a single effect.", "color": "sky"},
+                      {"code": "\nmargins, dydx(*) atmeans", "role": "MEM Variant", "tip": "Adding atmeans evaluates at sample means instead of averaging across observations.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "margins", "role": "Function", "tip": "From the margins package. Computes average marginal effects.", "color": "blue"},
-                      {"code": "(logit_model)", "role": "Model", "tip": "The fitted glm object. margins() automatically computes AME for all predictors.", "color": "pink"}
+                      {"code": "margins", "role": "Function", "tip": "From the margins package. Computes AME by default.", "color": "blue"},
+                      {"code": "(logit_model)", "role": "Argument", "tip": "A fitted glm() object. Returns AME for all predictors.", "color": "pink"}
                     ]
                   }
                 }
@@ -2641,28 +2629,26 @@ Relative risk ratios:
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate a multinomial logit model for unordered categorical outcomes",
-                  "pattern": "model = MNLogit(y, X).fit()",
-                  "structureNote": "Multinomial logit estimates the probability of each category relative to a <strong>base category</strong>. Exponentiated coefficients are <strong>relative risk ratios</strong>: exp(&beta;) = 1.26 means a one-unit increase in X multiplies the odds of choosing category j over the base by 1.26. The <strong>IIA assumption</strong> (independence of irrelevant alternatives) should be tested.",
+                  "instruction": "Multinomial logit for unordered categorical outcomes",
+                  "pattern": "sm.MNLogit(y, X).fit()  /  mlogit y x, baseoutcome()  /  multinom(y ~ x)",
+                  "structureNote": "Pattern: Python uses <strong>array-style input</strong> (y vector + X matrix with constant); Stata has a <strong>dedicated command</strong> with a <code>baseoutcome()</code> option; R uses <strong>formula syntax</strong> via the nnet package.",
                   "languages": {
                     "python": [
-                      {"code": "mlogit_model", "role": "Variable", "tip": "Stores the fitted multinomial logit model.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "sm.MNLogit", "role": "Class", "tip": "From statsmodels. Multinomial logit for unordered categorical outcomes.", "color": "blue"},
-                      {"code": "(y_dummies", "role": "Outcome", "tip": "Categorical dependent variable (integer categories).", "color": "sky"},
-                      {"code": ", X", "role": "Covariates", "tip": "Design matrix including a constant.", "color": "pink"},
-                      {"code": ").fit()", "role": "Fit", "tip": "Estimates via MLE. One set of coefficients per non-base outcome.", "color": "teal"}
+                      {"code": "sm.MNLogit", "role": "Class", "tip": "From statsmodels. Uses the Engle-Granger API (arrays), not the formula API.", "color": "blue"},
+                      {"code": "(df['occupation']", "role": "Endog", "tip": "First positional arg: the categorical dependent variable (integer-coded).", "color": "pink"},
+                      {"code": ", sm.add_constant(X)", "role": "Exog", "tip": "Second positional arg: design matrix. add_constant() prepends a column of ones.", "color": "pink"},
+                      {"code": ").fit()", "role": "Chain", "tip": "Estimates via MLE. One coefficient vector per non-base category.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "mlogit", "role": "Command", "tip": "Multinomial logit estimation.", "color": "mauve"},
-                      {"code": " occupation education experience age", "role": "Variables", "tip": "Categorical outcome followed by covariates.", "color": "sky"},
-                      {"code": ", rrr", "role": "Option", "tip": "Reports relative risk ratios instead of raw coefficients. Easier to interpret.", "color": "yellow"},
-                      {"code": " baseoutcome(1)", "role": "Base Category", "tip": "Sets category 1 as the reference. Coefficients are relative to this category.", "color": "lavender"}
+                      {"code": "mlogit", "role": "Command", "tip": "Multinomial logit. Coefficients are log-odds relative to the base.", "color": "mauve"},
+                      {"code": " occupation education experience age", "role": "Varlist", "tip": "Categorical outcome first.", "color": "pink"},
+                      {"code": ", baseoutcome(1)", "role": "Base Option", "tip": "Parenthesised option setting the reference category number.", "color": "sky"},
+                      {"code": " rrr", "role": "Display Option", "tip": "Reports exponentiated coefficients (relative risk ratios) instead of log-odds.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "multinom", "role": "Function", "tip": "From nnet package. Fits multinomial log-linear models.", "color": "blue"},
-                      {"code": "(occupation ~ education + experience + age", "role": "Formula", "tip": "Categorical outcome on the left, covariates on the right.", "color": "green"},
-                      {"code": ", data = df)", "role": "Data", "tip": "Data frame with the variables.", "color": "pink"}
+                      {"code": "multinom", "role": "Function", "tip": "From nnet package. R picks the first factor level as the base.", "color": "blue"},
+                      {"code": "(occupation ~ education + experience + age", "role": "Formula", "tip": "Factor outcome on the left. Base category is the first level of the factor.", "color": "green"},
+                      {"code": ", data = df)", "role": "Data", "tip": "Named argument.", "color": "pink"}
                     ]
                   }
                 }
@@ -2869,30 +2855,28 @@ Parallel regression assumption holds (p > 0.05)</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate ordered logit/probit for ordinal outcomes (e.g., satisfaction scales, ratings)",
-                  "pattern": "model = OrderedModel(y, X, distr='logit').fit()",
-                  "structureNote": "Ordered models estimate a latent continuous variable with <strong>cutpoints</strong> that map it to observed categories. The <strong>proportional odds</strong> assumption means each covariate shifts the entire distribution uniformly. Always test this assumption with the Brant test.",
+                  "instruction": "Ordered logit/probit for ordinal outcomes",
+                  "pattern": "OrderedModel(y, X, distr='logit')  /  ologit y x  /  polr(y ~ x, method='logistic')",
+                  "structureNote": "Pattern: Python selects logit vs probit with a <strong>string argument</strong> <code>distr=</code>; Stata has <strong>separate commands</strong> (<code>ologit</code> / <code>oprobit</code>); R uses a <strong>method argument</strong> in <code>polr()</code>.",
                   "languages": {
                     "python": [
-                      {"code": "model_ologit", "role": "Variable", "tip": "Stores the fitted ordered logit model.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "OrderedModel", "role": "Class", "tip": "From statsmodels.miscmodels.ordinal_model. Handles ordered discrete outcomes.", "color": "blue"},
-                      {"code": "(df['satisfaction']", "role": "Outcome", "tip": "Ordinal dependent variable (e.g., 1-5 scale).", "color": "sky"},
-                      {"code": ", X", "role": "Covariates", "tip": "Design matrix of independent variables.", "color": "pink"},
-                      {"code": ", distr='logit'", "role": "Distribution", "tip": "Link function. 'logit' = ordered logit, 'probit' = ordered probit.", "color": "lavender"},
-                      {"code": ").fit()", "role": "Fit", "tip": "Estimates via MLE. Reports coefficients and cutpoints.", "color": "teal"}
+                      {"code": "OrderedModel", "role": "Class", "tip": "From statsmodels.miscmodels.ordinal_model.", "color": "blue"},
+                      {"code": "(df['satisfaction']", "role": "Endog", "tip": "First positional arg: the ordinal outcome (integer-coded).", "color": "pink"},
+                      {"code": ", X", "role": "Exog", "tip": "Second positional arg: design matrix.", "color": "pink"},
+                      {"code": ", distr='logit'", "role": "Distribution Arg", "tip": "String keyword: 'logit' or 'probit'. Controls the link function.", "color": "sky"},
+                      {"code": ").fit(method='bfgs')", "role": "Optimizer", "tip": "method= selects the optimisation algorithm. 'bfgs' is reliable for this model.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "ologit", "role": "Command", "tip": "Ordered logit regression. Use 'oprobit' for ordered probit.", "color": "mauve"},
-                      {"code": " satisfaction income education age", "role": "Variables", "tip": "Ordinal outcome followed by covariates.", "color": "sky"},
-                      {"code": "\nmargins, dydx(*)", "role": "Marginal Effects", "tip": "Compute average marginal effects for interpretation.", "color": "teal"},
-                      {"code": " predict(outcome(3))", "role": "Prediction", "tip": "Marginal effects for a specific outcome category.", "color": "lavender"}
+                      {"code": "ologit", "role": "Command", "tip": "Ordered logit. Swap to oprobit for ordered probit.", "color": "mauve"},
+                      {"code": " satisfaction income education age", "role": "Varlist", "tip": "Ordinal outcome first, then covariates.", "color": "pink"},
+                      {"code": "\nmargins, dydx(*) predict(outcome(3))", "role": "Post-estimation", "tip": "margins with predict(outcome(j)) gives marginal effects for category j specifically.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "polr", "role": "Function", "tip": "From MASS package. Proportional odds logistic regression for ordered factors.", "color": "blue"},
-                      {"code": "(as.ordered(satisfaction) ~ income + education + age", "role": "Formula", "tip": "as.ordered() tells R the outcome has natural ordering.", "color": "green"},
-                      {"code": ", data = df", "role": "Data", "tip": "Data frame containing the variables.", "color": "pink"},
-                      {"code": ", method = 'logistic')", "role": "Method", "tip": "'logistic' = ordered logit, 'probit' = ordered probit.", "color": "lavender"}
+                      {"code": "polr", "role": "Function", "tip": "From MASS package. Proportional odds logistic regression.", "color": "blue"},
+                      {"code": "(factor(satisfaction) ~ income + education + age", "role": "Formula", "tip": "Wrap outcome in factor() or ordered() so R knows it is categorical.", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "Named argument.", "color": "pink"},
+                      {"code": ", method = 'logistic'", "role": "Method Arg", "tip": "String: 'logistic' = ordered logit, 'probit' = ordered probit.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -3087,28 +3071,25 @@ n = 1000, Log-Lik = -1042.34</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate a bivariate probit model with two correlated binary outcomes",
-                  "pattern": "biprobit y1 y2 = x1 x2, partial",
-                  "structureNote": "Bivariate probit jointly models two binary outcomes that may be correlated through unobserved factors. The correlation parameter <strong>&rho;</strong> captures this dependence. A Wald test of &rho;=0 tests whether separate probits would suffice. Common applications: IV with a binary endogenous variable, sample selection models.",
+                  "instruction": "Bivariate probit: two correlated binary equations",
+                  "pattern": "biprobit (y1 = x1 x2) (y2 = x1 x3)  /  mvprobit(cbind(y1,y2) ~ x)",
+                  "structureNote": "Pattern: Stata uses <strong>parenthesised equation blocks</strong> to define each binary outcome separately; R uses <strong><code>cbind()</code></strong> on the LHS of the formula; Python has no built-in command and requires <strong>custom MLE</strong>.",
                   "languages": {
                     "python": [
-                      {"code": "biprobit_result", "role": "Variable", "tip": "Stores the bivariate probit estimation results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "bivariate_probit", "role": "Function", "tip": "Custom function or from a specialized package. Not in base statsmodels.", "color": "blue"},
-                      {"code": "(y1, y2", "role": "Outcome Variables", "tip": "Two binary (0/1) outcome variables.", "color": "sky"},
-                      {"code": ", X1, X2", "role": "Design Matrices", "tip": "Covariates for each equation (can differ for identification).", "color": "pink"},
-                      {"code": ")", "role": "Close Paren", "tip": "Estimates rho (correlation of latent errors) via MLE.", "color": "overlay"}
+                      {"code": "# No built-in bivariate probit", "role": "Comment", "tip": "Requires custom MLE with scipy.optimize.minimize and scipy.stats.mvn.", "color": "overlay"},
+                      {"code": "\nminimize(biprobit_ll, x0, args=(X1, X2, y1, y2)", "role": "Custom MLE", "tip": "Write a log-likelihood using the bivariate normal CDF, then minimise the negative.", "color": "blue"},
+                      {"code": ", method='BFGS')", "role": "Optimizer", "tip": "BFGS quasi-Newton method. The last parameter is rho (use tanh to bound it to (-1,1)).", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "biprobit", "role": "Command", "tip": "Bivariate probit estimation. Jointly models two binary outcomes.", "color": "mauve"},
-                      {"code": " (y1 = x1 x2)", "role": "Equation 1", "tip": "First binary outcome equation.", "color": "sky"},
-                      {"code": " (y2 = x1 x3)", "role": "Equation 2", "tip": "Second binary outcome equation. Different covariates improve identification.", "color": "green"},
-                      {"code": ", partial", "role": "Option", "tip": "Reports partial effects (marginal effects) instead of raw coefficients.", "color": "yellow"}
+                      {"code": "biprobit", "role": "Command", "tip": "Built-in bivariate probit. Estimates rho automatically.", "color": "mauve"},
+                      {"code": " (y1 = x1 x2 z1)", "role": "Equation 1", "tip": "Parenthesised block: outcome = covariates. Equations can have different regressors.", "color": "green"},
+                      {"code": " (y2 = x1 x2)", "role": "Equation 2", "tip": "Second equation. Exclusion restriction (z1 in eq1 only) aids identification.", "color": "green"}
                     ],
                     "r": [
-                      {"code": "mvprobit", "role": "Function", "tip": "From mvprobit package. Multivariate probit via simulated maximum likelihood.", "color": "blue"},
-                      {"code": "(cbind(y1, y2) ~ x1 + x2", "role": "Formula", "tip": "cbind() combines the two binary outcomes on the left-hand side.", "color": "green"},
-                      {"code": ", data = df)", "role": "Data", "tip": "Data frame containing all variables.", "color": "pink"}
+                      {"code": "mvprobit", "role": "Function", "tip": "From mvprobit package. Simulated ML estimation.", "color": "blue"},
+                      {"code": "(cbind(y1, y2)", "role": "LHS", "tip": "cbind() binds two outcome vectors into a matrix on the formula LHS.", "color": "pink"},
+                      {"code": " ~ x1 + x2", "role": "RHS", "tip": "Shared covariates. For different covariates per equation, use a list of formulas.", "color": "green"},
+                      {"code": ", data = df)", "role": "Data", "tip": "Named argument.", "color": "pink"}
                     ]
                   }
                 }
@@ -3350,31 +3331,25 @@ v_hat          0.0870     0.0956   1.099</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you implement the control function approach for endogeneity in nonlinear models (probit/logit)",
-                  "pattern": "step1 residuals -> step2 probit with v_hat as control",
-                  "structureNote": "Standard 2SLS is inconsistent in nonlinear models. The control function approach: (1) OLS first stage to get residuals <strong>v&#770;</strong>, (2) include v&#770; in the nonlinear second stage. The coefficient on v&#770; tests for endogeneity. <strong>Bootstrap the entire procedure</strong> for valid standard errors.",
+                  "instruction": "Control function: two-step procedure for nonlinear models",
+                  "pattern": "Step 1: OLS -> predict residuals -> Step 2: probit with v_hat",
+                  "structureNote": "Pattern: a <strong>two-step workflow</strong> in all three languages: (1) run OLS to extract residuals, (2) include those residuals in the nonlinear second stage. Stata also offers a <strong>one-command alternative</strong> (<code>ivprobit</code>).",
                   "languages": {
                     "python": [
-                      {"code": "first_stage", "role": "Variable", "tip": "Stores the first-stage OLS regression.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "smf.ols", "role": "OLS Function", "tip": "First stage: regress endogenous variable on instruments and controls.", "color": "blue"},
-                      {"code": "('endog_x ~ instrument + controls', data=df).fit()", "role": "First Stage", "tip": "Formula includes instruments that predict the endogenous variable.", "color": "green"},
-                      {"code": "\ndf['v_hat']", "role": "Residuals", "tip": "First-stage residuals serve as the control function.", "color": "pink"},
-                      {"code": " = first_stage.resid", "role": "Extract Residuals", "tip": "These residuals capture the endogenous variation.", "color": "teal"},
-                      {"code": "\nsecond_stage = smf.probit('y ~ endog_x + controls + v_hat', data=df).fit()", "role": "Second Stage", "tip": "Include v_hat as additional regressor. Its significance tests for endogeneity.", "color": "blue"}
+                      {"code": "smf.ols('endog_x ~ instrument + controls', data=df).fit()", "role": "Step 1", "tip": "First stage: OLS of the endogenous variable on instruments + controls.", "color": "blue"},
+                      {"code": "\ndf['v_hat'] = first_stage.resid", "role": "Extract Residuals", "tip": ".resid attribute returns the OLS residuals as a Series.", "color": "pink"},
+                      {"code": "\nsmf.probit('y ~ endog_x + controls + v_hat', data=df).fit()", "role": "Step 2", "tip": "Include v_hat in the formula. Its coefficient is an endogeneity test.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "reg", "role": "First Stage", "tip": "OLS regression of endogenous variable on instruments and controls.", "color": "mauve"},
-                      {"code": " endog_x instrument controls\n", "role": "Variables", "tip": "Endogenous variable on instruments.", "color": "sky"},
-                      {"code": "predict v_hat, residuals", "role": "Get Residuals", "tip": "Saves first-stage residuals as the control function.", "color": "teal"},
-                      {"code": "\nprobit y endog_x controls v_hat", "role": "Second Stage", "tip": "Probit with v_hat included. Test v_hat coefficient for endogeneity.", "color": "mauve"}
+                      {"code": "reg endog_x instrument controls", "role": "Step 1", "tip": "First-stage OLS.", "color": "mauve"},
+                      {"code": "\npredict v_hat, residuals", "role": "Predict", "tip": "predict with residuals option saves the OLS residuals as a new variable.", "color": "mauve"},
+                      {"code": "\nprobit y endog_x controls v_hat", "role": "Step 2", "tip": "Second-stage probit. Test v_hat significance for endogeneity.", "color": "mauve"},
+                      {"code": "\nivprobit y controls (endog_x = instrument)", "role": "One-command Alt", "tip": "Built-in IV probit. Parentheses: (endogenous = instruments). Handles SEs correctly.", "color": "blue"}
                     ],
                     "r": [
-                      {"code": "first_stage", "role": "Variable", "tip": "Stores the first-stage OLS regression.", "color": "pink"},
-                      {"code": " <- lm(endog_x ~ instrument + controls, data = df)", "role": "First Stage", "tip": "OLS of endogenous variable on instruments and controls.", "color": "blue"},
-                      {"code": "\ndf$v_hat", "role": "Residuals Column", "tip": "New column for first-stage residuals.", "color": "pink"},
-                      {"code": " <- residuals(first_stage)", "role": "Extract Residuals", "tip": "Extracts the OLS residuals to use as the control function.", "color": "teal"},
-                      {"code": "\nsecond_stage <- glm(y ~ endog_x + controls + v_hat, data = df, family = binomial(link = 'probit'))", "role": "Second Stage", "tip": "Probit with v_hat. Bootstrap the entire procedure for valid SEs.", "color": "blue"}
+                      {"code": "lm(endog_x ~ instrument + controls, data = df)", "role": "Step 1", "tip": "First-stage OLS.", "color": "blue"},
+                      {"code": "\ndf$v_hat <- residuals(first_stage)", "role": "Extract Residuals", "tip": "residuals() extracts OLS residuals. Assign to a new column with $.", "color": "pink"},
+                      {"code": "\nglm(y ~ endog_x + controls + v_hat, data = df, family = binomial(link = 'probit'))", "role": "Step 2", "tip": "Second-stage probit via glm(). Bootstrap the entire two-step procedure for valid SEs.", "color": "blue"}
                     ]
                   }
                 }
@@ -3585,29 +3560,28 @@ Std. Err.:  0.1385
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate Poisson and Negative Binomial models for count data",
-                  "pattern": "model = glm.from_formula(formula, data, family=Poisson()).fit()",
-                  "structureNote": "Poisson assumes <strong>E[Y|X] = Var(Y|X) = exp(X&beta;)</strong>. When variance exceeds the mean (overdispersion), use <strong>Negative Binomial</strong> which adds a dispersion parameter. Coefficients are in log units: exp(&beta;) gives the <strong>incidence rate ratio</strong>.",
+                  "instruction": "Poisson and Negative Binomial for count data",
+                  "pattern": "smf.poisson(formula, data).fit()  /  poisson y x, robust  /  glm(..., family=poisson())",
+                  "structureNote": "Pattern: Python has <strong>shortcut functions</strong> (<code>smf.poisson</code>) and a general <code>smf.glm</code>; Stata has <strong>separate commands</strong> (<code>poisson</code> / <code>nbreg</code>); R uses <code>glm()</code> with <strong>family =</strong> for Poisson, but a <strong>separate function</strong> <code>glm.nb()</code> from MASS for NB.",
                   "languages": {
                     "python": [
-                      {"code": "poisson_model", "role": "Variable", "tip": "Stores the fitted Poisson regression model.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "smf.glm", "role": "GLM Function", "tip": "From statsmodels.formula.api. Generalized Linear Models framework.", "color": "blue"},
-                      {"code": "('patents ~ rd_spending + firm_size'", "role": "Formula", "tip": "R-style formula. Dependent variable is a count.", "color": "green"},
-                      {"code": ", data=df", "role": "Data", "tip": "Data frame with the variables.", "color": "pink"},
-                      {"code": ", family=sm.families.Poisson()", "role": "Family", "tip": "Specifies the Poisson distribution. Use NegativeBinomial() for overdispersed data.", "color": "lavender"},
-                      {"code": ").fit()", "role": "Fit", "tip": "Estimates the model via maximum likelihood.", "color": "teal"}
+                      {"code": "smf.poisson", "role": "Function", "tip": "Shortcut from statsmodels.formula.api. Also: smf.negativebinomial.", "color": "blue"},
+                      {"code": "('patents ~ rd_spending + firm_size'", "role": "Formula", "tip": "R-style formula. Count outcome on the left.", "color": "green"},
+                      {"code": ", data=df)", "role": "Data Argument", "tip": "Named argument.", "color": "pink"},
+                      {"code": ".fit(cov_type='HC1')", "role": "Robust Fit", "tip": "Adding cov_type='HC1' gives Poisson pseudo-MLE (PPML) -- consistent even if data aren't Poisson.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "poisson", "role": "Command", "tip": "Poisson regression. Use 'nbreg' for Negative Binomial.", "color": "mauve"},
-                      {"code": " patents rd_spending firm_size", "role": "Variables", "tip": "Count dependent variable followed by covariates.", "color": "sky"},
-                      {"code": ", robust", "role": "Option", "tip": "Robust SEs. Makes Poisson consistent even under misspecification (PPML).", "color": "yellow"}
+                      {"code": "poisson", "role": "Command", "tip": "Poisson regression. Switch to nbreg for Negative Binomial.", "color": "mauve"},
+                      {"code": " patents rd_spending firm_size", "role": "Varlist", "tip": "Count outcome first.", "color": "pink"},
+                      {"code": ", robust", "role": "Option", "tip": "Robust SEs make Poisson consistent under misspecification (PPML).", "color": "sky"},
+                      {"code": "\nppmlhdfe", "role": "Alt Command", "tip": "Poisson pseudo-ML with high-dimensional FE. Standard for gravity equations.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "glm", "role": "Function", "tip": "Base R generalized linear models function.", "color": "blue"},
-                      {"code": "(patents ~ rd_spending + firm_size", "role": "Formula", "tip": "R-style formula for the count model.", "color": "green"},
-                      {"code": ", data = df", "role": "Data", "tip": "Data frame containing the variables.", "color": "pink"},
-                      {"code": ", family = poisson)", "role": "Family", "tip": "Poisson family. Use MASS::glm.nb() for Negative Binomial.", "color": "lavender"}
+                      {"code": "glm", "role": "Function", "tip": "Base R generalised linear models.", "color": "blue"},
+                      {"code": "(patents ~ rd_spending + firm_size", "role": "Formula", "tip": "Count outcome on the left.", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "Named argument.", "color": "pink"},
+                      {"code": ", family = poisson()", "role": "Family", "tip": "Poisson family. For NB: use MASS::glm.nb() (separate function, no family arg).", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -3849,31 +3823,31 @@ BIC: 1159.234</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you implement custom Maximum Likelihood Estimation (MLE) by defining a log-likelihood function and optimizing it numerically",
-                  "pattern": "result = minimize(neg_log_lik, x0, method='BFGS')",
-                  "structureNote": "Custom MLE lets you estimate models not available in standard packages. The approach: (1) write the negative log-likelihood function, (2) choose starting values, (3) minimize using an optimizer. Standard errors come from the <strong>inverse Hessian</strong> at the optimum.",
+                  "instruction": "Custom MLE: optimizer syntax across three languages",
+                  "pattern": "minimize(neg_ll, x0, method='BFGS')  /  ml model lf ... ; ml maximize  /  optim(par, fn, method, hessian)",
+                  "structureNote": "Pattern: Python and R call a <strong>general-purpose optimizer</strong> with the negative log-likelihood as an argument; Stata uses a <strong>two-step framework</strong> (<code>ml model</code> then <code>ml maximize</code>) with a user-written evaluator program.",
                   "languages": {
                     "python": [
-                      {"code": "result", "role": "Variable", "tip": "Stores the optimization result including parameter estimates.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "minimize", "role": "Function", "tip": "From scipy.optimize. General-purpose numerical optimizer.", "color": "blue"},
-                      {"code": "(neg_log_lik", "role": "Objective Function", "tip": "The negative log-likelihood. Negative because minimizers minimize, but we want to maximize.", "color": "sky"},
-                      {"code": ", x0=start_vals", "role": "Starting Values", "tip": "Initial parameter guesses. Try OLS estimates or zeros.", "color": "lavender"},
-                      {"code": ", method='BFGS')", "role": "Algorithm", "tip": "BFGS = quasi-Newton method. Good default -- approximates the Hessian without computing it exactly.", "color": "yellow"}
+                      {"code": "minimize", "role": "Function", "tip": "From scipy.optimize. Minimises any scalar function.", "color": "blue"},
+                      {"code": "(neg_log_lik", "role": "Objective Arg", "tip": "First positional arg: the function to minimise. Negate the log-likelihood because minimize() minimises.", "color": "pink"},
+                      {"code": ", x0=start_vals", "role": "Starting Values", "tip": "Keyword argument: initial parameter vector.", "color": "sky"},
+                      {"code": ", args=(X, y)", "role": "Extra Args", "tip": "Tuple of additional arguments passed to the objective function.", "color": "sky"},
+                      {"code": ", method='BFGS'", "role": "Algorithm", "tip": "String selecting the optimiser. 'BFGS' approximates the Hessian; 'Nelder-Mead' is derivative-free.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "SEs from result.hess_inv (BFGS) or numerical Hessian.", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "ml model lf", "role": "ML Command", "tip": "Stata's ml framework. 'lf' = user supplies observation-level log-likelihood.", "color": "mauve"},
-                      {"code": " mylikelihood", "role": "Evaluator", "tip": "User-written program that computes log-likelihood for each observation.", "color": "sky"},
-                      {"code": " (y = x1 x2)", "role": "Equation", "tip": "Linear combination of variables.", "color": "green"},
-                      {"code": "\nml maximize", "role": "Maximize", "tip": "Runs the optimization algorithm (Newton-Raphson by default).", "color": "teal"}
+                      {"code": "ml model lf", "role": "Setup Command", "tip": "Declares a custom ML model. lf = observation-level log-likelihood evaluator.", "color": "mauve"},
+                      {"code": " mylikelihood", "role": "Evaluator Name", "tip": "Name of a user-written program that fills in the log-likelihood.", "color": "pink"},
+                      {"code": " (y = x1 x2)", "role": "Equation Block", "tip": "Parenthesised block defining the linear predictor.", "color": "green"},
+                      {"code": "\nml maximize", "role": "Run Command", "tip": "Separate command that triggers the Newton-Raphson optimisation.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "optim", "role": "Function", "tip": "Base R general-purpose optimizer.", "color": "blue"},
-                      {"code": "(par = start_vals", "role": "Starting Values", "tip": "Initial parameter vector.", "color": "lavender"},
-                      {"code": ", fn = neg_log_lik", "role": "Objective Function", "tip": "The negative log-likelihood function to minimize.", "color": "sky"},
-                      {"code": ", method = 'BFGS'", "role": "Algorithm", "tip": "BFGS quasi-Newton method. Alternative: 'Nelder-Mead' for non-smooth functions.", "color": "yellow"},
-                      {"code": ", hessian = TRUE", "role": "Hessian Flag", "tip": "Compute the Hessian at the optimum for standard errors.", "color": "lavender"},
-                      {"code": ")", "role": "Close Paren", "tip": "SEs = sqrt(diag(solve(result$hessian))).", "color": "overlay"}
+                      {"code": "optim", "role": "Function", "tip": "Base R optimiser. Also: nlm() for Newton-type methods.", "color": "blue"},
+                      {"code": "(par = start_vals", "role": "Starting Values", "tip": "Named argument: initial parameter vector.", "color": "sky"},
+                      {"code": ", fn = neg_log_lik", "role": "Objective Arg", "tip": "Named argument: the function to minimise.", "color": "pink"},
+                      {"code": ", method = 'BFGS'", "role": "Algorithm", "tip": "String: 'BFGS', 'Nelder-Mead', 'L-BFGS-B' (for bounded parameters).", "color": "sky"},
+                      {"code": ", hessian = TRUE", "role": "Hessian Flag", "tip": "Logical. If TRUE, returns the Hessian at the optimum for SE computation.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "SEs = sqrt(diag(solve(result$hessian))).", "color": "overlay"}
                     ]
                   }
                 }
@@ -4120,31 +4094,26 @@ Note: Manual NR and glm() produce identical estimates.</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you implement the Newton-Raphson algorithm for maximum likelihood estimation",
-                  "pattern": "theta = theta - inv(H) @ gradient",
-                  "structureNote": "Newton-Raphson iteratively updates parameter estimates using the gradient (first derivative) and Hessian (second derivative) of the log-likelihood. The update rule <strong>&theta;<sub>t+1</sub> = &theta;<sub>t</sub> - H<sup>-1</sup>g</strong> takes steps toward the maximum. At convergence, the negative inverse Hessian gives the variance-covariance matrix of the estimates.",
+                  "instruction": "Newton-Raphson update rule and the @ operator",
+                  "pattern": "beta = beta - solve(H, score)  /  ml maximize  /  nlm(fn, start, hessian=TRUE)",
+                  "structureNote": "Pattern: The NR update <code>&theta; = &theta; - H<sup>-1</sup>g</code> uses <strong>matrix algebra</strong>. Python uses the <code>@</code> operator for matrix multiplication; R uses <code>%*%</code>. In practice, use <code>solve()</code> instead of explicit inversion.",
                   "languages": {
                     "python": [
-                      {"code": "theta", "role": "Variable", "tip": "Parameter vector being iteratively updated.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Updates the parameter values.", "color": "peach"},
-                      {"code": "theta", "role": "Current Value", "tip": "Current parameter estimates from previous iteration.", "color": "pink"},
-                      {"code": " - ", "role": "Subtraction", "tip": "Newton-Raphson subtracts the step (for maximization of concave function).", "color": "peach"},
-                      {"code": "np.linalg.inv(H)", "role": "Inverse Hessian", "tip": "Inverse of the Hessian matrix. Controls step size and direction.", "color": "blue"},
-                      {"code": " @ ", "role": "Matrix Multiply", "tip": "Python's matrix multiplication operator.", "color": "peach"},
-                      {"code": "gradient", "role": "Score Vector", "tip": "First derivative of the log-likelihood. Points toward the maximum.", "color": "sky"}
+                      {"code": "np.linalg.solve(H, score)", "role": "Linear Solve", "tip": "Solves H * delta = score without inverting H. More numerically stable than inv(H) @ score.", "color": "blue"},
+                      {"code": "\nbeta = beta - delta", "role": "Update", "tip": "Subtraction because maximising a concave function. The - flips the step direction.", "color": "peach"},
+                      {"code": "\n@ ", "role": "Matmul Operator", "tip": "Python's infix matrix multiply operator (PEP 465). Works on numpy arrays.", "color": "peach"},
+                      {"code": "\nnp.linalg.inv(-H)", "role": "Vcov", "tip": "At convergence, the negative inverse Hessian is the variance-covariance matrix.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "ml model lf", "role": "ML Command", "tip": "Stata's ml framework for maximum likelihood. 'lf' = log-likelihood evaluator.", "color": "mauve"},
-                      {"code": " mylogit", "role": "Evaluator Program", "tip": "User-written program that computes the log-likelihood for each observation.", "color": "sky"},
-                      {"code": " (y = x1 x2)", "role": "Equation", "tip": "Specifies the linear combination of variables entering the likelihood.", "color": "green"},
-                      {"code": "\nml maximize", "role": "Maximize", "tip": "Runs Newton-Raphson to find the maximum. Reports convergence info.", "color": "teal"}
+                      {"code": "ml model lf mylogit (y = x1 x2)", "role": "Setup", "tip": "Same ml framework. Newton-Raphson is the default algorithm.", "color": "mauve"},
+                      {"code": "\nml maximize, iterate(100) trace", "role": "Run", "tip": "iterate() sets max iterations; trace prints each step's log-likelihood.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "nlm", "role": "Function", "tip": "Base R nonlinear minimizer using Newton-type methods.", "color": "blue"},
-                      {"code": "(neg_ll", "role": "Objective Function", "tip": "The negative log-likelihood function to minimize.", "color": "sky"},
-                      {"code": ", rep(0, 4)", "role": "Starting Values", "tip": "Initial parameter vector (here: 4 zeros).", "color": "lavender"},
-                      {"code": ", X = X, y = y", "role": "Data Arguments", "tip": "Additional arguments passed to the objective function.", "color": "pink"},
-                      {"code": ", hessian = TRUE)", "role": "Hessian Flag", "tip": "Returns the Hessian at the optimum for computing standard errors.", "color": "yellow"}
+                      {"code": "nlm", "role": "Function", "tip": "Base R Newton-type minimiser. Uses analytic or numerical derivatives.", "color": "blue"},
+                      {"code": "(neg_ll", "role": "Objective", "tip": "First positional arg: the function to minimise.", "color": "pink"},
+                      {"code": ", rep(0, k)", "role": "Starting Values", "tip": "rep() creates a vector of k zeros as initial guesses.", "color": "sky"},
+                      {"code": ", hessian = TRUE", "role": "Hessian Flag", "tip": "Returns result$hessian for SE computation.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -4333,28 +4302,29 @@ r    0.020934   0.025912</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate Nonlinear Least Squares (NLS) for models that cannot be linearized",
-                  "pattern": "result = curve_fit(func, x, y, p0=[init_values])",
-                  "structureNote": "NLS minimizes the sum of squared residuals for nonlinear functions. Unlike OLS, it requires <strong>starting values</strong> and iterative optimization. The choice of starting values matters -- bad ones can lead to convergence failure or local optima.",
+                  "instruction": "Nonlinear Least Squares (NLS) syntax",
+                  "pattern": "curve_fit(func, x, y, p0=...)  /  nl (y = {a}*x^{b}), initial(...)  /  nls(y ~ a*exp(b*x), start=...)",
+                  "structureNote": "Pattern: Python passes a <strong>callable function</strong> to the optimiser; Stata defines the nonlinear equation <strong>inline</strong> with parameters in <code>{braces}</code>; R uses <strong>formula syntax</strong> where parameter names appear directly.",
                   "languages": {
                     "python": [
-                      {"code": "popt, pcov", "role": "Variables", "tip": "popt = optimal parameter values, pcov = covariance matrix (SEs = sqrt(diag(pcov))).", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Unpacks the two return values.", "color": "peach"},
-                      {"code": "curve_fit", "role": "Function", "tip": "From scipy.optimize. Fits a nonlinear function to data using least squares.", "color": "blue"},
-                      {"code": "(growth_model", "role": "Model Function", "tip": "A Python function f(x, *params) defining the nonlinear relationship.", "color": "sky"},
-                      {"code": ", x, y", "role": "Data", "tip": "Independent and dependent variable arrays.", "color": "pink"},
-                      {"code": ", p0=[1, 0.1, 1])", "role": "Starting Values", "tip": "Initial parameter guesses. Critical for convergence -- try values close to the expected range.", "color": "lavender"}
+                      {"code": "popt, pcov = ", "role": "Tuple Unpack", "tip": "curve_fit returns two values: optimal params and their covariance matrix.", "color": "pink"},
+                      {"code": "curve_fit", "role": "Function", "tip": "From scipy.optimize. Levenberg-Marquardt NLS.", "color": "blue"},
+                      {"code": "(ces_production", "role": "Model Function", "tip": "First arg: a Python function f(x, *params). Signature must match.", "color": "pink"},
+                      {"code": ", xdata, ydata", "role": "Data Args", "tip": "Independent and dependent data. xdata can be a tuple for multivariate input.", "color": "pink"},
+                      {"code": ", p0=[1, 0.5, -0.5]", "role": "Starting Values", "tip": "List of initial guesses. Length must match the number of parameters.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "SEs = np.sqrt(np.diag(pcov)).", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "nl", "role": "Command", "tip": "Nonlinear regression command in Stata.", "color": "mauve"},
-                      {"code": " (y = {b0} * x ^ {b1})", "role": "Model Equation", "tip": "Specifies the nonlinear equation with parameters in curly braces.", "color": "sky"},
-                      {"code": ", initial(b0 1 b1 0.5)", "role": "Starting Values", "tip": "Initial parameter guesses for the optimizer.", "color": "lavender"}
+                      {"code": "nl", "role": "Command", "tip": "Nonlinear regression.", "color": "mauve"},
+                      {"code": " (output = {a} * ({alpha}*K^{rho} + (1-{alpha})*L^{rho})^(1/{rho}))", "role": "Inline Equation", "tip": "Parameters in {braces} are what Stata estimates. Variables are bare names.", "color": "green"},
+                      {"code": ", initial(a 1 alpha 0.5 rho -0.5)", "role": "Starting Values", "tip": "Space-separated pairs: name value name value.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "nls", "role": "Function", "tip": "Base R function for nonlinear least squares.", "color": "blue"},
-                      {"code": "(y ~ a * exp(b * x)", "role": "Formula", "tip": "Specifies the nonlinear model with named parameters.", "color": "green"},
-                      {"code": ", data = df", "role": "Data", "tip": "Data frame containing the variables.", "color": "pink"},
-                      {"code": ", start = list(a = 1, b = 0.1))", "role": "Starting Values", "tip": "Named list of initial parameter values. Try grid search if convergence fails.", "color": "lavender"}
+                      {"code": "nls", "role": "Function", "tip": "Base R nonlinear least squares.", "color": "blue"},
+                      {"code": "(output ~ a * (alpha*K^rho + (1-alpha)*L^rho)^(1/rho)", "role": "Formula", "tip": "Parameter names (a, alpha, rho) appear directly in the formula -- R distinguishes them from data columns via start=.", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "Named argument.", "color": "pink"},
+                      {"code": ", start = list(a=1, alpha=0.5, rho=-0.5)", "role": "Starting Values", "tip": "Named list. Names must match the parameter names in the formula.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -4586,28 +4556,29 @@ Theta[2]   2.345678   0.187654    12.4987     < 2e-16  ***
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate models using the Generalized Method of Moments (GMM)",
-                  "pattern": "result = gmm(moment_fn, data, instruments)",
-                  "structureNote": "GMM finds parameter values that make sample moment conditions close to zero. It nests OLS and IV as special cases. The <strong>J-test</strong> (overidentification test) checks whether all moment conditions hold jointly -- a significant J-statistic suggests model misspecification.",
+                  "instruction": "GMM estimation syntax across three languages",
+                  "pattern": "gmm (resid), instruments(z)  /  gmm(g, x=data, t0=start)  /  minimize(gmm_obj, x0)",
+                  "structureNote": "Pattern: Stata defines <strong>moment conditions inline</strong> with <code>instruments()</code> as an option; R passes a <strong>user-written moment function</strong> to <code>gmm()</code>; Python typically uses <strong>IV2SLS</strong> or a custom objective with <code>minimize()</code>.",
                   "languages": {
                     "python": [
-                      {"code": "result", "role": "Variable", "tip": "Stores the GMM estimation results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "GMMResults", "role": "Class", "tip": "From linearmodels or custom implementation. GMM estimation framework.", "color": "blue"},
-                      {"code": "(moments", "role": "Moment Function", "tip": "Function defining E[g(data, theta)] = 0 moment conditions.", "color": "sky"},
-                      {"code": ", starting_values)", "role": "Initial Values", "tip": "Starting point for the optimizer. Try OLS estimates as starting values.", "color": "lavender"}
+                      {"code": "IV2SLS", "role": "Class", "tip": "From linearmodels.iv. For IV-GMM. Custom GMM uses minimize() with a quadratic-form objective.", "color": "blue"},
+                      {"code": "(df['y'], df[['exo']], df[['endo']], df[['z1','z2']])", "role": "Positional Args", "tip": "Four args: dependent, exogenous, endogenous, instruments.", "color": "pink"},
+                      {"code": ".fit(cov_type='robust')", "role": "Fit", "tip": "Robust SE option. J-statistic for overidentification is in the summary.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "gmm", "role": "Command", "tip": "GMM estimation command. Supports one-step, two-step, and iterated GMM.", "color": "mauve"},
-                      {"code": " (moment_condition)", "role": "Moment Condition", "tip": "Specifies the moment equation. Multiple conditions in multiple parentheses.", "color": "sky"},
-                      {"code": ", instruments(z1 z2)", "role": "Instruments", "tip": "Variables used as instruments for the moment conditions.", "color": "lavender"},
-                      {"code": " winitial(identity)", "role": "Weight Matrix", "tip": "Initial weighting matrix. 'identity' for one-step, then updated for two-step.", "color": "yellow"}
+                      {"code": "gmm", "role": "Command", "tip": "Built-in GMM. Flexible moment-condition syntax.", "color": "mauve"},
+                      {"code": " (y - {b0} - {b1}*x)", "role": "Moment Condition", "tip": "Parenthesised expression. Parameters in {braces}. Multiple conditions in multiple ().", "color": "green"},
+                      {"code": ", instruments(z1 z2)", "role": "Instruments Option", "tip": "Variables satisfying the orthogonality conditions.", "color": "sky"},
+                      {"code": " twostep", "role": "Step Option", "tip": "Two-step efficient GMM. Default is one-step.", "color": "sky"},
+                      {"code": " winitial(unadjusted)", "role": "Weight Option", "tip": "Initial weighting matrix. Updated in the second step.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "gmm", "role": "Function", "tip": "From gmm package. Estimates parameters via Generalized Method of Moments.", "color": "blue"},
-                      {"code": "(g_function", "role": "Moment Function", "tip": "An R function that returns the moment conditions for each observation.", "color": "sky"},
-                      {"code": ", x = data", "role": "Data", "tip": "The data passed to the moment function.", "color": "pink"},
-                      {"code": ", t0 = c(0, 1))", "role": "Starting Values", "tip": "Initial parameter values for the optimizer.", "color": "lavender"}
+                      {"code": "gmm", "role": "Function", "tip": "From the gmm package.", "color": "blue"},
+                      {"code": "(g", "role": "Moment Function", "tip": "First arg: an R function(theta, x) returning an N x L matrix of moment conditions.", "color": "pink"},
+                      {"code": ", x = data_mat", "role": "Data Arg", "tip": "Named argument: the data matrix passed to g().", "color": "pink"},
+                      {"code": ", t0 = c(0, 0, 0)", "role": "Starting Values", "tip": "Numeric vector of initial parameter guesses.", "color": "sky"},
+                      {"code": ", type = 'twoStep'", "role": "Type Arg", "tip": "String: 'twoStep' for efficient GMM, 'iterative' for iterated.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -4845,28 +4816,27 @@ Q75 education effect: 1.0235</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate quantile regression at different quantiles of the conditional distribution",
-                  "pattern": "qr = quantreg(formula, data).fit(q=0.5)",
-                  "structureNote": "Quantile regression estimates conditional quantiles rather than the conditional mean. Comparing coefficients across quantiles (e.g., Q10 vs Q90) reveals <strong>heterogeneous effects</strong> across the distribution -- something OLS misses entirely.",
+                  "instruction": "Quantile regression: specifying the quantile",
+                  "pattern": "smf.quantreg(...).fit(q=0.5)  /  qreg ..., quantile(0.5)  /  rq(..., tau=0.5)",
+                  "structureNote": "Pattern: All three languages accept the quantile as a <strong>numeric argument</strong> between 0 and 1. Python passes it to <code>.fit()</code>; Stata uses a <strong>parenthesised option</strong>; R uses a <strong>named argument</strong> <code>tau</code> that also accepts vectors for multiple quantiles at once.",
                   "languages": {
                     "python": [
-                      {"code": "qr_50", "role": "Variable", "tip": "Stores the fitted quantile regression model at the 50th percentile.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
                       {"code": "smf.quantreg", "role": "Function", "tip": "From statsmodels.formula.api. Creates a quantile regression model.", "color": "blue"},
-                      {"code": "('wage ~ education + experience + female', df)", "role": "Specification", "tip": "R-style formula and data frame.", "color": "green"},
-                      {"code": ".fit(", "role": "Fit Method", "tip": "Estimates the model parameters.", "color": "teal"},
-                      {"code": "q=0.5)", "role": "Quantile", "tip": "Which quantile to estimate. 0.5 = median, 0.25 = first quartile, 0.75 = third quartile.", "color": "lavender"}
+                      {"code": "('wage ~ education + experience + female', df)", "role": "Formula + Data", "tip": "R-style formula and DataFrame.", "color": "green"},
+                      {"code": ".fit(q=0.5)", "role": "Quantile at Fit", "tip": "Keyword argument selecting the quantile. 0.5 = median. Set at fit time, not model creation.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "qreg", "role": "Command", "tip": "Quantile regression command.", "color": "mauve"},
-                      {"code": " wage education experience female, ", "role": "Variables", "tip": "Dependent variable followed by independent variables.", "color": "sky"},
-                      {"code": "quantile(0.5)", "role": "Quantile Option", "tip": "Specifies which quantile to estimate. 0.5 = median regression (LAD).", "color": "lavender"}
+                      {"code": "qreg", "role": "Command", "tip": "Single-quantile regression. Use sqreg for simultaneous multiple quantiles.", "color": "mauve"},
+                      {"code": " wage education experience female", "role": "Varlist", "tip": "Outcome first, then predictors.", "color": "pink"},
+                      {"code": ", quantile(0.5)", "role": "Quantile Option", "tip": "Parenthesised option. 0.5 = median (LAD).", "color": "sky"},
+                      {"code": "\nsqreg ..., quantiles(25 50 75 90)", "role": "Multi-quantile", "tip": "sqreg estimates multiple quantiles simultaneously with joint bootstrap SEs.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "rq", "role": "Function", "tip": "From quantreg package. Fits quantile regression models.", "color": "blue"},
-                      {"code": "(wage ~ education + experience + female", "role": "Formula", "tip": "R-style formula specifying the model.", "color": "green"},
-                      {"code": ", data = df", "role": "Data", "tip": "Data frame containing the variables.", "color": "pink"},
-                      {"code": ", tau = 0.5)", "role": "Quantile", "tip": "Which quantile to estimate. Can be a vector like c(0.25, 0.5, 0.75) for multiple quantiles.", "color": "lavender"}
+                      {"code": "rq", "role": "Function", "tip": "From quantreg package.", "color": "blue"},
+                      {"code": "(wage ~ education + experience + female", "role": "Formula", "tip": "R-style formula.", "color": "green"},
+                      {"code": ", data = df", "role": "Data", "tip": "Named argument.", "color": "pink"},
+                      {"code": ", tau = 0.5", "role": "Quantile Arg", "tip": "Numeric. Can be a vector: tau = c(0.1, 0.25, 0.5, 0.75, 0.9) for multiple quantiles.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -5141,37 +5111,29 @@ Note: Wild cluster bootstrap is recommended when number of clusters < 50.</pre>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you compute bootstrap standard errors by resampling",
-                  "pattern": "for each iteration: resample data, re-estimate, collect coefficients",
-                  "structureNote": "<strong>Bootstrap</strong> estimates the sampling distribution by repeatedly resampling with replacement from your data. Each resample has the same size as the original but with some observations duplicated and others omitted. The standard deviation of the bootstrap estimates IS the standard error.",
+                  "instruction": "Bootstrap syntax: prefix (Stata), explicit loop (Python), boot() framework (R)",
+                  "pattern": "bootstrap _b, reps(1000): reg y x  /  boot(df, fn, R=1000)  /  for loop + .sample(replace=True)",
+                  "structureNote": "Pattern: Stata uses a <strong>prefix command</strong> that wraps any estimator; R uses a <strong>boot() function</strong> that calls a user-written statistic function; Python requires an <strong>explicit loop</strong> with <code>df.sample(replace=True)</code>.",
                   "languages": {
                     "python": [
-                      {"code": "coefs = []\n", "role": "Storage", "tip": "Empty list to collect coefficient estimates from each bootstrap iteration.", "color": "pink"},
-                      {"code": "for _ in range(1000):", "role": "Loop", "tip": "Repeat 1000 times. _ means we don't use the loop counter.", "color": "mauve"},
-                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
-                      {"code": "sample = df.sample(n, replace=True)", "role": "Resample", "tip": "Draw n observations with replacement. Some rows appear multiple times, others not at all.", "color": "blue"},
-                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
-                      {"code": "model = smf.ols(formula, data=sample).fit()", "role": "Re-estimate", "tip": "Fit the model on the bootstrap sample.", "color": "teal"},
-                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
-                      {"code": "coefs.append(model.params.values)\n", "role": "Collect", "tip": "Store this iteration's coefficients.", "color": "sky"},
-                      {"code": "se = np.std(coefs, axis=0)", "role": "Bootstrap SE", "tip": "Standard deviation of bootstrap estimates = bootstrap standard error.", "color": "teal"}
+                      {"code": "for _ in range(1000):", "role": "Loop", "tip": "Explicit for-loop. _ is a throwaway variable (iteration index not needed).", "color": "mauve"},
+                      {"code": "\n    sample = df.sample(n, replace=True)", "role": "Resample", "tip": ".sample(replace=True) draws with replacement. n = len(df) to match original size.", "color": "blue"},
+                      {"code": "\n    coefs.append(smf.ols(formula, data=sample).fit().params)", "role": "Estimate + Collect", "tip": "Re-estimate on the resample and append coefficients to a list.", "color": "blue"},
+                      {"code": "\nse = np.std(coefs, axis=0)", "role": "Compute SE", "tip": "SD across bootstrap draws = bootstrap standard error.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "bootstrap", "role": "Prefix", "tip": "Stata's bootstrap prefix. Precedes any estimation command.", "color": "mauve"},
-                      {"code": " _b", "role": "Collect", "tip": "_b collects all coefficient estimates from each replication.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "reps(1000)", "role": "Repetitions", "tip": "Number of bootstrap replications.", "color": "yellow"},
-                      {"code": " seed(12345)", "role": "Seed", "tip": "For reproducibility.", "color": "yellow"},
-                      {"code": ": ", "role": "Colon", "tip": "Introduces the estimation command to bootstrap.", "color": "text"},
-                      {"code": "reg outcome treatment controls", "role": "Command", "tip": "The estimation command to run on each bootstrap sample.", "color": "blue"}
+                      {"code": "bootstrap", "role": "Prefix Command", "tip": "Prefix syntax: placed before the colon and estimation command.", "color": "mauve"},
+                      {"code": " _b", "role": "Statistic", "tip": "_b tells Stata to collect all coefficient estimates from each replication.", "color": "pink"},
+                      {"code": ", reps(1000) seed(12345)", "role": "Options", "tip": "reps = number of replications; seed = for reproducibility.", "color": "sky"},
+                      {"code": ":", "role": "Colon Separator", "tip": "The colon separates bootstrap options from the estimation command.", "color": "overlay"},
+                      {"code": " reg outcome treatment controls", "role": "Wrapped Command", "tip": "Any estimation command goes after the colon.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "boot_results", "role": "Variable", "tip": "Stores bootstrap results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "boot", "role": "Function", "tip": "From the boot package. General-purpose bootstrap function.", "color": "blue"},
-                      {"code": "(data = df", "role": "Data", "tip": "The original data.", "color": "sky"},
-                      {"code": ", statistic = boot_fn", "role": "Function", "tip": "A user-defined function that takes (data, indices) and returns the statistic of interest.", "color": "teal"},
-                      {"code": ", R = 1000)", "role": "Replications", "tip": "Number of bootstrap replications.", "color": "lavender"}
+                      {"code": "boot", "role": "Function", "tip": "From the boot package. Handles resampling and collection.", "color": "blue"},
+                      {"code": "(data = df", "role": "Data Arg", "tip": "The original data frame.", "color": "pink"},
+                      {"code": ", statistic = boot_fn", "role": "Statistic Arg", "tip": "A function(data, indices) that subsets data[indices, ] and returns the statistic.", "color": "pink"},
+                      {"code": ", R = 1000", "role": "Replications", "tip": "Number of bootstrap draws.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "Use boot.ci() to extract percentile or BCa confidence intervals.", "color": "overlay"}
                     ]
                   }
                 }

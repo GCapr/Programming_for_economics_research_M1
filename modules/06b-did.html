@@ -298,32 +298,19 @@ DiD Estimate: 0.582
             {
               "exercises": [
                 {
-                  "instruction": "This is how you create the interaction term for a DiD manually",
-                  "pattern": "interaction = group_indicator * time_indicator",
-                  "structureNote": "The <strong>interaction term</strong> is the product of the group indicator (1 if treated) and the time indicator (1 if post-treatment). It equals 1 only for treated units in the post period. The coefficient on this term is the DiD estimate: the causal effect under the parallel trends assumption.",
+                  "instruction": "Creating the DiD interaction term manually vs. letting the regression formula handle it",
+                  "pattern": "df['treat_post'] = df['group'] * df['post']",
+                  "structureNote": "In Python and Stata, you can create the interaction column manually with <code>*</code>. Alternatively, Stata's <code>##</code> and R's <code>*</code> in formulas generate it automatically during regression.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "Your panel dataset.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Column selection/creation.", "color": "overlay"},
-                      {"code": "'treat_post'", "role": "New Column", "tip": "Name for the interaction term. Descriptive: treatment x post-period.", "color": "green"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends column name.", "color": "overlay"},
-                      {"code": " = ", "role": "Assignment", "tip": "Creates the new column.", "color": "peach"},
-                      {"code": "df['treated_group']", "role": "Group Indicator", "tip": "1 for treatment group, 0 for control. Time-invariant.", "color": "sky"},
-                      {"code": " * ", "role": "Multiplication", "tip": "Element-wise multiplication. 1*1=1, 1*0=0, 0*1=0, 0*0=0.", "color": "overlay"},
-                      {"code": "df['post']", "role": "Time Indicator", "tip": "1 for post-treatment period, 0 for pre-treatment. The product is 1 only for treated-post observations.", "color": "sky"}
+                      {"code": "df['treat_post']", "role": "New Column", "tip": "Bracket assignment creates a new column in the DataFrame.", "color": "pink"},
+                      {"code": " = df['treated_group'] * df['post']", "role": "Element-wise Product", "tip": "<code>*</code> between two Series is element-wise. Result is 1 only where both are 1.", "color": "peach"}
                     ],
                     "stata": [
-                      {"code": "gen", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
-                      {"code": " treat_post", "role": "Variable Name", "tip": "The interaction variable.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the computed value.", "color": "peach"},
-                      {"code": "treated_group * post", "role": "Interaction", "tip": "Product of group and time indicators. Or use ## in the regression formula to skip manual creation.", "color": "blue"}
+                      {"code": "gen treat_post = treated_group * post", "role": "Manual", "tip": "<code>gen</code> creates a variable. Alternatively, use <code>##</code> in the regression formula to skip this step.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "df$treat_post", "role": "New Column", "tip": "$ accesses/creates a column in the data frame.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "df$treated_group", "role": "Group Indicator", "tip": "The treatment group indicator.", "color": "sky"},
-                      {"code": " * ", "role": "Multiplication", "tip": "Element-wise multiplication of the two indicators.", "color": "overlay"},
-                      {"code": "df$post", "role": "Time Indicator", "tip": "Post-treatment indicator. Or just use * in the formula (R creates the interaction automatically).", "color": "sky"}
+                      {"code": "df$treat_post <- df$treated_group * df$post", "role": "Manual", "tip": "<code>$</code> accesses columns. In R formulas, <code>*</code> automatically includes main effects + interaction.", "color": "pink"}
                     ]
                   }
                 }
@@ -339,32 +326,23 @@ DiD Estimate: 0.582
             {
               "exercises": [
                 {
-                  "instruction": "This is how you run a classic 2x2 DiD regression with an interaction term",
-                  "pattern": "model = ols('outcome ~ group + time + group*time', data).fit()",
-                  "structureNote": "The DiD regression includes three terms: <strong>group</strong> (treated vs control), <strong>time</strong> (before vs after), and their <strong>interaction</strong>. The coefficient on the interaction term IS the DiD estimate: the differential change in outcomes for the treatment group after the policy.",
+                  "instruction": "DiD regression formula syntax: interaction operators differ across languages",
+                  "pattern": "reg outcome i.group##i.post, cluster(id)",
+                  "structureNote": "Python's statsmodels uses string formulas with explicit terms. Stata's <code>##</code> auto-generates main effects + interaction from factor variables. R's <code>*</code> in formulas does the same.",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "Stores the fitted regression model.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "smf.ols(", "role": "Function", "tip": "OLS regression from statsmodels.formula.api. The formula interface lets you specify models with R-style syntax.", "color": "blue"},
-                      {"code": "'outcome ~ treated_group + post + treat_post'", "role": "Formula", "tip": "outcome = b0 + b1*group + b2*time + b3*interaction. b3 is the DiD estimate.", "color": "green"},
-                      {"code": ", data=df)", "role": "Data", "tip": "The DataFrame containing all variables.", "color": "sky"},
-                      {"code": ".fit()", "role": "Fit Method", "tip": "Estimates the model. Returns a results object with coefficients, SEs, p-values.", "color": "teal"}
+                      {"code": "smf.ols(", "role": "Function", "tip": "<code>smf</code> = <code>statsmodels.formula.api</code>. Accepts R-style formula strings.", "color": "blue"},
+                      {"code": "'outcome ~ treated_group + post + treat_post'", "role": "Formula String", "tip": "Must list all three terms explicitly. Python formulas do not expand <code>*</code> like R does.", "color": "green"},
+                      {"code": ", data=df).fit()", "role": "Chain", "tip": "<code>.fit()</code> estimates the model. Returns a results object.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "reg", "role": "Command", "tip": "OLS regression. Short for 'regress'.", "color": "mauve"},
-                      {"code": " outcome", "role": "Dependent Var", "tip": "The outcome variable.", "color": "sky"},
-                      {"code": " i.treated_group##i.post", "role": "Factor Interaction", "tip": "i. creates factor variables. ## includes main effects AND interaction. The interaction coefficient is the DiD estimate.", "color": "green"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "cluster(unit_id)", "role": "Clustering", "tip": "Clusters standard errors at the unit level. Essential for panel DiD.", "color": "yellow"}
+                      {"code": "reg outcome", "role": "Command", "tip": "<code>reg</code> (short for <code>regress</code>) follows: <code>reg depvar indepvars, options</code>.", "color": "mauve"},
+                      {"code": " i.treated_group##i.post", "role": "Factor Interaction", "tip": "<code>i.</code> declares factor variables. <code>##</code> expands to main effects + interaction. <code>#</code> alone gives interaction only.", "color": "green"},
+                      {"code": ", cluster(unit_id)", "role": "Clustering", "tip": "<code>cluster()</code> computes cluster-robust SEs at the specified level.", "color": "yellow"}
                     ],
                     "r": [
-                      {"code": "did_model", "role": "Variable", "tip": "Stores the fixest regression object.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "feols", "role": "Function", "tip": "From fixest. Fast OLS with fixed effects and clustered SEs.", "color": "blue"},
-                      {"code": "(outcome ~ treated_group * post", "role": "Formula", "tip": "* in R formulas includes both main effects AND the interaction. Equivalent to treated_group + post + treated_group:post.", "color": "green"},
-                      {"code": ", data = df", "role": "Data", "tip": "The data frame.", "color": "sky"},
-                      {"code": ", cluster = ~ unit_id)", "role": "Clustering", "tip": "~ before variable name specifies the clustering level. Uses CR1 correction by default.", "color": "lavender"}
+                      {"code": "feols(outcome ~ treated_group * post", "role": "Formula", "tip": "<code>*</code> in R formulas auto-expands to <code>a + b + a:b</code>. Use <code>:</code> for interaction only.", "color": "green"},
+                      {"code": ", cluster = ~ unit_id)", "role": "Clustering", "tip": "<code>~ varname</code> syntax specifies clustering. Fixest uses CR1 correction by default.", "color": "lavender"}
                     ]
                   }
                 }
@@ -530,35 +508,23 @@ Wald test for joint significance of FEs:
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate a two-way fixed effects (TWFE) DiD with unit and time fixed effects",
-                  "pattern": "panel_model with entity_effects + time_effects",
-                  "structureNote": "TWFE adds <strong>unit fixed effects</strong> (controlling for all time-invariant differences between units) and <strong>time fixed effects</strong> (controlling for common shocks). This is the standard panel DiD specification. The treatment coefficient captures the within-unit, within-period treatment effect.",
+                  "instruction": "TWFE syntax: each language specifies fixed effects differently",
+                  "pattern": "feols(outcome ~ treated | unit_id + year)",
+                  "structureNote": "Python uses boolean flags (<code>entity_effects=True</code>). Stata uses the <code>fe</code> option for unit FE and <code>i.year</code> dummies for time FE. R's fixest uses <code>|</code> to separate regressors from absorbed FEs.",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "The panel regression model.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the model.", "color": "peach"},
-                      {"code": "PanelOLS.from_formula(", "role": "Constructor", "tip": "From linearmodels.panel. Creates a panel OLS model from a formula string.", "color": "blue"},
-                      {"code": "'outcome ~ treated + controls'", "role": "Formula", "tip": "Only time-varying regressors. Fixed effects are specified separately.", "color": "green"},
-                      {"code": ", data=df", "role": "Data", "tip": "Panel data with MultiIndex (unit_id, year).", "color": "sky"},
-                      {"code": ", entity_effects=True", "role": "Unit FE", "tip": "Adds unit fixed effects. Absorbs all time-invariant differences between units.", "color": "lavender"},
-                      {"code": ", time_effects=True)", "role": "Time FE", "tip": "Adds time fixed effects. Controls for common shocks (e.g., recessions) affecting all units.", "color": "lavender"}
+                      {"code": "PanelOLS.from_formula(", "role": "Constructor", "tip": "Requires a MultiIndex DataFrame (<code>.set_index([unit, time])</code>).", "color": "blue"},
+                      {"code": "'outcome ~ treated + controls'", "role": "Formula", "tip": "Only time-varying regressors go in the formula. FEs are set via arguments.", "color": "green"},
+                      {"code": ", entity_effects=True, time_effects=True)", "role": "FE Flags", "tip": "Boolean flags add unit and time fixed effects. Cannot mix with formula-based FEs.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "xtreg", "role": "Command", "tip": "Panel data regression. Requires prior xtset to declare panel structure.", "color": "mauve"},
-                      {"code": " outcome treated", "role": "Variables", "tip": "Dependent variable followed by regressors.", "color": "sky"},
-                      {"code": " i.year", "role": "Time FE", "tip": "i.year creates year dummies (time fixed effects). Unit FE are handled by the 'fe' option.", "color": "green"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "fe", "role": "Fixed Effects", "tip": "Specifies the within (fixed effects) estimator. Absorbs unit-level fixed effects.", "color": "yellow"},
-                      {"code": " cluster(unit_id)", "role": "Clustering", "tip": "Clusters standard errors at the unit level.", "color": "yellow"}
+                      {"code": "xtreg outcome treated i.year", "role": "Command", "tip": "<code>xtreg</code> requires prior <code>xtset</code>. <code>i.year</code> adds time dummies explicitly.", "color": "mauve"},
+                      {"code": ", fe cluster(unit_id)", "role": "Options", "tip": "<code>fe</code> activates the within estimator (unit FE). <code>cluster()</code> adjusts SEs.", "color": "yellow"}
                     ],
                     "r": [
-                      {"code": "twfe_model", "role": "Variable", "tip": "The TWFE model object.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "feols", "role": "Function", "tip": "fixest's workhorse function. Handles fixed effects absorption efficiently.", "color": "blue"},
-                      {"code": "(outcome ~ treated", "role": "Formula", "tip": "Only include time-varying regressors before the pipe.", "color": "green"},
-                      {"code": " | unit_id + year", "role": "Fixed Effects", "tip": "The | pipe separates regressors from absorbed fixed effects. unit_id = unit FE, year = time FE.", "color": "teal"},
-                      {"code": ", data = df", "role": "Data", "tip": "The panel data frame.", "color": "sky"},
-                      {"code": ", cluster = ~ unit_id)", "role": "Clustering", "tip": "Clusters SEs at the unit level.", "color": "lavender"}
+                      {"code": "feols(outcome ~ treated", "role": "Formula LHS", "tip": "Only time-varying regressors before the pipe.", "color": "green"},
+                      {"code": " | unit_id + year", "role": "FE Pipe", "tip": "<code>|</code> separates regressors from absorbed FEs. <code>+</code> adds multiple FE dimensions.", "color": "teal"},
+                      {"code": ", cluster = ~ unit_id)", "role": "Clustering", "tip": "<code>~ varname</code> syntax for clustering.", "color": "lavender"}
                     ]
                   }
                 }
@@ -766,32 +732,21 @@ positive, increasing post-treatment effects]</div>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you estimate an event study with leads and lags relative to treatment",
-                  "pattern": "regression with period dummies relative to treatment timing",
-                  "structureNote": "An event study estimates <strong>separate treatment effects for each period</strong> relative to treatment. Pre-treatment coefficients should be near zero (parallel trends test). Post-treatment coefficients show how the effect evolves over time. One period (usually t=-1) is omitted as the reference.",
+                  "instruction": "Event study syntax: how each language specifies relative-time dummies with a reference period",
+                  "pattern": "reghdfe outcome ib(-1).rel_time, absorb(unit_id year)",
+                  "structureNote": "Python builds dummies manually and joins them in a formula string. Stata's <code>ib(-1).</code> prefix sets the reference period inline. R's fixest uses <code>i(var, ref=)</code> to create and reference-code dummies natively.",
                   "languages": {
                     "python": [
-                      {"code": "# Create relative time dummies\n", "role": "Comment", "tip": "First, create indicator variables for each period relative to treatment.", "color": "text"},
-                      {"code": "for k in range(-4, 5):", "role": "Loop", "tip": "Creates dummies for periods -4 to +4 relative to treatment.", "color": "mauve"},
-                      {"code": "\n    ", "role": "Indent", "tip": "Inside the loop.", "color": "text"},
-                      {"code": "df[f'rel_{k}'] = (df['rel_time'] == k).astype(int)\n", "role": "Dummy Creation", "tip": "Creates a 0/1 indicator for each relative time period. Drop one (k=-1) as reference.", "color": "blue"},
-                      {"code": "model = PanelOLS.from_formula('outcome ~ ' + ' + '.join(rel_cols), data=df, entity_effects=True, time_effects=True)", "role": "Event Study Model", "tip": "Include all relative time dummies (except reference period) with unit and time fixed effects.", "color": "teal"}
+                      {"code": "df[f'rel_{k}'] = (df['rel_time'] == k).astype(int)", "role": "Dummy Creation", "tip": "f-string creates column names like <code>rel_-4</code>, <code>rel_0</code>. <code>.astype(int)</code> converts boolean to 0/1.", "color": "blue"},
+                      {"code": "\n'outcome ~ ' + ' + '.join(rel_cols)", "role": "Formula Builder", "tip": "<code>' + '.join(list)</code> concatenates column names into a formula string. Drop the reference period column first.", "color": "green"}
                     ],
                     "stata": [
-                      {"code": "reghdfe", "role": "Command", "tip": "Regression with high-dimensional fixed effects. Faster than xtreg for multiple FE levels.", "color": "mauve"},
-                      {"code": " outcome", "role": "Dependent Var", "tip": "The outcome variable.", "color": "sky"},
-                      {"code": " ib(-1).rel_time", "role": "Event Study Dummies", "tip": "i. creates dummies for each value of rel_time. b(-1) sets period -1 as the omitted reference.", "color": "green"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "absorb(unit_id year)", "role": "Fixed Effects", "tip": "Absorbs unit and year fixed effects. More efficient than including as dummies.", "color": "yellow"},
-                      {"code": " cluster(unit_id)", "role": "Clustering", "tip": "Clusters standard errors at the unit level.", "color": "yellow"}
+                      {"code": "ib(-1).rel_time", "role": "Factor Syntax", "tip": "<code>i.</code> creates dummies. <code>b(-1)</code> sets period -1 as reference. This is Stata's factor-variable notation.", "color": "green"},
+                      {"code": ", absorb(unit_id year)", "role": "Option", "tip": "<code>absorb()</code> is reghdfe's syntax for demean-absorbed FEs. Faster than including dummies.", "color": "yellow"}
                     ],
                     "r": [
-                      {"code": "es_model", "role": "Variable", "tip": "The event study model.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "feols", "role": "Function", "tip": "fixest handles event studies natively with i() syntax.", "color": "blue"},
-                      {"code": "(outcome ~ i(rel_time, ref = -1)", "role": "Formula", "tip": "i() creates treatment-time interactions. ref=-1 sets the reference period (omitted category).", "color": "green"},
-                      {"code": " | unit_id + year", "role": "Fixed Effects", "tip": "Unit and time fixed effects after the pipe.", "color": "teal"},
-                      {"code": ", data = df, cluster = ~ unit_id)", "role": "Data & Clustering", "tip": "Data and clustered SEs.", "color": "sky"}
+                      {"code": "i(rel_time, ref = -1)", "role": "fixest Syntax", "tip": "<code>i()</code> is fixest-specific. Creates factor dummies and sets the reference level in one call.", "color": "green"},
+                      {"code": " | unit_id + year", "role": "FE Pipe", "tip": "FEs after the pipe are absorbed, not included as dummies.", "color": "teal"}
                     ]
                   }
                 }
@@ -807,31 +762,20 @@ positive, increasing post-treatment effects]</div>
             {
               "exercises": [
                 {
-                  "instruction": "This is how you visualize an event study plot with confidence intervals",
-                  "pattern": "plot coefficients with error bars by relative time",
-                  "structureNote": "The event study plot is the <strong>key diagnostic</strong> for DiD. Pre-treatment coefficients near zero support parallel trends. Post-treatment coefficients show the treatment effect dynamics. Error bars (95% CIs) that cross zero indicate insignificance.",
+                  "instruction": "Event study plotting: Python builds manually, Stata and R have dedicated commands",
+                  "pattern": "iplot(es_model) or plt.errorbar(x, coefs, yerr=1.96*ses)",
+                  "structureNote": "Python extracts coefficients and plots with <code>plt.errorbar()</code>. Stata's <code>eventdd</code> automates everything. R's fixest provides <code>iplot()</code> for one-line event study plots.",
                   "languages": {
                     "python": [
-                      {"code": "coefs", "role": "Coefficients", "tip": "Extract the event study coefficients from the results object.", "color": "pink"},
-                      {"code": " = results.params[rel_cols]\n", "role": "Extraction", "tip": "Gets the estimated coefficients for each relative time period.", "color": "teal"},
-                      {"code": "ses", "role": "Std Errors", "tip": "Standard errors for constructing confidence intervals.", "color": "pink"},
-                      {"code": " = results.std_errors[rel_cols]\n", "role": "Extraction", "tip": "Gets SEs for the same coefficients.", "color": "teal"},
-                      {"code": "plt.errorbar(periods, coefs, yerr=1.96*ses, fmt='o-')\n", "role": "Error Bar Plot", "tip": "Plots point estimates with 95% confidence intervals. fmt='o-' = circle markers connected by lines.", "color": "blue"},
-                      {"code": "plt.axhline(y=0, color='red', linestyle='--')", "role": "Zero Line", "tip": "Horizontal line at zero. Coefficients crossing this line are statistically insignificant.", "color": "blue"}
+                      {"code": "plt.errorbar(periods, coefs, yerr=1.96*ses, fmt='o-')", "role": "Plot Call", "tip": "<code>yerr=</code> draws symmetric error bars. <code>fmt='o-'</code> means circle markers with connecting lines.", "color": "blue"},
+                      {"code": "\nplt.axhline(y=0, linestyle='--')", "role": "Reference Line", "tip": "<code>axhline()</code> draws a horizontal line. <code>axvline()</code> draws vertical.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "eventdd", "role": "Command", "tip": "Automates event study estimation and plotting. ssc install eventdd.", "color": "mauve"},
-                      {"code": " outcome", "role": "Dependent Var", "tip": "The outcome variable.", "color": "sky"},
-                      {"code": ", timevar(rel_time)", "role": "Time Variable", "tip": "The relative time variable (periods since treatment).", "color": "yellow"},
-                      {"code": " method(hdfe, absorb(unit_id year))", "role": "Method", "tip": "Uses reghdfe with unit and year fixed effects.", "color": "lavender"},
-                      {"code": " cluster(unit_id)", "role": "Clustering", "tip": "Clusters standard errors.", "color": "yellow"},
-                      {"code": " graph", "role": "Plot Option", "tip": "Produces the event study figure automatically.", "color": "yellow"}
+                      {"code": "eventdd outcome, timevar(rel_time)", "role": "Command", "tip": "<code>eventdd</code> combines estimation and plotting. <code>timevar()</code> specifies the relative-time variable.", "color": "mauve"},
+                      {"code": " method(hdfe, absorb(unit_id year)) graph", "role": "Options", "tip": "<code>method()</code> sets the estimator. <code>graph</code> triggers the plot.", "color": "yellow"}
                     ],
                     "r": [
-                      {"code": "iplot", "role": "Function", "tip": "fixest's built-in event study plotting function. Creates publication-ready plots.", "color": "blue"},
-                      {"code": "(es_model", "role": "Model", "tip": "The event study model fitted with feols() and i() syntax.", "color": "pink"},
-                      {"code": ", xlab = \"Periods Relative to Treatment\"", "role": "X Label", "tip": "Label for the x-axis.", "color": "green"},
-                      {"code": ", main = \"Event Study\")", "role": "Title", "tip": "Plot title.", "color": "green"}
+                      {"code": "iplot(es_model)", "role": "One-Liner", "tip": "<code>iplot()</code> is fixest-specific. Only works with models using <code>i()</code> syntax.", "color": "blue"}
                     ]
                   }
                 }
@@ -1046,37 +990,22 @@ Overall ATT:
             {
               "exercises": [
                 {
-                  "instruction": "This estimates group-time average treatment effects using Callaway and Sant’Anna (2021), which handles staggered treatment adoption without the negative weighting problem of standard TWFE",
+                  "instruction": "Callaway-Sant’Anna syntax: all three languages use named arguments for panel structure",
                   "languages": {
                     "python": [
-                      {"code": "att_gt", "role": "Variable", "tip": "Stores the group-time ATT estimator object.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the estimator.", "color": "peach"},
-                      {"code": "ATTgt", "role": "Class", "tip": "The Callaway-Sant’Anna group-time ATT estimator from the csdid package.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens configuration.", "color": "overlay"},
-                      {"code": "yname='outcome', ", "role": "Argument", "tip": "Name of the outcome variable.", "color": "sky"},
-                      {"code": "gname='first_treat', ", "role": "Argument", "tip": "Variable indicating when each unit was first treated (0 if never treated).", "color": "sky"},
-                      {"code": "control_group='nevertreated'", "role": "Argument", "tip": "Uses never-treated units as the comparison group (alternative: 'notyettreated').", "color": "green"},
-                      {"code": ")", "role": "Paren", "tip": "Closes configuration.", "color": "overlay"}
+                      {"code": "ATTgt(yname=’outcome’, gname=’first_treat’", "role": "Core Args", "tip": "String variable names. <code>gname</code> codes when each unit was first treated (0 = never treated).", "color": "blue"},
+                      {"code": ", control_group=’nevertreated’)", "role": "Control Group", "tip": "Accepts <code>’nevertreated’</code> or <code>’notyettreated’</code>.", "color": "green"}
                     ],
                     "stata": [
-                      {"code": "csdid ", "role": "Command", "tip": "Callaway-Sant’Anna DiD estimator for staggered treatments.", "color": "blue"},
-                      {"code": "outcome, ", "role": "Variable", "tip": "The dependent variable.", "color": "pink"},
-                      {"code": "ivar(unit_id) ", "role": "Option", "tip": "Panel unit identifier.", "color": "sky"},
-                      {"code": "time(year) ", "role": "Option", "tip": "Time period variable.", "color": "sky"},
-                      {"code": "gvar(first_treat)", "role": "Option", "tip": "Variable indicating when each unit was first treated.", "color": "sky"}
+                      {"code": "csdid outcome", "role": "Command", "tip": "Syntax: <code>csdid depvar, ivar() time() gvar()</code>.", "color": "mauve"},
+                      {"code": ", ivar(unit_id) time(year) gvar(first_treat)", "role": "Options", "tip": "<code>ivar()</code> = unit ID, <code>time()</code> = time var, <code>gvar()</code> = first-treatment-period var.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "out", "role": "Variable", "tip": "Stores the group-time ATT results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "att_gt", "role": "Function", "tip": "Estimates group-time ATTs from the did package.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "yname = \"outcome\", ", "role": "Argument", "tip": "Outcome variable name.", "color": "sky"},
-                      {"code": "gname = \"first_treat\", ", "role": "Argument", "tip": "Variable coding first treatment period (0 = never treated).", "color": "sky"},
-                      {"code": "control_group = \"nevertreated\"", "role": "Argument", "tip": "Comparison group: never-treated or not-yet-treated units.", "color": "green"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "att_gt(yname = \"outcome\", gname = \"first_treat\"", "role": "Core Args", "tip": "Quoted string variable names. Same argument names as the Python version.", "color": "blue"},
+                      {"code": ", control_group = \"nevertreated\")", "role": "Control Group", "tip": "Same string options: <code>\"nevertreated\"</code> or <code>\"notyettreated\"</code>.", "color": "green"}
                     ]
                   },
-                  "structureNote": "The Callaway-Sant’Anna estimator computes a separate ATT for each <strong>cohort-time pair</strong> (g,t), where g is when a group was first treated and t is the calendar period. These are then aggregated into an overall ATT or event-study coefficients. Using never-treated (or not-yet-treated) units as controls avoids contaminating the comparison with already-treated units."
+                  "structureNote": "All three languages use <strong>named string arguments</strong> for variable names and the control group choice. The <code>gname</code>/<code>gvar</code> argument identifies treatment cohorts (0 = never treated)."
                 }
               ]
             }
@@ -1203,27 +1132,18 @@ Joint test for placebos: chi2(3) = 0.78, p = 0.854
             {
               "exercises": [
                 {
-                  "instruction": "This estimates treatment effects using de Chaisemartin and D’Haultfoeuille (2020), which is robust to heterogeneous effects and can handle units that switch treatment on and off",
+                  "instruction": "dCDH syntax: positional variables in Stata, named string arguments in R",
                   "languages": {
                     "stata": [
-                      {"code": "did_multiplegt ", "role": "Command", "tip": "de Chaisemartin-D’Haultfoeuille estimator for heterogeneous treatment effects.", "color": "blue"},
-                      {"code": "outcome unit_id year treatment, ", "role": "Variables", "tip": "Outcome, unit ID, time variable, and treatment indicator.", "color": "pink"},
-                      {"code": "robust_dynamic ", "role": "Option", "tip": "Uses the robust dynamic specification allowing heterogeneous effects.", "color": "mauve"},
-                      {"code": "dynamic(5) ", "role": "Option", "tip": "Estimates dynamic effects for 5 post-treatment periods.", "color": "sky"},
-                      {"code": "placebo(3)", "role": "Option", "tip": "Tests for pre-treatment effects over 3 periods (should be zero under parallel trends).", "color": "sky"}
+                      {"code": "did_multiplegt outcome unit_id year treatment", "role": "Positional Args", "tip": "Four positional arguments in order: outcome, unit ID, time, treatment.", "color": "mauve"},
+                      {"code": ", robust_dynamic dynamic(5) placebo(3)", "role": "Options", "tip": "<code>dynamic(k)</code> = post-treatment horizons. <code>placebo(k)</code> = pre-treatment tests.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "result", "role": "Variable", "tip": "Stores the estimation results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "did_multiplegt", "role": "Function", "tip": "R implementation of the dCDH estimator.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "Y = \"outcome\", ", "role": "Argument", "tip": "Outcome variable name.", "color": "sky"},
-                      {"code": "D = \"treatment\", ", "role": "Argument", "tip": "Treatment indicator — can switch on and off.", "color": "sky"},
-                      {"code": "dynamic = 5, placebo = 3", "role": "Arguments", "tip": "Number of dynamic and placebo periods to estimate.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "did_multiplegt(Y = \"outcome\", D = \"treatment\"", "role": "Named Args", "tip": "Variable names are passed as quoted strings.", "color": "blue"},
+                      {"code": ", dynamic = 5, placebo = 3)", "role": "Options", "tip": "Integer arguments set the number of dynamic and placebo periods.", "color": "sky"}
                     ]
                   },
-                  "structureNote": "The dCDH estimator is unique in handling <strong>switching treatments</strong> — units that can move in and out of treatment over time. It reports dynamic effects (how the effect evolves post-treatment) and placebo tests (whether there are spurious effects in pre-treatment periods). A non-significant joint placebo test supports parallel trends."
+                  "structureNote": "Stata uses <strong>positional arguments</strong> (outcome, unit, time, treatment in order). R uses <strong>named string arguments</strong>. Both use <code>dynamic()</code> and <code>placebo()</code> to control the number of estimated horizons."
                 }
               ]
             }
@@ -1335,28 +1255,18 @@ Aggregated ATT (average post-treatment effect):
             {
               "exercises": [
                 {
-                  "instruction": "This estimates treatment effects using the Sun and Abraham (2021) interaction-weighted estimator, which correctly averages cohort-specific effects to avoid TWFE bias from staggered treatment timing",
+                  "instruction": "Sun-Abraham syntax: Stata uses a standalone command; R integrates it via sunab() inside feols()",
                   "languages": {
                     "stata": [
-                      {"code": "eventstudyinteract ", "role": "Command", "tip": "Sun-Abraham interaction-weighted estimator for staggered DiD.", "color": "blue"},
-                      {"code": "outcome rel_time_*, ", "role": "Variables", "tip": "Outcome variable and relative-time dummy variables.", "color": "pink"},
-                      {"code": "cohort(cohort) ", "role": "Option", "tip": "Variable identifying treatment cohorts (year of first treatment).", "color": "sky"},
-                      {"code": "control_cohort(never_treat) ", "role": "Option", "tip": "Indicator for the never-treated comparison group.", "color": "sky"},
-                      {"code": "absorb(unit_id year)", "role": "Option", "tip": "Absorbs unit and time fixed effects.", "color": "sky"}
+                      {"code": "eventstudyinteract outcome rel_time_*", "role": "Command", "tip": "Outcome followed by relative-time dummies (wildcard <code>*</code> matches all).", "color": "mauve"},
+                      {"code": ", cohort(cohort) control_cohort(never_treat) absorb(unit_id year)", "role": "Options", "tip": "<code>cohort()</code> identifies treatment timing. <code>control_cohort()</code> flags the comparison group.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "sa_model", "role": "Variable", "tip": "Stores the Sun-Abraham estimation result.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "feols", "role": "Function", "tip": "Fixed-effects OLS from the fixest package.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "outcome ~ ", "role": "Formula", "tip": "Outcome variable on the left of the formula.", "color": "pink"},
-                      {"code": "sunab(cohort, year)", "role": "Function", "tip": "Sun-Abraham interaction-weighted estimator — automatically creates cohort x period interactions.", "color": "blue"},
-                      {"code": " | ", "role": "Pipe", "tip": "Separates the formula from fixed effects.", "color": "peach"},
-                      {"code": "unit_id + year", "role": "Fixed Effects", "tip": "Unit and time fixed effects, absorbed for efficiency.", "color": "pink"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "feols(outcome ~ sunab(cohort, year)", "role": "Formula", "tip": "<code>sunab()</code> is a fixest-specific function used inside formulas. It auto-generates cohort-period interactions.", "color": "blue"},
+                      {"code": " | unit_id + year)", "role": "FE Pipe", "tip": "Same pipe syntax as standard <code>feols()</code> for absorbed FEs.", "color": "teal"}
                     ]
                   },
-                  "structureNote": "Sun-Abraham works by interacting treatment indicators with cohort dummies, then <strong>re-weighting</strong> these cohort-specific effects to produce unbiased event study coefficients. Unlike TWFE, it never uses already-treated units as implicit controls."
+                  "structureNote": "In R, <code>sunab(cohort, year)</code> is used <strong>inside the formula</strong> of <code>feols()</code>. Stata requires a separate <code>eventstudyinteract</code> command with pre-created relative-time dummies."
                 }
               ]
             }
@@ -1650,32 +1560,20 @@ Saved: estimator_comparison.png (10" x 6", 300 dpi)</div>
             {
               "exercises": [
                 {
-                  "instruction": "This creates a multi-estimator comparison plot overlaying event study coefficients from TWFE, Callaway-Sant’Anna, Sun-Abraham, and other robust estimators on a single figure",
+                  "instruction": "Multi-estimator overlay plot: each language layers error bars differently",
                   "languages": {
                     "python": [
-                      {"code": "ax.errorbar", "role": "Method", "tip": "Plots point estimates with confidence interval error bars for each estimator.", "color": "teal"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "x, y, ", "role": "Coordinates", "tip": "Relative time periods and treatment effect point estimates.", "color": "pink"},
-                      {"code": "yerr=yerr, ", "role": "Argument", "tip": "Confidence interval widths (lower and upper).", "color": "sky"},
-                      {"code": "label=name", "role": "Argument", "tip": "Estimator name for the legend.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "ax.errorbar(x, y, yerr=yerr, label=name)", "role": "Method", "tip": "Call <code>ax.errorbar()</code> once per estimator inside a loop. <code>label=</code> populates the legend.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "twoway ", "role": "Command", "tip": "Stata's graph command for overlaying multiple plot types.", "color": "blue"},
-                      {"code": "(rcap ci_lo ci_hi rel_time) ", "role": "CI Bars", "tip": "Draws confidence interval bars for each estimator.", "color": "sky"},
-                      {"code": "(scatter coef rel_time)", "role": "Points", "tip": "Plots point estimates as markers.", "color": "sky"}
+                      {"code": "twoway (rcap ci_lo ci_hi rel_time) (scatter coef rel_time)", "role": "Layered Plot", "tip": "Stata layers plot types in parentheses. <code>rcap</code> draws capped CI bars; <code>scatter</code> adds points.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "ggplot", "role": "Function", "tip": "Creates a ggplot2 plot.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "all_results, ", "role": "Data", "tip": "Combined data frame with coefficients from all estimators.", "color": "pink"},
-                      {"code": "aes(x = rel_time, y = coef, color = estimator)", "role": "Aesthetics", "tip": "Maps relative time to x-axis, coefficient to y-axis, colors by estimator.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"},
-                      {"code": " + ", "role": "Operator", "tip": "Adds ggplot layers.", "color": "peach"},
-                      {"code": "position_dodge(width = 0.3)", "role": "Adjustment", "tip": "Horizontally offsets estimators to prevent overlapping error bars.", "color": "sky"}
+                      {"code": "ggplot(all_results, aes(x = rel_time, y = coef, color = estimator))", "role": "Aesthetics", "tip": "<code>aes()</code> maps data columns to visual properties. <code>color =</code> separates estimators.", "color": "blue"},
+                      {"code": " + position_dodge(width = 0.3)", "role": "Layer", "tip": "<code>+</code> adds ggplot layers. <code>position_dodge()</code> offsets overlapping points horizontally.", "color": "sky"}
                     ]
                   },
-                  "structureNote": "Plotting multiple estimators together is a powerful <strong>robustness check</strong>. If all estimators agree on the treatment effect trajectory, this strengthens the causal interpretation. When they diverge — particularly if TWFE is attenuated relative to robust estimators — this signals that negative weighting from staggered adoption may be biasing the standard approach."
+                  "structureNote": "Python loops <code>ax.errorbar()</code> per estimator. Stata layers <code>twoway</code> plot types in parentheses. R uses <code>ggplot</code> with <code>color = estimator</code> and <code>position_dodge()</code> for separation."
                 }
               ]
             }
@@ -1871,29 +1769,19 @@ Pre-treatment coefficient magnitudes:
             {
               "exercises": [
                 {
-                  "instruction": "This tests the parallel trends assumption by plotting group means over time and statistically testing whether pre-treatment event study coefficients are jointly zero",
+                  "instruction": "Joint significance test syntax for pre-treatment coefficients",
                   "languages": {
                     "python": [
-                      {"code": "fig, ax", "role": "Variables", "tip": "Figure and axes objects for the matplotlib plot.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Unpacks the figure and axes.", "color": "peach"},
-                      {"code": "plt.subplots", "role": "Function", "tip": "Creates a figure with one set of axes.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "figsize=(10, 6)", "role": "Argument", "tip": "Sets the figure size in inches.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "fig, ax = plt.subplots(figsize=(10, 6))", "role": "Tuple Unpacking", "tip": "<code>plt.subplots()</code> returns a (figure, axes) tuple. Unpack into two variables.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "testparm ", "role": "Command", "tip": "Tests whether multiple coefficients are jointly zero.", "color": "blue"},
-                      {"code": "*rel_time#*", "role": "Pattern", "tip": "Selects all pre-treatment relative-time coefficients for the joint F-test.", "color": "pink"}
+                      {"code": "testparm *rel_time#*", "role": "Post-estimation", "tip": "<code>testparm</code> tests joint significance. The wildcard <code>*</code> pattern selects coefficients matching the name.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "wald", "role": "Function", "tip": "Wald test for joint significance of coefficients.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "es_model, ", "role": "Model", "tip": "The event study model estimated with feols.", "color": "pink"},
-                      {"code": "pretreat_coefs", "role": "Coefficients", "tip": "Character vector of pre-treatment coefficient names to test jointly.", "color": "pink"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "wald(es_model, pretreat_coefs)", "role": "Function", "tip": "First arg is the model; second is a character vector of coefficient names to test jointly.", "color": "blue"}
                     ]
                   },
-                  "structureNote": "Parallel trends is the <strong>key identifying assumption</strong> of DiD: absent treatment, treated and control groups would have followed the same trajectory. While untestable, you can check (1) visual parallelism before treatment, (2) a joint F-test that pre-treatment event study coefficients equal zero, and (3) placebo tests at fake treatment dates."
+                  "structureNote": "Stata uses <code>testparm</code> with wildcard patterns after estimation. R uses <code>wald()</code> with a vector of coefficient names. Python requires manual F-test construction."
                 }
               ]
             }
@@ -2046,32 +1934,21 @@ reveals that already-treated units are contaminated controls.</div>
             {
               "exercises": [
                 {
-                  "instruction": "This performs the Goodman-Bacon (2021) decomposition, showing that the TWFE coefficient is a weighted average of all possible 2x2 DiD comparisons — revealing whether problematic comparisons drive the estimate",
+                  "instruction": "Goodman-Bacon decomposition syntax: Stata and R have dedicated commands; Python requires manual implementation",
                   "languages": {
                     "python": [
-                      {"code": "cohorts", "role": "Variable", "tip": "Array of unique treatment timing years — each defines a cohort.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the cohort identifiers.", "color": "peach"},
-                      {"code": "df[df['treatment'] == 1]", "role": "Filter", "tip": "Selects only treated observations.", "color": "pink"},
-                      {"code": ".groupby('unit_id')['year'].min()", "role": "Method Chain", "tip": "Finds the first year each unit was treated.", "color": "teal"},
-                      {"code": ".unique()", "role": "Method", "tip": "Gets unique treatment cohorts.", "color": "teal"}
+                      {"code": ".groupby('unit_id')['year'].min().unique()", "role": "Method Chain", "tip": "Chains pandas methods: <code>.groupby()</code>, <code>.min()</code>, <code>.unique()</code>. No dedicated package in Python.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "bacondecomp ", "role": "Command", "tip": "Goodman-Bacon decomposition — breaks TWFE into component 2x2 DiD estimates.", "color": "blue"},
-                      {"code": "outcome treatment, ", "role": "Variables", "tip": "Outcome variable and treatment indicator.", "color": "pink"},
-                      {"code": "id(unit_id) ", "role": "Option", "tip": "Panel unit identifier.", "color": "sky"},
-                      {"code": "time(year)", "role": "Option", "tip": "Time period variable.", "color": "sky"}
+                      {"code": "bacondecomp outcome treatment", "role": "Command", "tip": "Syntax: <code>bacondecomp depvar treatment, id() time()</code>.", "color": "mauve"},
+                      {"code": ", id(unit_id) time(year)", "role": "Options", "tip": "<code>id()</code> and <code>time()</code> specify the panel structure.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "bacon_out", "role": "Variable", "tip": "Stores the decomposition results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "bacon", "role": "Function", "tip": "Goodman-Bacon decomposition from the bacondecomp package.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "outcome ~ treatment, ", "role": "Formula", "tip": "Outcome regressed on treatment status.", "color": "pink"},
-                      {"code": "data = df, id_var = \"unit_id\", time_var = \"year\"", "role": "Arguments", "tip": "Data, unit identifier, and time variable.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "bacon(outcome ~ treatment, data = df", "role": "Formula + Data", "tip": "Uses R formula syntax. Variable names in <code>id_var</code> and <code>time_var</code> are quoted strings.", "color": "blue"},
+                      {"code": ", id_var = \"unit_id\", time_var = \"year\")", "role": "Panel IDs", "tip": "Named string arguments for the panel identifiers.", "color": "sky"}
                     ]
                   },
-                  "structureNote": "The Bacon decomposition breaks TWFE into three types of 2x2 comparisons: <strong>treated vs. never-treated</strong> (clean), <strong>earlier vs. later treated</strong> (potentially biased), and <strong>later vs. earlier treated</strong> (most problematic). Plotting weights vs. estimates reveals whether the problematic comparisons drive the TWFE coefficient."
+                  "structureNote": "Stata's <code>bacondecomp</code> and R's <code>bacon()</code> are purpose-built. R uses formula syntax; Stata uses positional variables with <code>id()</code>/<code>time()</code> options."
                 }
               ]
             }
@@ -2227,30 +2104,21 @@ TWFE may be biased with heterogeneous effects.</div>
             {
               "exercises": [
                 {
-                  "instruction": "This computes the implicit weights TWFE assigns to each group-time cell, checking whether any weights are negative — a sign that heterogeneous treatment effects could severely bias the TWFE estimate",
+                  "instruction": "TWFE weight diagnostic syntax: Stata and R have dedicated commands; Python requires manual demeaning",
                   "languages": {
                     "python": [
-                      {"code": "df['outcome_dm']", "role": "Variable", "tip": "Demeaned outcome — after removing unit and time means.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the demeaned values.", "color": "peach"},
-                      {"code": "df.groupby('unit_id')['outcome']", "role": "Group", "tip": "Groups observations by unit.", "color": "pink"},
-                      {"code": ".transform('demean')", "role": "Method", "tip": "Subtracts the unit mean from each observation (within transformation).", "color": "teal"}
+                      {"code": ".groupby(‘unit_id’)[‘outcome’].transform(‘demean’)", "role": "Method Chain", "tip": "<code>.transform(‘demean’)</code> subtracts group means while preserving the original index. Chain two <code>.groupby()</code> calls for two-way demeaning.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "twowayfeweights ", "role": "Command", "tip": "Computes the implicit weights TWFE assigns to each group-time cell.", "color": "blue"},
-                      {"code": "outcome unit_id year treatment, ", "role": "Variables", "tip": "Outcome, unit ID, time, and treatment variables.", "color": "pink"},
-                      {"code": "type(feTR)", "role": "Option", "tip": "Computes weights for the fixed-effects treatment regression.", "color": "sky"}
+                      {"code": "twowayfeweights outcome unit_id year treatment", "role": "Positional Args", "tip": "Four positional arguments: outcome, unit ID, time, treatment.", "color": "mauve"},
+                      {"code": ", type(feTR)", "role": "Option", "tip": "<code>type(feTR)</code> specifies weights for the FE treatment regression.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "weights_out", "role": "Variable", "tip": "Stores the computed TWFE weights for each group-time cell.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "twowayfeweights", "role": "Function", "tip": "Computes TWFE weights from the TwoWayFEWeights package.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "df, \"outcome\", \"unit_id\", \"year\", \"treatment\", ", "role": "Arguments", "tip": "Data and variable names.", "color": "sky"},
-                      {"code": "type = \"feTR\"", "role": "Argument", "tip": "Type of TWFE regression to decompose.", "color": "green"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "twowayfeweights(df, \"outcome\", \"unit_id\", \"year\", \"treatment\"", "role": "Arguments", "tip": "Data frame followed by quoted variable name strings.", "color": "blue"},
+                      {"code": ", type = \"feTR\")", "role": "Option", "tip": "Same <code>type</code> option as Stata.", "color": "green"}
                     ]
                   },
-                  "structureNote": "de Chaisemartin and D’Haultfoeuille (2020) show that TWFE implicitly assigns <strong>negative weights</strong> to some treated observations when treatment timing varies. If treatment effects are heterogeneous, these negative weights can produce a TWFE estimate that is severely biased — even of the wrong sign."
+                  "structureNote": "Stata and R use <code>twowayfeweights</code> with positional variable names and a <code>type()</code> option. Python has no direct package; manual demeaning with <code>.transform(‘demean’)</code> reveals implicit weights."
                 }
               ]
             }
@@ -2433,31 +2301,21 @@ Event Study (with pre-trends):
             {
               "exercises": [
                 {
-                  "instruction": "This estimates the ATT using the Borusyak, Jaravel, and Spiess (2024) imputation approach, which learns unit and time patterns from untreated observations to impute counterfactual outcomes for treated units",
+                  "instruction": "Borusyak et al. imputation syntax: Stata and R have dedicated commands with horizon/pretrend options",
                   "languages": {
                     "python": [
-                      {"code": "untreated", "role": "Variable", "tip": "Subset containing only untreated observations.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the filtered data.", "color": "peach"},
-                      {"code": "df[df['treatment'] == 0]", "role": "Filter", "tip": "Keeps only observations where treatment is zero — the clean data for learning the counterfactual model.", "color": "pink"}
+                      {"code": "df[df[‘treatment’] == 0]", "role": "Boolean Filter", "tip": "No dedicated Python package. Filter untreated observations manually with boolean indexing.", "color": "pink"}
                     ],
                     "stata": [
-                      {"code": "did_imputation ", "role": "Command", "tip": "Borusyak et al. imputation estimator for staggered DiD.", "color": "blue"},
-                      {"code": "outcome unit_id year first_treated, ", "role": "Variables", "tip": "Outcome, unit ID, time, and first-treatment-period variables.", "color": "pink"},
-                      {"code": "allhorizons ", "role": "Option", "tip": "Reports effects at all post-treatment horizons.", "color": "mauve"},
-                      {"code": "pretrends(5)", "role": "Option", "tip": "Includes 5 pre-treatment periods to test for parallel trends violations.", "color": "sky"}
+                      {"code": "did_imputation outcome unit_id year first_treated", "role": "Positional Args", "tip": "Four positional arguments: outcome, unit ID, time, cohort variable.", "color": "mauve"},
+                      {"code": ", allhorizons pretrends(5)", "role": "Options", "tip": "<code>allhorizons</code> reports all post-treatment periods. <code>pretrends(k)</code> adds k pre-treatment tests.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "did_imp", "role": "Variable", "tip": "Stores the imputation estimation results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "did_imputation", "role": "Function", "tip": "Borusyak et al. imputation estimator from the didimputation package.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "data = df, ", "role": "Argument", "tip": "The panel dataset.", "color": "sky"},
-                      {"code": "yname = \"outcome\", ", "role": "Argument", "tip": "Outcome variable name.", "color": "sky"},
-                      {"code": "gname = \"first_treated\"", "role": "Argument", "tip": "Cohort indicator — year of first treatment.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "did_imputation(data = df, yname = \"outcome\", gname = \"first_treated\"", "role": "Named Args", "tip": "Quoted string variable names. Same naming convention as Callaway-Sant’Anna.", "color": "blue"},
+                      {"code": ", tname = \"year\", idname = \"unit_id\")", "role": "Panel IDs", "tip": "<code>tname</code> and <code>idname</code> specify time and unit variables.", "color": "sky"}
                     ]
                   },
-                  "structureNote": "The imputation approach works in three steps: (1) estimate unit and time fixed effects using <strong>only untreated observations</strong>, (2) predict what treated units’ outcomes would have been without treatment, (3) the treatment effect is the gap between actual and imputed outcomes. This completely avoids negative weighting."
+                  "structureNote": "Stata uses positional args followed by <code>allhorizons</code>/<code>pretrends()</code> options. R uses named string arguments matching the Callaway-Sant’Anna convention (<code>yname</code>, <code>gname</code>, etc.)."
                 }
               ]
             }
@@ -2642,36 +2500,27 @@ Comparison:
             {
               "exercises": [
                 {
-                  "instruction": "This estimates a fuzzy difference-in-differences model, where treatment assignment instruments actual treatment uptake via 2SLS within a panel fixed effects framework",
+                  "instruction": "Each language specifies the IV (endogenous = instrument) relationship differently within a fixed-effects framework",
                   "languages": {
                     "python": [
-                      {"code": "fuzzy", "role": "Variable", "tip": "Stores the fuzzy DiD (IV) estimation result.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the model result.", "color": "peach"},
-                      {"code": "IV2SLS", "role": "Class", "tip": "Two-stage least squares estimator from linearmodels.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "endog=df[['treatment_actual']], ", "role": "Endogenous", "tip": "The endogenous regressor — actual treatment uptake.", "color": "sky"},
-                      {"code": "instruments=df[['treatment_assigned']]", "role": "Instruments", "tip": "The instrument — treatment assignment (intent-to-treat).", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "IV2SLS", "role": "Class", "tip": "linearmodels class; instantiate with named arguments, then call <code>.fit()</code>.", "color": "blue"},
+                      {"code": "endog=df[['treatment_actual']]", "role": "Endogenous", "tip": "Double brackets <code>[[]]</code> return a DataFrame (required), not a Series.", "color": "sky"},
+                      {"code": "instruments=df[['treatment_assigned']]", "role": "Instruments", "tip": "Separate keyword from <code>exog</code>; order doesn't matter.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "ivreghdfe ", "role": "Command", "tip": "IV regression with high-dimensional fixed effects.", "color": "blue"},
-                      {"code": "outcome ", "role": "Variable", "tip": "The dependent variable.", "color": "pink"},
-                      {"code": "(treatment_actual = treatment_assigned), ", "role": "IV Spec", "tip": "Endogenous variable = instrument.", "color": "sky"},
-                      {"code": "absorb(unit_id year) ", "role": "Option", "tip": "Absorbs unit and time fixed effects.", "color": "sky"},
-                      {"code": "cluster(unit_id)", "role": "Option", "tip": "Clusters standard errors at the unit level.", "color": "sky"}
+                      {"code": "ivreghdfe ", "role": "Command", "tip": "Variant of <code>ivregress</code> that accepts <code>absorb()</code> for high-dimensional FEs.", "color": "blue"},
+                      {"code": "(treatment_actual = treatment_assigned)", "role": "IV spec", "tip": "Parenthetical syntax: <code>(endogenous = instruments)</code>. Multiple instruments separated by spaces.", "color": "sky"},
+                      {"code": "absorb(unit_id year)", "role": "Option", "tip": "Demeans away listed fixed effects instead of creating dummies.", "color": "sky"},
+                      {"code": "cluster(unit_id)", "role": "Option", "tip": "Cluster-robust SEs; goes after the comma in Stata option syntax.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "fuzzy", "role": "Variable", "tip": "Stores the fuzzy DiD result.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "feols", "role": "Function", "tip": "Fixed-effects OLS/IV from fixest.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "outcome ~ 1 | unit_id + year", "role": "Formula + FE", "tip": "Outcome with unit and year fixed effects.", "color": "pink"},
-                      {"code": " | ", "role": "Separator", "tip": "Second pipe introduces IV specification.", "color": "peach"},
-                      {"code": "treatment_actual ~ treatment_assigned", "role": "IV Spec", "tip": "Endogenous ~ instrument.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "feols", "role": "Function", "tip": "Handles OLS and IV; the number of <code>|</code> separators determines which.", "color": "blue"},
+                      {"code": "outcome ~ 1 | unit_id + year", "role": "Formula + FE", "tip": "First <code>|</code> separates covariates from absorbed FEs, as in standard <code>feols</code>.", "color": "pink"},
+                      {"code": " | ", "role": "IV pipe", "tip": "Second <code>|</code> activates IV mode. Three-part formula: <code>covariates | FEs | endog ~ instruments</code>.", "color": "peach"},
+                      {"code": "treatment_actual ~ treatment_assigned", "role": "IV spec", "tip": "Reads as: instrument <code>treatment_assigned</code> for <code>treatment_actual</code>. Uses <code>~</code> not <code>=</code>.", "color": "sky"}
                     ]
                   },
-                  "structureNote": "Standard (sharp) DiD assumes perfect compliance. <strong>Fuzzy DiD</strong> handles imperfect compliance by using treatment assignment as an instrument for actual treatment, estimating the Local Average Treatment Effect (LATE) for compliers — those whose treatment status changes because of the policy."
+                  "structureNote": "Python uses named keyword arguments (<code>endog=</code>, <code>instruments=</code>). Stata uses parenthetical syntax <code>(endog = instruments)</code>. R extends the <code>feols</code> formula with a second <code>|</code> pipe for IV."
                 }
               ]
             }
@@ -2860,29 +2709,24 @@ Interpretation:
             {
               "exercises": [
                 {
-                  "instruction": "This performs the Rambachan and Roth (2023) HonestDiD sensitivity analysis, computing confidence intervals that remain valid even if parallel trends are violated by up to a specified magnitude M",
+                  "instruction": "Stata and R differ in how they pass event-study dimensions and the M-value grid to HonestDiD",
                   "languages": {
                     "python": [
-                      {"code": "# M = 0: standard CI\n", "role": "Comment", "tip": "M = 0 assumes exact parallel trends — gives the standard confidence interval.", "color": "pink"},
-                      {"code": "# M > 0: wider CI", "role": "Comment", "tip": "M > 0 allows for violations of parallel trends — the CI widens to remain valid.", "color": "pink"}
+                      {"code": "# M = 0: standard CI\n# M > 0: wider CI", "role": "Comment", "tip": "No native Python package; call R via <code>rpy2</code> or use the R syntax below.", "color": "pink"}
                     ],
                     "stata": [
-                      {"code": "honestdid, ", "role": "Command", "tip": "HonestDiD sensitivity analysis for DiD designs.", "color": "blue"},
-                      {"code": "pre(4) ", "role": "Option", "tip": "Number of pre-treatment periods in the event study.", "color": "sky"},
-                      {"code": "post(5) ", "role": "Option", "tip": "Number of post-treatment periods.", "color": "sky"},
-                      {"code": "mvec(0 0.5 1 1.5 2)", "role": "Option", "tip": "Grid of M values — each allows post-treatment violations up to M times the max pre-trend.", "color": "sky"}
+                      {"code": "honestdid", "role": "Command", "tip": "Post-estimation command; must follow an event-study regression in the same Stata session.", "color": "blue"},
+                      {"code": "pre(4) post(5)", "role": "Options", "tip": "Integers specifying how many pre- and post-treatment coefficients from the preceding regression to use.", "color": "sky"},
+                      {"code": "mvec(0 0.5 1 1.5 2)", "role": "Option", "tip": "Space-separated M values inside parentheses. Stata uses spaces, not commas, to delimit elements in option lists.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "sensitivity", "role": "Variable", "tip": "Stores the sensitivity analysis results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "createSensitivityResults_relativeMagnitudes", "role": "Function", "tip": "Computes robust CIs allowing violations proportional to the largest pre-trend.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "betahat = betahat, sigma = sigma, ", "role": "Arguments", "tip": "Event study coefficients and their variance-covariance matrix.", "color": "sky"},
-                      {"code": "Mbarvec = seq(0, 2, by = 0.5)", "role": "Argument", "tip": "Grid of M values from 0 (standard) to 2 (allowing large violations).", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "createSensitivityResults_relativeMagnitudes", "role": "Function", "tip": "Long but descriptive name; the <code>_relativeMagnitudes</code> suffix selects the relative-magnitudes approach (vs. smoothness).", "color": "blue"},
+                      {"code": "betahat = betahat, sigma = sigma", "role": "Arguments", "tip": "Coefficient vector and variance-covariance matrix extracted from the event study with <code>coef()</code> and <code>vcov()</code>.", "color": "sky"},
+                      {"code": "numPrePeriods = 4, numPostPeriods = 5", "role": "Arguments", "tip": "Named integer arguments; R spells these out rather than using Stata's shorthand <code>pre()/post()</code>.", "color": "sky"},
+                      {"code": "Mbarvec = seq(0, 2, by = 0.5)", "role": "Argument", "tip": "<code>seq()</code> generates the M grid as a numeric vector. Stata passes the same grid as a space-separated list.", "color": "sky"}
                     ]
                   },
-                  "structureNote": "Standard pre-trend tests have <strong>low power</strong> (Roth, 2022). HonestDiD asks a more informative question: how large do parallel trends violations need to be before the conclusion changes? The breakdown value of M tells you the maximum violation magnitude the result can survive."
+                  "structureNote": "Stata's <code>honestdid</code> is a post-estimation command that reads from the last regression. R requires explicit coefficient and vcov inputs. Both take a grid of M values but use different delimiters (spaces vs. <code>seq()</code>)."
                 }
               ]
             }

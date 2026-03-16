@@ -374,28 +374,28 @@ Loaded <span class="out-num">2246</span> observations and <span class="out-num">
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to rename columns in a DataFrame",
-                  "pattern": "dataframe.rename(columns={old: new})",
-                  "structureNote": "Renaming columns improves readability and consistency. The <code>columns=</code> parameter takes a <strong>dictionary</strong> mapping old names to new names. You can rename one or many columns at once. This is essential when merging datasets with inconsistent naming.",
+                  "instruction": "How a dictionary literal is passed as a keyword argument, and how R reverses the mapping order.",
+                  "pattern": "df = df.method(key={'old': 'new'})  |  df <- df %>% func(new = old)  |  command old new",
+                  "structureNote": "Python passes a <code>{'old': 'new'}</code> dictionary literal to the <code>columns=</code> keyword argument. R's dplyr uses <code>new = old</code> (reversed order). Stata uses bare positional arguments: old name then new name.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The dataset with columns to rename.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the renamed result (or use inplace=True).", "color": "peach"},
-                      {"code": "df", "role": "DataFrame", "tip": "The original DataFrame.", "color": "pink"},
-                      {"code": ".rename", "role": "Method", "tip": "Returns a new DataFrame with renamed columns.", "color": "teal"},
-                      {"code": "(columns=", "role": "Parameter", "tip": "Takes a dictionary mapping old names to new names.", "color": "lavender"},
-                      {"code": "{'wage': 'income'})", "role": "Name Mapping", "tip": "A dictionary: old name 'wage' becomes new name 'income'. Can include multiple mappings separated by commas.", "color": "green"}
+                      {"code": "df", "role": "Variable", "tip": "Stores the return value.", "color": "variable"},
+                      {"code": " = df", "role": "Assignment", "tip": "Reassigns to the same name -- the method returns a new object.", "color": "operator"},
+                      {"code": ".rename", "role": "Method", "tip": "Method call via dot.", "color": "function"},
+                      {"code": "(columns=", "role": "Keyword arg", "tip": "Named parameter expecting a dictionary.", "color": "variable"},
+                      {"code": "{'wage': 'income'}", "role": "Dict literal", "tip": "Curly braces with <code>key: value</code> pairs. Multiple renames are comma-separated inside the braces.", "color": "string"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "rename ", "role": "Command", "tip": "Changes a variable's name. The old name comes first, then the new name.", "color": "mauve"},
-                      {"code": "wage ", "role": "Old Name", "tip": "The current variable name.", "color": "sky"},
-                      {"code": "income", "role": "New Name", "tip": "The desired new name. Must follow Stata naming rules (no spaces, no special characters).", "color": "teal"}
+                      {"code": "rename", "role": "Command", "tip": "Stata command.", "color": "keyword"},
+                      {"code": " wage", "role": "Old name", "tip": "First positional argument.", "color": "variable"},
+                      {"code": " income", "role": "New name", "tip": "Second positional argument. Order: old then new.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Data Frame", "tip": "The dataset.", "color": "pink"},
-                      {"code": " <- df %>% ", "role": "Pipe Chain", "tip": "Transform and store back.", "color": "mauve"},
-                      {"code": "rename(", "role": "Function", "tip": "From dplyr. Renames columns. Syntax: new_name = old_name.", "color": "blue"},
-                      {"code": "income = wage)", "role": "Name Mapping", "tip": "New name on the left, old name on the right. Note: this is the OPPOSITE order from Python!", "color": "sky"}
+                      {"code": "df <- df %>% ", "role": "Pipe + assign", "tip": "Pipe feeds df into rename(), result stored back.", "color": "operator"},
+                      {"code": "rename(", "role": "Function", "tip": "dplyr function.", "color": "function"},
+                      {"code": "income = wage", "role": "Mapping", "tip": "<code>new = old</code> -- opposite order from Python's <code>{'old': 'new'}</code>.", "color": "variable"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -447,27 +447,24 @@ Loaded <span class="out-num">2246</span> observations and <span class="out-num">
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to count missing values in each column of a DataFrame",
-                  "pattern": "dataframe.method().method()",
-                  "structureNote": "This demonstrates <strong>method chaining</strong>: calling one method on the result of another. <code>isnull()</code> returns a True/False table, then <code>.sum()</code> counts the Trues in each column. Chaining reads left to right, each step producing an object the next step works on.",
+                  "instruction": "How method chaining works: the return value of one call becomes the object for the next.",
+                  "pattern": "obj.method1().method2()  |  outerFunc(innerFunc(arg))  |  command subcommand",
+                  "structureNote": "Python chains methods left to right with dots: <code>.isnull()</code> returns a new object, and <code>.sum()</code> is called on that result. R nests functions inside-out: <code>colSums(is.na(df))</code> evaluates the inner call first. Stata uses a two-word command.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The dataset to check for missing values.", "color": "pink"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the isnull method on the DataFrame.", "color": "overlay"},
-                      {"code": "isnull", "role": "Method", "tip": "Returns a DataFrame of True/False values. True means the cell is missing (NaN). Works on every cell in the entire table.", "color": "teal"},
-                      {"code": "()", "role": "Empty Args", "tip": "No arguments needed. Checks every cell.", "color": "overlay"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Now calling sum() on the True/False table that isnull() returned.", "color": "overlay"},
-                      {"code": "sum", "role": "Method", "tip": "Adds up values in each column. Since True=1 and False=0, this counts the number of missing values per column.", "color": "teal"},
-                      {"code": "()", "role": "Empty Args", "tip": "Sums each column by default. Returns one count per column.", "color": "overlay"}
+                      {"code": "df", "role": "Object", "tip": "Starting object.", "color": "variable"},
+                      {"code": ".isnull()", "role": "First method", "tip": "Returns a new object (a True/False DataFrame). The dot chains onto df.", "color": "function"},
+                      {"code": ".sum()", "role": "Second method", "tip": "Called on the result of isnull(). Each dot chains onto the previous return value.", "color": "function"}
                     ],
                     "stata": [
-                      {"code": "misstable ", "role": "Command", "tip": "Stata's built-in command for analyzing missing data patterns.", "color": "mauve"},
-                      {"code": "summarize", "role": "Subcommand", "tip": "Shows a summary table of missing values: which variables have them and how many.", "color": "mauve"}
+                      {"code": "misstable", "role": "Command", "tip": "First word of a two-word command.", "color": "keyword"},
+                      {"code": " summarize", "role": "Subcommand", "tip": "Second word -- Stata treats the pair as a single operation.", "color": "keyword"}
                     ],
                     "r": [
-                      {"code": "colSums(", "role": "Function", "tip": "Sums each column of a matrix or data frame. Applied to a True/False matrix, it counts the Trues.", "color": "blue"},
-                      {"code": "is.na(", "role": "Function", "tip": "Tests each cell for missing values (NA). Returns TRUE if missing, FALSE if present.", "color": "blue"},
-                      {"code": "df))", "role": "Data Frame", "tip": "The dataset to check.", "color": "pink"}
+                      {"code": "colSums(", "role": "Outer function", "tip": "Evaluated last -- receives the result of is.na().", "color": "function"},
+                      {"code": "is.na(", "role": "Inner function", "tip": "Evaluated first. R nests inside-out, unlike Python's left-to-right chaining.", "color": "function"},
+                      {"code": "df", "role": "Argument", "tip": "The innermost argument.", "color": "variable"},
+                      {"code": "))", "role": "Close both", "tip": "Inner paren closes is.na(), outer closes colSums().", "color": "overlay"}
                     ]
                   }
                 }
@@ -668,31 +665,28 @@ Imputed: m=1 through m=20               updated =        0
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to drop rows where a specific column has missing values",
-                  "pattern": "result = dataframe.dropna(subset=[column])",
-                  "structureNote": "The <code>dropna(subset=)</code> pattern is <strong>targeted deletion</strong>: instead of dropping any row with ANY missing value (which could lose lots of data), you only drop rows where a specific column is missing. Always compare row counts before and after to understand how much data you lost.",
+                  "instruction": "How a keyword argument with a list value narrows a method's behaviour, and how Stata uses if + function().",
+                  "pattern": "result = df.method(subset=['col'])  |  result <- df %>% func(col)  |  command if func(var)",
+                  "structureNote": "Python's <code>subset=</code> takes a list literal <code>['col']</code> in square brackets. Without it, the method applies to all columns. R's tidyr function takes bare column names. Stata uses <code>if missing(var)</code> as a qualifier after the command.",
                   "languages": {
                     "python": [
-                      {"code": "df_clean", "role": "Variable Name", "tip": "Stores the result with missing rows removed. Using a new name preserves the original data.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the filtered data.", "color": "peach"},
-                      {"code": "df", "role": "DataFrame", "tip": "The original dataset.", "color": "pink"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the dropna method.", "color": "overlay"},
-                      {"code": "dropna(", "role": "Method", "tip": "Removes rows with missing values. Without subset=, it drops any row with any missing value.", "color": "teal"},
-                      {"code": "subset=", "role": "Parameter", "tip": "Specifies WHICH columns to check. Only drops rows where these specific columns are missing.", "color": "lavender"},
-                      {"code": "['income'])", "role": "Column List", "tip": "Only drop rows where 'income' is missing. Other columns can have NaN and the row is still kept.", "color": "green"}
+                      {"code": "df_clean", "role": "Variable", "tip": "Stores the return value.", "color": "variable"},
+                      {"code": " = df", "role": "Assignment", "tip": "Method returns a new object -- does not modify df in place.", "color": "operator"},
+                      {"code": ".dropna", "role": "Method", "tip": "Method call via dot.", "color": "function"},
+                      {"code": "(subset=", "role": "Keyword arg", "tip": "Named parameter. Without it, the method checks all columns.", "color": "variable"},
+                      {"code": "['income']", "role": "List literal", "tip": "Square brackets create a list. Even for one column, a list is expected here.", "color": "string"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "drop", "role": "Command", "tip": "Permanently removes observations from the dataset. Irreversible -- save a backup first!", "color": "mauve"},
-                      {"code": " if ", "role": "Condition", "tip": "Only drops rows meeting the condition.", "color": "mauve"},
-                      {"code": "missing(income)", "role": "Test", "tip": "missing() returns true when a variable has no value. So this drops rows where income is blank.", "color": "sky"}
+                      {"code": "drop", "role": "Command", "tip": "Stata command.", "color": "keyword"},
+                      {"code": " if ", "role": "Qualifier", "tip": "Restricts the command to rows matching the condition.", "color": "keyword"},
+                      {"code": "missing(income)", "role": "Condition", "tip": "Function call inside the qualifier -- parentheses wrap the variable name.", "color": "function"}
                     ],
                     "r": [
-                      {"code": "df_clean", "role": "Variable Name", "tip": "Stores the filtered result.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
-                      {"code": "df", "role": "Data Frame", "tip": "The original dataset.", "color": "pink"},
-                      {"code": " %>% ", "role": "Pipe", "tip": "Passes df into the next function.", "color": "mauve"},
-                      {"code": "drop_na(", "role": "Function", "tip": "From tidyr. Removes rows with missing values in specified columns.", "color": "blue"},
-                      {"code": "income)", "role": "Column", "tip": "Only drop rows where income is NA. In dplyr, column names don't need quotes.", "color": "sky"}
+                      {"code": "df_clean <- df %>% ", "role": "Pipe + assign", "tip": "Pipe chain with assignment.", "color": "operator"},
+                      {"code": "drop_na(", "role": "Function", "tip": "tidyr function.", "color": "function"},
+                      {"code": "income", "role": "Column name", "tip": "Bare name -- no quotes, no $. tidyr uses non-standard evaluation.", "color": "variable"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -708,33 +702,27 @@ Imputed: m=1 through m=20               updated =        0
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to fill missing values with the column mean",
-                  "pattern": "dataframe['col'].fillna(dataframe['col'].mean())",
-                  "structureNote": "Mean imputation replaces missing values with the average of existing values. This is a <strong>nested function call</strong>: the inner <code>.mean()</code> computes the average, and the outer <code>.fillna()</code> uses that value to fill gaps. Caution: this reduces variance and can bias results.",
+                  "instruction": "How a method call takes another method's return value as its argument (nested evaluation).",
+                  "pattern": "col.fillna(col.mean())  |  mutate(col = replace_na(col, mean(col)))  |  replace var = r(stat) if condition",
+                  "structureNote": "Python evaluates the inner <code>.mean()</code> first, producing a single number, then passes it to <code>.fillna()</code>. R nests <code>mean()</code> inside <code>replace_na()</code> inside <code>mutate()</code>. Stata uses <code>r(mean)</code> to retrieve a stored result from the previous command -- a two-step pattern.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The dataset.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Begins column selection.", "color": "overlay"},
-                      {"code": "'income'", "role": "Column Name", "tip": "The column with missing values to fill.", "color": "green"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends column selection. Returns a Series.", "color": "overlay"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses fillna method on the column.", "color": "overlay"},
-                      {"code": "fillna(", "role": "Method", "tip": "Replaces NaN (missing) values with the specified value.", "color": "teal"},
-                      {"code": "df['income'].mean())", "role": "Fill Value", "tip": "Computes the mean of existing (non-missing) income values. This value replaces every NaN.", "color": "sky"}
+                      {"code": "df['income']", "role": "Column selection", "tip": "Bracket notation selects the column.", "color": "variable"},
+                      {"code": ".fillna(", "role": "Outer method", "tip": "Called on the column. Expects a fill value as its argument.", "color": "function"},
+                      {"code": "df['income'].mean()", "role": "Inner method call", "tip": "Evaluated first -- returns a single number. That number becomes fillna()'s argument.", "color": "function"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "summarize", "role": "Command", "tip": "Calculates statistics including the mean.", "color": "mauve"},
-                      {"code": " income\n", "role": "Variable", "tip": "The variable to summarize.", "color": "sky"},
-                      {"code": "replace", "role": "Command", "tip": "Modifies values of an existing variable.", "color": "mauve"},
-                      {"code": " income = r(mean)", "role": "New Value", "tip": "r(mean) retrieves the mean calculated by the previous summarize command.", "color": "sky"},
-                      {"code": " if missing(income)", "role": "Condition", "tip": "Only replace where income is currently missing.", "color": "yellow"}
+                      {"code": "summarize income", "role": "Step 1", "tip": "First command stores results in r(). Stata uses sequential two-step patterns.", "color": "keyword"},
+                      {"code": "\nreplace income = ", "role": "Step 2", "tip": "Second command uses the stored result.", "color": "keyword"},
+                      {"code": "r(mean)", "role": "Stored result", "tip": "<code>r()</code> retrieves values stored by the previous command. Stata-specific pattern.", "color": "function"},
+                      {"code": " if missing(income)", "role": "Qualifier", "tip": "Restricts replacement to rows where income is missing.", "color": "keyword"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Data Frame", "tip": "The dataset.", "color": "pink"},
-                      {"code": " <- df %>%\n  ", "role": "Pipe Chain", "tip": "Passes df through a transformation and stores the result back.", "color": "mauve"},
-                      {"code": "mutate", "role": "Function", "tip": "From dplyr. Creates or modifies columns. Takes the column name and its new definition.", "color": "blue"},
-                      {"code": "(income = ", "role": "Column", "tip": "Redefines the income column.", "color": "sky"},
-                      {"code": "replace_na", "role": "Function", "tip": "Replaces NA values with a specified value.", "color": "blue"},
-                      {"code": "(income, mean(income, na.rm=TRUE)))", "role": "Arguments", "tip": "First arg is the column, second is the fill value. na.rm=TRUE tells mean() to ignore NAs when computing.", "color": "sky"}
+                      {"code": "df <- df %>% mutate(", "role": "Pipe + mutate", "tip": "Pipe chain into column modification.", "color": "function"},
+                      {"code": "income = replace_na(income, ", "role": "Outer function", "tip": "<code>name = expr</code> inside mutate redefines the column.", "color": "function"},
+                      {"code": "mean(income, na.rm=TRUE)", "role": "Inner function", "tip": "Nested call. <code>na.rm=TRUE</code> is a keyword arg (R spells TRUE in uppercase).", "color": "function"},
+                      {"code": "))", "role": "Close both", "tip": "Inner paren closes replace_na(), outer closes mutate().", "color": "overlay"}
                     ]
                   }
                 }
@@ -916,32 +904,28 @@ Outliers flagged: <span class="out-num">47</span></div>
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to filter rows based on a boolean condition",
-                  "pattern": "result = dataframe[condition]",
-                  "structureNote": "Boolean filtering is the <strong>most common way to subset data</strong>. The condition inside the brackets produces True/False for each row, and only True rows are kept. This is how you select subsamples, remove outliers, or focus on specific groups.",
+                  "instruction": "How comparison operators produce boolean values used for row selection.",
+                  "pattern": "result = df[df['col'] > val]  |  result <- df %>% filter(col > val)  |  keep if var > val",
+                  "structureNote": "The <code>&gt;</code> operator returns True/False element-wise. Python wraps the condition inside <code>df[...]</code> brackets for boolean indexing. R passes it inside <code>filter()</code>. Stata appends <code>if condition</code> after the command. All three use the same comparison operators: <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>==</code>, <code>!=</code>.",
                   "languages": {
                     "python": [
-                      {"code": "high_earners", "role": "Variable Name", "tip": "Stores the filtered subset.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "df", "role": "DataFrame", "tip": "The full dataset.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Begins boolean indexing. The condition inside produces True/False for each row.", "color": "overlay"},
-                      {"code": "df['income']", "role": "Column", "tip": "Selects the income column for comparison.", "color": "sky"},
-                      {"code": " > ", "role": "Comparison", "tip": "Greater than operator. Returns True where income exceeds 50000, False elsewhere.", "color": "peach"},
-                      {"code": "50000", "role": "Threshold", "tip": "The value to compare against. Only rows where income > 50000 are kept.", "color": "sky"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends the filter. Only rows with True are included in the result.", "color": "overlay"}
+                      {"code": "high_earners", "role": "Variable", "tip": "Stores the filtered subset.", "color": "variable"},
+                      {"code": " = df[", "role": "Boolean indexing", "tip": "Outer brackets expect a True/False series.", "color": "variable"},
+                      {"code": "df['income']", "role": "Column", "tip": "Inner brackets select the column to compare.", "color": "variable"},
+                      {"code": " > ", "role": "Comparison", "tip": "Greater-than operator. Returns True/False per row.", "color": "operator"},
+                      {"code": "50000", "role": "Literal", "tip": "Numeric value compared against every row.", "color": "sky"},
+                      {"code": "]", "role": "Close", "tip": "Only True rows are kept.", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "keep", "role": "Command", "tip": "Keeps only observations meeting the condition. Permanently removes all others.", "color": "mauve"},
-                      {"code": " if ", "role": "Condition", "tip": "Specifies which rows to keep.", "color": "mauve"},
-                      {"code": "income > 50000", "role": "Expression", "tip": "The boolean test. Rows where income exceeds 50000 are kept; all others are dropped.", "color": "sky"}
+                      {"code": "keep", "role": "Command", "tip": "Stata command.", "color": "keyword"},
+                      {"code": " if ", "role": "Qualifier", "tip": "Restricts to rows matching the condition.", "color": "keyword"},
+                      {"code": "income > 50000", "role": "Condition", "tip": "Bare variable name + comparison operator + value.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "high_earners", "role": "Variable Name", "tip": "Stores the filtered result.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
-                      {"code": "df", "role": "Data Frame", "tip": "The full dataset.", "color": "pink"},
-                      {"code": " %>% ", "role": "Pipe", "tip": "Passes df into filter.", "color": "mauve"},
-                      {"code": "filter", "role": "Function", "tip": "From dplyr. Keeps rows that satisfy a condition.", "color": "blue"},
-                      {"code": "(income > 50000)", "role": "Condition", "tip": "The boolean test. In dplyr, column names don't need quotes or df$ prefix.", "color": "sky"}
+                      {"code": "high_earners <- df %>% ", "role": "Pipe + assign", "tip": "Pipe chain.", "color": "operator"},
+                      {"code": "filter(", "role": "Function", "tip": "dplyr function.", "color": "function"},
+                      {"code": "income > 50000", "role": "Condition", "tip": "Bare column name -- no quotes, no $.", "color": "variable"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -1125,44 +1109,27 @@ Outliers flagged: <span class="out-num">47</span></div>
             {
               "exercises": [
                 {
-                  "instruction": "This converts all country names to lowercase for consistent matching and merging",
+                  "instruction": "How Python's .str accessor exposes string methods on a column, and how R and Stata wrap functions differently.",
+                  "pattern": "col = col.str.method()  |  mutate(col = func(col))  |  replace var = func(var)",
+                  "structureNote": "Python's <code>.str</code> is a special accessor that exposes string methods on an entire column -- two dots chain: <code>.str.lower()</code>. R wraps the column in a function inside <code>mutate()</code>. Stata uses <code>replace var = func(var)</code> with the function wrapping the variable name.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The DataFrame containing the data to clean.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Selects a column by name.", "color": "overlay"},
-                      {"code": "'country'", "role": "Column Name", "tip": "The column containing country names to standardize.", "color": "green"},
-                      {"code": "] ", "role": "Close Bracket", "tip": "Ends the column selection.", "color": "overlay"},
-                      {"code": "= ", "role": "Assignment", "tip": "Overwrites the column with the cleaned values.", "color": "peach"},
-                      {"code": "df", "role": "DataFrame", "tip": "References the same DataFrame.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Selects the column again to read its current values.", "color": "overlay"},
-                      {"code": "'country'", "role": "Column Name", "tip": "The column to read.", "color": "green"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends the column selection.", "color": "overlay"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses the string accessor on the Series.", "color": "overlay"},
-                      {"code": "str", "role": "String Accessor", "tip": "Provides vectorized string methods for an entire column at once.", "color": "lavender"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a specific string method.", "color": "overlay"},
-                      {"code": "lower", "role": "Method", "tip": "Converts every string in the column to lowercase.", "color": "teal"},
-                      {"code": "()", "role": "Parentheses", "tip": "Calls the method. No arguments needed for lower().", "color": "overlay"}
+                      {"code": "df['country']", "role": "Target column", "tip": "Left side of = overwrites the column.", "color": "variable"},
+                      {"code": " = df['country']", "role": "Source column", "tip": "Right side reads current values.", "color": "variable"},
+                      {"code": ".str", "role": "Accessor", "tip": "Special namespace that exposes string methods on the Series. Not a method call -- no parentheses.", "color": "function"},
+                      {"code": ".lower()", "role": "String method", "tip": "Called via the .str accessor. Second dot chains onto .str.", "color": "function"}
                     ],
                     "stata": [
-                      {"code": "replace ", "role": "Command", "tip": "Overwrites an existing variable with new values.", "color": "mauve"},
-                      {"code": "country ", "role": "Variable", "tip": "The variable to modify.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Sets the variable to the result of the expression.", "color": "peach"},
-                      {"code": "lower(", "role": "Function", "tip": "Stata's built-in function to convert strings to lowercase.", "color": "blue"},
-                      {"code": "country)", "role": "Variable", "tip": "The variable whose values to convert.", "color": "pink"}
+                      {"code": "replace", "role": "Command", "tip": "Stata command for modifying an existing variable.", "color": "keyword"},
+                      {"code": " country = ", "role": "Variable + assign", "tip": "Variable name followed by = sets its new value.", "color": "variable"},
+                      {"code": "lower(country)", "role": "Function call", "tip": "Standalone function wrapping the variable name. Stata does not use dot-chaining.", "color": "function"}
                     ],
                     "r": [
-                      {"code": "df ", "role": "Data Frame", "tip": "The data frame to modify.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the result back into df.", "color": "peach"},
-                      {"code": "df ", "role": "Data Frame", "tip": "The data frame piped into mutate.", "color": "pink"},
-                      {"code": "%>% ", "role": "Pipe", "tip": "Passes df as the first argument to mutate().", "color": "peach"},
-                      {"code": "mutate(", "role": "Function", "tip": "Creates or modifies columns in a data frame.", "color": "blue"},
-                      {"code": "country ", "role": "Column", "tip": "The column to modify (or create).", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Inside mutate, = assigns the new value to the column.", "color": "peach"},
-                      {"code": "str_to_lower(", "role": "Function", "tip": "From stringr (tidyverse). Converts all characters to lowercase.", "color": "blue"},
-                      {"code": "country))", "role": "Column", "tip": "The column to convert.", "color": "pink"}
+                      {"code": "df <- df %>% mutate(", "role": "Pipe + mutate", "tip": "Pipe chain into column modification.", "color": "function"},
+                      {"code": "country = str_to_lower(country)", "role": "Column redefinition", "tip": "<code>name = expr</code> inside mutate. The function wraps the bare column name.", "color": "function"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
-                  },
-                  "structureNote": "String standardization is essential before merging datasets or counting categories. Without it, 'USA', 'usa', and 'Usa' would be treated as three different countries. Python uses the <code>.str</code> accessor for vectorized string operations, R uses <code>stringr</code> functions inside <code>mutate()</code>, and Stata wraps string functions around variables in <code>replace</code> statements."
+                  }
                 }
               ]
             }
@@ -1352,40 +1319,30 @@ Invalid dates: <span class="out-num">3</span></div>
             {
               "exercises": [
                 {
-                  "instruction": "This converts a column of date strings into proper datetime objects so you can sort, compare, and do arithmetic with dates",
+                  "instruction": "How a module-level function converts a column in place, and how Stata's gen creates a new variable.",
+                  "pattern": "df['col'] = module.func(df['col'])  |  gen new = func(old, \"fmt\")  |  mutate(col = func(col))",
+                  "structureNote": "Python calls a module-level function (<code>pd.to_datetime</code>) and assigns the result back into the column. Stata's <code>gen</code> creates a new variable from a function call with a format string argument. R's <code>ymd()</code> encodes the expected date order in the function name itself -- no format string needed.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The DataFrame containing the date strings to convert.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Selects a column by name.", "color": "overlay"},
-                      {"code": "'date'", "role": "Column Name", "tip": "The column that will hold the parsed datetime values.", "color": "green"},
-                      {"code": "] ", "role": "Close Bracket", "tip": "Ends the column selection.", "color": "overlay"},
-                      {"code": "= ", "role": "Assignment", "tip": "Overwrites the column with the parsed datetime values.", "color": "peach"},
-                      {"code": "pd", "role": "Library Alias", "tip": "Short name for pandas.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a function in pandas.", "color": "overlay"},
-                      {"code": "to_datetime(", "role": "Function", "tip": "Converts strings like '2024-01-15' into datetime objects that support sorting, comparison, and date arithmetic.", "color": "blue"},
-                      {"code": "df['date_string'])", "role": "Input Column", "tip": "The column of date strings to parse.", "color": "pink"}
+                      {"code": "df['date']", "role": "Target column", "tip": "Bracket notation on the left side overwrites the column.", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the converted values.", "color": "operator"},
+                      {"code": "pd.to_datetime", "role": "Module function", "tip": "Accessed via dot on the module alias. Not a method on df.", "color": "function"},
+                      {"code": "(df['date_string'])", "role": "Argument", "tip": "The column to convert, selected with brackets.", "color": "variable"}
                     ],
                     "stata": [
-                      {"code": "gen ", "role": "Command", "tip": "Creates a new variable in Stata.", "color": "mauve"},
-                      {"code": "date ", "role": "New Variable", "tip": "The new variable that will hold the parsed date.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Sets the new variable to the result of the expression.", "color": "peach"},
-                      {"code": "date(", "role": "Function", "tip": "Stata's function that converts a date string into a numeric date (days since Jan 1, 1960).", "color": "blue"},
-                      {"code": "date_string, ", "role": "Variable", "tip": "The string variable containing dates to parse.", "color": "pink"},
-                      {"code": "\"DMY\")", "role": "Format Mask", "tip": "Tells Stata the order of components: Day-Month-Year. Use YMD for ISO format, MDY for American format.", "color": "green"}
+                      {"code": "gen", "role": "Command", "tip": "Creates a new variable (unlike replace, which modifies an existing one).", "color": "keyword"},
+                      {"code": " date = ", "role": "New variable", "tip": "The name for the new variable.", "color": "variable"},
+                      {"code": "date(", "role": "Function", "tip": "Stata function. Takes two positional arguments.", "color": "function"},
+                      {"code": "date_string, ", "role": "First arg", "tip": "The string variable to parse.", "color": "variable"},
+                      {"code": "\"DMY\"", "role": "Format string", "tip": "A string literal telling the function the component order. Quotes are required.", "color": "string"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "r": [
-                      {"code": "df ", "role": "Data Frame", "tip": "The data frame to modify.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the result back into df.", "color": "peach"},
-                      {"code": "df ", "role": "Data Frame", "tip": "The data frame piped into mutate.", "color": "pink"},
-                      {"code": "%>% ", "role": "Pipe", "tip": "Passes df into mutate().", "color": "peach"},
-                      {"code": "mutate(", "role": "Function", "tip": "Creates or modifies columns.", "color": "blue"},
-                      {"code": "date", "role": "Column", "tip": "The column to create or overwrite.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the new value inside mutate.", "color": "peach"},
-                      {"code": "ymd(", "role": "Function", "tip": "From lubridate. Parses year-month-day format strings. Also available: dmy(), mdy() for other orderings.", "color": "blue"},
-                      {"code": "date_string))", "role": "Column", "tip": "The column of date strings to parse.", "color": "pink"}
+                      {"code": "df <- df %>% mutate(", "role": "Pipe + mutate", "tip": "Pipe chain.", "color": "function"},
+                      {"code": "date = ymd(date_string)", "role": "Column redefinition", "tip": "The function name <code>ymd</code> encodes the expected order -- no format string argument needed.", "color": "function"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
-                  },
-                  "structureNote": "Dates stored as strings cannot be sorted, compared, or used in arithmetic. Parsing them into proper date objects enables operations like calculating time differences, extracting year/month, and filtering by date ranges. Always specify the format when your dates are not in standard ISO format (YYYY-MM-DD)."
+                  }
                 }
               ]
             }
@@ -1644,34 +1601,25 @@ Validation failed:
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to convert a column's data type from string to numeric",
-                  "pattern": "dataframe['col'] = dataframe['col'].astype(type)",
-                  "structureNote": "Data type conversion is critical when columns are loaded as the wrong type (e.g., numbers stored as text). The <code>astype()</code> method converts data types. Common issue: IDs loaded as numbers lose leading zeros, or year columns stored as text can't be used in calculations.",
+                  "instruction": "Same column-overwrite pattern as before, with a keyword arg controlling error behaviour.",
+                  "pattern": "df['col'] = pd.func(df['col'], errors='coerce')  |  destring var, replace force  |  mutate(col = as.type(col))",
+                  "structureNote": "Python's <code>errors='coerce'</code> is a keyword argument with a string value. Stata's <code>replace</code> and <code>force</code> are flag options after the comma. R's <code>as.numeric()</code> follows the <code>as.</code> naming convention for type coercion functions.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "The dataset.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Begins column selection.", "color": "overlay"},
-                      {"code": "'income'", "role": "Column Name", "tip": "The column to convert.", "color": "green"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends selection.", "color": "overlay"},
-                      {"code": " = ", "role": "Assignment", "tip": "Overwrites the column with the converted version.", "color": "peach"},
-                      {"code": "pd.to_numeric(", "role": "Function", "tip": "Pandas function that converts strings to numbers. More flexible than astype() -- can handle errors gracefully.", "color": "blue"},
-                      {"code": "df['income']", "role": "Column", "tip": "The column to convert.", "color": "pink"},
-                      {"code": ", errors='coerce')", "role": "Error Handling", "tip": "Values that can't be converted become NaN instead of causing an error. Essential for messy real-world data.", "color": "lavender"}
+                      {"code": "df['income']", "role": "Target", "tip": "Bracket overwrite.", "color": "variable"},
+                      {"code": " = pd.to_numeric(", "role": "Module function", "tip": "Dot accesses the function inside the pandas module.", "color": "function"},
+                      {"code": "df['income']", "role": "Positional arg", "tip": "The column to convert.", "color": "variable"},
+                      {"code": ", errors='coerce'", "role": "Keyword arg", "tip": "String value bound to the errors parameter.", "color": "string"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "destring ", "role": "Command", "tip": "Converts string variables to numeric. The opposite of 'tostring'.", "color": "mauve"},
-                      {"code": "income", "role": "Variable", "tip": "The string variable to convert to numeric.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "replace", "role": "Option", "tip": "Overwrites the variable in place. Without this, Stata creates a new variable.", "color": "yellow"},
-                      {"code": " force", "role": "Option", "tip": "Non-numeric values become missing (.) instead of causing an error.", "color": "yellow"}
+                      {"code": "destring income", "role": "Command + var", "tip": "Command followed by the variable name.", "color": "keyword"},
+                      {"code": ", replace force", "role": "Options", "tip": "Comma separates options from the variable. Both are flags -- no = needed.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Data Frame", "tip": "The dataset.", "color": "pink"},
-                      {"code": " <- df %>% ", "role": "Pipe Chain", "tip": "Transform and store back.", "color": "mauve"},
-                      {"code": "mutate", "role": "Function", "tip": "Creates or modifies columns.", "color": "blue"},
-                      {"code": "(income = ", "role": "Column", "tip": "Redefines the income column.", "color": "sky"},
-                      {"code": "as.numeric", "role": "Function", "tip": "Converts values to numeric type. Non-numeric values become NA with a warning.", "color": "blue"},
-                      {"code": "(income))", "role": "Argument", "tip": "The column to convert.", "color": "sky"}
+                      {"code": "df <- df %>% mutate(", "role": "Pipe + mutate", "tip": "Pipe chain into column modification.", "color": "function"},
+                      {"code": "income = as.numeric(income)", "role": "Column redefinition", "tip": "<code>as.</code> prefix is R's convention for coercion functions.", "color": "function"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
                   }
                 }
@@ -1807,37 +1755,33 @@ Financials only: <span class="out-num">12</span></div>
             {
               "exercises": [
                 {
-                  "instruction": "This merges two datasets and adds an indicator column to diagnose how many rows matched, appeared only in the left dataset, or only in the right dataset",
+                  "instruction": "How a function with multiple keyword arguments works, and how Stata's merge syntax differs.",
+                  "pattern": "result = module.func(left, right, on='key', how='type', flag=True)  |  merge 1:1 var using file  |  anti_join(left, right, by='key')",
+                  "structureNote": "Python's <code>pd.merge()</code> takes two positional arguments (the DataFrames) followed by keyword arguments. <code>indicator=True</code> is a boolean keyword arg. Stata's <code>merge</code> uses a cardinality specifier (<code>1:1</code>, <code>m:1</code>) and the keyword <code>using</code> before the file path. R's <code>by =</code> takes a quoted string.",
                   "languages": {
                     "python": [
-                      {"code": "merged ", "role": "Variable Name", "tip": "Stores the combined dataset with all rows from both inputs.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the merge result.", "color": "peach"},
-                      {"code": "pd", "role": "Library Alias", "tip": "Short name for pandas.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses the merge function in pandas.", "color": "overlay"},
-                      {"code": "merge(", "role": "Function", "tip": "Combines two DataFrames by matching rows on shared columns (like a SQL JOIN).", "color": "blue"},
-                      {"code": "firms, ", "role": "Left DataFrame", "tip": "The first (left) dataset in the merge.", "color": "pink"},
-                      {"code": "financials, ", "role": "Right DataFrame", "tip": "The second (right) dataset to merge.", "color": "pink"},
-                      {"code": "on='firm_id', ", "role": "Key Column", "tip": "The column to match on. Rows with the same firm_id are linked together.", "color": "sky"},
-                      {"code": "how='outer', ", "role": "Join Type", "tip": "Keeps all rows from both datasets, filling NaN where there is no match.", "color": "sky"},
-                      {"code": "indicator=True)", "role": "Diagnostic Flag", "tip": "Adds a '_merge' column showing 'both', 'left_only', or 'right_only' for each row.", "color": "sky"}
+                      {"code": "merged", "role": "Variable", "tip": "Stores the return value.", "color": "variable"},
+                      {"code": " = pd.merge(", "role": "Module function", "tip": "Dot accesses merge inside pandas.", "color": "function"},
+                      {"code": "firms, financials", "role": "Positional args", "tip": "Two DataFrames passed by position -- left and right.", "color": "variable"},
+                      {"code": ", on='firm_id'", "role": "Keyword arg", "tip": "String value naming the shared column.", "color": "string"},
+                      {"code": ", how='outer'", "role": "Keyword arg", "tip": "String value selecting the join type.", "color": "string"},
+                      {"code": ", indicator=True", "role": "Keyword arg", "tip": "Boolean flag. Adds a diagnostic column to the result.", "color": "sky"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "merge ", "role": "Command", "tip": "Stata's command to combine datasets.", "color": "mauve"},
-                      {"code": "1:1 ", "role": "Match Type", "tip": "One-to-one merge: each firm_id appears at most once in each dataset. Also available: m:1, 1:m, m:m.", "color": "sky"},
-                      {"code": "firm_id ", "role": "Key Variable", "tip": "The variable to match on between the master and using datasets.", "color": "pink"},
-                      {"code": "using ", "role": "Keyword", "tip": "Introduces the file path of the second dataset to merge.", "color": "mauve"},
-                      {"code": "financials.dta", "role": "File Path", "tip": "The Stata data file to merge with the data currently in memory.", "color": "green"}
+                      {"code": "merge", "role": "Command", "tip": "Stata command.", "color": "keyword"},
+                      {"code": " 1:1", "role": "Cardinality", "tip": "Specifies the expected match ratio. Stata-specific syntax.", "color": "variable"},
+                      {"code": " firm_id", "role": "Key variable", "tip": "Bare variable name.", "color": "variable"},
+                      {"code": " using ", "role": "Keyword", "tip": "Stata keyword introducing the second dataset's file path.", "color": "keyword"},
+                      {"code": "financials.dta", "role": "File path", "tip": "Path to the .dta file. No quotes required unless path has spaces.", "color": "string"}
                     ],
                     "r": [
-                      {"code": "firms_only ", "role": "Variable Name", "tip": "Stores the rows from firms that had no match in financials.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "anti_join(", "role": "Function", "tip": "Returns rows in the left table that have NO match in the right table. The diagnostic equivalent of Stata's _merge==1.", "color": "blue"},
-                      {"code": "firms, ", "role": "Left Data Frame", "tip": "The dataset to check for unmatched rows.", "color": "pink"},
-                      {"code": "financials, ", "role": "Right Data Frame", "tip": "The dataset to compare against.", "color": "pink"},
-                      {"code": "by = \"firm_id\")", "role": "Key Column", "tip": "The column to match on between the two data frames.", "color": "sky"}
+                      {"code": "firms_only <- anti_join(", "role": "Function", "tip": "A dplyr join function -- returns unmatched rows.", "color": "function"},
+                      {"code": "firms, financials", "role": "Positional args", "tip": "Two data frames passed by position.", "color": "variable"},
+                      {"code": ", by = \"firm_id\"", "role": "Keyword arg", "tip": "Quoted string naming the key column. R requires quotes here.", "color": "string"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
-                  },
-                  "structureNote": "Always diagnose your merges. In Python, use <code>indicator=True</code> then check <code>value_counts()</code>. In Stata, always <code>tab _merge</code> after merging. In R, use <code>anti_join()</code> to find unmatched rows. Large numbers of unmatched records indicate ID formatting differences, typos, or missing data that must be investigated before analysis."
+                  }
                 }
               ]
             }
@@ -2092,44 +2036,32 @@ Missing wages: <span class="out-num">0</span>
             {
               "exercises": [
                 {
-                  "instruction": "This constructs an hourly wage variable by dividing annual income by estimated annual hours worked (weekly hours times 52 weeks)",
+                  "instruction": "How to create a new column from an arithmetic expression using existing columns.",
+                  "pattern": "df['new'] = df['a'] / (df['b'] * c)  |  gen new = a / (b * c)  |  mutate(new = a / (b * c))",
+                  "structureNote": "All three languages use standard arithmetic operators (<code>/</code>, <code>*</code>) that apply element-wise across every row. Parentheses control evaluation order. Python requires bracket notation to reference columns in expressions. Stata and R use bare variable names.",
                   "languages": {
                     "python": [
-                      {"code": "cps", "role": "DataFrame", "tip": "The CPS DataFrame containing the cleaned data.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Selects or creates a column.", "color": "overlay"},
-                      {"code": "'hourly_wage'", "role": "New Column", "tip": "The new variable being created. Using bracket notation on the left of = creates a new column.", "color": "green"},
-                      {"code": "] ", "role": "Close Bracket", "tip": "Ends the column selection.", "color": "overlay"},
-                      {"code": "= ", "role": "Assignment", "tip": "Creates the new column with the computed values.", "color": "peach"},
-                      {"code": "cps['incwage'] ", "role": "Numerator", "tip": "Annual wage income from the CPS survey.", "color": "pink"},
-                      {"code": "/ ", "role": "Division", "tip": "Divides element-wise across all rows.", "color": "peach"},
-                      {"code": "(", "role": "Open Paren", "tip": "Groups the denominator calculation.", "color": "overlay"},
-                      {"code": "cps['uhrswork'] ", "role": "Weekly Hours", "tip": "Usual hours worked per week.", "color": "pink"},
-                      {"code": "* ", "role": "Multiplication", "tip": "Multiplies element-wise.", "color": "peach"},
-                      {"code": "52)", "role": "Weeks/Year", "tip": "Converts weekly hours to annual hours. Assumes full-year work.", "color": "red"}
+                      {"code": "cps['hourly_wage']", "role": "New column", "tip": "Bracket notation on the left of = creates a new column if it does not exist.", "color": "variable"},
+                      {"code": " = ", "role": "Assignment", "tip": "Stores the computed values.", "color": "operator"},
+                      {"code": "cps['incwage']", "role": "Column ref", "tip": "Bracket notation reads the column values.", "color": "variable"},
+                      {"code": " / ", "role": "Division", "tip": "Element-wise division across all rows.", "color": "operator"},
+                      {"code": "(", "role": "Grouping", "tip": "Parentheses force the multiplication to happen before the division.", "color": "overlay"},
+                      {"code": "cps['uhrswork']", "role": "Column ref", "tip": "Another column reference.", "color": "variable"},
+                      {"code": " * ", "role": "Multiplication", "tip": "Element-wise multiplication.", "color": "operator"},
+                      {"code": "52", "role": "Literal", "tip": "A scalar -- broadcast to every row automatically.", "color": "sky"},
+                      {"code": ")", "role": "Close", "tip": "Closes the grouping.", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "gen ", "role": "Command", "tip": "Creates a new variable in Stata.", "color": "mauve"},
-                      {"code": "hourly_wage ", "role": "New Variable", "tip": "The new variable being created.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Sets the new variable to the result of the expression.", "color": "peach"},
-                      {"code": "incwage ", "role": "Variable", "tip": "Annual wage income from the CPS.", "color": "pink"},
-                      {"code": "/ ", "role": "Division", "tip": "Divides for each observation.", "color": "peach"},
-                      {"code": "(", "role": "Open Paren", "tip": "Groups the denominator.", "color": "overlay"},
-                      {"code": "uhrswork", "role": "Variable", "tip": "Usual hours worked per week.", "color": "pink"},
-                      {"code": " * ", "role": "Multiplication", "tip": "Multiplies weekly hours by weeks per year.", "color": "peach"},
-                      {"code": "52)", "role": "Constant", "tip": "Weeks per year.", "color": "red"}
+                      {"code": "gen", "role": "Command", "tip": "Creates a new variable.", "color": "keyword"},
+                      {"code": " hourly_wage = ", "role": "New variable", "tip": "Name followed by = and the expression.", "color": "variable"},
+                      {"code": "incwage / (uhrswork * 52)", "role": "Expression", "tip": "Bare variable names. Same arithmetic operators and parentheses rules.", "color": "variable"}
                     ],
                     "r": [
-                      {"code": "cps ", "role": "Data Frame", "tip": "The CPS data frame.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the modified data frame.", "color": "peach"},
-                      {"code": "cps ", "role": "Data Frame", "tip": "The data frame piped into mutate.", "color": "pink"},
-                      {"code": "%>% ", "role": "Pipe", "tip": "Passes cps into mutate().", "color": "peach"},
-                      {"code": "mutate(", "role": "Function", "tip": "Creates or modifies columns.", "color": "blue"},
-                      {"code": "hourly_wage", "role": "New Column", "tip": "The new column being created.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the computed value.", "color": "peach"},
-                      {"code": "incwage / (uhrswork * 52))", "role": "Expression", "tip": "Annual income divided by estimated annual hours.", "color": "pink"}
+                      {"code": "cps <- cps %>% mutate(", "role": "Pipe + mutate", "tip": "Pipe chain into column creation.", "color": "function"},
+                      {"code": "hourly_wage = incwage / (uhrswork * 52)", "role": "Expression", "tip": "Bare column names inside mutate -- no quotes, no $, no df[] brackets.", "color": "variable"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
-                  },
-                  "structureNote": "Constructing derived variables is a core data cleaning step. Hourly wage (annual earnings / annual hours) is the standard measure in labor economics because it allows comparison across workers with different weekly hours. The pattern <code>df['new_col'] = expression</code> (Python), <code>gen new_var = expression</code> (Stata), or <code>mutate(new_col = expression)</code> (R) is used whenever you create a new variable from existing ones."
+                  }
                 }
               ]
             }

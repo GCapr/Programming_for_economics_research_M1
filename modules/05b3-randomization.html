@@ -348,34 +348,23 @@ Treatment assigned:
             {
               "exercises": [
                 {
-                  "instruction": "Perform complete random assignment: create a vector with exactly half ones and half zeros, then shuffle it",
+                  "instruction": "List repetition with [value]*n, Stata option syntax in randtreat, and R's $ column assignment",
                   "languages": {
                     "python": [
-                      {"code": "assignment ", "role": "Variable", "tip": "Will hold the treatment assignment vector (0s and 1s)", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the array", "color": "peach"},
-                      {"code": "np", "role": "Library alias", "tip": "NumPy -- Python's numerical computing library", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "", "color": "overlay"},
-                      {"code": "array", "role": "Function", "tip": "Converts a Python list into a NumPy array for efficient numerical operations", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "[1]*n_treat + [0]*(n - n_treat)", "role": "List expression", "tip": "Creates a list with n_treat ones followed by (n - n_treat) zeros -- guarantees exact group sizes", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "assignment = np.array(", "role": "Convert to Array", "tip": "np.array() converts a Python list to a NumPy array for vectorized operations.", "color": "blue"},
+                      {"code": "[1]*n_treat + [0]*(n - n_treat)", "role": "List Repetition", "tip": "[value]*N repeats the value N times. + concatenates lists. Guarantees exact group sizes.", "color": "sky"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "randtreat, ", "role": "Command", "tip": "A community-contributed Stata command for randomization -- install with 'ssc install randtreat'", "color": "blue"},
-                      {"code": "generate(treatment) ", "role": "Option", "tip": "Creates a new variable called 'treatment' containing the random assignment", "color": "sky"},
-                      {"code": "setseed(42)", "role": "Option", "tip": "Sets the random seed so the assignment is reproducible -- anyone using seed 42 gets the same result", "color": "sky"}
+                      {"code": "randtreat", "role": "Command", "tip": "Community-contributed command. Install with: ssc install randtreat.", "color": "blue"},
+                      {"code": ", generate(treatment) setseed(42)", "role": "Options", "tip": "generate() names the output variable. setseed() sets the random seed. Stata options always follow a comma.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "df$treatment_complete ", "role": "Variable", "tip": "Creates a new column called 'treatment_complete' in the dataframe df", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "R's assignment operator", "color": "peach"},
-                      {"code": "complete_ra", "role": "Function", "tip": "From the randomizr package -- performs complete random assignment with guaranteed exact group sizes", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "N = nrow(df), ", "role": "Argument", "tip": "Total number of units to randomize", "color": "sky"},
-                      {"code": "prob = 0.5", "role": "Argument", "tip": "Probability of treatment -- 0.5 means exactly 50% treated and 50% control", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "df$treatment_complete", "role": "Column Assignment", "tip": "df$newcol <- value creates a new column. The $ operator both reads and writes columns.", "color": "pink"},
+                      {"code": " <- complete_ra(N = nrow(df), prob = 0.5)", "role": "Function Call", "tip": "From randomizr. nrow(df) counts rows. prob = 0.5 means 50% treated.", "color": "blue"}
                     ]
                   },
-                  "structureNote": "Complete randomization guarantees exact group sizes (unlike Bernoulli/coin-flip methods where groups can be unequal by chance). Always set a <strong>seed</strong> for reproducibility."
+                  "structureNote": "Python's <code>[x]*N</code> repeats a value N times in a list. Stata's <code>randtreat</code> uses <code>option(value)</code> syntax after a comma. R's <code>df$col <- value</code> creates or overwrites a column using the <code>$</code> accessor."
                 }
               ]
             }
@@ -626,33 +615,20 @@ M  3 3</pre>
             {
               "exercises": [
                 {
-                  "instruction": "Stratified randomization: randomly assign treatment within each subgroup to guarantee balance on key variables",
+                  "instruction": "Iterating over groupby() groups, strata() option syntax, and block_ra() with blocks argument",
                   "languages": {
                     "python": [
-                      {"code": "for ", "role": "Keyword", "tip": "Loops over each subgroup (stratum) in the data", "color": "mauve"},
-                      {"code": "name, group ", "role": "Variables", "tip": "Unpacks each stratum: 'name' is the stratum label (e.g. 'M-young'), 'group' is the subset of rows", "color": "pink"},
-                      {"code": "in ", "role": "Keyword", "tip": "", "color": "mauve"},
-                      {"code": "df", "role": "Variable", "tip": "Your DataFrame", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "", "color": "overlay"},
-                      {"code": "groupby", "role": "Method", "tip": "Splits the DataFrame into subgroups based on column values", "color": "teal"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "strata_cols", "role": "Argument", "tip": "The columns defining strata -- e.g. ['gender', 'age_group'] creates separate groups for each combination", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "for name, group in df.groupby(strata_cols):", "role": "GroupBy Iteration", "tip": "Iterating over groupby() yields (group_key, sub_DataFrame) tuples. Unpacked into name and group.", "color": "mauve"},
+                      {"code": "\n    ...", "role": "Loop Body", "tip": "Indented block runs once per stratum. group.index gives row indices for .loc assignment.", "color": "pink"}
                     ],
                     "stata": [
-                      {"code": "randtreat, ", "role": "Command", "tip": "Stata's randomization command", "color": "blue"},
-                      {"code": "generate(treatment) ", "role": "Option", "tip": "Name of the variable to create", "color": "sky"},
-                      {"code": "strata(gender region)", "role": "Option", "tip": "Randomizes separately within each gender-region combination -- ensures balanced treatment across subgroups", "color": "sky"}
+                      {"code": "randtreat, generate(treatment) strata(gender region)", "role": "Stratified Option", "tip": "strata() accepts one or more variables. Randomization runs independently within each combination.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "block_ra", "role": "Function", "tip": "From randomizr -- performs block (stratified) random assignment, ensuring balance within each block", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "blocks = df$gender, ", "role": "Argument", "tip": "The blocking variable -- randomization happens separately within each level (M and F)", "color": "sky"},
-                      {"code": "prob = 0.5", "role": "Argument", "tip": "50% treatment probability within each block", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "block_ra(blocks = df$gender, prob = 0.5)", "role": "Block Randomization", "tip": "blocks= defines the strata. For multiple strata, create an interaction: interaction(df$gender, df$region).", "color": "blue"}
                     ]
                   },
-                  "structureNote": "Stratified randomization randomizes <em>within</em> subgroups, guaranteeing that key variables (gender, region, age) are balanced across treatment arms by design -- not just by chance."
+                  "structureNote": "Python iterates over <code>groupby()</code> to process each stratum manually. Stata's <code>strata()</code> option handles multiple stratification variables natively. R's <code>block_ra()</code> takes a single blocks vector -- use <code>interaction()</code> to combine multiple variables."
                 }
               ]
             }
@@ -893,31 +869,20 @@ D  3 0</pre>
             {
               "exercises": [
                 {
-                  "instruction": "Cluster randomization: assign entire groups (schools, villages) to treatment or control, then map back to individuals",
+                  "instruction": "dict(zip()) pattern for key-value mapping, cluster() option, and .map() for merging back to individuals",
                   "languages": {
                     "python": [
-                      {"code": "cluster_treatment ", "role": "Variable", "tip": "A dictionary mapping each cluster ID to its treatment assignment", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "", "color": "peach"},
-                      {"code": "dict", "role": "Function", "tip": "Creates a dictionary (key-value pairs) from paired sequences", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "zip", "role": "Function", "tip": "Pairs cluster names with their random assignments", "color": "blue"},
-                      {"code": "(clusters, np.random.binomial(1, 0.5, n_clusters))", "role": "Arguments", "tip": "Pairs each cluster with a random 0 or 1 -- all individuals in the same cluster get the same value", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "cluster_treatment = dict(zip(clusters, np.random.binomial(1, 0.5, n_clusters)))", "role": "dict(zip()) Pattern", "tip": "dict(zip(keys, values)) creates a dictionary from two sequences. Common pattern for lookup tables.", "color": "blue"},
+                      {"code": "\ndf['treatment'] = df['school_id'].map(cluster_treatment)", "role": ".map() Lookup", "tip": ".map(dict) replaces each value with the dictionary lookup. Broadcasts cluster assignments to individuals.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "randtreat, ", "role": "Command", "tip": "Stata's randomization command", "color": "blue"},
-                      {"code": "generate(treatment) ", "role": "Option", "tip": "Name of the treatment variable to create", "color": "sky"},
-                      {"code": "cluster(school_id)", "role": "Option", "tip": "Tells randtreat to assign treatment at the school level -- all students in the same school get the same status", "color": "sky"}
+                      {"code": "randtreat, generate(treatment) cluster(school_id)", "role": "Cluster Option", "tip": "cluster() assigns at the group level. Can combine with strata(): cluster(school_id) strata(district).", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "cluster_ra", "role": "Function", "tip": "From randomizr -- assigns treatment at the cluster level, not the individual level", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "", "color": "overlay"},
-                      {"code": "clusters = df$school_id, ", "role": "Argument", "tip": "The variable identifying which cluster each individual belongs to -- all members of a cluster get the same treatment", "color": "sky"},
-                      {"code": "prob = 0.5", "role": "Argument", "tip": "50% of clusters are assigned to treatment", "color": "sky"},
-                      {"code": ")", "role": "Close paren", "tip": "", "color": "overlay"}
+                      {"code": "cluster_ra(clusters = df$school_id, prob = 0.5)", "role": "Cluster Randomization", "tip": "clusters= identifies group membership. The function assigns the same value to all rows sharing a cluster ID.", "color": "blue"}
                     ]
                   },
-                  "structureNote": "Cluster randomization is necessary when the treatment operates at the group level (e.g., a new school curriculum). The key requirement: all individuals within a cluster must receive the same treatment."
+                  "structureNote": "Python uses <code>dict(zip(keys, values))</code> to create a mapping, then <code>.map()</code> to apply it. Stata's <code>cluster()</code> option handles everything internally. R's <code>cluster_ra()</code> returns an individual-level vector that already maps clusters to treatments."
                 }
               ]
             }

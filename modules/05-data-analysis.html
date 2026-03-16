@@ -503,36 +503,28 @@ OUTPUT:       /Users/researcher/my_project/output</div>
             {
               "exercises": [
                 {
-                  "instruction": "This defines a project root path and builds relative paths for data and output folders, so the project works on any computer",
+                  "instruction": "Build portable project paths using chained .parent properties, global macros, or here()",
                   "languages": {
                     "python": [
-                      {"code": "from ", "role": "Keyword", "tip": "Begins a selective import from a module.", "color": "mauve"},
-                      {"code": "pathlib ", "role": "Module", "tip": "Python's built-in module for file system paths. More readable than string concatenation.", "color": "yellow"},
-                      {"code": "import ", "role": "Keyword", "tip": "Selects a specific class from the module.", "color": "mauve"},
-                      {"code": "Path\n", "role": "Class", "tip": "Represents file system paths. Supports / operator for joining path segments.", "color": "blue"},
-                      {"code": "PROJECT_ROOT ", "role": "Variable", "tip": "Stores the path to the top-level project folder.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the computed path.", "color": "peach"},
-                      {"code": "Path(__file__)", "role": "Current File", "tip": "__file__ is the path of the script being run. Path() wraps it as a Path object.", "color": "blue"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a property of the Path object.", "color": "overlay"},
-                      {"code": "parent", "role": "Property", "tip": "Goes up one directory level from the current file.", "color": "lavender"},
-                      {"code": ".", "role": "Dot", "tip": "Chains another property access.", "color": "overlay"},
-                      {"code": "parent", "role": "Property", "tip": "Goes up another level to reach the project root.", "color": "lavender"}
+                      {"code": "from pathlib import Path\n", "role": "Selective Import", "tip": "from M import X imports only X from module M, so you write Path() instead of pathlib.Path().", "color": "mauve"},
+                      {"code": "PROJECT_ROOT ", "role": "Variable", "tip": "ALL_CAPS naming convention signals a constant that should not be reassigned.", "color": "pink"},
+                      {"code": "= ", "role": "Assignment", "tip": "", "color": "peach"},
+                      {"code": "Path(__file__)", "role": "Constructor", "tip": "__file__ is a built-in variable holding the current script's path. Path() wraps it as a Path object.", "color": "blue"},
+                      {"code": ".parent.parent", "role": "Chained Properties", "tip": "Each .parent goes up one directory level. Chaining navigates the tree without string slicing.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "global ", "role": "Command", "tip": "Creates a global macro accessible from any do-file in the session.", "color": "mauve"},
-                      {"code": "PROJECT ", "role": "Macro Name", "tip": "The name of the global macro. Referenced later as $PROJECT.", "color": "pink"},
-                      {"code": "\"/Users/researcher/my_project\"", "role": "Path Value", "tip": "The absolute path to your project. Change this one path and all others update automatically.", "color": "green"}
+                      {"code": "global ", "role": "Command", "tip": "Creates a macro visible everywhere in the session. Referenced later with the $ prefix: $PROJECT.", "color": "mauve"},
+                      {"code": "PROJECT ", "role": "Macro Name", "tip": "Convention: uppercase for global macros. local macros use lowercase and backtick-quote syntax.", "color": "pink"},
+                      {"code": "\"/Users/researcher/my_project\"", "role": "Path Value", "tip": "Quoted string. All downstream paths build from this single root.", "color": "green"}
                     ],
                     "r": [
-                      {"code": "library(", "role": "Function", "tip": "Loads an R package into the current session.", "color": "blue"},
-                      {"code": "here)\n", "role": "Package", "tip": "Automatically detects the project root from .Rproj or .here files. Paths work on any computer.", "color": "yellow"},
-                      {"code": "source(", "role": "Function", "tip": "Runs an R script file, executing all its code in the current session.", "color": "blue"},
-                      {"code": "here(", "role": "Function", "tip": "Builds the file path relative to the project root.", "color": "blue"},
-                      {"code": "\"code\", ", "role": "Folder", "tip": "First path segment: the code directory.", "color": "green"},
-                      {"code": "\"01_load_data.R\"))", "role": "File Name", "tip": "The script file to run.", "color": "green"}
+                      {"code": "library(here)\n", "role": "Load Package", "tip": "library() attaches a package. here detects the project root from .Rproj or .here marker files.", "color": "blue"},
+                      {"code": "source(", "role": "Function", "tip": "Executes an external .R script in the current session.", "color": "blue"},
+                      {"code": "here(\"code\", \"01_load_data.R\")", "role": "Path Builder", "tip": "here() joins path segments relative to the project root. Each argument is one folder or file name.", "color": "green"},
+                      {"code": ")", "role": "Close", "tip": "", "color": "overlay"}
                     ]
                   },
-                  "structureNote": "Portable paths are essential for reproducible research. Hardcoded paths like <code>C:/Users/me/data.csv</code> break on other computers. Python uses <code>pathlib</code>, R uses the <code>here</code> package, and Stata uses <code>global</code> macros to define one root path that all other paths build from."
+                  "structureNote": "Pattern: define one root path, build everything relative to it. Python chains <code>.parent</code> properties on Path objects. Stata uses <code>global</code> macros referenced with <code>$NAME</code>. R uses <code>here()</code> which auto-detects the root from a marker file."
                 }
               ]
             }
@@ -780,31 +772,30 @@ Loaded <span class="out-num">2246</span> observations and <span class="out-num">
             {
               "exercises": [
                 {
-                  "instruction": "This loads a Stata .dta file from a URL into a DataFrame and renames columns for clarity",
+                  "instruction": "Load a .dta file using library.reader(path) syntax, namespace operators, and Stata's webuse convention",
                   "languages": {
                     "python": [
-                      {"code": "df ", "role": "Variable Name", "tip": "The DataFrame that will hold the loaded data.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the loaded data.", "color": "peach"},
-                      {"code": "pd", "role": "Library Alias", "tip": "Short name for pandas.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a function in pandas.", "color": "overlay"},
-                      {"code": "read_stata(", "role": "Function", "tip": "Reads Stata .dta files into a pandas DataFrame. Works with URLs or local file paths.", "color": "blue"},
-                      {"code": "'https://...nlsw88.dta')", "role": "URL", "tip": "The URL pointing to a Stata dataset. Can also be a local file path.", "color": "green"}
+                      {"code": "df ", "role": "Variable", "tip": "Convention: df for a single DataFrame.", "color": "pink"},
+                      {"code": "= ", "role": "Assignment", "tip": "", "color": "peach"},
+                      {"code": "pd.", "role": "Alias Prefix", "tip": "Accesses a function via the library alias. Pattern: alias.function().", "color": "yellow"},
+                      {"code": "read_stata(", "role": "Reader Function", "tip": "pandas reader functions follow the naming pattern read_FORMAT: read_csv, read_stata, read_excel.", "color": "blue"},
+                      {"code": "'https://...nlsw88.dta')", "role": "Path/URL", "tip": "Accepts a file path string or a URL. The file extension determines the expected format.", "color": "green"}
                     ],
                     "stata": [
-                      {"code": "webuse ", "role": "Command", "tip": "Loads a dataset directly from Stata's online repository. No need to download first.", "color": "mauve"},
-                      {"code": "nlsw88, ", "role": "Dataset Name", "tip": "The name of the dataset in Stata's repository. National Longitudinal Survey of Young Women, 1988.", "color": "pink"},
-                      {"code": "clear", "role": "Option", "tip": "Removes any existing data from memory before loading. Stata holds one dataset at a time.", "color": "sky"}
+                      {"code": "webuse ", "role": "Command", "tip": "Loads from Stata's online repository. For local files, use the use command instead.", "color": "mauve"},
+                      {"code": "nlsw88", "role": "Dataset Name", "tip": "Bare name (no quotes, no extension). Stata resolves the URL internally.", "color": "pink"},
+                      {"code": ", clear", "role": "Option", "tip": "Stata holds one dataset at a time. clear drops the current data before loading.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "df ", "role": "Variable Name", "tip": "The data frame that will hold the loaded data.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the loaded data into df.", "color": "peach"},
-                      {"code": "haven", "role": "Package", "tip": "An R package for reading Stata, SPSS, and SAS files.", "color": "yellow"},
-                      {"code": "::", "role": "Namespace Operator", "tip": "Calls a function from a package without loading the entire package with library().", "color": "overlay"},
-                      {"code": "read_dta(", "role": "Function", "tip": "Reads a Stata .dta file. Works with URLs or local file paths.", "color": "blue"},
-                      {"code": "\"https://...nlsw88.dta\")", "role": "URL", "tip": "The URL to the Stata dataset.", "color": "green"}
+                      {"code": "df ", "role": "Variable", "tip": "", "color": "pink"},
+                      {"code": "<- ", "role": "Assignment", "tip": "R's assignment arrow. = also works inside function calls, but <- is idiomatic for top-level assignment.", "color": "peach"},
+                      {"code": "haven", "role": "Package", "tip": "", "color": "yellow"},
+                      {"code": "::", "role": "Namespace Operator", "tip": "package::function() calls a function without loading the full package via library(). Avoids namespace collisions.", "color": "overlay"},
+                      {"code": "read_dta(", "role": "Function", "tip": "haven readers follow the pattern read_FORMAT: read_dta (Stata), read_sav (SPSS), read_sas (SAS).", "color": "blue"},
+                      {"code": "\"https://...nlsw88.dta\")", "role": "Path/URL", "tip": "", "color": "green"}
                     ]
                   },
-                  "structureNote": "Loading data is the first step in any analysis. Python can read Stata files with <code>pd.read_stata()</code>, R uses <code>haven::read_dta()</code>, and Stata uses <code>webuse</code> for its online repository or <code>use</code> for local files. Always inspect your data immediately after loading with <code>.head()</code>, <code>describe</code>, or <code>head()</code>."
+                  "structureNote": "Reader functions follow a naming convention: <code>pd.read_FORMAT()</code> in Python, <code>haven::read_FORMAT()</code> in R. Stata uses distinct commands: <code>webuse</code> for its repository, <code>use</code> for local files, <code>import delimited</code> for CSV. R's <code>::</code> operator lets you call a package function without <code>library()</code>."
                 }
               ]
             }
@@ -987,37 +978,30 @@ Group variable: education
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to compute grouped descriptive statistics using groupby and agg",
-                  "pattern": "dataframe.groupby(key).agg(functions)",
-                  "structureNote": "This is the <strong>split-apply-combine</strong> pattern: <code>groupby()</code> splits the data into groups, <code>.agg()</code> applies multiple summary functions to each group, and the result is combined into a new table. This is used constantly for comparing subgroups (treated vs control, male vs female, etc.).",
+                  "instruction": "Split-apply-combine: chain .groupby()[column].agg() or pipe through group_by %>% summarize",
+                  "pattern": "df.groupby(key)[col].agg([funcs])",
+                  "structureNote": "The <strong>split-apply-combine</strong> pattern: <code>.groupby()</code> splits, <code>.agg()</code> applies, the result is combined. R uses <code>%>%</code> pipes to chain the same steps. Stata uses <code>table</code> with <code>stat()</code> options.",
                   "languages": {
                     "python": [
-                      {"code": "stats", "role": "Variable Name", "tip": "Stores the grouped summary table.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "df", "role": "DataFrame", "tip": "The full dataset.", "color": "pink"},
-                      {"code": ".groupby", "role": "Method", "tip": "Splits data into groups based on a column's unique values. Nothing visible happens yet.", "color": "teal"},
-                      {"code": "('education')", "role": "Group Key", "tip": "Group by education level. Each unique value becomes its own group.", "color": "green"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Selects which column to aggregate.", "color": "overlay"},
-                      {"code": "'income'", "role": "Value Column", "tip": "Compute statistics on this column within each group.", "color": "green"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends column selection.", "color": "overlay"},
-                      {"code": ".agg", "role": "Method", "tip": "Apply multiple aggregation functions at once. Returns one row per group, one column per function.", "color": "teal"},
-                      {"code": "(['mean', 'std', 'count'])", "role": "Functions", "tip": "A list of statistics to compute: mean (average), std (standard deviation), count (number of observations).", "color": "green"}
+                      {"code": "stats = df", "role": "Setup", "tip": "", "color": "pink"},
+                      {"code": ".groupby", "role": "Method", "tip": "Returns a GroupBy object -- nothing computes until you call an aggregation method on it.", "color": "teal"},
+                      {"code": "('education')", "role": "Group Key", "tip": "String column name. For multiple keys: .groupby(['col1', 'col2']).", "color": "green"},
+                      {"code": "['income']", "role": "Column Select", "tip": "Bracket notation selects which column to aggregate. Without this, all numeric columns are aggregated.", "color": "pink"},
+                      {"code": ".agg", "role": "Method", "tip": "Accepts a list of function names as strings. Returns one row per group, one column per function.", "color": "teal"},
+                      {"code": "(['mean', 'std', 'count'])", "role": "Function List", "tip": "Pass function names as strings in a list. Also accepts dicts for renaming: .agg(avg='mean').", "color": "green"}
                     ],
                     "stata": [
-                      {"code": "table ", "role": "Command", "tip": "Creates flexible summary tables in Stata 17+. More powerful than tabstat.", "color": "mauve"},
-                      {"code": "education", "role": "Row Variable", "tip": "Groups displayed as rows in the table.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "stat(mean sd count)", "role": "Statistics", "tip": "Which statistics to compute for each group: mean, standard deviation, count.", "color": "yellow"},
-                      {"code": " nformat(%9.2f)", "role": "Format", "tip": "Formats numbers with 2 decimal places. Makes the output easier to read.", "color": "yellow"}
+                      {"code": "table ", "role": "Command", "tip": "Stata 17+ table command. For older versions, use tabstat varname, by() stat().", "color": "mauve"},
+                      {"code": "education", "role": "Row Variable", "tip": "The grouping variable defines rows.", "color": "sky"},
+                      {"code": ", stat(mean sd count)", "role": "Options", "tip": "stat() accepts: mean, sd, count, median, min, max, p25, p75, and more.", "color": "yellow"},
+                      {"code": " nformat(%9.2f)", "role": "Format", "tip": "%9.2f is Stata's display format: 9 total width, 2 decimal places.", "color": "yellow"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Data Frame", "tip": "The full dataset.", "color": "pink"},
-                      {"code": " %>% ", "role": "Pipe", "tip": "Passes data to the next function.", "color": "mauve"},
-                      {"code": "group_by", "role": "Function", "tip": "From dplyr. Groups data -- subsequent operations work within each group.", "color": "blue"},
-                      {"code": "(education)", "role": "Group Key", "tip": "Group by education level.", "color": "sky"},
-                      {"code": " %>% ", "role": "Pipe", "tip": "Passes grouped data to summarize.", "color": "mauve"},
-                      {"code": "summarize", "role": "Function", "tip": "Computes summary statistics within each group. Creates one row per group.", "color": "blue"},
-                      {"code": "(avg = mean(income), sd = sd(income), n = n())", "role": "Statistics", "tip": "Creates columns for mean, standard deviation, and count. n() counts rows per group.", "color": "sky"}
+                      {"code": "df", "role": "Data Frame", "tip": "", "color": "pink"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the left side as the first argument to the right side. R 4.1+ also supports |>.", "color": "mauve"},
+                      {"code": "group_by(education)", "role": "Group", "tip": "Attaches grouping metadata. All subsequent dplyr verbs operate within each group.", "color": "blue"},
+                      {"code": " %>% ", "role": "Pipe", "tip": "", "color": "mauve"},
+                      {"code": "summarize(avg = mean(income), sd = sd(income), n = n())", "role": "Aggregation", "tip": "name = function(col) syntax creates named output columns. n() counts rows per group (no argument needed).", "color": "blue"}
                     ]
                   }
                 }
@@ -1217,31 +1201,25 @@ Distribution of Income (Hourly Wage)
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to create a histogram to visualize the distribution of income",
-                  "pattern": "plt.hist(data, bins=N); plt.xlabel(); plt.savefig()",
-                  "structureNote": "Visualization in Python uses <strong>matplotlib's state-based interface</strong>: each <code>plt.</code> call adds to the current figure. First create the plot (<code>hist</code>), then label it (<code>xlabel</code>, <code>ylabel</code>, <code>title</code>), then save it (<code>savefig</code>). R's ggplot2 uses a different approach with <code>+</code> to add layers.",
+                  "instruction": "Compare matplotlib's sequential plt.function() calls vs ggplot2's layer-based + operator",
+                  "pattern": "plt.hist() then plt.savefig()  vs  ggplot() + geom_histogram()",
+                  "structureNote": "Two plotting paradigms: matplotlib uses <strong>sequential calls</strong> on a shared state (<code>plt.hist()</code>, then <code>plt.xlabel()</code>, then <code>plt.savefig()</code>). ggplot2 uses <strong>additive layers</strong> with <code>+</code>. Stata uses a single command with comma-separated options.",
                   "languages": {
                     "python": [
-                      {"code": "plt", "role": "Library Alias", "tip": "Short for matplotlib.pyplot. Set up with 'import matplotlib.pyplot as plt'.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses the hist function.", "color": "overlay"},
-                      {"code": "hist(", "role": "Function", "tip": "Creates a histogram -- a bar chart showing the frequency distribution of a variable.", "color": "blue"},
-                      {"code": "df['income']", "role": "Data", "tip": "The column to plot. Must be numeric.", "color": "pink"},
-                      {"code": ", bins=", "role": "Parameter", "tip": "Number of bars (bins) to divide the range into.", "color": "lavender"},
-                      {"code": "30)", "role": "Value", "tip": "30 bins. More bins = more detail but may look noisy. Fewer = smoother but less detail.", "color": "sky"}
+                      {"code": "plt.", "role": "State-based Call", "tip": "Each plt.function() modifies the current figure. Order matters: create the plot before labeling or saving.", "color": "yellow"},
+                      {"code": "hist(", "role": "Plot Function", "tip": "matplotlib plot types: hist(), scatter(), plot(), bar(), boxplot().", "color": "blue"},
+                      {"code": "df['income']", "role": "Data", "tip": "Bracket notation selects a Series from the DataFrame.", "color": "pink"},
+                      {"code": ", bins=30)", "role": "Keyword Argument", "tip": "bins= controls granularity. Keyword arguments use name=value syntax.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "histogram ", "role": "Command", "tip": "Creates a histogram in Stata.", "color": "mauve"},
-                      {"code": "income", "role": "Variable", "tip": "The variable to plot.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "frequency", "role": "Option", "tip": "Shows counts (how many observations per bar) instead of density.", "color": "yellow"}
+                      {"code": "histogram ", "role": "Command", "tip": "Stata graph commands: histogram, scatter, twoway, graph bar.", "color": "mauve"},
+                      {"code": "income", "role": "Variable", "tip": "Bare variable name (no quotes, no $ prefix).", "color": "sky"},
+                      {"code": ", frequency", "role": "Option", "tip": "Options after the comma modify behavior. frequency shows counts; default is density.", "color": "yellow"}
                     ],
                     "r": [
-                      {"code": "ggplot", "role": "Function", "tip": "From ggplot2. Sets up the canvas with your data. The Grammar of Graphics approach builds plots layer by layer.", "color": "blue"},
-                      {"code": "(df, ", "role": "Data", "tip": "The data frame to plot.", "color": "pink"},
-                      {"code": "aes(x = income)", "role": "Aesthetics", "tip": "aes() maps variables to visual properties. x = income puts income on the x-axis.", "color": "sky"},
-                      {"code": ") + ", "role": "Add Layer", "tip": "The + operator adds layers to the plot. Each layer adds a visual element.", "color": "mauve"},
-                      {"code": "geom_histogram", "role": "Geometry", "tip": "Adds the histogram bars. geom_ functions define what type of visual element to draw.", "color": "blue"},
-                      {"code": "(bins = 30)", "role": "Parameters", "tip": "30 bars. geom_histogram() handles binning and counting automatically.", "color": "sky"}
+                      {"code": "ggplot(df, aes(x = income))", "role": "Canvas + Mapping", "tip": "aes() maps data columns to visual properties (x, y, color, fill). No plot appears until you add a geom.", "color": "blue"},
+                      {"code": " + ", "role": "Layer Operator", "tip": "The + adds layers. Each geom_ or scale_ or labs() is a separate layer stacked onto the plot.", "color": "mauve"},
+                      {"code": "geom_histogram(bins = 30)", "role": "Geometry Layer", "tip": "geom_ prefix indicates a visual layer. Common: geom_point, geom_line, geom_bar, geom_histogram.", "color": "blue"}
                     ]
                   }
                 }
@@ -1447,30 +1425,26 @@ Legend: <span style="color: #fc8181;">x</span>=Africa <span style="color: #90cdf
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to save a matplotlib figure to a file for publication",
-                  "pattern": "plt.savefig(filepath, dpi=N, bbox_inches='tight')",
-                  "structureNote": "After building a plot with matplotlib, <code>savefig()</code> exports it to a file. The file format is determined by the extension (.png, .pdf, .svg). For publications, use <strong>PDF or SVG</strong> (vector formats that scale perfectly) with <code>dpi=300</code> or higher for raster formats.",
+                  "instruction": "Export figures: file extension determines format; keyword arguments control resolution and cropping",
+                  "pattern": "plt.savefig(path, dpi=N, bbox_inches='tight')",
+                  "structureNote": "The file extension (.pdf, .png, .svg) determines the output format in all three languages. Use <code>bbox_inches='tight'</code> in matplotlib and <code>replace</code> in Stata to avoid common gotchas (clipped labels, overwrite errors).",
                   "languages": {
                     "python": [
-                      {"code": "plt", "role": "Library Alias", "tip": "matplotlib.pyplot.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses the savefig function.", "color": "overlay"},
-                      {"code": "savefig(", "role": "Function", "tip": "Saves the current figure to a file. Must be called BEFORE plt.show() or the figure will be blank.", "color": "blue"},
-                      {"code": "'output/figure1.pdf'", "role": "File Path", "tip": "Where to save. The extension determines the format: .pdf for vector, .png for raster, .svg for web.", "color": "green"},
-                      {"code": ", dpi=", "role": "Resolution", "tip": "Dots per inch. Only matters for raster formats (PNG). 300 is standard for publications.", "color": "lavender"},
-                      {"code": "300", "role": "Value", "tip": "300 DPI is publication quality. 72 is screen quality.", "color": "sky"},
-                      {"code": ", bbox_inches=", "role": "Cropping", "tip": "Controls whitespace around the figure.", "color": "lavender"},
-                      {"code": "'tight')", "role": "Value", "tip": "Removes excess whitespace around the plot. Essential -- without it, labels may be cut off.", "color": "green"}
+                      {"code": "plt.savefig(", "role": "Export Function", "tip": "Must be called BEFORE plt.show(), which clears the figure.", "color": "blue"},
+                      {"code": "'output/figure1.pdf'", "role": "File Path", "tip": "Extension sets format: .pdf/.svg = vector (scalable), .png = raster (fixed pixels).", "color": "green"},
+                      {"code": ", dpi=300", "role": "Resolution", "tip": "Dots per inch. Only affects raster formats (.png). 300 is publication standard.", "color": "sky"},
+                      {"code": ", bbox_inches='tight'", "role": "Crop Option", "tip": "Trims whitespace so labels are not clipped. Almost always needed.", "color": "green"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "graph export ", "role": "Command", "tip": "Exports the current graph to a file.", "color": "mauve"},
-                      {"code": "\"output/figure1.pdf\"", "role": "File Path", "tip": "Where to save. Supports .pdf, .png, .eps, .svg.", "color": "green"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "replace", "role": "Option", "tip": "Overwrites any existing file with the same name.", "color": "yellow"}
+                      {"code": "graph export ", "role": "Command", "tip": "Exports the most recently created graph.", "color": "mauve"},
+                      {"code": "\"output/figure1.pdf\"", "role": "File Path", "tip": "Quoted path. Extension sets format.", "color": "green"},
+                      {"code": ", replace", "role": "Option", "tip": "Stata refuses to overwrite existing files unless you specify replace.", "color": "yellow"}
                     ],
                     "r": [
-                      {"code": "ggsave(", "role": "Function", "tip": "From ggplot2. Saves the most recent ggplot to a file.", "color": "blue"},
-                      {"code": "\"output/figure1.pdf\"", "role": "File Path", "tip": "Where to save. Auto-detects format from extension.", "color": "green"},
-                      {"code": ", width = 8, height = 6)", "role": "Dimensions", "tip": "Figure size in inches. Controls aspect ratio. Standard is roughly 4:3 or 16:9.", "color": "lavender"}
+                      {"code": "ggsave(", "role": "Function", "tip": "Saves the last ggplot. Auto-detects format from extension.", "color": "blue"},
+                      {"code": "\"output/figure1.pdf\"", "role": "File Path", "tip": "", "color": "green"},
+                      {"code": ", width = 8, height = 6)", "role": "Dimensions", "tip": "Size in inches. Controls aspect ratio. Not needed for screen display, essential for publication.", "color": "lavender"}
                     ]
                   }
                 }
@@ -1592,34 +1566,27 @@ sample estimates:
             {
               "exercises": [
                 {
-                  "instruction": "This computes the Pearson correlation coefficient and its p-value to test whether two variables are linearly related",
+                  "instruction": "Tuple unpacking, pairwise correlation options, and the $ column accessor in R",
                   "languages": {
                     "python": [
-                      {"code": "r", "role": "Variable", "tip": "Stores the correlation coefficient (ranges from -1 to +1).", "color": "pink"},
-                      {"code": ", ", "role": "Comma", "tip": "Python supports multiple assignment: two values returned, two variables to receive them.", "color": "overlay"},
-                      {"code": "p ", "role": "Variable", "tip": "Stores the p-value testing whether the correlation is significantly different from zero.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Unpacks the two returned values into r and p.", "color": "peach"},
-                      {"code": "stats", "role": "Module", "tip": "scipy.stats provides statistical tests and distributions.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a function in the module.", "color": "overlay"},
-                      {"code": "pearsonr(", "role": "Function", "tip": "Computes Pearson correlation and tests if it is significantly different from zero.", "color": "blue"},
-                      {"code": "df['income'], ", "role": "First Variable", "tip": "The first numeric column.", "color": "pink"},
-                      {"code": "df['education'])", "role": "Second Variable", "tip": "The second numeric column.", "color": "pink"}
+                      {"code": "r, p", "role": "Tuple Unpacking", "tip": "Python functions can return multiple values as a tuple. Listing variables on the left unpacks them in order.", "color": "pink"},
+                      {"code": " = ", "role": "Assignment", "tip": "", "color": "peach"},
+                      {"code": "stats.pearsonr(", "role": "Function", "tip": "Returns a (correlation, p-value) tuple. Part of scipy.stats.", "color": "blue"},
+                      {"code": "df['income'], df['education'])", "role": "Two Series", "tip": "Two arguments of equal length. Bracket notation selects columns from the DataFrame.", "color": "pink"}
                     ],
                     "stata": [
-                      {"code": "pwcorr ", "role": "Command", "tip": "Computes pairwise correlations between variables.", "color": "mauve"},
-                      {"code": "income ", "role": "Variable", "tip": "First variable.", "color": "pink"},
-                      {"code": "education ", "role": "Variable", "tip": "Second variable.", "color": "pink"},
-                      {"code": "age, ", "role": "Variable", "tip": "Third variable. All pairwise correlations are computed.", "color": "pink"},
-                      {"code": "sig ", "role": "Option", "tip": "Displays p-values below each correlation coefficient.", "color": "sky"},
-                      {"code": "star(.05)", "role": "Option", "tip": "Marks correlations significant at the 5% level with an asterisk.", "color": "sky"}
+                      {"code": "pwcorr ", "role": "Command", "tip": "Pairwise correlations. Alternative: correlate (no p-values, includes all variables by default).", "color": "mauve"},
+                      {"code": "income education age", "role": "Variable List", "tip": "Space-separated. All pairwise correlations are computed in one table.", "color": "pink"},
+                      {"code": ", sig", "role": "Option", "tip": "Displays p-values below each coefficient.", "color": "sky"},
+                      {"code": " star(.05)", "role": "Option", "tip": "Marks significant correlations with *. Threshold in parentheses.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "cor.test(", "role": "Function", "tip": "Tests whether the correlation between two variables is statistically significant.", "color": "blue"},
-                      {"code": "df$income, ", "role": "First Variable", "tip": "The first numeric vector. Uses $ to access the column.", "color": "pink"},
-                      {"code": "df$education)", "role": "Second Variable", "tip": "The second numeric vector.", "color": "pink"}
+                      {"code": "cor.test(", "role": "Function", "tip": "Returns correlation, p-value, and confidence interval. For a full matrix, use cor().", "color": "blue"},
+                      {"code": "df$income", "role": "Column", "tip": "The $ operator extracts a column as a vector. R's equivalent of df['col'] in Python.", "color": "pink"},
+                      {"code": ", df$education)", "role": "Column", "tip": "", "color": "pink"}
                     ]
                   },
-                  "structureNote": "Correlation measures how strongly two variables move together linearly. Values near +1 mean strong positive relationship, -1 means strong negative, and 0 means no linear relationship. Always report the <strong>p-value</strong> alongside the correlation coefficient — a large correlation in a small sample may not be statistically significant, while a small correlation in a large sample may be highly significant."
+                  "structureNote": "Python returns multiple values via <strong>tuple unpacking</strong>: <code>a, b = func()</code>. Stata's <code>pwcorr</code> takes a variable list and options after the comma. R's <code>$</code> operator is the standard way to extract a column as a vector."
                 }
               ]
             }
@@ -1800,34 +1767,25 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</div>
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to run an OLS regression of income on education and view the results",
-                  "pattern": "model = library.ols(formula, data=df).fit()",
-                  "structureNote": "This is a <strong>method chain</strong> that builds and estimates a model in one line. <code>smf.ols()</code> defines the model specification (what depends on what), <code>.fit()</code> actually runs the estimation (computes coefficients), and <code>.summary()</code> displays the results. The formula syntax <code>y ~ x</code> means 'y is explained by x'.",
+                  "instruction": "Formula syntax y ~ x, method chaining .ols().fit(), and Stata's positional variable list",
+                  "pattern": "model = smf.ols('y ~ x', data=df).fit()",
+                  "structureNote": "The <code>~</code> (tilde) is the formula operator: left side is Y, right side is X. Python chains <code>.ols()</code> (define) then <code>.fit()</code> (estimate). Stata uses a positional convention: first variable is Y, rest are X. All three auto-include an intercept.",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable Name", "tip": "Stores the fitted regression results. Contains coefficients, standard errors, R-squared, p-values, etc.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the fitted model.", "color": "peach"},
-                      {"code": "smf", "role": "Library Alias", "tip": "Short for statsmodels.formula.api. Set up with 'import statsmodels.formula.api as smf'. Provides R-style formula syntax.", "color": "yellow"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses the ols function from statsmodels.", "color": "overlay"},
-                      {"code": "ols(", "role": "Function", "tip": "Ordinary Least Squares. Creates a model object from a formula. Does NOT estimate yet -- just defines the specification.", "color": "blue"},
-                      {"code": "'income ~ education'", "role": "Formula", "tip": "R-style formula: income = b0 + b1*education + error. The ~ separates Y (left) from X (right). Use + to add more variables.", "color": "green"},
-                      {"code": ", data=", "role": "Data Parameter", "tip": "Tells the model which DataFrame contains the variables.", "color": "lavender"},
-                      {"code": "df)", "role": "DataFrame", "tip": "The dataset with income and education columns.", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Chains to the fit method.", "color": "overlay"},
-                      {"code": "fit()", "role": "Estimation", "tip": "Actually runs the regression: computes coefficients, standard errors, R-squared, etc. Returns a RegressionResults object.", "color": "teal"}
+                      {"code": "model = smf.ols(", "role": "Setup", "tip": "smf.ols() creates an unestimated model object. Nothing is computed yet.", "color": "blue"},
+                      {"code": "'income ~ education'", "role": "Formula String", "tip": "~ separates Y (left) from X (right). Use + to add variables: 'y ~ x1 + x2'. Intercept is implicit.", "color": "green"},
+                      {"code": ", data=df)", "role": "Data Argument", "tip": "data= tells the formula where to find the variable names.", "color": "pink"},
+                      {"code": ".fit()", "role": "Method Chain", "tip": "Estimates the model. Returns a results object with .params, .pvalues, .summary(), etc.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "reg ", "role": "Command", "tip": "Short for 'regress'. Runs OLS regression. First variable is Y (dependent), rest are X (independent).", "color": "mauve"},
-                      {"code": "income ", "role": "Dependent Variable", "tip": "The Y variable -- what you're trying to explain or predict.", "color": "pink"},
-                      {"code": "education", "role": "Independent Variable", "tip": "The X variable -- the explanatory factor. Stata automatically includes a constant (intercept).", "color": "sky"}
+                      {"code": "reg ", "role": "Command", "tip": "Short for regress. Specifies and estimates in one command (no separate .fit() step).", "color": "mauve"},
+                      {"code": "income ", "role": "Dependent (Y)", "tip": "First variable after reg is always Y. This positional convention applies to all Stata estimation commands.", "color": "pink"},
+                      {"code": "education", "role": "Independent (X)", "tip": "Everything after Y is X. Intercept is always included unless you add the noconstant option.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "model", "role": "Variable Name", "tip": "Stores the fitted linear model.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
-                      {"code": "lm(", "role": "Function", "tip": "Linear model. R's built-in function for OLS regression. No packages needed.", "color": "blue"},
-                      {"code": "income ~ education", "role": "Formula", "tip": "R's formula syntax: income = b0 + b1*education + error. The ~ means 'is modeled by'. R automatically includes an intercept.", "color": "green"},
-                      {"code": ", data = ", "role": "Data Parameter", "tip": "Specifies the data frame containing the variables.", "color": "lavender"},
-                      {"code": "df)", "role": "Data Frame", "tip": "The dataset with income and education.", "color": "pink"}
+                      {"code": "model <- lm(", "role": "Function", "tip": "lm() is built-in (no package needed). Equivalent: glm() for generalized models, feols() for fixed effects.", "color": "blue"},
+                      {"code": "income ~ education", "role": "Formula Object", "tip": "R formulas are a language feature, not strings. ~ means 'modeled by'. Intercept is implicit; suppress with - 1.", "color": "green"},
+                      {"code": ", data = df)", "role": "Data Argument", "tip": "", "color": "pink"}
                     ]
                   }
                 }
@@ -2091,36 +2049,25 @@ Manual adj-R2: 0.1642346  summary adj-R2: 0.1642346
             {
               "exercises": [
                 {
-                  "instruction": "This extracts the Sum of Squared Residuals (SSR), Explained Sum of Squares (ESS), and R-squared from a regression model",
+                  "instruction": "Access post-estimation results via model.property in Python, e() in Stata, or extractor functions in R",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "The fitted OLS model object that stores all regression results.", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a stored result from the model.", "color": "overlay"},
-                      {"code": "ssr\n", "role": "Property", "tip": "Sum of Squared Residuals — the total unexplained variation. Lower is better.", "color": "lavender"},
-                      {"code": "model", "role": "Variable", "tip": "The same fitted model.", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses another stored result.", "color": "overlay"},
-                      {"code": "ess\n", "role": "Property", "tip": "Explained Sum of Squares — variation captured by the model.", "color": "lavender"},
-                      {"code": "model", "role": "Variable", "tip": "The same fitted model.", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses another stored result.", "color": "overlay"},
-                      {"code": "rsquared", "role": "Property", "tip": "R-squared = ESS/TSS = 1 - SSR/TSS. Fraction of variance explained.", "color": "lavender"}
+                      {"code": "model.ssr\n", "role": "Property Access", "tip": "Dot notation accesses stored attributes. No parentheses = property, not a method call.", "color": "lavender"},
+                      {"code": "model.ess\n", "role": "Property Access", "tip": "Common properties: .params (coefficients), .pvalues, .rsquared, .ssr, .ess, .bse (standard errors).", "color": "lavender"},
+                      {"code": "model.rsquared", "role": "Property Access", "tip": "Note: rsquared (no underscore). For adjusted: .rsquared_adj.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "display ", "role": "Command", "tip": "Prints a value to the output window.", "color": "mauve"},
-                      {"code": "e(rss)\n", "role": "Stored Result", "tip": "Residual Sum of Squares — retrieved from Stata's stored estimation results.", "color": "lavender"},
-                      {"code": "display ", "role": "Command", "tip": "Prints another value.", "color": "mauve"},
-                      {"code": "e(mss)\n", "role": "Stored Result", "tip": "Model Sum of Squares (ESS) — variation explained by the regression.", "color": "lavender"},
-                      {"code": "display ", "role": "Command", "tip": "Prints another value.", "color": "mauve"},
-                      {"code": "e(r2)", "role": "Stored Result", "tip": "R-squared — the fraction of total variance explained by the model.", "color": "lavender"}
+                      {"code": "display e(rss)\n", "role": "Stored Result", "tip": "e() holds estimation results. Use ereturn list to see all available e() values after any estimation command.", "color": "lavender"},
+                      {"code": "display e(mss)\n", "role": "Stored Result", "tip": "e() scalars: e(r2), e(r2_a), e(rss), e(mss), e(N), e(df_r). e(b) holds the coefficient vector.", "color": "lavender"},
+                      {"code": "display e(r2)", "role": "Stored Result", "tip": "display prints a single value. For matrices, use matrix list e(b).", "color": "lavender"}
                     ],
                     "r": [
-                      {"code": "SSR ", "role": "Variable", "tip": "Will store the Sum of Squared Residuals.", "color": "pink"},
-                      {"code": "<- ", "role": "Assignment", "tip": "Stores the computed value.", "color": "peach"},
-                      {"code": "sum(", "role": "Function", "tip": "Sums all elements of a vector.", "color": "blue"},
-                      {"code": "residuals(model)", "role": "Residuals", "tip": "Extracts the residual vector (prediction errors) from the fitted model.", "color": "blue"},
-                      {"code": "^2)", "role": "Square", "tip": "Squares each residual before summing.", "color": "peach"}
+                      {"code": "SSR <- sum(", "role": "Manual Calculation", "tip": "", "color": "pink"},
+                      {"code": "residuals(model)", "role": "Extractor Function", "tip": "R uses extractor functions: residuals(), fitted(), coef(), confint(), vcov(). Not dot notation.", "color": "blue"},
+                      {"code": "^2)", "role": "Vectorized Power", "tip": "^ is the exponentiation operator. Applied element-wise to the vector before sum().", "color": "peach"}
                     ]
                   },
-                  "structureNote": "The variance decomposition <strong>TSS = ESS + SSR</strong> is fundamental to understanding regression. TSS measures total variation in the outcome, ESS measures variation explained by the model, and SSR measures unexplained variation. R-squared = ESS/TSS tells you what fraction of variation your model explains. Always available from the model object — you rarely compute these manually, but understanding the decomposition helps you interpret results."
+                  "structureNote": "Three paradigms for accessing results: Python uses <strong>dot properties</strong> (<code>model.ssr</code>), Stata uses <strong>e() stored results</strong> (<code>e(rss)</code>), and R uses <strong>extractor functions</strong> (<code>residuals(model)</code>). Learn the listing command for each: <code>dir(model)</code>, <code>ereturn list</code>, <code>names(summary(model))</code>."
                 }
               ]
             }
@@ -2269,28 +2216,25 @@ Linear hypothesis test (with HC1 robust SEs):
             {
               "exercises": [
                 {
-                  "instruction": "This tests whether education and experience are jointly significant — whether they matter together for predicting income, even if one might not be significant alone",
+                  "instruction": "Joint F-test syntax: comma-separated restrictions in a string, post-estimation test, or c() vector",
                   "languages": {
                     "python": [
-                      {"code": "f_result ", "role": "Variable", "tip": "Stores the F-test result object containing the F-statistic and p-value.", "color": "pink"},
-                      {"code": "= ", "role": "Assignment", "tip": "Stores the test result.", "color": "peach"},
-                      {"code": "model", "role": "Fitted Model", "tip": "The OLS regression result from which you are testing restrictions.", "color": "pink"},
-                      {"code": ".", "role": "Dot", "tip": "Accesses a method on the fitted model.", "color": "overlay"},
-                      {"code": "f_test(", "role": "Method", "tip": "Performs a joint F-test on specified coefficient restrictions.", "color": "teal"},
-                      {"code": "'education = 0, experience = 0')", "role": "Hypotheses", "tip": "Tests H0: both coefficients are zero simultaneously. A comma separates multiple restrictions.", "color": "green"}
+                      {"code": "f_result = model.f_test(", "role": "Post-estimation Method", "tip": "Called on a fitted model object. Returns an F-test result with .fvalue and .pvalue attributes.", "color": "teal"},
+                      {"code": "'education = 0, experience = 0'", "role": "Restriction String", "tip": "Comma-separated restrictions in a single string. Can also test equalities: 'education = experience'.", "color": "green"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ],
                     "stata": [
-                      {"code": "test ", "role": "Command", "tip": "Stata's post-estimation command for joint hypothesis testing.", "color": "mauve"},
-                      {"code": "education ", "role": "Variable", "tip": "First coefficient to test. H0: education coefficient = 0.", "color": "pink"},
-                      {"code": "experience", "role": "Variable", "tip": "Second coefficient to test. H0: experience coefficient = 0. Together: both equal zero.", "color": "pink"}
+                      {"code": "test ", "role": "Post-estimation Command", "tip": "Must follow an estimation command (reg, logit, etc.). Tests restrictions on the most recent model.", "color": "mauve"},
+                      {"code": "education experience", "role": "Variable List", "tip": "Listing variables tests H0: all listed coefficients = 0. For equality: test education = experience.", "color": "pink"}
                     ],
                     "r": [
-                      {"code": "linearHypothesis(", "role": "Function", "tip": "From the car package. Tests linear restrictions on regression coefficients.", "color": "blue"},
-                      {"code": "model, ", "role": "Fitted Model", "tip": "The lm() regression result to test.", "color": "pink"},
-                      {"code": "c(\"education = 0\", \"experience = 0\"))", "role": "Hypotheses", "tip": "A character vector of restrictions. Each string specifies one linear restriction on the coefficients.", "color": "green"}
+                      {"code": "linearHypothesis(", "role": "Function", "tip": "From the car package. Accepts a model and a character vector of restrictions.", "color": "blue"},
+                      {"code": "model, ", "role": "Model Object", "tip": "", "color": "pink"},
+                      {"code": "c(\"education = 0\", \"experience = 0\")", "role": "Restriction Vector", "tip": "c() creates a character vector. Each element is one restriction. Can also pass a single string for one restriction.", "color": "green"},
+                      {"code": ")", "role": "", "tip": "", "color": "overlay"}
                     ]
                   },
-                  "structureNote": "F-tests check whether a <em>group</em> of variables matters jointly. This is different from individual t-tests, which test one coefficient at a time. Variables can be individually insignificant but jointly significant (e.g., correlated regressors), or you might want to test restrictions like 'does education have the same effect as experience?' Always use robust F-tests when you suspect heteroskedasticity."
+                  "structureNote": "Joint hypothesis syntax differs: Python uses a <strong>comma-separated string</strong>, Stata uses a <strong>space-separated variable list</strong> after the post-estimation <code>test</code> command, and R uses a <strong>character vector</strong> via <code>c()</code>. All test whether multiple coefficients are jointly zero."
                 }
               ]
             }
@@ -2502,30 +2446,24 @@ age          <span style="color: #68d391;">0.0123</span>     0.0412   0.299    0
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to run a multiple regression with control variables",
-                  "pattern": "model = ols('y ~ x1 + x2 + x3', data=df).fit()",
-                  "structureNote": "Multiple regression adds <strong>control variables</strong> to isolate the effect of your variable of interest. Each <code>+</code> adds another variable. The coefficient on education now measures its effect <em>holding age and experience constant</em>. This is the foundation of causal inference in economics.",
+                  "instruction": "Formula + operator for multiple regressors, Stata's robust option, and common regression specifications",
+                  "pattern": "'y ~ x1 + x2 + x3'   or   reg y x1 x2 x3, robust",
+                  "structureNote": "The <code>+</code> in formulas adds variables (it does not mean arithmetic addition). Stata's <code>, robust</code> option uses heteroskedasticity-consistent standard errors. Special formula operators: <code>*</code> for interaction + main effects, <code>:</code> for interaction only, <code>I()</code> to protect arithmetic.",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "Stores the regression results with multiple predictors.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the fitted model.", "color": "peach"},
-                      {"code": "smf.ols(", "role": "Function", "tip": "statsmodels OLS.", "color": "blue"},
-                      {"code": "'income ~ education + age + experience'", "role": "Formula", "tip": "income = b0 + b1*education + b2*age + b3*experience + error. Each + adds a control variable. Coefficients are partial effects.", "color": "green"},
-                      {"code": ", data=df).fit()", "role": "Data + Fit", "tip": "Specifies the data and runs the estimation in one chain.", "color": "pink"}
+                      {"code": "smf.ols(", "role": "Function", "tip": "", "color": "blue"},
+                      {"code": "'income ~ education + age + experience'", "role": "Multi-variable Formula", "tip": "+ adds regressors. Special operators: * (interaction + mains), : (interaction only), I(x**2) (protect arithmetic).", "color": "green"},
+                      {"code": ", data=df).fit()", "role": "Chain", "tip": "", "color": "pink"}
                     ],
                     "stata": [
-                      {"code": "reg ", "role": "Command", "tip": "OLS regression.", "color": "mauve"},
-                      {"code": "income ", "role": "Dependent (Y)", "tip": "What you're explaining.", "color": "pink"},
-                      {"code": "education age experience", "role": "Independent (X's)", "tip": "Space-separated list of explanatory variables. Stata includes an intercept automatically.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "robust", "role": "Option", "tip": "Uses Huber-White robust standard errors. Essential when error variance differs across observations (heteroskedasticity).", "color": "yellow"}
+                      {"code": "reg income ", "role": "Command + Y", "tip": "", "color": "mauve"},
+                      {"code": "education age experience", "role": "X Variables", "tip": "Space-separated. Order does not matter for estimation, only for positional Y identification.", "color": "sky"},
+                      {"code": ", robust", "role": "Robust SEs", "tip": "Huber-White standard errors. Alternative: cluster(varname) for clustered SEs. Always placed after the comma.", "color": "yellow"}
                     ],
                     "r": [
-                      {"code": "model", "role": "Variable", "tip": "Stores the model.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
-                      {"code": "lm(", "role": "Function", "tip": "Linear model.", "color": "blue"},
-                      {"code": "income ~ education + age + experience", "role": "Formula", "tip": "Each + adds a control. R estimates all coefficients simultaneously.", "color": "green"},
-                      {"code": ", data = df)", "role": "Data", "tip": "The data frame.", "color": "pink"}
+                      {"code": "lm(", "role": "Function", "tip": "", "color": "blue"},
+                      {"code": "income ~ education + age + experience", "role": "Formula", "tip": "R formulas are objects, not strings. Use . to include all other columns: y ~ . means 'y on everything else'.", "color": "green"},
+                      {"code": ", data = df)", "role": "Data", "tip": "", "color": "pink"}
                     ]
                   }
                 }
@@ -2732,31 +2670,26 @@ Standard errors in parentheses
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to export regression results to a publication-quality LaTeX table",
-                  "pattern": "stargazer/esttab/modelsummary(models, output=file)",
-                  "structureNote": "Summary tables are <strong>essential for academic papers</strong>. Each language has a specialized tool: Python's <code>Stargazer</code>, Stata's <code>esttab</code> (from estout), and R's <code>modelsummary</code>. They all produce formatted tables with coefficients, standard errors, significance stars, and fit statistics.",
+                  "instruction": "Export regression tables: Stargazer list syntax, eststo:/esttab workflow, modelsummary output options",
+                  "pattern": "Stargazer([models]).render_latex()  |  eststo: reg ... ; esttab using  |  modelsummary(list(), output=)",
+                  "structureNote": "Each language has a <strong>store-then-export</strong> pattern. Python passes a list of models to Stargazer. Stata uses <code>eststo:</code> as a prefix to store, then <code>esttab</code> to export. R passes a <code>list()</code> to modelsummary. The output format is set by the file extension or a render method.",
                   "languages": {
                     "python": [
-                      {"code": "from", "role": "Keyword", "tip": "Imports a specific class from a package.", "color": "mauve"},
-                      {"code": " stargazer.stargazer ", "role": "Module Path", "tip": "The module containing the Stargazer class. Install with: pip install stargazer.", "color": "yellow"},
-                      {"code": "import", "role": "Keyword", "tip": "Brings the specific class into scope.", "color": "mauve"},
-                      {"code": " Stargazer\n", "role": "Class Name", "tip": "Creates publication-ready regression tables in LaTeX, HTML, or text format.", "color": "blue"},
-                      {"code": "Stargazer([model])", "role": "Create Table", "tip": "Pass a list of fitted models. Multiple models appear side-by-side for comparison.", "color": "teal"},
-                      {"code": ".render_latex()", "role": "Output", "tip": "Generates LaTeX code. Also available: .render_html() and .render_text().", "color": "teal"}
+                      {"code": "from stargazer.stargazer import Stargazer\n", "role": "Import", "tip": "Dotted module path: package.submodule. The class name matches the module name here.", "color": "mauve"},
+                      {"code": "Stargazer([model])", "role": "Constructor", "tip": "Takes a list of fitted models. Multiple models appear as side-by-side columns.", "color": "teal"},
+                      {"code": ".render_latex()", "role": "Output Method", "tip": "Also: .render_html(), .render_text(). Method name controls format.", "color": "teal"}
                     ],
                     "stata": [
-                      {"code": "eststo clear\n", "role": "Clear Stored", "tip": "Clears any previously stored estimation results.", "color": "mauve"},
-                      {"code": "eststo:", "role": "Store Prefix", "tip": "Stores the following regression results for later table creation.", "color": "mauve"},
-                      {"code": " reg income education\n", "role": "Regression", "tip": "Runs OLS and stores results. Run multiple regressions with eststo: before each.", "color": "sky"},
-                      {"code": "esttab", "role": "Command", "tip": "From the estout package. Exports stored results as a formatted table.", "color": "mauve"},
-                      {"code": " using \"table.tex\"", "role": "Output File", "tip": "Saves the table as a LaTeX file for inclusion in papers.", "color": "green"},
-                      {"code": ", replace se", "role": "Options", "tip": "replace overwrites existing file. se shows standard errors below coefficients.", "color": "yellow"}
+                      {"code": "eststo clear\n", "role": "Clear Buffer", "tip": "Clears previously stored models. Always do this before a new table.", "color": "mauve"},
+                      {"code": "eststo: ", "role": "Prefix Command", "tip": "Prefix syntax: eststo: runs the command after it AND stores the result. Run once per model.", "color": "mauve"},
+                      {"code": "reg income education\n", "role": "Estimation", "tip": "", "color": "sky"},
+                      {"code": "esttab using \"table.tex\", replace se", "role": "Export", "tip": "using sets the file. Options: se (standard errors), star() (significance stars), keep() (filter variables).", "color": "green"}
                     ],
                     "r": [
-                      {"code": "modelsummary(", "role": "Function", "tip": "From the modelsummary package. Creates publication-quality tables from regression models.", "color": "blue"},
-                      {"code": "list(model1, model2)", "role": "Model List", "tip": "A list of fitted models. Each appears as a column in the table.", "color": "pink"},
-                      {"code": ", stars = TRUE", "role": "Stars Option", "tip": "Adds significance stars: * p<0.1, ** p<0.05, *** p<0.01.", "color": "lavender"},
-                      {"code": ", output = \"table.tex\")", "role": "Output File", "tip": "Saves as LaTeX. Also supports .html, .docx, .png, and more.", "color": "green"}
+                      {"code": "modelsummary(", "role": "Function", "tip": "From the modelsummary package. Highly flexible output.", "color": "blue"},
+                      {"code": "list(model1, model2)", "role": "Model List", "tip": "list() wraps multiple models. Named lists (list(\"(1)\"=m1)) set column headers.", "color": "pink"},
+                      {"code": ", stars = TRUE", "role": "Option", "tip": "Adds significance stars. Customize with stars = c('*'=.1, '**'=.05, '***'=.01).", "color": "lavender"},
+                      {"code": ", output = \"table.tex\")", "role": "Output File", "tip": "Extension determines format: .tex, .html, .docx, .png, .md.", "color": "green"}
                     ]
                   }
                 }

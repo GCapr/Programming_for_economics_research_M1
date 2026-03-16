@@ -414,38 +414,137 @@ Total trainable parameters: 12,161</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you define a feedforward neural network architecture using Sequential with two hidden layers",
+                  "instruction": "Stack layers in <code>nn.Sequential</code> -- data flows through each in order",
                   "pattern": "model = nn.Sequential(nn.Linear(in, out), nn.ReLU(), ..., nn.Linear(out, 1))",
-                  "structureNote": "<code>nn.Sequential</code> stacks layers in order: data flows through each layer top-to-bottom. Each <code>nn.Linear</code> layer does a matrix multiplication (Wx + b), and each <code>nn.ReLU</code> adds nonlinearity by zeroing out negative values. The first Linear must match the number of input features; the last Linear must match the number of outputs (1 for regression).",
+                  "structureNote": "Pattern: <code>nn.Sequential(layer1, layer2, ...)</code>. Layers are positional arguments, executed top-to-bottom.",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "Stores the neural network model -- later call model(X) for forward pass and model.parameters() for optimization", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Binds the model to the variable name", "color": "peach"},
-                      {"code": "nn", "role": "Module", "tip": "The torch.nn module, imported as nn -- contains all neural network building blocks", "color": "yellow"},
-                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the Sequential class from the nn module", "color": "overlay"},
-                      {"code": "Sequential", "role": "Container", "tip": "A container that stacks layers in order -- data flows through each layer sequentially from first to last", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the list of layers to stack", "color": "overlay"},
-                      {"code": "nn.Linear(8, 128), ", "role": "Hidden layer 1", "tip": "A fully connected layer: 8 input features mapped to 128 neurons. Computes output = W*x + b with a 128x8 weight matrix", "color": "blue"},
-                      {"code": "nn.ReLU(), ", "role": "Activation", "tip": "Rectified Linear Unit: replaces negative values with zero. Adds nonlinearity so the network can learn non-linear patterns", "color": "blue"},
-                      {"code": "nn.Linear(128, 64), ", "role": "Hidden layer 2", "tip": "128 inputs (from previous layer) mapped to 64 neurons -- the network narrows, compressing information", "color": "blue"},
-                      {"code": "nn.ReLU(), ", "role": "Activation", "tip": "Another ReLU activation after the second hidden layer", "color": "blue"},
-                      {"code": "nn.Linear(64, 1)", "role": "Output layer", "tip": "64 inputs mapped to 1 output -- for regression, no activation function is applied to the output layer", "color": "blue"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the Sequential definition -- the model architecture is now complete", "color": "overlay"}
+                      {
+                        "code": "model",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "nn",
+                        "role": "Module",
+                        "tip": "<code>import torch.nn as nn</code>.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": ".",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "Sequential",
+                        "role": "Container",
+                        "tip": "Ordered container. Data flows through layers sequentially.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "nn.Linear(3, 64),",
+                        "role": "Layer",
+                        "tip": "<code>Linear(in, out)</code> -- positional args: input size, output size.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "nn.ReLU(),",
+                        "role": "Activation",
+                        "tip": "No-arg constructor. Applied element-wise after the linear layer.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "nn.Linear(64, 1)",
+                        "role": "Layer",
+                        "tip": "Final layer. Output size = 1 for regression.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ")",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ],
                     "r": [
-                      {"code": "model", "role": "Variable", "tip": "Stores the neural network model", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow", "color": "peach"},
-                      {"code": "nn_sequential", "role": "Container", "tip": "R's torch equivalent of nn.Sequential -- stacks layers in order", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the layer list", "color": "overlay"},
-                      {"code": "nn_linear(13, 128), ", "role": "Hidden layer 1", "tip": "13 inputs to 128 neurons -- R's torch uses underscores instead of dots (nn_linear vs nn.Linear)", "color": "blue"},
-                      {"code": "nn_relu(), ", "role": "Activation", "tip": "ReLU activation function", "color": "blue"},
-                      {"code": "nn_linear(128, 64), ", "role": "Hidden layer 2", "tip": "128 inputs to 64 neurons", "color": "blue"},
-                      {"code": "nn_relu(), ", "role": "Activation", "tip": "Another ReLU activation", "color": "blue"},
-                      {"code": "nn_linear(64, 1)", "role": "Output layer", "tip": "64 inputs to 1 output for regression", "color": "blue"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the nn_sequential definition", "color": "overlay"}
+                      {
+                        "code": "model",
+                        "role": "Variable",
+                        "tip": "Stores the neural network model",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- ",
+                        "role": "Assignment",
+                        "tip": "R's assignment arrow",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "nn_sequential",
+                        "role": "Container",
+                        "tip": "R's torch equivalent of nn.Sequential -- stacks layers in order",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "Open paren",
+                        "tip": "Begins the layer list",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "nn_linear(13, 128), ",
+                        "role": "Hidden layer 1",
+                        "tip": "13 inputs to 128 neurons -- R's torch uses underscores instead of dots (nn_linear vs nn.Linear)",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "nn_relu(), ",
+                        "role": "Activation",
+                        "tip": "ReLU activation function",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "nn_linear(128, 64), ",
+                        "role": "Hidden layer 2",
+                        "tip": "128 inputs to 64 neurons",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "nn_relu(), ",
+                        "role": "Activation",
+                        "tip": "Another ReLU activation",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "nn_linear(64, 1)",
+                        "role": "Output layer",
+                        "tip": "64 inputs to 1 output for regression",
+                        "color": "blue"
+                      },
+                      {
+                        "code": ")",
+                        "role": "Close paren",
+                        "tip": "Ends the nn_sequential definition",
+                        "color": "overlay"
+                      }
                     ]
                   }
                 }
@@ -472,20 +571,51 @@ Total trainable parameters: 12,161</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you set up the loss function for training a neural network",
+                  "instruction": "Instantiate a loss function and an optimizer as separate objects",
                   "pattern": "criterion = nn.MSELoss(); optimizer = torch.optim.Adam(model.parameters(), lr=N)",
-                  "structureNote": "Training a neural network requires two components: (1) a <strong>loss function</strong> that measures how wrong the predictions are, and (2) an <strong>optimizer</strong> that adjusts the weights to reduce the loss. <code>MSELoss</code> is the standard loss for regression. <code>Adam</code> is the most widely used optimizer because it adapts the learning rate for each parameter automatically.",
+                  "structureNote": "Pattern: <code>criterion = nn.LossFunction()</code> and <code>optimizer = torch.optim.Algo(model.parameters(), lr=val)</code>.",
                   "languages": {
                     "python": [
-                      {"code": "criterion", "role": "Variable", "tip": "Stores the loss function -- you will call criterion(predictions, targets) during training", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Binds the loss function to the variable", "color": "peach"},
-                      {"code": "nn", "role": "Module", "tip": "torch.nn module", "color": "yellow"},
-                      {"code": ".", "role": "Dot accessor", "tip": "Accesses MSELoss from nn", "color": "overlay"},
-                      {"code": "MSELoss", "role": "Loss function", "tip": "Mean Squared Error loss: computes the average of (prediction - target)^2 -- the standard loss for regression tasks", "color": "blue"},
-                      {"code": "()", "role": "Call parens", "tip": "Creates an instance of the loss function with default parameters", "color": "overlay"}
+                      {
+                        "code": "criterion",
+                        "role": "Variable",
+                        "tip": "Convention: loss function stored in 'criterion'.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "nn",
+                        "role": "Module",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": ".",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "MSELoss",
+                        "role": "Class",
+                        "tip": "No-arg constructor. Other losses: CrossEntropyLoss, L1Loss.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "()",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ]
                   }
                 }
@@ -498,25 +628,69 @@ Total trainable parameters: 12,161</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you create the Adam optimizer that updates the network weights during training",
+                  "instruction": "Pass <code>model.parameters()</code> to the optimizer so it knows which weights to update",
                   "pattern": "optimizer = torch.optim.Adam(model.parameters(), lr=N)",
-                  "structureNote": "The optimizer is responsible for adjusting the network's weights after each backward pass. <code>model.parameters()</code> tells the optimizer which tensors to update. The <code>lr</code> (learning rate) controls the step size: too large and training overshoots, too small and it converges slowly. Adam adapts the learning rate per-parameter, making it more robust than basic SGD.",
+                  "structureNote": "Pattern: <code>optimizer = torch.optim.Adam(model.parameters(), lr=val)</code>. The optimizer needs a reference to the model's learnable weights.",
                   "languages": {
                     "python": [
-                      {"code": "optimizer", "role": "Variable", "tip": "Stores the optimizer -- call optimizer.zero_grad(), then loss.backward(), then optimizer.step() each iteration", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Binds the optimizer to the variable", "color": "peach"},
-                      {"code": "torch.optim", "role": "Module", "tip": "PyTorch's optimization module containing all optimizer algorithms (SGD, Adam, RMSprop, etc.)", "color": "yellow"},
-                      {"code": ".", "role": "Dot accessor", "tip": "Accesses the Adam class", "color": "overlay"},
-                      {"code": "Adam", "role": "Optimizer", "tip": "Adaptive Moment Estimation -- the most popular optimizer, adapts learning rates per-parameter using gradient history", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the argument list", "color": "overlay"},
-                      {"code": "model.parameters(), ", "role": "Argument", "tip": "Returns an iterator over all trainable weights and biases in the model -- tells the optimizer what to update", "color": "blue"},
-                      {"code": "lr", "role": "Keyword arg", "tip": "Learning rate -- the base step size for weight updates", "color": "sky"},
-                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "0.001", "role": "Float", "tip": "0.001 is Adam's default and a good starting point -- typical range is 0.01 to 0.0001", "color": "green"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the optimizer construction", "color": "overlay"}
+                      {
+                        "code": "optimizer",
+                        "role": "Variable",
+                        "tip": "Convention: optimizer stored in 'optimizer'.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "torch.optim",
+                        "role": "Module Path",
+                        "tip": "Dot-chained module path.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": ".",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "Adam",
+                        "role": "Class",
+                        "tip": "Other optimizers: SGD, AdamW, RMSprop.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "model.parameters(),",
+                        "role": "Positional Arg",
+                        "tip": "Generator yielding all learnable weights. Required first arg for any optimizer.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "lr=0.001",
+                        "role": "Keyword Arg",
+                        "tip": "Learning rate. Float controlling step size.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ")",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ]
                   }
                 }
@@ -774,21 +948,51 @@ Epoch 100 | Train:  4.8901 | Test:  9.7654</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you add Dropout layers to a neural network for regularization",
+                  "instruction": "Insert <code>nn.Dropout(p)</code> between layers in a Sequential stack",
                   "pattern": "nn.Sequential(..., nn.ReLU(), nn.Dropout(p), nn.Linear(...))",
-                  "structureNote": "Dropout randomly sets a fraction <code>p</code> of neuron outputs to zero during training. This forces the network to not rely on any single neuron, effectively training an ensemble of subnetworks. At test time, dropout is turned off and outputs are scaled accordingly. Dropout goes <strong>after</strong> the activation function (ReLU) and <strong>before</strong> the next Linear layer.",
+                  "structureNote": "Pattern: <code>nn.Sequential(..., nn.Dropout(p), ...)</code>. Place after activation, before next linear layer. <code>p</code> is the drop probability.",
                   "languages": {
                     "python": [
-                      {"code": "nn.Linear(3, 64), ", "role": "Hidden layer", "tip": "First hidden layer: 3 input features mapped to 64 neurons", "color": "blue"},
-                      {"code": "nn.ReLU(), ", "role": "Activation", "tip": "ReLU activation applied to the 64 outputs", "color": "blue"},
-                      {"code": "nn.Dropout", "role": "Regularization", "tip": "Dropout layer -- randomly zeros out neuron outputs during training to prevent overfitting", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the dropout probability argument", "color": "overlay"},
-                      {"code": "0.3", "role": "Drop probability", "tip": "30% of neurons are randomly turned off each training step -- typical values are 0.1 to 0.5", "color": "green"},
-                      {"code": "), ", "role": "Close paren", "tip": "Ends the Dropout layer definition", "color": "overlay"},
-                      {"code": "nn.Linear(64, 32)", "role": "Next layer", "tip": "The next hidden layer -- receives the dropout-masked outputs from the 64-neuron layer", "color": "blue"}
+                      {
+                        "code": "nn.Linear(3, 64),",
+                        "role": "Layer",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "nn.ReLU(),",
+                        "role": "Activation",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "nn.Dropout",
+                        "role": "Layer",
+                        "tip": "Regularization layer. Placed after activation.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "0.3",
+                        "role": "Positional Arg",
+                        "tip": "Drop probability. Float between 0 and 1.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "),",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ]
                   }
                 }
@@ -1054,26 +1258,75 @@ Early stopping at epoch 112</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you create a DataLoader that feeds training data to the network in shuffled mini-batches",
+                  "instruction": "Wrap a dataset in a <code>DataLoader</code> for batched iteration",
                   "pattern": "loader = DataLoader(dataset, batch_size=N, shuffle=True)",
-                  "structureNote": "Instead of feeding all training data at once (which requires too much memory) or one observation at a time (which produces noisy gradients), <strong>mini-batch training</strong> splits data into small batches. The <code>DataLoader</code> handles this automatically: it shuffles the data each epoch and yields batches of size <code>batch_size</code>. Shuffling ensures the model does not learn from the order of observations.",
+                  "structureNote": "Pattern: <code>DataLoader(dataset, batch_size=N, shuffle=True)</code>. Iterate with <code>for X_batch, y_batch in loader:</code>.",
                   "languages": {
                     "python": [
-                      {"code": "train_loader", "role": "Variable", "tip": "An iterable that yields (X_batch, y_batch) tuples -- use in a for loop during training", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the DataLoader object", "color": "peach"},
-                      {"code": "DataLoader", "role": "Class", "tip": "From torch.utils.data -- wraps a dataset and provides batching, shuffling, and parallel data loading", "color": "blue"},
-                      {"code": "(", "role": "Open paren", "tip": "Begins the arguments", "color": "overlay"},
-                      {"code": "train_ds, ", "role": "Dataset", "tip": "A TensorDataset containing the training features and targets, created with TensorDataset(X_tensor, y_tensor)", "color": "pink"},
-                      {"code": "batch_size", "role": "Keyword arg", "tip": "Number of observations per mini-batch", "color": "sky"},
-                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "64, ", "role": "Integer", "tip": "64 observations per batch -- a common default. Larger batches are faster per epoch but may generalize worse", "color": "green"},
-                      {"code": "shuffle", "role": "Keyword arg", "tip": "Whether to shuffle the data at the start of each epoch", "color": "sky"},
-                      {"code": "=", "role": "Binding", "tip": "Connects parameter to value", "color": "peach"},
-                      {"code": "True", "role": "Boolean", "tip": "Shuffle data each epoch so the model does not memorize the order of observations", "color": "mauve"},
-                      {"code": ")", "role": "Close paren", "tip": "Ends the DataLoader construction", "color": "overlay"}
+                      {
+                        "code": "train_loader",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = ",
+                        "role": "Assignment",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "DataLoader",
+                        "role": "Class",
+                        "tip": "From <code>torch.utils.data</code>.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "(",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "train_ds,",
+                        "role": "Positional Arg",
+                        "tip": "A TensorDataset or any Dataset subclass.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "batch_size",
+                        "role": "Keyword Arg",
+                        "tip": "Number of samples per mini-batch.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "=",
+                        "role": "",
+                        "tip": "",
+                        "color": "peach"
+                      },
+                      {
+                        "code": "32,",
+                        "role": "Value",
+                        "tip": "",
+                        "color": "sky"
+                      },
+                      {
+                        "code": "shuffle=True",
+                        "role": "Keyword Arg",
+                        "tip": "Randomize order each epoch. Usually True for training, False for testing.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ")",
+                        "role": "",
+                        "tip": "",
+                        "color": "overlay"
+                      }
                     ]
                   }
                 }
@@ -1354,39 +1607,127 @@ MAE:       2.1234</pre></div>
         <div class="grammar-teach-section">
           <div class="grammar-primer" data-mode="teach">
             <script type="application/json">
+            
             {
               "exercises": [
                 {
-                  "instruction": "This is how you build a complete neural network pipeline in PyTorch: define architecture, train with early stopping, and evaluate",
+                  "instruction": "Chain Linear, BatchNorm, ReLU, and Dropout in a repeated layer pattern",
                   "pattern": "model = nn.Sequential(layers...); optimizer = Adam(model.parameters()); train loop with validation",
-                  "structureNote": "A full neural network pipeline has four stages: (1) <strong>data preparation</strong> (split, scale, tensorize), (2) <strong>architecture</strong> (layers, activations, regularization), (3) <strong>training loop</strong> (forward pass, loss, backprop, early stopping), (4) <strong>evaluation</strong> on held-out test set. Always use a <strong>validation set</strong> for early stopping to prevent overfitting.",
+                  "structureNote": "Common pattern per block: <code>Linear -> BatchNorm -> ReLU -> Dropout</code>. Repeat for each hidden layer, then a final <code>Linear</code> output.",
                   "languages": {
                     "python": [
-                      {"code": "model", "role": "Variable", "tip": "Stores the neural network model.", "color": "pink"},
-                      {"code": " = nn.Sequential(", "role": "Architecture", "tip": "Chains layers sequentially. Each input passes through all layers in order.", "color": "blue"},
-                      {"code": "\n  nn.Linear(8, 256)", "role": "Dense Layer", "tip": "Fully connected layer: 8 inputs -> 256 neurons. Learnable weight matrix.", "color": "sky"},
-                      {"code": ", nn.BatchNorm1d(256)", "role": "Batch Norm", "tip": "Normalizes activations within each mini-batch. Stabilizes training.", "color": "lavender"},
-                      {"code": ", nn.ReLU()", "role": "Activation", "tip": "ReLU(x) = max(0, x). Introduces nonlinearity between layers.", "color": "yellow"},
-                      {"code": ", nn.Dropout(0.3)", "role": "Regularization", "tip": "Randomly zeroes 30% of neurons during training. Prevents overfitting.", "color": "red"},
-                      {"code": "\n)", "role": "Close", "tip": "Final layer outputs 1 neuron (regression) or K neurons (classification).", "color": "overlay"},
-                      {"code": "\nopt = torch.optim.Adam(model.parameters(), lr=0.001)", "role": "Optimizer", "tip": "Adam: adaptive learning rate optimizer. lr=0.001 is a good default.", "color": "teal"},
-                      {"code": "\ncrit = nn.MSELoss()", "role": "Loss Function", "tip": "Mean Squared Error for regression. Use CrossEntropyLoss for classification.", "color": "blue"}
+                      {
+                        "code": "model",
+                        "role": "Variable",
+                        "tip": "",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " = nn.Sequential(",
+                        "role": "Container",
+                        "tip": "",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "nn.Linear(8, 256)",
+                        "role": "Layer",
+                        "tip": "<code>(in_features, out_features)</code> positional args.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ", nn.BatchNorm1d(256)",
+                        "role": "Layer",
+                        "tip": "Argument = number of features from preceding Linear layer.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ", nn.ReLU()",
+                        "role": "Activation",
+                        "tip": "No arguments.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ", nn.Dropout(0.3)",
+                        "role": "Regularization",
+                        "tip": "Drop probability as positional arg.",
+                        "color": "sky"
+                      }
                     ],
                     "stata": [
-                      {"code": "python:", "role": "Python Block", "tip": "Stata uses embedded Python for PyTorch neural networks.", "color": "mauve"},
-                      {"code": "\nimport torch", "role": "Import", "tip": "PyTorch must be installed in Stata's Python environment.", "color": "yellow"},
-                      {"code": "\nmodel = nn.Sequential(...)", "role": "Architecture", "tip": "Same PyTorch syntax as standalone Python.", "color": "blue"},
-                      {"code": "\n# Training loop with early stopping", "role": "Training", "tip": "Monitor validation loss; save best model; stop when loss stops improving.", "color": "overlay"}
+                      {
+                        "code": "python:",
+                        "role": "Python Block",
+                        "tip": "Stata uses embedded Python for PyTorch neural networks.",
+                        "color": "mauve"
+                      },
+                      {
+                        "code": "\nimport torch",
+                        "role": "Import",
+                        "tip": "PyTorch must be installed in Stata's Python environment.",
+                        "color": "yellow"
+                      },
+                      {
+                        "code": "\nmodel = nn.Sequential(...)",
+                        "role": "Architecture",
+                        "tip": "Same PyTorch syntax as standalone Python.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\n# Training loop with early stopping",
+                        "role": "Training",
+                        "tip": "Monitor validation loss; save best model; stop when loss stops improving.",
+                        "color": "overlay"
+                      }
                     ],
                     "r": [
-                      {"code": "net", "role": "Variable", "tip": "Stores the neural network model.", "color": "pink"},
-                      {"code": " <- nn_sequential(", "role": "Architecture", "tip": "R torch's sequential container. Same concept as PyTorch.", "color": "blue"},
-                      {"code": "\n  nn_linear(13, 256)", "role": "Dense Layer", "tip": "Fully connected layer: 13 inputs -> 256 neurons.", "color": "sky"},
-                      {"code": ", nn_batch_norm1d(256)", "role": "Batch Norm", "tip": "Batch normalization layer.", "color": "lavender"},
-                      {"code": ", nn_relu()", "role": "Activation", "tip": "ReLU activation function.", "color": "yellow"},
-                      {"code": ", nn_dropout(0.3)", "role": "Dropout", "tip": "Drops 30% of neurons during training for regularization.", "color": "red"},
-                      {"code": "\n)", "role": "Close", "tip": "Final layer: nn_linear(64, 1) for regression output.", "color": "overlay"},
-                      {"code": "\nopt <- optim_adam(net$parameters, lr = 0.001)", "role": "Optimizer", "tip": "Adam optimizer with learning rate 0.001.", "color": "teal"}
+                      {
+                        "code": "net",
+                        "role": "Variable",
+                        "tip": "Stores the neural network model.",
+                        "color": "pink"
+                      },
+                      {
+                        "code": " <- nn_sequential(",
+                        "role": "Architecture",
+                        "tip": "R torch's sequential container. Same concept as PyTorch.",
+                        "color": "blue"
+                      },
+                      {
+                        "code": "\n  nn_linear(13, 256)",
+                        "role": "Dense Layer",
+                        "tip": "Fully connected layer: 13 inputs -> 256 neurons.",
+                        "color": "sky"
+                      },
+                      {
+                        "code": ", nn_batch_norm1d(256)",
+                        "role": "Batch Norm",
+                        "tip": "Batch normalization layer.",
+                        "color": "lavender"
+                      },
+                      {
+                        "code": ", nn_relu()",
+                        "role": "Activation",
+                        "tip": "ReLU activation function.",
+                        "color": "yellow"
+                      },
+                      {
+                        "code": ", nn_dropout(0.3)",
+                        "role": "Dropout",
+                        "tip": "Drops 30% of neurons during training for regularization.",
+                        "color": "red"
+                      },
+                      {
+                        "code": "\n)",
+                        "role": "Close",
+                        "tip": "Final layer: nn_linear(64, 1) for regression output.",
+                        "color": "overlay"
+                      },
+                      {
+                        "code": "\nopt <- optim_adam(net$parameters, lr = 0.001)",
+                        "role": "Optimizer",
+                        "tip": "Adam optimizer with learning rate 0.001.",
+                        "color": "teal"
+                      }
                     ]
                   }
                 }

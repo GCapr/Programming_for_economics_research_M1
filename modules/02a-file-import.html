@@ -464,29 +464,24 @@ Loaded <span class="out-num">14,112</span> rows, <span class="out-num">4</span> 
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to load a CSV file into a DataFrame using pandas",
+                  "instruction": "The alias.function(path) pattern for loading files",
                   "pattern": "variable = alias.function(filepath)",
-                  "structureNote": "This is the <strong>library.function(argument)</strong> pattern -- the most common way to call functions in Python. You tell pandas (<code>pd</code>) to run its <code>read_csv</code> function on a file, and store the resulting table in a variable. The same pattern applies to read_excel, read_stata, etc.",
+                  "structureNote": "General pattern: <code>var = alias.function(\"filepath\")</code>. In Python, the alias prefix (pd.) tells Python which library owns the function. Stata uses multi-word commands and requires <code>clear</code> because it holds only one dataset. R's <code>&lt;-</code> replaces Python's <code>=</code>.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "Variable Name", "tip": "Short for DataFrame -- a variable name for your data table. Convention but not required; you could use 'gdp_data' or any name.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the loaded data into the variable. The file stays on disk unchanged -- you're working with a copy in memory.", "color": "peach"},
-                      {"code": "pd", "role": "Library Alias", "tip": "Short for pandas, set up with 'import pandas as pd'. This prefix tells Python which library the function belongs to.", "color": "yellow"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses a function that belongs to the pandas library. Read as 'pandas's read_csv'.", "color": "overlay"},
-                      {"code": "read_csv(", "role": "Function Name", "tip": "Reads a CSV file and returns a DataFrame. Automatically detects column names from the first row and guesses data types.", "color": "blue"},
-                      {"code": "\"data/gdp.csv\")", "role": "File Path", "tip": "The location of the CSV file. Can be a local path or a URL. Strings must be in quotes.", "color": "green"}
+                      {"code": "df = ", "role": "Assignment", "tip": "", "color": "pink"},
+                      {"code": "pd.", "role": "Alias + dot", "tip": "The alias prefix (from 'import pandas as pd') is required -- Python has no global read_csv().", "color": "sky"},
+                      {"code": "read_csv(", "role": "Function", "tip": "Naming convention: read_ functions return DataFrames. Similar: read_excel(), read_stata(), read_json().", "color": "blue"},
+                      {"code": "\"data/gdp.csv\")", "role": "File path", "tip": "Paths can be relative (from working directory) or absolute. Can also be a URL string.", "color": "green"}
                     ],
                     "stata": [
-                      {"code": "import delimited ", "role": "Command", "tip": "Stata's command for loading CSV files. Two words that act as one command.", "color": "mauve"},
-                      {"code": "\"data/gdp.csv\"", "role": "File Path", "tip": "The file to load. In Stata, this is a positional argument -- no parameter name needed.", "color": "green"},
-                      {"code": ", ", "role": "Comma", "tip": "In Stata, commas separate the main arguments from options.", "color": "text"},
-                      {"code": "clear", "role": "Option", "tip": "Removes any existing data from memory before loading. Stata can only hold one dataset at a time.", "color": "yellow"}
+                      {"code": "import delimited ", "role": "Two-word command", "tip": "Stata uses multi-word commands: 'import delimited' for CSV, 'import excel' for Excel.", "color": "mauve"},
+                      {"code": "\"data/gdp.csv\"", "role": "File path", "tip": "Stata requires double quotes for file paths (single quotes are not valid).", "color": "green"},
+                      {"code": ", clear", "role": "Option", "tip": "The clear option is needed because Stata holds only one dataset in memory at a time.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Variable Name", "tip": "Name for your data frame (tibble in tidyverse).", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment operator. Points from the value to the variable name.", "color": "peach"},
-                      {"code": "read_csv(", "role": "Function Name", "tip": "From the readr package (part of tidyverse). Reads CSV files into a tibble. Faster and smarter than base R's read.csv().", "color": "blue"},
-                      {"code": "\"data/gdp.csv\")", "role": "File Path", "tip": "The file to read. Can be a local path or URL.", "color": "green"}
+                      {"code": "df <- ", "role": "Assignment", "tip": "", "color": "pink"},
+                      {"code": "read_csv(\"data/gdp.csv\")", "role": "Function call", "tip": "No library prefix needed after library(readr) -- R functions become globally available. Note: read_csv (readr) vs read.csv (base R).", "color": "blue"}
                     ]
                   }
                 }
@@ -502,24 +497,19 @@ Loaded <span class="out-num">14,112</span> rows, <span class="out-num">4</span> 
             {
               "exercises": [
                 {
-                  "instruction": "This is the pattern for previewing the first few rows of your loaded dataset",
+                  "instruction": "Method call vs function call: object.method() vs function(object)",
                   "pattern": "dataframe.method()",
-                  "structureNote": "After loading data, <strong>always inspect it</strong>. The <code>head()</code> method shows the first few rows so you can verify the data loaded correctly. Empty parentheses mean 'use default settings'. This is a <strong>method call</strong> -- a function that belongs to an object.",
+                  "structureNote": "Python uses <code>object.method()</code> (the function belongs to the object). R uses <code>function(object)</code> (standalone function). Stata uses <code>command qualifiers</code>. Empty parentheses <code>()</code> are required in Python/R to execute the call.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "Object", "tip": "The DataFrame you want to preview.", "color": "pink"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Connects the object to its method. Read as 'df's head'.", "color": "overlay"},
-                      {"code": "head", "role": "Method Name", "tip": "Returns the first N rows. Default is 5. Use head(10) to see more.", "color": "teal"},
-                      {"code": "()", "role": "Empty Args", "tip": "Empty parentheses mean 'use defaults'. Still required -- without them you'd reference the method, not call it.", "color": "overlay"}
+                      {"code": "df.head()", "role": "Method call", "tip": "object.method() pattern. The () are required even with no arguments -- without them you get the method object, not the result.", "color": "pink"}
                     ],
                     "stata": [
-                      {"code": "list", "role": "Command", "tip": "Displays observations and their values.", "color": "mauve"},
-                      {"code": " in ", "role": "Qualifier", "tip": "Restricts which observations to show by row numbers.", "color": "mauve"},
-                      {"code": "1/5", "role": "Range", "tip": "From observation 1 to 5. Stata indexes from 1, not 0.", "color": "sky"}
+                      {"code": "list ", "role": "Command", "tip": "", "color": "mauve"},
+                      {"code": "in 1/5", "role": "Range qualifier", "tip": "'in' restricts to row numbers. The 1/5 syntax means rows 1 through 5 (Stata is 1-indexed).", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "head(", "role": "Function", "tip": "Returns the first N elements of a data frame. R's default is 6 rows (not 5 like Python).", "color": "blue"},
-                      {"code": "df)", "role": "Argument", "tip": "The data frame to preview.", "color": "pink"}
+                      {"code": "head(df)", "role": "Function call", "tip": "R uses standalone functions: head(df) not df.head(). R defaults to 6 rows; Python defaults to 5.", "color": "blue"}
                     ]
                   }
                 }
@@ -699,36 +689,23 @@ Contains data from data.dta
             {
               "exercises": [
                 {
-                  "instruction": "This is the pattern for loading an Excel file and specifying a particular sheet",
+                  "instruction": "Keyword arguments to control function behavior (sheet selection)",
                   "pattern": "variable = alias.function(filepath, sheet=name)",
-                  "structureNote": "This introduces <strong>keyword arguments</strong> -- named parameters that control how a function behaves. <code>sheet_name=</code> tells the function which sheet to load. Without it, the function uses defaults (first sheet). Keyword arguments make code self-documenting.",
+                  "structureNote": "General pattern: <code>function(required_arg, keyword=value)</code>. Keyword arguments are optional and named. In Stata, options go after a comma with different syntax: <code>sheet(\"name\")</code> uses parentheses around the value.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "Variable Name", "tip": "Stores the loaded Excel data.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "pd", "role": "Library Alias", "tip": "Pandas library.", "color": "yellow"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the function.", "color": "overlay"},
-                      {"code": "read_excel(", "role": "Function Name", "tip": "Loads Excel files (.xlsx, .xls) into a DataFrame. Requires the openpyxl package.", "color": "blue"},
-                      {"code": "\"data.xlsx\", ", "role": "File Path", "tip": "The Excel file to load.", "color": "green"},
-                      {"code": "sheet_name", "role": "Parameter Name", "tip": "A keyword argument specifying which sheet. Can be a name (string) or index (number starting from 0).", "color": "lavender"},
-                      {"code": "=", "role": "Equals", "tip": "Assigns a value to the parameter inside the function call.", "color": "peach"},
-                      {"code": "\"Sheet2\")", "role": "Sheet Name", "tip": "The exact name of the Excel sheet tab to load.", "color": "green"}
+                      {"code": "pd.read_excel(", "role": "Function", "tip": "", "color": "blue"},
+                      {"code": "\"data.xlsx\"", "role": "Positional arg", "tip": "Required argument -- position matters.", "color": "green"},
+                      {"code": ", sheet_name=\"Sheet2\")", "role": "Keyword arg", "tip": "sheet_name can be a string (\"Sheet2\") or 0-based integer (1 = second sheet). Python uses underscores in parameter names.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "import excel ", "role": "Command", "tip": "Stata's command for loading Excel files.", "color": "mauve"},
-                      {"code": "\"data.xlsx\", ", "role": "File Path", "tip": "The Excel file to load.", "color": "green"},
-                      {"code": "sheet(\"Sheet2\")", "role": "Sheet Option", "tip": "Specifies which sheet to load. Use the exact name as it appears in Excel.", "color": "yellow"},
-                      {"code": " firstrow", "role": "Option", "tip": "Treats the first row as variable names (column headers).", "color": "yellow"},
-                      {"code": " clear", "role": "Option", "tip": "Removes existing data before loading.", "color": "yellow"}
+                      {"code": "import excel \"data.xlsx\"", "role": "Command + path", "tip": "", "color": "mauve"},
+                      {"code": ", sheet(\"Sheet2\")", "role": "Option with value", "tip": "Stata wraps option values in parentheses: sheet(\"name\"). Contrast with flag-style options like 'clear' and 'firstrow'.", "color": "sky"},
+                      {"code": " firstrow clear", "role": "Flag options", "tip": "Flag options (no value) are space-separated after the comma.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Variable Name", "tip": "Stores the loaded data.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
-                      {"code": "read_excel(", "role": "Function Name", "tip": "From the readxl package. Loads Excel files without needing Microsoft Excel installed.", "color": "blue"},
-                      {"code": "\"data.xlsx\", ", "role": "File Path", "tip": "The Excel file.", "color": "green"},
-                      {"code": "sheet", "role": "Parameter Name", "tip": "Specifies which sheet to load.", "color": "lavender"},
-                      {"code": " = ", "role": "Equals", "tip": "Assigns value to parameter.", "color": "peach"},
-                      {"code": "\"Sheet2\")", "role": "Sheet Name", "tip": "Name of the Excel sheet tab.", "color": "green"}
+                      {"code": "read_excel(\"data.xlsx\"", "role": "Function + path", "tip": "", "color": "blue"},
+                      {"code": ", sheet = \"Sheet2\")", "role": "Named argument", "tip": "R convention: spaces around = in function calls (sheet = \"Sheet2\"), no spaces in assignment (x <- 5).", "color": "sky"}
                     ]
                   }
                 }
@@ -744,28 +721,18 @@ Contains data from data.dta
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to load a Stata .dta file while preserving variable labels",
+                  "instruction": "Loading .dta files: different function names, same pattern",
                   "pattern": "variable = alias.function(filepath)",
-                  "structureNote": "Stata .dta files are extremely common in economics research (IPUMS, replication packages, AER datasets). All three languages can read them. The key advantage of .dta files is that they <strong>preserve metadata</strong> like variable labels and value labels.",
+                  "structureNote": "The same <code>var = function(\"filepath\")</code> pattern works for all file types -- only the function name changes. Python: <code>pd.read_stata()</code>. R: <code>read_dta()</code> (from haven). Stata: <code>use</code>.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "Variable Name", "tip": "Stores the Stata dataset as a pandas DataFrame.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "pd", "role": "Library Alias", "tip": "Pandas library.", "color": "yellow"},
-                      {"code": ".", "role": "Dot Accessor", "tip": "Accesses the function.", "color": "overlay"},
-                      {"code": "read_stata(", "role": "Function Name", "tip": "Loads Stata .dta files. Preserves variable labels and value labels from the Stata file.", "color": "blue"},
-                      {"code": "\"data.dta\")", "role": "File Path", "tip": "The Stata data file. Very common format for academic economics datasets.", "color": "green"}
+                      {"code": "df = pd.read_stata(\"data.dta\")", "role": "Full statement", "tip": "Same alias.function() pattern as read_csv(). The function name changes for each file type: read_csv, read_excel, read_stata.", "color": "blue"}
                     ],
                     "stata": [
-                      {"code": "use ", "role": "Command", "tip": "Stata's primary command to load .dta files. Preserves all metadata: variable labels, value labels, notes.", "color": "mauve"},
-                      {"code": "\"data.dta\", ", "role": "File Path", "tip": "The Stata data file. Can also be a URL.", "color": "green"},
-                      {"code": "clear", "role": "Option", "tip": "Removes existing data from memory before loading.", "color": "yellow"}
+                      {"code": "use \"data.dta\", clear", "role": "Full statement", "tip": "'use' is Stata's native .dta loader -- a single-word command. File paths can also be URLs.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "df", "role": "Variable Name", "tip": "Stores the loaded data.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
-                      {"code": "read_dta(", "role": "Function Name", "tip": "From the haven package. Loads Stata .dta files and preserves variable labels and value labels.", "color": "blue"},
-                      {"code": "\"data.dta\")", "role": "File Path", "tip": "The Stata data file.", "color": "green"}
+                      {"code": "df <- read_dta(\"data.dta\")", "role": "Full statement", "tip": "read_dta() is from the haven package (must load with library(haven) first). Base R has no .dta reader.", "color": "blue"}
                     ]
                   }
                 }
@@ -1109,36 +1076,24 @@ GDP: <span class="out-num">3</span>, Pop: <span class="out-num">3</span>, Merged
             {
               "exercises": [
                 {
-                  "instruction": "This is the pattern for merging two datasets on common key columns using a left join",
+                  "instruction": "Merge/join syntax: specifying keys and join type",
                   "pattern": "result = merge(left, right, on=keys, how='left')",
-                  "structureNote": "Merging combines two datasets based on <strong>key variables</strong> they share. A left join keeps ALL rows from the left dataset and adds matching columns from the right. If no match is found, the right-side columns get <code>NaN</code> (missing). Always check merge quality afterwards!",
+                  "structureNote": "Each language specifies the merge differently: Python uses keyword args (<code>on=</code>, <code>how=</code>), Stata uses a match-type prefix (<code>1:1</code>, <code>m:1</code>) and the <code>using</code> keyword, R uses separate functions per join type (<code>left_join</code>, <code>inner_join</code>).",
                   "languages": {
                     "python": [
-                      {"code": "merged", "role": "Variable Name", "tip": "Stores the combined dataset.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the merge result.", "color": "peach"},
-                      {"code": "pd.merge(", "role": "Function", "tip": "Pandas function for combining two DataFrames. Like a SQL JOIN or VLOOKUP in Excel.", "color": "blue"},
-                      {"code": "gdp, ", "role": "Left DataFrame", "tip": "The primary dataset. In a left join, all its rows are kept.", "color": "pink"},
-                      {"code": "pop", "role": "Right DataFrame", "tip": "The secondary dataset. Only matching rows are added.", "color": "pink"},
-                      {"code": ", on=", "role": "Key Parameter", "tip": "Specifies which columns to match on.", "color": "lavender"},
-                      {"code": "['country', 'year']", "role": "Key Columns", "tip": "A list of column names. Rows match only when BOTH country AND year are the same.", "color": "green"},
-                      {"code": ", how=", "role": "Join Type", "tip": "Specifies the type of join.", "color": "lavender"},
-                      {"code": "'left')", "role": "Join Value", "tip": "Left join: keep all from left, add matches from right. Options: 'inner', 'left', 'right', 'outer'.", "color": "green"}
+                      {"code": "pd.merge(gdp, pop", "role": "Two positional args", "tip": "The two DataFrames to combine, in order: left, right.", "color": "pink"},
+                      {"code": ", on=['country', 'year']", "role": "Key columns", "tip": "on= takes a list of column names. Use left_on=/right_on= when column names differ between datasets.", "color": "green"},
+                      {"code": ", how='left')", "role": "Join type", "tip": "Options: 'inner', 'left', 'right', 'outer'. The how= parameter controls which rows are kept.", "color": "green"}
                     ],
                     "stata": [
-                      {"code": "merge ", "role": "Command", "tip": "Stata's command to combine two datasets. Creates a _merge variable to track results.", "color": "mauve"},
-                      {"code": "1:1 ", "role": "Match Type", "tip": "One-to-one: each key appears at most once in both datasets. Other options: m:1, 1:m, m:m.", "color": "sky"},
-                      {"code": "country year", "role": "Key Variables", "tip": "Variables to match on. Space-separated (not comma-separated) in Stata.", "color": "sky"},
-                      {"code": " using ", "role": "Keyword", "tip": "Introduces the path to the second (using) dataset.", "color": "mauve"},
-                      {"code": "\"pop.dta\"", "role": "Using File", "tip": "The file to merge in. Must be a .dta file on disk.", "color": "green"}
+                      {"code": "merge ", "role": "Command", "tip": "Stata's merge auto-creates a _merge variable (values 1, 2, 3) to track match quality.", "color": "mauve"},
+                      {"code": "1:1 ", "role": "Match type", "tip": "Specifies the expected relationship: 1:1 (one-to-one), m:1 (many-to-one), 1:m, m:m. Stata checks this.", "color": "peach"},
+                      {"code": "country year ", "role": "Key variables", "tip": "Space-separated variable names (no commas, no brackets).", "color": "pink"},
+                      {"code": "using \"pop.dta\"", "role": "Using dataset", "tip": "The 'using' keyword specifies the second dataset. It must be a file on disk, not a variable in memory.", "color": "green"}
                     ],
                     "r": [
-                      {"code": "merged", "role": "Variable Name", "tip": "Stores the joined result.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
-                      {"code": "left_join(", "role": "Function", "tip": "From dplyr. Keeps all rows from the left dataset, adds matching columns from the right.", "color": "blue"},
-                      {"code": "gdp, ", "role": "Left Data", "tip": "The primary dataset -- all its rows are kept.", "color": "pink"},
-                      {"code": "pop", "role": "Right Data", "tip": "The secondary dataset.", "color": "pink"},
-                      {"code": ", by = ", "role": "Key Parameter", "tip": "Specifies which columns to match on.", "color": "lavender"},
-                      {"code": "c(\"country\", \"year\"))", "role": "Key Columns", "tip": "A vector of column names to join on. c() combines them into one argument.", "color": "green"}
+                      {"code": "left_join(gdp, pop", "role": "Function + data", "tip": "R uses a different function for each join type: left_join, inner_join, right_join, full_join.", "color": "blue"},
+                      {"code": ", by = c(\"country\", \"year\"))", "role": "Key columns", "tip": "by= takes a character vector of column names. Quotes are required here (unlike filter/select).", "color": "green"}
                     ]
                   }
                 }
@@ -1391,35 +1346,24 @@ xij variables:
             {
               "exercises": [
                 {
-                  "instruction": "Here's how to reshape data from wide format to long format",
+                  "instruction": "Wide-to-long reshape syntax: specifying IDs, stubs, and new column names",
                   "pattern": "result = function(data, columns, names, values)",
-                  "structureNote": "Reshaping transforms data between <strong>wide format</strong> (one row per entity, multiple columns for time periods) and <strong>long format</strong> (one row per entity-time combination). Most analysis and plotting functions expect long format. This is one of the most important data wrangling operations.",
+                  "structureNote": "Each language has different parameter names for the same concept: which columns stay fixed (IDs) and which get stacked (values). Python: <code>id_vars=</code>, Stata: <code>i()</code>, R: <code>cols = -excluded</code>.",
                   "languages": {
                     "python": [
-                      {"code": "df_long", "role": "Variable Name", "tip": "Stores the reshaped (long-format) data.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "pd.melt(", "role": "Function", "tip": "Pandas function that 'melts' wide data into long format. Takes columns and stacks them into rows.", "color": "blue"},
-                      {"code": "df", "role": "Data", "tip": "The wide-format DataFrame to reshape.", "color": "pink"},
-                      {"code": ", id_vars=", "role": "ID Parameter", "tip": "Columns to keep as-is (not melted). These identify each entity.", "color": "lavender"},
-                      {"code": "['country']", "role": "ID Columns", "tip": "The country column stays as an identifier. Each country will have multiple rows in the output.", "color": "green"},
-                      {"code": ", var_name=", "role": "Name Parameter", "tip": "What to call the new column that holds the old column names.", "color": "lavender"},
-                      {"code": "'year')", "role": "Column Name", "tip": "The old column headers (2018, 2019, 2020) become values in this new 'year' column.", "color": "green"}
+                      {"code": "pd.melt(df", "role": "Function + data", "tip": "", "color": "blue"},
+                      {"code": ", id_vars=['country']", "role": "ID columns", "tip": "id_vars= specifies columns that stay fixed. Takes a list of column names.", "color": "green"},
+                      {"code": ", var_name='year')", "role": "New column name", "tip": "var_name= names the new column that holds the old column headers. value_name= (optional) names the values column.", "color": "green"}
                     ],
                     "stata": [
-                      {"code": "reshape long ", "role": "Command", "tip": "Converts data from wide to long format. 'reshape wide' does the reverse.", "color": "mauve"},
-                      {"code": "gdp", "role": "Stub Name", "tip": "The prefix shared by the columns to reshape (e.g., gdp2018, gdp2019, gdp2020).", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "i(country) ", "role": "ID Variable", "tip": "The variable that identifies each entity. Stays as-is.", "color": "yellow"},
-                      {"code": "j(year)", "role": "Time Variable", "tip": "The new variable created from the column suffixes (2018, 2019, 2020).", "color": "yellow"}
+                      {"code": "reshape long gdp", "role": "Command + stub", "tip": "The stub ('gdp') is the shared prefix of columns to stack: gdp2018, gdp2019, gdp2020.", "color": "mauve"},
+                      {"code": ", i(country)", "role": "ID variable", "tip": "i() specifies the entity identifier. Stata's options use parentheses for values.", "color": "sky"},
+                      {"code": " j(year)", "role": "Time variable", "tip": "j() names the new variable created from the column suffixes. Reverse with 'reshape wide'.", "color": "sky"}
                     ],
                     "r": [
-                      {"code": "df_long", "role": "Variable Name", "tip": "Stores the reshaped data.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment arrow.", "color": "peach"},
-                      {"code": "df", "role": "Data", "tip": "The wide-format data frame.", "color": "pink"},
-                      {"code": " %>% ", "role": "Pipe", "tip": "Passes the data to the next function. Read as 'then'.", "color": "mauve"},
-                      {"code": "pivot_longer(", "role": "Function", "tip": "From tidyr. Pivots multiple columns into longer format -- one of the most important tidyverse functions.", "color": "blue"},
-                      {"code": "cols = -country", "role": "Columns to Pivot", "tip": "All columns EXCEPT country get pivoted. The minus sign means 'everything but this'.", "color": "sky"},
-                      {"code": ", names_to = \"year\")", "role": "Names Column", "tip": "Old column names become values in this new 'year' column.", "color": "green"}
+                      {"code": "df %>% pivot_longer(", "role": "Pipe + function", "tip": "", "color": "blue"},
+                      {"code": "cols = -country", "role": "Columns to pivot", "tip": "The minus sign (-) means 'everything except'. This is tidyselect syntax, unique to tidyverse.", "color": "sky"},
+                      {"code": ", names_to = \"year\")", "role": "New column name", "tip": "names_to names the column for old headers. values_to (optional) names the values column.", "color": "green"}
                     ]
                   }
                 }

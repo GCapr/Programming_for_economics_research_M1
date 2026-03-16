@@ -160,32 +160,22 @@
             {
               "exercises": [
                 {
-                  "instruction": "In RDD, the first step is to center the running variable at the cutoff. This subtracts the cutoff value so that the threshold becomes zero, simplifying estimation.",
+                  "instruction": "Centering follows the same arithmetic in all three languages but uses different column-access syntax",
                   "pattern": "new_variable = running_variable - cutoff",
-                  "structureNote": "RDD estimates effects at a <strong>cutoff</strong> in a running variable. Centering the running variable at the cutoff (subtracting the cutoff value) makes the cutoff equal to zero. This simplifies the estimation — the treatment effect is estimated at x=0.",
+                  "structureNote": "Centering shifts the running variable so the cutoff sits at zero. Python uses bracket notation <code>df['col']</code>, Stata uses <code>gen</code>, and R uses <code>$</code>.",
                   "languages": {
                     "python": [
-                      {"code": "df", "role": "DataFrame", "tip": "Your dataset.", "color": "pink"},
-                      {"code": "[", "role": "Open Bracket", "tip": "Column access/creation.", "color": "overlay"},
-                      {"code": "'x_centered'", "role": "New Column", "tip": "The centered running variable. Values below 0 are untreated, above 0 are treated.", "color": "green"},
-                      {"code": "]", "role": "Close Bracket", "tip": "Ends column name.", "color": "overlay"},
-                      {"code": " = ", "role": "Assignment", "tip": "Creates the new column.", "color": "peach"},
-                      {"code": "df['running_var']", "role": "Running Variable", "tip": "The original score that determines treatment (e.g., test score, poverty index).", "color": "sky"},
-                      {"code": " - ", "role": "Subtraction", "tip": "Subtracts the cutoff from every observation.", "color": "overlay"},
-                      {"code": "cutoff", "role": "Cutoff Value", "tip": "The threshold value (e.g., 50 points). After centering, this becomes 0.", "color": "sky"}
+                      {"code": "df['x_centered']", "role": "New column", "tip": "Assigning to a bracket key that doesn't exist yet creates the column in-place.", "color": "pink"},
+                      {"code": "df['running_var'] - cutoff", "role": "Expression", "tip": "Pandas broadcasts the scalar subtraction element-wise across the Series.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "gen", "role": "Command", "tip": "Creates a new variable.", "color": "mauve"},
-                      {"code": " x_centered", "role": "Variable Name", "tip": "The centered running variable.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the value.", "color": "peach"},
-                      {"code": "running_var - 50", "role": "Expression", "tip": "Subtracts the cutoff (50) from the running variable.", "color": "blue"}
+                      {"code": "gen", "role": "Command", "tip": "Creates a new variable. Use <code>replace</code> if the variable already exists.", "color": "mauve"},
+                      {"code": " x_centered = running_var - 50", "role": "Expression", "tip": "Stata inlines the cutoff as a literal; no quoting needed for numeric constants.", "color": "pink"}
                     ],
                     "r": [
-                      {"code": "df$x_centered", "role": "New Column", "tip": "Creates a new column using $ notation.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "df$running_var", "role": "Running Variable", "tip": "The original running variable.", "color": "sky"},
-                      {"code": " - ", "role": "Subtraction", "tip": "Elementwise subtraction.", "color": "overlay"},
-                      {"code": "50", "role": "Cutoff", "tip": "The cutoff value.", "color": "sky"}
+                      {"code": "df$x_centered", "role": "New column", "tip": "<code>$</code> accesses or creates a column. Equivalent to <code>df[['x_centered']]</code>.", "color": "pink"},
+                      {"code": " <- ", "role": "Assignment", "tip": "R's standard assignment operator; <code>=</code> also works inside function calls.", "color": "peach"},
+                      {"code": "df$running_var - 50", "role": "Expression", "tip": "Vectorized subtraction, same semantics as pandas.", "color": "sky"}
                     ]
                   }
                 }
@@ -357,32 +347,24 @@ rho (h/b)                     0.606        0.606
             {
               "exercises": [
                 {
-                  "instruction": "The rdrobust package implements the Calonico, Cattaneo, Titiunik (2014) optimal bandwidth procedure. It automatically selects the bandwidth, fits local polynomials on each side, and reports bias-corrected confidence intervals.",
+                  "instruction": "The <code>rdrobust</code> call takes the same three core arguments in all languages, but argument-passing syntax differs",
                   "pattern": "result = rdrobust(y=outcome, x=running_var, c=cutoff)",
-                  "structureNote": "The <code>rdrobust</code> package implements the <strong>Calonico, Cattaneo, Titiunik (2014)</strong> optimal bandwidth procedure with bias-corrected confidence intervals. It automatically selects the bandwidth, fits local polynomials on each side of the cutoff, and reports robust inference.",
+                  "structureNote": "Python and R use named keyword arguments (<code>y=</code>, <code>x=</code>, <code>c=</code>). Stata uses positional arguments followed by a comma and options: <code>rdrobust depvar runvar, c(0)</code>.",
                   "languages": {
                     "python": [
-                      {"code": "result", "role": "Variable", "tip": "Stores the RDD estimation results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "rdrobust(", "role": "Function", "tip": "From the rdrobust package. Implements local polynomial RDD with optimal bandwidth.", "color": "blue"},
-                      {"code": "y=df['outcome'], ", "role": "Outcome", "tip": "The dependent variable (outcome). Passed as a pandas Series.", "color": "sky"},
-                      {"code": "x=df['x_centered'], ", "role": "Running Var", "tip": "The centered running variable. Treatment is assigned at x=0.", "color": "sky"},
-                      {"code": "c=0)", "role": "Cutoff", "tip": "The cutoff value. 0 because we centered the running variable.", "color": "lavender"}
+                      {"code": "rdrobust", "role": "Function", "tip": "Same package name as Stata/R; install with <code>pip install rdrobust</code>.", "color": "blue"},
+                      {"code": "y=df['outcome'], x=df['x_centered']", "role": "Core args", "tip": "Keyword arguments; order doesn't matter. Pass pandas Series, not column names.", "color": "sky"},
+                      {"code": "c=0", "role": "Cutoff", "tip": "Set to 0 when the running variable is pre-centered; otherwise pass the raw cutoff value.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "rdrobust", "role": "Command", "tip": "RDD estimation command. Install with: ssc install rdrobust.", "color": "mauve"},
-                      {"code": " outcome", "role": "Outcome", "tip": "The dependent variable.", "color": "sky"},
-                      {"code": " x_centered", "role": "Running Var", "tip": "The centered running variable.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "c(0)", "role": "Cutoff", "tip": "Specifies the cutoff. 0 because the variable is centered.", "color": "yellow"}
+                      {"code": "rdrobust", "role": "Command", "tip": "Install with <code>ssc install rdrobust</code>.", "color": "mauve"},
+                      {"code": " outcome x_centered", "role": "Positional args", "tip": "Stata convention: depvar first, then running variable. No <code>=</code> signs.", "color": "sky"},
+                      {"code": ", c(0)", "role": "Option", "tip": "Options come after the comma. <code>c()</code> sets the cutoff in parenthetical syntax.", "color": "lavender"}
                     ],
                     "r": [
-                      {"code": "rd_result", "role": "Variable", "tip": "Stores the RDD results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "rdrobust(", "role": "Function", "tip": "From the rdrobust R package.", "color": "blue"},
-                      {"code": "y = df$outcome, ", "role": "Outcome", "tip": "The outcome variable. $ accesses the column.", "color": "sky"},
-                      {"code": "x = df$x_centered, ", "role": "Running Var", "tip": "The centered running variable.", "color": "sky"},
-                      {"code": "c = 0)", "role": "Cutoff", "tip": "The cutoff value.", "color": "lavender"}
+                      {"code": "rdrobust", "role": "Function", "tip": "Install with <code>install.packages('rdrobust')</code>.", "color": "blue"},
+                      {"code": "y = df$outcome, x = df$x_centered", "role": "Core args", "tip": "Named arguments with spaces around <code>=</code> (R style). Use <code>$</code> to extract columns.", "color": "sky"},
+                      {"code": "c = 0", "role": "Cutoff", "tip": "Same parameter name as Python. R allows <code>=</code> inside function calls for assignment.", "color": "lavender"}
                     ]
                   }
                 }
@@ -398,29 +380,18 @@ rho (h/b)                     0.606        0.606
             {
               "exercises": [
                 {
-                  "instruction": "Adding covariates to RDD does not change the identification strategy (still based on the discontinuity), but it can improve precision by explaining residual variation. Covariates should not be affected by the treatment.",
+                  "instruction": "The <code>covs</code> argument takes a matrix/DataFrame of covariates; each language builds that matrix differently",
                   "pattern": "rdrobust(y, x, c, covs=covariate_matrix)",
-                  "structureNote": "Adding covariates to RDD doesn't change the identification (it's still based on the discontinuity), but it can <strong>improve precision</strong> by explaining residual variation. Covariates should NOT be affected by the treatment — otherwise you'd be controlling for a mediator.",
+                  "structureNote": "Python passes a DataFrame slice with <code>df[['col1','col2']]</code>. Stata lists variable names inside <code>covs()</code>. R binds columns with <code>cbind()</code>.",
                   "languages": {
                     "python": [
-                      {"code": "result", "role": "Variable", "tip": "RDD results with covariates.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "rdrobust", "role": "Function", "tip": "The rdrobust function with additional covariates.", "color": "blue"},
-                      {"code": "(y=df['outcome'], x=df['x_centered'], c=0", "role": "Core Args", "tip": "Same core specification.", "color": "sky"},
-                      {"code": ", ", "role": "Separator", "tip": "Before covariates.", "color": "text"},
-                      {"code": "covs=df[['age', 'gender']])", "role": "Covariates", "tip": "Pre-treatment covariates as a DataFrame. They improve precision but don't change identification.", "color": "lavender"}
+                      {"code": "covs=df[['age', 'gender']]", "role": "Covariates", "tip": "Double brackets return a DataFrame (2D). Single brackets would return a Series (1D), which <code>rdrobust</code> rejects for multiple covariates.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "rdrobust", "role": "Command", "tip": "RDD estimation with covariates.", "color": "mauve"},
-                      {"code": " outcome x_centered", "role": "Variables", "tip": "Outcome and running variable.", "color": "sky"},
-                      {"code": ", c(0)", "role": "Cutoff", "tip": "The cutoff value.", "color": "yellow"},
-                      {"code": " covs(age gender)", "role": "Covariates", "tip": "Pre-treatment covariates to improve precision. Listed after covs() option.", "color": "yellow"}
+                      {"code": "covs(age gender)", "role": "Option", "tip": "Space-separated variable names inside parentheses. No commas, no quotes.", "color": "lavender"}
                     ],
                     "r": [
-                      {"code": "rd_result", "role": "Variable", "tip": "RDD results with covariates.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "rdrobust(y = df$outcome, x = df$x_centered, c = 0", "role": "Core Args", "tip": "Standard RDD arguments.", "color": "blue"},
-                      {"code": ", covs = cbind(df$age, df$gender))", "role": "Covariates", "tip": "cbind() binds columns together into a matrix. Pre-treatment covariates only.", "color": "lavender"}
+                      {"code": "covs = cbind(df$age, df$gender)", "role": "Covariates", "tip": "<code>cbind()</code> column-binds vectors into a matrix. Alternatively pass <code>as.matrix(df[, c('age','gender')])</code>.", "color": "lavender"}
                     ]
                   }
                 }
@@ -442,29 +413,22 @@ rho (h/b)                     0.606        0.606
             {
               "exercises": [
                 {
-                  "instruction": "Bandwidth selection is crucial in RDD: too narrow wastes data, too wide introduces bias. The rdbwselect function computes the MSE-optimal and CER-optimal bandwidths automatically.",
+                  "instruction": "<code>rdbwselect</code> shares the same argument syntax as <code>rdrobust</code> — it computes optimal bandwidths without estimating effects",
                   "pattern": "bw_result = rdbwselect(y=outcome, x=running_var, c=cutoff)",
-                  "structureNote": "<strong>Bandwidth selection</strong> is crucial in RDD: too narrow wastes data, too wide introduces bias. The <code>rdbwselect</code> function computes the MSE-optimal bandwidth (minimizing mean squared error of the estimator) and the CER-optimal bandwidth (minimizing coverage error of confidence intervals).",
+                  "structureNote": "Same <code>(y, x, c)</code> signature as <code>rdrobust</code>. Stata adds a <code>bwselect()</code> option to choose the criterion (e.g., <code>mserd</code>, <code>cerrd</code>).",
                   "languages": {
                     "python": [
-                      {"code": "bw_result", "role": "Variable", "tip": "Stores bandwidth selection results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores the result.", "color": "peach"},
-                      {"code": "rdbwselect(", "role": "Function", "tip": "Computes optimal bandwidths. Returns MSE-optimal and CER-optimal values.", "color": "blue"},
-                      {"code": "y=df['outcome'], ", "role": "Outcome", "tip": "The dependent variable.", "color": "sky"},
-                      {"code": "x=df['x_centered'], ", "role": "Running Var", "tip": "The centered running variable.", "color": "sky"},
-                      {"code": "c=0)", "role": "Cutoff", "tip": "The cutoff value.", "color": "lavender"}
+                      {"code": "rdbwselect", "role": "Function", "tip": "Separate function from <code>rdrobust</code>; imported from the same package.", "color": "blue"},
+                      {"code": "y=df['outcome'], x=df['x_centered'], c=0", "role": "Arguments", "tip": "Identical argument names to <code>rdrobust</code>. Returns an object whose attributes hold optimal bandwidth values.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "rdbwselect", "role": "Command", "tip": "Reports optimal bandwidths for RDD. Separate from estimation.", "color": "mauve"},
-                      {"code": " outcome x_centered", "role": "Variables", "tip": "Outcome and running variable.", "color": "sky"},
-                      {"code": ", ", "role": "Comma", "tip": "Before options.", "color": "text"},
-                      {"code": "c(0)", "role": "Cutoff", "tip": "The cutoff value.", "color": "yellow"}
+                      {"code": "rdbwselect", "role": "Command", "tip": "Separate command from <code>rdrobust</code>; reports bandwidth without estimating effects.", "color": "mauve"},
+                      {"code": " outcome x_centered, c(0)", "role": "Core syntax", "tip": "Same positional-then-option pattern as <code>rdrobust</code>.", "color": "sky"},
+                      {"code": " bwselect(mserd)", "role": "Option", "tip": "Selects the bandwidth criterion. <code>mserd</code> = MSE-optimal, <code>cerrd</code> = coverage-error-optimal.", "color": "lavender"}
                     ],
                     "r": [
-                      {"code": "bw", "role": "Variable", "tip": "Stores the bandwidth selection result.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "rdbwselect", "role": "Function", "tip": "From rdrobust package. Computes data-driven optimal bandwidths.", "color": "blue"},
-                      {"code": "(y = df$outcome, x = df$x_centered, c = 0)", "role": "Arguments", "tip": "Same arguments as rdrobust. Returns optimal bandwidth values for different criteria.", "color": "sky"}
+                      {"code": "rdbwselect", "role": "Function", "tip": "Same package as <code>rdrobust</code>; returns an object you can pass to <code>summary()</code>.", "color": "blue"},
+                      {"code": "y = df$outcome, x = df$x_centered, c = 0", "role": "Arguments", "tip": "Same named-argument pattern as the R <code>rdrobust</code> call.", "color": "sky"}
                     ]
                   }
                 }
@@ -644,29 +608,18 @@ Robustness check across bandwidths:
             {
               "exercises": [
                 {
-                  "instruction": "You can override the automatic bandwidth with the h parameter to test robustness. Showing stable results across multiple bandwidths strengthens the credibility of the finding.",
+                  "instruction": "The <code>h</code> parameter overrides automatic bandwidth selection in all three languages",
                   "pattern": "result = rdrobust(y, x, c, h=bandwidth)",
-                  "structureNote": "You can override the automatic bandwidth with <code>h=</code> to test robustness. A good practice is to show results across multiple bandwidths — if the estimate is stable, the results are more credible. If it swings wildly, the finding is fragile.",
+                  "structureNote": "Adding <code>h=</code> (Python/R) or <code>h()</code> (Stata) forces a specific bandwidth. The parameter name is the same across languages; only the option syntax differs.",
                   "languages": {
                     "python": [
-                      {"code": "result", "role": "Variable", "tip": "RDD results with manual bandwidth.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Stores result.", "color": "peach"},
-                      {"code": "rdrobust(", "role": "Function", "tip": "Same function, but with a manual bandwidth argument.", "color": "blue"},
-                      {"code": "y=df['outcome'], x=df['x_centered'], c=0", "role": "Standard Args", "tip": "Same outcome, running variable, and cutoff as before.", "color": "sky"},
-                      {"code": ", ", "role": "Separator", "tip": "Before the bandwidth argument.", "color": "text"},
-                      {"code": "h=5)", "role": "Bandwidth", "tip": "Manual bandwidth: use only observations within 5 units of the cutoff. Overrides automatic selection.", "color": "lavender"}
+                      {"code": "h=5", "role": "Bandwidth", "tip": "Keyword argument appended after the core args. Overrides the data-driven bandwidth.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "rdrobust", "role": "Command", "tip": "RDD estimation with manual bandwidth.", "color": "mauve"},
-                      {"code": " outcome x_centered", "role": "Variables", "tip": "Outcome and running variable.", "color": "sky"},
-                      {"code": ", c(0)", "role": "Cutoff", "tip": "The cutoff.", "color": "yellow"},
-                      {"code": " h(5)", "role": "Bandwidth", "tip": "Manual bandwidth of 5 units around the cutoff.", "color": "yellow"}
+                      {"code": "h(5)", "role": "Option", "tip": "Parenthetical option after the comma. Stata wraps option values in <code>()</code> rather than using <code>=</code>.", "color": "lavender"}
                     ],
                     "r": [
-                      {"code": "rd_result", "role": "Variable", "tip": "RDD results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R's assignment.", "color": "peach"},
-                      {"code": "rdrobust(y = df$outcome, x = df$x_centered, c = 0", "role": "Standard Args", "tip": "Outcome, running variable, cutoff.", "color": "blue"},
-                      {"code": ", h = 5)", "role": "Bandwidth", "tip": "Manual bandwidth. Use various values (3, 5, 7, 10) for robustness checks.", "color": "lavender"}
+                      {"code": "h = 5", "role": "Bandwidth", "tip": "Named argument with spaces around <code>=</code>. Same parameter name as Python.", "color": "lavender"}
                     ]
                   }
                 }
@@ -845,36 +798,19 @@ First-stage F-statistic: 49.79</pre></div>
             {
               "exercises": [
                 {
-                  "instruction": "This estimates a fuzzy regression discontinuity design, where crossing the cutoff increases treatment probability but does not guarantee it — the cutoff is used as an instrument for actual treatment",
+                  "instruction": "Adding the <code>fuzzy</code> argument to <code>rdrobust</code> switches from sharp to fuzzy RDD with identical syntax otherwise",
                   "languages": {
                     "python": [
-                      {"code": "result", "role": "Variable", "tip": "Stores the fuzzy RDD estimation results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the result.", "color": "peach"},
-                      {"code": "rdrobust", "role": "Function", "tip": "Robust RDD estimation with optimal bandwidth selection.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "y=df['outcome'], ", "role": "Argument", "tip": "The outcome variable.", "color": "sky"},
-                      {"code": "x=df['x_centered'], ", "role": "Argument", "tip": "The running variable, centered at the cutoff.", "color": "sky"},
-                      {"code": "fuzzy=df['treatment']", "role": "Argument", "tip": "Actual treatment status — enables fuzzy RDD by instrumenting this with the cutoff.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "fuzzy=df['treatment']", "role": "Fuzzy arg", "tip": "Pass a pandas Series of the actual treatment indicator. <code>rdrobust</code> instruments it with the cutoff internally.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "rdrobust ", "role": "Command", "tip": "Robust RDD estimation with bias-corrected inference.", "color": "blue"},
-                      {"code": "outcome x_centered, ", "role": "Variables", "tip": "Outcome variable and running variable.", "color": "pink"},
-                      {"code": "c(0) ", "role": "Option", "tip": "Cutoff value (0 since the running variable is centered).", "color": "sky"},
-                      {"code": "fuzzy(treatment)", "role": "Option", "tip": "Enables fuzzy RDD — instruments actual treatment with the cutoff.", "color": "sky"}
+                      {"code": "fuzzy(treatment)", "role": "Option", "tip": "Parenthetical option naming the actual treatment variable. Added alongside <code>c(0)</code> after the comma.", "color": "lavender"}
                     ],
                     "r": [
-                      {"code": "rd_fuzzy", "role": "Variable", "tip": "Stores the fuzzy RDD results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "rdrobust", "role": "Function", "tip": "Robust RDD estimation from the rdrobust package.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "y = df$outcome, ", "role": "Argument", "tip": "Outcome variable.", "color": "sky"},
-                      {"code": "x = df$x_centered, ", "role": "Argument", "tip": "Running variable centered at cutoff.", "color": "sky"},
-                      {"code": "fuzzy = df$treatment", "role": "Argument", "tip": "Actual treatment status for fuzzy RDD.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "fuzzy = df$treatment", "role": "Fuzzy arg", "tip": "Named argument; pass the treatment column via <code>$</code>. Same parameter name across all three languages.", "color": "lavender"}
                     ]
                   },
-                  "structureNote": "In a <strong>fuzzy RDD</strong>, the running variable crossing the cutoff does not deterministically assign treatment. Instead, it creates a jump in treatment probability. The fuzzy option uses this jump as an instrument for actual treatment, yielding a Local Average Treatment Effect for compliers near the cutoff."
+                  "structureNote": "The <code>fuzzy</code> parameter is the only addition needed to move from sharp to fuzzy RDD. The core <code>(y, x, c)</code> signature stays unchanged. All three languages use the same parameter name."
                 }
               ]
             }
@@ -1083,34 +1019,25 @@ Placebo Cutoff Tests:
             {
               "exercises": [
                 {
-                  "instruction": "This runs the key RDD validity tests: the McCrary density test for manipulation of the running variable, covariate balance checks at the cutoff, and placebo tests at fake cutoffs",
+                  "instruction": "<code>rddensity</code> tests for bunching at the cutoff; note the capitalized <code>X</code> argument in Python/R",
                   "languages": {
                     "python": [
-                      {"code": "density_test", "role": "Variable", "tip": "Stores the McCrary density test results.", "color": "pink"},
-                      {"code": " = ", "role": "Assignment", "tip": "Assigns the test result.", "color": "peach"},
-                      {"code": "rddensity", "role": "Function", "tip": "McCrary-style density test for manipulation at the cutoff.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "X=df['x_centered'], ", "role": "Argument", "tip": "The running variable to test for density discontinuity.", "color": "sky"},
-                      {"code": "c=0", "role": "Argument", "tip": "The cutoff value to test for manipulation.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "rddensity", "role": "Function", "tip": "From the <code>rddensity</code> package (separate from <code>rdrobust</code>). Install with <code>pip install rddensity</code>.", "color": "blue"},
+                      {"code": "X=df['x_centered']", "role": "Argument", "tip": "Capital <code>X</code> (not lowercase <code>x</code> as in <code>rdrobust</code>). A common source of errors.", "color": "sky"},
+                      {"code": "c=0", "role": "Cutoff", "tip": "Same <code>c</code> parameter as <code>rdrobust</code>.", "color": "sky"}
                     ],
                     "stata": [
-                      {"code": "rddensity ", "role": "Command", "tip": "McCrary density test for manipulation of the running variable.", "color": "blue"},
-                      {"code": "x_centered, ", "role": "Variable", "tip": "The running variable.", "color": "pink"},
-                      {"code": "c(0) ", "role": "Option", "tip": "Cutoff value.", "color": "sky"},
-                      {"code": "plot", "role": "Option", "tip": "Produces a density plot showing whether there is a jump at the cutoff.", "color": "mauve"}
+                      {"code": "rddensity", "role": "Command", "tip": "Separate package from <code>rdrobust</code>; install with <code>ssc install rddensity</code>.", "color": "blue"},
+                      {"code": " x_centered, c(0)", "role": "Syntax", "tip": "Takes only the running variable (no depvar). Options follow the comma.", "color": "sky"},
+                      {"code": " plot", "role": "Option", "tip": "Stata-specific option that produces a density plot. Python/R require a separate <code>rdplotdensity()</code> call.", "color": "mauve"}
                     ],
                     "r": [
-                      {"code": "dens_test", "role": "Variable", "tip": "Stores the McCrary density test results.", "color": "pink"},
-                      {"code": " <- ", "role": "Assignment", "tip": "R assignment.", "color": "peach"},
-                      {"code": "rddensity", "role": "Function", "tip": "Density continuity test from the rddensity package.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "X = df$x_centered, ", "role": "Argument", "tip": "Running variable to test.", "color": "sky"},
-                      {"code": "c = 0", "role": "Argument", "tip": "Cutoff value.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "rddensity", "role": "Function", "tip": "From the <code>rddensity</code> R package.", "color": "blue"},
+                      {"code": "X = df$x_centered", "role": "Argument", "tip": "Capital <code>X</code>, matching the Python convention. Plot with <code>rdplotdensity(rdd=result, X=df$x_centered)</code>.", "color": "sky"},
+                      {"code": "c = 0", "role": "Cutoff", "tip": "Same as in <code>rdrobust</code>.", "color": "sky"}
                     ]
                   },
-                  "structureNote": "RDD validity rests on units being unable to precisely <strong>manipulate</strong> their position relative to the cutoff. The McCrary test checks for suspicious bunching. Covariate continuity tests verify that predetermined characteristics are smooth across the threshold. Placebo cutoff tests confirm the effect only exists at the true cutoff."
+                  "structureNote": "Note three syntax quirks: (1) capital <code>X</code> not lowercase <code>x</code>, (2) no outcome variable (density test uses only the running variable), (3) Stata's <code>plot</code> option is built-in while Python/R need a separate plot function."
                 }
               ]
             }
@@ -1298,33 +1225,26 @@ Visual discontinuity estimate:
             {
               "exercises": [
                 {
-                  "instruction": "This creates the canonical RDD visualization — a binned scatter plot with separate polynomial fits on each side of the cutoff, making the treatment effect visible as the gap between the two fitted lines",
+                  "instruction": "<code>rdplot</code> shares the same <code>(y, x, c)</code> signature as <code>rdrobust</code> but adds binning and labeling options",
                   "languages": {
                     "python": [
-                      {"code": "rdplot", "role": "Function", "tip": "Creates a publication-quality RDD scatter plot with optimal binning.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "y=df['outcome'], ", "role": "Argument", "tip": "Outcome variable for the y-axis.", "color": "sky"},
-                      {"code": "x=df['x_centered'], ", "role": "Argument", "tip": "Running variable for the x-axis.", "color": "sky"},
-                      {"code": "c=0, ", "role": "Argument", "tip": "Cutoff where the discontinuity is expected.", "color": "sky"},
-                      {"code": "nbins=[20, 20]", "role": "Argument", "tip": "Number of bins on each side of the cutoff.", "color": "sky"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "rdplot", "role": "Function", "tip": "Imported from the same <code>rdrobust</code> package. Generates plot as a side effect.", "color": "blue"},
+                      {"code": "nbins=[20, 20]", "role": "Argument", "tip": "Python list with [left-side bins, right-side bins]. Stata uses <code>nbins(20 20)</code> with spaces.", "color": "lavender"},
+                      {"code": "binselect='es'", "role": "Argument", "tip": "Bin-selection method: <code>'es'</code> = evenly spaced, <code>'qs'</code> = quantile-spaced.", "color": "lavender"}
                     ],
                     "stata": [
-                      {"code": "rdplot ", "role": "Command", "tip": "Creates an optimally-binned RDD scatter plot.", "color": "blue"},
-                      {"code": "outcome x_centered, ", "role": "Variables", "tip": "Outcome (y-axis) and running variable (x-axis).", "color": "pink"},
-                      {"code": "c(0)", "role": "Option", "tip": "Cutoff value for the vertical dividing line.", "color": "sky"}
+                      {"code": "rdplot", "role": "Command", "tip": "Same package as <code>rdrobust</code>. Separate command, not an option.", "color": "blue"},
+                      {"code": " outcome x_centered, c(0)", "role": "Core syntax", "tip": "Positional depvar + running var, then comma + options. Same layout as <code>rdrobust</code>.", "color": "sky"},
+                      {"code": " nbins(20 20)", "role": "Option", "tip": "Space-separated pair: bins left of cutoff, bins right of cutoff.", "color": "lavender"},
+                      {"code": " graph_options(...)", "role": "Option", "tip": "Passes standard Stata graph options (title, labels) inside <code>graph_options()</code>.", "color": "lavender"}
                     ],
                     "r": [
-                      {"code": "rdplot", "role": "Function", "tip": "Creates a binned scatter plot with polynomial fits from the rdrobust package.", "color": "blue"},
-                      {"code": "(", "role": "Paren", "tip": "Opens arguments.", "color": "overlay"},
-                      {"code": "y = df$outcome, ", "role": "Argument", "tip": "Outcome variable.", "color": "sky"},
-                      {"code": "x = df$x_centered, ", "role": "Argument", "tip": "Running variable.", "color": "sky"},
-                      {"code": "c = 0, ", "role": "Argument", "tip": "Cutoff value.", "color": "sky"},
-                      {"code": "title = \"RDD: Effect of Scholarship\"", "role": "Argument", "tip": "Plot title describing the specific application.", "color": "green"},
-                      {"code": ")", "role": "Paren", "tip": "Closes arguments.", "color": "overlay"}
+                      {"code": "rdplot", "role": "Function", "tip": "From the <code>rdrobust</code> package. Returns a ggplot object you can further customize.", "color": "blue"},
+                      {"code": "title = \"...\"", "role": "Argument", "tip": "R labels go as named arguments. Stata wraps them in <code>graph_options()</code> instead.", "color": "green"},
+                      {"code": "x.label = \"...\", y.label = \"...\"", "role": "Arguments", "tip": "Note the dot notation (<code>x.label</code>), not underscore. R-specific naming convention for this package.", "color": "green"}
                     ]
                   },
-                  "structureNote": "A good RDD plot is essential for <strong>visual credibility</strong>. It shows: (1) raw data as binned scatter points, (2) fitted polynomials on each side of the cutoff, (3) a vertical line at the cutoff, and (4) the visible gap. The <code>rdplot</code> command selects optimal bins and polynomial orders automatically."
+                  "structureNote": "All three languages use the same <code>(y, x, c)</code> core. Customization differs: Python uses keyword args, Stata nests options in <code>graph_options()</code>, R uses dot-separated parameter names."
                 }
               ]
             }

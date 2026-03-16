@@ -387,12 +387,12 @@
 <span class="code-comment">#   config.py            # Settings, paths</span>
 
 <span class="code-comment"># In config.py:</span>
-<span class="code-keyword">from</span> pathlib <span class="code-keyword">import</span> Path
+<span class="code-tooltip" data-tip="IMPORT PATHLIB: Path is Python's modern way to handle file paths. It works on Windows, Mac, and Linux without worrying about / vs \\ separators."><span class="code-keyword">from</span> pathlib <span class="code-keyword">import</span> Path</span>
 
-<span class="code-tooltip" data-tip="PROJECT_ROOT: Path(__file__) is the current file's location. .parent.parent goes up two folders (e.g., from code/config.py to the project root). All other paths are built relative to this root so the project works on any computer.">PROJECT_ROOT</span> = Path(__file__).parent.parent
+<span class="code-tooltip" data-tip="PROJECT_ROOT: Path(__file__) is the current file's location. .parent.parent goes up two folders (e.g., from code/config.py to the project root). All other paths are built relative to this root so the project works on any computer.">PROJECT_ROOT = Path(__file__).parent.parent
 DATA_RAW = PROJECT_ROOT / <span class="code-string">"data"</span> / <span class="code-string">"raw"</span>
 DATA_PROCESSED = PROJECT_ROOT / <span class="code-string">"data"</span> / <span class="code-string">"processed"</span>
-OUTPUT = PROJECT_ROOT / <span class="code-string">"output"</span></code></pre>
+OUTPUT = PROJECT_ROOT / <span class="code-string">"output"</span></span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
@@ -405,8 +405,8 @@ OUTPUT = PROJECT_ROOT / <span class="code-string">"output"</span></code></pre>
 
 <span class="code-tooltip" data-tip="GLOBAL: Creates a macro called PROJECT storing your project folder path. All other paths ($CODE, $DATA, $OUTPUT) are defined relative to this, so changing one path updates everything.">global PROJECT</span> <span class="code-string">"/Users/researcher/my_project"</span>
 <span class="code-tooltip" data-tip="GLOBAL: Defines the code folder path using $PROJECT. Any do-file can reference $CODE to find scripts, ensuring all paths stay consistent across your project.">global CODE</span>    <span class="code-string">"$PROJECT/code"</span>
-global DATA    <span class="code-string">"$PROJECT/data"</span>
-global OUTPUT  <span class="code-string">"$PROJECT/output"</span>
+<span class="code-tooltip" data-tip="GLOBAL PATHS: Defines the data and output folder paths relative to $PROJECT. Any do-file can reference $DATA and $OUTPUT, keeping all paths consistent.">global DATA    <span class="code-string">"$PROJECT/data"</span>
+global OUTPUT  <span class="code-string">"$PROJECT/output"</span></span>
 
 <span class="code-comment">* Run scripts in order</span>
 <span class="code-tooltip" data-tip="DO: Runs the data import script. Executing all scripts from this master do-file ensures they run in the correct order and makes your entire analysis reproducible with one click.">do</span> <span class="code-string">"$CODE/01_import_data.do"</span>
@@ -670,42 +670,108 @@ MIT License (or appropriate license)</code></pre>
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<pre><code><span class="code-tooltip" data-tip="IMPORT PANDAS: Loads the pandas library for DataFrame operations. The 'pd' alias is standard convention used for calls like pd.read_stata() and df.describe()."><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd</span>
+<span class="code-tooltip" data-tip="IMPORT NUMPY: Loads numpy for numerical operations. The 'np' alias is standard, used for np.log() and np.nan throughout this module."><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np</span>
 
 <span class="code-comment"># Load the NLSW88 dataset (National Longitudinal Survey of Young Women, 1988)</span>
-df = pd.read_stata(<span class="code-string">'https://www.stata-press.com/data/r18/nlsw88.dta'</span>)
+<span class="code-tooltip" data-tip="READ_STATA: Loads a Stata .dta file from a URL into a pandas DataFrame. This dataset contains labor market data (wages, education, experience) for 2,246 women from the 1988 National Longitudinal Survey.">df = pd.read_stata(<span class="code-string">'https://www.stata-press.com/data/r18/nlsw88.dta'</span>)</span>
 
 <span class="code-comment"># Rename columns to match this module's examples</span>
-df = df.rename(columns={<span class="code-string">'wage'</span>: <span class="code-string">'income'</span>, <span class="code-string">'grade'</span>: <span class="code-string">'education'</span>,
-                        <span class="code-string">'ttl_exp'</span>: <span class="code-string">'experience'</span>})
-<span class="code-keyword">print</span>(<span class="code-string">f"Loaded {len(df)} observations and {len(df.columns)} variables"</span>)
-<span class="code-keyword">print</span>(df.head())</code></pre>
+<span class="code-tooltip" data-tip="RENAME: Changes column names for clarity. 'wage' becomes 'income', 'grade' becomes 'education', and 'ttl_exp' becomes 'experience' — more intuitive names for the module examples.">df = df.rename(columns={<span class="code-string">'wage'</span>: <span class="code-string">'income'</span>, <span class="code-string">'grade'</span>: <span class="code-string">'education'</span>,
+                        <span class="code-string">'ttl_exp'</span>: <span class="code-string">'experience'</span>})</span>
+<span class="code-tooltip" data-tip="VERIFY: Prints the number of observations and variables, then shows the first 5 rows. Always inspect data immediately after loading to catch issues early."><span class="code-keyword">print</span>(<span class="code-string">f"Loaded {len(df)} observations and {len(df.columns)} variables"</span>)
+<span class="code-keyword">print</span>(df.head())</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Load the NLSW88 dataset (National Longitudinal Survey of Young Women, 1988)</span>
-<span class="code-keyword">webuse</span> nlsw88, clear
+<span class="code-tooltip" data-tip="WEBUSE: Loads a dataset from Stata's online repository. 'clear' removes any data currently in memory — Stata holds one dataset at a time."><span class="code-keyword">webuse</span> nlsw88, clear</span>
 
 <span class="code-comment">* Rename variables to match this module's examples</span>
-<span class="code-keyword">rename</span> wage income
+<span class="code-tooltip" data-tip="RENAME: Changes variable names to more intuitive labels. 'wage' becomes 'income', 'grade' becomes 'education', and 'ttl_exp' becomes 'experience' for clarity."><span class="code-keyword">rename</span> wage income
 <span class="code-keyword">rename</span> grade education
-<span class="code-keyword">rename</span> ttl_exp experience
-<span class="code-keyword">describe</span>, short</code></pre>
+<span class="code-keyword">rename</span> ttl_exp experience</span>
+<span class="code-tooltip" data-tip="DESCRIBE SHORT: Displays a compact summary — number of observations, variables, and storage size. Always check dimensions after loading data."><span class="code-keyword">describe</span>, short</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># Load the NLSW88 dataset (National Longitudinal Survey of Young Women, 1988)</span>
-<span class="code-function">library</span>(tidyverse)
-df &lt;- haven::read_dta(<span class="code-string">"https://www.stata-press.com/data/r18/nlsw88.dta"</span>)
+<span class="code-tooltip" data-tip="LIBRARY(TIDYVERSE): Loads the tidyverse collection including dplyr for rename() and the pipe operator (%>%)."><span class="code-function">library</span>(tidyverse)</span>
+<span class="code-tooltip" data-tip="READ_DTA: Loads a Stata .dta file from a URL using the haven package. The :: operator calls the function without loading the full package. Returns a tibble.">df &lt;- haven::read_dta(<span class="code-string">"https://www.stata-press.com/data/r18/nlsw88.dta"</span>)</span>
 
 <span class="code-comment"># Rename columns to match this module's examples</span>
-df &lt;- df %&gt;% rename(income = wage, education = grade,
-                    experience = ttl_exp)
-<span class="code-function">cat</span>(<span class="code-string">"Loaded"</span>, nrow(df), <span class="code-string">"observations and"</span>, ncol(df), <span class="code-string">"variables\n"</span>)
-<span class="code-function">head</span>(df)</code></pre>
+<span class="code-tooltip" data-tip="RENAME: Changes column names using new_name = old_name syntax inside the pipe. Makes variable names more intuitive for the module's analysis examples.">df &lt;- df %&gt;% rename(income = wage, education = grade,
+                    experience = ttl_exp)</span>
+<span class="code-tooltip" data-tip="VERIFY: Prints the number of rows and columns, then shows the first 6 rows. Always inspect data immediately after loading."><span class="code-function">cat</span>(<span class="code-string">"Loaded"</span>, nrow(df), <span class="code-string">"observations and"</span>, ncol(df), <span class="code-string">"variables\n"</span>)
+<span class="code-function">head</span>(df)</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="setup-data-05" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">&gt;&gt;&gt; print(f"Loaded {len(df)} observations and {len(df.columns)} variables")</span>
+Loaded <span class="out-num">2246</span> observations and <span class="out-num">17</span> variables
+<span class="out-green">&gt;&gt;&gt; print(df.head())</span>
+   idcode  age  race  married  never_married  education  collgrad  south  \
+0    <span class="out-num">1</span>      <span class="out-num">37</span>  black      <span class="out-num">1</span>              <span class="out-num">0</span>         <span class="out-num">12</span>         <span class="out-num">0</span>      <span class="out-num">0</span>
+1    <span class="out-num">2</span>      <span class="out-num">37</span>  black      <span class="out-num">1</span>              <span class="out-num">0</span>         <span class="out-num">12</span>         <span class="out-num">0</span>      <span class="out-num">0</span>
+2    <span class="out-num">3</span>      <span class="out-num">42</span>  white      <span class="out-num">0</span>              <span class="out-num">1</span>         <span class="out-num">12</span>         <span class="out-num">0</span>      <span class="out-num">0</span>
+3    <span class="out-num">4</span>      <span class="out-num">43</span>  white      <span class="out-num">1</span>              <span class="out-num">0</span>         <span class="out-num">17</span>         <span class="out-num">1</span>      <span class="out-num">0</span>
+4    <span class="out-num">5</span>      <span class="out-num">42</span>  white      <span class="out-num">1</span>              <span class="out-num">0</span>         <span class="out-num">12</span>         <span class="out-num">0</span>      <span class="out-num">1</span>
+
+   smsa  c_city  industry  occupation  union    income  hours  experience  tenure
+0     <span class="out-num">1</span>       <span class="out-num">0</span>         <span class="out-num">8</span>           <span class="out-num">2</span>    <span class="out-num">1</span>  <span class="out-num">6.8399</span>     <span class="out-num">48</span>      <span class="out-num">17.833</span>    <span class="out-num">2.833</span>
+1     <span class="out-num">1</span>       <span class="out-num">0</span>         <span class="out-num">5</span>           <span class="out-num">2</span>    <span class="out-num">1</span>  <span class="out-num">5.5166</span>     <span class="out-num">35</span>      <span class="out-num">17.833</span>    <span class="out-num">2.417</span>
+2     <span class="out-num">0</span>       <span class="out-num">0</span>        <span class="out-num">11</span>           <span class="out-num">9</span>    <span class="out-num">0</span>  <span class="out-num">3.6678</span>     <span class="out-num">40</span>      <span class="out-num">22.500</span>    <span class="out-num">17.333</span>
+3     <span class="out-num">1</span>       <span class="out-num">0</span>        <span class="out-num">11</span>           <span class="out-num">3</span>  NaN  <span class="out-num">11.7318</span>     <span class="out-num">45</span>      <span class="out-num">24.667</span>    <span class="out-num">12.500</span>
+4     <span class="out-num">0</span>       <span class="out-num">0</span>        <span class="out-num">5</span>           <span class="out-num">3</span>    <span class="out-num">0</span>  <span class="out-num">5.2527</span>     <span class="out-num">40</span>      <span class="out-num">21.167</span>    <span class="out-num">5.000</span></div>
+        </div>
+
+        <div class="output-simulation" data-output="setup-data-05" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. webuse nlsw88, clear</span>
+(NLSW, 1988 extract)
+
+<span class="out-green">. rename wage income</span>
+
+<span class="out-green">. rename grade education</span>
+
+<span class="out-green">. rename ttl_exp experience</span>
+
+<span class="out-green">. describe, short</span>
+
+Contains data from https://www.stata-press.com/data/r18/nlsw88.dta
+  Observations:         <span class="out-num">2,246</span>
+      Variables:            <span class="out-num">17</span>
+Sorted by:</div>
+        </div>
+
+        <div class="output-simulation" data-output="setup-data-05" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">&gt; cat("Loaded", nrow(df), "observations and", ncol(df), "variables\n")</span>
+Loaded <span class="out-num">2246</span> observations and <span class="out-num">17</span> variables
+<span class="out-green">&gt; head(df)</span>
+# A tibble: 6 x 17
+  idcode   age race  married never_married education collgrad south  smsa c_city
+   &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;   &lt;dbl&gt;         &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
+1      <span class="out-num">1</span>    <span class="out-num">37</span> black       <span class="out-num">1</span>             <span class="out-num">0</span>        <span class="out-num">12</span>        <span class="out-num">0</span>     <span class="out-num">0</span>     <span class="out-num">1</span>      <span class="out-num">0</span>
+2      <span class="out-num">2</span>    <span class="out-num">37</span> black       <span class="out-num">1</span>             <span class="out-num">0</span>        <span class="out-num">12</span>        <span class="out-num">0</span>     <span class="out-num">0</span>     <span class="out-num">1</span>      <span class="out-num">0</span>
+3      <span class="out-num">3</span>    <span class="out-num">42</span> white       <span class="out-num">0</span>             <span class="out-num">1</span>        <span class="out-num">12</span>        <span class="out-num">0</span>     <span class="out-num">0</span>     <span class="out-num">0</span>      <span class="out-num">0</span>
+4      <span class="out-num">4</span>    <span class="out-num">43</span> white       <span class="out-num">1</span>             <span class="out-num">0</span>        <span class="out-num">17</span>        <span class="out-num">1</span>     <span class="out-num">0</span>     <span class="out-num">1</span>      <span class="out-num">0</span>
+5      <span class="out-num">5</span>    <span class="out-num">42</span> white       <span class="out-num">1</span>             <span class="out-num">0</span>        <span class="out-num">12</span>        <span class="out-num">0</span>     <span class="out-num">1</span>     <span class="out-num">0</span>      <span class="out-num">0</span>
+6      <span class="out-num">6</span>    <span class="out-num">39</span> white       <span class="out-num">1</span>             <span class="out-num">0</span>        <span class="out-num">12</span>        <span class="out-num">0</span>     <span class="out-num">0</span>     <span class="out-num">1</span>      <span class="out-num">0</span>
+# ... with 7 more variables: industry &lt;dbl&gt;, occupation &lt;dbl&gt;, union &lt;dbl&gt;,
+#   income &lt;dbl&gt;, hours &lt;dbl&gt;, experience &lt;dbl&gt;, tenure &lt;dbl&gt;</div>
         </div>
 
         <div class="grammar-teach-section">
@@ -1621,8 +1687,8 @@ sample estimates:
 <span class="code-tooltip" data-tip="summary() displays coefficients, standard errors, t-values, p-values, R-squared, and F-statistic">summary(model)</span>
 
 <span class="code-comment"># Robust standard errors (using sandwich package)</span>
-<span class="code-keyword">library</span>(sandwich)
-<span class="code-keyword">library</span>(lmtest)
+<span class="code-tooltip" data-tip="SANDWICH + LMTEST: sandwich provides robust variance-covariance estimators (vcovHC), and lmtest provides coeftest() for displaying results with those robust standard errors."><span class="code-keyword">library</span>(sandwich)
+<span class="code-keyword">library</span>(lmtest)</span>
 <span class="code-tooltip" data-tip="coeftest() with vcovHC() applies heteroskedasticity-consistent (robust) standard errors to your model">coeftest(model, vcov = vcovHC(model, type = <span class="code-string">"HC1"</span>))</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
@@ -1882,7 +1948,7 @@ Prob (F-statistic):           2.45e-77
 <span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
 <span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
 
-model = smf.ols(<span class="code-string">'income ~ education + experience'</span>, data=df).fit()
+<span class="code-tooltip" data-tip="OLS FIT: Runs an OLS regression of income on education and experience, and .fit() estimates the coefficients. The fitted model object stores SSR, ESS, R-squared, and other diagnostics.">model = smf.ols(<span class="code-string">'income ~ education + experience'</span>, data=df).fit()</span>
 
 <span class="code-comment"># Direct access from model object</span>
 <span class="code-tooltip" data-tip="RESULTS: statsmodels stores SSR (sum of squared residuals), ESS, and R-squared directly in the fitted model object, so you can access them without manual calculation.">print(f<span class="code-string">"SSR (Residual SS):  {model.ssr:.4f}"</span>)
@@ -1892,9 +1958,9 @@ print(f<span class="code-string">"R-squared:          {model.rsquared:.4f}"</spa
 print(f<span class="code-string">"Adj. R-squared:     {model.rsquared_adj:.4f}"</span>)</span>
 
 <span class="code-comment"># Manual calculation (for understanding)</span>
-y = df[<span class="code-string">'income'</span>]
+<span class="code-tooltip" data-tip="EXTRACT VECTORS: y is the actual outcome, y_hat (fittedvalues) are the model's predictions, and e (resid) are the prediction errors. These are the building blocks for computing TSS, ESS, and SSR manually.">y = df[<span class="code-string">'income'</span>]
 y_hat = model.fittedvalues
-e = model.resid
+e = model.resid</span>
 
 <span class="code-tooltip" data-tip="DECOMPOSITION: Manually computes the three sums of squares. TSS = total variation in Y, ESS = variation explained by the model, SSR = unexplained variation (residuals). TSS always equals ESS + SSR.">SSR = np.sum(e**2)
 TSS = np.sum((y - y.mean())**2)
@@ -1905,15 +1971,15 @@ R2 = 1 - SSR / TSS</span>
 print(f<span class="code-string">"TSS = {TSS:.4f}, ESS + SSR = {ESS + SSR:.4f}"</span>)
 
 <span class="code-comment"># Adjusted R-squared</span>
-n = len(y)
+<span class="code-tooltip" data-tip="ADJUSTED R-SQUARED: Penalizes R-squared for adding more regressors. (n-1)/(n-k-1) shrinks R2 when k (number of regressors) is large relative to n (sample size). Prevents overfitting by rewarding only variables that genuinely improve fit.">n = len(y)
 k = model.df_model  <span class="code-comment"># number of regressors</span>
-adj_R2 = 1 - (1 - R2) * (n - 1) / (n - k - 1)</code></pre>
+adj_R2 = 1 - (1 - R2) * (n - 1) / (n - k - 1)</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Extracting SSR, ESS, TSS, R-squared</span>
 
-reg income education experience
+<span class="code-tooltip" data-tip="OLS REGRESSION: Estimates income = b0 + b1*education + b2*experience + error. After running, Stata stores results (coefficients, R-squared, SSR, etc.) in e() scalars.">reg income education experience</span>
 
 <span class="code-comment">* All stored results accessible via ereturn list</span>
 <span class="code-tooltip" data-tip="ERETURN LIST: After running a regression, this displays all stored results (coefficients, R-squared, F-statistic, etc.) that Stata saved. Use e(name) to access specific values.">ereturn list</span>
@@ -1930,9 +1996,9 @@ display "Degrees of freedom: " e(df_r)</span>
 display "TSS = " e(mss) + e(rss)
 
 <span class="code-comment">* Manual calculation from residuals</span>
-predict residuals, residuals
-predict yhat, xb
-quietly summarize income
+<span class="code-tooltip" data-tip="PREDICT: Creates new variables from the regression results. 'residuals' stores the prediction errors (y - y_hat) and 'xb' stores the predicted values (y_hat). These are the building blocks for TSS, ESS, and SSR.">predict residuals, residuals
+predict yhat, xb</span>
+<span class="code-tooltip" data-tip="SUMMARIZE: Computes the mean income, which is needed to calculate the squared deviations in TSS and ESS.">quietly summarize income</span>
 <span class="code-tooltip" data-tip="MANUAL CALCULATION: gen creates the squared deviation variable for each observation. After summing these with quietly summarize, you get TSS (total sum of squares) - the total variation in income.">gen dev_sq = (income - r(mean))^2
 gen res_sq = residuals^2
 gen fit_sq = (yhat - r(mean))^2
@@ -1944,7 +2010,7 @@ display "SSR = " r(sum)</span></code></pre>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Extracting SSR, ESS, TSS, R-squared</span>
-model <- lm(income ~ education + experience, data = df)
+<span class="code-tooltip" data-tip="OLS FIT: Estimates income = b0 + b1*education + b2*experience + error using lm(). The fitted model stores coefficients, residuals, and fitted values needed for decomposition.">model <- lm(income ~ education + experience, data = df)</span>
 
 <span class="code-comment"># Extract key objects</span>
 <span class="code-tooltip" data-tip="EXTRACT COMPONENTS: residuals(model) gets the prediction errors, fitted(model) gets the predicted values. These are the building blocks for computing TSS, ESS, and SSR manually.">e_hat  <- residuals(model)      <span class="code-comment"># residual vector</span>
@@ -1952,25 +2018,25 @@ y_hat  <- fitted(model)          <span class="code-comment"># predicted values</
 y      <- df$income              <span class="code-comment"># actual outcome</span></span>
 
 <span class="code-comment"># Manual calculations</span>
-SSR <- sum(e_hat^2)                         <span class="code-comment"># Sum of Squared Residuals</span>
+<span class="code-tooltip" data-tip="DECOMPOSITION: SSR = sum of squared residuals (unexplained variation), TSS = total variation in income around its mean, ESS = variation captured by the model. The identity TSS = ESS + SSR always holds with an intercept.">SSR <- sum(e_hat^2)                         <span class="code-comment"># Sum of Squared Residuals</span>
 TSS <- sum((y - mean(y))^2)                 <span class="code-comment"># Total Sum of Squares</span>
-ESS <- sum((y_hat - mean(y))^2)             <span class="code-comment"># Explained Sum of Squares</span>
+ESS <- sum((y_hat - mean(y))^2)             <span class="code-comment"># Explained Sum of Squares</span></span>
 
 <span class="code-comment"># Verify: TSS = ESS + SSR</span>
 <span class="code-tooltip" data-tip="VERIFICATION: Confirms that TSS = ESS + SSR, the fundamental OLS decomposition. This identity always holds when the regression includes an intercept term.">cat("TSS =", TSS, " ESS + SSR =", ESS + SSR, "\n")</span>
 
 <span class="code-comment"># R-squared and adjusted R-squared</span>
-R2 <- 1 - SSR / TSS
+<span class="code-tooltip" data-tip="R-SQUARED AND ADJUSTED: R2 = 1 - SSR/TSS measures the fraction of variation explained. Adjusted R2 penalizes for adding regressors — it only increases if a new variable genuinely improves fit.">R2 <- 1 - SSR / TSS
 n  <- nrow(df)
 k  <- length(coef(model)) - 1   <span class="code-comment"># number of regressors (excl. intercept)</span>
-adj_R2 <- 1 - (1 - R2) * (n - 1) / (n - k - 1)
+adj_R2 <- 1 - (1 - R2) * (n - 1) / (n - k - 1)</span>
 
 <span class="code-comment"># Compare with built-in</span>
 <span class="code-tooltip" data-tip="R-SQUARED: Compares the manually calculated R-squared (ESS/TSS) with the value stored in summary(model)$r.squared. They should match exactly, confirming your understanding of the formula.">cat("Manual R2:", R2, " summary R2:", summary(model)$r.squared, "\n")
 cat("Manual adj-R2:", adj_R2, " summary adj-R2:", summary(model)$adj.r.squared, "\n")</span>
 
 <span class="code-comment"># Alternative: deviance() gives SSR directly</span>
-deviance(model)  <span class="code-comment"># same as SSR</span></code></pre>
+<span class="code-tooltip" data-tip="DEVIANCE: R's built-in function that returns the SSR (sum of squared residuals) directly from the model object, saving you the manual calculation above.">deviance(model)</span>  <span class="code-comment"># same as SSR</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -2089,7 +2155,7 @@ Manual adj-R2: 0.1642346  summary adj-R2: 0.1642346
 <span class="code-keyword">import</span> statsmodels.formula.api <span class="code-keyword">as</span> smf
 <span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
 
-model = smf.ols(<span class="code-string">'income ~ education + experience + age'</span>, data=df).fit()
+<span class="code-tooltip" data-tip="OLS FIT: Estimates income as a function of education, experience, and age. The fitted model is used below for joint significance (F) tests on subsets of coefficients.">model = smf.ols(<span class="code-string">'income ~ education + experience + age'</span>, data=df).fit()</span>
 
 <span class="code-comment"># Joint test: education AND experience = 0</span>
 <span class="code-tooltip" data-tip="JOINT F-TEST: Tests whether education and experience are jointly significant (both equal zero). A significant result means at least one of them matters for predicting income.">f_result = model.f_test(<span class="code-string">'education = 0, experience = 0'</span>)</span>
@@ -2100,14 +2166,14 @@ print(f_result)
 print(f_restrict)
 
 <span class="code-comment"># Overall F-test (all regressors jointly = 0)</span>
-print(f<span class="code-string">"Overall F-statistic: {model.fvalue:.4f}"</span>)
-print(f<span class="code-string">"Overall F p-value:   {model.f_pvalue:.6f}"</span>)</code></pre>
+<span class="code-tooltip" data-tip="OVERALL F-TEST: model.fvalue tests whether ALL regressors are jointly zero (i.e., whether the model explains anything). A significant F means at least one variable matters.">print(f<span class="code-string">"Overall F-statistic: {model.fvalue:.4f}"</span>)
+print(f<span class="code-string">"Overall F p-value:   {model.f_pvalue:.6f}"</span>)</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: F-tests and joint significance</span>
 
-reg income education experience age
+<span class="code-tooltip" data-tip="OLS REGRESSION: Estimates income as a function of education, experience, and age. Results are stored in e() for use by the test commands below.">reg income education experience age</span>
 
 <span class="code-comment">* Joint test: education AND experience = 0</span>
 <span class="code-tooltip" data-tip="TEST: Jointly tests whether education and experience coefficients are both zero. A low p-value means these variables collectively matter for predicting income.">test education experience</span>
@@ -2116,7 +2182,7 @@ reg income education experience age
 <span class="code-tooltip" data-tip="EQUALITY TEST: Tests whether education and experience have equal effects on income. If rejected, one variable has a significantly larger impact than the other.">test education = experience</span>
 
 <span class="code-comment">* Multiple restrictions at once</span>
-test (education = 0) (experience = 0) (age = 0)
+<span class="code-tooltip" data-tip="JOINT TEST ALL: Tests whether all three variables are jointly zero — equivalent to the overall F-test. Each restriction in parentheses is tested simultaneously.">test (education = 0) (experience = 0) (age = 0)</span>
 
 <span class="code-comment">* Wald test (equivalent for linear models)</span>
 <span class="code-tooltip" data-tip="TESTPARM: Tests whether the listed variables are jointly significant. Similar to 'test' but designed for testing groups of related coefficients (e.g., all education dummies).">testparm education experience</span></code></pre>
@@ -2124,9 +2190,9 @@ test (education = 0) (experience = 0) (age = 0)
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: F-tests and joint significance</span>
-<span class="code-keyword">library</span>(car)
+<span class="code-tooltip" data-tip="LIBRARY(CAR): Loads the 'Companion to Applied Regression' package, which provides linearHypothesis() for testing linear restrictions on coefficients."><span class="code-keyword">library</span>(car)</span>
 
-model <- lm(income ~ education + experience + age, data = df)
+<span class="code-tooltip" data-tip="OLS FIT: Estimates income as a function of education, experience, and age. The fitted model is used below for joint significance (F) tests.">model <- lm(income ~ education + experience + age, data = df)</span>
 
 <span class="code-comment"># Joint test: education AND experience = 0</span>
 <span class="code-tooltip" data-tip="LINEARHYPOTHESIS: Tests whether education and experience are jointly significant (both coefficients equal zero). Pass each restriction as a string in a character vector.">linearHypothesis(model, c("education = 0", "experience = 0"))</span>
@@ -2135,7 +2201,7 @@ model <- lm(income ~ education + experience + age, data = df)
 <span class="code-tooltip" data-tip="EQUALITY TEST: Tests whether education and experience have the same coefficient (H0: their difference equals zero). Rejection means one has a significantly larger effect.">linearHypothesis(model, "education = experience")</span>
 
 <span class="code-comment"># With robust standard errors</span>
-<span class="code-keyword">library</span>(sandwich)
+<span class="code-tooltip" data-tip="LIBRARY(SANDWICH): Loads the sandwich package which provides heteroskedasticity-consistent (robust) variance-covariance estimators like vcovHC()."><span class="code-keyword">library</span>(sandwich)</span>
 <span class="code-tooltip" data-tip="ROBUST F-TEST: Passing a vcov matrix (e.g., HC1 robust standard errors) makes the joint test valid even when error variance differs across observations.">linearHypothesis(model, c("education = 0", "experience = 0"),
                  vcov = vcovHC(model, type = "HC1"))</span>
 
@@ -2188,8 +2254,8 @@ Model 1: restricted model
 Model 2: income ~ education + experience + age
 
   Res.Df      RSS Df Sum of Sq      F    Pr(>F)
-1   2244 73847.05
-2   2242 61662.45  2   12184.60 198.34 2.45e-79 ***
+1   2244 72571.74
+2   2242 61662.45  2   10909.29 198.34 2.45e-79 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 

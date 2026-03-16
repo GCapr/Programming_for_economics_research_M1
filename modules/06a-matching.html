@@ -288,36 +288,36 @@
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Propensity Score Matching</span>
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LogisticRegression
-<span class="code-keyword">from</span> sklearn.neighbors <span class="code-keyword">import</span> NearestNeighbors
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for data manipulation and numpy for numerical operations."><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np</span>
+<span class="code-tooltip" data-tip="IMPORT: Loads LogisticRegression to estimate propensity scores and NearestNeighbors to find the closest match for each treated unit."><span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LogisticRegression
+<span class="code-keyword">from</span> sklearn.neighbors <span class="code-keyword">import</span> NearestNeighbors</span>
 
 <span class="code-comment"># Step 1: Estimate propensity scores</span>
-X = df[[<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>]]
-y = df[<span class="code-string">'treatment'</span>]
+<span class="code-tooltip" data-tip="SETUP: Selects the covariates (age, income, education) as predictors and the treatment indicator as the target for the propensity score model.">X = df[[<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>]]
+y = df[<span class="code-string">'treatment'</span>]</span>
 
-<span class="code-tooltip" data-tip="MODEL: Trains a logistic regression to estimate each unit's propensity score — the probability of receiving treatment given age, income, and education">model = LogisticRegression(max_iter=1000)
+<span class="code-tooltip" data-tip="MODEL: Trains a logistic regression to estimate each unit's propensity score — the probability of receiving treatment given age, income, and education.">model = LogisticRegression(max_iter=1000)
 model.fit(X, y)</span>
-df[<span class="code-string">'pscore'</span>] = model.predict_proba(X)[:, 1]
+<span class="code-tooltip" data-tip="PREDICT: Stores each unit's estimated probability of being treated (column index 1 from predict_proba) as a new column in the dataframe.">df[<span class="code-string">'pscore'</span>] = model.predict_proba(X)[:, 1]</span>
 
 <span class="code-comment"># Step 2: Match treated to nearest control</span>
-treated = df[df[<span class="code-string">'treatment'</span>] == 1]
-control = df[df[<span class="code-string">'treatment'</span>] == 0]
+<span class="code-tooltip" data-tip="SPLIT: Separates the data into treated and control groups so we can match each treated unit to the closest control.">treated = df[df[<span class="code-string">'treatment'</span>] == 1]
+control = df[df[<span class="code-string">'treatment'</span>] == 0]</span>
 
-<span class="code-tooltip" data-tip="MATCHING: For each treated unit, finds the single closest control unit based on propensity score distance, so we compare treated individuals to similar untreated ones">nn = NearestNeighbors(n_neighbors=1, metric=<span class="code-string">'euclidean'</span>)
+<span class="code-tooltip" data-tip="MATCHING: For each treated unit, finds the single closest control unit based on propensity score distance, so we compare treated individuals to similar untreated ones.">nn = NearestNeighbors(n_neighbors=1, metric=<span class="code-string">'euclidean'</span>)
 nn.fit(control[[<span class="code-string">'pscore'</span>]])</span>
-distances, indices = nn.kneighbors(treated[[<span class="code-string">'pscore'</span>]])
+<span class="code-tooltip" data-tip="QUERY: Returns the distance to and index of the nearest control unit for each treated unit's propensity score.">distances, indices = nn.kneighbors(treated[[<span class="code-string">'pscore'</span>]])</span>
 
 <span class="code-comment"># Step 3: Create matched sample</span>
-matched_control = control.iloc[indices.flatten()]
+<span class="code-tooltip" data-tip="BUILD: Extracts the matched control observations using the indices found above and stacks them with the treated group into one matched dataframe.">matched_control = control.iloc[indices.flatten()]
 matched_df = pd.concat([treated.reset_index(drop=True),
                         matched_control.reset_index(drop=True)],
-                       keys=[<span class="code-string">'treated'</span>, <span class="code-string">'control'</span>])
+                       keys=[<span class="code-string">'treated'</span>, <span class="code-string">'control'</span>])</span>
 
 <span class="code-comment"># Step 4: Estimate ATT</span>
-att = treated[<span class="code-string">'outcome'</span>].mean() - matched_control[<span class="code-string">'outcome'</span>].mean()
-print(f<span class="code-string">"ATT: {att:.3f}"</span>)</code></pre>
+<span class="code-tooltip" data-tip="ATT: Computes the Average Treatment Effect on the Treated as the difference in mean outcomes between treated units and their matched controls.">att = treated[<span class="code-string">'outcome'</span>].mean() - matched_control[<span class="code-string">'outcome'</span>].mean()
+print(f<span class="code-string">"ATT: {att:.3f}"</span>)</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
@@ -328,38 +328,38 @@ print(f<span class="code-string">"ATT: {att:.3f}"</span>)</code></pre>
     atet nn(1)</span>
 
 <span class="code-comment">* With caliper (maximum allowed distance)</span>
-teffects psmatch (outcome) (treatment age income education), ///
-    atet nn(1) caliper(0.1)
+<span class="code-tooltip" data-tip="CALIPER: Adds a maximum distance of 0.1 — any treated unit without a control within that propensity score range is dropped rather than poorly matched.">teffects psmatch (outcome) (treatment age income education), ///
+    atet nn(1) caliper(0.1)</span>
 
 <span class="code-comment">* Method 2: psmatch2 (community-contributed, more options)</span>
 <span class="code-comment">* ssc install psmatch2</span>
-<span class="code-tooltip" data-tip="STATA: Community package that matches using a logit model for propensity scores and restricts to the common support region where treated and control groups overlap">psmatch2 treatment age income education, ///
+<span class="code-tooltip" data-tip="STATA: Community package that matches using a logit model for propensity scores and restricts to the common support region where treated and control groups overlap.">psmatch2 treatment age income education, ///
     outcome(outcome) logit common</span>
 
 <span class="code-comment">* Check balance after matching</span>
-pstest age income education, treated(treatment)</code></pre>
+<span class="code-tooltip" data-tip="BALANCE: Tests whether covariates are balanced between treated and matched control groups — large remaining differences suggest the matching failed to create comparable groups.">pstest age income education, treated(treatment)</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Propensity Score Matching with MatchIt</span>
-<span class="code-keyword">library</span>(MatchIt)
-<span class="code-keyword">library</span>(cobalt)
+<span class="code-tooltip" data-tip="LIBRARY: Loads MatchIt for matching and cobalt for balance diagnostics."><span class="code-keyword">library</span>(MatchIt)
+<span class="code-keyword">library</span>(cobalt)</span>
 
 <span class="code-comment"># Estimate propensity scores and match</span>
-<span class="code-tooltip" data-tip="R: Estimates propensity scores via logistic regression and pairs each treated unit with its closest control, with a caliper of 0.1 to prevent poor matches">m.out <- matchit(treatment ~ age + income + education,
+<span class="code-tooltip" data-tip="R: Estimates propensity scores via logistic regression and pairs each treated unit with its closest control, with a caliper of 0.1 to prevent poor matches.">m.out <- matchit(treatment ~ age + income + education,
                  data = df,
                  method = "nearest",
                  distance = "glm",  <span class="code-comment"># logistic regression</span>
                  caliper = 0.1)</span>
 
 <span class="code-comment"># Check match quality</span>
-summary(m.out)
+<span class="code-tooltip" data-tip="SUMMARY: Displays matching diagnostics including the number of matched pairs, balance statistics, and sample sizes before and after matching.">summary(m.out)</span>
 
 <span class="code-comment"># Extract matched data</span>
-matched_df <- match.data(m.out)
+<span class="code-tooltip" data-tip="EXTRACT: Creates a new dataframe containing only the matched treated and control units, along with matching weights and subclass indicators.">matched_df <- match.data(m.out)</span>
 
 <span class="code-comment"># Estimate ATT on matched sample</span>
-<span class="code-tooltip" data-tip="ATT: Regresses outcome on treatment using only the matched pairs, so the coefficient on treatment is the estimated causal effect on the treated">att_model <- lm(outcome ~ treatment, data = matched_df,
+<span class="code-tooltip" data-tip="ATT: Regresses outcome on treatment using only the matched pairs, so the coefficient on treatment is the estimated causal effect on the treated.">att_model <- lm(outcome ~ treatment, data = matched_df,
                 weights = weights)
 summary(att_model)</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
@@ -590,29 +590,29 @@ treatment     0.3389     0.0891   3.803  0.00016 ***</div>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Coarsened Exact Matching</span>
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas and numpy for data manipulation and numerical operations."><span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np</span>
 
 <span class="code-comment"># Step 1: Coarsen variables into bins</span>
-<span class="code-tooltip" data-tip="COARSEN: Converts continuous variables into broad bins (e.g., age groups 18-30, 30-45, etc.) so treated and control units can be exactly matched within the same bin">df[<span class="code-string">'age_bin'</span>] = pd.cut(df[<span class="code-string">'age'</span>], bins=[18, 30, 45, 60, 100])
+<span class="code-tooltip" data-tip="COARSEN: Converts continuous variables into broad bins (e.g., age groups 18-30, 30-45, etc.) so treated and control units can be exactly matched within the same bin.">df[<span class="code-string">'age_bin'</span>] = pd.cut(df[<span class="code-string">'age'</span>], bins=[18, 30, 45, 60, 100])
 df[<span class="code-string">'income_bin'</span>] = pd.cut(df[<span class="code-string">'income'</span>], bins=5)
 df[<span class="code-string">'edu_bin'</span>] = df[<span class="code-string">'education'</span>]  <span class="code-comment"># already categorical</span></span>
 
 <span class="code-comment"># Step 2: Create strata</span>
-df[<span class="code-string">'strata'</span>] = df.groupby([<span class="code-string">'age_bin'</span>, <span class="code-string">'income_bin'</span>, <span class="code-string">'edu_bin'</span>]).ngroup()
+<span class="code-tooltip" data-tip="STRATA: Assigns a unique group number to each combination of coarsened bins, creating strata within which treated and control units will be compared.">df[<span class="code-string">'strata'</span>] = df.groupby([<span class="code-string">'age_bin'</span>, <span class="code-string">'income_bin'</span>, <span class="code-string">'edu_bin'</span>]).ngroup()</span>
 
 <span class="code-comment"># Step 3: Keep only matched strata (both treated and control)</span>
-strata_counts = df.groupby([<span class="code-string">'strata'</span>, <span class="code-string">'treatment'</span>]).size().unstack(fill_value=0)
-<span class="code-tooltip" data-tip="FILTER: Drops any bin that contains only treated or only control units — we can only compare treatment effects within bins that have both">matched_strata = strata_counts[(strata_counts[0] > 0) & (strata_counts[1] > 0)].index
+<span class="code-tooltip" data-tip="COUNT: Counts treated and control units within each stratum, then unstacks so each column represents a treatment status.">strata_counts = df.groupby([<span class="code-string">'strata'</span>, <span class="code-string">'treatment'</span>]).size().unstack(fill_value=0)</span>
+<span class="code-tooltip" data-tip="FILTER: Drops any bin that contains only treated or only control units — we can only compare treatment effects within bins that have both.">matched_strata = strata_counts[(strata_counts[0] > 0) & (strata_counts[1] > 0)].index
 df_matched = df[df[<span class="code-string">'strata'</span>].isin(matched_strata)]</span>
 
 <span class="code-comment"># Step 4: Calculate CEM weights</span>
-strata_weights = df_matched.groupby([<span class="code-string">'strata'</span>, <span class="code-string">'treatment'</span>]).size().unstack()
+<span class="code-tooltip" data-tip="WEIGHT: Computes CEM weights so that within each stratum the treated and control groups contribute equally, correcting for different group sizes within bins.">strata_weights = df_matched.groupby([<span class="code-string">'strata'</span>, <span class="code-string">'treatment'</span>]).size().unstack()
 df_matched[<span class="code-string">'cem_weight'</span>] = df_matched.apply(
     <span class="code-keyword">lambda</span> row: 1 / strata_weights.loc[row[<span class="code-string">'strata'</span>], row[<span class="code-string">'treatment'</span>]], axis=1
-)
+)</span>
 
-print(f<span class="code-string">"Matched: {len(df_matched)} of {len(df)} observations"</span>)</code></pre>
+<span class="code-tooltip" data-tip="OUTPUT: Prints how many of the original observations survived the matching process.">print(f<span class="code-string">"Matched: {len(df_matched)} of {len(df)} observations"</span>)</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
@@ -623,40 +623,40 @@ print(f<span class="code-string">"Matched: {len(df_matched)} of {len(df)} observ
 <span class="code-tooltip" data-tip="STATA: Automatically coarsens age, income, and education into bins, then exactly matches treated and control units that fall in the same bin">cem age income education, treatment(treatment)</span>
 
 <span class="code-comment">* Custom cutpoints for coarsening</span>
-cem age (#5) income (#4) education, treatment(treatment)
+<span class="code-tooltip" data-tip="BINS: Specifies 5 equal-sized bins for age and 4 for income, giving you manual control over how finely variables are coarsened.">cem age (#5) income (#4) education, treatment(treatment)</span>
 <span class="code-comment">* #5 means 5 equal-sized bins</span>
 
 <span class="code-comment">* Estimate treatment effect with CEM weights</span>
-<span class="code-tooltip" data-tip="ESTIMATE: Runs a weighted regression using CEM weights so that each matched stratum contributes proportionally, giving the treatment effect adjusted for covariates">reg outcome treatment age income education [pw=cem_weights]</span>
+<span class="code-tooltip" data-tip="ESTIMATE: Runs a weighted regression using CEM weights so that each matched stratum contributes proportionally, giving the treatment effect adjusted for covariates.">reg outcome treatment age income education [pw=cem_weights]</span>
 
 <span class="code-comment">* Check match quality</span>
-imb age income education, treatment(treatment)</code></pre>
+<span class="code-tooltip" data-tip="BALANCE: Displays imbalance statistics for each covariate between treated and control groups after CEM, confirming whether matching improved comparability.">imb age income education, treatment(treatment)</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Coarsened Exact Matching with MatchIt</span>
-<span class="code-keyword">library</span>(MatchIt)
+<span class="code-tooltip" data-tip="LIBRARY: Loads the MatchIt package for matching methods including CEM."><span class="code-keyword">library</span>(MatchIt)</span>
 
 <span class="code-comment"># CEM matching</span>
-<span class="code-tooltip" data-tip="R: Performs coarsened exact matching — bins covariates automatically, then pairs treated and control units in the same bin for apples-to-apples comparison">m.cem <- matchit(treatment ~ age + income + education,
+<span class="code-tooltip" data-tip="R: Performs coarsened exact matching — bins covariates automatically, then pairs treated and control units in the same bin for apples-to-apples comparison.">m.cem <- matchit(treatment ~ age + income + education,
                  data = df,
                  method = "cem")</span>
 
 <span class="code-comment"># With custom cutpoints</span>
-m.cem <- matchit(treatment ~ age + income + education,
+<span class="code-tooltip" data-tip="CUSTOM: Specifies manual cutpoints for age (30, 45, 60) and income quartiles, giving finer control over how the coarsening is done.">m.cem <- matchit(treatment ~ age + income + education,
                  data = df,
                  method = "cem",
                  cutpoints = list(age = c(30, 45, 60),
-                                  income = "q4"))  <span class="code-comment"># quartiles</span>
+                                  income = "q4"))  <span class="code-comment"># quartiles</span></span>
 
 <span class="code-comment"># Extract matched data with weights</span>
-matched_df <- match.data(m.cem)
+<span class="code-tooltip" data-tip="EXTRACT: Pulls the matched dataset with CEM weights that adjust for differing stratum sizes.">matched_df <- match.data(m.cem)</span>
 
 <span class="code-comment"># Estimate ATT using weights</span>
-att_model <- lm(outcome ~ treatment + age + income + education,
+<span class="code-tooltip" data-tip="ATT: Estimates the treatment effect on the matched sample using CEM weights, controlling for covariates in the regression.">att_model <- lm(outcome ~ treatment + age + income + education,
                 data = matched_df,
                 weights = weights)
-summary(att_model)</code></pre>
+summary(att_model)</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -786,27 +786,27 @@ education      0.0456     0.0189   2.413  0.01612 *</div>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Mahalanobis Distance Matching</span>
-<span class="code-keyword">from</span> scipy.spatial.distance <span class="code-keyword">import</span> cdist
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-tooltip" data-tip="IMPORT: Loads cdist for pairwise distance computation and numpy for matrix operations."><span class="code-keyword">from</span> scipy.spatial.distance <span class="code-keyword">import</span> cdist
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np</span>
 
-covariates = [<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>]
+<span class="code-tooltip" data-tip="SETUP: Defines the covariates and extracts their values as arrays for treated and control groups separately.">covariates = [<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>]
 X_treated = df.loc[df[<span class="code-string">'treatment'</span>] == 1, covariates].values
-X_control = df.loc[df[<span class="code-string">'treatment'</span>] == 0, covariates].values
+X_control = df.loc[df[<span class="code-string">'treatment'</span>] == 0, covariates].values</span>
 
 <span class="code-comment"># Calculate Mahalanobis distance matrix</span>
-<span class="code-tooltip" data-tip="DISTANCE: Computes the covariance matrix of covariates so Mahalanobis distance can account for correlations and different scales when measuring how similar two units are">cov_matrix = np.cov(df[covariates].values.T)
+<span class="code-tooltip" data-tip="DISTANCE: Computes the covariance matrix of covariates so Mahalanobis distance can account for correlations and different scales when measuring how similar two units are.">cov_matrix = np.cov(df[covariates].values.T)
 VI = np.linalg.inv(cov_matrix)
 distances = cdist(X_treated, X_control, metric=<span class="code-string">'mahalanobis'</span>, VI=VI)</span>
 
 <span class="code-comment"># Find nearest neighbor for each treated</span>
-matches = np.argmin(distances, axis=1)
+<span class="code-tooltip" data-tip="MATCH: For each treated unit (row), finds the column index of the control unit with the smallest Mahalanobis distance.">matches = np.argmin(distances, axis=1)</span>
 
 <span class="code-comment"># Extract matched control outcomes</span>
-control_indices = df[df[<span class="code-string">'treatment'</span>] == 0].index
-matched_outcomes = df.loc[control_indices[matches], <span class="code-string">'outcome'</span>].values
+<span class="code-tooltip" data-tip="EXTRACT: Retrieves the outcome values for the matched control units using the indices found above.">control_indices = df[df[<span class="code-string">'treatment'</span>] == 0].index
+matched_outcomes = df.loc[control_indices[matches], <span class="code-string">'outcome'</span>].values</span>
 
 <span class="code-comment"># ATT</span>
-att = df.loc[df[<span class="code-string">'treatment'</span>] == 1, <span class="code-string">'outcome'</span>].mean() - matched_outcomes.mean()</code></pre>
+<span class="code-tooltip" data-tip="ATT: Computes the Average Treatment Effect on the Treated as the difference in mean outcomes between treated and their Mahalanobis-matched controls.">att = df.loc[df[<span class="code-string">'treatment'</span>] == 1, <span class="code-string">'outcome'</span>].mean() - matched_outcomes.mean()</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
@@ -817,39 +817,39 @@ att = df.loc[df[<span class="code-string">'treatment'</span>] == 1, <span class=
     atet metric(maha) nn(1)</span>
 
 <span class="code-comment">* With bias adjustment (Abadie-Imbens)</span>
-teffects nnmatch (outcome age income education) (treatment), ///
-    atet metric(maha) nn(3) biasadj(age income education)
+<span class="code-tooltip" data-tip="BIAS-ADJ: Uses 3 nearest neighbors and applies the Abadie-Imbens bias correction, which adjusts for remaining covariate differences between matched pairs.">teffects nnmatch (outcome age income education) (treatment), ///
+    atet metric(maha) nn(3) biasadj(age income education)</span>
 
 <span class="code-comment">* Multiple matches with replacement</span>
-teffects nnmatch (outcome age income education) (treatment), ///
-    atet metric(maha) nn(5)</code></pre>
+<span class="code-tooltip" data-tip="NN(5): Matches each treated unit to its 5 nearest controls by Mahalanobis distance, averaging their outcomes for a smoother but potentially more biased estimate.">teffects nnmatch (outcome age income education) (treatment), ///
+    atet metric(maha) nn(5)</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Mahalanobis Distance Matching</span>
-<span class="code-keyword">library</span>(MatchIt)
+<span class="code-tooltip" data-tip="LIBRARY: Loads the MatchIt package for matching methods."><span class="code-keyword">library</span>(MatchIt)</span>
 
 <span class="code-comment"># Mahalanobis distance matching</span>
-<span class="code-tooltip" data-tip="R: Matches on Mahalanobis distance rather than propensity scores, directly measuring multivariate similarity between treated and control units across age, income, and education">m.maha <- matchit(treatment ~ age + income + education,
+<span class="code-tooltip" data-tip="R: Matches on Mahalanobis distance rather than propensity scores, directly measuring multivariate similarity between treated and control units across age, income, and education.">m.maha <- matchit(treatment ~ age + income + education,
                   data = df,
                   method = "nearest",
                   distance = "mahalanobis")</span>
 
 <span class="code-comment"># Multiple matches (k:1)</span>
-m.maha <- matchit(treatment ~ age + income + education,
+<span class="code-tooltip" data-tip="RATIO: Matches each treated unit to 3 control units instead of 1, reducing variance at the cost of potentially worse match quality.">m.maha <- matchit(treatment ~ age + income + education,
                   data = df,
                   method = "nearest",
                   distance = "mahalanobis",
-                  ratio = 3)  <span class="code-comment"># 3 controls per treated</span>
+                  ratio = 3)  <span class="code-comment"># 3 controls per treated</span></span>
 
 <span class="code-comment"># With caliper on propensity score</span>
-m.maha <- matchit(treatment ~ age + income + education,
+<span class="code-tooltip" data-tip="CALIPER: Adds a maximum allowed standardized Mahalanobis distance of 0.25 — matches beyond this threshold are discarded to prevent poor pairings.">m.maha <- matchit(treatment ~ age + income + education,
                   data = df,
                   method = "nearest",
                   distance = "mahalanobis",
                   mahvars = ~ age + income + education,
                   caliper = 0.25,
-                  std.caliper = TRUE)</code></pre>
+                  std.caliper = TRUE)</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -989,19 +989,19 @@ Matched    698.23   247</div>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Balance Diagnostics</span>
-<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+<span class="code-tooltip" data-tip="IMPORT: Loads matplotlib for creating the Love plot visualization."><span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt</span>
 
-<span class="code-keyword">def</span> <span class="code-function">calc_smd</span>(df, var, treatment_col):
+<span class="code-tooltip" data-tip="FUNCTION: Defines a helper that calculates the standardized mean difference (SMD) between treated and control groups for a given variable — values below 0.1 indicate good balance."><span class="code-keyword">def</span> <span class="code-function">calc_smd</span>(df, var, treatment_col):
     <span class="code-string">"""Calculate standardized mean difference."""</span>
     treated = df[df[treatment_col] == 1][var]
     control = df[df[treatment_col] == 0][var]
     pooled_std = np.sqrt((treated.var() + control.var()) / 2)
-    <span class="code-keyword">return</span> (treated.mean() - control.mean()) / pooled_std
+    <span class="code-keyword">return</span> (treated.mean() - control.mean()) / pooled_std</span>
 
 <span class="code-comment"># Before and after matching</span>
-covariates = [<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>]
+<span class="code-tooltip" data-tip="COMPARE: Calculates the SMD for each covariate before and after matching to quantify how much matching improved balance.">covariates = [<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>]
 smd_before = [calc_smd(df, v, <span class="code-string">'treatment'</span>) <span class="code-keyword">for</span> v <span class="code-keyword">in</span> covariates]
-smd_after = [calc_smd(matched_df, v, <span class="code-string">'treatment'</span>) <span class="code-keyword">for</span> v <span class="code-keyword">in</span> covariates]
+smd_after = [calc_smd(matched_df, v, <span class="code-string">'treatment'</span>) <span class="code-keyword">for</span> v <span class="code-keyword">in</span> covariates]</span>
 
 <span class="code-comment"># Love plot</span>
 <span class="code-tooltip" data-tip="BALANCE: Creates a Love plot showing how much treated and control groups differ on each covariate before vs. after matching — dots crossing the red 0.1 threshold indicate remaining imbalance">fig, ax = plt.subplots(figsize=(8, 5))
@@ -1022,36 +1022,36 @@ plt.show()</span></code></pre>
 <pre><code><span class="code-comment">* Stata: Balance Diagnostics</span>
 
 <span class="code-comment">* After psmatch2</span>
-pstest age income education, treated(treatment) both graph
+<span class="code-tooltip" data-tip="PSTEST: Displays balance statistics and a graph comparing covariate distributions between treated and control groups both before and after matching.">pstest age income education, treated(treatment) both graph</span>
 
 <span class="code-comment">* Standardized differences table</span>
-<span class="code-tooltip" data-tip="STATA: Displays a balance table showing standardized mean differences and variance ratios for each covariate — tells you if matching made treated and control groups comparable">tebalance summarize</span>
+<span class="code-tooltip" data-tip="STATA: Displays a balance table showing standardized mean differences and variance ratios for each covariate — tells you if matching made treated and control groups comparable.">tebalance summarize</span>
 
 <span class="code-comment">* Density plots of propensity scores</span>
-tebalance density
+<span class="code-tooltip" data-tip="DENSITY: Plots the propensity score distributions for treated and control groups, visually showing how much overlap exists.">tebalance density</span>
 
 <span class="code-comment">* Overidentification test for balance</span>
-tebalance overid</code></pre>
+<span class="code-tooltip" data-tip="OVERID: Formal statistical test of whether covariates are balanced after matching — a significant p-value suggests remaining imbalance.">tebalance overid</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Balance Diagnostics with cobalt</span>
-<span class="code-keyword">library</span>(cobalt)
+<span class="code-tooltip" data-tip="LIBRARY: Loads the cobalt package for balance assessment after matching."><span class="code-keyword">library</span>(cobalt)</span>
 
 <span class="code-comment"># Balance table</span>
-<span class="code-tooltip" data-tip="R: Produces a balance table comparing treated and control groups before and after matching, flagging any covariate with standardized mean difference above 0.1">bal.tab(m.out, un = TRUE, thresholds = c(m = 0.1))</span>
+<span class="code-tooltip" data-tip="R: Produces a balance table comparing treated and control groups before and after matching, flagging any covariate with standardized mean difference above 0.1.">bal.tab(m.out, un = TRUE, thresholds = c(m = 0.1))</span>
 
 <span class="code-comment"># Love plot (visual balance check)</span>
-<span class="code-tooltip" data-tip="R: Visualizes covariate balance improvement — each dot shows the standardized difference for one variable; dots moving inside the threshold lines after matching confirm the groups are now comparable">love.plot(m.out,
+<span class="code-tooltip" data-tip="R: Visualizes covariate balance improvement — each dot shows the standardized difference for one variable; dots moving inside the threshold lines after matching confirm the groups are now comparable.">love.plot(m.out,
           binary = "std",
           thresholds = c(m = 0.1),
           var.order = "unadjusted")</span>
 
 <span class="code-comment"># Density plots</span>
-bal.plot(m.out, var.name = "age", which = "both")
+<span class="code-tooltip" data-tip="DENSITY: Plots the distribution of age for treated and control groups before and after matching to visually check overlap.">bal.plot(m.out, var.name = "age", which = "both")</span>
 
 <span class="code-comment"># Full balance summary</span>
-summary(m.out)</code></pre>
+<span class="code-tooltip" data-tip="SUMMARY: Prints detailed matching statistics including sample sizes, balance measures, and percentage improvement for each covariate.">summary(m.out)</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -1260,18 +1260,18 @@ Unmatched      15       9
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Doubly Robust Estimation (AIPW)</span>
-<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LogisticRegression, LinearRegression
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-tooltip" data-tip="IMPORT: Loads LogisticRegression for propensity scores, LinearRegression for outcome models, and numpy for array operations."><span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> LogisticRegression, LinearRegression
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np</span>
 
-covariates = [<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>]
+<span class="code-tooltip" data-tip="SETUP: Extracts covariates, treatment indicator, and outcome as numpy arrays for the AIPW estimator.">covariates = [<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>]
 X = df[covariates].values
 D = df[<span class="code-string">'treatment'</span>].values
-Y = df[<span class="code-string">'outcome'</span>].values
+Y = df[<span class="code-string">'outcome'</span>].values</span>
 
 <span class="code-comment"># Step 1: Estimate propensity scores</span>
-ps_model = LogisticRegression(max_iter=1000)
+<span class="code-tooltip" data-tip="PROPENSITY: Fits a logistic regression to predict the probability of treatment, then stores the predicted probabilities as propensity scores.">ps_model = LogisticRegression(max_iter=1000)
 ps_model.fit(X, D)
-pscore = ps_model.predict_proba(X)[:, 1]
+pscore = ps_model.predict_proba(X)[:, 1]</span>
 
 <span class="code-comment"># Step 2: Estimate outcome models</span>
 <span class="code-tooltip" data-tip="OUTCOME MODEL: Fits two separate regressions to predict outcomes — one for treated units and one for controls — so we can estimate what each unit's outcome would be under either treatment status">mu1_model = LinearRegression()
@@ -1279,8 +1279,8 @@ mu0_model = LinearRegression()
 mu1_model.fit(X[D == 1], Y[D == 1])
 mu0_model.fit(X[D == 0], Y[D == 0])</span>
 
-mu1 = mu1_model.predict(X)  <span class="code-comment"># E[Y(1)|X]</span>
-mu0 = mu0_model.predict(X)  <span class="code-comment"># E[Y(0)|X]</span>
+<span class="code-tooltip" data-tip="PREDICT: Generates predicted outcomes under treatment (mu1) and control (mu0) for every unit, regardless of their actual treatment status.">mu1 = mu1_model.predict(X)  <span class="code-comment"># E[Y(1)|X]</span>
+mu0 = mu0_model.predict(X)  <span class="code-comment"># E[Y(0)|X]</span></span>
 
 <span class="code-comment"># Step 3: AIPW estimator</span>
 <span class="code-tooltip" data-tip="AIPW: The doubly robust formula — augments the outcome model predictions with an IPW correction term, so the ATE estimate is consistent if either the propensity score or the outcome model is correct">aipw_1 = mu1 + D * (Y - mu1) / pscore
@@ -1298,20 +1298,20 @@ print(f<span class="code-string">"ATE (AIPW): {ate_aipw:.3f}"</span>)</code></pr
     (treatment age income education), atet</span>
 
 <span class="code-comment">* IPWRA (IPW + Regression Adjustment)</span>
-teffects ipwra (outcome age income education) ///
-    (treatment age income education), atet
+<span class="code-tooltip" data-tip="IPWRA: Combines inverse probability weighting with regression adjustment — another doubly robust estimator that gives consistent estimates if either model is correct.">teffects ipwra (outcome age income education) ///
+    (treatment age income education), atet</span>
 
 <span class="code-comment">* With different link functions</span>
-teffects aipw (outcome age income education, poisson) ///
-    (treatment age income education, probit), atet</code></pre>
+<span class="code-tooltip" data-tip="LINK: Uses a Poisson outcome model and probit treatment model instead of the defaults, useful when the outcome is a count or the treatment model fits better with probit.">teffects aipw (outcome age income education, poisson) ///
+    (treatment age income education, probit), atet</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Doubly Robust with AIPW package</span>
-<span class="code-keyword">library</span>(AIPW)
+<span class="code-tooltip" data-tip="LIBRARY: Loads the AIPW package for augmented inverse probability weighting estimation."><span class="code-keyword">library</span>(AIPW)</span>
 
 <span class="code-comment"># Basic AIPW</span>
-<span class="code-tooltip" data-tip="R: Sets up a doubly robust estimator using SuperLearner for both the outcome model and propensity score model, providing insurance against misspecification of either">aipw_obj <- AIPW$new(
+<span class="code-tooltip" data-tip="R: Sets up a doubly robust estimator using SuperLearner for both the outcome model and propensity score model, providing insurance against misspecification of either.">aipw_obj <- AIPW$new(
   Y = df$outcome,
   A = df$treatment,
   W = df[, c("age", "income", "education")],
@@ -1320,11 +1320,11 @@ teffects aipw (outcome age income education, poisson) ///
 )</span>
 
 <span class="code-comment"># Fit and summarize</span>
-aipw_obj$fit()
-aipw_obj$summary()
+<span class="code-tooltip" data-tip="FIT: Trains both the outcome and propensity score models, then computes the doubly robust ATE and ATT estimates with standard errors.">aipw_obj$fit()
+aipw_obj$summary()</span>
 
 <span class="code-comment"># With SuperLearner (ML ensemble)</span>
-<span class="code-keyword">library</span>(SuperLearner)
+<span class="code-tooltip" data-tip="ENSEMBLE: Uses multiple machine learning algorithms (GLM, random forest, XGBoost) as an ensemble for both models, improving robustness to functional form misspecification."><span class="code-keyword">library</span>(SuperLearner)
 aipw_ml <- AIPW$new(
   Y = df$outcome,
   A = df$treatment,
@@ -1333,7 +1333,7 @@ aipw_ml <- AIPW$new(
   g.SL.library = c("SL.glm", "SL.ranger")
 )
 aipw_ml$fit()
-aipw_ml$summary()</code></pre>
+aipw_ml$summary()</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>

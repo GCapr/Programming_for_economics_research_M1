@@ -12,8 +12,11 @@
     .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
     .protected-content pre, .protected-content code, .protected-content .code-block, .protected-content .code-tabs { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
     .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
-    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; line-height: 1.4; text-align: left; font-family: var(--font-body); font-style: normal; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .tooltip-popup.visible { opacity: 1; }
+    .tooltip-popup::after { content: ''; position: absolute; border: 6px solid transparent; }
+    .tooltip-popup.arrow-bottom::after { top: 100%; left: 50%; transform: translateX(-50%); border-top-color: #1f2937; }
+    .tooltip-popup.arrow-top::after { bottom: 100%; left: 50%; transform: translateX(-50%); border-bottom-color: #1f2937; }
   </style>
 </head>
 <body>
@@ -171,13 +174,20 @@
 
         <h3>URL Structure</h3>
 
-        <pre style="background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code><span style="color: #68d391;"># Base survey URL with parameters</span>
-https://yourschool.qualtrics.com/jfe/form/SV_XXXX?treatment=1&pid=ABC123
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="url">URL</button>
+          </div>
+          <div class="tab-content active" data-lang="url">
+<pre><code><span class="code-comment"># Base survey URL with parameters</span>
+<span class="code-tooltip" data-tip="BASE URL: The Qualtrics survey link — everything after the ? is parameter data that Qualtrics captures automatically when participants click the link.">https://yourschool.qualtrics.com/jfe/form/SV_XXXX?treatment=1&pid=ABC123</span>
 
-<span style="color: #68d391;"># Parameters:</span>
-<span style="color: #f6ad55;">treatment=1</span>    <span style="color: #68d391;"># Treatment condition (e.g., 0=control, 1=treatment)</span>
-<span style="color: #f6ad55;">pid=ABC123</span>    <span style="color: #68d391;"># Participant ID from recruitment platform</span>
-<span style="color: #f6ad55;">source=prolific</span> <span style="color: #68d391;"># Track recruitment source</span></code></pre>
+<span class="code-comment"># Parameters:</span>
+<span class="code-tooltip" data-tip="TREATMENT: Tells Qualtrics which condition to show — 0 for control, 1 for treatment. Qualtrics stores this as embedded data."><span class="code-variable">treatment=1</span>    <span class="code-comment"># Treatment condition (e.g., 0=control, 1=treatment)</span></span>
+<span class="code-tooltip" data-tip="PID: A unique participant identifier from the recruitment platform — essential for linking survey responses back to participant records."><span class="code-variable">pid=ABC123</span>    <span class="code-comment"># Participant ID from recruitment platform</span></span>
+<span class="code-tooltip" data-tip="SOURCE: Tracks where the participant came from — useful if you recruit from multiple platforms (Prolific, MTurk, etc.) and need to analyze by source."><span class="code-variable">source=prolific</span> <span class="code-comment"># Track recruitment source</span></span></code></pre>
+          </div>
+        </div>
 
         <h3>Setting Up Embedded Data in Qualtrics</h3>
 
@@ -192,10 +202,17 @@ https://yourschool.qualtrics.com/jfe/form/SV_XXXX?treatment=1&pid=ABC123
 
         <p>In Survey Flow, add a <strong>Branch</strong> that checks the embedded data:</p>
 
-        <pre style="background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px;"><code>If treatment = 1
-  → Show Treatment Block
-If treatment = 0
-  → Show Control Block</code></pre>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="qualtrics">Qualtrics</button>
+          </div>
+          <div class="tab-content active" data-lang="qualtrics">
+<pre><code><span class="code-tooltip" data-tip="BRANCH LOGIC: If the embedded data field 'treatment' equals 1, Qualtrics displays the Treatment Block — this is how URL-based randomization controls what each participant sees."><span class="code-keyword">If</span> <span class="code-variable">treatment</span> = <span class="code-number">1</span>
+  → Show Treatment Block</span>
+<span class="code-tooltip" data-tip="CONTROL BRANCH: If the treatment field equals 0, Qualtrics shows the Control Block instead — each participant sees exactly one version of the survey."><span class="code-keyword">If</span> <span class="code-variable">treatment</span> = <span class="code-number">0</span>
+  → Show Control Block</span></code></pre>
+          </div>
+        </div>
 
         <h2 id="prolific-integration">Prolific Integration</h2>
 
@@ -207,17 +224,31 @@ If treatment = 0
 
         <p>Prolific automatically appends participant info to your survey URL. Configure your study to include:</p>
 
-        <pre style="background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px;"><code><span style="color: #68d391;"># Your survey URL in Prolific:</span>
-https://yourschool.qualtrics.com/jfe/form/SV_XXXX?PROLIFIC_PID={{%PROLIFIC_PID%}}&STUDY_ID={{%STUDY_ID%}}&SESSION_ID={{%SESSION_ID%}}</code></pre>
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="url">URL</button>
+          </div>
+          <div class="tab-content active" data-lang="url">
+<pre><code><span class="code-comment"># Your survey URL in Prolific:</span>
+<span class="code-tooltip" data-tip="PROLIFIC URL: The double-brace placeholders (e.g., PROLIFIC_PID) are Prolific template variables — when a participant clicks the link, Prolific replaces them with the actual participant ID, study ID, and session ID.">https://yourschool.qualtrics.com/jfe/form/SV_XXXX?PROLIFIC_PID={{%PROLIFIC_PID%}}&STUDY_ID={{%STUDY_ID%}}&SESSION_ID={{%SESSION_ID%}}</span></code></pre>
+          </div>
+        </div>
 
         <h3>2. Redirecting Back to Prolific</h3>
 
         <p>At survey end, redirect participants to Prolific's completion URL:</p>
 
-        <pre style="background: #1a202c; color: #e2e8f0; padding: 1rem; border-radius: 8px;"><code><span style="color: #68d391;"># End of survey redirect URL (in Qualtrics):</span>
-https://app.prolific.co/submissions/complete?cc=XXXXXXXX
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="url">URL</button>
+          </div>
+          <div class="tab-content active" data-lang="url">
+<pre><code><span class="code-comment"># End of survey redirect URL (in Qualtrics):</span>
+<span class="code-tooltip" data-tip="REDIRECT: After finishing the survey, Qualtrics sends participants to this Prolific URL — the completion code (cc) tells Prolific they finished, so they get paid automatically.">https://app.prolific.co/submissions/complete?cc=XXXXXXXX</span>
 
-<span style="color: #68d391;"># The completion code (cc) is provided by Prolific for your study</span></code></pre>
+<span class="code-comment"># The completion code (cc) is provided by Prolific for your study</span></code></pre>
+          </div>
+        </div>
 
         <h3>3. Python Script for Pre-Assigning Treatments</h3>
 
@@ -227,19 +258,19 @@ https://app.prolific.co/submissions/complete?cc=XXXXXXXX
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Generate treatment-assigned URLs for Prolific</span>
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for creating and exporting DataFrames."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Loads NumPy for random number generation (treatment assignment)."><span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
 
 <span class="code-comment"># Base survey URL</span>
-base_url = <span class="code-string">"https://yourschool.qualtrics.com/jfe/form/SV_XXXX"</span>
+<span class="code-tooltip" data-tip="BASE URL: Stores the Qualtrics survey link — parameters will be appended after the ? to pass treatment and ID info."><span class="code-variable">base_url</span> = <span class="code-string">"https://yourschool.qualtrics.com/jfe/form/SV_XXXX"</span></span>
 
 <span class="code-comment"># List of participant IDs (from Prolific or pre-registration)</span>
-participant_ids = [<span class="code-string">"P001"</span>, <span class="code-string">"P002"</span>, <span class="code-string">"P003"</span>, <span class="code-string">"P004"</span>, <span class="code-string">"P005"</span>, <span class="code-string">"P006"</span>]
+<span class="code-tooltip" data-tip="PARTICIPANT IDS: A list of unique identifiers for each participant — in practice these come from Prolific or your own pre-registration system."><span class="code-variable">participant_ids</span> = [<span class="code-string">"P001"</span>, <span class="code-string">"P002"</span>, <span class="code-string">"P003"</span>, <span class="code-string">"P004"</span>, <span class="code-string">"P005"</span>, <span class="code-string">"P006"</span>]</span>
 
 <span class="code-comment"># Random assignment</span>
-np.random.seed(42)
-n = len(participant_ids)
-treatments = np.random.choice([0, 1], size=n)
+<span class="code-tooltip" data-tip="SEED: Fixes the random number generator so treatment assignments are reproducible — anyone using seed 42 gets the exact same result."><span class="code-variable">np</span>.<span class="code-function">random.seed</span>(<span class="code-number">42</span>)</span>
+<span class="code-tooltip" data-tip="LEN: Counts how many participants are in the list."><span class="code-variable">n</span> = <span class="code-function">len</span>(<span class="code-variable">participant_ids</span>)</span>
+<span class="code-tooltip" data-tip="RANDOM CHOICE: Randomly assigns each participant to control (0) or treatment (1) — this is Bernoulli randomization where each person independently gets a coin flip."><span class="code-variable">treatments</span> = <span class="code-variable">np</span>.<span class="code-function">random.choice</span>([<span class="code-number">0</span>, <span class="code-number">1</span>], size=<span class="code-variable">n</span>)</span>
 
 <span class="code-comment"># Generate personalized URLs</span>
 <span class="code-tooltip" data-tip="URL GENERATION: Builds a personalized survey link for each participant embedding their ID and treatment assignment — when they click the link, Qualtrics automatically captures these values.">urls = [
@@ -248,13 +279,13 @@ treatments = np.random.choice([0, 1], size=n)
 ]</span>
 
 <span class="code-comment"># Save assignment for analysis</span>
-df = pd.DataFrame({
+<span class="code-tooltip" data-tip="DATAFRAME: Creates a table linking each participant to their treatment and unique URL — this is your master record for tracking who got which condition."><span class="code-variable">df</span> = <span class="code-variable">pd</span>.<span class="code-function">DataFrame</span>({
     <span class="code-string">'participant_id'</span>: participant_ids,
     <span class="code-string">'treatment'</span>: treatments,
     <span class="code-string">'survey_url'</span>: urls
-})
-<span class="code-function">print</span>(df.to_string(index=False))
-df.to_csv(<span class="code-string">'treatment_assignment.csv'</span>, index=False)</code></pre>
+})</span>
+<span class="code-tooltip" data-tip="PRINT: Displays the DataFrame without the index column for a cleaner view of the treatment assignments."><span class="code-function">print</span>(df.<span class="code-function">to_string</span>(index=<span class="code-keyword">False</span>))</span>
+<span class="code-tooltip" data-tip="TO_CSV: Saves the treatment assignment table to a CSV file — keep this file safe for matching survey responses to treatment status during analysis."><span class="code-variable">df</span>.<span class="code-function">to_csv</span>(<span class="code-string">'treatment_assignment.csv'</span>, index=<span class="code-keyword">False</span>)</span></code></pre>
 <button class="run-btn" data-lang="python">Run Code</button>
           </div>
         </div>
@@ -347,6 +378,53 @@ Saved to: treatment_assignment.csv</pre>
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
   <script src="../js/password-protection.js"></script>
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+      const targetRect = target.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const padding = 10;
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+      const tooltipRect = tooltip.getBoundingClientRect();
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+      let top = targetRect.top - tooltipRect.height - 8;
+      let arrowClass = 'arrow-bottom';
+      if (top < padding) { top = targetRect.bottom + 8; arrowClass = 'arrow-top'; }
+      if (left < padding) left = padding;
+      if (left + tooltipRect.width > viewportWidth - padding) left = viewportWidth - tooltipRect.width - padding;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) { if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; } currentTarget = target; positionTooltip(target); }
+    function hideTooltip() { hideTimeout = setTimeout(function() { if (tooltipEl) tooltipEl.classList.remove('visible'); currentTarget = null; }, 100); }
+
+    document.addEventListener('mouseenter', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target); }, true);
+    document.addEventListener('mouseleave', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip(); }, true);
+  })();
+  </script>
   <script src="../js/grammar-primer.js"></script>
 </body>
 </html>

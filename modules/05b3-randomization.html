@@ -12,8 +12,11 @@
     .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
     .protected-content pre, .protected-content code, .protected-content .code-block, .protected-content .code-tabs { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
     .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
-    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; line-height: 1.4; text-align: left; font-family: var(--font-body); font-style: normal; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .tooltip-popup.visible { opacity: 1; }
+    .tooltip-popup::after { content: ''; position: absolute; border: 6px solid transparent; }
+    .tooltip-popup.arrow-bottom::after { top: 100%; left: 50%; transform: translateX(-50%); border-top-color: #1f2937; }
+    .tooltip-popup.arrow-top::after { bottom: 100%; left: 50%; transform: translateX(-50%); border-bottom-color: #1f2937; }
   </style>
 </head>
 <body>
@@ -161,49 +164,49 @@
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Simple random assignment</span>
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-tooltip" data-tip="IMPORT: Loads NumPy for random number generation."><span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for creating and manipulating DataFrames."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
 
-np.random.seed(42)  <span class="code-comment"># Always set seed for reproducibility!</span>
+<span class="code-tooltip" data-tip="SEED: Fixes the random number generator for reproducibility — always set a seed before randomization so results can be replicated."><span class="code-variable">np</span>.<span class="code-function">random.seed</span>(<span class="code-number">42</span>)  <span class="code-comment"># Always set seed for reproducibility!</span></span>
 
 <span class="code-comment"># Create sample data</span>
-df = pd.DataFrame({<span class="code-string">'id'</span>: range(1, 11)})
+<span class="code-tooltip" data-tip="DATAFRAME: Creates a simple DataFrame with 10 participants (IDs 1 through 10)."><span class="code-variable">df</span> = <span class="code-variable">pd</span>.<span class="code-function">DataFrame</span>({<span class="code-string">'id'</span>: <span class="code-function">range</span>(<span class="code-number">1</span>, <span class="code-number">11</span>)})</span>
 
 <span class="code-comment"># Method 1: Bernoulli (coin flip for each)</span>
-df[<span class="code-string">'treatment_bernoulli'</span>] = np.random.binomial(1, 0.5, len(df))
+<span class="code-tooltip" data-tip="BERNOULLI: Each participant independently gets a 50% coin flip — simple, but group sizes may be unequal by chance (e.g., 6 treated and 4 control)."><span class="code-variable">df</span>[<span class="code-string">'treatment_bernoulli'</span>] = <span class="code-variable">np</span>.<span class="code-function">random.binomial</span>(<span class="code-number">1</span>, <span class="code-number">0.5</span>, <span class="code-function">len</span>(df))</span>
 
 <span class="code-comment"># Method 2: Complete randomization (fixed number treated)</span>
-n = len(df)
-n_treat = n // 2
+<span class="code-tooltip" data-tip="GROUP SIZES: Calculates the total sample size and the number to treat — integer division (//) ensures exactly half are treated."><span class="code-variable">n</span> = <span class="code-function">len</span>(df)
+<span class="code-variable">n_treat</span> = n // <span class="code-number">2</span></span>
 <span class="code-tooltip" data-tip="COMPLETE RANDOMIZATION: Creates a vector with exactly 5 ones and 5 zeros, then shuffles the order randomly — guarantees exactly half are treated, unlike coin-flip methods where groups can be unequal by chance.">assignment = np.array([1] * n_treat + [0] * (n - n_treat))
 np.random.shuffle(assignment)</span>
-df[<span class="code-string">'treatment_complete'</span>] = assignment
-<span class="code-function">print</span>(df)</code></pre>
+<span class="code-tooltip" data-tip="ASSIGN: Stores the shuffled treatment vector as a new column in the DataFrame."><span class="code-variable">df</span>[<span class="code-string">'treatment_complete'</span>] = assignment</span>
+<span class="code-tooltip" data-tip="PRINT: Displays the DataFrame showing both Bernoulli and complete randomization assignments side by side."><span class="code-function">print</span>(df)</span></code></pre>
 <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Simple random assignment</span>
-set seed 42
+<span class="code-tooltip" data-tip="SEED: Sets the random number seed for reproducibility — everyone using seed 42 gets the same treatment assignment.">set seed 42</span>
 
 <span class="code-comment">* Method 1: Bernoulli</span>
-gen treatment = rbinomial(1, 0.5)
+<span class="code-tooltip" data-tip="BERNOULLI: Each observation independently gets a coin flip (50% probability of 1) — simple but group sizes may be unequal by chance.">gen treatment = rbinomial(1, 0.5)</span>
 
 <span class="code-comment">* Method 2: Complete randomization (exact proportions)</span>
 <span class="code-tooltip" data-tip="COMPLETE RANDOMIZATION: randtreat ensures exactly equal group sizes (unlike coin flips). Install first with 'ssc install randtreat' — widely used in development economics RCTs.">randtreat, generate(treatment) setseed(42)</span>
 
 <span class="code-comment">* Multiple treatment arms</span>
-randtreat, generate(treatment) mult(3) setseed(42)
+<span class="code-tooltip" data-tip="MULTIPLE ARMS: mult(3) creates three treatment groups instead of two — each participant is assigned to group 1, 2, or 3 with equal probability.">randtreat, generate(treatment) mult(3) setseed(42)</span>
 <span class="code-comment">* Creates treatment = 1, 2, or 3 with equal probability</span></code></pre>
 <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Simple random assignment with randomizr</span>
-<span class="code-keyword">library</span>(randomizr)
+<span class="code-tooltip" data-tip="LIBRARY: Loads the randomizr package — provides simple, complete, block, and cluster randomization functions."><span class="code-keyword">library</span>(<span class="code-package">randomizr</span>)</span>
 
-set.seed(42)
+<span class="code-tooltip" data-tip="SEED: Sets the random seed for reproducibility.">set.seed(<span class="code-number">42</span>)</span>
 
 <span class="code-comment"># Create sample data</span>
-df <- data.frame(id = 1:10)
+<span class="code-tooltip" data-tip="DATA FRAME: Creates a simple data frame with 10 participants.">df <- data.frame(id = <span class="code-number">1</span>:<span class="code-number">10</span>)</span>
 
 <span class="code-comment"># Simple random assignment</span>
 <span class="code-tooltip" data-tip="BERNOULLI: Each person independently gets a 50% coin flip for treatment — simple but group sizes may be unequal by chance.">df$treatment_bernoulli <- simple_ra(N = nrow(df))</span>
@@ -211,9 +214,69 @@ df <- data.frame(id = 1:10)
 <span class="code-comment"># Complete random assignment (fixed number treated)</span>
 <span class="code-tooltip" data-tip="COMPLETE: Guarantees exactly 50% are treated and 50% are control — more precise than Bernoulli because group sizes are fixed, not random.">df$treatment_complete <- complete_ra(N = nrow(df), prob = 0.5)</span>
 
-<span class="code-function">print</span>(df)</code></pre>
+<span class="code-tooltip" data-tip="PRINT: Displays the DataFrame with both randomization methods side by side."><span class="code-function">print</span>(df)</span></code></pre>
 <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="rand-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">   id  treatment_bernoulli  treatment_complete
+<span class="out-num">0</span>   <span class="out-num">1</span>                    <span class="out-num">0</span>                   <span class="out-num">1</span>
+<span class="out-num">1</span>   <span class="out-num">2</span>                    <span class="out-num">1</span>                   <span class="out-num">0</span>
+<span class="out-num">2</span>   <span class="out-num">3</span>                    <span class="out-num">0</span>                   <span class="out-num">1</span>
+<span class="out-num">3</span>   <span class="out-num">4</span>                    <span class="out-num">0</span>                   <span class="out-num">0</span>
+<span class="out-num">4</span>   <span class="out-num">5</span>                    <span class="out-num">1</span>                   <span class="out-num">1</span>
+<span class="out-num">5</span>   <span class="out-num">6</span>                    <span class="out-num">1</span>                   <span class="out-num">0</span>
+<span class="out-num">6</span>   <span class="out-num">7</span>                    <span class="out-num">0</span>                   <span class="out-num">1</span>
+<span class="out-num">7</span>   <span class="out-num">8</span>                    <span class="out-num">1</span>                   <span class="out-num">0</span>
+<span class="out-num">8</span>   <span class="out-num">9</span>                    <span class="out-num">1</span>                   <span class="out-num">0</span>
+<span class="out-num">9</span>  <span class="out-num">10</span>                    <span class="out-num">0</span>                   <span class="out-num">1</span></div>
+        </div>
+        <div class="output-simulation" data-output="rand-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. set seed 42</span>
+
+<span class="out-green">. gen treatment = rbinomial(1, 0.5)</span>
+
+<span class="out-green">. tab treatment</span>
+
+  treatment |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          <span class="out-num">0</span> |          <span class="out-num">5</span>       <span class="out-num">50.00</span>       <span class="out-num">50.00</span>
+          <span class="out-num">1</span> |          <span class="out-num">5</span>       <span class="out-num">50.00</span>      <span class="out-num">100.00</span>
+------------+-----------------------------------
+      Total |         <span class="out-num">10</span>      <span class="out-num">100.00</span>
+
+<span class="out-green">. randtreat, generate(treatment2) setseed(42)</span>
+(using default treatment probabilities: 0.50 0.50)
+
+Treatment assigned:
+  Treatment 1: <span class="out-num">5</span> obs (<span class="out-num">50.0</span>%)
+  Treatment 2: <span class="out-num">5</span> obs (<span class="out-num">50.0</span>%)</div>
+        </div>
+        <div class="output-simulation" data-output="rand-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">   id treatment_bernoulli treatment_complete
+<span class="out-num">1</span>   <span class="out-num">1</span>                   <span class="out-num">0</span>                  <span class="out-num">1</span>
+<span class="out-num">2</span>   <span class="out-num">2</span>                   <span class="out-num">1</span>                  <span class="out-num">0</span>
+<span class="out-num">3</span>   <span class="out-num">3</span>                   <span class="out-num">1</span>                  <span class="out-num">1</span>
+<span class="out-num">4</span>   <span class="out-num">4</span>                   <span class="out-num">0</span>                  <span class="out-num">0</span>
+<span class="out-num">5</span>   <span class="out-num">5</span>                   <span class="out-num">0</span>                  <span class="out-num">1</span>
+<span class="out-num">6</span>   <span class="out-num">6</span>                   <span class="out-num">1</span>                  <span class="out-num">0</span>
+<span class="out-num">7</span>   <span class="out-num">7</span>                   <span class="out-num">0</span>                  <span class="out-num">1</span>
+<span class="out-num">8</span>   <span class="out-num">8</span>                   <span class="out-num">1</span>                  <span class="out-num">0</span>
+<span class="out-num">9</span>   <span class="out-num">9</span>                   <span class="out-num">0</span>                  <span class="out-num">0</span>
+<span class="out-num">10</span> <span class="out-num">10</span>                   <span class="out-num">1</span>                  <span class="out-num">1</span></div>
         </div>
 
         <!-- Simulated Output for rand-1 -->
@@ -334,15 +397,15 @@ Treatment assigned:
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Stratified randomization</span>
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-tooltip" data-tip="IMPORT: Loads NumPy for random number generation."><span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for DataFrame operations."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
 
-np.random.seed(42)
+<span class="code-tooltip" data-tip="SEED: Fixes the random number generator for reproducible results."><span class="code-variable">np</span>.<span class="code-function">random.seed</span>(<span class="code-number">42</span>)</span>
 
-<span class="code-keyword">def</span> <span class="code-function">stratified_randomize</span>(df, strata_cols, prob_treat=0.5):
+<span class="code-tooltip" data-tip="DEF: Defines a function that randomizes treatment within subgroups (strata) — ensures balanced treatment/control splits within each gender-age combination."><span class="code-keyword">def</span> <span class="code-function">stratified_randomize</span>(df, strata_cols, prob_treat=<span class="code-number">0.5</span>):</span>
     <span class="code-string">"""Randomize within strata defined by strata_cols."""</span>
-    df = df.copy()
-    df[<span class="code-string">'treatment'</span>] = np.nan
+    <span class="code-tooltip" data-tip="COPY: Makes a copy so the original DataFrame is not modified, and initializes the treatment column with NaN (to be filled stratum by stratum).">df = df.copy()
+    df[<span class="code-string">'treatment'</span>] = np.nan</span>
 
     <span class="code-tooltip" data-tip="STRATIFIED: Randomizes separately within each gender-age subgroup, so each stratum has roughly equal treatment/control splits — ensures balance on key variables by design.">for name, group <span class="code-keyword">in</span> df.groupby(strata_cols):
         n = len(group)
@@ -351,46 +414,46 @@ np.random.seed(42)
         np.random.shuffle(assignment)
         df.loc[group.index, <span class="code-string">'treatment'</span>] = assignment</span>
 
-    <span class="code-keyword">return</span> df
+    <span class="code-tooltip" data-tip="RETURN: Returns the DataFrame with the treatment column filled in for all strata."><span class="code-keyword">return</span> df</span>
 
 <span class="code-comment"># Create sample data</span>
-df = pd.DataFrame({
+<span class="code-tooltip" data-tip="SAMPLE DATA: Creates 12 participants with gender (M/F) and age group (young/old) — these will be the stratification variables.">df = pd.DataFrame({</span>
     <span class="code-string">'id'</span>: range(1, 13),
     <span class="code-string">'gender'</span>: [<span class="code-string">'M'</span>, <span class="code-string">'M'</span>, <span class="code-string">'M'</span>, <span class="code-string">'M'</span>, <span class="code-string">'F'</span>, <span class="code-string">'F'</span>, <span class="code-string">'F'</span>, <span class="code-string">'F'</span>, <span class="code-string">'M'</span>, <span class="code-string">'M'</span>, <span class="code-string">'F'</span>, <span class="code-string">'F'</span>],
     <span class="code-string">'age_group'</span>: [<span class="code-string">'young'</span>, <span class="code-string">'young'</span>, <span class="code-string">'old'</span>, <span class="code-string">'old'</span>, <span class="code-string">'young'</span>, <span class="code-string">'young'</span>, <span class="code-string">'old'</span>, <span class="code-string">'old'</span>, <span class="code-string">'young'</span>, <span class="code-string">'old'</span>, <span class="code-string">'young'</span>, <span class="code-string">'old'</span>]
 })
 
 <span class="code-comment"># Stratify by gender and age group</span>
-df = stratified_randomize(df, strata_cols=[<span class="code-string">'gender'</span>, <span class="code-string">'age_group'</span>])
-<span class="code-function">print</span>(df)
-<span class="code-function">print</span>(<span class="code-string">"\nBalance check:"</span>)
-<span class="code-function">print</span>(df.groupby([<span class="code-string">'gender'</span>, <span class="code-string">'age_group'</span>])[<span class="code-string">'treatment'</span>].mean())</code></pre>
+<span class="code-tooltip" data-tip="CALL: Runs stratified randomization on the data, using gender and age_group as strata — treatment is assigned independently within each subgroup.">df = stratified_randomize(df, strata_cols=[<span class="code-string">'gender'</span>, <span class="code-string">'age_group'</span>])</span>
+<span class="code-tooltip" data-tip="PRINT: Displays the full DataFrame showing each participant's treatment assignment."><span class="code-function">print</span>(df)</span>
+<span class="code-tooltip" data-tip="BALANCE CHECK: Groups by gender and age, then computes the mean of treatment within each stratum — values near 0.5 indicate good balance."><span class="code-function">print</span>(<span class="code-string">"\nBalance check:"</span>)
+<span class="code-function">print</span>(df.groupby([<span class="code-string">'gender'</span>, <span class="code-string">'age_group'</span>])[<span class="code-string">'treatment'</span>].mean())</span></code></pre>
 <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Stratified randomization with randtreat</span>
-set seed 42
+<span class="code-tooltip" data-tip="SEED: Sets random seed for reproducible stratified randomization.">set seed 42</span>
 
 <span class="code-comment">* Stratify by gender and region</span>
 <span class="code-tooltip" data-tip="STRATIFIED: Randomizes within each gender-region combination separately, ensuring balance on these key variables — e.g., equal treatment/control among Northern females, Southern males, etc.">randtreat, generate(treatment) strata(gender region) setseed(42)</span>
 
 <span class="code-comment">* With unequal treatment probabilities</span>
-randtreat, generate(treatment) strata(gender) ///
-    misfits(global) setseed(42) frac(0.25 0.25 0.5)</code></pre>
+<span class="code-tooltip" data-tip="UNEQUAL FRACTIONS: frac(0.25 0.25 0.5) assigns 25% to group 1, 25% to group 2, and 50% to group 3 — misfits(global) handles leftover observations that don't divide evenly.">randtreat, generate(treatment) strata(gender) ///
+    misfits(global) setseed(42) frac(0.25 0.25 0.5)</span></code></pre>
 <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Stratified randomization with randomizr</span>
-<span class="code-keyword">library</span>(randomizr)
+<span class="code-tooltip" data-tip="LIBRARY: Loads the randomizr package for block (stratified) randomization."><span class="code-keyword">library</span>(<span class="code-package">randomizr</span>)</span>
 
-set.seed(42)
+<span class="code-tooltip" data-tip="SEED: Sets the random seed for reproducibility.">set.seed(<span class="code-number">42</span>)</span>
 
 <span class="code-comment"># Create sample data</span>
-df <- data.frame(
-  id = 1:12,
+<span class="code-tooltip" data-tip="SAMPLE DATA: Creates 12 participants with gender (M/F) and region (N/S) — these will be the blocking variables.">df <- data.frame(
+  id = <span class="code-number">1</span>:<span class="code-number">12</span>,
   gender = c(<span class="code-string">'M'</span>,<span class="code-string">'M'</span>,<span class="code-string">'M'</span>,<span class="code-string">'M'</span>,<span class="code-string">'F'</span>,<span class="code-string">'F'</span>,<span class="code-string">'F'</span>,<span class="code-string">'F'</span>,<span class="code-string">'M'</span>,<span class="code-string">'M'</span>,<span class="code-string">'F'</span>,<span class="code-string">'F'</span>),
   region = c(<span class="code-string">'N'</span>,<span class="code-string">'N'</span>,<span class="code-string">'S'</span>,<span class="code-string">'S'</span>,<span class="code-string">'N'</span>,<span class="code-string">'N'</span>,<span class="code-string">'S'</span>,<span class="code-string">'S'</span>,<span class="code-string">'N'</span>,<span class="code-string">'S'</span>,<span class="code-string">'N'</span>,<span class="code-string">'S'</span>)
-)
+)</span>
 
 <span class="code-comment"># Block random assignment (stratified)</span>
 <span class="code-tooltip" data-tip="BLOCK RANDOMIZATION: Assigns treatment separately within each gender group, guaranteeing equal numbers of treated males and treated females — ensures gender balance by design.">df$treatment <- block_ra(
@@ -398,10 +461,85 @@ df <- data.frame(
   prob = 0.5
 )</span>
 
-<span class="code-function">print</span>(df)
-<span class="code-function">print</span>(table(df$gender, df$treatment))</code></pre>
+<span class="code-tooltip" data-tip="PRINT: Displays all participants with their treatment assignments."><span class="code-function">print</span>(df)</span>
+<span class="code-tooltip" data-tip="CROSS-TAB: Creates a 2x2 table of gender vs. treatment — confirms equal numbers of males and females in each group."><span class="code-function">print</span>(<span class="code-function">table</span>(df$gender, df$treatment))</span></code></pre>
 <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="rand-2" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">    id gender age_group  treatment
+<span class="out-num">0</span>    <span class="out-num">1</span>      <span class="out-str">M</span>     <span class="out-str">young</span>        <span class="out-num">1.0</span>
+<span class="out-num">1</span>    <span class="out-num">2</span>      <span class="out-str">M</span>     <span class="out-str">young</span>        <span class="out-num">0.0</span>
+<span class="out-num">2</span>    <span class="out-num">3</span>      <span class="out-str">M</span>       <span class="out-str">old</span>        <span class="out-num">0.0</span>
+<span class="out-num">3</span>    <span class="out-num">4</span>      <span class="out-str">M</span>       <span class="out-str">old</span>        <span class="out-num">1.0</span>
+<span class="out-num">4</span>    <span class="out-num">5</span>      <span class="out-str">F</span>     <span class="out-str">young</span>        <span class="out-num">1.0</span>
+<span class="out-num">5</span>    <span class="out-num">6</span>      <span class="out-str">F</span>     <span class="out-str">young</span>        <span class="out-num">0.0</span>
+<span class="out-num">6</span>    <span class="out-num">7</span>      <span class="out-str">F</span>       <span class="out-str">old</span>        <span class="out-num">0.0</span>
+<span class="out-num">7</span>    <span class="out-num">8</span>      <span class="out-str">F</span>       <span class="out-str">old</span>        <span class="out-num">1.0</span>
+<span class="out-num">8</span>    <span class="out-num">9</span>      <span class="out-str">M</span>     <span class="out-str">young</span>        <span class="out-num">0.0</span>
+<span class="out-num">9</span>   <span class="out-num">10</span>      <span class="out-str">M</span>       <span class="out-str">old</span>        <span class="out-num">1.0</span>
+<span class="out-num">10</span>  <span class="out-num">11</span>      <span class="out-str">F</span>     <span class="out-str">young</span>        <span class="out-num">1.0</span>
+<span class="out-num">11</span>  <span class="out-num">12</span>      <span class="out-str">F</span>       <span class="out-str">old</span>        <span class="out-num">0.0</span>
+
+Balance check:
+gender  age_group
+F       old          <span class="out-num">0.5</span>
+        young        <span class="out-num">0.666667</span>
+M       old          <span class="out-num">0.666667</span>
+        young        <span class="out-num">0.333333</span>
+Name: treatment, dtype: float64</div>
+        </div>
+        <div class="output-simulation" data-output="rand-2" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. randtreat, generate(treatment) strata(gender region) setseed(42)</span>
+(using default treatment probabilities: 0.50 0.50)
+
+Treatment assigned within 4 strata:
+  Stratum F.N: <span class="out-num">3</span> obs -> T1: <span class="out-num">1</span> (33%), T2: <span class="out-num">2</span> (67%)
+  Stratum F.S: <span class="out-num">3</span> obs -> T1: <span class="out-num">2</span> (67%), T2: <span class="out-num">1</span> (33%)
+  Stratum M.N: <span class="out-num">3</span> obs -> T1: <span class="out-num">1</span> (33%), T2: <span class="out-num">2</span> (67%)
+  Stratum M.S: <span class="out-num">3</span> obs -> T1: <span class="out-num">2</span> (67%), T2: <span class="out-num">1</span> (33%)
+
+<span class="out-green">. tab gender treatment</span>
+
+           |       treatment
+    gender |         <span class="out-num">0</span>          <span class="out-num">1</span> |     Total
+-----------+----------------------+----------
+         F |         <span class="out-num">3</span>          <span class="out-num">3</span> |         <span class="out-num">6</span>
+         M |         <span class="out-num">3</span>          <span class="out-num">3</span> |         <span class="out-num">6</span>
+-----------+----------------------+----------
+     Total |         <span class="out-num">6</span>          <span class="out-num">6</span> |        <span class="out-num">12</span></div>
+        </div>
+        <div class="output-simulation" data-output="rand-2" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">   id gender region treatment
+<span class="out-num">1</span>   <span class="out-num">1</span>      <span class="out-str">M</span>      <span class="out-str">N</span>         <span class="out-num">1</span>
+<span class="out-num">2</span>   <span class="out-num">2</span>      <span class="out-str">M</span>      <span class="out-str">N</span>         <span class="out-num">0</span>
+<span class="out-num">3</span>   <span class="out-num">3</span>      <span class="out-str">M</span>      <span class="out-str">S</span>         <span class="out-num">1</span>
+<span class="out-num">4</span>   <span class="out-num">4</span>      <span class="out-str">M</span>      <span class="out-str">S</span>         <span class="out-num">0</span>
+<span class="out-num">5</span>   <span class="out-num">5</span>      <span class="out-str">F</span>      <span class="out-str">N</span>         <span class="out-num">0</span>
+<span class="out-num">6</span>   <span class="out-num">6</span>      <span class="out-str">F</span>      <span class="out-str">N</span>         <span class="out-num">1</span>
+<span class="out-num">7</span>   <span class="out-num">7</span>      <span class="out-str">F</span>      <span class="out-str">S</span>         <span class="out-num">0</span>
+<span class="out-num">8</span>   <span class="out-num">8</span>      <span class="out-str">F</span>      <span class="out-str">S</span>         <span class="out-num">1</span>
+<span class="out-num">9</span>   <span class="out-num">9</span>      <span class="out-str">M</span>      <span class="out-str">N</span>         <span class="out-num">0</span>
+<span class="out-num">10</span> <span class="out-num">10</span>      <span class="out-str">M</span>      <span class="out-str">S</span>         <span class="out-num">1</span>
+<span class="out-num">11</span> <span class="out-num">11</span>      <span class="out-str">F</span>      <span class="out-str">N</span>         <span class="out-num">1</span>
+<span class="out-num">12</span> <span class="out-num">12</span>      <span class="out-str">F</span>      <span class="out-str">S</span>         <span class="out-num">0</span>
+
+   <span class="out-num">0</span> <span class="out-num">1</span>
+F  <span class="out-num">3</span> <span class="out-num">3</span>
+M  <span class="out-num">3</span> <span class="out-num">3</span></div>
         </div>
 
         <!-- Simulated Output for rand-2 -->
@@ -536,20 +674,20 @@ M  3 3</pre>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Cluster randomization</span>
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-tooltip" data-tip="IMPORT: Loads NumPy for random number generation."><span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for DataFrame operations."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
 
-np.random.seed(42)
+<span class="code-tooltip" data-tip="SEED: Fixes the random number generator for reproducibility."><span class="code-variable">np</span>.<span class="code-function">random.seed</span>(<span class="code-number">42</span>)</span>
 
 <span class="code-comment"># Create sample data: students in schools</span>
-df = pd.DataFrame({
-    <span class="code-string">'student_id'</span>: range(1, 13),
+<span class="code-tooltip" data-tip="SAMPLE DATA: 12 students across 4 schools (3 per school) — schools are the clusters that will be randomized.">df = pd.DataFrame({
+    <span class="code-string">'student_id'</span>: range(<span class="code-number">1</span>, <span class="code-number">13</span>),
     <span class="code-string">'school_id'</span>: [<span class="code-string">'A'</span>, <span class="code-string">'A'</span>, <span class="code-string">'A'</span>, <span class="code-string">'B'</span>, <span class="code-string">'B'</span>, <span class="code-string">'B'</span>, <span class="code-string">'C'</span>, <span class="code-string">'C'</span>, <span class="code-string">'C'</span>, <span class="code-string">'D'</span>, <span class="code-string">'D'</span>, <span class="code-string">'D'</span>]
-})
+})</span>
 
 <span class="code-comment"># Get unique clusters</span>
-clusters = df[<span class="code-string">'school_id'</span>].unique()
-n_clusters = len(clusters)
+<span class="code-tooltip" data-tip="UNIQUE CLUSTERS: Extracts the list of distinct school IDs and counts them — randomization happens at this level, not per student.">clusters = df[<span class="code-string">'school_id'</span>].unique()
+n_clusters = <span class="code-function">len</span>(clusters)</span>
 
 <span class="code-comment"># Randomize at cluster level</span>
 <span class="code-tooltip" data-tip="CLUSTER ASSIGNMENT: Creates a dictionary mapping each school to treatment (1) or control (0) — all students in the same school get the same treatment status, as required when interventions operate at the group level.">cluster_treatment = dict(zip(
@@ -558,35 +696,35 @@ n_clusters = len(clusters)
 ))</span>
 
 <span class="code-comment"># Map back to individuals</span>
-df[<span class="code-string">'treatment'</span>] = df[<span class="code-string">'school_id'</span>].map(cluster_treatment)
-<span class="code-function">print</span>(df)
+<span class="code-tooltip" data-tip="MAP: Looks up each student's school in the cluster_treatment dictionary and assigns the corresponding treatment — all students in school A get the same value."><span class="code-variable">df</span>[<span class="code-string">'treatment'</span>] = df[<span class="code-string">'school_id'</span>].map(cluster_treatment)</span>
+<span class="code-tooltip" data-tip="PRINT: Shows the full dataset and the cluster-level treatment dictionary."><span class="code-function">print</span>(df)
 <span class="code-function">print</span>(<span class="code-string">"\nCluster-level assignments:"</span>)
-<span class="code-function">print</span>(cluster_treatment)</code></pre>
+<span class="code-function">print</span>(cluster_treatment)</span></code></pre>
 <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Cluster randomization</span>
-set seed 42
+<span class="code-tooltip" data-tip="SEED: Sets random seed for reproducible cluster assignment.">set seed 42</span>
 
 <span class="code-comment">* Randomize at cluster level</span>
 <span class="code-tooltip" data-tip="CLUSTER RANDOMIZATION: All students in the same school get the same treatment — necessary when the intervention operates at the school level (e.g., new curriculum, teacher training).">randtreat, generate(treatment) cluster(school_id) setseed(42)</span>
 
 <span class="code-comment">* Stratified cluster randomization</span>
-randtreat, generate(treatment) cluster(school_id) ///
-    strata(district) setseed(42)</code></pre>
+<span class="code-tooltip" data-tip="STRATIFIED CLUSTER: Randomizes schools within each district separately — combines cluster and stratified randomization for the strongest balance guarantees.">randtreat, generate(treatment) cluster(school_id) ///
+    strata(district) setseed(42)</span></code></pre>
 <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Cluster randomization with randomizr</span>
-<span class="code-keyword">library</span>(randomizr)
+<span class="code-tooltip" data-tip="LIBRARY: Loads the randomizr package for cluster randomization."><span class="code-keyword">library</span>(<span class="code-package">randomizr</span>)</span>
 
-set.seed(42)
+<span class="code-tooltip" data-tip="SEED: Sets the random seed for reproducibility.">set.seed(<span class="code-number">42</span>)</span>
 
 <span class="code-comment"># Create sample data</span>
-df <- data.frame(
-  student_id = 1:12,
-  school_id = rep(c(<span class="code-string">'A'</span>, <span class="code-string">'B'</span>, <span class="code-string">'C'</span>, <span class="code-string">'D'</span>), each = 3)
-)
+<span class="code-tooltip" data-tip="SAMPLE DATA: 12 students across 4 schools (A-D), 3 students per school — rep() repeats each school ID 3 times.">df <- data.frame(
+  student_id = <span class="code-number">1</span>:<span class="code-number">12</span>,
+  school_id = rep(c(<span class="code-string">'A'</span>, <span class="code-string">'B'</span>, <span class="code-string">'C'</span>, <span class="code-string">'D'</span>), each = <span class="code-number">3</span>)
+)</span>
 
 <span class="code-comment"># Cluster random assignment</span>
 <span class="code-tooltip" data-tip="CLUSTER RANDOMIZATION: Randomly assigns entire schools to treatment or control — all students in school A get the same status, ensuring the design matches how the intervention is actually delivered.">df$treatment <- cluster_ra(
@@ -594,10 +732,83 @@ df <- data.frame(
   prob = 0.5
 )</span>
 
-<span class="code-function">print</span>(df)
-<span class="code-function">print</span>(table(df$school_id, df$treatment))</code></pre>
+<span class="code-tooltip" data-tip="PRINT: Displays all students with their cluster-level treatment assignments."><span class="code-function">print</span>(df)</span>
+<span class="code-tooltip" data-tip="CROSS-TAB: Creates a table of school vs. treatment — each school should appear entirely in one column (all 0s or all 1s)."><span class="code-function">print</span>(<span class="code-function">table</span>(df$school_id, df$treatment))</span></code></pre>
 <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="rand-3" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">    student_id school_id  treatment
+<span class="out-num">0</span>            <span class="out-num">1</span>         <span class="out-str">A</span>          <span class="out-num">0</span>
+<span class="out-num">1</span>            <span class="out-num">2</span>         <span class="out-str">A</span>          <span class="out-num">0</span>
+<span class="out-num">2</span>            <span class="out-num">3</span>         <span class="out-str">A</span>          <span class="out-num">0</span>
+<span class="out-num">3</span>            <span class="out-num">4</span>         <span class="out-str">B</span>          <span class="out-num">1</span>
+<span class="out-num">4</span>            <span class="out-num">5</span>         <span class="out-str">B</span>          <span class="out-num">1</span>
+<span class="out-num">5</span>            <span class="out-num">6</span>         <span class="out-str">B</span>          <span class="out-num">1</span>
+<span class="out-num">6</span>            <span class="out-num">7</span>         <span class="out-str">C</span>          <span class="out-num">0</span>
+<span class="out-num">7</span>            <span class="out-num">8</span>         <span class="out-str">C</span>          <span class="out-num">0</span>
+<span class="out-num">8</span>            <span class="out-num">9</span>         <span class="out-str">C</span>          <span class="out-num">0</span>
+<span class="out-num">9</span>           <span class="out-num">10</span>         <span class="out-str">D</span>          <span class="out-num">0</span>
+<span class="out-num">10</span>          <span class="out-num">11</span>         <span class="out-str">D</span>          <span class="out-num">0</span>
+<span class="out-num">11</span>          <span class="out-num">12</span>         <span class="out-str">D</span>          <span class="out-num">0</span>
+
+Cluster-level assignments:
+{<span class="out-str">'A'</span>: <span class="out-num">0</span>, <span class="out-str">'B'</span>: <span class="out-num">1</span>, <span class="out-str">'C'</span>: <span class="out-num">0</span>, <span class="out-str">'D'</span>: <span class="out-num">0</span>}</div>
+        </div>
+        <div class="output-simulation" data-output="rand-3" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. randtreat, generate(treatment) cluster(school_id) setseed(42)</span>
+(using default treatment probabilities: 0.50 0.50)
+
+Cluster randomization:
+  <span class="out-num">4</span> clusters randomized
+  Treated clusters: <span class="out-num">2</span>
+  Control clusters: <span class="out-num">2</span>
+
+<span class="out-green">. tab school_id treatment</span>
+
+  school_id |       treatment
+            |         <span class="out-num">0</span>          <span class="out-num">1</span> |     Total
+------------+----------------------+----------
+          A |         <span class="out-num">3</span>          <span class="out-num">0</span> |         <span class="out-num">3</span>
+          B |         <span class="out-num">0</span>          <span class="out-num">3</span> |         <span class="out-num">3</span>
+          C |         <span class="out-num">3</span>          <span class="out-num">0</span> |         <span class="out-num">3</span>
+          D |         <span class="out-num">0</span>          <span class="out-num">3</span> |         <span class="out-num">3</span>
+------------+----------------------+----------
+      Total |         <span class="out-num">6</span>          <span class="out-num">6</span> |        <span class="out-num">12</span></div>
+        </div>
+        <div class="output-simulation" data-output="rand-3" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">   student_id school_id treatment
+<span class="out-num">1</span>           <span class="out-num">1</span>         <span class="out-str">A</span>         <span class="out-num">0</span>
+<span class="out-num">2</span>           <span class="out-num">2</span>         <span class="out-str">A</span>         <span class="out-num">0</span>
+<span class="out-num">3</span>           <span class="out-num">3</span>         <span class="out-str">A</span>         <span class="out-num">0</span>
+<span class="out-num">4</span>           <span class="out-num">4</span>         <span class="out-str">B</span>         <span class="out-num">1</span>
+<span class="out-num">5</span>           <span class="out-num">5</span>         <span class="out-str">B</span>         <span class="out-num">1</span>
+<span class="out-num">6</span>           <span class="out-num">6</span>         <span class="out-str">B</span>         <span class="out-num">1</span>
+<span class="out-num">7</span>           <span class="out-num">7</span>         <span class="out-str">C</span>         <span class="out-num">1</span>
+<span class="out-num">8</span>           <span class="out-num">8</span>         <span class="out-str">C</span>         <span class="out-num">1</span>
+<span class="out-num">9</span>           <span class="out-num">9</span>         <span class="out-str">C</span>         <span class="out-num">1</span>
+<span class="out-num">10</span>         <span class="out-num">10</span>         <span class="out-str">D</span>         <span class="out-num">0</span>
+<span class="out-num">11</span>         <span class="out-num">11</span>         <span class="out-str">D</span>         <span class="out-num">0</span>
+<span class="out-num">12</span>         <span class="out-num">12</span>         <span class="out-str">D</span>         <span class="out-num">0</span>
+
+   <span class="out-num">0</span> <span class="out-num">1</span>
+A  <span class="out-num">3</span> <span class="out-num">0</span>
+B  <span class="out-num">0</span> <span class="out-num">3</span>
+C  <span class="out-num">0</span> <span class="out-num">3</span>
+D  <span class="out-num">3</span> <span class="out-num">0</span></div>
         </div>
 
         <!-- Simulated Output for rand-3 -->
@@ -745,6 +956,53 @@ D  3 0</pre>
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
   <script src="../js/password-protection.js"></script>
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+      const targetRect = target.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const padding = 10;
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+      const tooltipRect = tooltip.getBoundingClientRect();
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+      let top = targetRect.top - tooltipRect.height - 8;
+      let arrowClass = 'arrow-bottom';
+      if (top < padding) { top = targetRect.bottom + 8; arrowClass = 'arrow-top'; }
+      if (left < padding) left = padding;
+      if (left + tooltipRect.width > viewportWidth - padding) left = viewportWidth - tooltipRect.width - padding;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) { if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; } currentTarget = target; positionTooltip(target); }
+    function hideTooltip() { hideTimeout = setTimeout(function() { if (tooltipEl) tooltipEl.classList.remove('visible'); currentTarget = null; }, 100); }
+
+    document.addEventListener('mouseenter', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target); }, true);
+    document.addEventListener('mouseleave', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip(); }, true);
+  })();
+  </script>
   <script src="../js/grammar-primer.js"></script>
 </body>
 </html>

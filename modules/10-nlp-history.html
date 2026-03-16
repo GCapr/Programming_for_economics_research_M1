@@ -597,16 +597,23 @@
 
         <div class="demo-box">
           <div class="demo-box-title">🤖 ELIZA in Action</div>
+          <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
           <pre><code><span class="code-comment"># A typical ELIZA conversation</span>
 
-<span class="code-variable">User:</span>    <span class="code-string">I am feeling sad today.</span>
-<span class="code-variable">ELIZA:</span>   <span class="code-string">I am sorry to hear you are feeling sad today.</span>
+<span class="code-tooltip" data-tip="USER INPUT: The user types a natural sentence. ELIZA scans for keywords like 'feeling', 'sad', 'mother', 'think'."><span class="code-variable">User:</span>    <span class="code-string">I am feeling sad today.</span></span>
+<span class="code-tooltip" data-tip="ELIZA RESPONSE: ELIZA matches the pattern 'I am (.*)', captures 'feeling sad today', and reflects it back using a template. No understanding -- just text substitution."><span class="code-variable">ELIZA:</span>   <span class="code-string">I am sorry to hear you are feeling sad today.</span></span>
 
-<span class="code-variable">User:</span>    <span class="code-string">My mother doesn't understand me.</span>
-<span class="code-variable">ELIZA:</span>   <span class="code-string">Tell me more about your family.</span>
+<span class="code-tooltip" data-tip="USER INPUT: The word 'mother' triggers ELIZA's family-related rules, overriding other patterns."><span class="code-variable">User:</span>    <span class="code-string">My mother doesn't understand me.</span></span>
+<span class="code-tooltip" data-tip="ELIZA RESPONSE: The keyword 'mother' matched a family rule. ELIZA responds with a generic family-exploration prompt regardless of the rest of the sentence."><span class="code-variable">ELIZA:</span>   <span class="code-string">Tell me more about your family.</span></span>
 
-<span class="code-variable">User:</span>    <span class="code-string">I think you don't really understand me either.</span>
-<span class="code-variable">ELIZA:</span>   <span class="code-string">What makes you think I don't really understand you?</span></code></pre>
+<span class="code-tooltip" data-tip="USER INPUT: Contains the keyword 'think', which triggers the reflection pattern."><span class="code-variable">User:</span>    <span class="code-string">I think you don't really understand me either.</span></span>
+<span class="code-tooltip" data-tip="ELIZA RESPONSE: Matches 'I think (.*)', captures the rest, and reflects it back as a question. This is the core trick: turning statements into questions feels conversational."><span class="code-variable">ELIZA:</span>   <span class="code-string">What makes you think I don't really understand you?</span></span></code></pre>
+          </div>
+          </div>
           <p style="margin-top: 1rem; color: #a0aec0; font-size: 0.9rem;">
             ELIZA worked by matching keywords ("mother" → family topic) and transforming sentences with templates. It had <strong>no understanding whatsoever</strong>&mdash;just clever rules. Yet users found it surprisingly engaging, a phenomenon Weizenbaum called the <em>"ELIZA effect."</em>
           </p>
@@ -626,24 +633,31 @@
 
         <div class="demo-box">
           <div class="demo-box-title">⚙️ ELIZA's Pattern Matching Rules (Simplified)</div>
+          <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
           <pre><code><span class="code-comment"># Simplified ELIZA-style rules in Python</span>
 
-<span class="code-variable">rules</span> = [
+<span class="code-tooltip" data-tip="RULES: A list of (pattern, template) tuples. ELIZA checks each pattern in order and uses the first one that matches."><span class="code-variable">rules</span> = [</span>
     <span class="code-comment"># (pattern, response_template)</span>
-    (<span class="code-string">r"I am (.*)"</span>,          <span class="code-string">"Why do you say you are {0}?"</span>),
-    (<span class="code-string">r"I feel (.*)"</span>,        <span class="code-string">"Tell me more about feeling {0}."</span>),
-    (<span class="code-string">r"(.*) mother (.*)"</span>,   <span class="code-string">"Tell me more about your family."</span>),
-    (<span class="code-string">r"(.*) father (.*)"</span>,   <span class="code-string">"How do you feel about your father?"</span>),
-    (<span class="code-string">r"I think (.*)"</span>,       <span class="code-string">"What makes you think {0}?"</span>),
-    (<span class="code-string">r"(.*)"</span>,               <span class="code-string">"Please go on."</span>),  <span class="code-comment"># fallback</span>
+<span class="code-tooltip" data-tip="REGEX PATTERN: r'I am (.*)' captures everything after 'I am'. The {0} in the response inserts the captured text back into the reply.">    (<span class="code-string">r"I am (.*)"</span>,          <span class="code-string">"Why do you say you are {0}?"</span>),</span>
+<span class="code-tooltip" data-tip="PATTERN: Matches any sentence containing 'I feel' and captures the rest. The response reflects the feeling back to the user.">    (<span class="code-string">r"I feel (.*)"</span>,        <span class="code-string">"Tell me more about feeling {0}."</span>),</span>
+<span class="code-tooltip" data-tip="PATTERN: Matches any sentence containing 'mother'. The (.*) on each side means it matches regardless of surrounding words. Response ignores captured text entirely.">    (<span class="code-string">r"(.*) mother (.*)"</span>,   <span class="code-string">"Tell me more about your family."</span>),</span>
+<span class="code-tooltip" data-tip="PATTERN: Same approach for 'father'. Family keywords always trigger a family-related response.">    (<span class="code-string">r"(.*) father (.*)"</span>,   <span class="code-string">"How do you feel about your father?"</span>),</span>
+<span class="code-tooltip" data-tip="PATTERN: Matches 'I think ...' and reflects the thought back as a question. This technique makes ELIZA seem insightful.">    (<span class="code-string">r"I think (.*)"</span>,       <span class="code-string">"What makes you think {0}?"</span>),</span>
+<span class="code-tooltip" data-tip="FALLBACK: The pattern (.*) matches everything. This is the last rule, so it only fires if nothing else matched. A generic response that keeps the conversation going.">    (<span class="code-string">r"(.*)"</span>,               <span class="code-string">"Please go on."</span>),  <span class="code-comment"># fallback</span></span>
 ]
 
-<span class="code-keyword">def</span> <span class="code-function">eliza_respond</span>(<span class="code-variable">user_input</span>):
-    <span class="code-keyword">for</span> pattern, response <span class="code-keyword">in</span> rules:
-        match = re.match(pattern, user_input, re.IGNORECASE)
-        <span class="code-keyword">if</span> match:
-            <span class="code-keyword">return</span> response.format(*match.groups())
-    <span class="code-keyword">return</span> <span class="code-string">"I see. Please continue."</span></code></pre>
+<span class="code-tooltip" data-tip="DEF: Defines the function that generates ELIZA's response. Takes a user input string and returns a response string."><span class="code-keyword">def</span> <span class="code-function">eliza_respond</span>(<span class="code-variable">user_input</span>):</span>
+<span class="code-tooltip" data-tip="FOR LOOP: Iterates through the rules list in order. Each rule is a (pattern, response) tuple.">    <span class="code-keyword">for</span> pattern, response <span class="code-keyword">in</span> rules:</span>
+<span class="code-tooltip" data-tip="RE.MATCH: Tries to match the regex pattern against the user input. re.IGNORECASE makes it case-insensitive so 'I AM' and 'i am' both match.">        match = re.match(pattern, user_input, re.IGNORECASE)</span>
+<span class="code-tooltip" data-tip="IF MATCH: If the pattern matched, use the response template. match.groups() returns the captured text from parentheses in the regex.">        <span class="code-keyword">if</span> match:</span>
+<span class="code-tooltip" data-tip="RETURN: Fills in the template with captured groups. For 'I am feeling sad', {0} becomes 'feeling sad', producing 'Why do you say you are feeling sad?'">            <span class="code-keyword">return</span> response.format(*match.groups())</span>
+<span class="code-tooltip" data-tip="RETURN: Default response if no pattern matched (should not happen since the last rule matches everything).">    <span class="code-keyword">return</span> <span class="code-string">"I see. Please continue."</span></span></code></pre>
+          </div>
+          </div>
         </div>
 
         <h3>The Chomsky Paradigm</h3>
@@ -711,23 +725,30 @@
 
         <div class="demo-box">
           <div class="demo-box-title">📊 N-gram Language Models</div>
+          <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
           <pre><code><span class="code-comment"># N-gram probability estimation</span>
 
 <span class="code-comment"># Unigram (n=1): Each word is independent</span>
-<span class="code-variable">P</span>(<span class="code-string">"cat"</span>) = count(<span class="code-string">"cat"</span>) / total_words
+<span class="code-tooltip" data-tip="UNIGRAM: The simplest model. The probability of a word is just how often it appears divided by the total number of words. No context at all."><span class="code-variable">P</span>(<span class="code-string">"cat"</span>) = count(<span class="code-string">"cat"</span>) / total_words</span>
 
 <span class="code-comment"># Bigram (n=2): Depends on previous word only</span>
-<span class="code-variable">P</span>(<span class="code-string">"cat"</span> | <span class="code-string">"the"</span>) = count(<span class="code-string">"the cat"</span>) / count(<span class="code-string">"the"</span>)
+<span class="code-tooltip" data-tip="BIGRAM: The probability of 'cat' given the previous word 'the'. Count how often 'the cat' appears together, divided by how often 'the' appears in any context."><span class="code-variable">P</span>(<span class="code-string">"cat"</span> | <span class="code-string">"the"</span>) = count(<span class="code-string">"the cat"</span>) / count(<span class="code-string">"the"</span>)</span>
 
 <span class="code-comment"># Trigram (n=3): Depends on two previous words</span>
-<span class="code-variable">P</span>(<span class="code-string">"mat"</span> | <span class="code-string">"on the"</span>) = count(<span class="code-string">"on the mat"</span>) / count(<span class="code-string">"on the"</span>)
+<span class="code-tooltip" data-tip="TRIGRAM: Uses two words of context. Probability of 'mat' given 'on the'. More context = better predictions, but much more data needed to avoid sparsity."><span class="code-variable">P</span>(<span class="code-string">"mat"</span> | <span class="code-string">"on the"</span>) = count(<span class="code-string">"on the mat"</span>) / count(<span class="code-string">"on the"</span>)</span>
 
 <span class="code-comment"># Example with a toy corpus: "the cat sat on the mat"</span>
 <span class="code-comment"># Bigram counts: "the cat":1, "cat sat":1, "sat on":1, "on the":1, "the mat":1</span>
 
-<span class="code-variable">P</span>(<span class="code-string">"cat"</span> | <span class="code-string">"the"</span>) = <span class="code-number">1</span>/<span class="code-number">2</span> = <span class="code-number">0.5</span>   <span class="code-comment"># "the" appears twice, followed by "cat" once</span>
-<span class="code-variable">P</span>(<span class="code-string">"mat"</span> | <span class="code-string">"the"</span>) = <span class="code-number">1</span>/<span class="code-number">2</span> = <span class="code-number">0.5</span>   <span class="code-comment"># "the" appears twice, followed by "mat" once</span>
-<span class="code-variable">P</span>(<span class="code-string">"dog"</span> | <span class="code-string">"the"</span>) = <span class="code-number">0</span>/<span class="code-number">2</span> = <span class="code-number">0.0</span>   <span class="code-comment"># Never seen "the dog" - assigns zero!</span></code></pre>
+<span class="code-tooltip" data-tip="BIGRAM CALCULATION: 'the' appears twice in the corpus (before 'cat' and before 'mat'). 'the cat' appears once. So P('cat'|'the') = 1/2 = 0.5."><span class="code-variable">P</span>(<span class="code-string">"cat"</span> | <span class="code-string">"the"</span>) = <span class="code-number">1</span>/<span class="code-number">2</span> = <span class="code-number">0.5</span>   <span class="code-comment"># "the" appears twice, followed by "cat" once</span></span>
+<span class="code-tooltip" data-tip="BIGRAM CALCULATION: Similarly, 'the mat' appears once out of two occurrences of 'the'. So P('mat'|'the') = 1/2 = 0.5."><span class="code-variable">P</span>(<span class="code-string">"mat"</span> | <span class="code-string">"the"</span>) = <span class="code-number">1</span>/<span class="code-number">2</span> = <span class="code-number">0.5</span>   <span class="code-comment"># "the" appears twice, followed by "mat" once</span></span>
+<span class="code-tooltip" data-tip="ZERO PROBABILITY: 'the dog' never appeared in training data, so the model assigns probability 0. This is the sparsity problem -- the model thinks impossible things just because it hasn't seen them."><span class="code-variable">P</span>(<span class="code-string">"dog"</span> | <span class="code-string">"the"</span>) = <span class="code-number">0</span>/<span class="code-number">2</span> = <span class="code-number">0.0</span>   <span class="code-comment"># Never seen "the dog" - assigns zero!</span></span></code></pre>
+          </div>
+          </div>
         </div>
 
         <h3>The Sparsity Problem</h3>
@@ -775,22 +796,29 @@
 
         <div class="demo-box">
           <div class="demo-box-title">🏷️ Part-of-Speech Tagging with HMMs</div>
+          <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
           <pre><code><span class="code-comment"># Given a sentence, find the most likely sequence of tags</span>
 
-<span class="code-variable">sentence</span> = [<span class="code-string">"The"</span>, <span class="code-string">"cat"</span>, <span class="code-string">"sat"</span>, <span class="code-string">"quickly"</span>]
+<span class="code-tooltip" data-tip="SENTENCE: A list of words to tag. The HMM will assign a part-of-speech label (DET, NOUN, VERB, ADV) to each word."><span class="code-variable">sentence</span> = [<span class="code-string">"The"</span>, <span class="code-string">"cat"</span>, <span class="code-string">"sat"</span>, <span class="code-string">"quickly"</span>]</span>
 
 <span class="code-comment"># HMM estimates two types of probabilities:</span>
 
 <span class="code-comment"># 1. Transition probabilities: P(tag_i | tag_{i-1})</span>
-<span class="code-variable">P</span>(NOUN | DET) = <span class="code-number">0.6</span>      <span class="code-comment"># After "the", nouns are common</span>
-<span class="code-variable">P</span>(VERB | NOUN) = <span class="code-number">0.4</span>     <span class="code-comment"># After a noun, verbs are common</span>
+<span class="code-tooltip" data-tip="TRANSITION: The probability of seeing a NOUN after a DET (determiner). Learned from labeled training data -- 60% of the time, a determiner is followed by a noun."><span class="code-variable">P</span>(NOUN | DET) = <span class="code-number">0.6</span>      <span class="code-comment"># After "the", nouns are common</span></span>
+<span class="code-tooltip" data-tip="TRANSITION: The probability of seeing a VERB after a NOUN. These transition probabilities encode grammar patterns from the training corpus."><span class="code-variable">P</span>(VERB | NOUN) = <span class="code-number">0.4</span>     <span class="code-comment"># After a noun, verbs are common</span></span>
 
 <span class="code-comment"># 2. Emission probabilities: P(word | tag)</span>
-<span class="code-variable">P</span>(<span class="code-string">"cat"</span> | NOUN) = <span class="code-number">0.01</span>   <span class="code-comment"># "cat" is a noun</span>
-<span class="code-variable">P</span>(<span class="code-string">"sat"</span> | VERB) = <span class="code-number">0.005</span>  <span class="code-comment"># "sat" is a verb</span>
+<span class="code-tooltip" data-tip="EMISSION: The probability that a NOUN produces the specific word 'cat'. Low because there are many possible nouns, but 'cat' is one of them."><span class="code-variable">P</span>(<span class="code-string">"cat"</span> | NOUN) = <span class="code-number">0.01</span>   <span class="code-comment"># "cat" is a noun</span></span>
+<span class="code-tooltip" data-tip="EMISSION: The probability that a VERB produces 'sat'. The Viterbi algorithm combines transition and emission probabilities to find the best tag sequence."><span class="code-variable">P</span>(<span class="code-string">"sat"</span> | VERB) = <span class="code-number">0.005</span>  <span class="code-comment"># "sat" is a verb</span></span>
 
 <span class="code-comment"># Viterbi algorithm finds: DET → NOUN → VERB → ADV</span>
-<span class="code-variable">tags</span> = [<span class="code-string">"DET"</span>, <span class="code-string">"NOUN"</span>, <span class="code-string">"VERB"</span>, <span class="code-string">"ADV"</span>]</code></pre>
+<span class="code-tooltip" data-tip="RESULT: The Viterbi algorithm finds the most probable tag sequence by dynamic programming. Each word gets the tag that maximizes the joint probability of the whole sequence."><span class="code-variable">tags</span> = [<span class="code-string">"DET"</span>, <span class="code-string">"NOUN"</span>, <span class="code-string">"VERB"</span>, <span class="code-string">"ADV"</span>]</span></code></pre>
+          </div>
+          </div>
         </div>
 
         <h3>The IBM Translation Models (1990s)</h3>
@@ -865,19 +893,26 @@
 
         <div class="demo-box">
           <div class="demo-box-title">✨ The Magic of Word Vectors</div>
+          <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
           <pre><code><span class="code-comment"># These relationships emerged automatically from text!</span>
 
 <span class="code-comment"># Gender relationship</span>
-<span class="code-function">vector</span>(<span class="code-string">"king"</span>) - <span class="code-function">vector</span>(<span class="code-string">"man"</span>) + <span class="code-function">vector</span>(<span class="code-string">"woman"</span>) ≈ <span class="code-function">vector</span>(<span class="code-string">"queen"</span>)
+<span class="code-tooltip" data-tip="VECTOR ARITHMETIC: Subtracting 'man' from 'king' removes the 'maleness' direction, then adding 'woman' adds 'femaleness'. The result lands near 'queen' in vector space."><span class="code-function">vector</span>(<span class="code-string">"king"</span>) - <span class="code-function">vector</span>(<span class="code-string">"man"</span>) + <span class="code-function">vector</span>(<span class="code-string">"woman"</span>) ≈ <span class="code-function">vector</span>(<span class="code-string">"queen"</span>)</span>
 
 <span class="code-comment"># Capital cities</span>
-<span class="code-function">vector</span>(<span class="code-string">"paris"</span>) - <span class="code-function">vector</span>(<span class="code-string">"france"</span>) + <span class="code-function">vector</span>(<span class="code-string">"italy"</span>) ≈ <span class="code-function">vector</span>(<span class="code-string">"rome"</span>)
+<span class="code-tooltip" data-tip="VECTOR ARITHMETIC: The direction from 'france' to 'paris' captures the 'capital-of' relationship. Applying it to 'italy' yields 'rome'. The model learned geography from text alone."><span class="code-function">vector</span>(<span class="code-string">"paris"</span>) - <span class="code-function">vector</span>(<span class="code-string">"france"</span>) + <span class="code-function">vector</span>(<span class="code-string">"italy"</span>) ≈ <span class="code-function">vector</span>(<span class="code-string">"rome"</span>)</span>
 
 <span class="code-comment"># Verb tense</span>
-<span class="code-function">vector</span>(<span class="code-string">"walking"</span>) - <span class="code-function">vector</span>(<span class="code-string">"walk"</span>) + <span class="code-function">vector</span>(<span class="code-string">"swim"</span>) ≈ <span class="code-function">vector</span>(<span class="code-string">"swimming"</span>)
+<span class="code-tooltip" data-tip="VECTOR ARITHMETIC: The direction from 'walk' to 'walking' encodes the present-participle transformation. Applying it to 'swim' produces 'swimming'."><span class="code-function">vector</span>(<span class="code-string">"walking"</span>) - <span class="code-function">vector</span>(<span class="code-string">"walk"</span>) + <span class="code-function">vector</span>(<span class="code-string">"swim"</span>) ≈ <span class="code-function">vector</span>(<span class="code-string">"swimming"</span>)</span>
 
 <span class="code-comment"># Superlatives</span>
-<span class="code-function">vector</span>(<span class="code-string">"biggest"</span>) - <span class="code-function">vector</span>(<span class="code-string">"big"</span>) + <span class="code-function">vector</span>(<span class="code-string">"small"</span>) ≈ <span class="code-function">vector</span>(<span class="code-string">"smallest"</span>)</code></pre>
+<span class="code-tooltip" data-tip="VECTOR ARITHMETIC: The direction from 'big' to 'biggest' captures the superlative transformation. Applying it to 'small' yields 'smallest'. These relationships were never taught -- they emerged from word co-occurrence patterns."><span class="code-function">vector</span>(<span class="code-string">"biggest"</span>) - <span class="code-function">vector</span>(<span class="code-string">"big"</span>) + <span class="code-function">vector</span>(<span class="code-string">"small"</span>) ≈ <span class="code-function">vector</span>(<span class="code-string">"smallest"</span>)</span></code></pre>
+          </div>
+          </div>
           <p style="margin-top: 1rem; color: #a0aec0; font-size: 0.9rem;">
             The model learned these relationships purely from word co-occurrence patterns&mdash;no explicit knowledge was provided!
           </p>
@@ -926,23 +961,30 @@
 
         <div class="demo-box">
           <div class="demo-box-title">🔄 RNN Processing Step-by-Step</div>
+          <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
           <pre><code><span class="code-comment"># Processing "The cat sat on the mat"</span>
 
-<span class="code-variable">h_0</span> = [<span class="code-number">0</span>, <span class="code-number">0</span>, <span class="code-number">0</span>, ...]        <span class="code-comment"># Initial hidden state (zeros)</span>
+<span class="code-tooltip" data-tip="INITIAL STATE: The hidden state starts as all zeros. It will accumulate information about the sentence as words are processed one at a time."><span class="code-variable">h_0</span> = [<span class="code-number">0</span>, <span class="code-number">0</span>, <span class="code-number">0</span>, ...]        <span class="code-comment"># Initial hidden state (zeros)</span></span>
 
 <span class="code-comment"># Step 1: Process "The"</span>
-<span class="code-variable">h_1</span> = <span class="code-function">tanh</span>(W_h @ h_0 + W_x @ <span class="code-function">embed</span>(<span class="code-string">"The"</span>) + b)
+<span class="code-tooltip" data-tip="RNN STEP: Combines the previous hidden state (h_0) with the embedding of the current word ('The'). W_h and W_x are learned weight matrices. tanh squashes the output to [-1, 1]."><span class="code-variable">h_1</span> = <span class="code-function">tanh</span>(W_h @ h_0 + W_x @ <span class="code-function">embed</span>(<span class="code-string">"The"</span>) + b)</span>
 
 <span class="code-comment"># Step 2: Process "cat" - h_1 carries info about "The"</span>
-<span class="code-variable">h_2</span> = <span class="code-function">tanh</span>(W_h @ h_1 + W_x @ <span class="code-function">embed</span>(<span class="code-string">"cat"</span>) + b)
+<span class="code-tooltip" data-tip="RNN STEP: Now h_1 encodes 'The'. The same weight matrices W_h and W_x are reused at every step -- this is weight sharing, the key to RNNs handling variable-length sequences."><span class="code-variable">h_2</span> = <span class="code-function">tanh</span>(W_h @ h_1 + W_x @ <span class="code-function">embed</span>(<span class="code-string">"cat"</span>) + b)</span>
 
 <span class="code-comment"># Step 3: Process "sat" - h_2 carries info about "The cat"</span>
-<span class="code-variable">h_3</span> = <span class="code-function">tanh</span>(W_h @ h_2 + W_x @ <span class="code-function">embed</span>(<span class="code-string">"sat"</span>) + b)
+<span class="code-tooltip" data-tip="RNN STEP: h_2 now encodes the context 'The cat'. After processing 'sat', h_3 encodes 'The cat sat'. Each step blends new input with accumulated context."><span class="code-variable">h_3</span> = <span class="code-function">tanh</span>(W_h @ h_2 + W_x @ <span class="code-function">embed</span>(<span class="code-string">"sat"</span>) + b)</span>
 
 <span class="code-comment"># ... and so on</span>
 
 <span class="code-comment"># The hidden state h_t encodes context from all previous words</span>
 <span class="code-comment"># But information from early words gets "diluted" over time</span></code></pre>
+          </div>
+          </div>
         </div>
 
         <h3>The Vanishing Gradient Problem</h3>
@@ -991,19 +1033,26 @@
 
         <div class="demo-box">
           <div class="demo-box-title">🔄 Seq2Seq for Translation</div>
+          <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
           <pre><code><span class="code-comment"># Translating "The cat sat" → "Le chat s'assit"</span>
 
 <span class="code-comment"># ENCODER: Process input and compress to a single vector</span>
-h_1 = LSTM(<span class="code-string">"The"</span>, h_0)
-h_2 = LSTM(<span class="code-string">"cat"</span>, h_1)
-h_3 = LSTM(<span class="code-string">"sat"</span>, h_2)
-<span class="code-variable">context</span> = h_3  <span class="code-comment"># This single vector must encode the entire input!</span>
+<span class="code-tooltip" data-tip="ENCODER STEP 1: The LSTM processes 'The' and produces hidden state h_1. The LSTM's gating mechanism decides what to remember.">h_1 = LSTM(<span class="code-string">"The"</span>, h_0)</span>
+<span class="code-tooltip" data-tip="ENCODER STEP 2: Processes 'cat' with h_1 as context. h_2 now encodes 'The cat'.">h_2 = LSTM(<span class="code-string">"cat"</span>, h_1)</span>
+<span class="code-tooltip" data-tip="ENCODER STEP 3: Processes 'sat'. h_3 now encodes the entire input sentence.">h_3 = LSTM(<span class="code-string">"sat"</span>, h_2)</span>
+<span class="code-tooltip" data-tip="BOTTLENECK: The entire input sentence is compressed into this single fixed-size vector. For long sentences, this is a severe limitation -- too much information is lost."><span class="code-variable">context</span> = h_3  <span class="code-comment"># This single vector must encode the entire input!</span></span>
 
 <span class="code-comment"># DECODER: Generate output one word at a time</span>
-s_1 = LSTM(<span class="code-string">"&lt;START&gt;"</span>, context) → <span class="code-string">"Le"</span>
-s_2 = LSTM(<span class="code-string">"Le"</span>, s_1)          → <span class="code-string">"chat"</span>
-s_3 = LSTM(<span class="code-string">"chat"</span>, s_2)        → <span class="code-string">"s'assit"</span>
-s_4 = LSTM(<span class="code-string">"s'assit"</span>, s_3)    → <span class="code-string">"&lt;END&gt;"</span></code></pre>
+<span class="code-tooltip" data-tip="DECODER STEP 1: Starting from the context vector and a START token, the decoder LSTM predicts the first French word: 'Le'.">s_1 = LSTM(<span class="code-string">"&lt;START&gt;"</span>, context) → <span class="code-string">"Le"</span></span>
+<span class="code-tooltip" data-tip="DECODER STEP 2: Feeds the previous output ('Le') back in as input. This autoregressive pattern generates one word at a time.">s_2 = LSTM(<span class="code-string">"Le"</span>, s_1)          → <span class="code-string">"chat"</span></span>
+<span class="code-tooltip" data-tip="DECODER STEP 3: Continues generating. Each step conditions on all previous outputs plus the original context vector.">s_3 = LSTM(<span class="code-string">"chat"</span>, s_2)        → <span class="code-string">"s'assit"</span></span>
+<span class="code-tooltip" data-tip="DECODER STEP 4: Generates the END token, signaling that the translation is complete. The model learned when to stop from training data.">s_4 = LSTM(<span class="code-string">"s'assit"</span>, s_3)    → <span class="code-string">"&lt;END&gt;"</span></span></code></pre>
+          </div>
+          </div>
         </div>
 
         <p>
@@ -1026,27 +1075,34 @@ s_4 = LSTM(<span class="code-string">"s'assit"</span>, s_3)    → <span class="
 
         <div class="demo-box">
           <div class="demo-box-title">👁️ Attention Mechanism</div>
+          <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
           <pre><code><span class="code-comment"># Generating the French word "chat" (cat)</span>
 
 <span class="code-comment"># Encoder states from "The cat sat"</span>
-<span class="code-variable">encoder_states</span> = [h_the, h_cat, h_sat]
+<span class="code-tooltip" data-tip="ENCODER STATES: Instead of compressing into one vector, attention keeps ALL encoder hidden states available. The decoder can 'look back' at any of them."><span class="code-variable">encoder_states</span> = [h_the, h_cat, h_sat]</span>
 
 <span class="code-comment"># Current decoder state</span>
-<span class="code-variable">decoder_state</span> = s_1
+<span class="code-tooltip" data-tip="DECODER STATE: The current state of the decoder, which is trying to generate the next French word. It 'queries' the encoder states to find relevant information."><span class="code-variable">decoder_state</span> = s_1</span>
 
 <span class="code-comment"># Compute attention scores (how relevant is each encoder state?)</span>
-<span class="code-variable">scores</span> = [<span class="code-function">dot</span>(s_1, h_the),   <span class="code-comment"># 0.1 - "The" not very relevant</span>
+<span class="code-tooltip" data-tip="ATTENTION SCORES: The dot product measures similarity between the decoder state and each encoder state. Higher dot product = more relevant. Here, 'cat' scores highest because we are translating it."><span class="code-variable">scores</span> = [<span class="code-function">dot</span>(s_1, h_the),   <span class="code-comment"># 0.1 - "The" not very relevant</span>
           <span class="code-function">dot</span>(s_1, h_cat),   <span class="code-comment"># 0.8 - "cat" highly relevant!</span>
-          <span class="code-function">dot</span>(s_1, h_sat)]   <span class="code-comment"># 0.1 - "sat" not very relevant</span>
+          <span class="code-function">dot</span>(s_1, h_sat)]   <span class="code-comment"># 0.1 - "sat" not very relevant</span></span>
 
 <span class="code-comment"># Convert to probabilities with softmax</span>
-<span class="code-variable">attention_weights</span> = <span class="code-function">softmax</span>(scores)  <span class="code-comment"># [0.1, 0.8, 0.1]</span>
+<span class="code-tooltip" data-tip="SOFTMAX: Converts raw scores into a probability distribution that sums to 1. The highest score ('cat' at 0.8) gets the most weight. This is a 'soft' selection -- all states contribute, but 'cat' dominates."><span class="code-variable">attention_weights</span> = <span class="code-function">softmax</span>(scores)  <span class="code-comment"># [0.1, 0.8, 0.1]</span></span>
 
 <span class="code-comment"># Weighted sum of encoder states</span>
-<span class="code-variable">context</span> = <span class="code-number">0.1</span>*h_the + <span class="code-number">0.8</span>*h_cat + <span class="code-number">0.1</span>*h_sat
+<span class="code-tooltip" data-tip="CONTEXT VECTOR: A weighted average of all encoder states. Since 'cat' has weight 0.8, the context is mostly about 'cat'. This replaces the single bottleneck vector from seq2seq."><span class="code-variable">context</span> = <span class="code-number">0.1</span>*h_the + <span class="code-number">0.8</span>*h_cat + <span class="code-number">0.1</span>*h_sat</span>
 
 <span class="code-comment"># Use context to help predict "chat"</span>
-<span class="code-variable">output</span> = <span class="code-function">predict</span>(decoder_state, context)  <span class="code-comment"># → "chat"</span></code></pre>
+<span class="code-tooltip" data-tip="PREDICT: Combines the decoder state with the attention-weighted context to predict the next word. Because the context focuses on 'cat', the model correctly outputs 'chat' (French for cat)."><span class="code-variable">output</span> = <span class="code-function">predict</span>(decoder_state, context)  <span class="code-comment"># → "chat"</span></span></code></pre>
+          </div>
+          </div>
         </div>
 
         <div class="key-concept">
@@ -1112,19 +1168,26 @@ s_4 = LSTM(<span class="code-string">"s'assit"</span>, s_3)    → <span class="
 
         <div class="demo-box">
           <div class="demo-box-title">🔑 Query, Key, Value</div>
+          <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
           <pre><code><span class="code-comment"># For each word, compute Q, K, V by linear projection</span>
-<span class="code-variable">Q</span> = X @ W_Q  <span class="code-comment"># Query: "What am I looking for?"</span>
-<span class="code-variable">K</span> = X @ W_K  <span class="code-comment"># Key: "What do I contain?"</span>
-<span class="code-variable">V</span> = X @ W_V  <span class="code-comment"># Value: "What do I contribute?"</span>
+<span class="code-tooltip" data-tip="QUERY: Each word asks 'What am I looking for?' by multiplying its embedding by the learned weight matrix W_Q. The result is a vector representing what this word needs from other words."><span class="code-variable">Q</span> = X @ W_Q  <span class="code-comment"># Query: "What am I looking for?"</span></span>
+<span class="code-tooltip" data-tip="KEY: Each word advertises 'What do I contain?' by multiplying its embedding by W_K. High dot product between a Query and a Key means those two words are relevant to each other."><span class="code-variable">K</span> = X @ W_K  <span class="code-comment"># Key: "What do I contain?"</span></span>
+<span class="code-tooltip" data-tip="VALUE: Each word provides 'What do I contribute?' via W_V. The Value is the actual information passed forward. The attention weights determine how much each Value contributes."><span class="code-variable">V</span> = X @ W_V  <span class="code-comment"># Value: "What do I contribute?"</span></span>
 
 <span class="code-comment"># Attention scores: how much should each word attend to each other word?</span>
-<span class="code-variable">scores</span> = Q @ K.T / <span class="code-function">sqrt</span>(d_k)  <span class="code-comment"># Scale by dimension</span>
+<span class="code-tooltip" data-tip="SCALED DOT-PRODUCT: Q @ K.T computes all pairwise similarity scores. Dividing by sqrt(d_k) prevents scores from becoming too large in high dimensions, which would cause softmax to produce near-one-hot distributions."><span class="code-variable">scores</span> = Q @ K.T / <span class="code-function">sqrt</span>(d_k)  <span class="code-comment"># Scale by dimension</span></span>
 
 <span class="code-comment"># Softmax to get probabilities</span>
-<span class="code-variable">attention</span> = <span class="code-function">softmax</span>(scores)
+<span class="code-tooltip" data-tip="SOFTMAX: Converts raw scores to probabilities. Each row sums to 1. Entry (i,j) = how much word i should attend to word j. This creates the 'attention pattern' -- the signature of what the model has learned."><span class="code-variable">attention</span> = <span class="code-function">softmax</span>(scores)</span>
 
 <span class="code-comment"># Output: weighted sum of values</span>
-<span class="code-variable">output</span> = attention @ V</code></pre>
+<span class="code-tooltip" data-tip="OUTPUT: Multiplies attention weights by Values. Each word's output is a weighted combination of all other words' Values, with weights determined by relevance. This is the core of the Transformer."><span class="code-variable">output</span> = attention @ V</span></code></pre>
+          </div>
+          </div>
           <p style="margin-top: 1rem; color: #a0aec0; font-size: 0.9rem;">
             Think of it like a library: Query = "I'm looking for books about cats", Key = "This shelf has books about animals", Value = "Here are the actual books." High query-key similarity means the value gets more weight.
           </p>

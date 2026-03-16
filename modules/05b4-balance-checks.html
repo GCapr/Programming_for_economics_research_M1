@@ -12,8 +12,11 @@
     .protected-content { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
     .protected-content pre, .protected-content code, .protected-content .code-block, .protected-content .code-tabs { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
     .code-tooltip { position: relative; cursor: help; border-bottom: 1px dotted #888; text-decoration: none; }
-    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; }
+    .tooltip-popup { position: fixed; background: #1f2937; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem; white-space: normal; max-width: 300px; opacity: 0; pointer-events: none; transition: opacity 0.15s ease-in-out; z-index: 10000; line-height: 1.4; text-align: left; font-family: var(--font-body); font-style: normal; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .tooltip-popup.visible { opacity: 1; }
+    .tooltip-popup::after { content: ''; position: absolute; border: 6px solid transparent; }
+    .tooltip-popup.arrow-bottom::after { top: 100%; left: 50%; transform: translateX(-50%); border-top-color: #1f2937; }
+    .tooltip-popup.arrow-top::after { bottom: 100%; left: 50%; transform: translateX(-50%); border-bottom-color: #1f2937; }
   </style>
 </head>
 <body>
@@ -170,31 +173,31 @@
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Balance table</span>
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> scipy <span class="code-keyword">import</span> stats
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for DataFrame operations."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Loads NumPy for numerical operations and random data generation."><span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Loads the stats module from SciPy — provides the t-test function used to compare group means."><span class="code-keyword">from</span> <span class="code-package">scipy</span> <span class="code-keyword">import</span> <span class="code-variable">stats</span></span>
 
-<span class="code-keyword">def</span> <span class="code-function">balance_table</span>(df, treatment_col, covariates):
+<span class="code-tooltip" data-tip="DEF: Defines a function that creates a balance table — loops over each covariate, compares means between treatment and control, and tests for significant differences."><span class="code-keyword">def</span> <span class="code-function">balance_table</span>(df, treatment_col, covariates):</span>
     <span class="code-string">"""Create a balance table comparing treatment vs control."""</span>
-    results = []
+    <span class="code-tooltip" data-tip="RESULTS: An empty list that will collect one dictionary per covariate with means, differences, and p-values.">results = []</span>
 
-    <span class="code-keyword">for</span> var <span class="code-keyword">in</span> covariates:
-        treat = df[df[treatment_col] == 1][var].dropna()
-        control = df[df[treatment_col] == 0][var].dropna()
+    <span class="code-tooltip" data-tip="LOOP: Iterates over each covariate (age, income, education, female) to compute balance statistics one at a time."><span class="code-keyword">for</span> var <span class="code-keyword">in</span> covariates:</span>
+        <span class="code-tooltip" data-tip="SPLIT: Separates the covariate values into treatment and control groups, dropping any missing values.">treat = df[df[treatment_col] == <span class="code-number">1</span>][var].dropna()
+        control = df[df[treatment_col] == <span class="code-number">0</span>][var].dropna()</span>
 
         <span class="code-comment"># Means</span>
-        mean_t = treat.mean()
+        <span class="code-tooltip" data-tip="MEANS AND DIFF: Computes the average of the covariate in each group and their difference — small differences indicate good balance.">mean_t = treat.mean()
         mean_c = control.mean()
-        diff = mean_t - mean_c
+        diff = mean_t - mean_c</span>
 
         <span class="code-comment"># T-test for difference</span>
         <span class="code-tooltip" data-tip="T-TEST: Tests whether the average of each covariate differs significantly between treatment and control groups — a large p-value (>0.05) is good, meaning the groups are balanced on this variable.">t_stat, p_val = stats.ttest_ind(treat, control)</span>
 
         <span class="code-comment"># Standardized difference</span>
-        pooled_sd = np.sqrt((treat.var() + control.var()) / 2)
-        std_diff = diff / pooled_sd if pooled_sd > 0 else 0
+        <span class="code-tooltip" data-tip="STANDARDIZED DIFFERENCE: Divides the raw difference by the pooled standard deviation — values below 0.1 indicate good balance, above 0.25 is concerning.">pooled_sd = np.sqrt((treat.var() + control.var()) / <span class="code-number">2</span>)
+        std_diff = diff / pooled_sd <span class="code-keyword">if</span> pooled_sd > <span class="code-number">0</span> <span class="code-keyword">else</span> <span class="code-number">0</span></span>
 
-        results.append({
+        <span class="code-tooltip" data-tip="APPEND: Adds one row of results for this covariate — formatted to 3 decimal places for clean output.">results.append({</span>
             <span class="code-string">'Variable'</span>: var,
             <span class="code-string">'Control Mean'</span>: f<span class="code-string">"{mean_c:.3f}"</span>,
             <span class="code-string">'Treatment Mean'</span>: f<span class="code-string">"{mean_t:.3f}"</span>,
@@ -203,12 +206,12 @@
             <span class="code-string">'P-value'</span>: f<span class="code-string">"{p_val:.3f}"</span>
         })
 
-    <span class="code-keyword">return</span> pd.DataFrame(results)
+    <span class="code-tooltip" data-tip="RETURN: Converts the list of dictionaries into a DataFrame — one row per covariate, columns for means, difference, and p-value."><span class="code-keyword">return</span> pd.DataFrame(results)</span>
 
 <span class="code-comment"># Create sample data</span>
-np.random.seed(42)
-n = 200
-df = pd.DataFrame({
+<span class="code-tooltip" data-tip="SAMPLE DATA: Generates 200 simulated participants with random treatment assignment and baseline characteristics — mimics what you'd have before analyzing a real experiment.">np.random.seed(<span class="code-number">42</span>)
+n = <span class="code-number">200</span>
+df = pd.DataFrame({</span>
     <span class="code-string">'treatment'</span>: np.random.binomial(1, 0.5, n),
     <span class="code-string">'age'</span>: np.random.normal(35, 10, n),
     <span class="code-string">'income'</span>: np.random.normal(50000, 15000, n),
@@ -217,9 +220,9 @@ df = pd.DataFrame({
 })
 
 <span class="code-comment"># Generate balance table</span>
-covariates = [<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'female'</span>]
-balance = balance_table(df, <span class="code-string">'treatment'</span>, covariates)
-<span class="code-function">print</span>(balance.to_string(index=False))</code></pre>
+<span class="code-tooltip" data-tip="COVARIATES: Lists the baseline variables to check for balance — these should be measured before treatment and not affected by it.">covariates = [<span class="code-string">'age'</span>, <span class="code-string">'income'</span>, <span class="code-string">'education'</span>, <span class="code-string">'female'</span>]</span>
+<span class="code-tooltip" data-tip="CALL: Runs the balance_table function on the data and prints the result — each row shows one covariate with group means, difference, standardized difference, and p-value.">balance = balance_table(df, <span class="code-string">'treatment'</span>, covariates)
+<span class="code-function">print</span>(balance.to_string(index=<span class="code-keyword">False</span>))</span></code></pre>
 <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
@@ -240,25 +243,25 @@ iebaltab age income education female, ///
     save("balance_table.xlsx") replace
 
 <span class="code-comment">* Manual approach</span>
-foreach var in age income education female {
+<span class="code-tooltip" data-tip="MANUAL T-TESTS: Loops over each covariate and runs a separate t-test comparing treatment vs. control — useful when you don't have iebaltab or want more control over the output.">foreach var in age income education female {
     ttest `var', by(treatment)
-}</code></pre>
+}</span></code></pre>
 <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Balance table with cobalt package</span>
-<span class="code-keyword">library</span>(cobalt)
+<span class="code-tooltip" data-tip="LIBRARY: Loads the cobalt package — provides balance assessment tools for experiments and observational studies."><span class="code-keyword">library</span>(<span class="code-package">cobalt</span>)</span>
 
 <span class="code-comment"># Create sample data</span>
-set.seed(42)
-n <- 200
+<span class="code-tooltip" data-tip="SAMPLE DATA: Generates 200 simulated participants with random treatment and baseline covariates.">set.seed(<span class="code-number">42</span>)
+n <- <span class="code-number">200</span>
 df <- data.frame(
-  treatment = rbinom(n, 1, 0.5),
-  age = rnorm(n, 35, 10),
-  income = rnorm(n, 50000, 15000),
-  education = rnorm(n, 14, 2),
-  female = rbinom(n, 1, 0.5)
-)
+  treatment = rbinom(n, <span class="code-number">1</span>, <span class="code-number">0.5</span>),
+  age = rnorm(n, <span class="code-number">35</span>, <span class="code-number">10</span>),
+  income = rnorm(n, <span class="code-number">50000</span>, <span class="code-number">15000</span>),
+  education = rnorm(n, <span class="code-number">14</span>, <span class="code-number">2</span>),
+  female = rbinom(n, <span class="code-number">1</span>, <span class="code-number">0.5</span>)
+)</span>
 
 <span class="code-comment"># Create balance table</span>
 <span class="code-tooltip" data-tip="BALANCE TABLE: bal.tab() computes standardized mean differences between treatment and control for every covariate — values below 0.1 indicate good balance.">balance <- bal.tab(
@@ -266,9 +269,70 @@ df <- data.frame(
   data = df,
   binary = <span class="code-string">"std"</span>  <span class="code-comment"># Standardize binary variables</span>
 )</span>
-<span class="code-function">print</span>(balance)</code></pre>
+<span class="code-tooltip" data-tip="PRINT: Displays the balance table with standardized mean differences for each covariate."><span class="code-function">print</span>(balance)</span></code></pre>
 <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="balance-1" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">  Variable Control Mean Treatment Mean Difference Std. Diff. P-value
+       age       <span class="out-num">34.821</span>         <span class="out-num">35.432</span>      <span class="out-num">0.611</span>      <span class="out-num">0.062</span>   <span class="out-num">0.571</span>
+    income    <span class="out-num">49823.456</span>      <span class="out-num">50412.789</span>    <span class="out-num">589.333</span>      <span class="out-num">0.041</span>   <span class="out-num">0.712</span>
+ education       <span class="out-num">13.912</span>         <span class="out-num">14.087</span>      <span class="out-num">0.175</span>      <span class="out-num">0.089</span>   <span class="out-num">0.423</span>
+    female        <span class="out-num">0.485</span>          <span class="out-num">0.520</span>      <span class="out-num">0.035</span>      <span class="out-num">0.070</span>   <span class="out-num">0.593</span></div>
+        </div>
+        <div class="output-simulation" data-output="balance-1" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. iebaltab age income education female, grpvar(treatment) ftest stdev</span>
+
+Balance table
+
+                      (1)             (2)
+                  Control       Treatment      Diff        P-value
+                    Mean            Mean      (2)-(1)
+                   [SD]            [SD]
+--------------------------------------------------------------------
+age                <span class="out-num">34.82</span>           <span class="out-num">35.43</span>       <span class="out-num">0.61</span>        <span class="out-num">0.571</span>
+                  [<span class="out-num">9.84</span>]          [<span class="out-num">9.92</span>]
+income          <span class="out-num">49823.46</span>        <span class="out-num">50412.79</span>     <span class="out-num">589.33</span>        <span class="out-num">0.712</span>
+              [<span class="out-num">14523.12</span>]      [<span class="out-num">14812.45</span>]
+education          <span class="out-num">13.91</span>           <span class="out-num">14.09</span>       <span class="out-num">0.18</span>        <span class="out-num">0.423</span>
+                  [<span class="out-num">1.98</span>]          [<span class="out-num">1.95</span>]
+female              <span class="out-num">0.49</span>            <span class="out-num">0.52</span>       <span class="out-num">0.04</span>        <span class="out-num">0.593</span>
+                  [<span class="out-num">0.50</span>]          [<span class="out-num">0.50</span>]
+--------------------------------------------------------------------
+N                     <span class="out-num">98</span>             <span class="out-num">102</span>
+
+F-test of joint significance: F(<span class="out-num">4</span>, <span class="out-num">195</span>) = <span class="out-num">0.23</span>, p = <span class="out-num">0.921</span>
+
+Balance table saved to: balance_table.xlsx</div>
+        </div>
+        <div class="output-simulation" data-output="balance-1" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Balance Measures
+                Type Diff.Un
+age          Contin.  <span class="out-num">0.0621</span>
+income       Contin.  <span class="out-num">0.0408</span>
+education    Contin.  <span class="out-num">0.0892</span>
+female       Binary   <span class="out-num">0.0700</span>
+
+Sample sizes
+    Control Treated
+All      <span class="out-num">98</span>     <span class="out-num">102</span>
+
+Effective sample sizes
+    Control Treated
+All      <span class="out-num">98</span>     <span class="out-num">102</span></div>
         </div>
 
         <!-- Simulated Output for balance-1 -->
@@ -432,27 +496,27 @@ All      98     102</pre>
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Attrition analysis</span>
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
-<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> scipy.stats <span class="code-keyword">import</span> chi2_contingency
+<span class="code-tooltip" data-tip="IMPORT: Loads pandas for DataFrame operations."><span class="code-keyword">import</span> <span class="code-package">pandas</span> <span class="code-keyword">as</span> <span class="code-variable">pd</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Loads NumPy for random data generation."><span class="code-keyword">import</span> <span class="code-package">numpy</span> <span class="code-keyword">as</span> <span class="code-variable">np</span></span>
+<span class="code-tooltip" data-tip="IMPORT: Loads chi2_contingency for testing whether attrition differs between groups."><span class="code-keyword">from</span> <span class="code-package">scipy.stats</span> <span class="code-keyword">import</span> <span class="code-variable">chi2_contingency</span></span>
 
 <span class="code-comment"># Create sample data with some attrition</span>
-np.random.seed(42)
-n = 200
+<span class="code-tooltip" data-tip="SAMPLE DATA: Generates 200 participants with treatment, age, and an outcome variable.">np.random.seed(<span class="code-number">42</span>)
+n = <span class="code-number">200</span>
 df = pd.DataFrame({
-    <span class="code-string">'treatment'</span>: np.random.binomial(1, 0.5, n),
-    <span class="code-string">'age'</span>: np.random.normal(35, 10, n),
-    <span class="code-string">'outcome'</span>: np.random.normal(100, 15, n)
-})
+    <span class="code-string">'treatment'</span>: np.random.binomial(<span class="code-number">1</span>, <span class="code-number">0.5</span>, n),
+    <span class="code-string">'age'</span>: np.random.normal(<span class="code-number">35</span>, <span class="code-number">10</span>, n),
+    <span class="code-string">'outcome'</span>: np.random.normal(<span class="code-number">100</span>, <span class="code-number">15</span>, n)
+})</span>
 <span class="code-comment"># Introduce some attrition (15% overall, slightly higher in treatment)</span>
-df.loc[np.random.choice(df[df[<span class="code-string">'treatment'</span>]==1].index, 18), <span class="code-string">'outcome'</span>] = np.nan
-df.loc[np.random.choice(df[df[<span class="code-string">'treatment'</span>]==0].index, 12), <span class="code-string">'outcome'</span>] = np.nan
+<span class="code-tooltip" data-tip="ATTRITION: Randomly sets 18 treatment outcomes and 12 control outcomes to NaN (missing) — simulates differential dropout where treated participants leave at a slightly higher rate.">df.loc[np.random.choice(df[df[<span class="code-string">'treatment'</span>]==<span class="code-number">1</span>].index, <span class="code-number">18</span>), <span class="code-string">'outcome'</span>] = np.nan
+df.loc[np.random.choice(df[df[<span class="code-string">'treatment'</span>]==<span class="code-number">0</span>].index, <span class="code-number">12</span>), <span class="code-string">'outcome'</span>] = np.nan</span>
 
 <span class="code-comment"># 1. Overall attrition rate by treatment</span>
-df[<span class="code-string">'completed'</span>] = df[<span class="code-string">'outcome'</span>].notna().astype(int)
+<span class="code-tooltip" data-tip="COMPLETION: Creates a binary variable (1=completed, 0=dropped out) and computes the completion rate for each group — helps you see if one group lost more participants.">df[<span class="code-string">'completed'</span>] = df[<span class="code-string">'outcome'</span>].notna().astype(<span class="code-keyword">int</span>)
 attrition = df.groupby(<span class="code-string">'treatment'</span>)[<span class="code-string">'completed'</span>].mean()
 <span class="code-function">print</span>(<span class="code-string">"Completion rates by treatment:"</span>)
-<span class="code-function">print</span>(attrition)
+<span class="code-function">print</span>(attrition)</span>
 
 <span class="code-comment"># 2. Test if attrition differs by treatment</span>
 <span class="code-tooltip" data-tip="DIFFERENTIAL ATTRITION: Creates a cross-tab of treatment vs. completion and runs a chi-square test — a significant result (p &lt; 0.05) would mean treated participants are dropping out at a different rate than controls, which could bias your results.">contingency = pd.crosstab(df[<span class="code-string">'treatment'</span>], df[<span class="code-string">'completed'</span>])
@@ -465,8 +529,8 @@ chi2, p, dof, expected = chi2_contingency(contingency)
 <pre><code><span class="code-comment">* Stata: Attrition analysis</span>
 
 <span class="code-comment">* 1. Completion rates</span>
-gen completed = !missing(outcome)
-tab treatment completed, row
+<span class="code-tooltip" data-tip="COMPLETION: Creates a binary variable that equals 1 if the outcome is non-missing (participant completed) and 0 if missing (dropped out).">gen completed = !missing(outcome)</span>
+<span class="code-tooltip" data-tip="CROSS-TAB: Displays a 2x2 table of treatment vs. completion with row percentages — lets you visually compare dropout rates across groups.">tab treatment completed, row</span>
 
 <span class="code-comment">* 2. Test for differential attrition</span>
 <span class="code-tooltip" data-tip="PROPORTION TEST: Compares the completion rate between treatment and control — if treated participants drop out more, the remaining sample is no longer balanced and your treatment effect estimate could be biased.">prtest completed, by(treatment)</span>
@@ -474,38 +538,115 @@ tab treatment completed, row
 <span class="code-comment">* 3. Lee bounds for treatment effects under selection</span>
 <span class="code-comment">* (Bounds on treatment effect accounting for differential attrition)</span>
 <span class="code-comment">* ssc install leebounds</span>
-leebounds outcome treatment
+<span class="code-tooltip" data-tip="LEE BOUNDS: Computes upper and lower bounds on the treatment effect that account for differential attrition — even in the worst case, the true effect falls within these bounds.">leebounds outcome treatment</span>
 
 <span class="code-comment">* 4. Balance among completers vs full sample</span>
-iebaltab age income education female if completed==1, ///
-    grpvar(treatment) save("balance_completers.xlsx") replace</code></pre>
+<span class="code-tooltip" data-tip="COMPLETER BALANCE: Runs a balance table only among participants who completed the study — if this differs from the full-sample balance, attrition may have introduced bias.">iebaltab age income education female if completed==1, ///
+    grpvar(treatment) save("balance_completers.xlsx") replace</span></code></pre>
 <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Attrition analysis</span>
-set.seed(42)
-n <- 200
+<span class="code-tooltip" data-tip="SAMPLE DATA: Generates 200 participants with treatment, age, and outcome.">set.seed(<span class="code-number">42</span>)
+n <- <span class="code-number">200</span></span>
 
 <span class="code-comment"># Create sample data with some attrition</span>
-df <- data.frame(
-  treatment = rbinom(n, 1, 0.5),
-  age = rnorm(n, 35, 10),
-  outcome = rnorm(n, 100, 15)
-)
+<span class="code-tooltip" data-tip="DATA FRAME: Creates the simulated experimental data with random treatment, baseline age, and outcome.">df <- data.frame(
+  treatment = rbinom(n, <span class="code-number">1</span>, <span class="code-number">0.5</span>),
+  age = rnorm(n, <span class="code-number">35</span>, <span class="code-number">10</span>),
+  outcome = rnorm(n, <span class="code-number">100</span>, <span class="code-number">15</span>)
+)</span>
 <span class="code-comment"># Introduce attrition</span>
-df$outcome[sample(which(df$treatment == 1), 18)] <- NA
-df$outcome[sample(which(df$treatment == 0), 12)] <- NA
+<span class="code-tooltip" data-tip="ATTRITION: Randomly sets 18 treatment and 12 control outcomes to NA — simulates higher dropout in the treatment group.">df$outcome[sample(which(df$treatment == <span class="code-number">1</span>), <span class="code-number">18</span>)] <- NA
+df$outcome[sample(which(df$treatment == <span class="code-number">0</span>), <span class="code-number">12</span>)] <- NA</span>
 
 <span class="code-comment"># 1. Completion rates by treatment</span>
-df$completed <- !is.na(df$outcome)
+<span class="code-tooltip" data-tip="COMPLETION: Creates a boolean column and displays a cross-tab of treatment vs. completion status.">df$completed <- !is.na(df$outcome)
 <span class="code-function">print</span>(<span class="code-string">"Completion by treatment:"</span>)
-<span class="code-function">print</span>(<span class="code-function">table</span>(df$treatment, df$completed))
+<span class="code-function">print</span>(<span class="code-function">table</span>(df$treatment, df$completed))</span>
 
 <span class="code-comment"># 2. Test for differential attrition</span>
 <span class="code-tooltip" data-tip="PROPORTION TEST: Tests whether completion rates differ between treatment and control — a non-significant result (p > 0.05) is reassuring that attrition is not biasing your treatment effect.">result <- prop.test(<span class="code-function">table</span>(df$treatment, df$completed))
 <span class="code-function">print</span>(result)</span></code></pre>
 <button class="run-btn" data-lang="r">Run Code</button>
           </div>
+        </div>
+
+        <div class="output-simulation" data-output="balance-2" data-lang="python">
+          <div class="output-header">
+            <span>Python Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body">Completion rates by treatment:
+treatment
+<span class="out-num">0</span>    <span class="out-num">0.877551</span>
+<span class="out-num">1</span>    <span class="out-num">0.823529</span>
+Name: completed, dtype: float64
+
+Chi-squared test for differential attrition:
+Chi2 = <span class="out-num">0.987</span>, p-value = <span class="out-num">0.3206</span></div>
+        </div>
+        <div class="output-simulation" data-output="balance-2" data-lang="stata">
+          <div class="output-header">
+            <span>Stata Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-green">. gen completed = !missing(outcome)</span>
+
+<span class="out-green">. tab treatment completed, row</span>
+
+           |       completed
+ treatment |         <span class="out-num">0</span>          <span class="out-num">1</span> |     Total
+-----------+----------------------+----------
+         0 |        <span class="out-num">12</span>         <span class="out-num">86</span> |        <span class="out-num">98</span>
+           |     <span class="out-num">12.24</span>      <span class="out-num">87.76</span> |    <span class="out-num">100.00</span>
+-----------+----------------------+----------
+         1 |        <span class="out-num">18</span>         <span class="out-num">84</span> |       <span class="out-num">102</span>
+           |     <span class="out-num">17.65</span>      <span class="out-num">82.35</span> |    <span class="out-num">100.00</span>
+-----------+----------------------+----------
+     Total |        <span class="out-num">30</span>        <span class="out-num">170</span> |       <span class="out-num">200</span>
+           |     <span class="out-num">15.00</span>      <span class="out-num">85.00</span> |    <span class="out-num">100.00</span>
+
+<span class="out-green">. prtest completed, by(treatment)</span>
+
+Two-sample test of proportions                     0: Number of obs =       <span class="out-num">98</span>
+                                                   1: Number of obs =      <span class="out-num">102</span>
+------------------------------------------------------------------------------
+       Group |       Mean   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+           0 |   <span class="out-num">.8775510</span>   <span class="out-num">.0331389</span>                      <span class="out-num">.8126000</span>    <span class="out-num">.9425021</span>
+           1 |   <span class="out-num">.8235294</span>   <span class="out-num">.0377551</span>                      <span class="out-num">.7495310</span>    <span class="out-num">.8975279</span>
+-------------+----------------------------------------------------------------
+        diff |   <span class="out-num">.0540216</span>   <span class="out-num">.0502584</span>                     <span class="out-num">-.0444830</span>    <span class="out-num">.1525263</span>
+             |  under Ho:   <span class="out-num">.0504892</span>     <span class="out-num">1.07</span>   <span class="out-num">0.285</span>
+------------------------------------------------------------------------------
+        diff = prop(0) - prop(1)                                  z =   <span class="out-num">1.0700</span>
+    Ho: diff = 0
+
+    Ha: diff &lt; 0                 Ha: diff != 0                 Ha: diff &gt; 0
+ Pr(Z &lt; z) = <span class="out-num">0.8576</span>         Pr(|Z| &gt; |z|) = <span class="out-num">0.2848</span>          Pr(Z &gt; z) = <span class="out-num">0.1424</span></div>
+        </div>
+        <div class="output-simulation" data-output="balance-2" data-lang="r">
+          <div class="output-header">
+            <span>R Output</span>
+            <button class="close-output">&times;</button>
+          </div>
+          <div class="output-body"><span class="out-str">[1] "Completion by treatment:"</span>
+
+   FALSE TRUE
+0     <span class="out-num">12</span>   <span class="out-num">86</span>
+1     <span class="out-num">18</span>   <span class="out-num">84</span>
+
+	2-sample test for equality of proportions with continuity correction
+
+data:  table(df$treatment, df$completed)
+X-squared = <span class="out-num">0.98696</span>, df = <span class="out-num">1</span>, p-value = <span class="out-num">0.3206</span>
+alternative hypothesis: two.sided
+<span class="out-num">95</span> percent confidence interval:
+ <span class="out-num">-0.04686043</span>  <span class="out-num">0.15503133</span>
+sample estimates:
+   prop 1    prop 2
+<span class="out-num">0.8775510</span> <span class="out-num">0.8235294</span></div>
         </div>
 
         <!-- Simulated Output for balance-2 -->
@@ -658,6 +799,53 @@ sample estimates:
   <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">Menu</button>
   <script src="../js/main.js"></script>
   <script src="../js/password-protection.js"></script>
+  <!-- Smart Tooltip Positioning System -->
+  <script>
+  (function() {
+    let tooltipEl = null;
+    let currentTarget = null;
+    let hideTimeout = null;
+
+    function createTooltip() {
+      if (tooltipEl) return tooltipEl;
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'tooltip-popup';
+      document.body.appendChild(tooltipEl);
+      return tooltipEl;
+    }
+
+    function positionTooltip(target) {
+      const tooltip = createTooltip();
+      const tipText = target.getAttribute('data-tip');
+      if (!tipText) return;
+      tooltip.textContent = tipText;
+      tooltip.className = 'tooltip-popup';
+      const targetRect = target.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const padding = 10;
+      tooltip.style.visibility = 'hidden';
+      tooltip.style.display = 'block';
+      tooltip.classList.add('visible');
+      const tooltipRect = tooltip.getBoundingClientRect();
+      let left = targetRect.left + (targetRect.width / 2) - (tooltipRect.width / 2);
+      let top = targetRect.top - tooltipRect.height - 8;
+      let arrowClass = 'arrow-bottom';
+      if (top < padding) { top = targetRect.bottom + 8; arrowClass = 'arrow-top'; }
+      if (left < padding) left = padding;
+      if (left + tooltipRect.width > viewportWidth - padding) left = viewportWidth - tooltipRect.width - padding;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      tooltip.style.visibility = 'visible';
+      tooltip.classList.add(arrowClass);
+    }
+
+    function showTooltip(target) { if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; } currentTarget = target; positionTooltip(target); }
+    function hideTooltip() { hideTimeout = setTimeout(function() { if (tooltipEl) tooltipEl.classList.remove('visible'); currentTarget = null; }, 100); }
+
+    document.addEventListener('mouseenter', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) showTooltip(e.target); }, true);
+    document.addEventListener('mouseleave', function(e) { if (e.target.classList && e.target.classList.contains('code-tooltip')) hideTooltip(); }, true);
+  })();
+  </script>
   <script src="../js/grammar-primer.js"></script>
 </body>
 </html>

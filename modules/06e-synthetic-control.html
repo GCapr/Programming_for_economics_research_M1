@@ -209,8 +209,8 @@
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Synthetic Control with SyntheticControlMethods</span>
 <span class="code-comment"># pip install SyntheticControlMethods</span>
-<span class="code-keyword">from</span> SyntheticControlMethods <span class="code-keyword">import</span> Synth
-<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-tooltip" data-tip="IMPORT: Synth class from SyntheticControlMethods implements the Abadie et al. SC estimator; pandas for data handling."><span class="code-keyword">from</span> SyntheticControlMethods <span class="code-keyword">import</span> Synth
+<span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd</span>
 
 <span class="code-comment"># Data structure: unit, time, outcome, covariates</span>
 <span class="code-comment"># treated_unit: the single treated unit</span>
@@ -225,17 +225,17 @@
            treated_unit=<span class="code-string">"West Germany"</span>)</span>
 
 <span class="code-comment"># Fit the synthetic control</span>
-sc.fit()
+<span class="code-tooltip" data-tip="FIT: Solves for the optimal donor weights that minimize the pre-treatment distance between treated and synthetic units.">sc.fit()</span>
 
 <span class="code-comment"># Get results</span>
-print(sc.summary())
+<span class="code-tooltip" data-tip="OUTPUT: Prints predictor balance, donor weights, pre-treatment RMSPE, and the estimated treatment effect.">print(sc.summary())</span>
 
 <span class="code-comment"># Plot</span>
-sc.plot([<span class="code-string">"original"</span>, <span class="code-string">"pointwise"</span>])
+<span class="code-tooltip" data-tip="PLOT: Shows the treated vs. synthetic series and a pointwise gap plot — the divergence after treatment is the estimated effect.">sc.plot([<span class="code-string">"original"</span>, <span class="code-string">"pointwise"</span>])</span>
 
 <span class="code-comment"># Get weights</span>
-print(<span class="code-string">"Donor weights:"</span>)
-print(sc.W)</code></pre>
+<span class="code-tooltip" data-tip="WEIGHTS: Displays how much each donor country contributes to the synthetic control — sparse weights (few countries dominating) are typical.">print(<span class="code-string">"Donor weights:"</span>)
+print(sc.W)</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
@@ -243,7 +243,7 @@ print(sc.W)</code></pre>
 <span class="code-comment">* ssc install synth</span>
 
 <span class="code-comment">* Set panel structure</span>
-tsset country_id year
+<span class="code-tooltip" data-tip="SETUP: Declares the panel structure — synth needs to know which variable identifies units and which identifies time.">tsset country_id year</span>
 
 <span class="code-comment">* Basic synthetic control</span>
 <span class="code-tooltip" data-tip="STATA: Specifies GDP in years 1985-1989 and covariates as predictors — synth finds donor country weights that best reproduce West Germany's pre-treatment trajectory">synth gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
@@ -252,22 +252,22 @@ tsset country_id year
     figure</span>
 
 <span class="code-comment">* With more options</span>
-synth gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
+<span class="code-tooltip" data-tip="STATA: Full specification — xperiod sets the covariate matching window, mspeperiod sets the MSPE optimization window, resultsperiod controls the output range, and keep saves results to a dataset.">synth gdp gdp(1985) gdp(1986) gdp(1987) gdp(1988) gdp(1989) ///
     population trade_openness inflation, ///
     trunit(7) trperiod(1990) ///
     xperiod(1985(1)1989) ///
     mspeperiod(1985(1)1989) ///
     resultsperiod(1985(1)2000) ///
-    keep(synth_results) replace
+    keep(synth_results) replace</span>
 
 <span class="code-comment">* Get weights and gaps</span>
-matrix list e(W_weights)  <span class="code-comment">// donor weights</span>
-matrix list e(V_matrix)   <span class="code-comment">// predictor weights</span></code></pre>
+<span class="code-tooltip" data-tip="STATA: W_weights shows each donor country's contribution; V_matrix shows how much each predictor (GDP, population, etc.) matters for matching.">matrix list e(W_weights)  <span class="code-comment">// donor weights</span>
+matrix list e(V_matrix)   <span class="code-comment">// predictor weights</span></span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Synthetic Control with Synth package</span>
-<span class="code-keyword">library</span>(Synth)
+<span class="code-tooltip" data-tip="LIBRARY: The Synth package implements the Abadie, Diamond, and Hainmueller SC method with dataprep() for setup and synth() for estimation."><span class="code-keyword">library</span>(Synth)</span>
 
 <span class="code-comment"># Prepare data for Synth</span>
 <span class="code-tooltip" data-tip="R: Prepares the data by specifying predictors, the pre-treatment optimization period, and which unit is treated vs. which are potential donors for the synthetic control">dataprep.out <- dataprep(
@@ -288,16 +288,16 @@ matrix list e(V_matrix)   <span class="code-comment">// predictor weights</span>
 <span class="code-tooltip" data-tip="R: Solves for the donor weights that minimize the pre-treatment mean squared prediction error — producing a synthetic control that best mimics the treated unit before the intervention">synth.out <- synth(dataprep.out)</span>
 
 <span class="code-comment"># Results</span>
-synth.tables <- synth.tab(dataprep.res = dataprep.out,
+<span class="code-tooltip" data-tip="R: Creates tables of donor weights and predictor balance — tab.w shows which countries form the synthetic control and their weights.">synth.tables <- synth.tab(dataprep.res = dataprep.out,
                           synth.res = synth.out)
-print(synth.tables$tab.w)  <span class="code-comment"># weights</span>
+print(synth.tables$tab.w)  <span class="code-comment"># weights</span></span>
 
 <span class="code-comment"># Plot</span>
-path.plot(synth.res = synth.out,
+<span class="code-tooltip" data-tip="R: Plots the treated unit's actual GDP path against the synthetic control — visual divergence after tr.intake (1990) is the estimated treatment effect.">path.plot(synth.res = synth.out,
           dataprep.res = dataprep.out,
           Ylab = "GDP",
           Xlab = "Year",
-          tr.intake = 1990)</code></pre>
+          tr.intake = 1990)</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -420,7 +420,7 @@ gdp(1989)          25890     25823       22012
 population          61.2      58.9        45.6
 trade_openness     0.456     0.448       0.412
 
-MSPE (pre-treatment): 55034.67
+MSPE (pre-treatment): 55018.39
 Root MSPE: 234.56
 
 [Path plot displayed showing treated vs synthetic control trajectories]</pre></div>
@@ -548,9 +548,9 @@ Root MSPE: 234.56
           </div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Placebo Tests</span>
-<span class="code-keyword">from</span> SyntheticControlMethods <span class="code-keyword">import</span> Synth
+<span class="code-tooltip" data-tip="IMPORT: Synth for SC estimation on each placebo unit; numpy for MSPE calculations; matplotlib for the placebo gap plot."><span class="code-keyword">from</span> SyntheticControlMethods <span class="code-keyword">import</span> Synth
 <span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
+<span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt</span>
 
 <span class="code-comment"># Run placebo tests (in-space placebos)</span>
 <span class="code-tooltip" data-tip="PLACEBO: Runs the synthetic control method on every control country as if each were treated — if the true treated unit's effect is unusually large compared to these placebos, the effect is statistically significant">all_units = df[<span class="code-string">'country'</span>].unique()
@@ -565,13 +565,13 @@ placebo_effects = {}
     placebo_effects[unit] = sc.gaps  <span class="code-comment"># gap = treated - synthetic</span></span>
 
 <span class="code-comment"># Plot all gaps</span>
-fig, ax = plt.subplots(figsize=(10, 6))
+<span class="code-tooltip" data-tip="PLOT: Gray lines show placebo gaps; the black line is the treated unit — if the black line stands out after 1990, the effect is unlikely due to chance.">fig, ax = plt.subplots(figsize=(10, 6))
 <span class="code-keyword">for</span> unit, gaps <span class="code-keyword">in</span> placebo_effects.items():
     ax.plot(gaps.index, gaps.values, color=<span class="code-string">'gray'</span>, alpha=0.3)
 ax.plot(treated_gaps.index, treated_gaps.values, color=<span class="code-string">'black'</span>, linewidth=2)
 ax.axvline(x=1990, linestyle=<span class="code-string">'--'</span>, color=<span class="code-string">'red'</span>)
 ax.axhline(y=0, linestyle=<span class="code-string">'-'</span>, color=<span class="code-string">'gray'</span>)
-plt.show()
+plt.show()</span>
 
 <span class="code-comment"># Calculate p-value</span>
 <span class="code-tooltip" data-tip="P-VALUE: Computes a permutation-based p-value — the fraction of placebo units whose post-treatment MSPE is at least as large as the treated unit's, providing an exact test of significance">post_treatment_mspe = np.mean(treated_gaps[1990:]**2)
@@ -591,10 +591,10 @@ print(f<span class="code-string">"p-value: {pvalue:.3f}"</span>)</span></code></
     gen_vars</span>
 
 <span class="code-comment">* Plot with placebos</span>
-effect_graphs
+<span class="code-tooltip" data-tip="STATA: Plots the treatment effect with placebo gaps overlaid — the treated unit's gap should visibly stand out from the placebo distribution.">effect_graphs</span>
 
 <span class="code-comment">* P-values</span>
-pval_graphs
+<span class="code-tooltip" data-tip="STATA: Plots exact p-values over time based on where the treated unit ranks among all placebo units.">pval_graphs</span>
 
 <span class="code-comment">* RMSPE ratio (pre/post treatment fit)</span>
 <span class="code-tooltip" data-tip="STATA: Plots the RMSPE ratio (post/pre treatment fit) — a large ratio for the treated unit relative to placebos indicates a genuine treatment effect rather than poor pre-fit">single_treatment_graphs</span></code></pre>
@@ -602,10 +602,10 @@ pval_graphs
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Placebo Tests</span>
-<span class="code-keyword">library</span>(Synth)
+<span class="code-tooltip" data-tip="LIBRARY: Synth for running SC on each placebo unit."><span class="code-keyword">library</span>(Synth)</span>
 
 <span class="code-comment"># Function to run SC for any unit</span>
-run_sc <- function(treated_id, donor_ids) {
+<span class="code-tooltip" data-tip="FUNCTION: Wraps the dataprep and synth calls into a reusable function so we can easily run SC for any unit as if it were treated.">run_sc <- function(treated_id, donor_ids) {
   dp <- dataprep(
     foo = df,
     predictors = c("gdp", "population", "trade_openness"),
@@ -635,9 +635,9 @@ placebo_gaps <- lapply(control_ids, function(id) {
 })</span>
 
 <span class="code-comment"># Using tidysynth (tidyverse-friendly)</span>
-<span class="code-keyword">library</span>(tidysynth)
+<span class="code-tooltip" data-tip="LIBRARY: tidysynth wraps the SC method in a tidyverse-style pipe workflow with built-in placebo test generation."><span class="code-keyword">library</span>(tidysynth)</span>
 
-sc <- df %>%
+<span class="code-tooltip" data-tip="TIDYSYNTH: Pipe-based SC — generate_placebos = TRUE automatically runs SC for every control unit as a placebo, then generate_weights and generate_control solve for the optimal synthetic match.">sc <- df %>%
   synthetic_control(
     outcome = gdp,
     unit = country,
@@ -648,10 +648,10 @@ sc <- df %>%
   ) %>%
   generate_predictor(...) %>%
   generate_weights() %>%
-  generate_control()
+  generate_control()</span>
 
 <span class="code-comment"># Plot with placebos</span>
-sc %>% plot_placebos()</code></pre>
+<span class="code-tooltip" data-tip="PLOT: Displays the treated unit's gap alongside all placebo gaps — visual inference on whether the effect is unusually large.">sc %>% plot_placebos()</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -828,8 +828,8 @@ Using tidysynth::plot_placebos():
 print(f<span class="code-string">"Pre-treatment RMSPE: {pre_rmspe:.3f}"</span>)</span>
 
 <span class="code-comment"># 2. Check covariate balance</span>
-print(<span class="code-string">"Predictor balance:"</span>)
-print(sc.comparison)  <span class="code-comment"># treated vs synthetic on predictors</span>
+<span class="code-tooltip" data-tip="BALANCE: Compares the treated unit and synthetic control on each predictor — close values confirm the synthetic unit is a good match on observable characteristics.">print(<span class="code-string">"Predictor balance:"</span>)
+print(sc.comparison)  <span class="code-comment"># treated vs synthetic on predictors</span></span>
 
 <span class="code-comment"># 3. Check weights (few large weights is concerning)</span>
 <span class="code-tooltip" data-tip="WEIGHTS: Checks how many donor countries have meaningful weight — if only 1-2 donors dominate, the synthetic control is essentially a single country comparison rather than a true weighted average">print(<span class="code-string">"Number of donors with weight > 0.05:"</span>)
@@ -854,7 +854,7 @@ display <span class="code-string">"Pre-treatment RMSPE: "</span> sqrt(e(RMSPE))<
 <span class="code-tooltip" data-tip="STATA: Displays how well the synthetic control matches the treated unit on GDP, population, and trade openness — close values indicate a credible counterfactual">matrix list e(Y_balance)</span>
 
 <span class="code-comment">* 3. Donor weights</span>
-matrix list e(W_weights)
+<span class="code-tooltip" data-tip="STATA: Lists the donor weights — ideally several donors contribute, rather than one country dominating the synthetic control.">matrix list e(W_weights)</span>
 
 <span class="code-comment">* 4. Leave-one-out robustness</span>
 <span class="code-tooltip" data-tip="STATA: Leave-one-out robustness — drops each donor country one at a time and re-estimates; stable results mean the effect isn't driven by any single comparison country">foreach donor in $donor_list {
@@ -865,13 +865,13 @@ matrix list e(W_weights)
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: SC Diagnostics</span>
-<span class="code-keyword">library</span>(Synth)
+<span class="code-tooltip" data-tip="LIBRARY: Synth provides synth.tab() for balance tables and path.plot() for visual diagnostics."><span class="code-keyword">library</span>(Synth)</span>
 
 <span class="code-comment"># 1. Pre-treatment RMSPE</span>
 <span class="code-tooltip" data-tip="R: Shows a table comparing the treated unit and synthetic control on each predictor — close match on these variables supports the synthetic control as a valid counterfactual">synth.tables$tab.pred  <span class="code-comment"># predictor comparison</span></span>
 
 <span class="code-comment"># 2. Weights</span>
-synth.tables$tab.w  <span class="code-comment"># donor weights</span>
+<span class="code-tooltip" data-tip="R: Displays the donor weights table — shows which countries and how much each contributes to the synthetic control.">synth.tables$tab.w  <span class="code-comment"># donor weights</span></span>
 
 <span class="code-comment"># 3. Check sparsity of weights</span>
 <span class="code-tooltip" data-tip="R: Counts how many donors have weight above 5% — more donors contributing means the synthetic control is a genuine blend of comparison units, not just one country">sum(synth.out$solution.w > 0.05)</span>
@@ -884,7 +884,7 @@ synth.tables$tab.w  <span class="code-comment"># donor weights</span>
 })</span>
 
 <span class="code-comment"># 5. Pre-treatment fit plot</span>
-path.plot(synth.res = synth.out, dataprep.res = dataprep.out)
+<span class="code-tooltip" data-tip="R: Plots the treated vs. synthetic GDP paths — a close match before the treatment year is essential for the post-treatment gap to be credible.">path.plot(synth.res = synth.out, dataprep.res = dataprep.out)</span>
 <span class="code-comment"># Visual check: do paths match well before treatment?</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
@@ -934,9 +934,9 @@ path.plot(synth.res = synth.out, dataprep.res = dataprep.out)
 
 . ereturn list
 scalars:
-              e(RMSPE) =  55034.67136
+              e(RMSPE) =  234.56013
 
-. display "Pre-treatment RMSPE: " sqrt(e(RMSPE))
+. display "Pre-treatment RMSPE: " e(RMSPE)
 Pre-treatment RMSPE: 234.56
 
 . matrix list e(Y_balance)
@@ -1064,7 +1064,7 @@ trade_openness     0.456     0.448       0.412
           </div>
           <div class="tab-content active" data-lang="r">
 <pre><code><span class="code-comment"># R: Augmented Synthetic Control</span>
-<span class="code-keyword">library</span>(augsynth)
+<span class="code-tooltip" data-tip="LIBRARY: augsynth implements the Ben-Michael et al. (2021) augmented SC that corrects for imperfect pre-treatment fit using ridge regression."><span class="code-keyword">library</span>(augsynth)</span>
 
 <span class="code-comment"># Augmented SC with ridge regression</span>
 <span class="code-tooltip" data-tip="AUGMENTED SC: Combines standard synthetic control with ridge regression to correct for any remaining pre-treatment imbalance — more robust than basic SC when the pre-fit is imperfect">asyn <- augsynth(outcome ~ treatment | covariate1 + covariate2,
@@ -1074,15 +1074,15 @@ trade_openness     0.456     0.448       0.412
                  progfunc = "Ridge")</span>
 
 <span class="code-comment"># Summary and plot</span>
-summary(asyn)
-plot(asyn)
+<span class="code-tooltip" data-tip="OUTPUT: summary() reports the ATT with confidence intervals; plot() shows the treatment effect over time with uncertainty bands.">summary(asyn)
+plot(asyn)</span>
 
 <span class="code-comment"># Compare to standard SC</span>
-syn <- augsynth(outcome ~ treatment,
+<span class="code-tooltip" data-tip="COMPARE: Setting progfunc = 'None' gives the standard SC without augmentation — comparing the two estimates shows how much the bias correction matters.">syn <- augsynth(outcome ~ treatment,
                 unit = unit_id,
                 time = year,
                 data = df,
-                progfunc = "None")  <span class="code-comment"># standard SC</span></code></pre>
+                progfunc = "None")  <span class="code-comment"># standard SC</span></span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -1170,16 +1170,16 @@ Pre-treatment RMSPE   234.56      154.23
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-comment"># Python: Synthetic DiD</span>
 <span class="code-comment"># pip install synthdid</span>
-<span class="code-keyword">from</span> synthdid.synthdid <span class="code-keyword">import</span> SynthDID
+<span class="code-tooltip" data-tip="IMPORT: SynthDID implements Arkhangelsky et al. (2021) — a hybrid of SC and DiD that weights both units and time periods."><span class="code-keyword">from</span> synthdid.synthdid <span class="code-keyword">import</span> SynthDID</span>
 
 <span class="code-comment"># Prepare data: Y matrix (units x time), treatment indicator</span>
 <span class="code-tooltip" data-tip="SDID: Combines SC and DiD — weights control units to match the treated (like SC) AND weights pre-treatment periods to focus on those most relevant for predicting post-treatment outcomes">sdid = SynthDID(Y, treatment_matrix)</span>
-estimate = sdid.fit()
-print(f<span class="code-string">"SDID estimate: {estimate:.3f}"</span>)
+<span class="code-tooltip" data-tip="FIT: Solves for unit weights (omega) and time weights (lambda) that produce the optimal counterfactual.">estimate = sdid.fit()
+print(f<span class="code-string">"SDID estimate: {estimate:.3f}"</span>)</span>
 
 <span class="code-comment"># Get weights</span>
-print(<span class="code-string">"Unit weights:"</span>, sdid.omega)
-print(<span class="code-string">"Time weights:"</span>, sdid.lambda_)</code></pre>
+<span class="code-tooltip" data-tip="WEIGHTS: omega shows how control units are weighted (like SC); lambda shows how pre-treatment periods are weighted (unlike standard DiD which weights them equally).">print(<span class="code-string">"Unit weights:"</span>, sdid.omega)
+print(<span class="code-string">"Time weights:"</span>, sdid.lambda_)</span></code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
@@ -1190,12 +1190,12 @@ print(<span class="code-string">"Time weights:"</span>, sdid.lambda_)</code></pr
 <span class="code-tooltip" data-tip="STATA: Estimates the synthetic DiD treatment effect with bootstrap standard errors — combines the best of SC (unit weighting) and DiD (differencing out time trends)">sdid outcome unit_id year treatment, vce(bootstrap) seed(1234)</span>
 
 <span class="code-comment">* With graph</span>
-sdid outcome unit_id year treatment, vce(bootstrap) graph</code></pre>
+<span class="code-tooltip" data-tip="STATA: Adds the graph option to visualize the treated unit, synthetic control, and treatment gap over time.">sdid outcome unit_id year treatment, vce(bootstrap) graph</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Synthetic DiD with synthdid</span>
-<span class="code-keyword">library</span>(synthdid)
+<span class="code-tooltip" data-tip="LIBRARY: synthdid implements Arkhangelsky et al. (2021) — combines SC-style unit weighting with DiD-style differencing for robust causal estimates."><span class="code-keyword">library</span>(synthdid)</span>
 
 <span class="code-comment"># Prepare panel data</span>
 <span class="code-tooltip" data-tip="R: Converts panel data into the outcome matrix format required by synthdid — separates treated and control units and identifies the pre/post treatment cutoff">setup <- panel.matrices(df,
@@ -1205,18 +1205,18 @@ sdid outcome unit_id year treatment, vce(bootstrap) graph</code></pre>
                         treatment = treatment)</span>
 
 <span class="code-comment"># Estimate SDID</span>
-sdid_est <- synthdid_estimate(setup$Y, setup$N0, setup$T0)
-print(sdid_est)
+<span class="code-tooltip" data-tip="SDID: Estimates the treatment effect using Y (outcome matrix), N0 (number of control units), and T0 (number of pre-treatment periods).">sdid_est <- synthdid_estimate(setup$Y, setup$N0, setup$T0)
+print(sdid_est)</span>
 
 <span class="code-comment"># Standard errors via bootstrap</span>
-se <- sqrt(vcov(sdid_est, method = "bootstrap"))
+<span class="code-tooltip" data-tip="SE: Bootstrap standard errors by resampling the estimation procedure — more reliable than analytical SEs for the SDID estimator.">se <- sqrt(vcov(sdid_est, method = "bootstrap"))</span>
 
 <span class="code-comment"># Compare to DiD and SC</span>
-did_est <- did_estimate(setup$Y, setup$N0, setup$T0)
-sc_est <- sc_estimate(setup$Y, setup$N0, setup$T0)
+<span class="code-tooltip" data-tip="COMPARE: Estimates pure DiD (equal unit weights) and pure SC (no time differencing) — comparing all three shows how much each component contributes to the SDID estimate.">did_est <- did_estimate(setup$Y, setup$N0, setup$T0)
+sc_est <- sc_estimate(setup$Y, setup$N0, setup$T0)</span>
 
 <span class="code-comment"># Plot</span>
-synthdid_plot(sdid_est)</code></pre>
+<span class="code-tooltip" data-tip="PLOT: Visualizes the SDID estimate with the treated unit, weighted control, and treatment gap over time.">synthdid_plot(sdid_est)</span></code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>

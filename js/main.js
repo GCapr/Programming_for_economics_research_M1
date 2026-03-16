@@ -640,11 +640,19 @@ function initRunButtons() {
           return;
         }
 
-        // Format 2: .code-output-wrapper[data-for] (new format)
-        const newOutput = document.querySelector(`.code-output-wrapper[data-for="${outputId}"]`);
+        // Format 2: any container with [data-for] (new/tabbed formats)
+        const newOutput = document.querySelector(`.code-output-wrapper[data-for="${outputId}"], .output-simulation[data-for="${outputId}"], .code-output-container[data-for="${outputId}"]`);
         if (newOutput) {
+          // If the container has language tabs, show only the matching one
+          const tabs = newOutput.querySelectorAll('[data-lang]');
+          if (tabs.length > 0) {
+            tabs.forEach(tab => {
+              tab.style.display = tab.dataset.lang === lang ? 'block' : 'none';
+            });
+          }
           // Toggle visibility with animation
-          if (newOutput.style.display === 'none' || !newOutput.style.display) {
+          if (newOutput.style.display === 'none' || !newOutput.style.display || newOutput.classList.contains('hidden')) {
+            newOutput.classList.remove('hidden');
             newOutput.style.display = 'block';
             newOutput.style.opacity = '0';
             newOutput.style.transform = 'translateY(-10px)';
@@ -657,6 +665,8 @@ function initRunButtons() {
             setTimeout(() => {
               newOutput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }, 100);
+          } else {
+            // Already visible — just switch the language tab
           }
         }
       }, 400);
@@ -670,12 +680,12 @@ function initRunButtons() {
     });
   });
 
-  // Add click-to-close for new format outputs
-  document.querySelectorAll('.code-output-wrapper .output-header').forEach(header => {
+  // Add click-to-close for new format outputs (all data-for containers)
+  document.querySelectorAll('.code-output-wrapper .output-header, .output-simulation[data-for] .output-header, .code-output-container .output-header').forEach(header => {
     header.style.cursor = 'pointer';
     header.title = 'Click to hide output';
     header.addEventListener('click', function() {
-      const wrapper = this.closest('.code-output-wrapper');
+      const wrapper = this.closest('.code-output-wrapper, .output-simulation[data-for], .code-output-container');
       if (wrapper) {
         wrapper.style.opacity = '0';
         wrapper.style.transform = 'translateY(-10px)';

@@ -1287,6 +1287,61 @@ Your Name (email@university.edu)</code></pre>
           </div>
         </div>
 
+        <p><code>modelsummary</code> produces the same table structure as the Stata example above. Here is what the rendered output looks like:</p>
+
+        <div style="background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; font-family: 'Crimson Pro', serif;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <caption style="font-weight: 600; margin-bottom: 1rem; text-align: left;">Table 1: Effect of Education on Earnings</caption>
+            <thead>
+              <tr style="border-bottom: 2px solid #333;">
+                <th style="text-align: left; padding: 0.5rem;"></th>
+                <th style="text-align: center; padding: 0.5rem;">(1) Basic</th>
+                <th style="text-align: center; padding: 0.5rem;">(2) Controls</th>
+                <th style="text-align: center; padding: 0.5rem;">(3) Industry FE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.5rem;">Education (years)</td>
+                <td style="text-align: center; padding: 0.5rem;">0.089***</td>
+                <td style="text-align: center; padding: 0.5rem;">0.074***</td>
+                <td style="text-align: center; padding: 0.5rem;">0.068***</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem;"></td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.003)</td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.003)</td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.004)</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem;">Age</td>
+                <td style="text-align: center; padding: 0.5rem;">0.012***</td>
+                <td style="text-align: center; padding: 0.5rem;">0.008***</td>
+                <td style="text-align: center; padding: 0.5rem;">0.007***</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #ccc;">
+                <td style="padding: 0.5rem;"></td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.001)</td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.001)</td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.001)</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem;">R-squared</td>
+                <td style="text-align: center; padding: 0.5rem;">0.142</td>
+                <td style="text-align: center; padding: 0.5rem;">0.187</td>
+                <td style="text-align: center; padding: 0.5rem;">0.234</td>
+              </tr>
+              <tr style="border-bottom: 2px solid #333;">
+                <td style="padding: 0.5rem;">Observations</td>
+                <td style="text-align: center; padding: 0.5rem;">45,231</td>
+                <td style="text-align: center; padding: 0.5rem;">45,231</td>
+                <td style="text-align: center; padding: 0.5rem;">45,231</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size: 0.8rem; color: #718096; margin-top: 0.75rem;">Standard errors in parentheses. * p<0.10, ** p<0.05, *** p<0.01</p>
+        </div>
+
         <h3>Python: stargazer</h3>
 
         <div class="code-tabs">
@@ -1304,14 +1359,74 @@ Your Name (email@university.edu)</code></pre>
 <span class="code-tooltip" data-tip="ADD_CONSTANT: Second model adds experience to the feature matrix."><span class="code-variable">X2</span> = <span class="code-function">sm.add_constant</span>(<span class="code-variable">df</span>[[<span class="code-string">'education'</span>, <span class="code-string">'age'</span>, <span class="code-string">'experience'</span>]])</span>
 <span class="code-tooltip" data-tip="SM.OLS().FIT(): Fits the second OLS model with robust standard errors."><span class="code-variable">m2</span> = <span class="code-function">sm.OLS</span>(<span class="code-variable">df</span>[<span class="code-string">'earnings'</span>], <span class="code-variable">X2</span>).fit(<span class="code-variable">cov_type</span>=<span class="code-string">'HC1'</span>)</span>
 
+<span class="code-comment"># Third model: add industry fixed effects via dummies</span>
+<span class="code-tooltip" data-tip="PD.GET_DUMMIES(): Creates dummy (0/1) columns for each industry category. drop_first=True omits one category to avoid perfect multicollinearity. This is the Python equivalent of Stata's i.industry or R's | industry."><span class="code-variable">industry_dummies</span> = <span class="code-function">pd.get_dummies</span>(<span class="code-variable">df</span>[<span class="code-string">'industry'</span>], <span class="code-variable">drop_first</span>=<span class="code-keyword">True</span>, <span class="code-variable">dtype</span>=<span class="code-keyword">int</span>)</span>
+<span class="code-tooltip" data-tip="PD.CONCAT(): Joins the regressors with the industry dummies column-wise (axis=1) to build the full feature matrix for the fixed-effects model."><span class="code-variable">X3</span> = <span class="code-function">sm.add_constant</span>(<span class="code-function">pd.concat</span>([<span class="code-variable">df</span>[[<span class="code-string">'education'</span>, <span class="code-string">'age'</span>, <span class="code-string">'experience'</span>]], <span class="code-variable">industry_dummies</span>], <span class="code-variable">axis</span>=<span class="code-number">1</span>))</span>
+<span class="code-tooltip" data-tip="SM.OLS().FIT(): Fits the third model including industry dummies, with robust standard errors."><span class="code-variable">m3</span> = <span class="code-function">sm.OLS</span>(<span class="code-variable">df</span>[<span class="code-string">'earnings'</span>], <span class="code-variable">X3</span>).fit(<span class="code-variable">cov_type</span>=<span class="code-string">'HC1'</span>)</span>
+
 <span class="code-comment"># Export to LaTeX</span>
-<span class="code-tooltip" data-tip="STARGAZER(): Creates a table formatter from a list of fitted models. You then customize it with methods like .title() and .custom_columns()."><span class="code-variable">stargazer</span> = <span class="code-function">Stargazer</span>([<span class="code-variable">m1</span>, <span class="code-variable">m2</span>])</span>
+<span class="code-tooltip" data-tip="STARGAZER(): Creates a table formatter from a list of fitted models. You then customize it with methods like .title() and .custom_columns()."><span class="code-variable">stargazer</span> = <span class="code-function">Stargazer</span>([<span class="code-variable">m1</span>, <span class="code-variable">m2</span>, <span class="code-variable">m3</span>])</span>
 <span class="code-tooltip" data-tip="TITLE(): Sets the table caption that will appear in the LaTeX output."><span class="code-variable">stargazer</span>.title(<span class="code-string">"Effect of Education on Earnings"</span>)</span>
-<span class="code-tooltip" data-tip="CUSTOM_COLUMNS(): Sets descriptive column headers for each model in the table."><span class="code-variable">stargazer</span>.custom_columns([<span class="code-string">"Basic"</span>, <span class="code-string">"Controls"</span>])</span>
+<span class="code-tooltip" data-tip="CUSTOM_COLUMNS(): Sets descriptive column headers for each model in the table."><span class="code-variable">stargazer</span>.custom_columns([<span class="code-string">"Basic"</span>, <span class="code-string">"Controls"</span>, <span class="code-string">"Industry FE"</span>])</span>
 
 <span class="code-tooltip" data-tip="WITH OPEN() AS F: Opens the output file for writing and automatically closes it when done. render_latex() generates the LaTeX code, and f.write() saves it to disk."><span class="code-keyword">with</span> <span class="code-function">open</span>(<span class="code-variable">PATHS</span>[<span class="code-string">'tables'</span>] / <span class="code-string">'main_results.tex'</span>, <span class="code-string">'w'</span>) <span class="code-keyword">as</span> <span class="code-variable">f</span>:
     <span class="code-variable">f</span>.write(<span class="code-variable">stargazer</span>.render_latex())</span></code></pre>
           </div>
+        </div>
+
+        <p>Python's <code>stargazer</code> produces a similar regression table. Here is what the rendered output looks like:</p>
+
+        <div style="background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; font-family: 'Crimson Pro', serif;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <caption style="font-weight: 600; margin-bottom: 1rem; text-align: left;">Table 1: Effect of Education on Earnings</caption>
+            <thead>
+              <tr style="border-bottom: 2px solid #333;">
+                <th style="text-align: left; padding: 0.5rem;"></th>
+                <th style="text-align: center; padding: 0.5rem;">(1) Basic</th>
+                <th style="text-align: center; padding: 0.5rem;">(2) Controls</th>
+                <th style="text-align: center; padding: 0.5rem;">(3) Industry FE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 0.5rem;">Education (years)</td>
+                <td style="text-align: center; padding: 0.5rem;">0.089***</td>
+                <td style="text-align: center; padding: 0.5rem;">0.074***</td>
+                <td style="text-align: center; padding: 0.5rem;">0.068***</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem;"></td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.003)</td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.003)</td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.004)</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem;">Age</td>
+                <td style="text-align: center; padding: 0.5rem;">0.012***</td>
+                <td style="text-align: center; padding: 0.5rem;">0.008***</td>
+                <td style="text-align: center; padding: 0.5rem;">0.007***</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #ccc;">
+                <td style="padding: 0.5rem;"></td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.001)</td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.001)</td>
+                <td style="text-align: center; padding: 0.25rem; color: #718096;">(0.001)</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.5rem;">R-squared</td>
+                <td style="text-align: center; padding: 0.5rem;">0.142</td>
+                <td style="text-align: center; padding: 0.5rem;">0.187</td>
+                <td style="text-align: center; padding: 0.5rem;">0.234</td>
+              </tr>
+              <tr style="border-bottom: 2px solid #333;">
+                <td style="padding: 0.5rem;">Observations</td>
+                <td style="text-align: center; padding: 0.5rem;">45,231</td>
+                <td style="text-align: center; padding: 0.5rem;">45,231</td>
+                <td style="text-align: center; padding: 0.5rem;">45,231</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size: 0.8rem; color: #718096; margin-top: 0.75rem;">Standard errors in parentheses. * p<0.10, ** p<0.05, *** p<0.01</p>
         </div>
 
         <h3>Including Tables in LaTeX</h3>
@@ -1328,6 +1443,45 @@ Your Name (email@university.edu)</code></pre>
 <span class="code-tooltip" data-tip="INPUT: Inserts the contents of another .tex file at this point. The table generated by Stata/R/Python is automatically included — no copy-pasting needed. If you re-run your analysis, the table updates automatically."><span class="code-keyword">\input</span>{../output/tables/main_results.tex}</span>
 <span class="code-tooltip" data-tip="END TABLE: Closes the table environment."><span class="code-keyword">\end</span>{table}</span></code></pre>
           </div>
+        </div>
+
+        <h3>What If You Use Word Instead of LaTeX?</h3>
+
+        <p>Many students write their theses in Word rather than LaTeX, and that is perfectly fine. The important principle is not <em>which</em> word processor you use, but that you <strong>never copy-paste numbers manually</strong> from your statistical output into your document. All three languages can export tables directly to Word-friendly formats.</p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="r">R</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+            <button class="tab-button" data-lang="python">Python</button>
+          </div>
+          <div class="tab-content active" data-lang="r">
+        <pre><code class="language-r"><span class="code-comment"># modelsummary can export directly to a Word document</span>
+<span class="code-tooltip" data-tip="OUTPUT = .DOCX: Changing the file extension to .docx tells modelsummary to produce a Word document instead of LaTeX. The table appears as a formatted Word table you can open and edit."><span class="code-function">modelsummary</span>(
+  <span class="code-function">list</span>(<span class="code-string">"Basic"</span> = <span class="code-variable">m1</span>, <span class="code-string">"Controls"</span> = <span class="code-variable">m2</span>, <span class="code-string">"Industry FE"</span> = <span class="code-variable">m3</span>),
+  <span class="code-variable">output</span> = <span class="code-function">here</span>(<span class="code-string">"output"</span>, <span class="code-string">"tables"</span>, <span class="code-string">"main_results.docx"</span>),
+  <span class="code-variable">stars</span> = <span class="code-function">c</span>(<span class="code-string">'*'</span> = <span class="code-number">0.10</span>, <span class="code-string">'**'</span> = <span class="code-number">0.05</span>, <span class="code-string">'***'</span> = <span class="code-number">0.01</span>)
+)</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+        <pre><code class="language-stata"><span class="code-comment">* esttab can export to RTF format, which Word opens natively</span>
+<span class="code-tooltip" data-tip="USING .RTF: Changing the file extension to .rtf produces a Rich Text Format file. Double-clicking the file opens it in Word with a formatted table."><span class="code-keyword">esttab</span> <span class="code-variable">m1</span> <span class="code-variable">m2</span> <span class="code-variable">m3</span> <span class="code-keyword">using</span> <span class="code-string">"$tables/main_results.rtf"</span>, ///</span>
+    <span class="code-keyword">replace</span> <span class="code-keyword">label</span> b(<span class="code-number">3</span>) se(<span class="code-number">3</span>)                       ///
+    star(* <span class="code-number">0.10</span> ** <span class="code-number">0.05</span> *** <span class="code-number">0.01</span>)                 ///
+    mtitles(<span class="code-string">"Basic"</span> <span class="code-string">"Controls"</span> <span class="code-string">"Industry FE"</span>)</code></pre>
+          </div>
+          <div class="tab-content" data-lang="python">
+        <pre><code class="language-python"><span class="code-comment"># Option 1: Save as HTML, then open in Word</span>
+<span class="code-tooltip" data-tip="RENDER_HTML(): Generates an HTML table instead of LaTeX. Word can open .html files and display the table with formatting intact."><span class="code-keyword">with</span> <span class="code-function">open</span>(<span class="code-variable">PATHS</span>[<span class="code-string">'tables'</span>] / <span class="code-string">'main_results.html'</span>, <span class="code-string">'w'</span>) <span class="code-keyword">as</span> <span class="code-variable">f</span>:
+    <span class="code-variable">f</span>.write(<span class="code-variable">stargazer</span>.render_html())</span>
+
+<span class="code-comment"># Option 2: For simpler tables, export via pandas</span>
+<span class="code-tooltip" data-tip="TO_EXCEL(): Exports a DataFrame to an Excel file, which you can then copy into Word. Useful for summary statistics or simple tables."><span class="code-variable">summary_df</span>.to_excel(<span class="code-variable">PATHS</span>[<span class="code-string">'tables'</span>] / <span class="code-string">'summary_stats.xlsx'</span>, <span class="code-variable">index</span>=<span class="code-keyword">False</span>)</span></code></pre>
+          </div>
+        </div>
+
+        <div class="tip-box" style="background: #e8f5e9; border-left: 4px solid #4caf50; padding: 1rem 1.25rem; margin: 1.5rem 0;">
+          <strong>Tip:</strong> Word tables will not auto-update the way LaTeX <code>\input{}</code> does. However, the workflow is still far better than copy-pasting: whenever your results change, simply re-run your script to regenerate the Word/RTF/HTML file, then replace the old table in your document. This takes seconds and eliminates transcription errors.
         </div>
 
         <h2>8.7 One-Click Pipeline: Full Integration</h2>
@@ -1365,6 +1519,12 @@ Your Name (email@university.edu)</code></pre>
         <p>A <strong>Makefile</strong> is a special file that tells your computer how to build your project, step by step. Think of a Makefile as a recipe book that knows which ingredients are already prepared. If you have already cleaned your data and nothing has changed since then, <code>make</code> will skip that step and jump straight to the analysis. This saves enormous amounts of time on large projects where a full pipeline might take hours to run.</p>
 
         <p>Researchers use Makefiles because they capture the <em>dependency structure</em> of a project. Each "rule" in the Makefile says: "To produce <em>this</em> output file, I need <em>these</em> input files, and here is the command to run." When you type <code>make all</code> in your terminal, the tool inspects which output files are missing or older than their inputs and re-runs only those steps. Everything else is left untouched.</p>
+
+        <div class="info-box tip">
+          <strong>What is a Makefile, exactly?</strong>
+          <p>Makefiles are not written in any programming language like Python or Stata -- they use their own simple declarative syntax understood by the <code>make</code> utility. Each rule declares an output, its inputs, and a shell command to run. The commands inside each rule (like <code>stata-mp -b do ...</code>) are regular shell/bash commands -- the Makefile just orchestrates when they execute. You type <code>make all</code> in your <strong>terminal</strong>, from the project's root directory (wherever the Makefile is saved).</p>
+          <p>On <strong>Mac/Linux</strong>, <code>make</code> is usually pre-installed. <strong>Windows</strong> users can get it through Git Bash, WSL (Windows Subsystem for Linux), or by installing GNU Make via Chocolatey.</p>
+        </div>
 
         <p>As you read the code below, pay attention to the pattern on each rule: the <strong>output file</strong> appears before the colon, the <strong>input files</strong> appear after the colon, and the <strong>command</strong> is indented on the next line. Notice how <code>paper/main.pdf</code> depends on both the LaTeX source and the generated tables and figures -- so the paper will only recompile when something it uses has actually changed.</p>
 
@@ -1409,7 +1569,7 @@ Your Name (email@university.edu)</code></pre>
 
         <h3>Option 2: Shell Script (Simpler)</h3>
 
-        <p>If a Makefile is a smart recipe book, a shell script is a simple checklist: it runs every step from top to bottom, every time, regardless of what has changed. This makes shell scripts easier to write and understand, which is why they are a perfectly good choice for small projects or when your full pipeline runs in a few minutes anyway. You create a file (typically called <code>run_all.sh</code>), list your commands in order, and execute it with <code>bash run_all.sh</code>. The downside is that it will redo work even when nothing has changed, but for many student projects that trade-off is fine.</p>
+        <p>If a Makefile is a smart recipe book, a shell script is a simple checklist: it runs every step from top to bottom, every time, regardless of what has changed. This makes shell scripts easier to write and understand, which is why they are a perfectly good choice for small projects or when your full pipeline runs in a few minutes anyway. You create a file (typically called <code>run_all.sh</code>), list your commands in order, and execute it with <code>bash run_all.sh</code> in your <strong>terminal, from the project's root directory</strong> (where the script is saved). The downside is that it will redo work even when nothing has changed, but for many student projects that trade-off is fine.</p>
 
         <div class="code-tabs">
           <div class="tab-buttons">
@@ -1443,35 +1603,33 @@ Your Name (email@university.edu)</code></pre>
           </div>
         </div>
 
-        <h3>Option 3: Overleaf + Dropbox/GitHub Sync</h3>
+        <h3>Option 3: Overleaf + GitHub Sync</h3>
 
-        <p>For teams using Overleaf, you can sync your output folder:</p>
+        <p>Options 1 and 2 handle the <strong>analysis pipeline</strong> -- running your code and generating outputs (tables, figures). But if your team writes the paper on <strong>Overleaf</strong> (a cloud-based LaTeX editor), you also need a way to get those generated tables and figures <em>into</em> your Overleaf project. That is what this option addresses: connecting your local pipeline's outputs to Overleaf via GitHub.</p>
+
+        <h4>How to connect Overleaf and GitHub</h4>
 
         <ol>
-          <li><strong>Link Overleaf to GitHub:</strong> Overleaf can pull from a GitHub repository</li>
-          <li><strong>Structure:</strong> Put your <code>output/</code> folder in the repo</li>
-          <li><strong>Workflow:</strong>
-            <ul>
-              <li>Run analysis locally → tables/figures saved to <code>output/</code></li>
-              <li>Push to GitHub</li>
-              <li>Pull in Overleaf → paper auto-compiles with new results</li>
-            </ul>
-          </li>
+          <li><strong>Create a GitHub repository</strong> for your project (or use an existing one). Make sure your <code>output/</code> folder with generated tables and figures is committed to this repo.</li>
+          <li><strong>In Overleaf</strong>, open your project and go to <strong>Menu</strong> (top-left corner) &rarr; <strong>GitHub</strong> &rarr; <strong>Link to GitHub Repository</strong>.</li>
+          <li><strong>Paste your GitHub repo URL</strong> and authorize Overleaf to access it.</li>
+          <li><strong>Push and pull between Overleaf and GitHub:</strong> in Overleaf, use <strong>Menu &rarr; GitHub &rarr; Push/Pull</strong> to sync changes in either direction.</li>
+          <li><strong>Workflow:</strong> run your analysis locally (via <code>make all</code> or <code>bash run_all.sh</code>) &rarr; outputs saved to <code>output/</code> folder &rarr; <code>git push</code> to GitHub &rarr; in Overleaf, pull from GitHub &rarr; paper recompiles with new tables and figures.</li>
         </ol>
 
-        <p>Version control plays a key role in this workflow. When you <code>git add</code> and <code>git commit</code> your generated tables and figures, you create a permanent snapshot of those results. Anyone who checks out that commit -- including your future self -- will see exactly the outputs your code produced at that point in time. The command <code>git push</code> then sends those snapshots to a remote repository (like GitHub), where Overleaf can pull them in automatically. If you ever need to trace back to an earlier version of a figure, <code>git log --oneline</code> gives you a compact list of every snapshot with its short description, making it easy to find what changed and when. Tagging a commit (e.g., <code>git tag v1.0-submission</code>) marks a specific version as a milestone, which is invaluable when a referee asks "which results were in the original submission?"</p>
+        <p>After running your pipeline, push the updated outputs to GitHub so Overleaf can pull them in. For a complete guide to Git commands like <code>git add</code>, <code>git commit</code>, and <code>git push</code>, see <a href="09-github.html">Module 9</a>.</p>
 
         <div class="code-tabs">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="bash">Bash</button>
           </div>
           <div class="tab-content active" data-lang="bash">
-        <pre><code class="language-bash"><span class="code-comment"># After running your analysis</span>
+        <pre><code class="language-bash"><span class="code-comment"># After running your analysis pipeline</span>
 <span class="code-tooltip" data-tip="GIT ADD: Stages specific files for the next commit. The wildcard patterns (*.tex, *.pdf) add all generated tables and figures. Only stage what you want to commit."><span class="code-keyword">git</span> add output/tables/*.tex output/figures/*.pdf</span>
 <span class="code-tooltip" data-tip="GIT COMMIT -M: Creates a snapshot of the staged files with a descriptive message. This permanent record lets you trace back to any previous version of your results."><span class="code-keyword">git</span> commit -m <span class="code-string">"Update results"</span></span>
-<span class="code-tooltip" data-tip="GIT PUSH: Uploads your commits to the remote repository (e.g., GitHub). If Overleaf is linked to this repo, it will automatically pull the new tables and figures."><span class="code-keyword">git</span> push</span>
+<span class="code-tooltip" data-tip="GIT PUSH: Uploads your commits to the remote repository (e.g., GitHub). Once pushed, open Overleaf and pull from GitHub to get the new outputs."><span class="code-keyword">git</span> push</span>
 
-<span class="code-comment"># Overleaf syncs automatically if linked to the repo</span></code></pre>
+<span class="code-comment"># Then in Overleaf: Menu → GitHub → Pull from GitHub</span></code></pre>
           </div>
         </div>
 

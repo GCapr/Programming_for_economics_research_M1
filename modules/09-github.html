@@ -676,7 +676,7 @@
         <div class="info-box note">
           <div class="info-box-title">Why the Staging Area?</div>
           <p style="margin-bottom: 0;">
-            The staging area lets you control exactly what goes into each commit. You might have changed 5 files, but only want to commit 3 of them right now. Stage just those 3, commit them with a meaningful message, then stage and commit the other 2 separately with their own message.
+            The staging area lets you control exactly what goes into each commit — stage only the files that belong together, and commit the rest separately. We explore this in detail in <a href="#staging-area">Section 9.6</a>.
           </p>
         </div>
 
@@ -746,6 +746,22 @@
         <!-- ============================================ -->
         <h2 id="git-workflow">9.3 The Git Workflow Explained Simply</h2>
 
+        <div class="info-box note">
+          <div class="info-box-title">Where to Run These Commands</div>
+          <p>
+            ALL Git commands in this module are run in a <strong>terminal</strong> (also called the command line, shell, or console) &mdash; not in the R console, not in a Python notebook, and not in a browser.
+          </p>
+          <p>
+            <strong>In VS Code:</strong> Open the built-in terminal with <code>Ctrl+`</code> (backtick) on Windows/Linux or <code>Cmd+`</code> on Mac. You can also go to <strong>View &rarr; Terminal</strong>, or use the menu <strong>Terminal &rarr; New Terminal</strong>. This terminal appears at the bottom of VS Code and works just like a standalone terminal. (See <a href="00c-vscode-guide.html">Module 0c: VS Code Guide</a> for more details.)
+          </p>
+          <p>
+            <strong>Outside VS Code:</strong> On Mac, open the <strong>Terminal</strong> app (search for "Terminal" in Spotlight or find it in Applications &rarr; Utilities). On Windows, use <strong>Git Bash</strong> (installed with Git), <strong>PowerShell</strong>, or <strong>Command Prompt</strong>. On Linux, open your distribution's terminal emulator.
+          </p>
+          <p style="margin-bottom: 0;">
+            Before running any Git commands, make sure you <code>cd</code> into your project directory. For example: <code>cd ~/Documents/my-research-project</code>.
+          </p>
+        </div>
+
         <p>
           The basic Git workflow has just four steps that you will repeat over and over. Once you understand this pattern, Git becomes much less intimidating.
         </p>
@@ -804,6 +820,13 @@
         <h3>A Day in the Life</h3>
 
         <p>Here is what a typical Git workflow looks like during a research project:</p>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Reading the Code Blocks Below</div>
+          <p style="margin-bottom: 0;">
+            In the code blocks below, the <code>$</code> symbol at the start of each line represents the <strong>terminal prompt</strong> &mdash; it is the symbol your terminal displays to show it is ready for input. <strong>You do not type the <code>$</code> yourself.</strong> For example, if you see <code>$ git status</code>, you only type <code>git status</code> and press Enter. The <code>$</code> is just a convention used in documentation to distinguish commands from their output.
+          </p>
+        </div>
 
         <div class="code-tabs" data-runnable="git-workflow-1">
           <div class="tab-buttons">
@@ -946,6 +969,8 @@ To https://github.com/username/my-project.git
 
         <p>Open your terminal (Terminal on Mac, Command Prompt or Git Bash on Windows) and type:</p>
 
+        <p><em>Remember: the <code>$</code> at the start of command lines represents your terminal prompt &mdash; do not type it. Just type what comes after the <code>$</code>.</em></p>
+
         <div class="code-tabs" data-runnable="git-version">
           <div class="tab-buttons">
             <button class="tab-button active" data-lang="bash">Terminal</button>
@@ -1044,25 +1069,33 @@ user.email=jane.smith@university.edu</pre>
           </div>
         </div>
 
-        <div class="info-box note">
-          <div class="info-box-title">Breaking Down the Command</div>
-          <p>Let us dissect <code>git config --global user.name "Your Name"</code>:</p>
-          <table style="font-size: 0.9rem;">
-            <tbody>
-              <tr><td><code>git config</code></td><td>The Git configuration command &mdash; reads or writes settings</td></tr>
-              <tr><td><code>--global</code></td><td>Apply this setting to <strong>all</strong> repositories on your computer (stored in <code>~/.gitconfig</code>). Without this flag the setting would only apply to the current repository</td></tr>
-              <tr><td><code>user.name</code></td><td>The specific setting to change (your display name)</td></tr>
-              <tr><td><code>"Your Name"</code></td><td>The value to set. Quotes are needed because the name contains a space</td></tr>
-            </tbody>
-          </table>
-          <p style="margin-bottom: 0;"><code>--list</code> prints all current Git configuration values so you can verify your settings.</p>
-        </div>
+        <!-- Command breakdown covered by the Syntax Breakdown above -->
 
         <div class="info-box tip">
           <div class="info-box-title">Use Your GitHub Email</div>
           <p style="margin-bottom: 0;">
             For the email, use the same address you registered with on GitHub. This ensures your commits are linked to your GitHub profile and show your contributions correctly. You can find or change your GitHub email at <a href="https://github.com/settings/emails" target="_blank">github.com/settings/emails</a>.
           </p>
+        </div>
+
+        <div class="info-box note">
+          <div class="info-box-title">Understanding Git Config in More Depth</div>
+
+          <p><strong>Why <code>--global</code>?</strong> The <code>--global</code> flag saves settings in <code>~/.gitconfig</code> (a file in your home directory) and applies to every Git repo on your computer. This is convenient because you only set it once. If you need a different name or email for a specific project (e.g., a work project vs. personal), run <code>git config user.name "Work Name"</code> (without <code>--global</code>) inside that repo &mdash; the local setting overrides the global one for that project only.</p>
+
+          <p><strong>How to change it later?</strong> Just run the same command again with the new value:</p>
+<pre><code><span class="code-comment"># Change your name</span>
+$ git config --global user.name "New Name"
+
+<span class="code-comment"># See all your current global settings</span>
+$ git config --global --list
+
+<span class="code-comment"># Remove a setting entirely</span>
+$ git config --global --unset user.name</code></pre>
+
+          <p><strong>Why do you need to provide your email?</strong> Git attaches your name and email to every commit as metadata. This is how collaborators know who made each change. GitHub also uses the email to link commits to your profile &mdash; if the email matches your GitHub account, your avatar and contribution graph update automatically.</p>
+
+          <p style="margin-bottom: 0;"><strong>When might you NOT want to use your real email?</strong> If your repository is public, your email is visible in the commit history. GitHub offers a private "noreply" email address (like <code>12345+username@users.noreply.github.com</code>) that you can use instead. Find it at <strong>GitHub &rarr; Settings &rarr; Emails &rarr; "Keep my email addresses private."</strong> Using this noreply email still links commits to your GitHub profile without exposing your real address.</p>
         </div>
 
         <h3>Step-by-Step: Create a New Repository</h3>
@@ -2022,6 +2055,8 @@ Fast-forward
 
         <h3>The Push/Pull Workflow with Collaborators</h3>
 
+        <p>This extends the daily cycle introduced in <a href="#git-workflow">Section 9.3</a> with the perspective of a collaborator working in parallel:</p>
+
         <div class="workflow-diagram">
           <div class="workflow-steps" style="flex-direction: column; gap: 1rem;">
             <div style="display: flex; gap: 0.5rem; align-items: center;">
@@ -2306,6 +2341,146 @@ $ <span class="code-tooltip" data-tip="REFLOG: Git's safety net. Shows a history
           <div class="info-box-title">The Golden Rule of Recovery</div>
           <p style="margin-bottom: 0;">
             If you have not run <code>git reset --hard</code> or deleted the <code>.git</code> folder, your changes are almost certainly recoverable. Stop, take a breath, and search for help before doing anything destructive.
+          </p>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECTION 9.9b: ENV FILES AND GITHUB SECRETS -->
+        <!-- ============================================ -->
+        <h2 id="env-secrets">9.9b Environment Variables, .env Files, and GitHub Secrets</h2>
+
+        <p>
+          As your projects grow, you will encounter situations where your code needs sensitive information &mdash; API keys, database passwords, or file paths that differ between machines. Hardcoding these values into your scripts is a security risk and makes collaboration harder. The standard solution is a <code>.env</code> file.
+        </p>
+
+        <h3>What is a .env File?</h3>
+
+        <p>
+          A <code>.env</code> file is a plain text file named exactly <code>.env</code> (note the dot &mdash; it is a hidden file) that stores configuration values your code needs but that should <strong>not</strong> be in your source code. It sits in your project's root directory and contains simple key-value pairs:
+        </p>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="bash">.env File</button>
+          </div>
+          <div class="tab-content active" data-lang="bash">
+<pre><code><span class="code-tooltip" data-tip="API_KEY: A secret token that authenticates your code with an external service (e.g., Census API, OpenAI). Never commit this to Git.">API_KEY=sk-abc123xyz</span>
+<span class="code-tooltip" data-tip="DATABASE_URL: A connection string containing the username, password, host, and database name. Highly sensitive.">DATABASE_URL=postgresql://user:pass@localhost/mydb</span>
+<span class="code-tooltip" data-tip="DATA_PATH: A local file path that differs between machines. Using .env means each collaborator sets their own path.">DATA_PATH=/Users/giulia/data/raw/</span></code></pre>
+          </div>
+        </div>
+
+        <h3>How to Create a .env File</h3>
+
+        <p>Create a file literally named <code>.env</code> in your project root (no file extension):</p>
+
+        <ul>
+          <li><strong>In VS Code:</strong> File &rarr; New File, then name it <code>.env</code></li>
+          <li><strong>In terminal (Mac/Linux):</strong> <code>touch .env</code></li>
+          <li><strong>In terminal (Windows):</strong> <code>echo. > .env</code></li>
+        </ul>
+
+        <div class="info-box note">
+          <div class="info-box-title">Why is .env Invisible?</div>
+          <p style="margin-bottom: 0;">
+            Files starting with a dot are hidden by default on Mac and Linux &mdash; they will not show up in Finder or when you run <code>ls</code> unless you use <code>ls -a</code>. This is a Unix convention for configuration files. In VS Code, hidden files appear normally in the sidebar, so you can always find and edit your <code>.env</code> there.
+          </p>
+        </div>
+
+        <h3>How Your Code Reads .env Variables</h3>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="python">Python</button>
+            <button class="tab-button" data-lang="r">R</button>
+            <button class="tab-button" data-lang="stata">Stata</button>
+          </div>
+          <div class="tab-content active" data-lang="python">
+<pre><code><span class="code-comment"># First install the package: pip install python-dotenv</span>
+<span class="code-tooltip" data-tip="IMPORT: Loads the dotenv library which reads .env files and sets the values as environment variables.">from dotenv import load_dotenv</span>
+<span class="code-tooltip" data-tip="IMPORT: The os module provides access to environment variables via os.getenv().">import os</span>
+
+<span class="code-comment"># Load variables from .env into the environment</span>
+<span class="code-tooltip" data-tip="LOAD_DOTENV: Reads the .env file in the current directory (or project root) and makes each key=value pair available via os.getenv().">load_dotenv()</span>
+
+<span class="code-comment"># Access a variable</span>
+<span class="code-tooltip" data-tip="OS.GETENV: Retrieves the value of an environment variable by name. Returns None if the variable is not set.">api_key = os.getenv("API_KEY")</span>
+<span class="code-tooltip" data-tip="OS.GETENV: Retrieves the DATA_PATH variable. Each collaborator's .env can have a different path.">data_path = os.getenv("DATA_PATH")</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="r">
+<pre><code><span class="code-comment"># Install the package: install.packages("dotenv")</span>
+<span class="code-tooltip" data-tip="LIBRARY: Loads the dotenv package which provides the load_dot_env() function.">library(dotenv)</span>
+
+<span class="code-comment"># Load variables from .env into the environment</span>
+<span class="code-tooltip" data-tip="LOAD_DOT_ENV: Reads the .env file and makes each key=value pair available via Sys.getenv().">load_dot_env()</span>
+
+<span class="code-comment"># Access a variable</span>
+<span class="code-tooltip" data-tip="SYS.GETENV: Retrieves the value of an environment variable by name. Returns an empty string if not set.">api_key &lt;- Sys.getenv("API_KEY")</span>
+<span class="code-tooltip" data-tip="SYS.GETENV: Retrieves the DATA_PATH variable set in your .env file.">data_path &lt;- Sys.getenv("DATA_PATH")</span></code></pre>
+          </div>
+          <div class="tab-content" data-lang="stata">
+<pre><code><span class="code-comment">* Stata does not have native .env support.</span>
+<span class="code-comment">* Instead, create a config.do file in your project root:</span>
+
+<span class="code-comment">* --- config.do ---</span>
+<span class="code-tooltip" data-tip="GLOBAL: Creates a Stata global macro. Access it later with $data_path or ${data_path}.">global data_path "/Users/giulia/data/raw/"</span>
+<span class="code-tooltip" data-tip="GLOBAL: Stores the API key in a macro. Keep config.do out of version control just like a .env file.">global api_key "sk-abc123xyz"</span>
+
+<span class="code-comment">* --- In your analysis script ---</span>
+<span class="code-tooltip" data-tip="DO: Runs the config.do script, which sets the global macros for this Stata session.">do "config.do"</span>
+<span class="code-tooltip" data-tip="USE: Loads a dataset using the path stored in the global macro. The $ prefix dereferences the macro.">use "${data_path}survey_data.dta", clear</span></code></pre>
+          </div>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title">The Critical Rule: Always Add .env to .gitignore</div>
+          <p>
+            <strong>ALWAYS</strong> add <code>.env</code> (and <code>config.do</code> for Stata) to your <code>.gitignore</code> file. If you commit a <code>.env</code> file with API keys to a public repository, those keys are compromised &mdash; anyone can see them in your commit history, even if you delete the file later.
+          </p>
+<pre><code><span class="code-comment"># Add this line to your .gitignore file</span>
+.env
+config.do</code></pre>
+          <p style="margin-bottom: 0;">
+            A common practice is to create a <code>.env.example</code> file (which <em>is</em> committed) showing the variable names without real values, so collaborators know which variables they need to set up:
+          </p>
+        </div>
+
+        <div class="code-tabs">
+          <div class="tab-buttons">
+            <button class="tab-button active" data-lang="bash">.env.example</button>
+          </div>
+          <div class="tab-content active" data-lang="bash">
+<pre><code><span class="code-comment"># Copy this file to .env and fill in your values</span>
+API_KEY=your_api_key_here
+DATABASE_URL=your_database_url_here
+DATA_PATH=/path/to/your/local/data/</code></pre>
+          </div>
+        </div>
+
+        <h3>GitHub Secrets (for GitHub Actions)</h3>
+
+        <p>
+          If you use GitHub Actions (automated workflows that run in the cloud), you may need API keys or credentials there too. You cannot use a <code>.env</code> file because it is not committed to your repo. Instead, GitHub provides <strong>Secrets</strong> &mdash; encrypted values stored securely on GitHub's servers.
+        </p>
+
+        <div class="step-guide">
+          <div class="step-item">
+            <h4>How to Set a GitHub Secret</h4>
+            <p>Go to your repository on GitHub &rarr; <strong>Settings</strong> &rarr; <strong>Secrets and variables</strong> &rarr; <strong>Actions</strong> &rarr; <strong>New repository secret</strong>. Give it a name (e.g., <code>MY_API_KEY</code>) and paste the value.</p>
+          </div>
+          <div class="step-item">
+            <h4>How to Use a Secret in a Workflow</h4>
+            <p>In your GitHub Actions workflow file (<code>.github/workflows/your-workflow.yml</code>), access secrets with the <code>${{ secrets.NAME }}</code> syntax:</p>
+<pre><code><span class="code-comment"># Inside a GitHub Actions workflow file</span>
+<span class="code-tooltip" data-tip="ENV: Sets an environment variable for this step. The secret is decrypted at runtime and never printed in logs.">env:</span>
+  <span class="code-tooltip" data-tip="SECRETS: GitHub decrypts the stored secret and injects it as an environment variable. The actual value is masked in all logs.">API_KEY: ${{ secrets.MY_API_KEY }}</span></code></pre>
+          </div>
+        </div>
+
+        <div class="info-box tip">
+          <div class="info-box-title">Secrets Are Never Visible in Logs</div>
+          <p style="margin-bottom: 0;">
+            GitHub automatically masks secret values in workflow logs. Even if your script accidentally prints the value, GitHub replaces it with <code>***</code> in the output. This makes secrets safe for use in automated pipelines.
           </p>
         </div>
 

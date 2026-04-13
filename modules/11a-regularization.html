@@ -174,6 +174,13 @@
         <!-- ============================================================ -->
         <h2 id="intuition">The Idea Behind Regularization</h2>
 
+        <!-- Intuitive Analogy Box -->
+        <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin: 0 0 0.75rem 0; color: #92400e;">The Big Picture</h3>
+          <p style="margin: 0 0 0.5rem 0;"><strong>Regularization is like a budget constraint for your model.</strong> Without it, the model can allocate unlimited weight to each predictor &mdash; it spends freely, chasing every pattern in the data, including noise. With regularization, the model has a fixed budget of coefficient magnitude. It must allocate wisely: predictors with strong signal get substantial weight, while noisy predictors get shrunk toward zero.</p>
+          <p style="margin: 0;">Think of it this way: imagine you are hiring consultants to predict house prices. An unregularized model hires all 200 applicants, paying each one something, even the astrologer. A regularized model imposes a salary cap &mdash; only the consultants who genuinely improve predictions get paid.</p>
+        </div>
+
         <p>In standard OLS regression, we estimate coefficients by minimizing the sum of squared residuals: find the &beta; that makes the predicted values as close to the observed values as possible. This works beautifully when we have a modest number of predictors relative to observations. But when the number of predictors is large &mdash; especially when p approaches or exceeds n &mdash; OLS overfits badly. It fits the noise in the training data, not the signal, and its predictions on new data can be wildly inaccurate. You saw this problem in the polynomial example in the main module page.</p>
 
         <p><strong>Regularization</strong> addresses this by adding a penalty term to the objective function that discourages large coefficients. Instead of simply minimizing residuals, we minimize residuals <em>plus</em> a penalty for model complexity. The penalty forces the model to &ldquo;keep things simple&rdquo; by shrinking coefficients toward zero. Larger coefficients are more expensive, so the model must have a good reason (strong signal in the data) to give any predictor a large coefficient.</p>
@@ -188,33 +195,117 @@
 
         <p>The parameter &lambda; (lambda) controls the strength of the penalty. When &lambda; = 0, there is no penalty and we get standard OLS. As &lambda; increases, the penalty becomes stronger and coefficients are shrunk more aggressively toward zero. The three main regularization methods differ in their choice of penalty function, which leads to fundamentally different behavior.</p>
 
-        <!-- Geometric Intuition Diagram -->
+        <!-- SVG: Overfitting vs Regularized Fit -->
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0;">
-          <h4 style="text-align: center; margin: 0 0 1.5rem 0; color: #1e293b;">Geometric Intuition: Constraint Regions</h4>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 600px; margin: 0 auto;">
+          <h4 style="text-align: center; margin: 0 0 1rem 0; color: #1e293b;">Overfitting vs. Regularized Fit</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 700px; margin: 0 auto;">
+            <!-- Overfitting panel -->
             <div style="text-align: center;">
-              <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
-                <div style="position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; border: 3px solid #3b82f6; border-radius: 50%; transform: translate(-50%, -50%);"></div>
-                <div style="position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #ef4444; border-radius: 50%; transform: translate(-50%, -50%);"></div>
-                <div style="position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; background: #059669; border-radius: 50%;"></div>
-              </div>
-              <p style="margin: 0.75rem 0 0; font-weight: 600; color: #3b82f6;">Ridge (L2)</p>
-              <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #64748b;">Circle: shrinks all coefficients<br>but none reach exactly zero</p>
+              <svg viewBox="0 0 200 140" style="width: 100%; max-width: 280px;" xmlns="http://www.w3.org/2000/svg">
+                <!-- axes -->
+                <line x1="25" y1="120" x2="190" y2="120" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="25" y1="120" x2="25" y2="10" stroke="#94a3b8" stroke-width="1"/>
+                <!-- data points -->
+                <circle cx="40" cy="95" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="55" cy="80" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="70" cy="70" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="85" cy="88" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="100" cy="55" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="115" cy="60" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="130" cy="40" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="145" cy="50" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="160" cy="30" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="175" cy="45" r="3" fill="#2563eb" opacity="0.6"/>
+                <!-- wiggly overfit line -->
+                <path d="M35,100 C42,92 48,78 55,80 C62,82 66,68 70,70 C74,72 80,92 85,88 C90,84 95,50 100,55 C105,60 110,62 115,60 C120,58 125,35 130,40 C135,45 140,52 145,50 C150,48 155,25 160,30 C165,35 170,48 178,45" fill="none" stroke="#dc2626" stroke-width="2"/>
+                <text x="100" y="135" text-anchor="middle" fill="#64748b" font-size="9">x</text>
+                <text x="15" y="65" text-anchor="middle" fill="#64748b" font-size="9" transform="rotate(-90,15,65)">y</text>
+              </svg>
+              <p style="margin: 0.5rem 0 0; font-weight: 600; color: #dc2626;">OLS (no penalty)</p>
+              <p style="margin: 0.25rem 0 0; font-size: 0.82rem; color: #64748b;">Chases every data point &mdash; fits noise</p>
             </div>
+            <!-- Regularized panel -->
             <div style="text-align: center;">
-              <div style="position: relative; width: 150px; height: 150px; margin: 0 auto;">
-                <div style="position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; transform: translate(-50%, -50%) rotate(45deg); border: 3px solid #ef4444;"></div>
-                <div style="position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #ef4444; border-radius: 50%; transform: translate(-50%, -50%);"></div>
-                <div style="position: absolute; top: 25px; left: 50%; width: 8px; height: 8px; background: #059669; border-radius: 50%; transform: translateX(-50%);"></div>
-              </div>
-              <p style="margin: 0.75rem 0 0; font-weight: 600; color: #ef4444;">LASSO (L1)</p>
-              <p style="margin: 0.25rem 0 0; font-size: 0.85rem; color: #64748b;">Diamond: OLS solution hits corners<br>&rarr; some coefficients = exactly 0</p>
+              <svg viewBox="0 0 200 140" style="width: 100%; max-width: 280px;" xmlns="http://www.w3.org/2000/svg">
+                <!-- axes -->
+                <line x1="25" y1="120" x2="190" y2="120" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="25" y1="120" x2="25" y2="10" stroke="#94a3b8" stroke-width="1"/>
+                <!-- same data points -->
+                <circle cx="40" cy="95" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="55" cy="80" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="70" cy="70" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="85" cy="88" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="100" cy="55" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="115" cy="60" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="130" cy="40" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="145" cy="50" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="160" cy="30" r="3" fill="#2563eb" opacity="0.6"/>
+                <circle cx="175" cy="45" r="3" fill="#2563eb" opacity="0.6"/>
+                <!-- smooth regularized line -->
+                <line x1="35" y1="98" x2="180" y2="38" stroke="#059669" stroke-width="2.5"/>
+                <text x="100" y="135" text-anchor="middle" fill="#64748b" font-size="9">x</text>
+                <text x="15" y="65" text-anchor="middle" fill="#64748b" font-size="9" transform="rotate(-90,15,65)">y</text>
+              </svg>
+              <p style="margin: 0.5rem 0 0; font-weight: 600; color: #059669;">Regularized</p>
+              <p style="margin: 0.25rem 0 0; font-size: 0.82rem; color: #64748b;">Captures the trend &mdash; ignores noise</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Geometric Intuition Diagram with SVGs -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0;">
+          <h4 style="text-align: center; margin: 0 0 0.5rem 0; color: #1e293b;">Geometric Intuition: Why LASSO Zeros Out Coefficients</h4>
+          <p style="text-align: center; margin: 0 0 1.5rem 0; font-size: 0.85rem; color: #64748b;">The OLS solution (green dot) is constrained to lie within the shaded region. The constrained solution (orange dot) is where the elliptical OLS contours first touch the constraint region.</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 650px; margin: 0 auto;">
+            <!-- Ridge: circle constraint -->
+            <div style="text-align: center;">
+              <svg viewBox="0 0 180 180" style="width: 100%; max-width: 240px;" xmlns="http://www.w3.org/2000/svg">
+                <!-- axes -->
+                <line x1="90" y1="10" x2="90" y2="170" stroke="#cbd5e1" stroke-width="0.5"/>
+                <line x1="10" y1="90" x2="170" y2="90" stroke="#cbd5e1" stroke-width="0.5"/>
+                <text x="170" y="85" fill="#94a3b8" font-size="9">&beta;1</text>
+                <text x="95" y="18" fill="#94a3b8" font-size="9">&beta;2</text>
+                <!-- constraint region: circle -->
+                <circle cx="90" cy="90" r="45" fill="#dbeafe" fill-opacity="0.4" stroke="#2563eb" stroke-width="2"/>
+                <!-- OLS contour ellipses (centered at OLS solution) -->
+                <ellipse cx="135" cy="45" rx="30" ry="50" fill="none" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,3" transform="rotate(-30,135,45)"/>
+                <ellipse cx="135" cy="45" rx="50" ry="75" fill="none" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,3" transform="rotate(-30,135,45)"/>
+                <!-- OLS solution -->
+                <circle cx="135" cy="45" r="4" fill="#059669"/>
+                <!-- constrained solution: on circle surface, NOT on axis -->
+                <circle cx="122" cy="58" r="4" fill="#f59e0b"/>
+              </svg>
+              <p style="margin: 0.5rem 0 0; font-weight: 600; color: #2563eb;">Ridge (L2): Circle</p>
+              <p style="margin: 0.25rem 0 0; font-size: 0.82rem; color: #64748b;">Contours touch the circle smoothly &mdash;<br>both &beta;1 and &beta;2 remain nonzero</p>
+            </div>
+            <!-- LASSO: diamond constraint -->
+            <div style="text-align: center;">
+              <svg viewBox="0 0 180 180" style="width: 100%; max-width: 240px;" xmlns="http://www.w3.org/2000/svg">
+                <!-- axes -->
+                <line x1="90" y1="10" x2="90" y2="170" stroke="#cbd5e1" stroke-width="0.5"/>
+                <line x1="10" y1="90" x2="170" y2="90" stroke="#cbd5e1" stroke-width="0.5"/>
+                <text x="170" y="85" fill="#94a3b8" font-size="9">&beta;1</text>
+                <text x="95" y="18" fill="#94a3b8" font-size="9">&beta;2</text>
+                <!-- constraint region: diamond -->
+                <polygon points="90,45 135,90 90,135 45,90" fill="#fee2e2" fill-opacity="0.4" stroke="#dc2626" stroke-width="2"/>
+                <!-- OLS contour ellipses -->
+                <ellipse cx="135" cy="45" rx="30" ry="50" fill="none" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,3" transform="rotate(-30,135,45)"/>
+                <ellipse cx="135" cy="45" rx="50" ry="75" fill="none" stroke="#94a3b8" stroke-width="0.8" stroke-dasharray="3,3" transform="rotate(-30,135,45)"/>
+                <!-- OLS solution -->
+                <circle cx="135" cy="45" r="4" fill="#059669"/>
+                <!-- constrained solution: on diamond CORNER (axis) = zero coefficient -->
+                <circle cx="135" cy="90" r="4" fill="#f59e0b"/>
+                <!-- arrow pointing to the corner -->
+                <text x="143" y="95" fill="#f59e0b" font-size="8" font-weight="600">&beta;2 = 0!</text>
+              </svg>
+              <p style="margin: 0.5rem 0 0; font-weight: 600; color: #dc2626;">LASSO (L1): Diamond</p>
+              <p style="margin: 0.25rem 0 0; font-size: 0.82rem; color: #64748b;">Contours hit a corner on the &beta;1 axis &mdash;<br>&beta;2 is set to exactly zero</p>
             </div>
           </div>
           <p style="text-align: center; margin: 1.25rem 0 0; font-size: 0.85rem; color: #475569;">
             <span style="color: #059669;">&bull;</span> OLS solution &nbsp;&nbsp;
-            <span style="color: #ef4444;">&bull;</span> Origin &nbsp;&nbsp;
-            The constrained solution is where the OLS contours first touch the constraint region.
+            <span style="color: #f59e0b;">&bull;</span> Constrained solution &nbsp;&nbsp;
+            <span style="color: #94a3b8;">- -</span> OLS contours
           </p>
         </div>
 
@@ -223,6 +314,12 @@
         <!-- RIDGE REGRESSION -->
         <!-- ============================================================ -->
         <h2 id="ridge">Ridge Regression (L2)</h2>
+
+        <div style="background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin: 0 0 0.5rem 0; color: #1e40af;">When to Use Ridge</h3>
+          <p style="margin: 0 0 0.5rem 0;"><strong>Use Ridge when all your predictors are potentially relevant but correlated.</strong> For example, if you are predicting GDP growth using 30 macroeconomic indicators &mdash; inflation, unemployment, trade balance, consumer confidence, etc. &mdash; many of these move together. OLS would give wildly unstable coefficients, flipping sign from sample to sample. Ridge stabilizes them by spreading weight evenly across correlated predictors.</p>
+          <p style="margin: 0;">Ridge is like turning down the volume on all speakers equally: everything gets quieter, but nothing is silenced. Every predictor stays in the model.</p>
+        </div>
 
         <p>Ridge regression uses the <strong>L2 penalty</strong> &mdash; the sum of squared coefficients. The objective function is:</p>
 
@@ -517,204 +614,17 @@ Test RMSE:       0.5289
 Non-zero coefs: 50 out of 50</pre></div>
         </div>
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Lasso uses the same API as Ridge -- only the class name changes",
-                  "pattern": "model = ClassName(params).fit(X, y)",
-                  "structureNote": "sklearn's consistent estimator API: swap <code>Ridge</code> for <code>Lasso</code> and the code structure is identical.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "lasso",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "Lasso",
-                        "role": "Class",
-                        "tip": "Same interface as Ridge. Swap the class name to change the penalty type.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "alpha=0.1",
-                        "role": "Keyword Arg",
-                        "tip": "Same parameter name across Ridge, Lasso, ElasticNet.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "\nlasso",
-                        "role": "Object",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ".",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "fit",
-                        "role": "Method",
-                        "tip": "",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "X_train, y_train",
-                        "role": "Arguments",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ],
-                    "stata": [
-                      {
-                        "code": "cvlasso ",
-                        "role": "Command",
-                        "tip": "Cross-validated LASSO/Ridge from the lassopack package -- selects the optimal lambda via K-fold CV",
-                        "color": "mauve"
-                      },
-                      {
-                        "code": "y ",
-                        "role": "Dependent var",
-                        "tip": "The outcome variable to be predicted",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "x1-x50",
-                        "role": "Independent vars",
-                        "tip": "Stata's variable range notation -- includes all variables from x1 through x50 as predictors",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ", ",
-                        "role": "Comma",
-                        "tip": "In Stata, the comma separates the main command from its options",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "alpha(0) ",
-                        "role": "Option",
-                        "tip": "Sets the elastic net mixing parameter: alpha(0) = pure Ridge (L2 penalty only), alpha(1) = LASSO (L1 only)",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "lopt",
-                        "role": "Option",
-                        "tip": "Tells cvlasso to select the lambda that minimizes the cross-validation error (the 'optimal' lambda)",
-                        "color": "sky"
-                      }
-                    ],
-                    "r": [
-                      {
-                        "code": "cv_ridge",
-                        "role": "Variable",
-                        "tip": "Stores the fitted cv.glmnet object -- contains the optimal lambda, CV error curve, and fitted coefficients",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " <- ",
-                        "role": "Assignment",
-                        "tip": "R's assignment operator -- stores the result on the right into the variable on the left",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "cv.glmnet",
-                        "role": "Function",
-                        "tip": "Fits a regularized regression with K-fold cross-validation and returns the optimal penalty (lambda)",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "Open paren",
-                        "tip": "Begins the argument list",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "X_train, ",
-                        "role": "Feature matrix",
-                        "tip": "The predictor matrix (must be a matrix, not a data frame)",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "y_train, ",
-                        "role": "Response vector",
-                        "tip": "The outcome variable as a numeric vector",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "alpha",
-                        "role": "Parameter",
-                        "tip": "The elastic net mixing parameter",
-                        "color": "sky"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Binding",
-                        "tip": "Connects the parameter name to its value",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "0",
-                        "role": "Value",
-                        "tip": "alpha = 0 means pure Ridge (L2 penalty only); alpha = 1 means LASSO (L1 only)",
-                        "color": "green"
-                      },
-                      {
-                        "code": ")",
-                        "role": "Close paren",
-                        "tip": "Ends the cv.glmnet() call -- the model is fitted and CV is performed in one step",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
 
         <!-- ============================================================ -->
         <!-- LASSO -->
         <!-- ============================================================ -->
         <h2 id="lasso">LASSO (L1)</h2>
+
+        <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin: 0 0 0.5rem 0; color: #991b1b;">When to Use LASSO</h3>
+          <p style="margin: 0 0 0.5rem 0;"><strong>Use LASSO when you suspect only a few of your many predictors actually matter.</strong> For example, with 200 potential determinants of house prices &mdash; square footage, number of rooms, distance to metro, local crime rate, school quality, street width, proximity to a park, number of nearby restaurants, etc. &mdash; you might believe only 10-20 actually drive prices. LASSO will find them and discard the rest.</p>
+          <p style="margin: 0;">LASSO is like Marie Kondo for your variables: if a predictor does not spark joy (predictive power), it gets set to exactly zero and removed from the model.</p>
+        </div>
 
         <p>The LASSO (Least Absolute Shrinkage and Selection Operator), introduced by Tibshirani (1996), uses the <strong>L1 penalty</strong> &mdash; the sum of absolute values of coefficients:</p>
 
@@ -727,193 +637,6 @@ Non-zero coefs: 50 out of 50</pre></div>
         <p>Why does the L1 penalty produce exact zeros while L2 does not? The answer lies in the geometry. The L1 constraint region is shaped like a diamond (in 2D) or a cross-polytope (in higher dimensions). This shape has corners that lie on the coordinate axes &mdash; that is, at points where one or more coordinates are exactly zero. The elliptical contours of the OLS objective function tend to first touch the diamond at one of these corners, producing a solution with some coefficients at zero. By contrast, the L2 constraint region (a circle) has no corners, so the contours touch it at a point where all coordinates are generically nonzero.</p>
 
         <p>The LASSO is your go-to method when you have many potential predictors but suspect that only a few are truly relevant. It is widely used in economics for variable selection in high-dimensional settings &mdash; for example, selecting which of hundreds of control variables to include in a regression.</p>
-
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "ElasticNet adds <code>l1_ratio</code> to blend Ridge and Lasso penalties",
-                  "pattern": "model = LassoCV(cv=K).fit(X, y)",
-                  "structureNote": "Pattern: <code>ElasticNet(alpha=..., l1_ratio=...)</code>. <code>l1_ratio=0</code> is pure Ridge; <code>l1_ratio=1</code> is pure Lasso.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "enet",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "ElasticNet",
-                        "role": "Class",
-                        "tip": "",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "alpha=0.1,",
-                        "role": "Keyword Arg",
-                        "tip": "Overall regularization strength.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "l1_ratio=0.5",
-                        "role": "Keyword Arg",
-                        "tip": "Blend: 0 = all L2 (Ridge), 1 = all L1 (Lasso), 0.5 = equal mix.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "\nenet",
-                        "role": "Object",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ".",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "fit",
-                        "role": "Method",
-                        "tip": "",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "X_train, y_train",
-                        "role": "Arguments",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ],
-                    "stata": [
-                      {
-                        "code": "cvlasso ",
-                        "role": "Command",
-                        "tip": "Cross-validated LASSO from lassopack -- without alpha() option, defaults to alpha(1) which is LASSO",
-                        "color": "mauve"
-                      },
-                      {
-                        "code": "y ",
-                        "role": "Dependent var",
-                        "tip": "The outcome variable",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "x1-x50, ",
-                        "role": "Independent vars",
-                        "tip": "All 50 predictor variables -- Stata's range notation x1-x50 expands to x1 x2 ... x50",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "lopt",
-                        "role": "Option",
-                        "tip": "Selects the lambda that minimizes cross-validation error -- the 'optimal' penalty strength",
-                        "color": "sky"
-                      }
-                    ],
-                    "r": [
-                      {
-                        "code": "cv_lasso",
-                        "role": "Variable",
-                        "tip": "Stores the cv.glmnet object -- access $lambda.min for the optimal penalty",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " <- ",
-                        "role": "Assignment",
-                        "tip": "R's assignment arrow",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "cv.glmnet",
-                        "role": "Function",
-                        "tip": "Fits regularized regression with cross-validation",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "Open paren",
-                        "tip": "Begins argument list",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "X_train, ",
-                        "role": "Feature matrix",
-                        "tip": "Predictor matrix -- must be a matrix object in glmnet",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "y_train, ",
-                        "role": "Response",
-                        "tip": "The outcome vector",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "alpha",
-                        "role": "Parameter",
-                        "tip": "Elastic net mixing parameter",
-                        "color": "sky"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Binding",
-                        "tip": "Connects parameter to value",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "1",
-                        "role": "Value",
-                        "tip": "alpha = 1 means pure LASSO (L1 penalty only) -- coefficients can be shrunk to exactly zero",
-                        "color": "green"
-                      },
-                      {
-                        "code": ")",
-                        "role": "Close paren",
-                        "tip": "Ends the call -- cross-validated LASSO is fitted",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
 
         <div class="code-tabs" data-runnable="ml-reg-2">
           <div class="tab-buttons">
@@ -1038,6 +761,12 @@ Non-zero coefs:     6 out of 50
         <!-- ELASTIC NET -->
         <!-- ============================================================ -->
         <h2 id="elastic-net">Elastic Net</h2>
+
+        <div style="background: #faf5ff; border-left: 4px solid #7c3aed; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin: 0 0 0.5rem 0; color: #5b21b6;">When to Use Elastic Net</h3>
+          <p style="margin: 0 0 0.5rem 0;"><strong>Use Elastic Net when you have groups of correlated predictors and still want variable selection.</strong> For example, in labor economics you might have years of education, degree type, field of study, and test scores &mdash; all measuring "human capital." LASSO would arbitrarily keep one and drop the rest. Elastic Net keeps the whole group together while still zeroing out genuinely irrelevant predictors.</p>
+          <p style="margin: 0;">Think of Elastic Net as a compromise diplomat: it has LASSO's courage to eliminate useless variables, but Ridge's fairness in treating correlated variables as a team.</p>
+        </div>
 
         <p>The Elastic Net, introduced by Zou and Hastie (2005), combines the L1 and L2 penalties into a single objective:</p>
 
@@ -1249,8 +978,11 @@ Non-zero coefs:     6 out of 50
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="ELASTIC NET: Combines LASSO and Ridge penalties. l1_ratio controls the mix — 0.5 means half L1 (variable selection) and half L2 (shrinkage), getting the best of both worlds.">ElasticNetCV</span>
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="ELASTIC NET: Combines LASSO and Ridge penalties. l1_ratio controls the mix — 0.5 means half L1 (variable selection) and half L2 (shrinkage), getting the best of both worlds.">ElasticNetCV</span>
+<span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error
 
+<span class="code-comment"># Using X_train_sc, X_test_sc, y_train, y_test from above</span>
 <span class="code-comment"># Fit Elastic Net with CV over both alpha and l1_ratio</span>
 enet = <span class="code-function">ElasticNetCV</span>(
     l1_ratio=[<span class="code-number">.1</span>, <span class="code-number">.5</span>, <span class="code-number">.7</span>, <span class="code-number">.9</span>, <span class="code-number">.95</span>, <span class="code-number">1</span>],
@@ -1270,7 +1002,8 @@ rmse_enet = np.<span class="code-function">sqrt</span>(<span class="code-functio
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Elastic Net with alpha = 0.5 (equal mix of L1 and L2)</span>
-<span class="code-tooltip" data-tip="ELASTIC NET: Fits a model with a blended penalty — alpha(0.5) gives equal weight to LASSO-style variable selection and Ridge-style shrinkage. Useful when correlated variables are present.">elasticnet</span> y x1-x50, <span class="code-keyword">alpha</span>(0.5)
+<span class="code-comment">* lasso2 with alpha(0.5) fits Elastic Net</span>
+<span class="code-tooltip" data-tip="ELASTIC NET: lasso2 with alpha(0.5) fits a model with a blended penalty — equal weight to LASSO-style variable selection and Ridge-style shrinkage. Useful when correlated variables are present.">lasso2</span> y x1-x50, <span class="code-keyword">alpha</span>(0.5)
 
 <span class="code-comment">* Cross-validated Elastic Net</span>
 <span class="code-keyword">cvlasso</span> y x1-x50, <span class="code-keyword">alpha</span>(0.5) <span class="code-keyword">lopt</span>
@@ -1315,6 +1048,61 @@ Optimal lambda: .04628</pre></div>
           <div class="output-body"><pre>Best lambda:     0.043476
 Test RMSE:       0.5078
 Non-zero coefs: 5 out of 50</pre></div>
+        </div>
+
+
+        <!-- SVG: Ridge vs LASSO Coefficient Paths -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0;">
+          <h4 style="text-align: center; margin: 0 0 0.5rem 0; color: #1e293b;">How Coefficients Shrink as &lambda; Increases</h4>
+          <p style="text-align: center; margin: 0 0 1.5rem 0; font-size: 0.85rem; color: #64748b;">Each colored line is one predictor's coefficient. Watch what happens as the penalty grows.</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; max-width: 750px; margin: 0 auto;">
+            <!-- Ridge coefficient paths -->
+            <div style="text-align: center;">
+              <svg viewBox="0 0 220 150" style="width: 100%; max-width: 320px;" xmlns="http://www.w3.org/2000/svg">
+                <text x="110" y="12" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="600">Ridge: All shrink, none reach zero</text>
+                <!-- axes -->
+                <line x1="30" y1="130" x2="210" y2="130" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="30" y1="130" x2="30" y2="20" stroke="#94a3b8" stroke-width="1"/>
+                <!-- zero line -->
+                <line x1="30" y1="80" x2="210" y2="80" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,3"/>
+                <!-- axis labels -->
+                <text x="120" y="145" text-anchor="middle" fill="#64748b" font-size="8">&lambda; (penalty strength) &rarr;</text>
+                <text x="12" y="80" text-anchor="middle" fill="#64748b" font-size="8" transform="rotate(-90,12,80)">&beta;</text>
+                <text x="35" y="140" fill="#94a3b8" font-size="7">0</text>
+                <text x="200" y="140" fill="#94a3b8" font-size="7">large</text>
+                <!-- coefficient paths: all curve toward zero but never reach it -->
+                <path d="M35,35 C80,40 140,55 200,72" fill="none" stroke="#2563eb" stroke-width="1.5" opacity="0.8"/>
+                <path d="M35,45 C80,50 140,60 200,74" fill="none" stroke="#059669" stroke-width="1.5" opacity="0.8"/>
+                <path d="M35,110 C80,105 140,95 200,85" fill="none" stroke="#dc2626" stroke-width="1.5" opacity="0.8"/>
+                <path d="M35,55 C80,58 140,67 200,76" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.8"/>
+                <path d="M35,100 C80,97 140,90 200,83" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity="0.8"/>
+              </svg>
+              <p style="margin: 0.25rem 0 0; font-size: 0.82rem; color: #64748b;">Coefficients approach zero asymptotically<br>but never arrive &mdash; all predictors stay in</p>
+            </div>
+            <!-- LASSO coefficient paths -->
+            <div style="text-align: center;">
+              <svg viewBox="0 0 220 150" style="width: 100%; max-width: 320px;" xmlns="http://www.w3.org/2000/svg">
+                <text x="110" y="12" text-anchor="middle" fill="#dc2626" font-size="10" font-weight="600">LASSO: Weak predictors hit zero</text>
+                <!-- axes -->
+                <line x1="30" y1="130" x2="210" y2="130" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="30" y1="130" x2="30" y2="20" stroke="#94a3b8" stroke-width="1"/>
+                <!-- zero line -->
+                <line x1="30" y1="80" x2="210" y2="80" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,3"/>
+                <!-- axis labels -->
+                <text x="120" y="145" text-anchor="middle" fill="#64748b" font-size="8">&lambda; (penalty strength) &rarr;</text>
+                <text x="12" y="80" text-anchor="middle" fill="#64748b" font-size="8" transform="rotate(-90,12,80)">&beta;</text>
+                <text x="35" y="140" fill="#94a3b8" font-size="7">0</text>
+                <text x="200" y="140" fill="#94a3b8" font-size="7">large</text>
+                <!-- coefficient paths: some hit zero and stay there -->
+                <path d="M35,35 C80,42 140,58 200,72" fill="none" stroke="#2563eb" stroke-width="1.5" opacity="0.8"/>
+                <path d="M35,45 C70,52 100,65 130,80 L210,80" fill="none" stroke="#059669" stroke-width="1.5" opacity="0.8"/>
+                <path d="M35,110 C60,105 80,95 105,80 L210,80" fill="none" stroke="#dc2626" stroke-width="1.5" opacity="0.8"/>
+                <path d="M35,55 C60,60 80,72 95,80 L210,80" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.8"/>
+                <path d="M35,100 C55,97 70,88 82,80 L210,80" fill="none" stroke="#8b5cf6" stroke-width="1.5" opacity="0.8"/>
+              </svg>
+              <p style="margin: 0.25rem 0 0; font-size: 0.82rem; color: #64748b;">Weak predictors hit exactly zero and drop out<br>&mdash; automatic variable selection</p>
+            </div>
+          </div>
         </div>
 
 
@@ -1591,7 +1379,8 @@ Non-zero (1se): 4</pre></div>
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> GridSearchCV
+<pre><code><span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> GridSearchCV
 <span class="code-keyword">from</span> sklearn.linear_model <span class="code-keyword">import</span> Lasso
 
 <span class="code-comment"># Define the parameter grid</span>
@@ -1602,14 +1391,14 @@ param_grid = {<span class="code-string">'alpha'</span>: [0.001, 0.01, 0.1, 1.0, 
     Lasso(), param_grid,
     cv=5, scoring=<span class="code-string">'neg_mean_squared_error'</span>
 )</span>
-grid_search.fit(X_train_scaled, y_train)
+grid_search.fit(X_train_sc, y_train)
 
 <span class="code-comment"># Best alpha selected by CV</span>
 print(<span class="code-string">f"Best alpha: {grid_search.best_params_['alpha']}"</span>)
 print(<span class="code-string">f"Best CV MSE: {-grid_search.best_score_:.4f}"</span>)
 
 <span class="code-comment"># Evaluate ONCE on the test set (never touch test set during tuning)</span>
-y_pred = grid_search.predict(X_test_scaled)
+y_pred = grid_search.predict(X_test_sc)
 test_rmse = np.sqrt(np.mean((y_pred - y_test)**2))
 print(<span class="code-string">f"Test RMSE: {test_rmse:.4f}"</span>)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
@@ -1619,16 +1408,17 @@ print(<span class="code-string">f"Test RMSE: {test_rmse:.4f}"</span>)</code></pr
 <span class="code-keyword">library</span>(glmnet)
 
 <span class="code-comment"># cv.glmnet automatically searches over a lambda grid</span>
-cv_lasso <- cv.glmnet(X_train, y_train, alpha = 1, nfolds = 5)
+cv_lasso &lt;- cv.glmnet(X_train, y_train, alpha = 1, nfolds = 5)
 
 <span class="code-comment"># For multiple hyperparameters, use caret or tidymodels</span>
 <span class="code-keyword">library</span>(caret)
-grid <- expand.grid(alpha = 1, lambda = 10^seq(-3, 1, length = 50))
-<span class="code-tooltip" data-tip="CARET TRAIN: R's general-purpose tuning framework. trainControl specifies 5-fold CV; tuneGrid defines the hyperparameter combinations to try. Works with any model type supported by caret.">model <- train(y ~ ., data = train_data,
-               method = "glmnet",
-               trControl = trainControl(method = "cv", number = 5),
+train_df &lt;- <span class="code-function">data.frame</span>(y = y_train, X_train)
+grid &lt;- <span class="code-function">expand.grid</span>(alpha = 1, lambda = 10^<span class="code-function">seq</span>(-3, 1, length = 50))
+<span class="code-tooltip" data-tip="CARET TRAIN: R's general-purpose tuning framework. trainControl specifies 5-fold CV; tuneGrid defines the hyperparameter combinations to try. Works with any model type supported by caret.">model &lt;- train(y ~ ., data = train_df,
+               method = <span class="code-string">"glmnet"</span>,
+               trControl = trainControl(method = <span class="code-string">"cv"</span>, number = 5),
                tuneGrid = grid)</span>
-print(model$bestTune)</code></pre>
+<span class="code-function">print</span>(model$bestTune)</code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -1652,107 +1442,6 @@ Test RMSE: <span class="out-num">0.6812</span></div>
 <span class="out-num">23</span>     <span class="out-num">1</span> <span class="out-num">0.01291550</span></div>
         </div>
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Access fitted model attributes with the trailing underscore convention",
-                  "pattern": "grid = GridSearchCV(Model(), param_grid, cv=5).fit(X, y)",
-                  "structureNote": "sklearn convention: attributes ending in <code>_</code> (e.g., <code>.coef_</code>, <code>.alpha_</code>) are set during <code>.fit()</code> and unavailable before.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "ridge",
-                        "role": "Object",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ".",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "coef_",
-                        "role": "Fitted Attribute",
-                        "tip": "Trailing underscore = set by <code>.fit()</code>. Array of learned coefficients.",
-                        "color": "mauve"
-                      },
-                      {
-                        "code": "\nridge",
-                        "role": "Object",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ".",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "intercept_",
-                        "role": "Fitted Attribute",
-                        "tip": "Scalar intercept term. Also set by <code>.fit()</code>.",
-                        "color": "mauve"
-                      },
-                      {
-                        "code": "\nnp.sum(ridge.coef_ != 0)",
-                        "role": "Expression",
-                        "tip": "Boolean array <code>!= 0</code> then <code>np.sum()</code> counts non-zero coefficients.",
-                        "color": "sky"
-                      }
-                    ],
-                    "r": [
-                      {
-                        "code": "train",
-                        "role": "Function",
-                        "tip": "From caret package. R's general-purpose model training and tuning.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(y ~ ., data = train_data",
-                        "role": "Formula",
-                        "tip": "Model formula with all available predictors.",
-                        "color": "green"
-                      },
-                      {
-                        "code": ", method = 'glmnet'",
-                        "role": "Model Type",
-                        "tip": "Model to tune. Caret supports 200+ model types.",
-                        "color": "yellow"
-                      },
-                      {
-                        "code": ", trControl = trainControl(method = 'cv', number = 5)",
-                        "role": "CV Control",
-                        "tip": "Specifies 5-fold cross-validation for tuning.",
-                        "color": "lavender"
-                      },
-                      {
-                        "code": ", tuneGrid = grid",
-                        "role": "Parameter Grid",
-                        "tip": "Data frame of hyperparameter combinations to try.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "Close Paren",
-                        "tip": "Best parameters stored in model$bestTune.",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
         <div class="info-box warning">
           <div class="info-box-title">Never tune on the test set</div>
           <p style="margin-bottom: 0;">
@@ -1765,6 +1454,11 @@ Test RMSE: <span class="out-num">0.6812</span></div>
         <!-- POST-LASSO AND POST-SELECTION INFERENCE -->
         <!-- ============================================================ -->
         <h2 id="post-lasso">Post-LASSO and Post-Selection Inference</h2>
+
+        <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin: 0 0 0.5rem 0; color: #92400e;">Why This Section Matters for Economists</h3>
+          <p style="margin: 0;">In economics, we usually care about <em>causal effects</em>, not just predictions. LASSO is excellent for prediction and variable selection, but its coefficients are <strong>biased</strong> (they are shrunk toward zero by design) and its standard errors are <strong>invalid</strong> (they ignore the fact that the model was chosen from the data). Post-LASSO methods fix this: they use LASSO to select variables, then re-estimate using OLS on the selected variables with proper inference. Think of it as a two-step process: LASSO is the scout that identifies which variables matter; OLS is the analyst that measures their effects with correct standard errors.</p>
+        </div>
 
         <!-- Warning Box -->
         <div class="info-box" style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
@@ -1910,127 +1604,6 @@ Pr(>|t|): < 2e-16
 (True treatment effect: 1.0)</pre></div>
         </div>
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Loop over alpha values, fit models, and collect coefficients for a regularization path",
-                  "pattern": "Step 1: LASSO Y~X → Step 2: LASSO D~X → Step 3: OLS Y~D+union(selected)",
-                  "structureNote": "Pattern: <code>for alpha in alphas: model = Class(alpha=alpha).fit(X, y); store model.coef_</code>. Plot coefficients vs alpha to visualize the path.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "alphas",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "np.logspace(-3, 3, 50)",
-                        "role": "Function Call",
-                        "tip": "Generates 50 values log-spaced from 10^-3 to 10^3.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "\nfor",
-                        "role": "Keyword",
-                        "tip": "",
-                        "color": "mauve"
-                      },
-                      {
-                        "code": "alpha",
-                        "role": "Loop Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "in",
-                        "role": "Keyword",
-                        "tip": "",
-                        "color": "mauve"
-                      },
-                      {
-                        "code": "alphas:\n",
-                        "role": "",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "    Ridge(alpha=alpha).fit(X, y).coef_",
-                        "role": "Method Chain",
-                        "tip": "Chain: instantiate > fit > access attribute. One-liner pattern.",
-                        "color": "blue"
-                      }
-                    ],
-                    "stata": [
-                      {
-                        "code": "pdslasso",
-                        "role": "Command",
-                        "tip": "From pdslasso package. Implements post-double-selection in one command.",
-                        "color": "mauve"
-                      },
-                      {
-                        "code": " y d",
-                        "role": "Outcome & Treatment",
-                        "tip": "Outcome variable and treatment variable.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": " (x1-x50)",
-                        "role": "Controls",
-                        "tip": "High-dimensional controls to select from. Parentheses denote the selection set.",
-                        "color": "green"
-                      }
-                    ],
-                    "r": [
-                      {
-                        "code": "rlassoEffect",
-                        "role": "Function",
-                        "tip": "From hdm package. Post-double-selection with rigorous LASSO.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(x = X",
-                        "role": "Controls",
-                        "tip": "Matrix of potential control variables.",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ", y = y",
-                        "role": "Outcome",
-                        "tip": "Outcome variable.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ", d = d",
-                        "role": "Treatment",
-                        "tip": "Treatment variable of interest.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "Close Paren",
-                        "tip": "Returns treatment effect with valid standard errors.",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
 
         <!-- ============================================================ -->
         <!-- CHOOSING THE RIGHT METHOD -->
@@ -2047,6 +1620,7 @@ Pr(>|t|): < 2e-16
               <li>Shrinks coefficients but keeps all</li>
               <li>Generally best when p &lt; n and features are correlated</li>
             </ul>
+            <p style="margin: 0.75rem 0 0; font-size: 0.82rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 0.5rem;"><strong>Economics example:</strong> Predicting GDP growth from 30 correlated macro indicators (inflation, unemployment, trade balance, etc.)</p>
           </div>
           <div class="distinction-card">
             <h4 style="color: #ef4444;">LASSO (L1)</h4>
@@ -2057,6 +1631,7 @@ Pr(>|t|): < 2e-16
               <li>May be unstable with correlated features</li>
               <li>Best when you believe the true model is sparse</li>
             </ul>
+            <p style="margin: 0.75rem 0 0; font-size: 0.82rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 0.5rem;"><strong>Economics example:</strong> With 200 potential determinants of house prices, LASSO selects the 15 that matter and discards the rest</p>
           </div>
           <div class="distinction-card">
             <h4 style="color: #7c3aed;">Elastic Net</h4>
@@ -2067,6 +1642,7 @@ Pr(>|t|): < 2e-16
               <li>More stable than LASSO with correlations</li>
               <li>Requires tuning two parameters (&lambda; and &alpha;)</li>
             </ul>
+            <p style="margin: 0.75rem 0 0; font-size: 0.82rem; color: #475569; border-top: 1px solid #e2e8f0; padding-top: 0.5rem;"><strong>Economics example:</strong> Wage determinants with correlated "human capital" variables (education, test scores, experience) that should stay or drop as a group</p>
           </div>
         </div>
 

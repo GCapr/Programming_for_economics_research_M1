@@ -167,13 +167,19 @@
         <!-- ===================== FROM LINEAR MODELS TO NEURAL NETWORKS ===================== -->
         <h2 id="intuition">From Linear Models to Neural Networks</h2>
 
-        <p>You already know linear regression: the predicted outcome is a weighted sum of the features, <strong>y = X&beta;</strong>. This is powerful and interpretable, but it can only learn linear relationships. If the true relationship between your features and the outcome is nonlinear (for example, the effect of education on earnings is different at different levels of education), a linear model will miss it unless you manually engineer the right transformations — adding squared terms, interactions, polynomials, and so on.</p>
+        <p>You already know linear regression: the predicted outcome is a weighted sum of the features, <strong>y = X&beta;</strong>. This is powerful and interpretable, but it can only learn linear relationships. If the true relationship between your features and the outcome is nonlinear (for example, the effect of education on earnings is different at different levels of education), a linear model will miss it unless you manually engineer the right transformations -- adding squared terms, interactions, polynomials, and so on.</p>
 
-        <p>A neural network automates this process. The key idea is to stack multiple linear transformations with <span class="code-tooltip" data-tip="A function applied element-wise to the output of a linear transformation. Without activation functions, stacking linear layers would just produce another linear model. The activation function introduces nonlinearity, allowing the network to learn complex patterns.">nonlinear activation functions</span> between them. In the simplest terms: take your features X, multiply by a weight matrix W1, add a bias b1, then apply a nonlinear function (like ReLU, which just replaces negative values with zero). The result is a new set of "features" — called a <span class="code-tooltip" data-tip="A set of neurons that are not directly observed in the data. Each hidden layer transforms its inputs into a new representation. The 'hidden' refers to the fact that these values are internal to the model, not part of the input or output.">hidden layer</span>. Then take those hidden features, multiply by another weight matrix W2, add another bias b2, and you get the output. By chaining together several of these layers, the network can learn arbitrarily complex nonlinear functions of the input features.</p>
+        <!-- Intuitive Analogy Box -->
+        <div style="background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;">The Factory Assembly Line Analogy</h4>
+          <p style="margin: 0; line-height: 1.7;">A neural network is like a <strong>factory assembly line</strong>. Raw materials (your input data -- income, education, age) enter at one end. They pass through multiple processing stages (layers), each one transforming the data a little bit -- combining features, filtering out noise, detecting patterns. At the end of the line, a finished product (a prediction) comes out. Just as a car factory turns raw steel and rubber into a car through a sequence of specialized stations, a neural network turns raw numbers into a prediction through a sequence of learned transformations. The key difference from a linear model is that each station can do <em>nonlinear</em> things -- bending, shaping, and combining -- rather than just adding things up.</p>
+        </div>
 
-        <p>This leads to one of the most remarkable results in mathematics: the <span class="code-tooltip" data-tip="A theorem proving that a feedforward neural network with a single hidden layer containing a finite number of neurons can approximate any continuous function to arbitrary accuracy, given enough neurons. This does not mean it is easy to find the right weights — only that the architecture is flexible enough in principle."><strong>Universal Approximation Theorem</strong></span>. It states that a neural network with just one hidden layer and enough neurons can approximate any continuous function to any desired degree of accuracy. In other words, neural networks are flexible enough to learn virtually any pattern in the data — if you have enough data and computational resources. The practical challenge is finding the right weights, which is where training algorithms come in.</p>
+        <p>A neural network automates the process of feature engineering. The key idea is to stack multiple linear transformations with <span class="code-tooltip" data-tip="A function applied element-wise to the output of a linear transformation. Without activation functions, stacking linear layers would just produce another linear model. The activation function introduces nonlinearity, allowing the network to learn complex patterns.">nonlinear activation functions</span> between them. Take your features X, multiply by a weight matrix W1, add a bias b1, then apply a nonlinear function (like ReLU, which replaces negative values with zero). The result is a new set of "features" -- called a <span class="code-tooltip" data-tip="A set of neurons that are not directly observed in the data. Each hidden layer transforms its inputs into a new representation. The 'hidden' refers to the fact that these values are internal to the model, not part of the input or output.">hidden layer</span>. Then take those hidden features, multiply by another weight matrix W2, add another bias b2, and you get the output. By chaining together several of these layers, the network can learn arbitrarily complex nonlinear functions of the input features.</p>
 
-        <p>Think of it this way: a linear model draws a single straight line (or plane) through your data. A neural network draws a wiggly, curved surface that can follow the contours of the data as closely as needed. Each hidden layer adds another level of abstraction — the first layer might learn simple features (like "is this value high or low?"), the second layer might combine those into more complex features (like "is this a pattern of high income AND low education?"), and so on. This hierarchical feature learning is what makes neural networks so powerful for complex data.</p>
+        <p>This leads to one of the most remarkable results in mathematics: the <span class="code-tooltip" data-tip="A theorem proving that a feedforward neural network with a single hidden layer containing a finite number of neurons can approximate any continuous function to arbitrary accuracy, given enough neurons. This does not mean it is easy to find the right weights -- only that the architecture is flexible enough in principle."><strong>Universal Approximation Theorem</strong></span>. It states that a neural network with just one hidden layer and enough neurons can approximate any continuous function to any desired degree of accuracy. In other words, neural networks are flexible enough to learn virtually any pattern in the data -- if you have enough data and computational resources. The practical challenge is finding the right weights, which is where training algorithms come in.</p>
+
+        <p>Think of it this way: a linear model draws a single straight line (or plane) through your data. A neural network draws a wiggly, curved surface that can follow the contours of the data as closely as needed. Each hidden layer adds another level of abstraction -- the first layer might learn simple features (like "is this value high or low?"), the second layer might combine those into more complex features (like "is this a pattern of high income AND low education?"), and so on. This hierarchical feature learning is what makes neural networks so powerful for complex data.</p>
 
         <!-- Perceptron Diagram -->
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
@@ -216,9 +222,85 @@
         <!-- ===================== NETWORK ARCHITECTURE ===================== -->
         <h2 id="architecture">Network Architecture</h2>
 
-        <p>A <span class="code-tooltip" data-tip="A neural network where information flows in one direction only — from input to output, with no cycles or feedback loops. This is the simplest and most common architecture.">feedforward neural network</span> is organized into layers. The <strong>input layer</strong> receives the features (one neuron per feature). One or more <strong>hidden layers</strong> perform the transformations. The <strong>output layer</strong> produces the final prediction. Each neuron in a layer receives inputs from every neuron in the previous layer (this is why these are also called "fully connected" or "dense" layers), applies a linear transformation (weighted sum + bias), and passes the result through an activation function.</p>
+        <p>A <span class="code-tooltip" data-tip="A neural network where information flows in one direction only -- from input to output, with no cycles or feedback loops. This is the simplest and most common architecture.">feedforward neural network</span> is organized into layers. The <strong>input layer</strong> receives the features (one neuron per feature). One or more <strong>hidden layers</strong> perform the transformations. The <strong>output layer</strong> produces the final prediction. Each neuron in a layer receives inputs from every neuron in the previous layer (this is why these are also called "fully connected" or "dense" layers), applies a linear transformation (weighted sum + bias), and passes the result through an activation function.</p>
 
-        <p>The choice of <strong>activation function</strong> is crucial. Without it, stacking layers would be pointless — a composition of linear functions is just another linear function. The activation function introduces the nonlinearity that gives neural networks their power. The most common choices are:</p>
+        <!-- SVG: Full Network Architecture Diagram -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
+          <h4 style="margin: 0 0 1rem 0; color: #1e293b;">Feedforward Neural Network Architecture</h4>
+          <svg viewBox="0 0 600 280" style="max-width: 600px; margin: 0 auto;">
+            <defs><marker id="arrow2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/></marker></defs>
+            <!-- Labels -->
+            <text x="65" y="20" text-anchor="middle" font-size="11" fill="#2563eb" font-weight="600">Input</text>
+            <text x="215" y="20" text-anchor="middle" font-size="11" fill="#059669" font-weight="600">Hidden 1</text>
+            <text x="365" y="20" text-anchor="middle" font-size="11" fill="#059669" font-weight="600">Hidden 2</text>
+            <text x="525" y="20" text-anchor="middle" font-size="11" fill="#dc2626" font-weight="600">Output</text>
+            <!-- Input layer (4 neurons) -->
+            <circle cx="65" cy="60" r="16" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/><text x="65" y="64" text-anchor="middle" font-size="10" fill="#1e40af">x&#x2081;</text>
+            <circle cx="65" cy="110" r="16" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/><text x="65" y="114" text-anchor="middle" font-size="10" fill="#1e40af">x&#x2082;</text>
+            <circle cx="65" cy="160" r="16" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/><text x="65" y="164" text-anchor="middle" font-size="10" fill="#1e40af">x&#x2083;</text>
+            <circle cx="65" cy="210" r="16" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/><text x="65" y="214" text-anchor="middle" font-size="10" fill="#1e40af">x&#x2084;</text>
+            <!-- Hidden layer 1 (5 neurons) -->
+            <circle cx="215" cy="45" r="16" fill="#d1fae5" stroke="#059669" stroke-width="2"/><text x="215" y="49" text-anchor="middle" font-size="9" fill="#065f46">h&#x2081;</text>
+            <circle cx="215" cy="90" r="16" fill="#d1fae5" stroke="#059669" stroke-width="2"/><text x="215" y="94" text-anchor="middle" font-size="9" fill="#065f46">h&#x2082;</text>
+            <circle cx="215" cy="135" r="16" fill="#d1fae5" stroke="#059669" stroke-width="2"/><text x="215" y="139" text-anchor="middle" font-size="9" fill="#065f46">h&#x2083;</text>
+            <circle cx="215" cy="180" r="16" fill="#d1fae5" stroke="#059669" stroke-width="2"/><text x="215" y="184" text-anchor="middle" font-size="9" fill="#065f46">h&#x2084;</text>
+            <circle cx="215" cy="225" r="16" fill="#d1fae5" stroke="#059669" stroke-width="2"/><text x="215" y="229" text-anchor="middle" font-size="9" fill="#065f46">h&#x2085;</text>
+            <!-- Hidden layer 2 (3 neurons) -->
+            <circle cx="365" cy="85" r="16" fill="#d1fae5" stroke="#059669" stroke-width="2"/><text x="365" y="89" text-anchor="middle" font-size="9" fill="#065f46">h&#x2086;</text>
+            <circle cx="365" cy="135" r="16" fill="#d1fae5" stroke="#059669" stroke-width="2"/><text x="365" y="139" text-anchor="middle" font-size="9" fill="#065f46">h&#x2087;</text>
+            <circle cx="365" cy="185" r="16" fill="#d1fae5" stroke="#059669" stroke-width="2"/><text x="365" y="189" text-anchor="middle" font-size="9" fill="#065f46">h&#x2088;</text>
+            <!-- Output (1 neuron) -->
+            <circle cx="525" cy="135" r="18" fill="#fce7f3" stroke="#dc2626" stroke-width="2"/><text x="525" y="139" text-anchor="middle" font-size="11" fill="#9d174d">&#x177;</text>
+            <!-- Connections: input -> hidden 1 (subset shown, rest faint) -->
+            <line x1="81" y1="60" x2="199" y2="45" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="60" x2="199" y2="90" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="60" x2="199" y2="135" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="60" x2="199" y2="180" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="60" x2="199" y2="225" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="110" x2="199" y2="45" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="110" x2="199" y2="90" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="110" x2="199" y2="135" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="110" x2="199" y2="180" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="110" x2="199" y2="225" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="160" x2="199" y2="45" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="160" x2="199" y2="90" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="160" x2="199" y2="135" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="160" x2="199" y2="180" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="160" x2="199" y2="225" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="210" x2="199" y2="45" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="210" x2="199" y2="90" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="210" x2="199" y2="135" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="210" x2="199" y2="180" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="81" y1="210" x2="199" y2="225" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <!-- Connections: hidden 1 -> hidden 2 -->
+            <line x1="231" y1="45" x2="349" y2="85" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="45" x2="349" y2="135" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="45" x2="349" y2="185" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="90" x2="349" y2="85" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="90" x2="349" y2="135" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="90" x2="349" y2="185" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="135" x2="349" y2="85" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="135" x2="349" y2="135" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="135" x2="349" y2="185" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="180" x2="349" y2="85" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="180" x2="349" y2="135" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="180" x2="349" y2="185" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="225" x2="349" y2="85" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="225" x2="349" y2="135" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <line x1="231" y1="225" x2="349" y2="185" stroke="#94a3b8" stroke-width="0.7" opacity="0.4"/>
+            <!-- Connections: hidden 2 -> output -->
+            <line x1="381" y1="85" x2="507" y2="135" stroke="#94a3b8" stroke-width="1" opacity="0.6"/>
+            <line x1="381" y1="135" x2="507" y2="135" stroke="#94a3b8" stroke-width="1" opacity="0.6"/>
+            <line x1="381" y1="185" x2="507" y2="135" stroke="#94a3b8" stroke-width="1" opacity="0.6"/>
+            <!-- Annotation -->
+            <text x="140" y="268" text-anchor="middle" font-size="9" fill="#64748b">Weights</text>
+            <text x="290" y="268" text-anchor="middle" font-size="9" fill="#64748b">Weights</text>
+            <text x="445" y="268" text-anchor="middle" font-size="9" fill="#64748b">Weights</text>
+          </svg>
+          <p style="margin: 1rem 0 0; font-size: 0.85rem; color: #475569;">Every neuron in one layer connects to every neuron in the next layer ("fully connected"). Each connection has a learnable weight.</p>
+        </div>
+
+        <p>The choice of <strong>activation function</strong> is crucial. Without it, stacking layers would be pointless -- a composition of linear functions is just another linear function. An activation function is like a <strong>filter</strong> -- it decides which signals to pass through and which to dampen. This nonlinearity is what gives neural networks their power.</p>
 
         <!-- Activation Function Comparison Table -->
         <table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem;">
@@ -258,9 +340,72 @@
           </tbody>
         </table>
 
-        <p>Two key design choices are the <strong>width</strong> (number of neurons per layer) and the <strong>depth</strong> (number of layers). Wider layers can learn more complex patterns within a single transformation, while deeper networks can learn hierarchical representations — simple patterns in early layers composed into complex patterns in later layers. In practice, modern networks tend to favor depth over width. A common starting point for tabular economic data is 2-3 hidden layers with 64-256 neurons each.</p>
+        <!-- SVG: Activation Function Plots -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
+          <h4 style="margin: 0 0 1rem 0; color: #1e293b;">Activation Functions Visualized</h4>
+          <svg viewBox="0 0 660 200" style="max-width: 660px; margin: 0 auto;">
+            <!-- ReLU -->
+            <g transform="translate(0,0)">
+              <text x="100" y="15" text-anchor="middle" font-size="12" fill="#2563eb" font-weight="600">ReLU</text>
+              <line x1="20" y1="100" x2="180" y2="100" stroke="#cbd5e1" stroke-width="1"/>
+              <line x1="100" y1="25" x2="100" y2="175" stroke="#cbd5e1" stroke-width="1"/>
+              <!-- ReLU line: flat at 0 for z<0, then linear -->
+              <polyline points="20,100 100,100 180,20" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+              <text x="100" y="192" text-anchor="middle" font-size="9" fill="#64748b">max(0, z)</text>
+            </g>
+            <!-- Sigmoid -->
+            <g transform="translate(220,0)">
+              <text x="100" y="15" text-anchor="middle" font-size="12" fill="#059669" font-weight="600">Sigmoid</text>
+              <line x1="20" y1="100" x2="180" y2="100" stroke="#cbd5e1" stroke-width="1"/>
+              <line x1="100" y1="25" x2="100" y2="175" stroke="#cbd5e1" stroke-width="1"/>
+              <!-- Sigmoid S-curve -->
+              <path d="M 20,165 C 50,162 70,155 85,135 Q 100,100 115,65 C 130,45 150,38 180,35" fill="none" stroke="#059669" stroke-width="2.5"/>
+              <!-- 0 and 1 labels -->
+              <text x="15" y="37" font-size="8" fill="#64748b">1</text>
+              <text x="15" y="170" font-size="8" fill="#64748b">0</text>
+              <text x="100" y="192" text-anchor="middle" font-size="9" fill="#64748b">1/(1+e^-z)</text>
+            </g>
+            <!-- Tanh -->
+            <g transform="translate(440,0)">
+              <text x="100" y="15" text-anchor="middle" font-size="12" fill="#dc2626" font-weight="600">Tanh</text>
+              <line x1="20" y1="100" x2="180" y2="100" stroke="#cbd5e1" stroke-width="1"/>
+              <line x1="100" y1="25" x2="100" y2="175" stroke="#cbd5e1" stroke-width="1"/>
+              <!-- Tanh S-curve centered at 0 -->
+              <path d="M 20,165 C 50,160 70,150 85,130 Q 100,100 115,70 C 130,50 150,40 180,35" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+              <!-- -1 and 1 labels -->
+              <text x="12" y="37" font-size="8" fill="#64748b">+1</text>
+              <text x="12" y="170" font-size="8" fill="#64748b">-1</text>
+              <text x="100" y="192" text-anchor="middle" font-size="9" fill="#64748b">(e^z-e^-z)/(e^z+e^-z)</text>
+            </g>
+          </svg>
+        </div>
+
+        <p>Two key design choices are the <strong>width</strong> (number of neurons per layer) and the <strong>depth</strong> (number of layers). Wider layers can learn more complex patterns within a single transformation, while deeper networks can learn hierarchical representations -- simple patterns in early layers composed into complex patterns in later layers. In practice, modern networks tend to favor depth over width. A common starting point for tabular economic data is 2-3 hidden layers with 64-256 neurons each.</p>
 
         <p>A subtle but important point: adding more layers and neurons always increases the model's <em>capacity</em> (the set of functions it can represent), but it also increases the risk of overfitting. This is why regularization (Section 4) is essential when training neural networks.</p>
+
+        <!-- Layer Types Reference -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin: 0 0 0.75rem 0; color: #1e293b;">Common Layer Types and What They Do</h4>
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb; width: 25%;">Linear / Dense</td>
+              <td style="padding: 0.5rem;">The basic building block. Every input connects to every output (<code>nn.Linear</code> in PyTorch). Used for tabular data.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb;">Conv2d (Convolutional)</td>
+              <td style="padding: 0.5rem;">Slides a small filter across an image to detect local patterns (edges, textures). Used for image data -- for example, classifying satellite imagery to estimate regional GDP.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb;">LSTM / GRU (Recurrent)</td>
+              <td style="padding: 0.5rem;">Processes sequential data one step at a time while maintaining a "memory" of previous steps. Used for time series -- for example, forecasting inflation from monthly economic indicators.</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb;">Transformer / Attention</td>
+              <td style="padding: 0.5rem;">Processes all positions in a sequence simultaneously, learning which parts to "attend to." The architecture behind GPT, BERT, and modern NLP -- for example, analyzing central bank communications.</td>
+            </tr>
+          </table>
+        </div>
 
         <!-- Code Block: Define Network Architecture -->
         <div class="code-tabs" data-runnable="ml-nn-1">
@@ -278,7 +423,7 @@
 
 model = nn.<span class="code-function">Sequential</span>(
     <span class="code-comment"># First hidden layer</span>
-    nn.<span class="code-function">Linear</span>(<span class="code-tooltip" data-tip="INPUTS: 8 input neurons, one for each feature in the dataset (e.g., median income, house age, etc.). Must match your data's column count exactly.">8</span>, <span class="code-tooltip" data-tip="HIDDEN LAYER: 128 neurons — each computes a different weighted combination of the 8 inputs plus a bias, then passes through ReLU. Together they learn 128 different 'features' from the raw data.">128</span>),
+    nn.<span class="code-function">Linear</span>(<span class="code-tooltip" data-tip="INPUTS: 8 input neurons, one for each feature in the dataset (e.g., median income, house age, etc.). Must match your data's column count exactly.">8</span>, <span class="code-tooltip" data-tip="HIDDEN LAYER: 128 neurons -- each computes a different weighted combination of the 8 inputs plus a bias, then passes through ReLU. Together they learn 128 different 'features' from the raw data.">128</span>),
     nn.<span class="code-function">ReLU</span>(),         <span class="code-comment"># Activation: max(0, z)</span>
 
     <span class="code-comment"># Second hidden layer</span>
@@ -411,294 +556,50 @@ Total parameters: 2,369</pre></div>
 Total trainable parameters: 12,161</pre></div>
         </div>
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Stack layers in <code>nn.Sequential</code> -- data flows through each in order",
-                  "pattern": "model = nn.Sequential(nn.Linear(in, out), nn.ReLU(), ..., nn.Linear(out, 1))",
-                  "structureNote": "Pattern: <code>nn.Sequential(layer1, layer2, ...)</code>. Layers are positional arguments, executed top-to-bottom.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "model",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "nn",
-                        "role": "Module",
-                        "tip": "<code>import torch.nn as nn</code>.",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ".",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "Sequential",
-                        "role": "Container",
-                        "tip": "Ordered container. Data flows through layers sequentially.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "nn.Linear(3, 64),",
-                        "role": "Layer",
-                        "tip": "<code>Linear(in, out)</code> -- positional args: input size, output size.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "nn.ReLU(),",
-                        "role": "Activation",
-                        "tip": "No-arg constructor. Applied element-wise after the linear layer.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "nn.Linear(64, 1)",
-                        "role": "Layer",
-                        "tip": "Final layer. Output size = 1 for regression.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ],
-                    "r": [
-                      {
-                        "code": "model",
-                        "role": "Variable",
-                        "tip": "Stores the neural network model",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " <- ",
-                        "role": "Assignment",
-                        "tip": "R's assignment arrow",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "nn_sequential",
-                        "role": "Container",
-                        "tip": "R's torch equivalent of nn.Sequential -- stacks layers in order",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "Open paren",
-                        "tip": "Begins the layer list",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "nn_linear(13, 128), ",
-                        "role": "Hidden layer 1",
-                        "tip": "13 inputs to 128 neurons -- R's torch uses underscores instead of dots (nn_linear vs nn.Linear)",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "nn_relu(), ",
-                        "role": "Activation",
-                        "tip": "ReLU activation function",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "nn_linear(128, 64), ",
-                        "role": "Hidden layer 2",
-                        "tip": "128 inputs to 64 neurons",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "nn_relu(), ",
-                        "role": "Activation",
-                        "tip": "Another ReLU activation",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "nn_linear(64, 1)",
-                        "role": "Output layer",
-                        "tip": "64 inputs to 1 output for regression",
-                        "color": "blue"
-                      },
-                      {
-                        "code": ")",
-                        "role": "Close paren",
-                        "tip": "Ends the nn_sequential definition",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
 
         <!-- ===================== TRAINING NEURAL NETWORKS ===================== -->
         <h2 id="training">Training Neural Networks</h2>
 
-        <p>Training a neural network means finding the values of all the weights and biases that minimize a <span class="code-tooltip" data-tip="A function that measures how far the model's predictions are from the true values. For regression, the most common loss is Mean Squared Error (MSE). For classification, it is cross-entropy loss."><strong>loss function</strong></span>. For regression, the standard loss is the mean squared error (MSE): the average of the squared differences between predicted and actual values. For binary classification, we use <span class="code-tooltip" data-tip="Also called log loss. Cross-entropy measures how well the predicted probabilities match the true binary labels. It heavily penalizes confident wrong predictions.">binary cross-entropy loss</span>. The choice of loss function is the same as choosing a likelihood in statistics — it defines what "good fit" means.</p>
+        <p>Training a neural network means finding the values of all the weights and biases that minimize a <span class="code-tooltip" data-tip="A function that measures how far the model's predictions are from the true values. For regression, the most common loss is Mean Squared Error (MSE). For classification, it is cross-entropy loss."><strong>loss function</strong></span> -- a measure of how wrong the predictions are.</p>
 
-        <p>The workhorse algorithm for training is <span class="code-tooltip" data-tip="An algorithm that computes the gradient of the loss function with respect to every weight in the network by applying the chain rule of calculus layer by layer, starting from the output and working backward. It is computationally efficient because it reuses intermediate calculations."><strong>backpropagation</strong></span>, which is simply the chain rule of calculus applied systematically through the network. Here is the intuition: after making a prediction, we compute the loss. Then we ask, "How would changing each weight slightly change the loss?" This is the gradient — the direction of steepest increase in the loss. We then update each weight in the opposite direction (downhill) to reduce the loss. Backpropagation computes all these gradients efficiently by working backward through the layers, reusing calculations from later layers to speed up the computation for earlier ones.</p>
+        <!-- Loss Function Reference -->
+        <div class="distinction-box">
+          <div class="distinction-card">
+            <h4>Regression Losses</h4>
+            <ul>
+              <li><strong>MSE</strong> (<code>nn.MSELoss</code>): Mean Squared Error. Average of squared differences between predicted and actual values. Penalizes large errors heavily. The default for continuous outcomes.</li>
+              <li><strong>MAE</strong> (<code>nn.L1Loss</code>): Mean Absolute Error. Average of absolute differences. More robust to outliers than MSE.</li>
+            </ul>
+          </div>
+          <div class="distinction-card">
+            <h4>Classification Losses</h4>
+            <ul>
+              <li><strong>Cross-Entropy</strong> (<code>nn.CrossEntropyLoss</code>): For multi-class classification (e.g., predicting industry sector). Expects raw logits, not probabilities.</li>
+              <li><strong>BCE</strong> (<code>nn.BCEWithLogitsLoss</code>): For binary classification (e.g., predicting default vs. no default). Combines sigmoid + binary cross-entropy for numerical stability.</li>
+            </ul>
+          </div>
+        </div>
 
-        <p>Once we have the gradients, we use <span class="code-tooltip" data-tip="An optimization algorithm that iteratively updates the weights by moving in the direction opposite to the gradient. Stochastic Gradient Descent (SGD) computes the gradient on a random subset (mini-batch) of the data, which is faster than using the entire dataset."><strong>gradient descent</strong></span> to update the weights. In practice, we almost always use <strong>Stochastic Gradient Descent (SGD)</strong> or one of its variants. Instead of computing the gradient on the entire dataset (which is slow), SGD computes the gradient on a small random subset called a <span class="code-tooltip" data-tip="A small random subset of the training data (typically 32, 64, or 128 observations) used to compute the gradient at each step. Using mini-batches is much faster than full-batch gradient descent and introduces beneficial noise that helps escape local minima.">mini-batch</span> (typically 32 to 256 observations). This is noisy but fast, and the noise actually helps the model escape shallow local minima and find better solutions.</p>
+        <p>The workhorse algorithm for training is <span class="code-tooltip" data-tip="An algorithm that computes the gradient of the loss function with respect to every weight in the network by applying the chain rule of calculus layer by layer, starting from the output and working backward. It is computationally efficient because it reuses intermediate calculations."><strong>backpropagation</strong></span>, which is the chain rule of calculus applied systematically through the network. Backpropagation is like <strong>tracing back through the factory to find which machine caused a defect</strong>: after the final product (prediction) turns out wrong, you walk backwards through each station asking "how much did you contribute to the error?" and adjust each machine accordingly.</p>
 
-        <p>The most popular gradient descent variant today is <span class="code-tooltip" data-tip="Adaptive Moment Estimation: an optimizer that maintains separate learning rates for each weight, adapting based on the history of gradients. Combines the benefits of momentum (accumulating past gradients) and RMSprop (scaling by recent gradient magnitudes). Usually converges faster than plain SGD."><strong>Adam</strong></span> (Adaptive Moment Estimation). Adam maintains a separate, adaptive learning rate for each weight, so you do not need to tune the learning rate as carefully. It is the default optimizer in most practical applications.</p>
+        <p>Once we have the gradients, we use <span class="code-tooltip" data-tip="An optimization algorithm that iteratively updates the weights by moving in the direction opposite to the gradient. Stochastic Gradient Descent (SGD) computes the gradient on a random subset (mini-batch) of the data, which is faster than using the entire dataset."><strong>gradient descent</strong></span> to update the weights. In practice, we almost always use <strong>Stochastic Gradient Descent (SGD)</strong> or one of its variants with a random <span class="code-tooltip" data-tip="A small random subset of the training data (typically 32, 64, or 128 observations) used to compute the gradient at each step. Using mini-batches is much faster than full-batch gradient descent and introduces beneficial noise that helps escape local minima.">mini-batch</span> (typically 32 to 256 observations) rather than the full dataset.</p>
+
+        <!-- Optimizer Comparison -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin: 0 0 0.75rem 0; color: #1e293b;">SGD vs. Adam: Which Optimizer to Use</h4>
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb; width: 20%;">SGD</td>
+              <td style="padding: 0.5rem;">The classic optimizer. Updates every weight by the same learning rate times the gradient. Simple, but requires careful learning rate tuning. Can find better final solutions with the right schedule. Use when you have time to tune and want the best possible generalization.</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb;">Adam</td>
+              <td style="padding: 0.5rem;">Maintains a separate adaptive learning rate per weight based on the history of gradients. Converges faster and requires less tuning. <strong>The default choice for most applications.</strong> Start with <code>lr=0.001</code>.</td>
+            </tr>
+          </table>
+        </div>
 
         <p>The <span class="code-tooltip" data-tip="Controls the step size when updating weights. Too large: the model overshoots and diverges. Too small: training is extremely slow. Typical starting values are 0.001 to 0.01 for Adam."><strong>learning rate</strong></span> is the single most important hyperparameter. Too large and the model overshoots the optimum, bouncing around chaotically. Too small and training takes forever and may get stuck. A common strategy is to start with a moderate learning rate (0.001 for Adam) and use a <span class="code-tooltip" data-tip="A rule that reduces the learning rate during training. For example, 'reduce on plateau' halves the learning rate whenever the validation loss stops improving.">learning rate scheduler</span> that reduces it as training progresses.</p>
-
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Instantiate a loss function and an optimizer as separate objects",
-                  "pattern": "criterion = nn.MSELoss(); optimizer = torch.optim.Adam(model.parameters(), lr=N)",
-                  "structureNote": "Pattern: <code>criterion = nn.LossFunction()</code> and <code>optimizer = torch.optim.Algo(model.parameters(), lr=val)</code>.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "criterion",
-                        "role": "Variable",
-                        "tip": "Convention: loss function stored in 'criterion'.",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "nn",
-                        "role": "Module",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ".",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "MSELoss",
-                        "role": "Class",
-                        "tip": "No-arg constructor. Other losses: CrossEntropyLoss, L1Loss.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "()",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Pass <code>model.parameters()</code> to the optimizer so it knows which weights to update",
-                  "pattern": "optimizer = torch.optim.Adam(model.parameters(), lr=N)",
-                  "structureNote": "Pattern: <code>optimizer = torch.optim.Adam(model.parameters(), lr=val)</code>. The optimizer needs a reference to the model's learnable weights.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "optimizer",
-                        "role": "Variable",
-                        "tip": "Convention: optimizer stored in 'optimizer'.",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "torch.optim",
-                        "role": "Module Path",
-                        "tip": "Dot-chained module path.",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ".",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "Adam",
-                        "role": "Class",
-                        "tip": "Other optimizers: SGD, AdamW, RMSprop.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "model.parameters(),",
-                        "role": "Positional Arg",
-                        "tip": "Generator yielding all learnable weights. Required first arg for any optimizer.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "lr=0.001",
-                        "role": "Keyword Arg",
-                        "tip": "Learning rate. Float controlling step size.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
 
         <!-- Code Block: Training Loop -->
         <div class="code-tabs" data-runnable="ml-nn-2">
@@ -712,7 +613,7 @@ Total trainable parameters: 12,161</pre></div>
 <span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
 <span class="code-keyword">from</span> torch.utils.data <span class="code-keyword">import</span> DataLoader, TensorDataset
 <span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
-<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="STANDARDIZE: Rescales each feature to mean 0, std 1. Critical for neural networks — without this, features like 'income' (thousands) would dominate features like 'rooms' (single digits), making training unstable.">StandardScaler</span>
+<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="STANDARDIZE: Rescales each feature to mean 0, std 1. Critical for neural networks -- without this, features like 'income' (thousands) would dominate features like 'rooms' (single digits), making training unstable.">StandardScaler</span>
 <span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
 <span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
 
@@ -728,10 +629,10 @@ X_train_scaled = scaler.<span class="code-function">fit_transform</span>(X_train
 X_test_scaled  = scaler.<span class="code-function">transform</span>(X_test)  <span class="code-comment"># Use train statistics!</span>
 
 <span class="code-comment"># Convert to PyTorch tensors</span>
-X_tr = torch.<span class="code-function">FloatTensor</span>(X_train_scaled)
-y_tr = torch.<span class="code-function">FloatTensor</span>(y_train).<span class="code-function">unsqueeze</span>(1)
-X_te = torch.<span class="code-function">FloatTensor</span>(X_test_scaled)
-y_te = torch.<span class="code-function">FloatTensor</span>(y_test).<span class="code-function">unsqueeze</span>(1)
+X_tr = torch.<span class="code-function">tensor</span>(X_train_scaled, dtype=torch.float32)
+y_tr = torch.<span class="code-function">tensor</span>(y_train, dtype=torch.float32).<span class="code-function">unsqueeze</span>(1)
+X_te = torch.<span class="code-function">tensor</span>(X_test_scaled, dtype=torch.float32)
+y_te = torch.<span class="code-function">tensor</span>(y_test, dtype=torch.float32).<span class="code-function">unsqueeze</span>(1)
 
 <span class="code-comment"># Create DataLoader for mini-batch training</span>
 train_ds = <span class="code-function">TensorDataset</span>(X_tr, y_tr)
@@ -747,7 +648,7 @@ model = nn.<span class="code-function">Sequential</span>(
 
 <span class="code-comment"># Loss function and optimizer</span>
 criterion = nn.<span class="code-function">MSELoss</span>()
-optimizer = torch.optim.<span class="code-function">Adam</span>(model.<span class="code-function">parameters</span>(), <span class="code-tooltip" data-tip="LEARNING RATE: Controls how big each weight update step is. 0.001 is the standard starting point for Adam — too large and training diverges, too small and it takes forever.">lr=0.001</span>)
+optimizer = torch.optim.<span class="code-function">Adam</span>(model.<span class="code-function">parameters</span>(), <span class="code-tooltip" data-tip="LEARNING RATE: Controls how big each weight update step is. 0.001 is the standard starting point for Adam -- too large and training diverges, too small and it takes forever.">lr=0.001</span>)
 
 <span class="code-comment"># Training loop</span>
 <span class="code-tooltip" data-tip="EPOCHS: 100 complete passes through the training data. Each epoch, every observation is seen once (shuffled into different mini-batches). The model improves gradually over epochs.">n_epochs</span> = 100
@@ -780,9 +681,9 @@ optimizer = torch.optim.<span class="code-function">Adam</span>(model.<span clas
 model.<span class="code-function">eval</span>()
 <span class="code-keyword">with</span> torch.<span class="code-function">no_grad</span>():
     y_pred = <span class="code-function">model</span>(X_te).<span class="code-function">numpy</span>()
-ss_res = np.<span class="code-function">sum</span>((y_test.reshape(-1,1) - y_pred)**2)
-ss_tot = np.<span class="code-function">sum</span>((y_test - y_test.<span class="code-function">mean</span>())**2)
-<span class="code-function">print</span>(<span class="code-string">f"\nFinal Test R-squared: {1 - ss_res/ss_tot:.4f}"</span>)</code></pre>
+ss_res = np.<span class="code-function">sum</span>((y_test.reshape(-1, 1) - y_pred) ** 2)
+ss_tot = np.<span class="code-function">sum</span>((y_test - y_test.<span class="code-function">mean</span>()) ** 2)
+<span class="code-function">print</span>(<span class="code-string">f"\nFinal Test R-squared: {1 - ss_res / ss_tot:.4f}"</span>)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
@@ -816,10 +717,10 @@ X = (X - X_mean) / X_std
 y_mean, y_std = y[mask].mean(), y[mask].std()
 y = (y - y_mean) / y_std
 
-X_tr = torch.FloatTensor(X[mask])
-y_tr = torch.FloatTensor(y[mask])
-X_te = torch.FloatTensor(X[~mask])
-y_te = torch.FloatTensor(y[~mask])
+X_tr = torch.tensor(X[mask], dtype=torch.float32)
+y_tr = torch.tensor(y[mask], dtype=torch.float32)
+X_te = torch.tensor(X[~mask], dtype=torch.float32)
+y_te = torch.tensor(y[~mask], dtype=torch.float32)
 
 model = nn.Sequential(
     nn.Linear(3, 64), nn.ReLU(),
@@ -831,22 +732,23 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 criterion = nn.MSELoss()
 
 for epoch in range(100):
+    model.train()
     pred = model(X_tr)
     loss = criterion(pred, y_tr)
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
     if (epoch + 1) % 25 == 0:
+        model.eval()
         with torch.no_grad():
             test_loss = criterion(model(X_te), y_te)
-        print(f<span class="code-string">"Epoch {epoch+1:3d} | Train: {loss:.4f} | Test: {test_loss:.4f}"</span>)
+        print(f<span class="code-string">"Epoch {epoch+1:3d} | Train: {loss.item():.4f} | Test: {test_loss.item():.4f}"</span>)
 <span class="code-keyword">end</span></code></pre>
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-comment"># R: Neural network training with torch + luz</span>
+<pre><code><span class="code-comment"># R: Neural network training with torch</span>
 <span class="code-keyword">library</span>(torch)
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="LUZ: A high-level wrapper for R's torch package, similar to Keras in Python. Handles the training loop, early stopping, and metrics automatically so you don't write boilerplate code.">luz</span>)
 
 <span class="code-comment"># Prepare data</span>
 <span class="code-keyword">data</span>(<span class="code-string">"BostonHousing"</span>, package = <span class="code-string">"mlbench"</span>)
@@ -935,72 +837,46 @@ Epoch 100 | Train:  4.8901 | Test:  9.7654</pre></div>
         <!-- ===================== REGULARIZATION IN NEURAL NETWORKS ===================== -->
         <h2 id="regularization-nn">Regularization in Neural Networks</h2>
 
-        <p>Neural networks are powerful function approximators, but that power comes with a cost: they can easily memorize the training data, producing models that perform brilliantly on the training set but poorly on new data. This is especially problematic in economics, where sample sizes are often small relative to the complexity of the model. Regularization techniques constrain the model's capacity and help it generalize. Here are the most important ones.</p>
+        <p>Neural networks are powerful function approximators, but that power comes with a cost: they can easily memorize the training data, producing models that perform brilliantly on the training set but poorly on new data. This is especially problematic in economics, where sample sizes are often small relative to the complexity of the model. Regularization techniques constrain the model's capacity and help it generalize.</p>
 
-        <p><span class="code-tooltip" data-tip="During each training step, dropout randomly sets a fraction of neurons to zero. This forces the network to not rely on any single neuron, distributing knowledge across many neurons. At test time, all neurons are active but their outputs are scaled down to compensate."><strong>Dropout</strong></span> is the most widely used regularization technique specific to neural networks. During each training step, each neuron in a dropout layer has a probability <em>p</em> (typically 0.2 to 0.5) of being temporarily "dropped" — its output is set to zero. This prevents the network from relying too heavily on any single neuron and forces it to develop redundant representations. At test time, all neurons are active, but their outputs are scaled by (1 - p) to compensate. Dropout can be thought of as training an ensemble of many different sub-networks and averaging their predictions.</p>
-
-        <p><span class="code-tooltip" data-tip="Monitor the validation loss during training. When it stops improving (or starts increasing) for a specified number of epochs (called 'patience'), stop training and use the model from the best epoch."><strong>Early stopping</strong></span> is the simplest and often the most effective regularization strategy. The idea is to monitor the model's performance on a held-out validation set during training. Initially, both training and validation loss decrease. At some point, the training loss continues to decrease while the validation loss starts to increase — this is the moment the model begins to overfit. Early stopping halts training at (or near) this point and restores the weights from the epoch with the lowest validation loss.</p>
-
-        <p><span class="code-tooltip" data-tip="Normalizes the inputs to each layer by subtracting the batch mean and dividing by the batch standard deviation, then applying learned scale and shift parameters. This stabilizes training by reducing internal covariate shift."><strong>Batch normalization</strong></span> normalizes the inputs to each layer, making training faster and more stable. While originally introduced to speed up training rather than as a regularization technique, batch normalization has a mild regularizing effect because the normalization introduces noise through the mini-batch statistics.</p>
-
-        <p><span class="code-tooltip" data-tip="Adds a penalty term to the loss function proportional to the sum of squared weights (L2) or absolute weights (L1). This is exactly analogous to Ridge and LASSO regression. In PyTorch, L2 weight decay is built into the optimizer."><strong>Weight decay</strong></span> (L2 regularization) penalizes large weight values, just like Ridge regression. In neural network frameworks, weight decay is typically implemented directly in the optimizer rather than as an explicit penalty term in the loss function. A small weight decay value (e.g., 1e-4 to 1e-2) is almost always beneficial.</p>
-
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Insert <code>nn.Dropout(p)</code> between layers in a Sequential stack",
-                  "pattern": "nn.Sequential(..., nn.ReLU(), nn.Dropout(p), nn.Linear(...))",
-                  "structureNote": "Pattern: <code>nn.Sequential(..., nn.Dropout(p), ...)</code>. Place after activation, before next linear layer. <code>p</code> is the drop probability.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "nn.Linear(3, 64),",
-                        "role": "Layer",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "nn.ReLU(),",
-                        "role": "Activation",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "nn.Dropout",
-                        "role": "Layer",
-                        "tip": "Regularization layer. Placed after activation.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "0.3",
-                        "role": "Positional Arg",
-                        "tip": "Drop probability. Float between 0 and 1.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "),",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
+        <!-- SVG: Overfitting Visualization -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
+          <h4 style="margin: 0 0 1rem 0; color: #1e293b;">Overfitting: When to Stop Training</h4>
+          <svg viewBox="0 0 400 220" style="max-width: 420px; margin: 0 auto;">
+            <defs><marker id="arrow3" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker></defs>
+            <!-- Axes -->
+            <line x1="50" y1="190" x2="380" y2="190" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow3)"/>
+            <line x1="50" y1="190" x2="50" y2="20" stroke="#64748b" stroke-width="1.5" marker-end="url(#arrow3)"/>
+            <text x="215" y="215" text-anchor="middle" font-size="11" fill="#64748b">Epochs</text>
+            <text x="18" y="105" text-anchor="middle" font-size="11" fill="#64748b" transform="rotate(-90, 18, 105)">Loss</text>
+            <!-- Training loss: keeps going down -->
+            <path d="M 60,50 Q 100,80 140,110 Q 180,130 220,142 Q 260,150 300,155 Q 340,158 370,160" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+            <!-- Validation loss: goes down then up -->
+            <path d="M 60,60 Q 100,85 140,110 Q 180,125 200,130 Q 220,132 240,135 Q 280,145 320,160 Q 350,172 370,180" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+            <!-- Optimal point -->
+            <line x1="210" y1="25" x2="210" y2="185" stroke="#059669" stroke-width="1.5" stroke-dasharray="5,4"/>
+            <text x="210" y="18" text-anchor="middle" font-size="10" fill="#059669" font-weight="600">Stop here</text>
+            <!-- Underfitting / Overfitting labels -->
+            <text x="130" y="42" text-anchor="middle" font-size="9" fill="#64748b">Underfitting</text>
+            <text x="310" y="42" text-anchor="middle" font-size="9" fill="#64748b">Overfitting</text>
+            <!-- Legend -->
+            <line x1="250" y1="70" x2="275" y2="70" stroke="#2563eb" stroke-width="2.5"/>
+            <text x="280" y="74" font-size="10" fill="#2563eb">Train loss</text>
+            <line x1="250" y1="85" x2="275" y2="85" stroke="#dc2626" stroke-width="2.5"/>
+            <text x="280" y="89" font-size="10" fill="#dc2626">Validation loss</text>
+          </svg>
+          <p style="margin: 1rem 0 0; font-size: 0.85rem; color: #475569;">The gap between training loss and validation loss signals overfitting. Early stopping halts training at the optimal point.</p>
         </div>
+
+        <p>Here are the most important regularization techniques for neural networks.</p>
+
+        <p><span class="code-tooltip" data-tip="During each training step, dropout randomly sets a fraction of neurons to zero. This forces the network to not rely on any single neuron, distributing knowledge across many neurons. At test time, all neurons are active but their outputs are scaled down to compensate."><strong>Dropout</strong></span> is the most widely used regularization technique specific to neural networks. During each training step, each neuron in a dropout layer has a probability <em>p</em> (typically 0.2 to 0.5) of being temporarily "dropped" -- its output is set to zero. Dropout is like <strong>randomly sending workers on coffee breaks during training</strong> -- it forces the remaining workers to be more versatile and not rely on any single colleague. At test time, all neurons are active, but their outputs are scaled by (1 - p) to compensate.</p>
+
+        <p><span class="code-tooltip" data-tip="Monitor the validation loss during training. When it stops improving (or starts increasing) for a specified number of epochs (called 'patience'), stop training and use the model from the best epoch."><strong>Early stopping</strong></span> is the simplest and often the most effective regularization strategy. Monitor the validation loss during training. When it stops improving for a specified number of epochs (called "patience"), stop training and restore the weights from the best epoch.</p>
+
+        <p><span class="code-tooltip" data-tip="Adds a penalty term to the loss function proportional to the sum of squared weights (L2) or absolute weights (L1). This is exactly analogous to Ridge and LASSO regression. In PyTorch, L2 weight decay is built into the optimizer."><strong>Weight decay</strong></span> (L2 regularization) penalizes large weight values, just like Ridge regression. In PyTorch, weight decay is implemented directly in the optimizer via the <code>weight_decay</code> parameter. A value of 1e-4 to 1e-2 is almost always beneficial.</p>
+
+        <p><span class="code-tooltip" data-tip="Normalizes the inputs to each layer by subtracting the batch mean and dividing by the batch standard deviation, then applying learned scale and shift parameters. This stabilizes training by reducing internal covariate shift."><strong>Batch normalization</strong></span> normalizes the inputs to each layer, making training faster and more stable. While primarily a training speedup technique, it also has a mild regularizing effect through the noise in mini-batch statistics.</p>
 
         <!-- Code Block: Regularization -->
         <div class="code-tabs" data-runnable="ml-nn-3">
@@ -1012,14 +888,34 @@ Epoch 100 | Train:  4.8901 | Test:  9.7654</pre></div>
           <div class="tab-content active" data-lang="python">
 <pre><code><span class="code-keyword">import</span> torch
 <span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
+<span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
 <span class="code-keyword">import</span> copy
+<span class="code-keyword">from</span> torch.utils.data <span class="code-keyword">import</span> DataLoader, TensorDataset
+<span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> StandardScaler
+<span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
+
+<span class="code-comment"># Prepare data (same as before)</span>
+housing = <span class="code-function">fetch_california_housing</span>()
+X_train, X_test, y_train, y_test = <span class="code-function">train_test_split</span>(
+    housing.data, housing.target, test_size=0.2, random_state=42
+)
+scaler = <span class="code-function">StandardScaler</span>()
+X_train_s = scaler.<span class="code-function">fit_transform</span>(X_train)
+X_test_s = scaler.<span class="code-function">transform</span>(X_test)
+
+X_tr = torch.<span class="code-function">tensor</span>(X_train_s, dtype=torch.float32)
+y_tr = torch.<span class="code-function">tensor</span>(y_train, dtype=torch.float32).<span class="code-function">unsqueeze</span>(1)
+X_te = torch.<span class="code-function">tensor</span>(X_test_s, dtype=torch.float32)
+y_te = torch.<span class="code-function">tensor</span>(y_test, dtype=torch.float32).<span class="code-function">unsqueeze</span>(1)
+train_loader = <span class="code-function">DataLoader</span>(<span class="code-function">TensorDataset</span>(X_tr, y_tr), batch_size=64, shuffle=True)
 
 <span class="code-comment"># Model with dropout and batch normalization</span>
 model_reg = nn.<span class="code-function">Sequential</span>(
     nn.<span class="code-function">Linear</span>(8, 128),
     <span class="code-tooltip" data-tip="BATCH NORM: Normalizes the 128 outputs to have mean~0, std~1 within each mini-batch. This stabilizes training by preventing activations from drifting to extreme values across layers.">nn.<span class="code-function">BatchNorm1d</span>(128)</span>,
     nn.<span class="code-function">ReLU</span>(),
-    <span class="code-tooltip" data-tip="DROPOUT: During training, randomly turns off 30% of neurons each batch. This forces the network to spread knowledge across many neurons, preventing over-reliance on any single one — like training an ensemble.">nn.<span class="code-function">Dropout</span>(0.3)</span>,
+    <span class="code-tooltip" data-tip="DROPOUT: During training, randomly turns off 30% of neurons each batch. This forces the network to spread knowledge across many neurons, preventing over-reliance on any single one.">nn.<span class="code-function">Dropout</span>(0.3)</span>,
 
     nn.<span class="code-function">Linear</span>(128, 64),
     nn.<span class="code-function">BatchNorm1d</span>(64),
@@ -1044,7 +940,7 @@ criterion = nn.<span class="code-function">MSELoss</span>()
 <span class="code-comment"># Training with early stopping</span>
 best_val_loss = <span class="code-function">float</span>(<span class="code-string">'inf'</span>)
 best_model_state = <span class="code-keyword">None</span>
-<span class="code-tooltip" data-tip="EARLY STOPPING: If validation loss does not improve for 15 consecutive epochs, training stops and we restore the best model. This is the simplest and most effective way to prevent overfitting in neural networks.">patience</span> = 15
+<span class="code-tooltip" data-tip="EARLY STOPPING: If validation loss does not improve for 15 consecutive epochs, training stops and we restore the best model. This is the simplest and most effective way to prevent overfitting.">patience</span> = 15
 patience_counter = 0
 
 <span class="code-keyword">for</span> epoch <span class="code-keyword">in</span> <span class="code-function">range</span>(200):
@@ -1070,7 +966,7 @@ patience_counter = 0
     <span class="code-keyword">else</span>:
         patience_counter += 1
         <span class="code-keyword">if</span> patience_counter >= patience:
-            <span class="code-function">print</span>(<span class="code-string">f"Early stopping at epoch {epoch+1}"</span>)
+            <span class="code-function">print</span>(<span class="code-string">f"Early stopping at epoch {epoch + 1}"</span>)
             <span class="code-keyword">break</span>
 
     <span class="code-keyword">if</span> (epoch + 1) % 25 == 0:
@@ -1081,13 +977,18 @@ model_reg.<span class="code-function">load_state_dict</span>(best_model_state)
 model_reg.<span class="code-function">eval</span>()
 <span class="code-keyword">with</span> torch.<span class="code-function">no_grad</span>():
     y_pred = <span class="code-function">model_reg</span>(X_te).<span class="code-function">numpy</span>()
-ss_res = np.<span class="code-function">sum</span>((y_test.reshape(-1,1) - y_pred)**2)
-ss_tot = np.<span class="code-function">sum</span>((y_test - y_test.<span class="code-function">mean</span>())**2)
-<span class="code-function">print</span>(<span class="code-string">f"\nRegularized Model Test R-squared: {1 - ss_res/ss_tot:.4f}"</span>)</code></pre>
+ss_res = np.<span class="code-function">sum</span>((y_test.reshape(-1, 1) - y_pred) ** 2)
+ss_tot = np.<span class="code-function">sum</span>((y_test - y_test.<span class="code-function">mean</span>()) ** 2)
+<span class="code-function">print</span>(<span class="code-string">f"\nRegularized Model Test R-squared: {1 - ss_res / ss_tot:.4f}"</span>)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Regularized neural network via Python block</span>
+
+<span class="code-keyword">sysuse</span> auto, clear
+<span class="code-keyword">set seed</span> 42
+<span class="code-keyword">gen</span> rand = <span class="code-function">runiform</span>()
+<span class="code-keyword">gen</span> byte train = (rand &lt;= 0.8)
 
 <span class="code-keyword">python:</span>
 <span class="code-keyword">import</span> torch
@@ -1096,7 +997,7 @@ ss_tot = np.<span class="code-function">sum</span>((y_test - y_test.<span class=
 <span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
 <span class="code-keyword">from</span> sfi <span class="code-keyword">import</span> Data
 
-<span class="code-comment"># Get and prepare data (reusing from earlier)</span>
+<span class="code-comment"># Get and prepare data</span>
 price  = np.array(Data.get(<span class="code-string">"price"</span>), dtype=np.float32)
 mpg    = np.array(Data.get(<span class="code-string">"mpg"</span>), dtype=np.float32)
 weight = np.array(Data.get(<span class="code-string">"weight"</span>), dtype=np.float32)
@@ -1113,10 +1014,10 @@ X_s = (X - X_mean) / X_std
 y_mean, y_std = y[mask].mean(), y[mask].std()
 y_s = (y - y_mean) / y_std
 
-X_tr = torch.FloatTensor(X_s[mask])
-y_tr = torch.FloatTensor(y_s[mask])
-X_te = torch.FloatTensor(X_s[~mask])
-y_te = torch.FloatTensor(y_s[~mask])
+X_tr = torch.tensor(X_s[mask], dtype=torch.float32)
+y_tr = torch.tensor(y_s[mask], dtype=torch.float32)
+X_te = torch.tensor(X_s[~mask], dtype=torch.float32)
+y_te = torch.tensor(y_s[~mask], dtype=torch.float32)
 
 <span class="code-comment"># Model with dropout</span>
 model = nn.Sequential(
@@ -1156,12 +1057,14 @@ print(f<span class="code-string">"Best validation loss: {best_loss:.4f}"</span>)
 <pre><code><span class="code-comment"># R: Regularized neural network with dropout and early stopping</span>
 <span class="code-keyword">library</span>(torch)
 
-<span class="code-comment"># Model with dropout</span>
+<span class="code-comment"># (Assumes data prepared as in previous example)</span>
+
+<span class="code-comment"># Model with dropout and batch normalization</span>
 net_reg &lt;- <span class="code-function">nn_sequential</span>(
   <span class="code-function">nn_linear</span>(13, 128),
-  <span class="code-tooltip" data-tip="BATCH NORM: Normalizes the 128 outputs of the previous layer to stabilize training and help gradients flow more smoothly through the network."><span class="code-function">nn_batch_norm1d</span>(128)</span>,
+  <span class="code-tooltip" data-tip="BATCH NORM: Normalizes the 128 outputs of the previous layer to stabilize training."><span class="code-function">nn_batch_norm1d</span>(128)</span>,
   <span class="code-function">nn_relu</span>(),
-  <span class="code-tooltip" data-tip="DROPOUT: Randomly turns off 30% of neurons during each training step, forcing the network to develop redundant representations and reducing overfitting."><span class="code-function">nn_dropout</span>(p = 0.3)</span>,
+  <span class="code-tooltip" data-tip="DROPOUT: Randomly turns off 30% of neurons during each training step, reducing overfitting."><span class="code-function">nn_dropout</span>(p = 0.3)</span>,
 
   <span class="code-function">nn_linear</span>(128, 64),
   <span class="code-function">nn_batch_norm1d</span>(64),
@@ -1177,7 +1080,7 @@ net_reg &lt;- <span class="code-function">nn_sequential</span>(
 
 <span class="code-comment"># Optimizer with weight decay</span>
 optimizer &lt;- <span class="code-function">optim_adam</span>(net_reg$parameters, lr = 0.001,
-                       <span class="code-tooltip" data-tip="WEIGHT DECAY: An L2 penalty of 0.0001 on all weights — the neural network equivalent of Ridge regression. Keeps weights small and helps prevent overfitting.">weight_decay = 1e-4</span>)
+                       <span class="code-tooltip" data-tip="WEIGHT DECAY: An L2 penalty of 0.0001 on all weights -- the neural network equivalent of Ridge regression.">weight_decay = 1e-4</span>)
 criterion &lt;- <span class="code-function">nn_mse_loss</span>()
 
 <span class="code-comment"># Training with early stopping</span>
@@ -1247,93 +1150,28 @@ Early stopping at epoch 112</pre></div>
         <!-- ===================== PRACTICAL IMPLEMENTATION ===================== -->
         <h2 id="practical">Practical Implementation</h2>
 
-        <p>Training a neural network involves several practical considerations that go beyond defining the architecture. The most important is <strong>feature scaling</strong>. Unlike tree-based methods, neural networks are sensitive to the scale of input features. If one feature ranges from 0 to 1 and another from 0 to 1,000,000, the gradients will be dominated by the large-scale feature, making training slow or unstable. Always standardize your features (subtract mean, divide by standard deviation) before feeding them to a neural network. Use the training set statistics for standardization and apply the same transformation to the test set.</p>
+        <p>Training a neural network involves several practical considerations that go beyond defining the architecture. Here is a checklist of the most important ones.</p>
 
-        <p><strong>Batch size</strong> controls the trade-off between computation speed and gradient quality. Larger batches (256, 512) produce more stable gradient estimates and train faster on GPUs, but may converge to sharper minima that generalize worse. Smaller batches (32, 64) introduce more noise in the gradients, which acts as implicit regularization and often leads to better generalization. A batch size of 32 or 64 is a good starting point for most tabular datasets in economics.</p>
-
-        <p>The number of <strong>epochs</strong> (complete passes through the training data) depends on the problem and the learning rate. With early stopping, you can set a large maximum number of epochs (say, 500) and let the early stopping criterion determine when to stop. Monitor both training and validation loss curves: if the training loss is much lower than the validation loss, the model is overfitting; if both are high, the model is underfitting (try a larger network or more epochs).</p>
-
-        <p>For large datasets or complex models, <strong>GPU acceleration</strong> can speed up training dramatically. PyTorch makes this easy: move your model and data to the GPU with <code>.to('cuda')</code>, and everything else stays the same. For the tabular datasets typical in economics (thousands to millions of rows, tens to hundreds of features), CPU training is usually fast enough.</p>
-
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Wrap a dataset in a <code>DataLoader</code> for batched iteration",
-                  "pattern": "loader = DataLoader(dataset, batch_size=N, shuffle=True)",
-                  "structureNote": "Pattern: <code>DataLoader(dataset, batch_size=N, shuffle=True)</code>. Iterate with <code>for X_batch, y_batch in loader:</code>.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "train_loader",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "DataLoader",
-                        "role": "Class",
-                        "tip": "From <code>torch.utils.data</code>.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "train_ds,",
-                        "role": "Positional Arg",
-                        "tip": "A TensorDataset or any Dataset subclass.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "batch_size",
-                        "role": "Keyword Arg",
-                        "tip": "Number of samples per mini-batch.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "=",
-                        "role": "",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "32,",
-                        "role": "Value",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "shuffle=True",
-                        "role": "Keyword Arg",
-                        "tip": "Randomize order each epoch. Usually True for training, False for testing.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin: 0 0 0.75rem 0; color: #1e293b;">Neural Network Practitioner's Checklist</h4>
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb; width: 25%;">Feature scaling</td>
+              <td style="padding: 0.5rem;">Always standardize inputs to mean 0, std 1 using training set statistics. Unlike trees, neural networks are sensitive to feature scales. Forgetting this step can cause training to fail silently.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb;">Batch size</td>
+              <td style="padding: 0.5rem;">Start with 32 or 64 for tabular data. Larger batches (256+) train faster on GPUs but may generalize worse. Smaller batches add noise that acts as implicit regularization.</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb;">Epochs</td>
+              <td style="padding: 0.5rem;">Set a large maximum (e.g., 300-500) and rely on early stopping to determine when to halt. Monitor both training and validation loss curves.</td>
+            </tr>
+            <tr>
+              <td style="padding: 0.5rem; font-weight: 600; color: #2563eb;">GPU acceleration</td>
+              <td style="padding: 0.5rem;">Move model and data to GPU with <code>.to('cuda')</code> for large datasets. For typical economics tabular data (up to millions of rows), CPU training is usually fast enough.</td>
+            </tr>
+          </table>
         </div>
 
         <!-- Code Block: Complete Pipeline -->
@@ -1349,11 +1187,11 @@ Early stopping at epoch 112</pre></div>
 <span class="code-keyword">from</span> torch.utils.data <span class="code-keyword">import</span> DataLoader, TensorDataset
 <span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
 <span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
+<span class="code-keyword">import</span> copy
 <span class="code-keyword">from</span> sklearn.preprocessing <span class="code-keyword">import</span> StandardScaler
 <span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
 <span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> train_test_split
 <span class="code-keyword">from</span> sklearn.metrics <span class="code-keyword">import</span> mean_squared_error, r2_score, mean_absolute_error
-<span class="code-keyword">import</span> copy
 
 <span class="code-comment"># ============ 1. DATA PREPARATION ============</span>
 housing = <span class="code-function">fetch_california_housing</span>()
@@ -1371,12 +1209,12 @@ X_val_s   = scaler.<span class="code-function">transform</span>(X_val)
 X_test_s  = scaler.<span class="code-function">transform</span>(X_test)
 
 <span class="code-comment"># Convert to tensors</span>
-X_tr = torch.<span class="code-function">FloatTensor</span>(X_train_s)
-y_tr = torch.<span class="code-function">FloatTensor</span>(y_train.values).<span class="code-function">unsqueeze</span>(1)
-X_vl = torch.<span class="code-function">FloatTensor</span>(X_val_s)
-y_vl = torch.<span class="code-function">FloatTensor</span>(y_val.values).<span class="code-function">unsqueeze</span>(1)
-X_te = torch.<span class="code-function">FloatTensor</span>(X_test_s)
-y_te = torch.<span class="code-function">FloatTensor</span>(y_test.values).<span class="code-function">unsqueeze</span>(1)
+X_tr = torch.<span class="code-function">tensor</span>(X_train_s, dtype=torch.float32)
+y_tr = torch.<span class="code-function">tensor</span>(y_train.values, dtype=torch.float32).<span class="code-function">unsqueeze</span>(1)
+X_vl = torch.<span class="code-function">tensor</span>(X_val_s, dtype=torch.float32)
+y_vl = torch.<span class="code-function">tensor</span>(y_val.values, dtype=torch.float32).<span class="code-function">unsqueeze</span>(1)
+X_te = torch.<span class="code-function">tensor</span>(X_test_s, dtype=torch.float32)
+y_te = torch.<span class="code-function">tensor</span>(y_test.values, dtype=torch.float32).<span class="code-function">unsqueeze</span>(1)
 
 train_loader = <span class="code-function">DataLoader</span>(
     <span class="code-function">TensorDataset</span>(X_tr, y_tr), batch_size=64, shuffle=True
@@ -1421,7 +1259,7 @@ patience, wait = 25, 0
     <span class="code-keyword">else</span>:
         wait += 1
         <span class="code-keyword">if</span> wait >= patience:
-            <span class="code-function">print</span>(<span class="code-string">f"Early stopping at epoch {epoch+1}"</span>)
+            <span class="code-function">print</span>(<span class="code-string">f"Early stopping at epoch {epoch + 1}"</span>)
             <span class="code-keyword">break</span>
 
 <span class="code-comment"># ============ 4. EVALUATION ============</span>
@@ -1432,7 +1270,7 @@ model.<span class="code-function">eval</span>()
 
 <span class="code-function">print</span>(<span class="code-string">"=== Final Evaluation on Test Set ==="</span>)
 <span class="code-function">print</span>(<span class="code-string">f"R-squared:          {r2_score(y_test, y_pred):.4f}"</span>)
-<span class="code-function">print</span>(<span class="code-string">f"RMSE:               {mean_squared_error(y_test, y_pred, squared=False):.4f}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"RMSE:               {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}"</span>)
 <span class="code-function">print</span>(<span class="code-string">f"MAE:                {mean_absolute_error(y_test, y_pred):.4f}"</span>)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
@@ -1446,7 +1284,9 @@ model.<span class="code-function">eval</span>()
 <span class="code-comment">* split: 1=train, 2=validation, 3=test</span>
 
 <span class="code-keyword">python:</span>
-<span class="code-keyword">import</span> torch, torch.nn <span class="code-keyword">as</span> nn, copy
+<span class="code-keyword">import</span> torch
+<span class="code-keyword">import</span> torch.nn <span class="code-keyword">as</span> nn
+<span class="code-keyword">import</span> copy
 <span class="code-keyword">import</span> numpy <span class="code-keyword">as</span> np
 <span class="code-keyword">from</span> sfi <span class="code-keyword">import</span> Data
 
@@ -1465,12 +1305,12 @@ tr_mask = (split == 1); vl_mask = (split == 2); te_mask = (split == 3)
 mu, sd = X[tr_mask].mean(0), X[tr_mask].std(0)
 X_s = (X - mu) / sd
 
-X_tr = torch.FloatTensor(X_s[tr_mask])
-y_tr = torch.FloatTensor(y[tr_mask])
-X_vl = torch.FloatTensor(X_s[vl_mask])
-y_vl = torch.FloatTensor(y[vl_mask])
-X_te = torch.FloatTensor(X_s[te_mask])
-y_te = torch.FloatTensor(y[te_mask])
+X_tr = torch.tensor(X_s[tr_mask], dtype=torch.float32)
+y_tr = torch.tensor(y[tr_mask], dtype=torch.float32)
+X_vl = torch.tensor(X_s[vl_mask], dtype=torch.float32)
+y_vl = torch.tensor(y[vl_mask], dtype=torch.float32)
+X_te = torch.tensor(X_s[te_mask], dtype=torch.float32)
+y_te = torch.tensor(y[te_mask], dtype=torch.float32)
 
 model = nn.Sequential(
     nn.Linear(3, 64), nn.BatchNorm1d(64), nn.ReLU(), nn.Dropout(0.3),
@@ -1519,8 +1359,8 @@ train_end &lt;- <span class="code-function">floor</span>(0.7 * n)
 val_end   &lt;- <span class="code-function">floor</span>(0.85 * n)
 
 train_df &lt;- df[idx[1:train_end], ]
-val_df   &lt;- df[idx[(train_end+1):val_end], ]
-test_df  &lt;- df[idx[(val_end+1):n], ]
+val_df   &lt;- df[idx[(train_end + 1):val_end], ]
+test_df  &lt;- df[idx[(val_end + 1):n], ]
 
 <span class="code-comment"># Scale</span>
 x_tr_raw &lt;- <span class="code-function">as.matrix</span>(train_df[, -14])
@@ -1604,157 +1444,36 @@ RMSE:      3.4521
 MAE:       2.1234</pre></div>
         </div>
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Chain Linear, BatchNorm, ReLU, and Dropout in a repeated layer pattern",
-                  "pattern": "model = nn.Sequential(layers...); optimizer = Adam(model.parameters()); train loop with validation",
-                  "structureNote": "Common pattern per block: <code>Linear -> BatchNorm -> ReLU -> Dropout</code>. Repeat for each hidden layer, then a final <code>Linear</code> output.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "model",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = nn.Sequential(",
-                        "role": "Container",
-                        "tip": "",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "nn.Linear(8, 256)",
-                        "role": "Layer",
-                        "tip": "<code>(in_features, out_features)</code> positional args.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ", nn.BatchNorm1d(256)",
-                        "role": "Layer",
-                        "tip": "Argument = number of features from preceding Linear layer.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ", nn.ReLU()",
-                        "role": "Activation",
-                        "tip": "No arguments.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ", nn.Dropout(0.3)",
-                        "role": "Regularization",
-                        "tip": "Drop probability as positional arg.",
-                        "color": "sky"
-                      }
-                    ],
-                    "stata": [
-                      {
-                        "code": "python:",
-                        "role": "Python Block",
-                        "tip": "Stata uses embedded Python for PyTorch neural networks.",
-                        "color": "mauve"
-                      },
-                      {
-                        "code": "\nimport torch",
-                        "role": "Import",
-                        "tip": "PyTorch must be installed in Stata's Python environment.",
-                        "color": "yellow"
-                      },
-                      {
-                        "code": "\nmodel = nn.Sequential(...)",
-                        "role": "Architecture",
-                        "tip": "Same PyTorch syntax as standalone Python.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "\n# Training loop with early stopping",
-                        "role": "Training",
-                        "tip": "Monitor validation loss; save best model; stop when loss stops improving.",
-                        "color": "overlay"
-                      }
-                    ],
-                    "r": [
-                      {
-                        "code": "net",
-                        "role": "Variable",
-                        "tip": "Stores the neural network model.",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " <- nn_sequential(",
-                        "role": "Architecture",
-                        "tip": "R torch's sequential container. Same concept as PyTorch.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "\n  nn_linear(13, 256)",
-                        "role": "Dense Layer",
-                        "tip": "Fully connected layer: 13 inputs -> 256 neurons.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ", nn_batch_norm1d(256)",
-                        "role": "Batch Norm",
-                        "tip": "Batch normalization layer.",
-                        "color": "lavender"
-                      },
-                      {
-                        "code": ", nn_relu()",
-                        "role": "Activation",
-                        "tip": "ReLU activation function.",
-                        "color": "yellow"
-                      },
-                      {
-                        "code": ", nn_dropout(0.3)",
-                        "role": "Dropout",
-                        "tip": "Drops 30% of neurons during training for regularization.",
-                        "color": "red"
-                      },
-                      {
-                        "code": "\n)",
-                        "role": "Close",
-                        "tip": "Final layer: nn_linear(64, 1) for regression output.",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "\nopt <- optim_adam(net$parameters, lr = 0.001)",
-                        "role": "Optimizer",
-                        "tip": "Adam optimizer with learning rate 0.001.",
-                        "color": "teal"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
 
         <!-- ===================== WHEN TO USE IN ECONOMICS ===================== -->
         <h2 id="economics">When to Use Neural Networks in Economics</h2>
 
-        <p>For the types of data most common in economics — structured, tabular datasets with tens to hundreds of features and thousands to hundreds of thousands of observations — neural networks are <strong>usually not the best choice</strong>. Tree-based methods (Random Forests, XGBoost) consistently match or outperform neural networks on tabular data, are easier to tune, and require less preprocessing. Multiple large-scale benchmarks have confirmed this finding. If your data fits in a spreadsheet, start with XGBoost.</p>
+        <p>For the types of data most common in economics -- structured, tabular datasets with tens to hundreds of features and thousands to hundreds of thousands of observations -- neural networks are <strong>usually not the best choice</strong>. Tree-based methods (Random Forests, XGBoost) consistently match or outperform neural networks on tabular data, are easier to tune, and require less preprocessing. If your data fits in a spreadsheet, start with XGBoost.</p>
 
-        <p>Where neural networks truly shine is on <strong>unstructured data</strong>: text (natural language processing), images (computer vision), audio, and other high-dimensional, spatially or sequentially structured inputs. If your economics research involves analyzing text from central bank communications, classifying satellite images to measure economic activity, or processing survey audio recordings, neural networks are the right tool. They are also valuable when you have <strong>very large datasets</strong> (millions of observations) where the additional model capacity pays off, and when you need to learn representations that transfer across tasks (transfer learning).</p>
+        <p>Where neural networks truly shine is on <strong>unstructured data</strong>: text, images, audio, and other high-dimensional inputs. They are also valuable when you have <strong>very large datasets</strong> (millions of observations) or when you need to learn representations that transfer across tasks.</p>
 
-        <p>A practical concern for policy-oriented economics research is <strong>interpretability</strong>. Regulators, policymakers, and journal referees often want to understand why a model makes certain predictions. Neural networks are inherently opaque — even with tools like SHAP values (which also work on neural networks but are slower to compute), the explanation is less transparent than for a linear model or even a decision tree. If your goal is policy-relevant prediction (for example, predicting recidivism to inform bail decisions), the interpretability costs of neural networks may outweigh their marginal predictive gains over simpler models.</p>
+        <!-- Economics Applications -->
+        <div style="background: linear-gradient(135deg, #eff6ff 0%, #fef3c7 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0;">
+          <h4 style="margin: 0 0 0.75rem 0; color: #1e40af;">Neural Networks in Economics Research: Real Applications</h4>
+          <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.8;">
+            <li><strong>Satellite imagery + CNNs:</strong> Processing nighttime light images or satellite photos to estimate regional GDP, poverty rates, or crop yields in areas with poor survey coverage.</li>
+            <li><strong>Central bank text + NLP:</strong> Analyzing FOMC minutes, ECB press conferences, or earnings calls with recurrent or transformer networks to predict monetary policy or market reactions.</li>
+            <li><strong>High-frequency finance:</strong> Processing millisecond-level order book data with LSTMs or temporal convolutions to model price formation or detect market manipulation.</li>
+            <li><strong>Survey audio:</strong> Classifying respondent sentiment or detecting survey fatigue from voice recordings using audio-specialized architectures.</li>
+            <li><strong>Causal ML first stages:</strong> Using neural networks as flexible first-stage estimators in IV or treatment effect estimation when the relationship between instruments and treatment is highly nonlinear.</li>
+          </ul>
+        </div>
 
         <div class="info-box">
-          <h3>When to Use Neural Networks vs. Other Methods</h3>
+          <h3>Decision Guide: Which Method to Use</h3>
           <ul>
             <li><strong>Use neural networks</strong> for: text data (NLP), image data (computer vision), very large datasets (millions of rows), tasks where transfer learning is beneficial, or when you need to learn complex representations from raw data.</li>
             <li><strong>Use tree-based methods</strong> (XGBoost, Random Forest) for: standard tabular data, moderate-size datasets, when you need variable importance, or when ease of tuning matters.</li>
             <li><strong>Use regularized regression</strong> (LASSO, Ridge) for: inference-adjacent prediction tasks, small samples, when interpretability is paramount, or when the true relationship is approximately linear.</li>
           </ul>
         </div>
+
+        <p>A practical concern for policy-oriented economics research is <strong>interpretability</strong>. Neural networks are inherently opaque -- even with tools like SHAP values, the explanation is less transparent than for a linear model or a decision tree. If your goal is policy-relevant prediction (for example, predicting loan default to inform credit decisions), the interpretability costs of neural networks may outweigh their marginal predictive gains over simpler models.</p>
 
 
         <!-- ===================== LIMITATIONS ===================== -->
@@ -1763,12 +1482,12 @@ MAE:       2.1234</pre></div>
         <div class="info-box" style="border-left-color: #e53e3e;">
           <h3>Key Limitations of Neural Networks</h3>
           <ul>
-            <li><strong>Data hungry:</strong> Neural networks require large amounts of data to train well. With small samples (a few hundred or even a few thousand observations, typical for many economic panel datasets), neural networks are prone to overfitting and usually underperform simpler models like LASSO or Random Forests.</li>
-            <li><strong>Computationally expensive:</strong> Training a neural network involves iterating over the data many times (epochs), computing gradients for thousands or millions of parameters. This is much slower than fitting an OLS regression or even training an XGBoost model. GPU hardware can help, but adds cost and complexity.</li>
-            <li><strong>Hard to interpret:</strong> Neural networks are black boxes. While SHAP values, attention weights, and other interpretation techniques exist, they provide approximations rather than the clean, transparent explanations that a linear model or single decision tree offers. This is a serious limitation for policy applications.</li>
-            <li><strong>Sensitive to hyperparameters:</strong> The number of layers, number of neurons, learning rate, dropout rate, batch size, and other settings all affect performance significantly. There is no reliable theory to guide these choices — you must rely on cross-validation and experimentation, which is time-consuming.</li>
-            <li><strong>Feature scaling is required:</strong> Unlike tree-based methods, neural networks require that features be standardized or normalized. Forgetting this step can cause training to fail silently — the model may appear to train but produce poor results.</li>
-            <li><strong>Overfitting on small data:</strong> A network with 10,000 parameters and 500 training observations is like fitting a polynomial of degree 10,000 — it will memorize the training data perfectly and generalize terribly. Regularization helps, but cannot fully compensate for insufficient data.</li>
+            <li><strong>Data hungry:</strong> Neural networks require large amounts of data to train well. With small samples (a few hundred or even a few thousand observations, typical for many economic panel datasets), they are prone to overfitting and usually underperform simpler models like LASSO or Random Forests.</li>
+            <li><strong>Computationally expensive:</strong> Training involves iterating over the data many times, computing gradients for thousands or millions of parameters. This is much slower than fitting an OLS regression or even training an XGBoost model.</li>
+            <li><strong>Hard to interpret:</strong> Neural networks are black boxes. While SHAP values and other interpretation techniques exist, they provide approximations rather than clean, transparent explanations. This is a serious limitation for policy applications.</li>
+            <li><strong>Sensitive to hyperparameters:</strong> The number of layers, neurons, learning rate, dropout rate, and batch size all affect performance significantly. There is no reliable theory to guide these choices -- you must rely on cross-validation and experimentation.</li>
+            <li><strong>Feature scaling required:</strong> Unlike tree-based methods, neural networks require that features be standardized. Forgetting this step can cause training to fail silently -- the model may appear to train but produce poor results.</li>
+            <li><strong>Overfitting on small data:</strong> A network with 10,000 parameters and 500 training observations is like fitting a polynomial of degree 10,000 -- it will memorize the training data perfectly and generalize terribly. Regularization helps but cannot fully compensate for insufficient data.</li>
           </ul>
         </div>
 
@@ -1779,6 +1498,7 @@ MAE:       2.1234</pre></div>
           <li>Goodfellow, I., Bengio, Y., & Courville, A. (2016). <em>Deep Learning</em>. MIT Press. (Available free at <a href="https://www.deeplearningbook.org/" target="_blank">deeplearningbook.org</a>)</li>
           <li>LeCun, Y., Bengio, Y., & Hinton, G. (2015). Deep learning. <em>Nature</em>, 521(7553), 436-444.</li>
           <li>Mullainathan, S., & Spiess, J. (2017). Machine Learning: An Applied Econometric Approach. <em>Journal of Economic Perspectives</em>, 31(2), 87-106.</li>
+          <li>Jean, N., Burke, M., Xie, M., Davis, W. M., Lobell, D. B., & Ermon, S. (2016). Combining satellite imagery and machine learning to predict poverty. <em>Science</em>, 353(6301), 790-794.</li>
           <li>Ng, A. Stanford CS229: Machine Learning. Lecture Notes on Neural Networks.</li>
         </ul>
 

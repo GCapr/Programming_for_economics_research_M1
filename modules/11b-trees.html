@@ -166,14 +166,30 @@
           </ul>
         </div>
 
+        <!-- ===================== THE BIG PICTURE ===================== -->
+        <div class="info-box" style="background: #f0f9ff; border-left: 4px solid #2563eb; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin-top: 0; color: #1e40af;">The Big Picture: Three Levels of Tree-Based Methods</h3>
+          <p style="margin-bottom: 0.75rem;">This module covers three increasingly powerful approaches. Think of them as levels:</p>
+          <ol style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
+            <li><strong>Decision Trees</strong> &mdash; A single tree that asks yes/no questions to split data. Highly interpretable, like reading a flowchart, but prone to overfitting. <em>Good for understanding the logic of your data.</em></li>
+            <li><strong>Random Forests</strong> &mdash; Hundreds of trees, each trained on a slightly different random subset, whose predictions are averaged. The best general-purpose method for tabular data. <em>Your default starting point for prediction tasks.</em></li>
+            <li><strong>Gradient Boosting / XGBoost</strong> &mdash; Trees built sequentially, each one correcting the mistakes of the previous ones. The highest accuracy on structured data; the dominant method in Kaggle competitions and production ML systems. <em>Use when you need the best possible predictions and are willing to tune hyperparameters.</em></li>
+          </ol>
+          <p style="margin: 0.75rem 0 0;">We also cover <strong>SHAP values</strong> (making black-box models interpretable) and <strong>variable importance</strong> (which features drive predictions) &mdash; essential tools for communicating results to policymakers and stakeholders.</p>
+        </div>
+
+
         <!-- ===================== HOW TREES PARTITION DATA ===================== -->
         <h2 id="intuition">How Trees Partition Data</h2>
 
-        <p>Imagine you are trying to predict house prices. A friend might ask you a series of yes-or-no questions: "Is it in the city center?" If yes, "Does it have more than two bedrooms?" If no, "Is the lot bigger than 500 square meters?" Each answer narrows the range of possible prices. A decision tree works in exactly this way: it learns a sequence of binary questions about the features of your data, and each question splits the observations into two groups that are more homogeneous in the outcome variable than they were before the split.</p>
+        <div class="info-box" style="background: #f0fdf4; border-left: 4px solid #059669; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin-top: 0; color: #065f46;">Analogy: A Game of 20 Questions</h3>
+          <p style="margin: 0;">A decision tree is like a game of 20 Questions. Imagine you are trying to guess the price of a house. You ask: "Is it in the city center?" Then: "Does it have more than two bedrooms?" Then: "Is the lot bigger than 500 square meters?" Each answer narrows the range of possible prices. A decision tree works exactly this way &mdash; it learns the <em>most informative</em> yes/no question to ask at each step, automatically, from the data.</p>
+        </div>
 
-        <p>Geometrically, each split divides the feature space with a line (or hyperplane) that is always perpendicular to one of the feature axes. After several splits, the feature space is partitioned into a set of rectangles (in 2D) or hyper-rectangles (in higher dimensions). Every observation that falls into the same rectangle receives the same prediction — the average of the outcome variable for the training observations in that rectangle. This is what makes trees fundamentally different from linear regression: instead of fitting a single line through the data, trees approximate the relationship with a step function that can capture sharp changes and interactions between variables without you having to specify them in advance.</p>
+        <p>Geometrically, each split divides the feature space with a line (or hyperplane) that is always perpendicular to one of the feature axes. After several splits, the feature space is partitioned into a set of rectangles (in 2D) or hyper-rectangles (in higher dimensions). Every observation that falls into the same rectangle receives the same prediction &mdash; the average of the outcome variable for the training observations in that rectangle. This is what makes trees fundamentally different from linear regression: instead of fitting a single line through the data, trees approximate the relationship with a step function that can capture sharp changes and interactions between variables without you having to specify them in advance.</p>
 
-        <p>The key insight is that each split is chosen to maximize the improvement in prediction. At every node, the algorithm considers every possible feature and every possible split point for that feature, and picks the one that best separates the data. "Best" means different things depending on the task: for regression, we typically minimize the mean squared error (MSE) within each resulting group; for classification, we maximize the purity of each group using criteria like the Gini index or entropy. The process is recursive — each child node is split again using the same logic — and continues until some stopping rule is met (for example, a minimum number of observations per leaf, or a maximum tree depth).</p>
+        <p>The key insight is that each split is chosen to maximize the improvement in prediction. At every node, the algorithm considers every possible feature and every possible split point for that feature, and picks the one that best separates the data. "Best" means different things depending on the task: for regression, we typically minimize the mean squared error (MSE) within each resulting group; for classification, we maximize the purity of each group using criteria like the Gini index or entropy. The process is recursive &mdash; each child node is split again using the same logic &mdash; and continues until some stopping rule is met (for example, a minimum number of observations per leaf, or a maximum tree depth).</p>
 
         <!-- Diagram: Decision Tree and Partition -->
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
@@ -184,27 +200,27 @@
               <p style="font-weight: 600; color: #475569; margin-bottom: 0.75rem; font-size: 0.9rem;">Decision Tree</p>
               <svg viewBox="0 0 320 220" style="max-width: 320px;">
                 <!-- Root -->
-                <rect x="100" y="5" width="120" height="35" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                <rect x="100" y="5" width="120" height="35" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
                 <text x="160" y="27" text-anchor="middle" font-size="12" fill="#1e40af">x1 &lt; 5?</text>
                 <!-- Left child -->
                 <line x1="130" y1="40" x2="70" y2="75" stroke="#94a3b8" stroke-width="1.5"/>
-                <text x="90" y="60" font-size="10" fill="#16a34a">Yes</text>
-                <rect x="15" y="75" width="110" height="35" rx="6" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                <text x="90" y="60" font-size="10" fill="#059669">Yes</text>
+                <rect x="15" y="75" width="110" height="35" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
                 <text x="70" y="97" text-anchor="middle" font-size="12" fill="#1e40af">x2 &lt; 3?</text>
                 <!-- Right child (leaf) -->
                 <line x1="190" y1="40" x2="250" y2="75" stroke="#94a3b8" stroke-width="1.5"/>
                 <text x="230" y="60" font-size="10" fill="#dc2626">No</text>
-                <rect x="200" y="75" width="100" height="35" rx="6" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
+                <rect x="200" y="75" width="100" height="35" rx="6" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
                 <text x="250" y="97" text-anchor="middle" font-size="12" fill="#92400e">y = 42</text>
                 <!-- Left-left leaf -->
                 <line x1="45" y1="110" x2="30" y2="145" stroke="#94a3b8" stroke-width="1.5"/>
-                <text x="28" y="135" font-size="10" fill="#16a34a">Yes</text>
-                <rect x="0" y="148" width="65" height="30" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+                <text x="28" y="135" font-size="10" fill="#059669">Yes</text>
+                <rect x="0" y="148" width="65" height="30" rx="6" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
                 <text x="32" y="167" text-anchor="middle" font-size="11" fill="#15803d">y = 18</text>
                 <!-- Left-right leaf -->
                 <line x1="95" y1="110" x2="110" y2="145" stroke="#94a3b8" stroke-width="1.5"/>
                 <text x="112" y="135" font-size="10" fill="#dc2626">No</text>
-                <rect x="80" y="148" width="65" height="30" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+                <rect x="80" y="148" width="65" height="30" rx="6" fill="#dcfce7" stroke="#059669" stroke-width="2"/>
                 <text x="112" y="167" text-anchor="middle" font-size="11" fill="#15803d">y = 31</text>
               </svg>
             </div>
@@ -214,38 +230,43 @@
               <svg viewBox="0 0 220 220" style="max-width: 220px;">
                 <rect x="10" y="10" width="200" height="200" fill="none" stroke="#334155" stroke-width="2"/>
                 <!-- Vertical split at x1=5 -->
-                <line x1="110" y1="10" x2="110" y2="210" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="6,3"/>
+                <line x1="110" y1="10" x2="110" y2="210" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="6,3"/>
                 <!-- Horizontal split at x2=3 in left partition -->
-                <line x1="10" y1="130" x2="110" y2="130" stroke="#3b82f6" stroke-width="2.5" stroke-dasharray="6,3"/>
+                <line x1="10" y1="130" x2="110" y2="130" stroke="#2563eb" stroke-width="2.5" stroke-dasharray="6,3"/>
                 <!-- Labels -->
-                <text x="55" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#15803d">y=18</text>
-                <text x="55" y="175" text-anchor="middle" font-size="14" font-weight="bold" fill="#15803d">y=31</text>
-                <text x="160" y="120" text-anchor="middle" font-size="14" font-weight="bold" fill="#92400e">y=42</text>
+                <text x="55" y="80" text-anchor="middle" font-size="14" font-weight="bold" fill="#059669">y=18</text>
+                <text x="55" y="175" text-anchor="middle" font-size="14" font-weight="bold" fill="#059669">y=31</text>
+                <text x="160" y="120" text-anchor="middle" font-size="14" font-weight="bold" fill="#f59e0b">y=42</text>
                 <!-- Axis labels -->
                 <text x="110" y="230" text-anchor="middle" font-size="12" fill="#64748b">x1</text>
                 <text x="-5" y="115" text-anchor="middle" font-size="12" fill="#64748b" transform="rotate(-90, -5, 115)">x2</text>
                 <!-- Split value labels -->
-                <text x="110" y="6" text-anchor="middle" font-size="10" fill="#3b82f6">x1=5</text>
-                <text x="8" y="128" text-anchor="end" font-size="10" fill="#3b82f6">x2=3</text>
+                <text x="110" y="6" text-anchor="middle" font-size="10" fill="#2563eb">x1=5</text>
+                <text x="8" y="128" text-anchor="end" font-size="10" fill="#2563eb">x2=3</text>
               </svg>
             </div>
           </div>
           <p style="margin: 1rem 0 0; font-size: 0.85rem; color: #475569;">Each split creates axis-aligned boundaries. Observations in the same partition receive the same prediction.</p>
         </div>
 
-        <p>Notice how the tree produces a piecewise constant approximation. This is both the strength and weakness of tree-based methods: they can capture complex interactions and nonlinearities, but a single tree tends to be "choppy" — it cannot produce smooth predictions. As we will see, Random Forests and gradient boosting address this limitation by combining many trees together.</p>
+        <p>Notice how the tree produces a piecewise constant approximation. This is both the strength and weakness of tree-based methods: they can capture complex interactions and nonlinearities, but a single tree tends to be "choppy" &mdash; it cannot produce smooth predictions. As we will see, Random Forests and gradient boosting address this limitation by combining many trees together.</p>
 
 
         <!-- ===================== DECISION TREES (CART) ===================== -->
         <h2 id="cart">Decision Trees (CART)</h2>
 
+        <div class="info-box" style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin-top: 0; color: #92400e;">What Are Decision Trees For?</h3>
+          <p style="margin: 0;">Decision trees are the <strong>building block</strong> of all tree-based methods. On their own, they tend to overfit and have mediocre predictive accuracy. But they have one unmatched advantage: <strong>transparency</strong>. You can visualize the entire model as a flowchart that any stakeholder &mdash; a minister, a bank regulator, a non-technical collaborator &mdash; can follow. Use a single decision tree when you need to <em>explain the logic</em> of your predictions, not just the predictions themselves.</p>
+        </div>
+
         <p>The most widely used algorithm for building decision trees is <strong>CART</strong> (Classification and Regression Trees), introduced by Leo Breiman and colleagues in 1984. CART builds a binary tree by performing recursive binary splitting: starting from the root, it considers every feature and every possible split point, selects the one that most reduces the loss function, and then repeats the process on each of the two resulting child nodes. For a regression tree, the loss function at each node is typically the <span class="code-tooltip" data-tip="The average of the squared differences between each observation's value and the group mean. A lower MSE means the group is more homogeneous.">mean squared error (MSE)</span>: the algorithm picks the split that produces two child nodes whose combined MSE is as small as possible.</p>
 
-        <p>For classification trees, CART uses either the <span class="code-tooltip" data-tip="Gini impurity measures how often a randomly chosen observation from the node would be misclassified if labeled according to the distribution of labels in the node. Gini = 1 - sum(p_k^2). A pure node has Gini = 0.">Gini impurity</span> or <span class="code-tooltip" data-tip="Entropy measures the disorder or uncertainty in a node. Entropy = -sum(p_k * log(p_k)). A pure node has entropy = 0.">entropy</span> as the splitting criterion. Both measure the "purity" of a node — how mixed the class labels are. The lower the impurity, the more homogeneous the node. In practice, the choice between Gini and entropy rarely makes a significant difference; Gini is the default in most implementations because it is slightly faster to compute.</p>
+        <p>For classification trees, CART uses either the <span class="code-tooltip" data-tip="Gini impurity measures how often a randomly chosen observation from the node would be misclassified if labeled according to the distribution of labels in the node. Gini = 1 - sum(p_k^2). A pure node has Gini = 0.">Gini impurity</span> or <span class="code-tooltip" data-tip="Entropy measures the disorder or uncertainty in a node. Entropy = -sum(p_k * log(p_k)). A pure node has entropy = 0.">entropy</span> as the splitting criterion. Both measure the "purity" of a node &mdash; how mixed the class labels are. The lower the impurity, the more homogeneous the node. In practice, the choice between Gini and entropy rarely makes a significant difference; Gini is the default in most implementations because it is slightly faster to compute.</p>
 
-        <p>Left unconstrained, a tree will keep splitting until every leaf contains a single observation, perfectly memorizing the training data. This is massive <span class="code-tooltip" data-tip="When a model fits the training data too closely, capturing noise rather than the true pattern. An overfit model has low training error but high test error.">overfitting</span>. To prevent this, we use <strong>pruning</strong>. The most common approach is <em>cost-complexity pruning</em> (also called weakest-link pruning): we grow a large tree first, then progressively collapse the internal nodes that contribute least to reducing the loss, trading a small increase in training error for a large reduction in model complexity. The trade-off is governed by a complexity parameter (often called <code>cp</code> in R or <code>ccp_alpha</code> in scikit-learn) that you select via cross-validation.</p>
+        <p>Left unconstrained, a tree will keep splitting until every leaf contains a single observation, perfectly memorizing the training data. This is massive <span class="code-tooltip" data-tip="When a model fits the training data too closely, capturing noise rather than the true pattern. An overfit model has low training error but high test error.">overfitting</span>. To prevent this, we use <strong>pruning</strong>. The most common approach is <em>cost-complexity pruning</em> (also called weakest-link pruning): we grow a large tree first, then progressively collapse the internal nodes that contribute least to reducing the loss. The trade-off is governed by a complexity parameter (often called <code>cp</code> in R or <code>ccp_alpha</code> in scikit-learn) that you select via cross-validation.</p>
 
-        <p>Despite their simplicity, single decision trees have a remarkable property: they are highly interpretable. You can visualize the entire model as a flowchart that any stakeholder can follow. This makes them appealing for policy applications where transparency is valued. However, their predictive performance is often mediocre because they have high variance — small changes in the data can produce a completely different tree structure.</p>
+        <p><strong>Economics example:</strong> Imagine predicting loan defaults using borrower characteristics (income, debt-to-income ratio, credit history length, employment status). A single decision tree might find that the most informative first question is "Is the debt-to-income ratio above 40%?" If yes, the next question might be "Has the borrower missed a payment in the last 12 months?" This produces an interpretable risk-scoring flowchart that a loan officer can follow &mdash; and that a regulator can audit for fairness.</p>
 
         <!-- Code Block: Decision Tree -->
         <div class="code-tabs" data-runnable="ml-tree-1">
@@ -259,7 +280,7 @@
 <span class="code-keyword">import</span> pandas <span class="code-keyword">as</span> pd
 <span class="code-keyword">from</span> sklearn.datasets <span class="code-keyword">import</span> fetch_california_housing
 <span class="code-keyword">from</span> sklearn.tree <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="CART TREE: Builds a regression tree that recursively splits the data into groups with similar outcomes. Each split finds the feature and threshold that best separates high and low values of the target.">DecisionTreeRegressor</span>, <span class="code-tooltip" data-tip="VISUALIZE: Draws the tree as a flowchart showing each split decision, how many observations fell into each branch, and the predicted value at each leaf.">plot_tree</span>
-<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="TRAIN/TEST: Splits the California housing data — 80% for building the tree, 20% held out to evaluate how well the tree predicts on unseen neighborhoods.">train_test_split</span>, <span class="code-tooltip" data-tip="CV SCORE: Runs 5-fold cross-validation to get a more reliable estimate of the tree's predictive performance, averaging across all folds.">cross_val_score</span>
+<span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="TRAIN/TEST: Splits the data -- 80% for building the tree, 20% held out to evaluate how well the tree predicts on unseen observations.">train_test_split</span>, <span class="code-tooltip" data-tip="CV SCORE: Runs k-fold cross-validation to get a reliable estimate of the tree's predictive performance, averaging across all folds.">cross_val_score</span>
 <span class="code-keyword">import</span> matplotlib.pyplot <span class="code-keyword">as</span> plt
 
 <span class="code-comment"># Load the California housing dataset</span>
@@ -269,14 +290,14 @@ y = housing.target
 
 <span class="code-comment"># Split into train and test sets</span>
 X_train, X_test, y_train, y_test = <span class="code-function">train_test_split</span>(
-    X, y, <span class="code-tooltip" data-tip="TEST SIZE: Holds out 20% of observations for testing. The tree is built using only the remaining 80% so we can honestly evaluate its predictions.">test_size=0.2</span>, <span class="code-tooltip" data-tip="SEED: Fixes the random number generator so the same split is produced every time, making results reproducible for anyone running this code.">random_state=42</span>
+    X, y, <span class="code-tooltip" data-tip="TEST SIZE: Holds out 20% of observations for testing. The tree is built using only the remaining 80% so we can honestly evaluate its predictions.">test_size=0.2</span>, <span class="code-tooltip" data-tip="SEED: Fixes the random number generator so the same split is produced every time, making results reproducible.">random_state=42</span>
 )
 
 <span class="code-comment"># Fit a decision tree with cost-complexity pruning</span>
 tree = <span class="code-function">DecisionTreeRegressor</span>(
-    <span class="code-tooltip" data-tip="DEPTH LIMIT: Stops the tree at 5 levels of splits. Without this, the tree would keep splitting until it memorizes every training observation, causing severe overfitting.">max_depth=5</span>,
-    <span class="code-tooltip" data-tip="MIN LEAF SIZE: Each terminal group must have at least 20 observations. This prevents the tree from creating tiny, unreliable groups based on just a few data points.">min_samples_leaf=20</span>,
-    <span class="code-tooltip" data-tip="PRUNING: Controls how aggressively weak splits are removed. Higher values produce simpler trees — a split must improve the fit by at least this amount to be kept.">ccp_alpha=0.01</span>,
+    <span class="code-tooltip" data-tip="DEPTH LIMIT: Stops the tree at 5 levels of splits. Without this, the tree would keep splitting until it memorizes every training observation.">max_depth=5</span>,
+    <span class="code-tooltip" data-tip="MIN LEAF SIZE: Each terminal group must have at least 20 observations. Prevents tiny, unreliable groups based on just a few data points.">min_samples_leaf=20</span>,
+    <span class="code-tooltip" data-tip="PRUNING: Controls how aggressively weak splits are removed. A split must improve the fit by at least this amount to be kept.">ccp_alpha=0.01</span>,
     random_state=42
 )
 tree.<span class="code-function">fit</span>(X_train, y_train)
@@ -320,9 +341,9 @@ plt.<span class="code-function">show</span>()</code></pre>
 <span class="code-comment">* iterations(1) = one tree; lsize(20) = min leaf size</span>
 <span class="code-keyword">rforest</span> price mpg weight length foreign <span class="code-keyword">if</span> train == 1, ///
     <span class="code-tooltip" data-tip="REGRESSION: Tells rforest to predict a continuous outcome (price) rather than classify into categories.">type(reg)</span> ///
-    <span class="code-tooltip" data-tip="SINGLE TREE: Sets iterations to 1 so we get a single decision tree rather than a forest. This lets us examine how one tree works before scaling up to many.">iterations(1)</span> ///
-    <span class="code-tooltip" data-tip="DEPTH: Limits the tree to 5 levels of if/then splits. Deeper trees fit training data better but risk overfitting.">depth(5)</span> ///
-    <span class="code-tooltip" data-tip="MIN LEAF: Requires at least 20 observations in each terminal group, ensuring predictions are based on enough data to be reliable.">lsize(20)</span>
+    <span class="code-tooltip" data-tip="SINGLE TREE: Sets iterations to 1 so we get a single decision tree rather than a forest.">iterations(1)</span> ///
+    <span class="code-tooltip" data-tip="DEPTH: Limits the tree to 5 levels of if/then splits.">depth(5)</span> ///
+    <span class="code-tooltip" data-tip="MIN LEAF: Requires at least 20 observations in each terminal group.">lsize(20)</span>
 
 <span class="code-comment">* Predict on test data</span>
 <span class="code-keyword">predict</span> price_hat
@@ -338,8 +359,8 @@ plt.<span class="code-function">show</span>()</code></pre>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Decision tree with rpart and visualization with rpart.plot</span>
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="RPART: The go-to R package for building decision trees. 'Recursive Partitioning' describes how the algorithm works — repeatedly splitting the data into increasingly homogeneous groups.">rpart</span>)
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="TREE PLOT: Creates publication-quality tree diagrams with color-coded nodes, clear split labels, and predicted values at each leaf — much more readable than the default rpart plots.">rpart.plot</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="RPART: The go-to R package for building decision trees. 'Recursive Partitioning' describes how the algorithm works -- repeatedly splitting the data into increasingly homogeneous groups.">rpart</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="TREE PLOT: Creates publication-quality tree diagrams with color-coded nodes, clear split labels, and predicted values at each leaf.">rpart.plot</span>)
 
 <span class="code-comment"># Load data</span>
 <span class="code-keyword">data</span>(<span class="code-string">"BostonHousing"</span>, package = <span class="code-string">"mlbench"</span>)
@@ -357,9 +378,9 @@ tree_model &lt;- <span class="code-function">rpart</span>(
   data = train,
   <span class="code-tooltip" data-tip="REGRESSION TREE: method='anova' means the tree minimizes variance within groups (MSE), which is the right criterion for predicting a continuous outcome like housing prices.">method = "anova"</span>,
   control = <span class="code-function">rpart.control</span>(
-    <span class="code-tooltip" data-tip="DEPTH: Caps the tree at 5 levels of splits. Each additional level doubles the potential number of leaf groups, so 5 levels can create up to 32 terminal predictions.">maxdepth = 5</span>,
-    <span class="code-tooltip" data-tip="MIN LEAF: Each final group must contain at least 20 observations. This ensures every prediction is backed by enough data, preventing overfitting to small pockets of noise.">minbucket = 20</span>,
-    <span class="code-tooltip" data-tip="PRUNING: A split must reduce the overall error by at least this amount (1%) to be kept. Weak splits that barely help are removed, producing a cleaner, more generalizable tree.">cp = 0.01</span>
+    <span class="code-tooltip" data-tip="DEPTH: Caps the tree at 5 levels of splits. Each additional level doubles the potential number of leaf groups.">maxdepth = 5</span>,
+    <span class="code-tooltip" data-tip="MIN LEAF: Each final group must contain at least 20 observations, preventing overfitting to small pockets of noise.">minbucket = 20</span>,
+    <span class="code-tooltip" data-tip="PRUNING: A split must reduce the overall error by at least this amount (1%) to be kept. Weak splits are removed.">cp = 0.01</span>
   )
 )
 
@@ -374,8 +395,8 @@ r2_test &lt;- 1 - ss_res / ss_tot
 
 <span class="code-comment"># Visualize the tree</span>
 <span class="code-function">rpart.plot</span>(tree_model,
-  <span class="code-tooltip" data-tip="DISPLAY: type=4 puts the split conditions ('rm >= 6.9') on the branches and shows predicted values inside the boxes — the most informative display style.">type = 4</span>,
-  <span class="code-tooltip" data-tip="DETAIL: extra=101 shows both the predicted value and the percentage of observations at each node, so you can see which groups are large vs. small.">extra = 101</span>,
+  <span class="code-tooltip" data-tip="DISPLAY: type=4 puts the split conditions on the branches and shows predicted values inside the boxes.">type = 4</span>,
+  <span class="code-tooltip" data-tip="DETAIL: extra=101 shows both the predicted value and the percentage of observations at each node.">extra = 101</span>,
   under = TRUE,
   box.palette = <span class="code-string">"BuGn"</span>,
   main = <span class="code-string">"Regression Tree for Boston Housing"</span>
@@ -401,35 +422,35 @@ Tree depth:         5
                   <rect width="700" height="300" fill="white"/>
                   <text x="350" y="18" text-anchor="middle" font-size="13" font-weight="600" fill="#333">Decision Tree for California Housing Prices</text>
                   <!-- Root node -->
-                  <rect x="280" y="28" width="140" height="36" rx="6" fill="#c6dbef" stroke="#6baed6" stroke-width="1.5"/>
+                  <rect x="280" y="28" width="140" height="36" rx="6" fill="#c6dbef" stroke="#2563eb" stroke-width="1.5"/>
                   <text x="350" y="42" text-anchor="middle" font-size="9" fill="#333" font-weight="600">MedInc &lt;= 5.03</text>
                   <text x="350" y="56" text-anchor="middle" font-size="8" fill="#555">n=16512, mse=1.33</text>
                   <!-- Level 2 left -->
                   <line x1="320" y1="64" x2="180" y2="85" stroke="#999" stroke-width="1"/>
-                  <rect x="110" y="85" width="140" height="36" rx="6" fill="#d4e8d1" stroke="#74c476" stroke-width="1.5"/>
+                  <rect x="110" y="85" width="140" height="36" rx="6" fill="#d4e8d1" stroke="#059669" stroke-width="1.5"/>
                   <text x="180" y="99" text-anchor="middle" font-size="9" fill="#333" font-weight="600">AveOccup &lt;= 3.15</text>
                   <text x="180" y="113" text-anchor="middle" font-size="8" fill="#555">n=10232, mse=0.52</text>
                   <!-- Level 2 right -->
                   <line x1="380" y1="64" x2="520" y2="85" stroke="#999" stroke-width="1"/>
-                  <rect x="450" y="85" width="140" height="36" rx="6" fill="#fdd0a2" stroke="#fd8d3c" stroke-width="1.5"/>
+                  <rect x="450" y="85" width="140" height="36" rx="6" fill="#fdd0a2" stroke="#f59e0b" stroke-width="1.5"/>
                   <text x="520" y="99" text-anchor="middle" font-size="9" fill="#333" font-weight="600">MedInc &lt;= 7.32</text>
                   <text x="520" y="113" text-anchor="middle" font-size="8" fill="#555">n=6280, mse=1.08</text>
                   <!-- Level 3 leaves (left subtree) -->
                   <line x1="150" y1="121" x2="80" y2="148" stroke="#999" stroke-width="1"/>
-                  <rect x="20" y="148" width="120" height="36" rx="6" fill="#a1d99b" stroke="#74c476" stroke-width="1.5"/>
+                  <rect x="20" y="148" width="120" height="36" rx="6" fill="#a1d99b" stroke="#059669" stroke-width="1.5"/>
                   <text x="80" y="162" text-anchor="middle" font-size="9" fill="#333" font-weight="600">Latitude &lt;= 34.1</text>
                   <text x="80" y="176" text-anchor="middle" font-size="8" fill="#555">n=7198, val=1.54</text>
                   <line x1="210" y1="121" x2="270" y2="148" stroke="#999" stroke-width="1"/>
-                  <rect x="210" y="148" width="120" height="36" rx="6" fill="#c7e9c0" stroke="#74c476" stroke-width="1.5"/>
+                  <rect x="210" y="148" width="120" height="36" rx="6" fill="#c7e9c0" stroke="#059669" stroke-width="1.5"/>
                   <text x="270" y="162" text-anchor="middle" font-size="9" fill="#333" font-weight="600">HouseAge &lt;= 28.5</text>
                   <text x="270" y="176" text-anchor="middle" font-size="8" fill="#555">n=3034, val=2.12</text>
                   <!-- Level 3 (right subtree) -->
                   <line x1="490" y1="121" x2="420" y2="148" stroke="#999" stroke-width="1"/>
-                  <rect x="360" y="148" width="120" height="36" rx="6" fill="#fdae6b" stroke="#fd8d3c" stroke-width="1.5"/>
+                  <rect x="360" y="148" width="120" height="36" rx="6" fill="#fdae6b" stroke="#f59e0b" stroke-width="1.5"/>
                   <text x="420" y="162" text-anchor="middle" font-size="9" fill="#333" font-weight="600">Longitude &lt;= -118</text>
                   <text x="420" y="176" text-anchor="middle" font-size="8" fill="#555">n=4105, val=2.87</text>
                   <line x1="550" y1="121" x2="610" y2="148" stroke="#999" stroke-width="1"/>
-                  <rect x="550" y="148" width="120" height="36" rx="6" fill="#f16913" stroke="#d94801" stroke-width="1.5"/>
+                  <rect x="550" y="148" width="120" height="36" rx="6" fill="#f16913" stroke="#dc2626" stroke-width="1.5"/>
                   <text x="610" y="162" text-anchor="middle" font-size="9" fill="#333" font-weight="600">AveRooms &lt;= 6.8</text>
                   <text x="610" y="176" text-anchor="middle" font-size="8" fill="#555">n=2175, val=3.65</text>
                   <!-- Level 4 leaf nodes -->
@@ -446,10 +467,10 @@ Tree depth:         5
                   <rect x="283" y="210" width="54" height="28" rx="5" fill="#c7e9c0" stroke="#74c476"/>
                   <text x="310" y="228" text-anchor="middle" font-size="8" fill="#333" font-weight="600">2.41</text>
                   <line x1="395" y1="184" x2="375" y2="210" stroke="#999" stroke-width="0.8"/>
-                  <rect x="348" y="210" width="54" height="28" rx="5" fill="#fdae6b" stroke="#fd8d3c"/>
+                  <rect x="348" y="210" width="54" height="28" rx="5" fill="#fdae6b" stroke="#f59e0b"/>
                   <text x="375" y="228" text-anchor="middle" font-size="8" fill="#333" font-weight="600">2.53</text>
                   <line x1="445" y1="184" x2="460" y2="210" stroke="#999" stroke-width="0.8"/>
-                  <rect x="433" y="210" width="54" height="28" rx="5" fill="#f16913" stroke="#d94801"/>
+                  <rect x="433" y="210" width="54" height="28" rx="5" fill="#f16913" stroke="#dc2626"/>
                   <text x="460" y="228" text-anchor="middle" font-size="8" fill="white" font-weight="600">3.21</text>
                   <line x1="585" y1="184" x2="565" y2="210" stroke="#999" stroke-width="0.8"/>
                   <rect x="538" y="210" width="54" height="28" rx="5" fill="#e6550d" stroke="#a63603"/>
@@ -500,179 +521,101 @@ Number of leaves: 11
         </div>
 
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Instantiate a decision tree with pruning constraints via keyword arguments",
-                  "pattern": "model = DecisionTreeRegressor(max_depth=N, min_samples_leaf=N, ccp_alpha=N)",
-                  "structureNote": "Pattern: <code>DecisionTreeRegressor(max_depth=N, min_samples_leaf=M).fit(X, y)</code>. Pruning params prevent the tree from growing too deep.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "tree",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "DecisionTreeRegressor",
-                        "role": "Class",
-                        "tip": "From <code>sklearn.tree</code>.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "max_depth",
-                        "role": "Keyword Arg",
-                        "tip": "Integer. Limits splitting depth.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "=",
-                        "role": "",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "5,",
-                        "role": "Value",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "min_samples_leaf",
-                        "role": "Keyword Arg",
-                        "tip": "Minimum observations per leaf node.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "=",
-                        "role": "",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "10",
-                        "role": "Value",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ],
-                    "r": [
-                      {
-                        "code": "tree_model",
-                        "role": "Variable",
-                        "tip": "Stores the fitted rpart tree object",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " <- ",
-                        "role": "Assignment",
-                        "tip": "R's assignment arrow",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "rpart",
-                        "role": "Function",
-                        "tip": "Fits a CART decision tree -- stands for Recursive Partitioning and Regression Trees",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "Open paren",
-                        "tip": "Begins the argument list",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "medv ~ ., ",
-                        "role": "Formula",
-                        "tip": "R formula: predict medv using all other variables in the data frame (the dot means 'everything else')",
-                        "color": "green"
-                      },
-                      {
-                        "code": "data",
-                        "role": "Parameter",
-                        "tip": "Specifies the data frame containing the variables",
-                        "color": "sky"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Binding",
-                        "tip": "Connects parameter to value",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "train, ",
-                        "role": "Variable",
-                        "tip": "The training data frame",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "method",
-                        "role": "Parameter",
-                        "tip": "Specifies the type of tree to build",
-                        "color": "sky"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Binding",
-                        "tip": "Connects parameter to value",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "\"anova\"",
-                        "role": "String",
-                        "tip": "method = 'anova' builds a regression tree that minimizes MSE -- use 'class' for classification",
-                        "color": "green"
-                      },
-                      {
-                        "code": ")",
-                        "role": "Close paren",
-                        "tip": "Ends the rpart() call -- the tree is fitted immediately",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
         <!-- ===================== RANDOM FORESTS ===================== -->
         <h2 id="random-forests">Random Forests</h2>
 
-        <p>A single decision tree is easy to interpret but tends to have high variance: if you slightly change the training data, you might get a completely different tree. <strong>Random Forests</strong>, proposed by Leo Breiman in 2001, solve this problem through a deceptively simple idea: grow many trees and average their predictions. The intuition is the same as polling: asking one person for a forecast is unreliable, but averaging the forecasts of hundreds of independent people tends to be remarkably accurate. This is the <em>wisdom of crowds</em> applied to prediction.</p>
+        <div class="info-box" style="background: #f0fdf4; border-left: 4px solid #059669; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin-top: 0; color: #065f46;">Analogy: Asking 500 Experts and Taking a Vote</h3>
+          <p style="margin: 0;">A Random Forest is like consulting 500 different experts, where each expert has studied a slightly different random subset of the available evidence, and each one focuses on different aspects of the problem. Individually, each expert might make mistakes. But when you average all 500 opinions, the errors tend to cancel out and the collective answer is remarkably accurate. This is the "wisdom of crowds" applied to prediction.</p>
+        </div>
 
-        <p>Random Forests combine two sources of randomness. The first is <span class="code-tooltip" data-tip="Bootstrap aggregation: each tree is trained on a random sample (with replacement) of the same size as the original training data. About 63% of original observations appear in each bootstrap sample."><strong>bagging</strong></span> (bootstrap aggregation): each tree is trained on a different bootstrap sample of the data — a random sample drawn with replacement. This means each tree sees a slightly different version of the training data. The second source of randomness is <strong>random feature subsets</strong>: at each split, instead of considering all features, the algorithm randomly selects a subset of features and picks the best split among those. This decorrelates the trees — if one feature is very strong, not every tree will split on it first, giving other features a chance to contribute.</p>
+        <div class="info-box" style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin-top: 0; color: #92400e;">What Are Random Forests For?</h3>
+          <p style="margin: 0;">Random Forests are the <strong>best general-purpose method for tabular data</strong>. They work well out of the box with minimal tuning, handle nonlinear relationships and interactions automatically, and are robust to outliers. If you are starting a prediction task on structured data (spreadsheets, survey data, administrative records) and do not know which method to try first, start with a Random Forest. It is the reliable workhorse of applied machine learning.</p>
+        </div>
 
-        <p>Together, bagging and random feature selection produce an ensemble of diverse, low-bias trees whose errors tend to cancel out when averaged. The result is a model that has much lower variance than a single tree, while retaining the ability to capture complex nonlinear patterns. For regression, the Random Forest prediction is simply the average of all the individual tree predictions; for classification, it is a majority vote.</p>
+        <p>A single decision tree is easy to interpret but tends to have high variance: if you slightly change the training data, you might get a completely different tree. <strong>Random Forests</strong>, proposed by Leo Breiman in 2001, solve this problem by growing many trees and averaging their predictions.</p>
 
-        <p>An elegant feature of Random Forests is the <span class="code-tooltip" data-tip="Each observation is 'out of bag' (not selected) for about 37% of the trees. We can predict each observation using only the trees that did NOT include it in their bootstrap sample, giving us a validation error estimate for free."><strong>out-of-bag (OOB) error</strong></span>. Because each tree is trained on only about 63% of the data (the bootstrap sample), the remaining 37% can be used as a built-in validation set. The OOB error is computed by predicting each observation using only the trees that did not include it in their training sample. This gives you a reliable estimate of generalization error without needing a separate validation set — it is essentially free cross-validation.</p>
+        <p>Random Forests combine two sources of randomness. The first is <span class="code-tooltip" data-tip="Bootstrap aggregation: each tree is trained on a random sample (with replacement) of the same size as the original training data. About 63% of original observations appear in each bootstrap sample."><strong>bagging</strong></span> (bootstrap aggregation): each tree is trained on a different bootstrap sample of the data &mdash; a random sample drawn with replacement. The second source of randomness is <strong>random feature subsets</strong>: at each split, instead of considering all features, the algorithm randomly selects a subset and picks the best split among those. This decorrelates the trees &mdash; if one feature is very strong, not every tree will split on it first, giving other features a chance to contribute.</p>
 
-        <p>The main downside of Random Forests is interpretability. While a single tree is a transparent flowchart, a forest of 500 trees is a black box. You cannot easily explain why the model made a particular prediction. However, as we will see in the next sections, tools like variable importance and SHAP values can help us peek inside the box.</p>
+        <p>An elegant feature of Random Forests is the <span class="code-tooltip" data-tip="Each observation is 'out of bag' (not selected) for about 37% of the trees. We can predict each observation using only the trees that did NOT include it in their bootstrap sample, giving us a validation error estimate for free."><strong>out-of-bag (OOB) error</strong></span>. Because each tree is trained on only about 63% of the data (the bootstrap sample), the remaining 37% can be used as a built-in validation set. The OOB error gives you a reliable estimate of generalization error without needing a separate validation set &mdash; it is essentially free cross-validation.</p>
+
+        <!-- SVG: Single Tree vs. Ensemble -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
+          <h4 style="margin: 0 0 1.5rem 0; color: #1e293b;">Single Tree vs. Random Forest: Why Averaging Helps</h4>
+          <div style="display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; align-items: flex-start;">
+            <div>
+              <p style="font-weight: 600; color: #475569; margin-bottom: 0.75rem; font-size: 0.9rem;">Single Tree (choppy, high variance)</p>
+              <svg viewBox="0 0 240 160" style="max-width: 240px;">
+                <rect width="240" height="160" fill="white" rx="4"/>
+                <!-- Axes -->
+                <line x1="30" y1="140" x2="230" y2="140" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="30" y1="10" x2="30" y2="140" stroke="#94a3b8" stroke-width="1"/>
+                <text x="130" y="155" text-anchor="middle" font-size="9" fill="#64748b">Feature</text>
+                <text x="12" y="80" text-anchor="middle" font-size="9" fill="#64748b" transform="rotate(-90, 12, 80)">Prediction</text>
+                <!-- Data points -->
+                <circle cx="45" cy="115" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="60" cy="105" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="75" cy="100" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="90" cy="85" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="105" cy="80" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="120" cy="70" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="135" cy="55" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="150" cy="50" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="165" cy="40" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="180" cy="35" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="195" cy="25" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="210" cy="20" r="3" fill="#2563eb" opacity="0.4"/>
+                <!-- Step function (single tree prediction) -->
+                <line x1="35" y1="110" x2="72" y2="110" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="72" y1="110" x2="72" y2="90" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="72" y1="90" x2="105" y2="90" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="105" y1="90" x2="105" y2="65" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="105" y1="65" x2="140" y2="65" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="140" y1="65" x2="140" y2="45" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="140" y1="45" x2="175" y2="45" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="175" y1="45" x2="175" y2="25" stroke="#dc2626" stroke-width="2.5"/>
+                <line x1="175" y1="25" x2="220" y2="25" stroke="#dc2626" stroke-width="2.5"/>
+              </svg>
+            </div>
+            <div>
+              <p style="font-weight: 600; color: #475569; margin-bottom: 0.75rem; font-size: 0.9rem;">Random Forest (smooth, low variance)</p>
+              <svg viewBox="0 0 240 160" style="max-width: 240px;">
+                <rect width="240" height="160" fill="white" rx="4"/>
+                <!-- Axes -->
+                <line x1="30" y1="140" x2="230" y2="140" stroke="#94a3b8" stroke-width="1"/>
+                <line x1="30" y1="10" x2="30" y2="140" stroke="#94a3b8" stroke-width="1"/>
+                <text x="130" y="155" text-anchor="middle" font-size="9" fill="#64748b">Feature</text>
+                <text x="12" y="80" text-anchor="middle" font-size="9" fill="#64748b" transform="rotate(-90, 12, 80)">Prediction</text>
+                <!-- Data points -->
+                <circle cx="45" cy="115" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="60" cy="105" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="75" cy="100" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="90" cy="85" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="105" cy="80" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="120" cy="70" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="135" cy="55" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="150" cy="50" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="165" cy="40" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="180" cy="35" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="195" cy="25" r="3" fill="#2563eb" opacity="0.4"/>
+                <circle cx="210" cy="20" r="3" fill="#2563eb" opacity="0.4"/>
+                <!-- Individual tree predictions (faint) -->
+                <polyline points="35,112 72,108 105,88 140,62 175,42 220,22" fill="none" stroke="#94a3b8" stroke-width="0.7" opacity="0.3"/>
+                <polyline points="35,108 72,92 105,70 140,68 175,48 220,28" fill="none" stroke="#94a3b8" stroke-width="0.7" opacity="0.3"/>
+                <polyline points="35,115 72,95 105,82 140,58 175,40 220,20" fill="none" stroke="#94a3b8" stroke-width="0.7" opacity="0.3"/>
+                <!-- Averaged prediction (smooth curve) -->
+                <polyline points="35,112 50,107 65,101 80,94 95,86 110,78 125,69 140,61 155,52 170,44 185,36 200,28 215,22" fill="none" stroke="#059669" stroke-width="3"/>
+                <!-- Legend -->
+                <line x1="50" y1="135" x2="70" y2="135" stroke="#94a3b8" stroke-width="1" opacity="0.5"/>
+                <text x="74" y="138" font-size="7" fill="#64748b">Individual trees</text>
+                <line x1="140" y1="135" x2="160" y2="135" stroke="#059669" stroke-width="2.5"/>
+                <text x="164" y="138" font-size="7" fill="#059669">Forest average</text>
+              </svg>
+            </div>
+          </div>
+          <p style="margin: 1rem 0 0; font-size: 0.85rem; color: #475569;">Averaging many choppy trees produces a smooth prediction that closely follows the true pattern in the data.</p>
+        </div>
 
         <!-- Code Block: Random Forest -->
         <div class="code-tabs" data-runnable="ml-tree-2">
@@ -688,12 +631,12 @@ Number of leaves: 11
 <span class="code-comment"># Fit a Random Forest</span>
 rf = <span class="code-function">RandomForestRegressor</span>(
     <span class="code-tooltip" data-tip="NUM TREES: 500 individual decision trees will be grown and averaged. More trees = better and more stable predictions, but slower training. 500 is a good default.">n_estimators=500</span>,
-    <span class="code-tooltip" data-tip="NO DEPTH LIMIT: None means each tree can grow as deep as needed. Unlike a single tree, overfitting per tree is okay in a forest because averaging many deep trees cancels out the noise.">max_depth=None</span>,
-    <span class="code-tooltip" data-tip="FEATURE SUBSET: At each split, only a random subset of features is considered (here, sqrt of total). This forces trees to use different features, making them diverse — the key to why random forests work.">max_features='sqrt'</span>,
-    <span class="code-tooltip" data-tip="MIN LEAF: Each leaf must have at least 5 observations. A mild constraint that prevents trees from creating predictions based on too few data points.">min_samples_leaf=5</span>,
-    <span class="code-tooltip" data-tip="OOB SCORE: Each tree only sees ~63% of the data (its bootstrap sample). The remaining 37% are 'out of bag' — used to estimate accuracy for free, without needing a separate validation set.">oob_score=True</span>,
+    <span class="code-tooltip" data-tip="NO DEPTH LIMIT: None means each tree can grow as deep as needed. Unlike a single tree, overfitting per tree is okay in a forest because averaging cancels out the noise.">max_depth=None</span>,
+    <span class="code-tooltip" data-tip="FEATURE SUBSET: At each split, only sqrt(n_features) features are considered. This forces trees to use different features, making them diverse.">max_features='sqrt'</span>,
+    <span class="code-tooltip" data-tip="MIN LEAF: Each leaf must have at least 5 observations, preventing predictions based on too few data points.">min_samples_leaf=5</span>,
+    <span class="code-tooltip" data-tip="OOB SCORE: Each tree only sees ~63% of the data. The remaining 37% are 'out of bag' -- used to estimate accuracy for free.">oob_score=True</span>,
     random_state=42,
-    <span class="code-tooltip" data-tip="PARALLEL: Uses all CPU cores to train trees simultaneously. Since trees are independent of each other, this makes training much faster on multi-core machines.">n_jobs=-1</span>
+    <span class="code-tooltip" data-tip="PARALLEL: Uses all CPU cores to train trees simultaneously, since trees are independent of each other.">n_jobs=-1</span>
 )
 rf.<span class="code-function">fit</span>(X_train, y_train)
 
@@ -701,7 +644,7 @@ rf.<span class="code-function">fit</span>(X_train, y_train)
 y_pred = rf.<span class="code-function">predict</span>(X_test)
 <span class="code-function">print</span>(<span class="code-string">f"OOB R-squared:  {rf.oob_score_:.4f}"</span>)
 <span class="code-function">print</span>(<span class="code-string">f"Test R-squared: {r2_score(y_test, y_pred):.4f}"</span>)
-<span class="code-function">print</span>(<span class="code-string">f"Test RMSE:      {mean_squared_error(y_test, y_pred, squared=False):.4f}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"Test RMSE:      {np.sqrt(mean_squared_error(y_test, y_pred)):.4f}"</span>)
 <span class="code-function">print</span>(<span class="code-string">f"Number of trees: {rf.n_estimators}"</span>)</code></pre>
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
@@ -718,11 +661,11 @@ y_pred = rf.<span class="code-function">predict</span>(X_test)
 
 <span class="code-comment">* Fit random forest (500 trees, max depth 10)</span>
 <span class="code-keyword">rforest</span> price mpg weight length foreign <span class="code-keyword">if</span> train == 1, ///
-    <span class="code-tooltip" data-tip="REGRESSION: Predicts a continuous outcome (car price). For categorical outcomes like default/no-default, you would use type(class) instead.">type(reg)</span> ///
-    <span class="code-tooltip" data-tip="NUM TREES: Grows 500 individual trees that will be averaged. Performance typically plateaus after a few hundred trees.">iterations(500)</span> ///
-    <span class="code-tooltip" data-tip="FEATURES PER SPLIT: Only 2 of the 4 features are randomly considered at each split. This randomness decorrelates the trees and improves ensemble performance.">numvars(2)</span> ///
-    <span class="code-tooltip" data-tip="DEPTH: Limits each tree to 10 levels of splits. In a forest, individual trees can be fairly deep since averaging reduces overfitting.">depth(10)</span> ///
-    <span class="code-tooltip" data-tip="MIN LEAF: Requires at least 5 observations in each terminal group, ensuring each prediction is based on enough data.">lsize(5)</span>
+    <span class="code-tooltip" data-tip="REGRESSION: Predicts a continuous outcome (car price). For categorical outcomes, use type(class).">type(reg)</span> ///
+    <span class="code-tooltip" data-tip="NUM TREES: Grows 500 individual trees that will be averaged.">iterations(500)</span> ///
+    <span class="code-tooltip" data-tip="FEATURES PER SPLIT: Only 2 of the 4 features are randomly considered at each split, decorrelating the trees.">numvars(2)</span> ///
+    <span class="code-tooltip" data-tip="DEPTH: Limits each tree to 10 levels of splits.">depth(10)</span> ///
+    <span class="code-tooltip" data-tip="MIN LEAF: Requires at least 5 observations in each terminal group.">lsize(5)</span>
 
 <span class="code-comment">* Predict and evaluate</span>
 <span class="code-keyword">predict</span> price_hat
@@ -736,16 +679,16 @@ y_pred = rf.<span class="code-function">predict</span>(X_test)
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Random Forest with the ranger package (fast implementation)</span>
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="RANGER: A fast, C++-based Random Forest implementation for R. Significantly faster than the classic randomForest package, especially with many features or observations.">ranger</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="RANGER: A fast, C++-based Random Forest implementation for R. Significantly faster than the classic randomForest package.">ranger</span>)
 
 <span class="code-comment"># Fit random forest</span>
 rf_model &lt;- <span class="code-function">ranger</span>(
   medv ~ .,
   data = train,
-  <span class="code-tooltip" data-tip="NUM TREES: 500 trees will be grown and their predictions averaged. More trees give more stable results but take longer to train.">num.trees = 500</span>,
-  <span class="code-tooltip" data-tip="FEATURES PER SPLIT: At each split, the algorithm randomly picks 4 features and chooses the best among them. This randomness creates diverse trees that complement each other.">mtry = 4</span>,
-  <span class="code-tooltip" data-tip="MIN NODE: Each leaf must contain at least 5 observations, preventing the tree from creating tiny groups based on noise.">min.node.size = 5</span>,
-  <span class="code-tooltip" data-tip="IMPORTANCE: Enables permutation importance — measures each feature's contribution by randomly shuffling it and seeing how much prediction accuracy drops. Larger drops = more important features.">importance = "permutation"</span>
+  <span class="code-tooltip" data-tip="NUM TREES: 500 trees will be grown and their predictions averaged.">num.trees = 500</span>,
+  <span class="code-tooltip" data-tip="FEATURES PER SPLIT: At each split, 4 randomly chosen features are considered. This creates diverse trees.">mtry = 4</span>,
+  <span class="code-tooltip" data-tip="MIN NODE: Each leaf must contain at least 5 observations.">min.node.size = 5</span>,
+  <span class="code-tooltip" data-tip="IMPORTANCE: Enables permutation importance -- measures each feature's contribution by shuffling it and measuring the drop in accuracy.">importance = "permutation"</span>
 )
 
 <span class="code-comment"># Predictions on test data</span>
@@ -796,193 +739,19 @@ Test RMSE: 2.8721</pre></div>
         </div>
 
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Configure a Random Forest with <code>n_estimators</code> and <code>oob_score</code>",
-                  "pattern": "model = RandomForestRegressor(n_estimators=N, max_features=str, oob_score=True)",
-                  "structureNote": "Pattern: <code>RandomForestRegressor(n_estimators=N, oob_score=True).fit(X, y)</code>. Access OOB score via <code>.oob_score_</code> (trailing underscore = fitted attribute).",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "rf",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "RandomForestRegressor",
-                        "role": "Class",
-                        "tip": "From <code>sklearn.ensemble</code>.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "n_estimators",
-                        "role": "Keyword Arg",
-                        "tip": "Number of trees in the ensemble.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "=",
-                        "role": "",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "500,",
-                        "role": "Value",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "oob_score",
-                        "role": "Keyword Arg",
-                        "tip": "Boolean. Enables out-of-bag evaluation.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "=",
-                        "role": "",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "True",
-                        "role": "Value",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ],
-                    "r": [
-                      {
-                        "code": "rf_model",
-                        "role": "Variable",
-                        "tip": "Stores the fitted ranger model object",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " <- ",
-                        "role": "Assignment",
-                        "tip": "R's assignment arrow",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "ranger",
-                        "role": "Function",
-                        "tip": "A fast Random Forest implementation in R -- faster than the classic randomForest package",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "Open paren",
-                        "tip": "Begins arguments",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "medv ~ ., ",
-                        "role": "Formula",
-                        "tip": "Predict medv using all other variables",
-                        "color": "green"
-                      },
-                      {
-                        "code": "data",
-                        "role": "Parameter",
-                        "tip": "The data frame to use",
-                        "color": "sky"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Binding",
-                        "tip": "Connects parameter to value",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "train, ",
-                        "role": "Variable",
-                        "tip": "Training data frame",
-                        "color": "pink"
-                      },
-                      {
-                        "code": "num.trees",
-                        "role": "Parameter",
-                        "tip": "Number of trees in the forest (R uses dots in parameter names)",
-                        "color": "sky"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Binding",
-                        "tip": "Connects parameter to value",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "500, ",
-                        "role": "Integer",
-                        "tip": "500 trees",
-                        "color": "green"
-                      },
-                      {
-                        "code": "importance",
-                        "role": "Parameter",
-                        "tip": "Which variable importance measure to compute",
-                        "color": "sky"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Binding",
-                        "tip": "Connects parameter to value",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "\"permutation\"",
-                        "role": "String",
-                        "tip": "Compute permutation importance -- measures how much each feature contributes by shuffling it and measuring the performance drop",
-                        "color": "green"
-                      },
-                      {
-                        "code": ")",
-                        "role": "Close paren",
-                        "tip": "Ends the ranger() call -- the model is fitted immediately (R does not separate construction from fitting)",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
         <!-- ===================== VARIABLE IMPORTANCE ===================== -->
         <h2 id="variable-importance">Variable Importance</h2>
 
-        <p>One of the most useful outputs from a Random Forest is the <strong>variable importance</strong> ranking, which tells you which features contribute most to the model's predictions. There are two main measures. The first is <span class="code-tooltip" data-tip="Mean Decrease in Impurity: for each feature, sums the reduction in MSE (or Gini impurity) achieved across all splits on that feature, across all trees. Features that appear in more splits and produce larger improvements rank higher."><strong>MDI</strong></span> (Mean Decrease in Impurity, also called Gini importance): for each feature, it sums up the total reduction in the loss function across all splits that use that feature, averaged over all trees. Features that lead to large improvements in node purity are ranked as more important.</p>
+        <div class="info-box" style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin-top: 0; color: #92400e;">What Is Variable Importance For?</h3>
+          <p style="margin: 0;">Variable importance answers the question: <strong>"Which features matter most for predictions?"</strong> After building a Random Forest or XGBoost model, you often want to know which variables are driving the results. For example, when predicting household consumption expenditure, is it income, household size, or education level that matters most? Variable importance rankings help you communicate results to stakeholders and identify the key drivers in your data. But remember: importance is about <em>prediction</em>, not <em>causation</em>.</p>
+        </div>
 
-        <p>The second measure is <span class="code-tooltip" data-tip="For each feature, randomly shuffle (permute) its values and measure how much the model's prediction error increases. A large increase means the feature was important; a small increase means the model does not rely on it."><strong>permutation importance</strong></span>: for each feature, randomly shuffle its values across observations (breaking the relationship between the feature and the outcome) and measure how much the model's performance degrades. A feature is important if shuffling it causes a large increase in prediction error. Permutation importance is generally considered more reliable than MDI because MDI can be biased toward high-cardinality features (features with many unique values, like ID numbers, tend to get artificially high MDI scores).</p>
+        <p>There are two main measures. The first is <span class="code-tooltip" data-tip="Mean Decrease in Impurity: for each feature, sums the reduction in MSE (or Gini impurity) achieved across all splits on that feature, across all trees."><strong>MDI</strong></span> (Mean Decrease in Impurity, also called Gini importance): for each feature, it sums up the total reduction in the loss function across all splits that use that feature, averaged over all trees. Features that lead to large improvements in node purity are ranked as more important.</p>
 
-        <p>A critical caveat: <strong>variable importance is not causal inference</strong>. A feature can rank high in importance because it is a good predictor, not because it has a causal effect on the outcome. For example, "number of fire trucks at a fire" is a strong predictor of property damage, but sending fewer trucks would obviously not reduce damage. Always interpret importance rankings as associations, not as evidence that changing a variable would change the outcome.</p>
+        <p>The second measure is <span class="code-tooltip" data-tip="For each feature, randomly shuffle (permute) its values and measure how much the model's prediction error increases. A large increase means the feature was important."><strong>permutation importance</strong></span>: for each feature, randomly shuffle its values across observations (breaking the relationship between the feature and the outcome) and measure how much the model's performance degrades. Permutation importance is generally considered more reliable than MDI because MDI can be biased toward high-cardinality features (features with many unique values tend to get artificially high MDI scores).</p>
+
+        <p>A critical caveat: <strong>variable importance is not causal inference</strong>. A feature can rank high because it is a good predictor, not because it has a causal effect. For example, "number of fire trucks at a fire" is a strong predictor of property damage, but sending fewer trucks would obviously not reduce damage. Always interpret importance rankings as associations, not as evidence that changing a variable would change the outcome.</p>
 
         <!-- Code Block: Variable Importance -->
         <div class="code-tabs" data-runnable="ml-tree-3">
@@ -992,7 +761,7 @@ Test RMSE: 2.8721</pre></div>
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-keyword">from</span> sklearn.inspection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="PERMUTATION IMP: For each feature, randomly scrambles its values and measures how much worse the model predicts. More reliable than the default Gini importance, which can be biased toward features with many unique values.">permutation_importance</span>
+<pre><code><span class="code-keyword">from</span> sklearn.inspection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="PERMUTATION IMP: For each feature, randomly scrambles its values and measures how much worse the model predicts. More reliable than the default Gini importance.">permutation_importance</span>
 
 <span class="code-comment"># MDI importance (built into the fitted model)</span>
 mdi_imp = pd.<span class="code-function">Series</span>(rf.feature_importances_, index=X.columns)
@@ -1003,7 +772,7 @@ mdi_imp = mdi_imp.<span class="code-function">sort_values</span>(ascending=False
 <span class="code-comment"># Permutation importance (more reliable)</span>
 perm_result = <span class="code-function">permutation_importance</span>(
     rf, X_test, y_test,
-    <span class="code-tooltip" data-tip="REPEATS: Each feature is shuffled 10 times, giving 10 estimates of its importance. Averaging reduces the randomness of any single shuffle, producing more stable rankings.">n_repeats=10</span>,
+    <span class="code-tooltip" data-tip="REPEATS: Each feature is shuffled 10 times, producing more stable importance rankings.">n_repeats=10</span>,
     random_state=42,
     n_jobs=-1
 )
@@ -1048,7 +817,7 @@ plt.<span class="code-function">show</span>()</code></pre>
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Variable importance with ranger + vip package</span>
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="VIP: Variable Importance Plots package — works with many model types (random forests, XGBoost, etc.) to create clean, publication-ready bar charts of feature importance.">vip</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="VIP: Variable Importance Plots package -- works with many model types to create clean bar charts of feature importance.">vip</span>)
 
 <span class="code-comment"># The ranger model already has permutation importance (set earlier)</span>
 <span class="code-comment"># Extract and display</span>
@@ -1063,7 +832,7 @@ imp_df &lt;- imp_df[<span class="code-function">order</span>(-imp_df$Importance)
 <span class="code-comment"># Plot variable importance</span>
 <span class="code-function">vip</span>(rf_model,
     num_features = 10,
-    <span class="code-tooltip" data-tip="BAR CHART: Horizontal bars make feature names easy to read — especially useful when you have many predictors to compare.">bar = TRUE</span>,
+    <span class="code-tooltip" data-tip="BAR CHART: Horizontal bars make feature names easy to read.">bar = TRUE</span>,
     aesthetics = <span class="code-function">list</span>(fill = <span class="code-string">"steelblue"</span>)
 ) + <span class="code-function">ggtitle</span>(<span class="code-string">"Permutation Importance (Random Forest)"</span>)</code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
@@ -1101,28 +870,28 @@ AveBedrms     0.0045</pre></div>
                   <text x="160" y="18" text-anchor="middle" font-size="12" font-weight="600" fill="#333">MDI (Gini) Importance</text>
                   <!-- Bars (horizontal) -->
                   <text x="72" y="42" text-anchor="end" font-size="9" fill="#555">MedInc</text>
-                  <rect x="76" y="32" width="218" height="16" rx="2" fill="#4682b4"/>
+                  <rect x="76" y="32" width="218" height="16" rx="2" fill="#2563eb"/>
                   <text x="298" y="44" font-size="8" fill="#333">0.52</text>
                   <text x="72" y="66" text-anchor="end" font-size="9" fill="#555">AveOccup</text>
-                  <rect x="76" y="56" width="48" height="16" rx="2" fill="#4682b4"/>
+                  <rect x="76" y="56" width="48" height="16" rx="2" fill="#2563eb"/>
                   <text x="128" y="68" font-size="8" fill="#333">0.11</text>
                   <text x="72" y="90" text-anchor="end" font-size="9" fill="#555">Latitude</text>
-                  <rect x="76" y="80" width="37" height="16" rx="2" fill="#4682b4"/>
+                  <rect x="76" y="80" width="37" height="16" rx="2" fill="#2563eb"/>
                   <text x="117" y="92" font-size="8" fill="#333">0.09</text>
                   <text x="72" y="114" text-anchor="end" font-size="9" fill="#555">Longitude</text>
-                  <rect x="76" y="104" width="36" height="16" rx="2" fill="#4682b4"/>
+                  <rect x="76" y="104" width="36" height="16" rx="2" fill="#2563eb"/>
                   <text x="116" y="116" font-size="8" fill="#333">0.09</text>
                   <text x="72" y="138" text-anchor="end" font-size="9" fill="#555">Population</text>
-                  <rect x="76" y="128" width="24" height="16" rx="2" fill="#4682b4"/>
+                  <rect x="76" y="128" width="24" height="16" rx="2" fill="#2563eb"/>
                   <text x="104" y="140" font-size="8" fill="#333">0.06</text>
                   <text x="72" y="162" text-anchor="end" font-size="9" fill="#555">HouseAge</text>
-                  <rect x="76" y="152" width="22" height="16" rx="2" fill="#4682b4"/>
+                  <rect x="76" y="152" width="22" height="16" rx="2" fill="#2563eb"/>
                   <text x="102" y="164" font-size="8" fill="#333">0.05</text>
                   <text x="72" y="186" text-anchor="end" font-size="9" fill="#555">AveRooms</text>
-                  <rect x="76" y="176" width="20" height="16" rx="2" fill="#4682b4"/>
+                  <rect x="76" y="176" width="20" height="16" rx="2" fill="#2563eb"/>
                   <text x="100" y="188" font-size="8" fill="#333">0.05</text>
                   <text x="72" y="210" text-anchor="end" font-size="9" fill="#555">AveBedrms</text>
-                  <rect x="76" y="200" width="13" height="16" rx="2" fill="#4682b4"/>
+                  <rect x="76" y="200" width="13" height="16" rx="2" fill="#2563eb"/>
                   <text x="93" y="212" font-size="8" fill="#333">0.03</text>
                 </svg>
               </div>
@@ -1132,28 +901,28 @@ AveBedrms     0.0045</pre></div>
                   <text x="160" y="18" text-anchor="middle" font-size="12" font-weight="600" fill="#333">Permutation Importance</text>
                   <!-- Bars (horizontal) -->
                   <text x="72" y="42" text-anchor="end" font-size="9" fill="#555">MedInc</text>
-                  <rect x="76" y="32" width="218" height="16" rx="2" fill="#ff7f50"/>
+                  <rect x="76" y="32" width="218" height="16" rx="2" fill="#dc2626"/>
                   <text x="298" y="44" font-size="8" fill="#333">0.58</text>
                   <text x="72" y="66" text-anchor="end" font-size="9" fill="#555">Latitude</text>
-                  <rect x="76" y="56" width="38" height="16" rx="2" fill="#ff7f50"/>
+                  <rect x="76" y="56" width="38" height="16" rx="2" fill="#dc2626"/>
                   <text x="118" y="68" font-size="8" fill="#333">0.10</text>
                   <text x="72" y="90" text-anchor="end" font-size="9" fill="#555">Longitude</text>
-                  <rect x="76" y="80" width="33" height="16" rx="2" fill="#ff7f50"/>
+                  <rect x="76" y="80" width="33" height="16" rx="2" fill="#dc2626"/>
                   <text x="113" y="92" font-size="8" fill="#333">0.09</text>
                   <text x="72" y="114" text-anchor="end" font-size="9" fill="#555">AveOccup</text>
-                  <rect x="76" y="104" width="29" height="16" rx="2" fill="#ff7f50"/>
+                  <rect x="76" y="104" width="29" height="16" rx="2" fill="#dc2626"/>
                   <text x="109" y="116" font-size="8" fill="#333">0.08</text>
                   <text x="72" y="138" text-anchor="end" font-size="9" fill="#555">HouseAge</text>
-                  <rect x="76" y="128" width="8" height="16" rx="2" fill="#ff7f50"/>
+                  <rect x="76" y="128" width="8" height="16" rx="2" fill="#dc2626"/>
                   <text x="88" y="140" font-size="8" fill="#333">0.02</text>
                   <text x="72" y="162" text-anchor="end" font-size="9" fill="#555">AveRooms</text>
-                  <rect x="76" y="152" width="7" height="16" rx="2" fill="#ff7f50"/>
+                  <rect x="76" y="152" width="7" height="16" rx="2" fill="#dc2626"/>
                   <text x="87" y="164" font-size="8" fill="#333">0.02</text>
                   <text x="72" y="186" text-anchor="end" font-size="9" fill="#555">Population</text>
-                  <rect x="76" y="176" width="4" height="16" rx="2" fill="#ff7f50"/>
+                  <rect x="76" y="176" width="4" height="16" rx="2" fill="#dc2626"/>
                   <text x="84" y="188" font-size="8" fill="#333">0.01</text>
                   <text x="72" y="210" text-anchor="end" font-size="9" fill="#555">AveBedrms</text>
-                  <rect x="76" y="200" width="2" height="16" rx="2" fill="#ff7f50"/>
+                  <rect x="76" y="200" width="2" height="16" rx="2" fill="#dc2626"/>
                   <text x="82" y="212" font-size="8" fill="#333">0.00</text>
                 </svg>
               </div>
@@ -1193,111 +962,71 @@ Variable importance (mean decrease in MSE):
         </div>
 
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Call <code>permutation_importance()</code> and access results via <code>.importances_mean</code>",
-                  "pattern": "result = permutation_importance(model, X_test, y_test, n_repeats=N)",
-                  "structureNote": "Pattern: <code>result = permutation_importance(model, X, y, n_repeats=N)</code>. Access <code>.importances_mean</code> and <code>.importances_std</code>.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "result",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "permutation_importance",
-                        "role": "Function",
-                        "tip": "From <code>sklearn.inspection</code>. A standalone function, not a method.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "rf,",
-                        "role": "Positional Arg",
-                        "tip": "Any fitted sklearn estimator.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "X_test,",
-                        "role": "Positional Arg",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "y_test,",
-                        "role": "Positional Arg",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "n_repeats=10",
-                        "role": "Keyword Arg",
-                        "tip": "Number of times to shuffle each feature.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")\n",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "result",
-                        "role": "Object",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ".",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "importances_mean",
-                        "role": "Attribute",
-                        "tip": "Array of mean importance scores, one per feature.",
-                        "color": "mauve"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
         <!-- ===================== GRADIENT BOOSTING & XGBOOST ===================== -->
         <h2 id="boosting">Gradient Boosting & XGBoost</h2>
 
-        <p>While Random Forests build many independent trees in parallel and average them, <strong>gradient boosting</strong> takes a fundamentally different approach: it builds trees <em>sequentially</em>, where each new tree tries to correct the mistakes of the ensemble built so far. The idea is simple but powerful. Start with a naive prediction (say, the mean of the outcome). Compute the residuals — the errors between the true values and the current prediction. Then fit a small tree to those residuals. Add that tree's predictions (scaled by a learning rate) to the ensemble. Compute new residuals. Fit another tree. Repeat.</p>
+        <div class="info-box" style="background: #f0fdf4; border-left: 4px solid #059669; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin-top: 0; color: #065f46;">Analogy: A Team of Specialists Fixing Mistakes</h3>
+          <p style="margin: 0;">Gradient Boosting is like a team of specialists where each one focuses on fixing the mistakes the previous ones made. The first specialist gives a rough estimate. The second one looks at where the first was wrong and corrects those errors. The third specialist corrects whatever errors remain. After 200 or 500 rounds of corrections, the team's combined answer is remarkably precise &mdash; even though each individual specialist was quite weak.</p>
+        </div>
 
-        <p>Each new tree is fitted to the <span class="code-tooltip" data-tip="In gradient boosting, 'residuals' are technically the negative gradient of the loss function. For squared error loss, this is simply (y - current_prediction), which is the ordinary residual.">residuals</span> (technically, the negative gradient of the loss function) of the current ensemble. Because each tree focuses on the cases where the model is currently doing poorly, the ensemble gradually improves in the regions of the feature space where prediction is hardest. The <span class="code-tooltip" data-tip="A number between 0 and 1 that scales each tree's contribution. Smaller values (e.g., 0.01-0.1) mean more trees are needed but generally lead to better generalization.">learning rate</span> (also called shrinkage) controls how much each tree contributes: a smaller learning rate means each tree has less influence, so you need more trees, but the model generalizes better because it avoids overfitting to early patterns.</p>
+        <div class="info-box" style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin-top: 0; color: #92400e;">What Is XGBoost For?</h3>
+          <p style="margin: 0;"><strong>XGBoost is the highest-accuracy method for structured/tabular data.</strong> It is the dominant algorithm in Kaggle competitions, production ML systems at tech companies, and increasingly in applied economics research. Use XGBoost when you need the best possible predictions and are willing to tune hyperparameters. The trade-off: it requires more careful configuration than a Random Forest, and it is a complete black box without SHAP values.</p>
+        </div>
 
-        <p>The key conceptual difference between bagging (Random Forests) and boosting is what they reduce. Bagging reduces <strong>variance</strong>: by averaging many noisy but unbiased trees, the fluctuations cancel out. Boosting reduces <strong>bias</strong>: by sequentially correcting errors, the model gets progressively better at fitting the training data. In practice, gradient boosting often achieves the highest predictive accuracy among conventional machine learning methods, especially for structured (tabular) data — the kind of data economists typically work with.</p>
+        <p>While Random Forests build many independent trees in parallel and average them, <strong>gradient boosting</strong> builds trees <em>sequentially</em>, where each new tree tries to correct the mistakes of the ensemble built so far. Start with a naive prediction (the mean of the outcome). Compute the residuals. Fit a small tree to those residuals. Add that tree's predictions (scaled by a learning rate) to the ensemble. Compute new residuals. Fit another tree. Repeat.</p>
 
-        <p><span class="code-tooltip" data-tip="eXtreme Gradient Boosting: a highly optimized, scalable implementation of gradient boosting by Tianqi Chen. Features include regularization, handling of missing values, and parallel tree construction."><strong>XGBoost</strong></span> (eXtreme Gradient Boosting) is the most popular implementation of gradient boosting. Developed by Tianqi Chen and first released in 2014, XGBoost adds several innovations beyond the basic algorithm: built-in L1 and L2 regularization on the tree structure, efficient handling of missing values, and clever engineering that makes it fast even on large datasets. It also supports <span class="code-tooltip" data-tip="Instead of using all training data for each tree, subsample randomly selects a fraction (e.g., 80%) of observations. This introduces randomness similar to bagging and can improve generalization.">column and row subsampling</span>, which introduces randomness similar to Random Forests and further helps prevent overfitting.</p>
+        <p>Each new tree is fitted to the <span class="code-tooltip" data-tip="In gradient boosting, 'residuals' are technically the negative gradient of the loss function. For squared error loss, this is simply (y - current_prediction).">residuals</span> of the current ensemble. The <span class="code-tooltip" data-tip="A number between 0 and 1 that scales each tree's contribution. Smaller values (e.g., 0.01-0.1) mean more trees are needed but generally lead to better generalization.">learning rate</span> (also called shrinkage) controls how much each tree contributes: a smaller learning rate means each tree has less influence, so you need more trees, but the model generalizes better.</p>
 
-        <p>XGBoost has become the dominant algorithm for tabular prediction tasks in data science competitions and in applied economic research. It consistently outperforms Random Forests on most benchmarks, though it requires more careful tuning of hyperparameters. The main hyperparameters to watch are the <code>learning_rate</code> (shrinkage), <code>n_estimators</code> (number of trees), <code>max_depth</code> (depth of each tree — typically 3 to 8 for boosting, much shallower than in Random Forests), and <code>subsample</code> (fraction of observations used per tree).</p>
+        <p>The key conceptual difference: <strong>bagging (Random Forests) reduces variance</strong> by averaging many noisy trees. <strong>Boosting reduces bias</strong> by sequentially correcting errors. In practice, gradient boosting often achieves the highest predictive accuracy for tabular data &mdash; the kind of data economists typically work with.</p>
+
+        <p><span class="code-tooltip" data-tip="eXtreme Gradient Boosting: a highly optimized, scalable implementation of gradient boosting by Tianqi Chen. Features regularization, handling of missing values, and parallel tree construction."><strong>XGBoost</strong></span> (eXtreme Gradient Boosting) is the most popular implementation. Developed by Tianqi Chen (2014), it adds built-in L1 and L2 regularization, efficient handling of missing values, and fast engineering. It also supports column and row subsampling, introducing randomness that further helps prevent overfitting.</p>
+
+        <p><strong>Economics example:</strong> When predicting county-level unemployment rates using Census data, XGBoost can capture complex interactions &mdash; for example, that the effect of educational attainment on unemployment depends on the local industry mix &mdash; without you having to specify these interactions manually. Researchers at the Federal Reserve and World Bank routinely use XGBoost for economic forecasting.</p>
+
+        <!-- SVG: How Gradient Boosting Works -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
+          <h4 style="margin: 0 0 1.5rem 0; color: #1e293b;">How Gradient Boosting Builds Sequentially</h4>
+          <svg viewBox="0 0 680 140" style="max-width: 680px;" xmlns="http://www.w3.org/2000/svg">
+            <rect width="680" height="140" fill="white" rx="4"/>
+            <!-- Tree 1 -->
+            <rect x="10" y="15" width="100" height="50" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+            <text x="60" y="35" text-anchor="middle" font-size="10" font-weight="600" fill="#1e40af">Tree 1</text>
+            <text x="60" y="52" text-anchor="middle" font-size="8" fill="#64748b">Fits the data</text>
+            <!-- Arrow 1 -->
+            <text x="135" y="45" text-anchor="middle" font-size="18" fill="#059669">+</text>
+            <!-- Tree 2 -->
+            <rect x="160" y="15" width="100" height="50" rx="8" fill="#dcfce7" stroke="#059669" stroke-width="1.5"/>
+            <text x="210" y="35" text-anchor="middle" font-size="10" font-weight="600" fill="#065f46">Tree 2</text>
+            <text x="210" y="52" text-anchor="middle" font-size="8" fill="#64748b">Fits residuals of 1</text>
+            <!-- Arrow 2 -->
+            <text x="285" y="45" text-anchor="middle" font-size="18" fill="#059669">+</text>
+            <!-- Tree 3 -->
+            <rect x="310" y="15" width="100" height="50" rx="8" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="360" y="35" text-anchor="middle" font-size="10" font-weight="600" fill="#92400e">Tree 3</text>
+            <text x="360" y="52" text-anchor="middle" font-size="8" fill="#64748b">Fits residuals of 1+2</text>
+            <!-- Dots -->
+            <text x="440" y="45" text-anchor="middle" font-size="16" fill="#94a3b8">...</text>
+            <!-- Tree N -->
+            <text x="480" y="45" text-anchor="middle" font-size="18" fill="#059669">+</text>
+            <rect x="500" y="15" width="100" height="50" rx="8" fill="#fce7f3" stroke="#dc2626" stroke-width="1.5"/>
+            <text x="550" y="35" text-anchor="middle" font-size="10" font-weight="600" fill="#9f1239">Tree N</text>
+            <text x="550" y="52" text-anchor="middle" font-size="8" fill="#64748b">Fixes last errors</text>
+            <!-- Equals -->
+            <text x="625" y="45" text-anchor="middle" font-size="18" font-weight="bold" fill="#1e293b">=</text>
+            <!-- Result -->
+            <rect x="640" y="20" width="30" height="40" rx="6" fill="#059669"/>
+            <text x="655" y="45" text-anchor="middle" font-size="10" font-weight="bold" fill="white">y</text>
+            <!-- Caption -->
+            <text x="340" y="90" text-anchor="middle" font-size="10" fill="#475569">Each tree is small and weak. The learning rate (e.g., 0.1) scales each tree's contribution.</text>
+            <text x="340" y="105" text-anchor="middle" font-size="10" fill="#475569">Errors shrink with each round. Early stopping prevents overfitting.</text>
+            <!-- Learning rate annotation -->
+            <text x="135" y="78" text-anchor="middle" font-size="9" fill="#2563eb" font-style="italic">x 0.1</text>
+            <text x="285" y="78" text-anchor="middle" font-size="9" fill="#2563eb" font-style="italic">x 0.1</text>
+            <text x="480" y="78" text-anchor="middle" font-size="9" fill="#2563eb" font-style="italic">x 0.1</text>
+          </svg>
+        </div>
 
         <!-- Code Block: XGBoost -->
         <div class="code-tabs" data-runnable="ml-tree-4">
@@ -1312,15 +1041,14 @@ Variable importance (mean decrease in MSE):
 
 <span class="code-comment"># Fit an XGBoost model</span>
 xgb_model = xgb.<span class="code-function">XGBRegressor</span>(
-    <span class="code-tooltip" data-tip="BOOSTING ROUNDS: Up to 500 trees built sequentially, each correcting errors of the previous ones. Early stopping will find the optimal number before overfitting occurs.">n_estimators=500</span>,
-    <span class="code-tooltip" data-tip="SHALLOW TREES: Each tree is only 6 levels deep — intentionally weak. In boosting, many small corrections work better than a few large ones, avoiding overfitting.">max_depth=6</span>,
-    <span class="code-tooltip" data-tip="LEARNING RATE: Each tree's correction is scaled by 0.1 (10%). Smaller values mean the model learns more cautiously — needing more trees but generalizing better to new data.">learning_rate=0.1</span>,
-    <span class="code-tooltip" data-tip="ROW SAMPLING: Each tree sees only 80% of the training data (randomly chosen). This randomness reduces overfitting, similar to bagging in random forests.">subsample=0.8</span>,
-    <span class="code-tooltip" data-tip="COLUMN SAMPLING: Each tree only considers 80% of features, chosen randomly. This prevents any single dominant feature from appearing in every tree.">colsample_bytree=0.8</span>,
-    <span class="code-tooltip" data-tip="L2 PENALTY: Penalizes large leaf predictions (like Ridge regression for coefficients). Prevents individual trees from making extreme predictions.">reg_lambda=1.0</span>,
-    <span class="code-tooltip" data-tip="L1 PENALTY: Like LASSO for leaf predictions — can set some to exactly zero. Set to 0.0 here (disabled), but useful when you want some leaves to have no effect.">reg_alpha=0.0</span>,
-    random_state=42,
-    <span class="code-tooltip" data-tip="EARLY STOPPING: If validation performance does not improve for 20 consecutive trees, stop adding more. This automatically finds the optimal number of trees instead of using all 500.">early_stopping_rounds=20</span>
+    <span class="code-tooltip" data-tip="BOOSTING ROUNDS: Up to 500 trees built sequentially. Early stopping will find the optimal number.">n_estimators=500</span>,
+    <span class="code-tooltip" data-tip="SHALLOW TREES: Each tree is only 6 levels deep -- intentionally weak. Many small corrections beat a few large ones.">max_depth=6</span>,
+    <span class="code-tooltip" data-tip="LEARNING RATE: Each tree's correction is scaled by 0.1. Smaller values learn more cautiously and generalize better.">learning_rate=0.1</span>,
+    <span class="code-tooltip" data-tip="ROW SAMPLING: Each tree sees only 80% of the training data, reducing overfitting.">subsample=0.8</span>,
+    <span class="code-tooltip" data-tip="COLUMN SAMPLING: Each tree only considers 80% of features, preventing any single feature from dominating.">colsample_bytree=0.8</span>,
+    <span class="code-tooltip" data-tip="L2 PENALTY: Penalizes large leaf predictions, preventing extreme values.">reg_lambda=1.0</span>,
+    <span class="code-tooltip" data-tip="L1 PENALTY: Like LASSO for leaf predictions. Set to 0.0 here (disabled).">reg_alpha=0.0</span>,
+    random_state=42
 )
 
 <span class="code-comment"># Fit with early stopping using a validation set</span>
@@ -1333,7 +1061,7 @@ xgb_model.<span class="code-function">fit</span>(
 <span class="code-comment"># Evaluate</span>
 y_pred_xgb = xgb_model.<span class="code-function">predict</span>(X_test)
 <span class="code-function">print</span>(<span class="code-string">f"Test R-squared: {r2_score(y_test, y_pred_xgb):.4f}"</span>)
-<span class="code-function">print</span>(<span class="code-string">f"Test RMSE:      {mean_squared_error(y_test, y_pred_xgb, squared=False):.4f}"</span>)
+<span class="code-function">print</span>(<span class="code-string">f"Test RMSE:      {np.sqrt(mean_squared_error(y_test, y_pred_xgb)):.4f}"</span>)
 <span class="code-function">print</span>(<span class="code-string">f"Best iteration: {xgb_model.best_iteration}"</span>)
 
 <span class="code-comment"># Compare with Random Forest</span>
@@ -1343,9 +1071,8 @@ y_pred_xgb = xgb_model.<span class="code-function">predict</span>(X_test)
             <button class="run-btn" data-lang="python">Run Code</button>
           </div>
           <div class="tab-content" data-lang="stata">
-<pre><code><span class="code-comment">* Stata: XGBoost via pystacked (ensemble command) or Python block</span>
-<span class="code-comment">* Option 1: Use pystacked (install: ssc install pystacked)</span>
-<span class="code-comment">* Option 2: Call Python directly</span>
+<pre><code><span class="code-comment">* Stata: XGBoost via Python block</span>
+<span class="code-comment">* Native Stata does not have XGBoost; call Python directly</span>
 
 <span class="code-keyword">sysuse</span> auto, clear
 <span class="code-keyword">set seed</span> 42
@@ -1385,13 +1112,13 @@ print(f<span class="code-string">"XGBoost Test R2: {r2:.4f}"</span>)
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: XGBoost</span>
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="XGBOOST: The R interface to the XGBoost gradient boosting library — consistently the best-performing algorithm for tabular data in benchmarks and competitions.">xgboost</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="XGBOOST: The R interface to the XGBoost gradient boosting library -- consistently top-performing for tabular data.">xgboost</span>)
 
 <span class="code-comment"># Prepare data in XGBoost's matrix format</span>
 features &lt;- <span class="code-function">as.matrix</span>(train[, -<span class="code-function">which</span>(<span class="code-function">names</span>(train) == <span class="code-string">"medv"</span>)])
 label    &lt;- train$medv
 
-dtrain &lt;- <span class="code-function">xgb.DMatrix</span>(data = features, <span class="code-tooltip" data-tip="TARGET: The outcome (median home value) is stored separately from the features. XGBoost's special DMatrix format keeps features and target together efficiently.">label = label</span>)
+dtrain &lt;- <span class="code-function">xgb.DMatrix</span>(data = features, <span class="code-tooltip" data-tip="TARGET: The outcome (median home value) is stored separately. XGBoost's DMatrix format keeps features and target together efficiently.">label = label</span>)
 dtest  &lt;- <span class="code-function">xgb.DMatrix</span>(
   data = <span class="code-function">as.matrix</span>(test[, -<span class="code-function">which</span>(<span class="code-function">names</span>(test) == <span class="code-string">"medv"</span>)]),
   label = test$medv
@@ -1399,9 +1126,9 @@ dtest  &lt;- <span class="code-function">xgb.DMatrix</span>(
 
 <span class="code-comment"># Set parameters</span>
 params &lt;- <span class="code-function">list</span>(
-  <span class="code-tooltip" data-tip="LOSS FUNCTION: Tells XGBoost to minimize squared error (MSE) — the standard choice for predicting continuous outcomes like housing prices.">objective = "reg:squarederror"</span>,
+  <span class="code-tooltip" data-tip="LOSS FUNCTION: Minimize squared error (MSE) -- standard for continuous outcomes.">objective = "reg:squarederror"</span>,
   max_depth = 6,
-  <span class="code-tooltip" data-tip="LEARNING RATE: Called 'eta' in XGBoost — each tree's contribution is scaled by 0.1. Smaller values learn more cautiously and usually predict better on new data.">eta = 0.1</span>,
+  <span class="code-tooltip" data-tip="LEARNING RATE: Called 'eta' in XGBoost -- each tree's contribution is scaled by 0.1.">eta = 0.1</span>,
   subsample = 0.8,
   colsample_bytree = 0.8
 )
@@ -1412,7 +1139,7 @@ xgb_model &lt;- <span class="code-function">xgb.train</span>(
   data = dtrain,
   nrounds = 500,
   watchlist = <span class="code-function">list</span>(train = dtrain, test = dtest),
-  <span class="code-tooltip" data-tip="EARLY STOPPING: Halts training if the test set error stops improving for 20 rounds. This automatically prevents overfitting and finds the ideal number of trees.">early_stopping_rounds = 20</span>,
+  <span class="code-tooltip" data-tip="EARLY STOPPING: Halts training if the test set error stops improving for 20 rounds, preventing overfitting.">early_stopping_rounds = 20</span>,
   verbose = 0
 )
 
@@ -1450,95 +1177,22 @@ Best iteration: 189</pre></div>
         </div>
 
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Instantiate XGBoost using the <code>xgb.XGBRegressor</code> class with regularization params",
-                  "pattern": "model = xgb.XGBRegressor(n_estimators=N, max_depth=N, learning_rate=N)",
-                  "structureNote": "Pattern: <code>xgb.XGBRegressor(n_estimators=N, learning_rate=lr, max_depth=d)</code>. Same sklearn-compatible <code>.fit()/.predict()</code> API.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "xgb_model",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "xgb",
-                        "role": "Alias",
-                        "tip": "<code>import xgboost as xgb</code>.",
-                        "color": "pink"
-                      },
-                      {
-                        "code": ".",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "XGBRegressor",
-                        "role": "Class",
-                        "tip": "sklearn-compatible API: <code>.fit()</code>, <code>.predict()</code>.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "n_estimators=200,",
-                        "role": "Keyword Arg",
-                        "tip": "Number of boosting rounds (sequential trees).",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "learning_rate=0.1,",
-                        "role": "Keyword Arg",
-                        "tip": "Shrinkage factor per tree. Lower = slower learning, needs more trees.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "max_depth=4",
-                        "role": "Keyword Arg",
-                        "tip": "Max depth per individual tree.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
         <!-- ===================== TUNING TREE-BASED MODELS ===================== -->
         <h2 id="hyperparameters">Tuning Tree-Based Models</h2>
 
-        <p>Tree-based models have several <span class="code-tooltip" data-tip="Settings that are not learned from the data but must be set by the user before training. The optimal values are typically found through cross-validation.">hyperparameters</span> that control model complexity and must be chosen carefully. The most important ones are: <code>n_estimators</code> (the number of trees), <code>max_depth</code> (maximum depth of each tree), <code>min_samples_split</code> or <code>min_samples_leaf</code> (minimum observations needed to create a split or in a leaf), <code>learning_rate</code> (for boosting — how much each tree contributes), and <code>subsample</code> (fraction of data used per tree). Getting these right can make a substantial difference in performance.</p>
+        <p>Tree-based models have several <span class="code-tooltip" data-tip="Settings that are not learned from the data but must be set by the user before training. The optimal values are typically found through cross-validation.">hyperparameters</span> that control model complexity. The most important ones are:</p>
 
-        <p>The standard approach is <strong>grid search with cross-validation</strong>: define a grid of candidate values for each hyperparameter, train the model for every combination, and evaluate each using k-fold cross-validation. The combination that produces the best cross-validated score is selected. For large grids, <span class="code-tooltip" data-tip="Instead of trying every combination (which can be very expensive), random search samples a fixed number of random combinations. This is often more efficient because many hyperparameters have little effect — random search covers the important dimensions better than a uniform grid."><strong>random search</strong></span> is a more efficient alternative: it randomly samples combinations from the grid, and empirical studies show that random search finds good configurations much faster than exhaustive grid search because it explores the hyperparameter space more broadly.</p>
+        <ul>
+          <li><code>n_estimators</code> &mdash; the number of trees (more is generally better until you overfit; use early stopping)</li>
+          <li><code>max_depth</code> &mdash; maximum depth of each tree (deeper = more complex; 3-8 for boosting, unlimited for RF)</li>
+          <li><code>learning_rate</code> &mdash; for boosting: how much each tree contributes (smaller = more cautious, needs more trees)</li>
+          <li><code>min_samples_leaf</code> &mdash; minimum observations in a leaf (prevents overfitting to tiny groups)</li>
+          <li><code>subsample</code> / <code>colsample_bytree</code> &mdash; fraction of data/features used per tree (adds randomness)</li>
+        </ul>
 
-        <p>A practical rule of thumb for XGBoost: start with a moderate learning rate (0.05 to 0.1), set <code>max_depth</code> between 3 and 8, use <code>subsample</code> and <code>colsample_bytree</code> around 0.7 to 0.9, and rely on early stopping to determine the optimal number of trees. Then fine-tune from there.</p>
+        <p>The standard approach is <strong>random search with cross-validation</strong>: define a range of candidate values, randomly sample combinations, and evaluate each using k-fold CV. Empirical studies show that random search finds good configurations much faster than exhaustive grid search because it explores the hyperparameter space more broadly.</p>
+
+        <p><strong>Practical rule of thumb for XGBoost:</strong> start with learning rate 0.05-0.1, <code>max_depth</code> between 3 and 8, <code>subsample</code> and <code>colsample_bytree</code> around 0.7-0.9, and rely on early stopping to determine the number of trees. Then fine-tune from there.</p>
 
         <!-- Code Block: Hyperparameter Tuning -->
         <div class="code-tabs" data-runnable="ml-tree-5">
@@ -1548,7 +1202,7 @@ Best iteration: 189</pre></div>
             <button class="tab-button" data-lang="r">R</button>
           </div>
           <div class="tab-content active" data-lang="python">
-<pre><code><span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="RANDOM SEARCH: Instead of trying every combination (which would be thousands), randomly samples 50 combinations and evaluates each with cross-validation. Often finds good settings faster than exhaustive grid search.">RandomizedSearchCV</span>
+<pre><code><span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> <span class="code-tooltip" data-tip="RANDOM SEARCH: Randomly samples 50 hyperparameter combinations and evaluates each with cross-validation. Faster than exhaustive grid search.">RandomizedSearchCV</span>
 <span class="code-keyword">import</span> xgboost <span class="code-keyword">as</span> xgb
 
 <span class="code-comment"># Define the hyperparameter search space</span>
@@ -1565,8 +1219,8 @@ param_grid = {
 search = <span class="code-function">RandomizedSearchCV</span>(
     xgb.<span class="code-function">XGBRegressor</span>(random_state=42),
     param_distributions=param_grid,
-    <span class="code-tooltip" data-tip="ITERATIONS: Tries 50 random hyperparameter combinations out of the thousands possible. Research shows this is often sufficient to find near-optimal settings.">n_iter=50</span>,
-    <span class="code-tooltip" data-tip="CROSS-VALIDATION: Each of the 50 combinations is evaluated using 5-fold CV, giving a reliable performance estimate that is not biased by a particular random split.">cv=5</span>,
+    <span class="code-tooltip" data-tip="ITERATIONS: Tries 50 random combinations out of thousands possible. Usually sufficient to find near-optimal settings.">n_iter=50</span>,
+    <span class="code-tooltip" data-tip="CROSS-VALIDATION: Each combination is evaluated using 5-fold CV for a reliable performance estimate.">cv=5</span>,
     scoring=<span class="code-string">'neg_mean_squared_error'</span>,
     random_state=42,
     n_jobs=-1,
@@ -1590,7 +1244,6 @@ y_pred_best = search.best_estimator_.<span class="code-function">predict</span>(
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: Hyperparameter tuning via Python block</span>
 <span class="code-comment">* Native Stata does not support grid/random search for ML models.</span>
-<span class="code-comment">* You can loop over parameter values manually or use Python.</span>
 
 <span class="code-keyword">python:</span>
 <span class="code-keyword">from</span> sklearn.model_selection <span class="code-keyword">import</span> RandomizedSearchCV
@@ -1629,7 +1282,7 @@ print(f<span class="code-string">"Best CV RMSE: {(-search.best_score_)**0.5:.2f}
           </div>
           <div class="tab-content" data-lang="r">
 <pre><code><span class="code-comment"># R: Hyperparameter tuning for XGBoost with caret</span>
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="CARET: R's Swiss-army knife for ML — provides a single interface for training, tuning, and comparing hundreds of models including random forests, XGBoost, LASSO, and neural networks.">caret</span>)
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="CARET: R's Swiss-army knife for ML -- provides a single interface for training, tuning, and comparing hundreds of models.">caret</span>)
 
 <span class="code-comment"># Define grid of hyperparameters</span>
 xgb_grid &lt;- <span class="code-function">expand.grid</span>(
@@ -1701,97 +1354,19 @@ Test R-squared: 0.9023</pre></div>
         </div>
 
 
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Run cross-validation with <code>cross_val_score</code> and aggregate with <code>.mean()</code>",
-                  "pattern": "scores = cross_val_score(model, X, y, cv=K, scoring=str)",
-                  "structureNote": "Pattern: <code>scores = cross_val_score(model, X, y, cv=k, scoring=str)</code>. Returns a NumPy array of k scores.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "cv_scores",
-                        "role": "Variable",
-                        "tip": "NumPy array of k scores.",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "cross_val_score",
-                        "role": "Function",
-                        "tip": "From <code>sklearn.model_selection</code>.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "tree,",
-                        "role": "Positional Arg",
-                        "tip": "Any sklearn estimator.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "X_train,",
-                        "role": "Positional Arg",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "y_train,",
-                        "role": "Positional Arg",
-                        "tip": "",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "cv=5,",
-                        "role": "Keyword Arg",
-                        "tip": "Integer or CV splitter object.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "scoring=\"neg_mean_squared_error\"",
-                        "role": "Keyword Arg",
-                        "tip": "'neg_' prefix because sklearn maximizes scores.",
-                        "color": "sky"
-                      },
-                      {
-                        "code": ")",
-                        "role": "",
-                        "tip": "",
-                        "color": "overlay"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
-        </div>
-
         <!-- ===================== SHAP ===================== -->
         <h2 id="shap">Interpreting Predictions with SHAP</h2>
 
-        <p>Variable importance tells us which features are globally important, but it does not tell us <em>how</em> a feature affects a specific prediction, or in which direction. <strong>SHAP values</strong> (SHapley Additive exPlanations), developed by Lundberg and Lee in 2017, provide exactly this. SHAP is based on <span class="code-tooltip" data-tip="A concept from cooperative game theory (Lloyd Shapley, 1953): how to fairly distribute the total payoff of a coalition game among players based on their marginal contributions. Here, the 'players' are features and the 'payoff' is the prediction.">Shapley values</span> from cooperative game theory, and the core idea is beautifully intuitive.</p>
+        <div class="info-box" style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1.25rem 1.5rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;">
+          <h3 style="margin-top: 0; color: #92400e;">What Are SHAP Values For?</h3>
+          <p style="margin: 0;">Variable importance tells you <em>which</em> features matter globally. SHAP values go deeper: they explain <strong>how each feature affects each individual prediction</strong>, and in which direction. If your XGBoost model predicts that a specific household will default on a loan, SHAP tells you <em>why</em>: maybe high debt-to-income ratio pushed the prediction up by 15 percentage points, while long credit history pulled it down by 8 points. SHAP makes black-box models auditable and interpretable &mdash; essential for communicating ML results to policymakers, regulators, and non-technical stakeholders.</p>
+        </div>
 
-        <p>Imagine you are trying to explain why a particular house was predicted to cost $450,000. The average prediction across all houses is $350,000, so we need to explain a difference of $100,000. SHAP assigns a portion of that $100,000 to each feature: maybe "median income in the neighborhood" contributes +$70,000, "proximity to the coast" contributes +$40,000, and "house age" contributes -$10,000. These contributions sum up to exactly the difference between the prediction and the average (this is a mathematical guarantee of Shapley values). Each SHAP value tells you how much a feature pushed the prediction above or below the baseline for that particular observation.</p>
+        <p><strong>SHAP values</strong> (SHapley Additive exPlanations), developed by Lundberg and Lee in 2017, are based on <span class="code-tooltip" data-tip="A concept from cooperative game theory (Lloyd Shapley, 1953): how to fairly distribute the total payoff of a coalition game among players based on their marginal contributions. Here, the 'players' are features and the 'payoff' is the prediction.">Shapley values</span> from cooperative game theory. The core idea: imagine a house is predicted to cost $450,000, while the average prediction is $350,000. SHAP assigns a portion of that $100,000 difference to each feature: maybe "median income in the neighborhood" contributes +$70,000, "proximity to the coast" contributes +$40,000, and "house age" contributes -$10,000. These contributions always sum to exactly the difference between the prediction and the baseline (this is a mathematical guarantee).</p>
 
-        <p>The most common SHAP visualization is the <strong>summary plot</strong> (also called a beeswarm plot): for each feature, it shows a dot for every observation, colored by the feature value (red = high, blue = low) and positioned along the x-axis according to the SHAP value (positive = pushes prediction up, negative = pushes prediction down). This gives you both the importance and the direction of each feature's effect in a single plot.</p>
+        <p>The most common SHAP visualization is the <strong>summary plot</strong> (beeswarm plot): for each feature, it shows a dot for every observation, colored by the feature value (red = high, blue = low) and positioned along the x-axis according to the SHAP value (positive = pushes prediction up, negative = pushes it down). This gives you both the importance and the direction of each feature's effect in a single plot.</p>
 
-        <p>SHAP values have become the gold standard for interpreting tree-based models because they are grounded in theory (they are the unique values satisfying a set of fairness axioms), work at the individual prediction level (not just globally), and have fast, exact implementations for tree models (via the <code>TreeExplainer</code> algorithm). In economics research, SHAP values are particularly useful for understanding heterogeneity — how different features matter for different observations.</p>
+        <p><strong>Economics example:</strong> In a model predicting household poverty using survey data, SHAP values can reveal that having a female household head increases the predicted poverty probability by 5 percentage points for urban households but only 2 points for rural ones &mdash; uncovering heterogeneity that a simple variable importance ranking would miss entirely.</p>
 
         <!-- Code Block: SHAP -->
         <div class="code-tabs" data-runnable="ml-tree-6">
@@ -1830,7 +1405,6 @@ obs_shap = obs_shap.<span class="code-function">reindex</span>(obs_shap.abs().<s
           <div class="tab-content" data-lang="stata">
 <pre><code><span class="code-comment">* Stata: SHAP values via Python block</span>
 <span class="code-comment">* Native Stata does not have SHAP support.</span>
-<span class="code-comment">* Use the Python interface within Stata.</span>
 
 <span class="code-keyword">python:</span>
 <span class="code-keyword">import</span> shap
@@ -1866,35 +1440,22 @@ for name, val in sorted(zip(feature_names, mean_shap), key=lambda x: -x[1]):
             <button class="run-btn" data-lang="stata">Run Code</button>
           </div>
           <div class="tab-content" data-lang="r">
-<pre><code><span class="code-comment"># R: SHAP values with the fastshap package</span>
-<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="FASTSHAP: Computes SHAP values for any model type using Monte Carlo approximation. SHAP values explain exactly how much each feature pushed a particular prediction up or down.">fastshap</span>)
-
-<span class="code-comment"># Define a prediction wrapper for fastshap</span>
-pfun &lt;- <span class="code-keyword">function</span>(object, newdata) {
-  <span class="code-function">predict</span>(object, <span class="code-function">xgb.DMatrix</span>(data = <span class="code-function">as.matrix</span>(newdata)))
-}
+<pre><code><span class="code-comment"># R: SHAP values with the shapviz package</span>
+<span class="code-keyword">library</span>(<span class="code-tooltip" data-tip="SHAPVIZ: Provides SHAP-based visualizations (beeswarm, waterfall, dependence plots) for XGBoost and other models using ggplot2.">shapviz</span>)
 
 <span class="code-comment"># Feature matrix (no outcome column)</span>
-X_train_mat &lt;- train[, -<span class="code-function">which</span>(<span class="code-function">names</span>(train) == <span class="code-string">"medv"</span>)]
-X_test_mat  &lt;- test[, -<span class="code-function">which</span>(<span class="code-function">names</span>(test) == <span class="code-string">"medv"</span>)]
+X_test_mat &lt;- <span class="code-function">as.matrix</span>(test[, -<span class="code-function">which</span>(<span class="code-function">names</span>(test) == <span class="code-string">"medv"</span>)])
 
-<span class="code-comment"># Compute SHAP values</span>
-shap_vals &lt;- <span class="code-function">explain</span>(
-  xgb_model,
-  X = <span class="code-function">as.data.frame</span>(X_train_mat),
-  newdata = <span class="code-function">as.data.frame</span>(X_test_mat),
-  pred_wrapper = pfun,
-  <span class="code-tooltip" data-tip="PRECISION: 50 Monte Carlo repetitions for each SHAP estimate. More repetitions give more precise values but take longer — 50 is a good balance for most analyses.">nsim = 50</span>
-)
+<span class="code-comment"># Create shapviz object (computes SHAP values internally)</span>
+shap_obj &lt;- <span class="code-function">shapviz</span>(xgb_model, X_pred = <span class="code-function">xgb.DMatrix</span>(X_test_mat, label = test$medv))
+
+<span class="code-comment"># Beeswarm plot (SHAP summary)</span>
+<span class="code-function">sv_importance</span>(shap_obj, kind = <span class="code-string">"beeswarm"</span>) +
+  <span class="code-function">ggtitle</span>(<span class="code-string">"SHAP Beeswarm Plot (XGBoost)"</span>)
 
 <span class="code-comment"># Mean absolute SHAP values (global importance)</span>
-mean_abs_shap &lt;- <span class="code-function">colMeans</span>(<span class="code-function">abs</span>(<span class="code-function">as.matrix</span>(shap_vals)))
-mean_abs_shap &lt;- <span class="code-function">sort</span>(mean_abs_shap, decreasing = TRUE)
-<span class="code-function">cat</span>(<span class="code-string">"Mean |SHAP| values:\n"</span>)
-<span class="code-function">print</span>(<span class="code-function">round</span>(mean_abs_shap, 4))
-
-<span class="code-comment"># Autoplot (requires ggplot2)</span>
-<span class="code-function">autoplot</span>(shap_vals) + <span class="code-function">ggtitle</span>(<span class="code-string">"SHAP Summary"</span>)</code></pre>
+<span class="code-function">sv_importance</span>(shap_obj, kind = <span class="code-string">"bar"</span>) +
+  <span class="code-function">ggtitle</span>(<span class="code-string">"Mean |SHAP| Values"</span>)</code></pre>
             <button class="run-btn" data-lang="r">Run Code</button>
           </div>
         </div>
@@ -1941,55 +1502,55 @@ Population   -0.0208</pre></div>
                   <text x="115" y="170" text-anchor="end" font-size="10" fill="#333">HouseAge</text>
                   <text x="115" y="200" text-anchor="end" font-size="10" fill="#333">AveRooms</text>
                   <text x="115" y="230" text-anchor="end" font-size="10" fill="#333">Population</text>
-                  <!-- MedInc beeswarm: wide spread, red=high on right, blue=low on left -->
-                  <circle cx="148" cy="46" r="3" fill="#3060cf" opacity="0.6"/><circle cx="155" cy="50" r="3" fill="#3060cf" opacity="0.6"/>
-                  <circle cx="163" cy="44" r="3" fill="#4272d6" opacity="0.6"/><circle cx="170" cy="52" r="3" fill="#4878d8" opacity="0.6"/>
-                  <circle cx="180" cy="47" r="3" fill="#5a8ade" opacity="0.6"/><circle cx="190" cy="50" r="3" fill="#6898e2" opacity="0.6"/>
-                  <circle cx="200" cy="44" r="3" fill="#78a4e6" opacity="0.6"/><circle cx="210" cy="52" r="3" fill="#88b0ea" opacity="0.6"/>
-                  <circle cx="220" cy="46" r="3" fill="#98bcee" opacity="0.6"/><circle cx="235" cy="50" r="3" fill="#a8c6f0" opacity="0.6"/>
-                  <circle cx="250" cy="47" r="3" fill="#c0d4f4" opacity="0.6"/><circle cx="265" cy="44" r="3" fill="#d4dce0" opacity="0.6"/>
-                  <circle cx="280" cy="50" r="3" fill="#e0d0c8" opacity="0.6"/><circle cx="295" cy="46" r="3" fill="#e8b8a0" opacity="0.6"/>
-                  <circle cx="310" cy="52" r="3" fill="#eca088" opacity="0.6"/><circle cx="325" cy="48" r="3" fill="#ee8870" opacity="0.6"/>
-                  <circle cx="340" cy="44" r="3" fill="#ef7058" opacity="0.6"/><circle cx="355" cy="50" r="3" fill="#ef5840" opacity="0.6"/>
-                  <circle cx="375" cy="47" r="3" fill="#ee4030" opacity="0.6"/><circle cx="395" cy="52" r="3" fill="#e82820" opacity="0.6"/>
-                  <circle cx="415" cy="46" r="3" fill="#e01010" opacity="0.6"/><circle cx="440" cy="50" r="3" fill="#d00000" opacity="0.6"/>
-                  <!-- AveOccup beeswarm: moderate spread -->
-                  <circle cx="210" cy="76" r="3" fill="#e82020" opacity="0.5"/><circle cx="220" cy="82" r="3" fill="#ee6050" opacity="0.5"/>
-                  <circle cx="235" cy="78" r="3" fill="#e8a888" opacity="0.5"/><circle cx="248" cy="84" r="3" fill="#d0d0d0" opacity="0.5"/>
-                  <circle cx="260" cy="77" r="3" fill="#a8c0e8" opacity="0.5"/><circle cx="270" cy="83" r="3" fill="#88a8e0" opacity="0.5"/>
-                  <circle cx="278" cy="79" r="3" fill="#6890d8" opacity="0.5"/><circle cx="285" cy="76" r="3" fill="#5080d0" opacity="0.5"/>
-                  <circle cx="292" cy="83" r="3" fill="#4070c8" opacity="0.5"/><circle cx="300" cy="78" r="3" fill="#3060c0" opacity="0.5"/>
-                  <circle cx="310" cy="82" r="3" fill="#3060c0" opacity="0.5"/>
+                  <!-- MedInc beeswarm -->
+                  <circle cx="148" cy="46" r="3" fill="#2563eb" opacity="0.6"/><circle cx="155" cy="50" r="3" fill="#2563eb" opacity="0.6"/>
+                  <circle cx="163" cy="44" r="3" fill="#2563eb" opacity="0.6"/><circle cx="170" cy="52" r="3" fill="#2563eb" opacity="0.6"/>
+                  <circle cx="180" cy="47" r="3" fill="#2563eb" opacity="0.6"/><circle cx="190" cy="50" r="3" fill="#2563eb" opacity="0.6"/>
+                  <circle cx="200" cy="44" r="3" fill="#2563eb" opacity="0.6"/><circle cx="210" cy="52" r="3" fill="#2563eb" opacity="0.6"/>
+                  <circle cx="220" cy="46" r="3" fill="#2563eb" opacity="0.5"/><circle cx="235" cy="50" r="3" fill="#94a3b8" opacity="0.5"/>
+                  <circle cx="250" cy="47" r="3" fill="#94a3b8" opacity="0.5"/><circle cx="265" cy="44" r="3" fill="#94a3b8" opacity="0.5"/>
+                  <circle cx="280" cy="50" r="3" fill="#dc2626" opacity="0.4"/><circle cx="295" cy="46" r="3" fill="#dc2626" opacity="0.5"/>
+                  <circle cx="310" cy="52" r="3" fill="#dc2626" opacity="0.5"/><circle cx="325" cy="48" r="3" fill="#dc2626" opacity="0.6"/>
+                  <circle cx="340" cy="44" r="3" fill="#dc2626" opacity="0.6"/><circle cx="355" cy="50" r="3" fill="#dc2626" opacity="0.6"/>
+                  <circle cx="375" cy="47" r="3" fill="#dc2626" opacity="0.6"/><circle cx="395" cy="52" r="3" fill="#dc2626" opacity="0.6"/>
+                  <circle cx="415" cy="46" r="3" fill="#dc2626" opacity="0.6"/><circle cx="440" cy="50" r="3" fill="#dc2626" opacity="0.6"/>
+                  <!-- AveOccup beeswarm -->
+                  <circle cx="210" cy="76" r="3" fill="#dc2626" opacity="0.5"/><circle cx="220" cy="82" r="3" fill="#dc2626" opacity="0.5"/>
+                  <circle cx="235" cy="78" r="3" fill="#dc2626" opacity="0.5"/><circle cx="248" cy="84" r="3" fill="#94a3b8" opacity="0.5"/>
+                  <circle cx="260" cy="77" r="3" fill="#2563eb" opacity="0.5"/><circle cx="270" cy="83" r="3" fill="#2563eb" opacity="0.5"/>
+                  <circle cx="278" cy="79" r="3" fill="#2563eb" opacity="0.5"/><circle cx="285" cy="76" r="3" fill="#2563eb" opacity="0.5"/>
+                  <circle cx="292" cy="83" r="3" fill="#2563eb" opacity="0.5"/><circle cx="300" cy="78" r="3" fill="#2563eb" opacity="0.5"/>
+                  <circle cx="310" cy="82" r="3" fill="#2563eb" opacity="0.5"/>
                   <!-- Latitude beeswarm -->
-                  <circle cx="220" cy="108" r="3" fill="#3060cf" opacity="0.5"/><circle cx="230" cy="113" r="3" fill="#5080d0" opacity="0.5"/>
-                  <circle cx="245" cy="107" r="3" fill="#88b0ea" opacity="0.5"/><circle cx="260" cy="112" r="3" fill="#c0d4f4" opacity="0.5"/>
-                  <circle cx="275" cy="108" r="3" fill="#d4dce0" opacity="0.5"/><circle cx="288" cy="113" r="3" fill="#e8b0a0" opacity="0.5"/>
-                  <circle cx="300" cy="107" r="3" fill="#ef6850" opacity="0.5"/><circle cx="315" cy="112" r="3" fill="#e82020" opacity="0.5"/>
-                  <circle cx="330" cy="108" r="3" fill="#d00000" opacity="0.5"/>
+                  <circle cx="220" cy="108" r="3" fill="#2563eb" opacity="0.5"/><circle cx="230" cy="113" r="3" fill="#2563eb" opacity="0.5"/>
+                  <circle cx="245" cy="107" r="3" fill="#2563eb" opacity="0.5"/><circle cx="260" cy="112" r="3" fill="#94a3b8" opacity="0.5"/>
+                  <circle cx="275" cy="108" r="3" fill="#94a3b8" opacity="0.5"/><circle cx="288" cy="113" r="3" fill="#dc2626" opacity="0.5"/>
+                  <circle cx="300" cy="107" r="3" fill="#dc2626" opacity="0.5"/><circle cx="315" cy="112" r="3" fill="#dc2626" opacity="0.5"/>
+                  <circle cx="330" cy="108" r="3" fill="#dc2626" opacity="0.5"/>
                   <!-- Longitude beeswarm -->
-                  <circle cx="225" cy="137" r="3" fill="#d00000" opacity="0.5"/><circle cx="235" cy="143" r="3" fill="#ef6050" opacity="0.5"/>
-                  <circle cx="250" cy="138" r="3" fill="#e8b0a0" opacity="0.5"/><circle cx="265" cy="142" r="3" fill="#d4dce0" opacity="0.5"/>
-                  <circle cx="278" cy="138" r="3" fill="#a8c0e8" opacity="0.5"/><circle cx="292" cy="143" r="3" fill="#6890d8" opacity="0.5"/>
-                  <circle cx="305" cy="137" r="3" fill="#4070c8" opacity="0.5"/><circle cx="320" cy="142" r="3" fill="#3060cf" opacity="0.5"/>
-                  <!-- HouseAge beeswarm: narrow -->
-                  <circle cx="258" cy="168" r="3" fill="#3060cf" opacity="0.5"/><circle cx="266" cy="173" r="3" fill="#6890d8" opacity="0.5"/>
-                  <circle cx="272" cy="167" r="3" fill="#a8c0e8" opacity="0.5"/><circle cx="280" cy="172" r="3" fill="#d4dce0" opacity="0.5"/>
-                  <circle cx="288" cy="168" r="3" fill="#e8b0a0" opacity="0.5"/><circle cx="296" cy="173" r="3" fill="#ef6050" opacity="0.5"/>
-                  <circle cx="304" cy="167" r="3" fill="#d00000" opacity="0.5"/>
-                  <!-- AveRooms: small -->
-                  <circle cx="262" cy="197" r="3" fill="#3060cf" opacity="0.5"/><circle cx="270" cy="203" r="3" fill="#88b0ea" opacity="0.5"/>
-                  <circle cx="278" cy="198" r="3" fill="#d4dce0" opacity="0.5"/><circle cx="286" cy="202" r="3" fill="#e8b0a0" opacity="0.5"/>
-                  <circle cx="295" cy="198" r="3" fill="#d00000" opacity="0.5"/>
-                  <!-- Population: small -->
-                  <circle cx="268" cy="228" r="3" fill="#3060cf" opacity="0.5"/><circle cx="274" cy="233" r="3" fill="#88b0ea" opacity="0.5"/>
-                  <circle cx="280" cy="227" r="3" fill="#d4dce0" opacity="0.5"/><circle cx="286" cy="232" r="3" fill="#ef6050" opacity="0.5"/>
-                  <circle cx="292" cy="228" r="3" fill="#d00000" opacity="0.5"/>
+                  <circle cx="225" cy="137" r="3" fill="#dc2626" opacity="0.5"/><circle cx="235" cy="143" r="3" fill="#dc2626" opacity="0.5"/>
+                  <circle cx="250" cy="138" r="3" fill="#dc2626" opacity="0.5"/><circle cx="265" cy="142" r="3" fill="#94a3b8" opacity="0.5"/>
+                  <circle cx="278" cy="138" r="3" fill="#2563eb" opacity="0.5"/><circle cx="292" cy="143" r="3" fill="#2563eb" opacity="0.5"/>
+                  <circle cx="305" cy="137" r="3" fill="#2563eb" opacity="0.5"/><circle cx="320" cy="142" r="3" fill="#2563eb" opacity="0.5"/>
+                  <!-- HouseAge beeswarm -->
+                  <circle cx="258" cy="168" r="3" fill="#2563eb" opacity="0.5"/><circle cx="266" cy="173" r="3" fill="#2563eb" opacity="0.5"/>
+                  <circle cx="272" cy="167" r="3" fill="#94a3b8" opacity="0.5"/><circle cx="280" cy="172" r="3" fill="#94a3b8" opacity="0.5"/>
+                  <circle cx="288" cy="168" r="3" fill="#dc2626" opacity="0.5"/><circle cx="296" cy="173" r="3" fill="#dc2626" opacity="0.5"/>
+                  <circle cx="304" cy="167" r="3" fill="#dc2626" opacity="0.5"/>
+                  <!-- AveRooms -->
+                  <circle cx="262" cy="197" r="3" fill="#2563eb" opacity="0.5"/><circle cx="270" cy="203" r="3" fill="#2563eb" opacity="0.5"/>
+                  <circle cx="278" cy="198" r="3" fill="#94a3b8" opacity="0.5"/><circle cx="286" cy="202" r="3" fill="#dc2626" opacity="0.5"/>
+                  <circle cx="295" cy="198" r="3" fill="#dc2626" opacity="0.5"/>
+                  <!-- Population -->
+                  <circle cx="268" cy="228" r="3" fill="#2563eb" opacity="0.5"/><circle cx="274" cy="233" r="3" fill="#2563eb" opacity="0.5"/>
+                  <circle cx="280" cy="227" r="3" fill="#94a3b8" opacity="0.5"/><circle cx="286" cy="232" r="3" fill="#dc2626" opacity="0.5"/>
+                  <circle cx="292" cy="228" r="3" fill="#dc2626" opacity="0.5"/>
                   <!-- Color bar legend -->
                   <defs>
                     <linearGradient id="shapGrad" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stop-color="#3060cf"/>
-                      <stop offset="50%" stop-color="#d4dce0"/>
-                      <stop offset="100%" stop-color="#d00000"/>
+                      <stop offset="0%" stop-color="#2563eb"/>
+                      <stop offset="50%" stop-color="#94a3b8"/>
+                      <stop offset="100%" stop-color="#dc2626"/>
                     </linearGradient>
                   </defs>
                   <rect x="380" y="40" width="12" height="100" fill="url(#shapGrad)" transform="rotate(90,386,90)" rx="2"/>
@@ -2010,133 +1571,19 @@ Population   -0.0208</pre></div>
         </div>
         <div class="output-simulation" data-output="ml-tree-6" data-lang="r">
           <div class="output-header"><span>R Output</span><button class="close-output">&times;</button></div>
-          <div class="output-body"><pre>Mean |SHAP| values:
-  lstat     rm    dis   crim    nox ptratio    age  indus    tax     zn   chas    rad      b
- 3.1245 2.4521 0.5432 0.4123 0.3876 0.3421 0.2134 0.1987 0.1654 0.0876 0.0654 0.0543 0.0312
+          <div class="output-body"><pre>[shapviz beeswarm plot displayed with features ranked by importance.
+ lstat and rm show the widest SHAP value spreads.
+ High lstat values push predictions down; high rm values push them up.]
 
-[SHAP autoplot displayed with horizontal bars for each feature]</pre></div>
-        </div>
-
-        <div class="grammar-teach-section">
-          <div class="grammar-primer" data-mode="teach">
-            <script type="application/json">
-            
-            {
-              "exercises": [
-                {
-                  "instruction": "Create a SHAP TreeExplainer and call <code>.shap_values()</code> on the feature matrix",
-                  "pattern": "explainer = shap.TreeExplainer(model); shap_values = explainer.shap_values(X)",
-                  "structureNote": "Pattern: <code>explainer = shap.TreeExplainer(model)</code> then <code>shap_values = explainer.shap_values(X)</code>. Optimized for tree-based models.",
-                  "languages": {
-                    "python": [
-                      {
-                        "code": "explainer",
-                        "role": "Variable",
-                        "tip": "",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = ",
-                        "role": "Assignment",
-                        "tip": "",
-                        "color": "peach"
-                      },
-                      {
-                        "code": "shap.TreeExplainer",
-                        "role": "Class",
-                        "tip": "Dot-path access: <code>shap.TreeExplainer</code>. Optimized for tree models.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "(xgb_model)",
-                        "role": "Argument",
-                        "tip": "Accepts any fitted tree model (XGBoost, RF, LightGBM).",
-                        "color": "sky"
-                      },
-                      {
-                        "code": "\nshap_values",
-                        "role": "Variable",
-                        "tip": "Matrix: shape (n_samples, n_features).",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " = explainer.shap_values(X_test)",
-                        "role": "Method Call",
-                        "tip": "Computes SHAP values using the tree structure.",
-                        "color": "blue"
-                      }
-                    ],
-                    "stata": [
-                      {
-                        "code": "python:",
-                        "role": "Python Block",
-                        "tip": "Stata uses Python interface for SHAP -- no native support.",
-                        "color": "mauve"
-                      },
-                      {
-                        "code": "\nimport shap",
-                        "role": "Import",
-                        "tip": "The shap library must be installed in Stata's Python environment.",
-                        "color": "yellow"
-                      },
-                      {
-                        "code": "\nexplainer = shap.TreeExplainer(model)",
-                        "role": "Explainer",
-                        "tip": "Same Python SHAP code runs within Stata's python: block.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "\nshap_values = explainer.shap_values(X)",
-                        "role": "Compute",
-                        "tip": "Computes SHAP values for the dataset.",
-                        "color": "teal"
-                      }
-                    ],
-                    "r": [
-                      {
-                        "code": "shap_contrib",
-                        "role": "Variable",
-                        "tip": "Stores the SHAP contribution matrix.",
-                        "color": "pink"
-                      },
-                      {
-                        "code": " <- predict(xgb_model, X_matrix, predcontrib = TRUE)",
-                        "role": "SHAP via XGBoost",
-                        "tip": "XGBoost's built-in SHAP computation. predcontrib=TRUE returns contributions.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "\n# Or use shapviz package:",
-                        "role": "Comment",
-                        "tip": "shapviz provides ggplot-based SHAP visualizations.",
-                        "color": "overlay"
-                      },
-                      {
-                        "code": "\nshap_obj <- shapviz(xgb_model, X_pred = X_matrix)",
-                        "role": "shapviz Object",
-                        "tip": "Creates a SHAP visualization object from the model.",
-                        "color": "blue"
-                      },
-                      {
-                        "code": "\nsv_importance(shap_obj, kind = 'beeswarm')",
-                        "role": "Beeswarm Plot",
-                        "tip": "Creates the beeswarm summary plot showing feature importance and direction.",
-                        "color": "teal"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
-            </script>
-          </div>
+[shapviz bar plot displayed showing mean |SHAP| values:
+ lstat: 3.12, rm: 2.45, dis: 0.54, crim: 0.41, nox: 0.39, ...]</pre></div>
         </div>
 
 
         <!-- ===================== TREES VS REGULARIZATION ===================== -->
         <h2 id="comparison">Trees vs. Regularization</h2>
 
-        <p>Both tree-based methods and regularized regression (LASSO, Ridge, Elastic Net) are powerful prediction tools, but they have different strengths. The choice between them depends on the nature of your data and the problem you are trying to solve.</p>
+        <p>Both tree-based methods and regularized regression (LASSO, Ridge, Elastic Net from <a href="11a-regularization.html">Module 11A</a>) are powerful prediction tools, but they have different strengths. The choice depends on the nature of your data and problem.</p>
 
         <div class="distinction-box">
           <div class="distinction-card">
@@ -2147,7 +1594,7 @@ Population   -0.0208</pre></div>
               <li>Robust to outliers and skewed distributions</li>
               <li>Handle mixed data types (numeric + categorical) naturally</li>
               <li>Do not require feature scaling or normalization</li>
-              <li>Best for: complex, nonlinear relationships; many features with interactions; tabular data competitions</li>
+              <li>Best for: complex nonlinear relationships; many features with interactions; tabular data where accuracy matters most</li>
             </ul>
           </div>
           <div class="distinction-card">
@@ -2163,6 +1610,42 @@ Population   -0.0208</pre></div>
           </div>
         </div>
 
+        <!-- SVG: Feature Importance comparison -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem; margin: 1.5rem 0; text-align: center;">
+          <h4 style="margin: 0 0 1rem 0; color: #1e293b;">When to Use What: A Quick Decision Guide</h4>
+          <svg viewBox="0 0 500 200" style="max-width: 500px;" xmlns="http://www.w3.org/2000/svg">
+            <rect width="500" height="200" fill="white" rx="4"/>
+            <!-- Decision diamond -->
+            <polygon points="250,10 350,50 250,90 150,50" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+            <text x="250" y="46" text-anchor="middle" font-size="10" fill="#1e40af">Nonlinear</text>
+            <text x="250" y="58" text-anchor="middle" font-size="10" fill="#1e40af">relationships?</text>
+            <!-- Left path: No -->
+            <line x1="150" y1="50" x2="70" y2="110" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="100" y="75" font-size="10" fill="#dc2626" font-weight="600">No</text>
+            <rect x="10" y="110" width="120" height="45" rx="8" fill="#dcfce7" stroke="#059669" stroke-width="1.5"/>
+            <text x="70" y="130" text-anchor="middle" font-size="10" font-weight="600" fill="#065f46">LASSO / Ridge</text>
+            <text x="70" y="145" text-anchor="middle" font-size="8" fill="#475569">Simple, interpretable</text>
+            <!-- Right path: Yes -->
+            <line x1="350" y1="50" x2="430" y2="110" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="400" y="75" font-size="10" fill="#059669" font-weight="600">Yes</text>
+            <!-- Sub-diamond -->
+            <polygon points="430,110 480,135 430,160 380,135" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="430" y="132" text-anchor="middle" font-size="8" fill="#92400e">Need max</text>
+            <text x="430" y="142" text-anchor="middle" font-size="8" fill="#92400e">accuracy?</text>
+            <!-- RF path -->
+            <line x1="380" y1="135" x2="300" y2="170" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="330" y="150" font-size="9" fill="#dc2626">No</text>
+            <rect x="240" y="170" width="120" height="25" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5"/>
+            <text x="300" y="187" text-anchor="middle" font-size="9" font-weight="600" fill="#1e40af">Random Forest</text>
+            <!-- XGB path -->
+            <line x1="480" y1="135" x2="480" y2="170" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="488" y="155" font-size="9" fill="#059669">Yes</text>
+            <rect x="420" y="170" width="70" height="25" rx="6" fill="#fce7f3" stroke="#dc2626" stroke-width="1.5"/>
+            <text x="455" y="187" text-anchor="middle" font-size="9" font-weight="600" fill="#9f1239">XGBoost</text>
+          </svg>
+          <p style="margin: 0.75rem 0 0; font-size: 0.85rem; color: #475569;">This is a rough guide. In practice, try both approaches and compare via cross-validation.</p>
+        </div>
+
 
         <!-- ===================== LIMITATIONS ===================== -->
         <h2 id="limitations">Limitations</h2>
@@ -2171,10 +1654,10 @@ Population   -0.0208</pre></div>
           <h3>Key Limitations of Tree-Based Methods</h3>
           <ul>
             <li><strong>Single trees are unstable:</strong> Small changes in the training data can produce a completely different tree structure. This is why ensembles (Random Forests, boosting) are almost always preferred over single trees in practice.</li>
-            <li><strong>Trees cannot extrapolate:</strong> Because predictions are averages of training observations in each leaf, trees can never predict values outside the range seen during training. If your training data has house prices between $100K and $1M, the model will never predict $1.5M, even for a mansion. This is a fundamental limitation compared to linear models.</li>
-            <li><strong>Computational cost:</strong> Large Random Forests and XGBoost models with many trees can be slow to train on very large datasets, though parallelization helps. XGBoost is significantly faster than a naive implementation but still requires more computation than a LASSO regression.</li>
-            <li><strong>Interpretability trade-off:</strong> While single trees are highly interpretable, ensembles of hundreds of trees are black boxes. SHAP values and variable importance plots help, but they do not provide the simple, transparent model that a policymaker or regulator might want.</li>
-            <li><strong>Not designed for causal inference:</strong> Tree-based methods are prediction machines. High variable importance does not imply causation. For causal questions, use the methods from Module 6 (or see Module 11D: Causal ML for hybrid approaches).</li>
+            <li><strong>Trees cannot extrapolate:</strong> Because predictions are averages of training observations in each leaf, trees can never predict values outside the range seen during training. If your training data has house prices between $100K and $1M, the model will never predict $1.5M. This is a fundamental limitation compared to linear models.</li>
+            <li><strong>Computational cost:</strong> Large Random Forests and XGBoost models can be slow to train on very large datasets, though parallelization helps. XGBoost is significantly faster than a naive implementation but still requires more computation than a LASSO regression.</li>
+            <li><strong>Interpretability trade-off:</strong> While single trees are highly interpretable, ensembles of hundreds of trees are black boxes. SHAP values and variable importance help, but they do not provide the simple, transparent model that a policymaker or regulator might want.</li>
+            <li><strong>Not designed for causal inference:</strong> Tree-based methods are prediction machines. High variable importance does not imply causation. For causal questions, use the methods from <a href="06-causal-inference.html">Module 6</a> (or see <a href="11d-causal-ml.html">Module 11D: Causal ML</a> for hybrid approaches like causal forests).</li>
           </ul>
         </div>
 
